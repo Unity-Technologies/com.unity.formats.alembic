@@ -1,0 +1,18 @@
+# Automatically generated script: Wednesday September 21, 08:42 2011
+\set noalias = 1
+#
+#  Creation script for alembicarchive operator
+#
+
+if ( "$arg1" == "" ) then
+    echo This script is intended as a creation script
+    exit
+endif
+
+# Node $arg1 (Object/alembicarchive)
+opexprlanguage -s hscript $arg1
+opuserdata -n '___Version___' -v '' $arg1
+
+opcf $arg1
+
+opcf ..

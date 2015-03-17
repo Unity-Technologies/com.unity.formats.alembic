@@ -1,0 +1,9 @@
+# regexp syntax.
+syntax: regexp
+#^contrib/
+^build/stash/
+.*\.pyc
+.*/doxygen
+^doc/html/*
+\.git.*
+.*\.swp

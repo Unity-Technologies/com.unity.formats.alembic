@@ -1,0 +1,1473 @@
+2015-1-15, Alembic 1.5.8
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcCoreAbstract:
+Fix wstring array hash calculation. (pull request 17)
+
+Build system:
+Make the OS X version check more robust to determine if C++11 flag is required.
+(pull request 18)
+
+Python:
+
+PyAlembic:
+Add asOgawa option for PyOArchive and make Ogawa the default for
+CreateArchiveWithInfo. (pull request 16)
+
+##-*****************************************************************************
+
+2015-12-09, Alembic 1.5.7
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+Python:
+
+Add missing methods to IPoints.
+Add Points schema to cask.
+(pull request 12)
+
+Cask:
+Add oproperty mapping for additional imath classes.
+Add iproperty to oproperty class mapping using pod, extent values.
+Remove named oproperty override mapping (replaced by above methods).
+Add metadata accessor to property class.
+Fix is_deforming method on objects.
+(pull request 15)
+
+Maya:
+
+AbcExport:
+Add support for writing out all UV sets on an MFnMesh with the
+-wuvs/-writeUVSets flag. (pull request 13)
+
+AbcImport:
+Support loaidng multiple UV sets on an MFnMesh when present. (pull request 13)
+
+##-*****************************************************************************
+
+2015-10-17, Alembic 1.5.6
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcCoreAbstract:
+Improve stability of TimeSamplingType equality comparison. (pull request 11)
+
+Maya:
+
+AbcExport:
+
+Recognize "faceVaryingInterpolateBoundary" not "facVaryingInterpolateBoundary"
+plug when writing out an MFnMesh as a SubD. (pull request 6)
+
+Don't produce an error for meshes without valid per-face mapping, e.g. whole
+object mappings. (pull request 6)
+
+Only create face sets for shading groups applied with with per-face mappings.
+(pull request 6)
+
+Make sure a schema that is detected to be static is written out with the
+default time sampling. (pull request 7)
+
+AbcImport:
+
+Don't warn about UVs or normals size being mismatched if the mesh has no
+points.  (pull request 8)
+
+Connections to custom VectorArray and PointArray properties will no longer fail.
+(pull request 8)
+
+Support varying or vertex color properties and unpacking them into facevarying
+as Maya requires. (pull request 8)
+
+Only call setUsedAsColor for attributes that are constant scoped.
+(pull request 8)
+
+
+Utilities:
+
+AbcStitcher:
+Revamp AbcStitcher to better handle cases where certain shapes or properties
+may not exist in some of the files. (pull request 7)
+
+Build system:
+
+Boost_PYTHON_LIBRARY is case sensitive. (pull request 8)
+
+
+
+##-*****************************************************************************
+
+2014-07-15, Alembic 1.5.5
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcGeom:
+Fix bug in OSubD::setHoles where corner indices were being set instead.
+
+AbcCoreAbstract:
+Improve lookup times and numerical stability of TimeSampling.
+
+AbcOpenGL:
+
+Camera rotations are now done in X,Y,Z order instead of Z,X,Y
+
+Python API:
+
+PyAlembic:
+Address Issue 347, expose the CoreType in python.
+
+PyAbcOpenGL:
+Wrap ALEMBIC_LIB_USES_BOOST around get_pointer.
+
+Maya:
+
+AbcExport:
+If a shading group has an attribute named AbcFaceSetName, use that attribute
+instead of the shading groups name for the face set name.
+
+Fix for Issue 339, some dag nodes can't be pushed onto MDagPath, so make sure
+the push was successful to avoid infinite recursion.
+
+Fix for Issue 342, for improved performance skip over shadingEngines and
+subgraphs in util::isAnimated.
+
+
+AbcImport:
+Set AbcFacesetName attribute on newly created shadingGroups.
+
+Fix bug with open form check on curves.
+
+Fix bug with restoring knots from a curve group with more than one curve.
+
+Tools:
+
+AbcView:
+Fix for Issue 344, show array property values of length 1.
+
+Improve performance for some graphics cards by adjusting some drawing options.
+(also done in SimpleAbcViewer)
+
+abcls
+Add -v option to automatically display the first sample of all properties.
+Print an error message when seg fault is detected.
+
+cask:
+Fix for Issue 345, handle V3d and double array on write.
+Default to Ogawa on write.
+
+Fix for Issue 346, TimeSampling is now preserved for properties that are
+copies on write.
+
+##-*****************************************************************************
+
+2014-03-28, Alembic 1.5.4
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API:
+
+AbcGeom:
+Fix for Issue 333,  optional property samples not being filled in correctly
+after being defined previously but not set on the current sample.
+
+AbcOpenGL:
+
+Fix for Issue 324, adjust dolly and clipping plane values when they get
+a bit extreme.
+
+Python:
+Updates for sphix docs
+
+AbcView:
+Fix static normals on animated archives.
+Fix remove item bug.
+Fix import session fle bug.
+Add Review mode.
+Support custom scripts.
+
+Maya:
+
+AbcExport:
+Write out NURBS curves as actual NURBS curves.
+
+AbcImport:
+
+Support reading NURBS curves.
+Use Alembic::Util::shared_ptr instead of std::tr1::shared_ptr in one spot.
+
+Util:
+
+AbcEcho:
+
+Fix bounds calculation on AbcBoundsEcho.
+Add an optional seconds argument for time sampling support.
+
+Build:
+
+Use C++11 for OSX Mavericks.
+Define ALEMBIC_LIB_USES_BOOST to accomodate python bindings.
+Use LIBPYTHON_VERSION to determine which python to use.
+
+##-*****************************************************************************
+
+2013-12-17, Alembic 1.5.3
+Hello Alembic users, thanks to your feedback and reports we have a few bug
+fixes and enhancements.
+
+API, Ogawa:
+
+Don't open extra filestreams until they are needed.
+
+Maya, AbcImport:
+Fix for issue 251, if connections to the immediate children of the archive fail
+warn about it.
+
+Relax naming constraints on connection so that if the namespace is different
+between the Maya scene and the Alembic archive, they can still connect.
+
+Specifying a Maya node to -connect which doesn't match any of the children of
+the immediate root of the archive, try and connect below that specified Maya
+node.
+
+Python:
+
+cask:
+Fix for issue 318, make sure the archive gets released properly.
+
+abcview:
+Fix bug where animated normals weren't being updated for display.
+
+##-*****************************************************************************
+
+2013-12-6, Alembic 1.5.2
+Hello Alembic users, thanks to your feedback and contributions we have another
+collection of bug fixes and enhancements to the API.
+
+API:
+
+Add Nurbs Curves support to I/OCurves, also addresses Issue 249.
+Most reference implementations have not yet been updated to support it.
+
+Add SetSourceName, GetSourceName, SetIsUV, isUV utility functions and
+setUVSourceName member function on OPolyMeshSchema and OSubDSchema.
+
+Don't assert in TimeSampling::getNearIndex if the floor index and the ceil index
+are the same.
+
+Address several clang compile warnings.  Part of Issue 322.
+
+AbcCoreHDF5 and AbcCoreOgawa:
+Fix reported thread-safety issues.
+
+Python bindings:
+
+Fix for issue 326.
+"error: control reaches end of non-void function" in PyIArchive
+
+Add Nurbs Curves support to I/OCurves.
+Note: The expected number of knots per curve is the number of vertices in the
+curve plus the order of the curve.
+
+Add SetSourceName, GetSourceName, SetIsUV, isUV utility functions and
+setUVSourceName member function on OPolyMeshSchema and OSubDSchema.
+
+AbcOpenGL:
+Fix for issue 324, clamp values instead of asserting.
+
+Misc Tools:
+
+AbcStitcher:
+Support stitching Nurbs curves.
+Fix bug where the output file would only be HDF5.
+Fix bug where invalid metadata and name were used for leftover objects.
+Fix bug where top object was gotten before checking for archive validity.
+Add additional check and error message if the number of children nodes aren't
+the same between the IObjects from different archives.
+
+AbcTree:
+Rename variable to fix shadow warning on some compilers.  Issue 320.
+Windows compatibility fix, S_ISDIR doesn't exist.
+
+AbcLs:
+Windows compatibility fix, S_ISDIR doesn't exist.
+Fix the way certain scalar properties print.
+
+##-*****************************************************************************
+
+2013-9-18, Alembic 1.5.1
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and enhancements to the API, some of the example
+tools, and the Maya plugins.
+
+API:
+
+IXform/OXform:
+Make default identity xforms use even less disk space.
+Fix for Issue 313: IXformSchema::getInheritsXforms() crash with no samples
+
+Python bindings:
+Fix for Issue 308: ILightSchema.getCameraSchema() segfaults when no cameras
+are available
+
+Maya:
+
+AbcImport:
+Fix for Issue 311: properly set SubD creases, corners, and holes when the
+geometry is animated
+
+Fix for Issue 312: AbcImport doesn't accept long names when filtering
+
+AbcExport:
+Ogawa is now written out by default. (when the -dataformat flag isn't specified)
+
+Multiple frame ranges can be specified for more control over the samples
+exported.
+
+-preRoll flag was added for specified frame ranges that you want evaluated but
+not exported.
+
+Misc Tools:
+
+AbcLs - fix bugs, added new flag -s to view the size of a scalar or array
+property, -t for printing time info of the archive and the time a sample
+index of a property corresponds to.  -f prints out the frame assuming 24fps.
+
+AbcView - tweaked docs, lots of bug fixes, better camera support
+
+prman Procedural - Fix for Issue 314: subdiv tags could become corrupted.
+
+##-*****************************************************************************
+
+2013-7-22, Alembic 1.5.0
+Hello Alembic users, we are pleased to announce the official release of a new
+data back end for Alembic, codenamed Ogawa with improved write, read, and
+especially multi-threaded read performance.
+
+Here are some improvements we are seeing with this version:
+
+1) File sizes are on average 5-15% smaller. Scenes with many small objects
+should see even greater reductions.
+
+2) Single-threaded reads average around 4x faster
+
+3) Multi-threaded reads can improve by 25x (relative to the same operations in
+the existing HDF5 back-end) on 8 core systems.
+
+We are maintaining backwards compatibility, and you will be able to continue to
+read and write Alembic files backed by HDF5.
+
+Other library features added:
+
+Support for explicit hierarchical deduplication. (OObject::addChildInstance)
+
+Hierarchical hash keys added to objects, making it easier to compare sub-graphs
+of various archives. (IObject::getPropertiesHash, IObject::getChildrenHash)
+
+Add AbcCoreFactory::IFactory class which is a convenience class for determining
+whether an archive is backed by HDF5 or Ogawa and returning a properly
+instantiated IArchive.  All of the readers in the repository have been updated
+to use this.
+
+Python bindings have been extended to support the new features above.
+
+New utility:
+
+abcls this utility is meant to behave like ls or h5ls and offers an
+inexpensive way to explore your object and property hierarchies.
+
+Bug fixes:
+
+ICamera:
+Getting the film back xform channels needs to be done by index.
+Animated film back data wasn't being reflected in isConstant.
+Offset data should be applied after the filmback matrix.
+
+AbcExport: preScale, and postScale film back xform should be 1.0/scale.
+
+##-*****************************************************************************
+
+2013-4-11, Alembic 1.1.5
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and performance enhancements for the Maya plugins.
+
+AbcExport:
+
+Improve the performance of util::isAnimated.
+
+If MFnIkJoint's Scale Compensate is off, [IS] is ignored otherwise multiply it
+after [T].  [IS] is actually the inverse of the inverseScale plug.
+
+Fixed const related error caught by Microsoft Visual Studio 9.0 compiler.
+
+AbcImport:
+
+Use createPoint and createColor for MFnNumericAttribute when appropriate.
+
+##-*****************************************************************************
+
+2013-03-25, Alembic 1.1.4
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful and important bug fixes.
+
+Fix several multi-platform issues to making compiling in Windows and OSX easier.
+
+PyAlembic:
+
+Fix typo XformSample::getZRotation should be XformSample::getScale.
+
+AbcImport:
+
+Directly set the string plug, as the default value is not saved to the Maya
+file and thus is not restored.
+
+AbcExport/AbcImport:
+
+Fix bug where the conversion from shutter open, shutter close to shutter angle
+was being improperly scaled.
+
+##-*****************************************************************************
+
+2013-02-11, Alembic 1.1.3
+Hello Alembic users, thanks to your feedback we have another collection of
+useful features and bug fixes.
+
+Alembic library:
+
+Add missing setTimeSampling member function to OCurves and ONuPatch. (Issue 295)
+
+Record the max number of samples written for various TimeSampling at the
+archive level, and provide a utility function for getting the start and end time
+of the archive using this data.  (Issue 301)
+
+Propogate the Error handling policy better.
+
+Add Box2(s,i,f,d) array properties to match scalar properties.
+
+INuPatch getTopologyVariance wasn't correctly taking into account animated
+weights.
+
+IsAncestorVisible utility function was returning the wrong value.
+
+TimeSamplingType now allows for some floating point imprecision during
+comparison. (Issue 301)
+
+Add isStandardName and makeStandardName convenience functions.
+
+    - These functions offer plugin writers an easy way to get multi-application
+      name compliance.  They help you convert any special characters your
+      application supports into a set universally accepted characters.
+
+Add AbcOpenGL library which is based on the draw code from SimpleAbcViewer.
+
+Python:
+
+Add PyAbcOpenGL bindings.
+
+Fix segfault with invalid getProperty index/name
+
+Add getProperty to OCompoundProperty
+
+Add getKey to IArrayProperty
+
+    - This is the preferred way to get the alembic hash of a property.
+      Previously you needed to build the a hash by marshalling
+      and serializing the data in python which is slooow.
+
+Add getMaxNumSamplesForTimeSamplingIndex to IArchive.
+
+Add high level Python API named "cask" built on top of the Alembic Python
+bindings.
+
+    - This was developed to simplify scripting of alembic files
+      in Python.
+
+    - It is designed to be easy to use and "Pythonic". For example it
+      gives you a dictionary style interface to objects and
+      properties.
+
+    - It is an abstraction on top of alembic which allows you to create mutable
+      objects. This means scripters are not forced to use the separated,
+      immutable input and output core alembic objects.
+
+    - We will host documentation on docs.alembic.io shortly but for now please
+      convert the cask.rst file in python/examples/cask/doc to read the docs
+      and see examples.
+
+Add abcview which uses PyQt and PyAbcOpenGL
+
+    - This tool is perfect for debugging alembic caches. It offers Katana-
+      style, lazy-UI hierarchy traversal and a script editor to do more 
+      in-depth object and property queries using the Python bindings.
+      SimpleAbcView is embedded into the application for easy reference.
+
+Bootstrap and CMake:
+
+Fix boost configuration if you are not building pyalembic. (Issue 296)
+
+Eliminate many warnings when compiling with Visual Studio 10. (Issue 294)
+
+Improve many of our CMakeLists.txt so that you can use Cmake directly instead
+of having to go through the bootstrap.
+
+Better Windows compliance. (Look for further improvements over the next releases).
+
+Maya:
+
+AbcExport bounding box calculation for the entire archive is much more efficient
+and is especially noticeable when calculating bounds on deep hierarchies.
+
+Add identifyFile and haveNamespaceSupport to AlembicImportFileTranslator.
+
+Fix bug where the AlembicImportFileTranslator could not be unloaded properly.
+
+Arnold Procedural:
+
+Fix bug with multiple samples potentially being added for uvlist.
+
+Initialize makeInstance on creation.
+
+Add instanced nodes to the list of createdNodes.
+
+Utilities:
+
+Add abctree which walks the entire hierarchy and prints out the names
+of objects.
+
+##-*****************************************************************************
+
+2012-10-17, Alembic 1.1.2
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful features and bug fixes.
+
+New features:
+
+Maya AbcImport:
+
+Added inclusive and exclusive filtering support to allow selective importing
+of cache objects via regex matches.
+
+Added file translator support. Alembic caches can now be opened directly and
+imported as Maya references.
+
+Facesets now get imported as Maya facesets instead of an integer array
+attribute.
+
+Maya AbcExport:
+
+Write out curves with a basis of b-spline and repeat first and last
+points twice (if they aren't repeated) if we have a cubic open curve.
+
+Support exporting Maya facesets with the -wfs/-writefacets flag.
+
+Add -ef/-eulerFilter flag which euler filters samples to rotate, rotate axis,
+and joint orient.
+
+Update -sn/-stripNamespaces flag with an optional integer to only strip
+that number of namespaces.
+
+Remove boost usage.
+
+Core library:
+
+Add static emptySample() convenience function.
+
+Improve const correctness on most of the Abc and AbcGeom getter functions.
+
+Child bounds are no longer written and read via the schema's sample class,
+instead the child bounds property is directly exposed on the schema.
+
+Normals and UVs IGeomParams are no longer returned by reference.
+
+On Xforms, only write the .animChans data once if necessary.
+
+Bug fixes:
+
+Maya AbcImport:
+
+Clean up temporary trim curves when the trim operation fails for 
+MFnNurbsSurface.
+
+##-*****************************************************************************
+
+2012-9-20, Alembic 1.1.1
+Hello Alembic users, thanks to your feedback we have another collection of
+small but useful and important bug fixes.
+
+Bug fixes:
+
+Issue 291
+Fix for some compile issues/warnings on Windows.
+
+Issue 292
+Hash keys are being computed incorrectly on Windows.
+
+Some small CMake updates.
+
+Fixed typo in OSubD::setHoles
+
+##-*****************************************************************************
+
+2012-7-26, Alembic 1.1.0
+
+Hello Alembic users.  We are excited to announce another release of Alembic
+which contains many new features, bug fixes and performance improvements.
+
+What's new:
+
+- AbcCollections. Alembic now supports the concept of a collection.  Sometimes
+people refer to collections as "groups" or "object sets" (as in Maya).
+
+- AbcMaterial.  Alembic now supports the concept of a material. This is done by
+defining a schema for a material definition which can act as a standalone object
+or as supplemental data attached to another object. AbcMaterial also defines
+conventions and utilities for binding and resolving marterial assignments 
+and overrides. We have not gone as far as defining what a material schema should
+actually contain (as we did with cameras); instead we allow you to define your
+own material "target" to allow all the many variations in material standards
+that exist today. However we have reserved the name "abc" for a target
+we will define at a later time; the hope is that this material target would
+become the standard for material interchange.
+
+- AbcLight. Alembic now supports the concept of a light. Light objects are 
+distinct objects that contain both a camera and a material schema.  The material
+on the light controls the shader parameters associated with the light and the
+camera can contain all relevant camera-like light information.
+
+- Python bindings.  At long last the Alembic team has finally completed the
+python bindings to allow scripters to access the full power of the alembic
+c++ api. All the new features listed above as well as the layers Abc though 
+AbcGeom are bound. The base bindings of typed data (including typed arrays) 
+are pyimath types so if your program can natively create imath data types 
+there is no performance penalty to convert to and from alembic types.
+
+- Performance optimization. When we profiled Alembic we found that, for some
+caches, a great deal of time was being spent in HDF5 functions that access
+groups and attributes by name.  We now let you optionally write a side car
+datastructure within the HDF5 file that maps the HDF5 hierarchy to HDF5 object
+references which results in lookups that are  much faster. You pay the price
+of a slight disk size increase and memory footprint.
+
+- Maya plugin updates. The ".userProperties" compound property that is available
+on most Alembic objects is now supported for both read and write with full 
+support for animated values. Additional parameters have also been added to the 
+AlembicNode to allow cache retiming along with support for loop, reverse and
+bounce.
+
+- Boost removal from the core. We are no longer dependent on boost to give us
+an implementation of a shared pointer (for example) so we were able to remove 
+the dependency on boost while building the core library.
+
+Bug Fixes:
+
+Issue 171:
+OScalar and OArray Properties had a scoping issue when parented to the immediate
+child compound property of an OObject.
+
+Issue 245:
+I<type>GeomParam would match to properties that aren't geom params.
+IArrayProperty is always considered a geom param with constant scope.
+
+Issue 253-255
+Several bugs involved with the -rm flag on AbcImport have been fixed.
+
+Issue 263
+AbcExport UV write fix, loop over all faces, not just the faces which have UVs.
+
+Issue 275
+AddGeomToParamListBuilderAsFloat was calculating wrong boundary for the
+IV2fArrayProperty.
+
+Issue 280
+Accomodate Unicode file names in AbcImport and AbcExport.
+
+Issue 285
+AbcGeom/Basis.h was not including Alembic/Util/Foundation.h
+
+##-*****************************************************************************
+
+2012-2-14, Alembic 1.0.5
+
+Bug fix release.
+
+Fix for issue 272.
+
+Core:
+
+String dimensions weren't being written correctly for string arrays when copying
+a previous sample.
+
+Correctness updates to "matches(..)" (data matching functions).
+
+Houdini plugin:
+Reverting frame - 1 change.
+Including a clear cache function.
+
+##-*****************************************************************************
+
+2012-1-12, Alembic 1.0.4
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+API additions and small but useful bug fixes.
+
+Some highlights:
+
+API:
+
+ - Now supports raw reads, and reading as a different precision, for array properties
+ via a new method getAs (). Currently strings, wstrings, and float16_t
+ can not be read as any other type.
+
+ - Added an optional velocity property to polymeshes, subds, nurbs, and curves.
+ Velocity is considered to be in units per second.
+
+ - Added a temporary work around for an HDF5 bug where parts of the file could become
+ corrupt. This workaround always stores the HDF5 links in dense storage.  This can lead to
+ larger file sizes when you have a lot of IObjects.
+
+ - Improved the performance on partial hierarchy traversal by deferring opening of an
+ object's HDF5 group until truly needed.
+
+Renderman Procedural:
+
+ - Added support for V3dGeomParam, P3dGeomParam, and BoolGeomParam
+
+Houdini SOP:
+
+ - Dramatically increased the performance under Houdini 12 and pleasantly increased
+ performance under 11.1.
+
+Maya AbcImport:
+
+ - Don't interpolate when the time values closely match the ceiling value.
+
+ - Don't create a new color set every time an animated color set is evaluated.
+
+ - Interpolating non indexed color values would sometimes cause a crash.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+
+2011-11-11, Alembic 1.0.3
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes to our plugins.
+
+Some highlights:
+
+Renderman Procedural:
+
+ - Addition of Windows export information for ConvertParameters/Subdivide/Free
+
+ - Fixed an uninitialized variable for -flipv
+
+ - Fixed a string-related memory bug for declarations in ParamListBuilder
+(issue 241)
+
+ - Addition of support for reading, caching and sharing argument strings from
+files.
+
+ - Addition of support for restoring named resource blocks at specified paths
+or names for objects and facesets
+
+ - Fixed support for getInheritsXforms in IXforms (issue 247)
+
+ - Fixed CMake where it failed to find libprman.lib because of a typo
+(issue 229)
+
+Maya AbcImport:
+
+ - Fixed compilation with Maya 2011 by adding an ifdef for the
+setDisplayColors(true) call.  (issue 244)
+
+ - Fixed some issues with the -connect option.  Transforms weren't being
+properly cleared when connection.
+
+Maya AbcExport:
+
+ - Change for FBIK joints, there isn't always a connection to translate or
+scale (like rotate for IK joints).  We now treat them like they are animated.
+
+ - Return an error if the file can't be written to.
+
+ - The full -renderableOnly flag was not properly being detected (issue 252)
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+
+2011-10-12, Alembic 1.0.2
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and a couple of new flags for some of our plugins.
+
+Some highlights:
+
+- In Maya don't flip V when reading and writing UVs. (AbcExport and AbcImport)
+
+- Add a flag (-flipv) to the prman Procedural to flip V when necessary.
+
+- Add a flag (-wcs / -writeColorSets) to AbcExport to write out color sets and
+restore them on AbcImport.
+
+- In AbcExport the -renderableOnly flag was doing the opposite of what it was
+supposed to do.
+
+- Fix bug in SimpleAbcViewer where XformSchema::getInheritsXforms() was not
+being respected.
+
+- Fix bug in AbcStitcher to prevent a segfault.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+2011-09-15, Alembic 1.0.1
+
+Hello, Alembic users, we've gotten great feedback from the community
+and with their help we've created this collection of small but useful
+bug fixes.
+
+Some highlights:
+
+ - A collection of useful bug fixes in the Maya AbcExport and AbcImport
+   plugins
+
+ - The renderman procedural has some small bug fixes, e.g. fixes related
+   to arbitrary geometric parameters
+
+As always, any files generated by either Alembic 1.0.0 or 
+Alembic 1.0.1 will interoperate. If you are working in Maya
+we encourage you to look at this update.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4978066/
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+
+##-*****************************************************************************
+2011-08-09, Alembic 1.0
+
+Hello, Alembic users, welcome to our first gold release of Alembic.
+
+The complete code changes for this release can be examined here:
+http://codereview.appspot.com/4819067/
+
+Some highlights:
+
+ - Addition of the Arnold procedural.
+
+ - Removal of some things that weren't Alembic related (GLUtil)
+
+ - Addition of a python unit test suite for AbcExport and AbcImport.
+
+ - Lots of Houdini SOP improvements.
+
+ - Cleanup of many compiler warnings.
+
+This initial 1.0 version can now be used for critical, deadline-driven
+production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+2011-06-28, Alembic 1.0rc1
+
+Hello, Alembic users, welcome to the latest beta version of Alembic.  As we
+close in on a 1.0 release, we hope the API and file format are now stable
+and fully forwards-compatible.  We consider these to be at a first
+"Release Candidate" stage. (note that this doesn't yet apply to the
+application-specific reference implementations). As with all pre-release
+software, we can't guarantee that changes won't occur between now and a full
+1.0 release.
+
+This release is mostly a bugfix and cleanup release.  We've improved the build
+support for Windows and OS X, as well as conformed the definitions of the Curves
+and NuPatch types more closely to the RI spec.  Those changes, though, do mean
+that Curves and NuPatch geometry written out with previous releases will not be
+recognized with this release.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4662068
+
+Some highlights:
+
+ - The flags and arguments for the AbcExport Maya plugin have been updated
+   based on feedback from the community, and to be more Maya-idiomatic.
+   You can see all the arguments supported by entering "AbcExport -h"
+   in the script editor.
+
+ - The Makefile setup for the AlembicIn Houdini SOP is greatly simplified,
+   though still not fully integrated with Alembic's CMake setup.
+
+ - The PRMan procedural now supports the Points, NuPatch, Curves, and FaceSet
+   types from AbcGeom.
+
+One other important thing to note: previous releases of Alembic did not
+require any of the compiled Boost libraries, but going forward, Alembic
+requires libboost_thread.
+
+Although this is our initial 1.0 release candidate, it should still be
+considered pre-release software, and should not be used for critical, deadline-
+driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
+2011-05-18, Alembic 0.9.3:
+
+The biggest news in this release is what we hope is the complete set of
+geometric types for ALembic 1.0, which includes curves (fashioned after
+RiCurves), nurbs surfaces, facesets in polygons and subds, and a camera
+definition. See http://code.google.com/p/alembic/wiki/Alembic_Geometric_Types
+for a complete list.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4517085
+
+Some highlights:
+
+ - There is now a single class for expression transforms. Preivously
+   we had both SimpleXform and Xform objects for expressing transformation.
+   The new unified Xform class can be used more simply than the old
+   Xform class, while retaining the expressivity of the original.
+
+ - We have experimental support for building Alembic on Windows. Details
+   for how to perform the build can found in build/Windows/README.txt and
+   build/Windows/WindowsBuildSteps.html
+
+ - We've changed the API in a couple places, most notably, in the way
+   instances of the class class Alembic::AbcCoreAbstract::TimeSampling are
+   stored and referenced.
+
+ - There is a reference Houdini SOP that can read an entire Alembic archive
+   or a subtree of an archive with the option to bake in transformations. As
+   such, it could also serve as the "leaf" node for an import process which
+   rebuilt the full transformation hierarchy within Houdini. The intention is
+   to pair this with a CHOP (not slated for inclusion this round) which extracts
+   transformation channels from the archive.  However, it is not yet integrated
+   into the Alembic build infrastructure, so compiling it may take some work.
+
+As this is still a 0.9 release, it is still to be considered Beta, and
+should not be used for critical, deadline-driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
+
+2011-02-17, Alembic 0.9.2:
+
+This is somewhere between a major and minor update.  Numerous bugs
+have been fixed, some new functionality has been introduced, and
+reference Maya plugins for import and export have been added.
+
+The code changes can be examined here:
+
+http://codereview.appspot.com/4160045/
+
+Some highlights in functionality:
+
+ - Maya export and import plugins are in the top-level "maya" directory.
+
+ - In the top-level "python" directory is the beginning of Python bindings
+   using Boost.Python.  This effort is currently incomplete, but with
+   these bindings, the structure of an Alembic Archive can be examined.
+
+ - UVs on PolyMeshes and SubD meshes, as well as Normals on PolyMeshes,
+   are included in their definition, and can be written and read as
+   indexed arrays or expanded, non-indexed arrays, with automatic
+   interconversion between the two representations.
+
+As this is still a 0.9 release, it is still to be considered Beta, and
+should not be used for critical, deadline-driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list:
+
+##-*****************************************************************************
+
+2010-12-13, Alembic 0.9.1:
+
+Just a minor update to enable Alembic on 32-bit systems, along with
+getting the code in examples/bin/AbcEcho reasonably working.
+
+2010-12-08, Alembic 0.9.1:
+
+The main things in this release are the addition of a Renderman procedural
+plugin, and a bunch of bug fixes.  The example Maya exporter
+(AlembicSimpleAbcExport) can be used to create an Alembic file from a Maya
+scene, and that Alembic file can be read by the Renderman plugin to create
+images, which means that an end-to-end workflow can be achieved.  A complete
+overview of the changes to the code is here:
+
+http://codereview.appspot.com/3427045
+
+A summary of the bugs fixed in this change:
+
+http://code.google.com/p/alembic/issues/detail?id=71
+
+An internal implementation detail that fixed an issue where files created by
+the AlembicSimpleAbcExport Maya plugin were invalid.
+
+http://code.google.com/p/alembic/issues/detail?id=118
+
+Another internal implementation bugfix that ensured that certain properties of
+a subdivision surface were properly animatable.
+
+http://code.google.com/p/alembic/issues/detail?id=17
+
+Method to return a Property's parent Object simply did not work.
+
+http://code.google.com/p/alembic/issues/detail?id=121
+
+Methods to determine high-level type now more flexible and correct.
+
+http://code.google.com/p/alembic/issues/detail?id=7
+
+Build system improvement; now behaves better when trying to find the Boost
+headers and libraries.
+
+http://code.google.com/p/alembic/issues/detail?id=13
+
+A consequence of the bug that was fixed in issue 71.
+
+http://code.google.com/p/alembic/issues/detail?id=123
+
+Alembic was not reading all the required data from an ISimpleXform.
+
+
+In progress, we have:
+
+http://code.google.com/p/alembic/issues/detail?id=102
+
+This is an arbitrary transform "stack" type, roughly equivalent to Renderman's
+transformation model.  It has per-operation hints that allow it to be
+recognized as a transform and mapped directly to another application's
+transformation model.  It can also be read and written as a regular 4x4
+matrix.
+
+##-*****************************************************************************
+
+2012-2-14, Alembic 1.0.5
+
+Bug fix release.
+
+Fix for issue 272.
+
+Core:
+
+String dimensions weren't being written correctly for string arrays when copying
+a previous sample.
+
+Correctness updates to "matches(..)" (data matching functions).
+
+Houdini plugin:
+Reverting frame - 1 change.
+Including a clear cache function.
+
+2012-1-12, Alembic 1.0.4
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+API additions and small but useful bug fixes.
+
+Some highlights:
+
+API:
+
+ - Now supports raw reads, and reading as a different precision, for array properties
+ via a new method getAs (). Currently strings, wstrings, and float16_t
+ can not be read as any other type.
+
+ - Added an optional velocity property to polymeshes, subds, nurbs, and curves.
+ Velocity is considered to be in units per second.
+
+ - Added a temporary work around for an HDF5 bug where parts of the file could become
+ corrupt. This workaround always stores the HDF5 links in dense storage.  This can lead to
+ larger file sizes when you have a lot of IObjects.
+
+ - Improved the performance on partial hierarchy traversal by deferring opening of an
+ object's HDF5 group until truly needed.
+
+Renderman Procedural:
+
+ - Added support for V3dGeomParam, P3dGeomParam, and BoolGeomParam
+
+Houdini SOP:
+
+ - Dramatically increased the performance under Houdini 12 and pleasantly increased
+ performance under 11.1.
+
+Maya AbcImport:
+
+ - Don't interpolate when the time values closely match the ceiling value.
+
+ - Don't create a new color set every time an animated color set is evaluated.
+
+ - Interpolating non indexed color values would sometimes cause a crash.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+
+2011-11-11, Alembic 1.0.3
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes to our plugins.
+
+Some highlights:
+
+Renderman Procedural:
+
+ - Addition of Windows export information for ConvertParameters/Subdivide/Free
+
+ - Fixed an uninitialized variable for -flipv
+
+ - Fixed a string-related memory bug for declarations in ParamListBuilder
+(issue 241)
+
+ - Addition of support for reading, caching and sharing argument strings from
+files.
+
+ - Addition of support for restoring named resource blocks at specified paths
+or names for objects and facesets
+
+ - Fixed support for getInheritsXforms in IXforms (issue 247)
+
+ - Fixed CMake where it failed to find libprman.lib because of a typo
+(issue 229)
+
+Maya AbcImport:
+
+ - Fixed compilation with Maya 2011 by adding an ifdef for the
+setDisplayColors(true) call.  (issue 244)
+
+ - Fixed some issues with the -connect option.  Transforms weren't being
+properly cleared when connection.
+
+Maya AbcExport:
+
+ - Change for FBIK joints, there isn't always a connection to translate or
+scale (like rotate for IK joints).  We now treat them like they are animated.
+
+ - Return an error if the file can't be written to.
+
+ - The full -renderableOnly flag was not properly being detected (issue 252)
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+
+2011-10-12, Alembic 1.0.2
+
+Hello, Alembic users, thanks to your feedback we have another collection of
+small but useful bug fixes and a couple of new flags for some of our plugins.
+
+Some highlights:
+
+- In Maya don't flip V when reading and writing UVs. (AbcExport and AbcImport)
+
+- Add a flag (-flipv) to the prman Procedural to flip V when necessary.
+
+- Add a flag (-wcs / -writeColorSets) to AbcExport to write out color sets and
+restore them on AbcImport.
+
+- In AbcExport the -renderableOnly flag was doing the opposite of what it was
+supposed to do.
+
+- Fix bug in SimpleAbcViewer where XformSchema::getInheritsXforms() was not
+being respected.
+
+- Fix bug in AbcStitcher to prevent a segfault.
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+2011-09-15, Alembic 1.0.1
+
+Hello, Alembic users, we've gotten great feedback from the community
+and with their help we've created this collection of small but useful
+bug fixes.
+
+Some highlights:
+
+ - A collection of useful bug fixes in the Maya AbcExport and AbcImport
+   plugins
+
+ - The renderman procedural has some small bug fixes, e.g. fixes related
+   to arbitrary geometric parameters
+
+As always, any files generated by either Alembic 1.0.0 or 
+Alembic 1.0.1 will interoperate. If you are working in Maya
+we encourage you to look at this update.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4978066/
+
+We welcome your comments on the discussion list.
+
+http://groups.google.com/group/alembic-discussion
+
+
+##-*****************************************************************************
+2011-08-09, Alembic 1.0
+
+Hello, Alembic users, welcome to our first gold release of Alembic.
+
+The complete code changes for this release can be examined here:
+http://codereview.appspot.com/4819067/
+
+Some highlights:
+
+ - Addition of the Arnold procedural.
+
+ - Removal of some things that weren't Alembic related (GLUtil)
+
+ - Addition of a python unit test suite for AbcExport and AbcImport.
+
+ - Lots of Houdini SOP improvements.
+
+ - Cleanup of many compiler warnings.
+
+This initial 1.0 version can now be used for critical, deadline-driven
+production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+##-*****************************************************************************
+2011-06-28, Alembic 1.0rc1
+
+Hello, Alembic users, welcome to the latest beta version of Alembic.  As we
+close in on a 1.0 release, we hope the API and file format are now stable
+and fully forwards-compatible.  We consider these to be at a first
+"Release Candidate" stage. (note that this doesn't yet apply to the
+application-specific reference implementations). As with all pre-release
+software, we can't guarantee that changes won't occur between now and a full
+1.0 release.
+
+This release is mostly a bugfix and cleanup release.  We've improved the build
+support for Windows and OS X, as well as conformed the definitions of the Curves
+and NuPatch types more closely to the RI spec.  Those changes, though, do mean
+that Curves and NuPatch geometry written out with previous releases will not be
+recognized with this release.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4662068
+
+Some highlights:
+
+ - The flags and arguments for the AbcExport Maya plugin have been updated
+   based on feedback from the community, and to be more Maya-idiomatic.
+   You can see all the arguments supported by entering "AbcExport -h"
+   in the script editor.
+
+ - The Makefile setup for the AlembicIn Houdini SOP is greatly simplified,
+   though still not fully integrated with Alembic's CMake setup.
+
+ - The PRMan procedural now supports the Points, NuPatch, Curves, and FaceSet
+   types from AbcGeom.
+
+One other important thing to note: previous releases of Alembic did not
+require any of the compiled Boost libraries, but going forward, Alembic
+requires libboost_thread.
+
+Although this is our initial 1.0 release candidate, it should still be
+considered pre-release software, and should not be used for critical, deadline-
+driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
+2011-05-18, Alembic 0.9.3:
+
+The biggest news in this release is what we hope is the complete set of
+geometric types for ALembic 1.0, which includes curves (fashioned after
+RiCurves), nurbs surfaces, facesets in polygons and subds, and a camera
+definition. See http://code.google.com/p/alembic/wiki/Alembic_Geometric_Types
+for a complete list.
+
+The complete code changes for this release can be examined here:
+
+http://codereview.appspot.com/4517085
+
+Some highlights:
+
+ - There is now a single class for expression transforms. Preivously
+   we had both SimpleXform and Xform objects for expressing transformation.
+   The new unified Xform class can be used more simply than the old
+   Xform class, while retaining the expressivity of the original.
+
+ - We have experimental support for building Alembic on Windows. Details
+   for how to perform the build can found in build/Windows/README.txt and
+   build/Windows/WindowsBuildSteps.html
+
+ - We've changed the API in a couple places, most notably, in the way
+   instances of the class class Alembic::AbcCoreAbstract::TimeSampling are
+   stored and referenced.
+
+ - There is a reference Houdini SOP that can read an entire Alembic archive
+   or a subtree of an archive with the option to bake in transformations. As
+   such, it could also serve as the "leaf" node for an import process which
+   rebuilt the full transformation hierarchy within Houdini. The intention is
+   to pair this with a CHOP (not slated for inclusion this round) which extracts
+   transformation channels from the archive.  However, it is not yet integrated
+   into the Alembic build infrastructure, so compiling it may take some work.
+
+As this is still a 0.9 release, it is still to be considered Beta, and
+should not be used for critical, deadline-driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list.
+
+##-*****************************************************************************
+
+2011-02-17, Alembic 0.9.2:
+
+This is somewhere between a major and minor update.  Numerous bugs
+have been fixed, some new functionality has been introduced, and
+reference Maya plugins for import and export have been added.
+
+The code changes can be examined here:
+
+http://codereview.appspot.com/4160045/
+
+Some highlights in functionality:
+
+ - Maya export and import plugins are in the top-level "maya" directory.
+
+ - In the top-level "python" directory is the beginning of Python bindings
+   using Boost.Python.  This effort is currently incomplete, but with
+   these bindings, the structure of an Alembic Archive can be examined.
+
+ - UVs on PolyMeshes and SubD meshes, as well as Normals on PolyMeshes,
+   are included in their definition, and can be written and read as
+   indexed arrays or expanded, non-indexed arrays, with automatic
+   interconversion between the two representations.
+
+As this is still a 0.9 release, it is still to be considered Beta, and
+should not be used for critical, deadline-driven production work.
+
+Also as usual, feedback and questions are welcome!  The main discussion list
+is low-traffic, but anyone can sign up and participate:
+
+http://groups.google.com/group/alembic-discussion
+
+As always, discussion is welcome on the discussion list:
+
+##-*****************************************************************************
+
+2010-12-13, Alembic 0.9.1:
+
+Just a minor update to enable Alembic on 32-bit systems, along with
+getting the code in examples/bin/AbcEcho reasonably working.
+
+2010-12-08, Alembic 0.9.1:
+
+The main things in this release are the addition of a Renderman procedural
+plugin, and a bunch of bug fixes.  The example Maya exporter
+(AlembicSimpleAbcExport) can be used to create an Alembic file from a Maya
+scene, and that Alembic file can be read by the Renderman plugin to create
+images, which means that an end-to-end workflow can be achieved.  A complete
+overview of the changes to the code is here:
+
+http://codereview.appspot.com/3427045
+
+A summary of the bugs fixed in this change:
+
+http://code.google.com/p/alembic/issues/detail?id=71
+
+An internal implementation detail that fixed an issue where files created by
+the AlembicSimpleAbcExport Maya plugin were invalid.
+
+http://code.google.com/p/alembic/issues/detail?id=118
+
+Another internal implementation bugfix that ensured that certain properties of
+a subdivision surface were properly animatable.
+
+http://code.google.com/p/alembic/issues/detail?id=17
+
+Method to return a Property's parent Object simply did not work.
+
+http://code.google.com/p/alembic/issues/detail?id=121
+
+Methods to determine high-level type now more flexible and correct.
+
+http://code.google.com/p/alembic/issues/detail?id=7
+
+Build system improvement; now behaves better when trying to find the Boost
+headers and libraries.
+
+http://code.google.com/p/alembic/issues/detail?id=13
+
+A consequence of the bug that was fixed in issue 71.
+
+http://code.google.com/p/alembic/issues/detail?id=123
+
+Alembic was not reading all the required data from an ISimpleXform.
+
+
+In progress, we have:
+
+http://code.google.com/p/alembic/issues/detail?id=102
+
+This is an arbitrary transform "stack" type, roughly equivalent to Renderman's
+transformation model.  It has per-operation hints that allow it to be
+recognized as a transform and mapped directly to another application's
+transformation model.  It can also be read and written as a regular 4x4
+matrix.
+
+##-*****************************************************************************

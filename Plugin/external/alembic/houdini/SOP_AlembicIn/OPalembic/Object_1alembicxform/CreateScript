@@ -1,0 +1,18 @@
+# Automatically generated script: Friday August 12, 12:25 2011
+\set noalias = 1
+#
+#  Creation script for alembicxform operator
+#
+
+if ( "$arg1" == "" ) then
+    echo This script is intended as a creation script
+    exit
+endif
+
+# Node $arg1 (Object/alembicxform)
+opexprlanguage -s hscript $arg1
+opuserdata -n '___Version___' -v '' $arg1
+
+opcf $arg1
+
+opcf ..

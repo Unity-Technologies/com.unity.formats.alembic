@@ -1,0 +1,41 @@
+This is the 1.0 release of Alembic.
+
+We are confident it performs well, is feature complete, and is bug free enough
+to make the following promises:
+
+1. Alembic Data will be backwards compatible with any version of the API.
+
+2. Read performance will be the same or improve with future versions.
+
+3. API will remain source code compatible unless read performance can be
+greatly improved.
+
+4. Write performance will stay the same or improve unless read performance can
+be greatly increased.
+
+5. Disk space usage will stay the same or improve unless read performance can
+be greatly increased.
+
+6. Traversing the hierarchy must remain fast and not require much data
+loading/memory usage to guarantee on-demand loading.
+
+7. Reading and writing the data for a specific node will not require the data
+of any other node for on-demand loading and writing.
+
+8. Reading and writing a frame for a node will not require any other frame for
+on-demand loading and writing.
+
+There are several items that aren't in version 1.0 but will hopefully be
+included in a future patch:
+* Python bindings for the public-facing API.
+* Katana plugin
+* Houdini exporter
+
+Alembic is stable and usable, and any comments, criticisms or insights that you
+can provide are more than welcome. We hope you'll share your thoughts
+and feedback with us on alembic-discussion@googlegroups.com.
+To join the alembic-discussion mailing list, please visit
+http://groups.google.com/group/alembic-discussion.
+
+Thanks,
+The Alembic Team
