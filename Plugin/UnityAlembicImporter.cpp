@@ -44,7 +44,7 @@ public:
     const char* getFullName() const;
     uint32_t    getNumChildren() const;
     bool        hasXForm() const;
-    bool        isPolyMesh() const;
+    bool        hasPolyMesh() const;
     abcV3       getPosition() const;
     abcV3       getRotation() const;
     abcV3       getScale() const;
@@ -52,7 +52,7 @@ public:
     uint32_t    getVertexCount() const;
     uint32_t    getIndexCount() const;
     void        copyVertices(abcV3 *dst);
-    void        copyIndices(int *dst);
+    void        copyIndices(int *dst, bool reverse);
 
 private:
     static std::map<int, uaiContextPtr> s_contexts;
@@ -134,7 +134,7 @@ void uaiContext::setCurrentObject(abcObject *obj)
             x.getSchema().get(m_xf);
         }
 
-        if (isPolyMesh())
+        if (hasPolyMesh())
         {
             AbcGeom::IPolyMesh mesh(m_current.getParent(), m_current.getName());
             AbcGeom::IPolyMeshSchema schema = mesh.getSchema();
@@ -163,7 +163,7 @@ bool uaiContext::hasXForm() const
     return AbcGeom::IXformSchema::matches(m_current.getMetaData());
 }
 
-bool uaiContext::isPolyMesh() const
+bool uaiContext::hasPolyMesh() const
 {
     return AbcGeom::IPolyMeshSchema::matches(m_current.getMetaData());
 }
@@ -207,12 +207,19 @@ void uaiContext::copyVertices(abcV3 *dst)
     }
 }
 
-void uaiContext::copyIndices(int *dst)
+void uaiContext::copyIndices(int *dst, bool reverse)
 {
     const auto &cont = *m_mesh.getFaceIndices();
     size_t n = cont.size();
-    for (size_t i = 0; i < n; ++i) {
-        dst[i] = cont[i];
+    if (reverse) {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i] = cont[n-i-1];
+        }
+    }
+    else {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i] = cont[i];
+        }
     }
 }
 
@@ -281,7 +288,7 @@ uaiCLinkage uaiExport void uaiSetCurrentObject(int ctx, abcObject *obj)
     }
 }
 
-uaiCLinkage uaiExport const char* uaiGetName(int ctx)
+uaiCLinkage uaiExport const char* uaiGetNameS(int ctx)
 {
     if (auto c = uaiContext::get(ctx))
     {
@@ -290,7 +297,7 @@ uaiCLinkage uaiExport const char* uaiGetName(int ctx)
     return "";
 }
 
-uaiCLinkage uaiExport const char* uaiGetFullName(int ctx)
+uaiCLinkage uaiExport const char* uaiGetFullNameS(int ctx)
 {
     if (auto c = uaiContext::get(ctx))
     {
@@ -317,11 +324,11 @@ uaiCLinkage uaiExport bool uaiHasXForm(int ctx)
     return false;
 }
 
-uaiCLinkage uaiExport bool uaiIsPolyMesh(int ctx)
+uaiCLinkage uaiExport bool uaiHasPolyMesh(int ctx)
 {
     if (auto c = uaiContext::get(ctx))
     {
-        return c->isPolyMesh();
+        return c->hasPolyMesh();
     }
     return false;
 }
@@ -380,11 +387,18 @@ uaiCLinkage uaiExport uint32_t uaiGetIndexCount(int ctx)
     return 0;
 }
 
-uaiCLinkage uaiExport void uaiCopyMeshData(int ctx, abcV3 *vertices, int *indices)
+uaiCLinkage uaiExport void uaiCopyVertices(int ctx, abcV3 *vertices)
 {
     if (auto c = uaiContext::get(ctx))
     {
-        return c->copyVertices(vertices);
-        return c->copyIndices(indices);
+        c->copyVertices(vertices);
+    }
+}
+
+uaiCLinkage uaiExport void uaiCopyIndices(int ctx, int *indices, bool reverse)
+{
+    if (auto c = uaiContext::get(ctx))
+    {
+        c->copyIndices(indices, reverse);
     }
 }
