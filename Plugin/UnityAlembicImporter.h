@@ -40,17 +40,18 @@ uaiCLinkage uaiExport abcObject*    uaiGetTopObject(int ctx);
 uaiCLinkage uaiExport void          uaiEnumerateChild(int ctx, abcObject *obj, uaiNodeEnumerator e);
 uaiCLinkage uaiExport void          uaiSetCurrentObject(int ctx, abcObject *obj);
 
-uaiCLinkage uaiExport const char*   uaiGetName(int ctx);
-uaiCLinkage uaiExport const char*   uaiGetFullName(int ctx);
+uaiCLinkage uaiExport const char*   uaiGetNameS(int ctx);
+uaiCLinkage uaiExport const char*   uaiGetFullNameS(int ctx);
 uaiCLinkage uaiExport uint32_t      uaiGetNumChildren(int ctx);
 uaiCLinkage uaiExport bool          uaiHasXForm(int ctx);
-uaiCLinkage uaiExport bool          uaiIsPolyMesh(int ctx);
+uaiCLinkage uaiExport bool          uaiHasPolyMesh(int ctx);
 uaiCLinkage uaiExport uaiV3         uaiGetPosition(int ctx);
 uaiCLinkage uaiExport uaiV3         uaiGetRotation(int ctx);
 uaiCLinkage uaiExport uaiV3         uaiGetScale(int ctx);
 uaiCLinkage uaiExport uaiM44        uaiGetMatrix(int ctx);
 uaiCLinkage uaiExport uint32_t      uaiGetVertexCount(int ctx);
 uaiCLinkage uaiExport uint32_t      uaiGetIndexCount(int ctx);
-uaiCLinkage uaiExport void          uaiCopyMeshData(int ctx, abcV3 *vertices, int *indices);
+uaiCLinkage uaiExport void          uaiCopyVertices(int ctx, abcV3 *vertices);
+uaiCLinkage uaiExport void          uaiCopyIndices(int ctx, int *indices, bool reverse);
 
 #endif // UnityAlembicImporter_h
