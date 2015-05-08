@@ -71,12 +71,12 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Project\UnityAlembicImporter\Plugin\external\alembic-1_05_08\lib;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Imath;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\IlmThread;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\IexMath;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Iex;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Half;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\config;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14\hl\src;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14\src;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Project\UnityAlembicImporter\Plugin\external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
+    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Project\UnityAlembicImporter\Plugin\external\alembic-1_05_08\lib;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Imath;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\IlmThread;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\IexMath;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Iex;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\Half;C:\Project\UnityAlembicImporter\Plugin\external\ilmbase-2.2.0\config;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14\hl\src;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14\src;C:\Project\UnityAlembicImporter\Plugin\external\hdf5-1.8.14;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Project\UnityAlembicImporter\Plugin\external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
+    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
