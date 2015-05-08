@@ -1,10 +1,33 @@
+#include "pch.h"
 #include "UnityAlembicImporter.h"
+#ifdef uaiWindows
+    #include <windows.h>
+#endif // uaiWindows
 
 using namespace Alembic;
 
 class uaiContext;
 typedef std::shared_ptr<uaiContext> uaiContextPtr;
 typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
+
+#ifdef uaiWithDebugLog
+void uaiDebugLog(const char* fmt, ...)
+{
+    va_list vl;
+    va_start(vl, fmt);
+
+#ifdef uaiWindows
+    char buf[2048];
+    vsprintf(buf, fmt, vl);
+    ::OutputDebugStringA(buf);
+#else // uaiWindows
+    vprintf(vl);
+#endif // uaiWindows
+
+    va_end(vl);
+}
+#endif // uaiWithDebugLog
+
 
 class uaiContext
 {
@@ -18,7 +41,9 @@ public:
     void setCurrentObject(abcObject *obj);
 
     const char* getName() const;
+    const char* getFullName() const;
     uint32_t    getNumChildren() const;
+    bool        hasXForm() const;
     bool        isPolyMesh() const;
     abcV3       getPosition() const;
     abcV3       getRotation() const;
@@ -62,16 +87,35 @@ uaiContextPtr uaiContext::get(int ctx)
 }
 
 
-
 bool uaiContext::load(const char *path)
 {
-    m_archive = abcArchivePtr(new Abc::IArchive(AbcCoreHDF5::ReadArchive(), path));
-    if (!m_archive->valid()) {
+    try {
+        uaiDebugLog("trying to open AbcCoreHDF5::ReadArchive...\n");
+        m_archive = abcArchivePtr(new Abc::IArchive(AbcCoreHDF5::ReadArchive(), path));
+    }
+    catch (Alembic::Util::Exception e)
+    {
+        uaiDebugLog("exception: %s\n", e.what());
+
+        try {
+            uaiDebugLog("trying to open AbcCoreOgawa::ReadArchive...\n");
+            m_archive = abcArchivePtr(new Abc::IArchive(AbcCoreOgawa::ReadArchive(), path));
+        }
+        catch (Alembic::Util::Exception e)
+        {
+            uaiDebugLog("exception: %s\n", e.what());
+        }
+    }
+
+    if (m_archive->valid()) {
+        m_top_object = m_archive->getTop();
+        uaiDebugLog("succeeded\n");
+        return true;
+    }
+    else {
         m_archive.reset();
         return false;
     }
-    m_top_object = m_archive->getTop();
-    return true;
 }
 
 abcObject* uaiContext::getTopObject()
@@ -84,10 +128,14 @@ void uaiContext::setCurrentObject(abcObject *obj)
     m_current = *obj;
     if (m_current.valid())
     {
-        AbcGeom::IXform x(*obj, Abc::kWrapExisting);
-        x.getSchema().get(m_xf);
+        if (hasXForm())
+        {
+            AbcGeom::IXform x(*obj, Abc::kWrapExisting);
+            x.getSchema().get(m_xf);
+        }
 
-        if (isPolyMesh()) {
+        if (isPolyMesh())
+        {
             AbcGeom::IPolyMesh mesh(m_current.getParent(), m_current.getName());
             AbcGeom::IPolyMeshSchema schema = mesh.getSchema();
             schema.get(m_mesh);
@@ -100,9 +148,19 @@ const char* uaiContext::getName() const
     return m_current.getName().c_str();
 }
 
+const char* uaiContext::getFullName() const
+{
+    return m_current.getFullName().c_str();
+}
+
 uint32_t uaiContext::getNumChildren() const
 {
     return m_current.getNumChildren();
+}
+
+bool uaiContext::hasXForm() const
+{
+    return AbcGeom::IXformSchema::matches(m_current.getMetaData());
 }
 
 bool uaiContext::isPolyMesh() const
@@ -163,17 +221,21 @@ void uaiContext::copyIndices(int *dst)
 
 uaiCLinkage uaiExport int uaiCreateContext()
 {
-    return uaiContext::create();
+    int ctx = uaiContext::create();
+    uaiDebugLog("uaiCreateContext(): %d\n", ctx);
+    return ctx;
 }
 
 uaiCLinkage uaiExport void uaiDestroyContext(int ctx)
 {
+    uaiDebugLog("uaiDestroyContext(): %d\n", ctx);
     uaiContext::destroy(ctx);
 }
 
 
 uaiCLinkage uaiExport bool uaiLoad(int ctx, const char *path)
 {
+    uaiDebugLog("uaiLoad(): %d %s\n", ctx, path);
     if (auto c = uaiContext::get(ctx))
     {
         return c->load(path);
@@ -192,13 +254,20 @@ uaiCLinkage uaiExport abcObject* uaiGetTopObject(int ctx)
 
 uaiCLinkage uaiExport void uaiEnumerateChild(int ctx, abcObject *obj, uaiNodeEnumerator e)
 {
+    uaiDebugLog("uaiEnumerateChild(): %d %s (%d children)\n", ctx, obj->getName().c_str(), obj->getNumChildren());
     if (auto c = uaiContext::get(ctx))
     {
         size_t n = obj->getNumChildren();
         for (size_t i = 0; i < n; ++i) {
-            abcObject child = obj->getChild(n);
-            c->setCurrentObject(&child);
-            e(&child);
+            try {
+                abcObject child(*obj, obj->getChildHeader(i).getName());
+                c->setCurrentObject(&child);
+                e(ctx, &child);
+            }
+            catch (Alembic::Util::Exception e)
+            {
+                uaiDebugLog("exception: %s\n", e.what());
+            }
         }
     }
 }
@@ -221,6 +290,15 @@ uaiCLinkage uaiExport const char* uaiGetName(int ctx)
     return "";
 }
 
+uaiCLinkage uaiExport const char* uaiGetFullName(int ctx)
+{
+    if (auto c = uaiContext::get(ctx))
+    {
+        return c->getFullName();
+    }
+    return "";
+}
+
 uaiCLinkage uaiExport uint32_t uaiGetNumChildren(int ctx)
 {
     if (auto c = uaiContext::get(ctx))
@@ -228,6 +306,15 @@ uaiCLinkage uaiExport uint32_t uaiGetNumChildren(int ctx)
         return c->getNumChildren();
     }
     return 0;
+}
+
+uaiCLinkage uaiExport bool uaiHasXForm(int ctx)
+{
+    if (auto c = uaiContext::get(ctx))
+    {
+        return c->hasXForm();
+    }
+    return false;
 }
 
 uaiCLinkage uaiExport bool uaiIsPolyMesh(int ctx)
