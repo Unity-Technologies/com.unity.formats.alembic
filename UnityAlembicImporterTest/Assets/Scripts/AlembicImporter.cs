@@ -19,7 +19,8 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern IntPtr     aiGetTopObject(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(IntPtr ctx, IntPtr obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentObject(IntPtr ctx, IntPtr obj);
-    
+    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(IntPtr ctx, float time);
+
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(IntPtr ctx);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(IntPtr ctx);
     public static string aiGetName(IntPtr ctx)      { return Marshal.PtrToStringAnsi(aiGetNameS(ctx)); }
@@ -27,18 +28,19 @@ public class AlembicImporter
 
     [DllImport ("AlembicImporter")] public static extern uint       aiGetNumChildren(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Vector3    aiGetPosition(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Vector3    aiGetRotation(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Vector3    aiGetScale(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiGetMatrix(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern uint       aiGetVertexCount(IntPtr ctx);
+
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern uint       aiGetIndexCount(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiCopyVertices(IntPtr ctx, IntPtr vertices);
+    [DllImport ("AlembicImporter")] public static extern uint       aiGetVertexCount(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiCopyIndices(IntPtr ctx, IntPtr indices, bool reverse=false);
+    [DllImport ("AlembicImporter")] public static extern void       aiCopyVertices(IntPtr ctx, IntPtr vertices);
 
 
-    [MenuItem ("AlembicImporter/Import")]
+    [MenuItem ("Assets/Import Alembic")]
     static void Import()
     {
         var path = EditorUtility.OpenFilePanel("", "", "abc");
@@ -53,6 +55,8 @@ public class AlembicImporter
         {
             GameObject root = new GameObject();
             root.name = filename;
+            var abcstream = root.AddComponent<AlembicStream>();
+            abcstream.m_path_to_abc = path;
 
             GCHandle gch = GCHandle.Alloc(root.GetComponent<Transform>());
             aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -60,18 +64,32 @@ public class AlembicImporter
         aiDestroyContext(ctx);
     }
 
+    public static void UpdateAbcTree(IntPtr ctx, Transform root, float time)
+    {
+        aiSetCurrentTime(ctx, time);
+
+        GCHandle gch = GCHandle.Alloc(root);
+        aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
+    }
+
     static void ImportEnumerator(IntPtr ctx, IntPtr node, IntPtr parent_addr)
     {
         Transform parent = GCHandle.FromIntPtr(parent_addr).Target as Transform;
-        bool xf = aiHasXForm(ctx);
-        bool mesh = aiHasPolyMesh(ctx);
-        Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
+        bool has_xform = aiHasXForm(ctx);
+        bool has_mesh = aiHasPolyMesh(ctx);
+        //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
-        GameObject go = new GameObject();
-        go.name = aiGetName(ctx);
-        var trans = go.GetComponent<Transform>();
-        trans.parent = parent;
-        if (xf)
+        string child_name = aiGetName(ctx);
+        var trans = parent.FindChild(child_name);
+        if (trans == null)
+        {
+            GameObject go = new GameObject();
+            go.name = aiGetName(ctx);
+            trans = go.GetComponent<Transform>();
+            trans.parent = parent;
+        }
+
+        if (has_xform)
         {
             trans.localPosition = aiGetPosition(ctx);
             trans.localEulerAngles = aiGetRotation(ctx);
@@ -83,18 +101,34 @@ public class AlembicImporter
             trans.localEulerAngles = Vector3.zero;
             trans.localScale = Vector3.one;
         }
-        if (mesh)
+        if (has_mesh)
         {
-            GenerateMesh(ctx, go);
+            UpdateMesh(ctx, trans);
         }
 
         GCHandle gch = GCHandle.Alloc(trans);
         aiEnumerateChild(ctx, node, ImportEnumerator, GCHandle.ToIntPtr(gch));
     }
 
-    static void GenerateMesh(IntPtr ctx, GameObject go)
+    static void UpdateMesh(IntPtr ctx, Transform trans)
     {
-        Mesh mesh = new Mesh();
+        Mesh mesh;
+        var mesh_filter = trans.GetComponent<MeshFilter>();
+        if (mesh_filter==null)
+        {
+            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+            mesh = new Mesh();
+
+            var mesh_renderer = trans.gameObject.AddComponent<MeshRenderer>();
+            mesh.name = trans.name = aiGetName(ctx);
+            mesh_filter.mesh = mesh;
+            mesh_renderer.material = GetDefaultMaterial();
+        }
+        else
+        {
+            mesh = mesh_filter.mesh;
+        }
+
         {
             Vector3[] vertices = new Vector3[aiGetVertexCount(ctx)];
             int[] indices = new int[aiGetIndexCount(ctx)];
@@ -104,12 +138,6 @@ public class AlembicImporter
             mesh.SetIndices(indices, MeshTopology.Triangles, 0);
             mesh.RecalculateNormals();
         }
-
-        mesh.name = go.name = aiGetName(ctx);
-        var mesh_filter = go.AddComponent<MeshFilter>();
-        var mesh_renderer = go.AddComponent<MeshRenderer>();
-        mesh_filter.mesh = mesh;
-        mesh_renderer.material = GetDefaultMaterial();
     }
 
 
