@@ -116,17 +116,17 @@ public class AlembicImporter
         var mesh_filter = trans.GetComponent<MeshFilter>();
         if (mesh_filter==null)
         {
-            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
             mesh = new Mesh();
+            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+            mesh_filter.sharedMesh = mesh;
 
             var mesh_renderer = trans.gameObject.AddComponent<MeshRenderer>();
             mesh.name = trans.name = aiGetName(ctx);
-            mesh_filter.mesh = mesh;
             mesh_renderer.material = GetDefaultMaterial();
         }
         else
         {
-            mesh = mesh_filter.mesh;
+            mesh = mesh_filter.sharedMesh;
         }
 
         {
