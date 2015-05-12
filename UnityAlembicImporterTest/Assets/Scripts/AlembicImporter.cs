@@ -10,70 +10,72 @@ using UnityEditor;
 
 public class AlembicImporter
 {
-    public delegate void uaiNodeEnumerator(int ctx, IntPtr obj);
+    public delegate void aiNodeEnumerator(IntPtr ctx, IntPtr obj, IntPtr userdata);
 
-    [DllImport ("UnityAlembicImporter")] public static extern int       uaiCreateContext();
-    [DllImport ("UnityAlembicImporter")] public static extern void      uaiDestroyContext(int ctx);
+    [DllImport ("AlembicImporter")] public static extern IntPtr     aiCreateContext();
+    [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(IntPtr ctx);
     
-    [DllImport ("UnityAlembicImporter")] public static extern bool      uaiLoad(int ctx, string path);
-    [DllImport ("UnityAlembicImporter")] public static extern IntPtr    uaiGetTopObject(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern void      uaiEnumerateChild(int ctx, IntPtr obj, uaiNodeEnumerator e);
-    [DllImport ("UnityAlembicImporter")] public static extern void      uaiSetCurrentObject(int ctx, IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiLoad(IntPtr ctx, string path);
+    [DllImport ("AlembicImporter")] public static extern IntPtr     aiGetTopObject(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(IntPtr ctx, IntPtr obj, aiNodeEnumerator e, IntPtr userdata);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentObject(IntPtr ctx, IntPtr obj);
     
-    [DllImport ("UnityAlembicImporter")] public static extern IntPtr    uaiGetNameS(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern IntPtr    uaiGetFullNameS(int ctx);
-    public static string uaiGetName(int ctx)    { return Marshal.PtrToStringAnsi(uaiGetNameS(ctx)); }
-    public static string uaiGetFullName(int ctx){ return Marshal.PtrToStringAnsi(uaiGetFullNameS(ctx)); }
+    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(IntPtr ctx);
+    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(IntPtr ctx);
+    public static string aiGetName(IntPtr ctx)      { return Marshal.PtrToStringAnsi(aiGetNameS(ctx)); }
+    public static string aiGetFullName(IntPtr ctx)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(ctx)); }
 
-    [DllImport ("UnityAlembicImporter")] public static extern uint      uaiGetNumChildren(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern bool      uaiHasXForm(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern bool      uaiHasPolyMesh(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern Vector3   uaiGetPosition(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern Vector3   uaiGetRotation(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern Vector3   uaiGetScale(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern Matrix4x4 uaiGetMatrix(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern uint      uaiGetVertexCount(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern uint      uaiGetIndexCount(int ctx);
-    [DllImport ("UnityAlembicImporter")] public static extern void      uaiCopyVertices(int ctx, IntPtr vertices);
-    [DllImport ("UnityAlembicImporter")] public static extern void      uaiCopyIndices(int ctx, IntPtr indices, bool reverse=false);
+    [DllImport ("AlembicImporter")] public static extern uint       aiGetNumChildren(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetPosition(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetRotation(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetScale(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiGetMatrix(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern uint       aiGetVertexCount(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern uint       aiGetIndexCount(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiCopyVertices(IntPtr ctx, IntPtr vertices);
+    [DllImport ("AlembicImporter")] public static extern void       aiCopyIndices(IntPtr ctx, IntPtr indices, bool reverse=false);
 
-
-    static Transform s_parent;
 
     [MenuItem ("AlembicImporter/Import")]
-    static void Test()
+    static void Import()
     {
         var path = EditorUtility.OpenFilePanel("", "", "abc");
+        var filename = System.IO.Path.GetFileNameWithoutExtension(path);
 
-        int ctx = uaiCreateContext();
-        if (!uaiLoad(ctx, path))
+        IntPtr ctx = aiCreateContext();
+        if (!aiLoad(ctx, path))
         {
-            Debug.Log("uaiLoad(\"" + path + "\") failed");
+            Debug.Log("aiLoad(\"" + path + "\") failed");
         }
         else
         {
-            uaiEnumerateChild(ctx, uaiGetTopObject(ctx), TestCallback);
+            GameObject root = new GameObject();
+            root.name = filename;
+
+            GCHandle gch = GCHandle.Alloc(root.GetComponent<Transform>());
+            aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
         }
-        uaiDestroyContext(ctx);
+        aiDestroyContext(ctx);
     }
 
-    static void TestCallback(int ctx, IntPtr node)
+    static void ImportEnumerator(IntPtr ctx, IntPtr node, IntPtr parent_addr)
     {
-        bool xf = uaiHasXForm(ctx);
-        bool mesh = uaiHasPolyMesh(ctx);
-        Debug.Log("Node: " + uaiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
+        Transform parent = GCHandle.FromIntPtr(parent_addr).Target as Transform;
+        bool xf = aiHasXForm(ctx);
+        bool mesh = aiHasPolyMesh(ctx);
+        Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
-        Transform prev_parent = s_parent;
         GameObject go = new GameObject();
-        go.name = uaiGetName(ctx);
+        go.name = aiGetName(ctx);
         var trans = go.GetComponent<Transform>();
-        trans.parent = s_parent;
-        s_parent = trans;
+        trans.parent = parent;
         if (xf)
         {
-            trans.localPosition = uaiGetPosition(ctx);
-            trans.localEulerAngles = uaiGetRotation(ctx);
-            trans.localScale = uaiGetScale(ctx);
+            trans.localPosition = aiGetPosition(ctx);
+            trans.localEulerAngles = aiGetRotation(ctx);
+            trans.localScale = aiGetScale(ctx);
         }
         else
         {
@@ -86,24 +88,24 @@ public class AlembicImporter
             GenerateMesh(ctx, go);
         }
 
-        uaiEnumerateChild(ctx, node, TestCallback);
-
-        s_parent = prev_parent;
+        GCHandle gch = GCHandle.Alloc(trans);
+        aiEnumerateChild(ctx, node, ImportEnumerator, GCHandle.ToIntPtr(gch));
     }
 
-    static void GenerateMesh(int ctx, GameObject go)
+    static void GenerateMesh(IntPtr ctx, GameObject go)
     {
         Mesh mesh = new Mesh();
         {
-            Vector3[] vertices = new Vector3[uaiGetVertexCount(ctx)];
-            int[] indices = new int[uaiGetIndexCount(ctx)];
-            uaiCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0));
-            uaiCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0), true);
+            Vector3[] vertices = new Vector3[aiGetVertexCount(ctx)];
+            int[] indices = new int[aiGetIndexCount(ctx)];
+            aiCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0));
+            aiCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0), true);
             mesh.vertices = vertices;
             mesh.SetIndices(indices, MeshTopology.Triangles, 0);
+            mesh.RecalculateNormals();
         }
 
-        mesh.name = go.name = uaiGetName(ctx);
+        mesh.name = go.name = aiGetName(ctx);
         var mesh_filter = go.AddComponent<MeshFilter>();
         var mesh_renderer = go.AddComponent<MeshRenderer>();
         mesh_filter.mesh = mesh;
@@ -112,6 +114,7 @@ public class AlembicImporter
 
 
     static MethodInfo s_GetBuiltinExtraResourcesMethod;
+
     static Material GetDefaultMaterial()
     {
         if (s_GetBuiltinExtraResourcesMethod == null)

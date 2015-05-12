@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <thread>
+#include <mutex>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
