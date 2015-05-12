@@ -19,17 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="UnityAlembicImporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="UnityAlembicImporter.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>
