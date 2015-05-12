@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-
+[ExecuteInEditMode]
 public class AlembicStream : MonoBehaviour
 {
     public string m_path_to_abc;
