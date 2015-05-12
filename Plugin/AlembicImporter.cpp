@@ -36,6 +36,7 @@ public:
     bool load(const char *path);
     abcObject* getTopObject();
     void setCurrentObject(abcObject *obj);
+    void setCurrentTime(float time);
 
     const char* getName() const;
     const char* getFullName() const;
@@ -46,10 +47,12 @@ public:
     abcV3       getRotation() const;
     abcV3       getScale() const;
     abcM44      getMatrix() const;
-    uint32_t    getVertexCount() const;
     uint32_t    getIndexCount() const;
-    void        copyVertices(abcV3 *dst);
+    uint32_t    getVertexCount() const;
     void        copyIndices(int *dst, bool reverse);
+    void        copyVertices(abcV3 *dst);
+    void        copyNormals(abcV3 *dst);
+    void        copyUVs(abcV2 *dst);
 
 private:
     static std::vector<aiContextPtr> s_contexts;
@@ -60,7 +63,12 @@ private:
 
     abcObject m_current;
     AbcGeom::XformSample m_xf;
-    AbcGeom::IPolyMeshSchema::Sample m_mesh;
+    AbcGeom::IPolyMeshSchema m_mesh_schema;
+    Abc::ISampleSelector m_sample_selector;
+    Abc::Int32ArraySamplePtr m_indices;
+    Abc::Int32ArraySamplePtr m_counts;
+    Abc::P3fArraySamplePtr m_positions;
+    Abc::V3fArraySamplePtr m_velocities;
 };
 
 std::vector<aiContextPtr> aiContext::s_contexts;
@@ -69,9 +77,8 @@ std::mutex aiContext::s_mutex;
 aiContextPtr aiContext::create()
 {
     std::lock_guard<std::mutex> l(s_mutex);
-    int i = 0;
     auto ctx = new aiContext();
-    for (;; ++i) {
+    for (int i=0; ; ++i) {
         if (s_contexts.size() <= i) {
             s_contexts.push_back(ctx);
             break;
@@ -89,7 +96,10 @@ void aiContext::destroy(aiContextPtr ctx)
 {
     std::lock_guard<std::mutex> l(s_mutex);
     auto it = std::find(s_contexts.begin(), s_contexts.end(), ctx);
-    s_contexts.erase(it);
+    if (it != s_contexts.end()) {
+        s_contexts.erase(it);
+        delete ctx;
+    }
 }
 
 
@@ -143,10 +153,21 @@ void aiContext::setCurrentObject(abcObject *obj)
         if (hasPolyMesh())
         {
             AbcGeom::IPolyMesh mesh(m_current.getParent(), m_current.getName());
-            AbcGeom::IPolyMeshSchema schema = mesh.getSchema();
-            schema.get(m_mesh);
+            m_mesh_schema = mesh.getSchema();
+            m_mesh_schema.getFaceIndicesProperty().get(m_indices, m_sample_selector);
+            m_mesh_schema.getFaceCountsProperty().get(m_counts, m_sample_selector);
+            m_mesh_schema.getPositionsProperty().get(m_positions, m_sample_selector);
+            if (m_mesh_schema.getVelocitiesProperty().valid()) {
+                m_mesh_schema.getVelocitiesProperty().get(m_velocities, m_sample_selector);
+            }
+            aiDebugLog("TopologyVariance: %d\n", m_mesh_schema.getTopologyVariance());
         }
     }
+}
+
+void aiContext::setCurrentTime(float time)
+{
+    m_sample_selector = Abc::ISampleSelector(time, Abc::ISampleSelector::kFloorIndex);
 }
 
 const char* aiContext::getName() const
@@ -194,32 +215,23 @@ abcM44 aiContext::getMatrix() const
     return abcM44(m_xf.getMatrix());
 }
 
-uint32_t aiContext::getVertexCount() const
-{
-    return m_mesh.getPositions()->size();
-}
-
 uint32_t aiContext::getIndexCount() const
 {
-    return m_mesh.getFaceIndices()->size();
+    return m_indices->size();
 }
 
-void aiContext::copyVertices(abcV3 *dst)
+uint32_t aiContext::getVertexCount() const
 {
-    const auto &cont = *m_mesh.getPositions();
-    size_t n = cont.size();
-    for (size_t i = 0; i < n; ++i) {
-        dst[i] = cont[i];
-    }
+    return m_positions->size();
 }
 
 void aiContext::copyIndices(int *dst, bool reverse)
 {
-    const auto &cont = *m_mesh.getFaceIndices();
+    const auto &cont = *m_indices;
     size_t n = cont.size();
     if (reverse) {
         for (size_t i = 0; i < n; ++i) {
-            dst[i] = cont[n-i-1];
+            dst[i] = cont[n - i - 1];
         }
     }
     else {
@@ -227,6 +239,23 @@ void aiContext::copyIndices(int *dst, bool reverse)
             dst[i] = cont[i];
         }
     }
+}
+
+void aiContext::copyVertices(abcV3 *dst)
+{
+    const auto &cont = *m_positions;
+    size_t n = cont.size();
+    for (size_t i = 0; i < n; ++i) {
+        dst[i] = cont[i];
+    }
+}
+
+void aiContext::copyNormals(abcV3 *dst)
+{
+}
+
+void aiContext::copyUVs(abcV2 *dst)
+{
 }
 
 
@@ -279,6 +308,13 @@ aiCLinkage aiExport void aiSetCurrentObject(aiContextPtr ctx, abcObject *obj)
 {
     ctx->setCurrentObject(obj);
 }
+
+aiCLinkage aiExport void aiSetCurrentTime(aiContextPtr ctx, float time)
+{
+    aiDebugLog("aiSetCurrentTime(): %.2f\n", time);
+    ctx->setCurrentTime(time);
+}
+
 
 aiCLinkage aiExport const char* aiGetNameS(aiContextPtr ctx)
 {
@@ -335,12 +371,22 @@ aiCLinkage aiExport uint32_t aiGetIndexCount(aiContextPtr ctx)
     return ctx->getIndexCount();
 }
 
+aiCLinkage aiExport void aiCopyIndices(aiContextPtr ctx, int *indices, bool reverse)
+{
+    ctx->copyIndices(indices, reverse);
+}
+
 aiCLinkage aiExport void aiCopyVertices(aiContextPtr ctx, abcV3 *vertices)
 {
     ctx->copyVertices(vertices);
 }
 
-aiCLinkage aiExport void aiCopyIndices(aiContextPtr ctx, int *indices, bool reverse)
+aiCLinkage aiExport void aiCopyNormals(aiContextPtr ctx, abcV3 *normals)
 {
-    ctx->copyIndices(indices, reverse);
+    ctx->copyNormals(normals);
+}
+
+aiCLinkage aiExport void aiCopyUVs(aiContextPtr ctx, abcV2 *uvs)
+{
+    ctx->copyUVs(uvs);
 }
