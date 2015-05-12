@@ -9,7 +9,7 @@ using namespace Alembic;
 typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
 
 #ifdef aiWithDebugLog
-void aiDebugLog(const char* fmt, ...)
+void aiDebugLogImpl(const char* fmt, ...)
 {
     va_list vl;
     va_start(vl, fmt);
@@ -41,12 +41,14 @@ public:
     const char* getName() const;
     const char* getFullName() const;
     uint32_t    getNumChildren() const;
+
     bool        hasXForm() const;
-    bool        hasPolyMesh() const;
     abcV3       getPosition() const;
     abcV3       getRotation() const;
     abcV3       getScale() const;
     abcM44      getMatrix() const;
+
+    bool        hasPolyMesh() const;
     uint32_t    getIndexCount() const;
     uint32_t    getVertexCount() const;
     void        copyIndices(int *dst, bool reverse);
@@ -55,9 +57,6 @@ public:
     void        copyUVs(abcV2 *dst);
 
 private:
-    static std::vector<aiContextPtr> s_contexts;
-    static std::mutex s_mutex;
-
     abcArchivePtr m_archive;
     abcObject m_top_object;
 
@@ -71,40 +70,22 @@ private:
     Abc::V3fArraySamplePtr m_velocities;
 };
 
-std::vector<aiContextPtr> aiContext::s_contexts;
-std::mutex aiContext::s_mutex;
 
 aiContextPtr aiContext::create()
 {
-    std::lock_guard<std::mutex> l(s_mutex);
-    auto ctx = new aiContext();
-    for (int i=0; ; ++i) {
-        if (s_contexts.size() <= i) {
-            s_contexts.push_back(ctx);
-            break;
-        }
-        else if (!s_contexts[i]) {
-            s_contexts[i] = ctx;
-            break;
-        }
-    }
-
-    return ctx;
+    return new aiContext();
 }
 
 void aiContext::destroy(aiContextPtr ctx)
 {
-    std::lock_guard<std::mutex> l(s_mutex);
-    auto it = std::find(s_contexts.begin(), s_contexts.end(), ctx);
-    if (it != s_contexts.end()) {
-        s_contexts.erase(it);
-        delete ctx;
-    }
+    delete ctx;
 }
 
 
 bool aiContext::load(const char *path)
 {
+    if (path == nullptr) return false;
+
     try {
         aiDebugLog("trying to open AbcCoreHDF5::ReadArchive...\n");
         m_archive = abcArchivePtr(new Abc::IArchive(AbcCoreHDF5::ReadArchive(), path));
@@ -160,7 +141,9 @@ void aiContext::setCurrentObject(abcObject *obj)
             if (m_mesh_schema.getVelocitiesProperty().valid()) {
                 m_mesh_schema.getVelocitiesProperty().get(m_velocities, m_sample_selector);
             }
-            aiDebugLog("TopologyVariance: %d\n", m_mesh_schema.getTopologyVariance());
+            if (m_mesh_schema.isConstant()) {
+                aiDebugLog("warning: topology is not consant\n");
+            }
         }
     }
 }
@@ -185,14 +168,10 @@ uint32_t aiContext::getNumChildren() const
     return m_current.getNumChildren();
 }
 
+
 bool aiContext::hasXForm() const
 {
     return AbcGeom::IXformSchema::matches(m_current.getMetaData());
-}
-
-bool aiContext::hasPolyMesh() const
-{
-    return AbcGeom::IPolyMeshSchema::matches(m_current.getMetaData());
 }
 
 abcV3 aiContext::getPosition() const
@@ -213,6 +192,12 @@ abcV3 aiContext::getScale() const
 abcM44 aiContext::getMatrix() const
 {
     return abcM44(m_xf.getMatrix());
+}
+
+
+bool aiContext::hasPolyMesh() const
+{
+    return AbcGeom::IPolyMeshSchema::matches(m_current.getMetaData());
 }
 
 uint32_t aiContext::getIndexCount() const
@@ -252,10 +237,12 @@ void aiContext::copyVertices(abcV3 *dst)
 
 void aiContext::copyNormals(abcV3 *dst)
 {
+    // todo
 }
 
 void aiContext::copyUVs(abcV2 *dst)
 {
+    // todo
 }
 
 
@@ -277,7 +264,7 @@ aiCLinkage aiExport void aiDestroyContext(aiContextPtr ctx)
 
 aiCLinkage aiExport bool aiLoad(aiContextPtr ctx, const char *path)
 {
-    aiDebugLog("aiLoad(): %d %s\n", ctx, path);
+    aiDebugLog("aiLoad(): %p %s\n", ctx, path);
     return ctx->load(path);
 }
 
@@ -288,7 +275,7 @@ aiCLinkage aiExport abcObject* aiGetTopObject(aiContextPtr ctx)
 
 aiCLinkage aiExport void aiEnumerateChild(aiContextPtr ctx, abcObject *obj, aiNodeEnumerator e, void *userdata)
 {
-    aiDebugLog("aiEnumerateChild(): %d %s (%d children)\n", ctx, obj->getName().c_str(), obj->getNumChildren());
+    aiDebugLogVerbose("aiEnumerateChild(): %p %s (%d children)\n", ctx, obj->getName().c_str(), obj->getNumChildren());
     size_t n = obj->getNumChildren();
     for (size_t i = 0; i < n; ++i) {
         try {
@@ -311,7 +298,7 @@ aiCLinkage aiExport void aiSetCurrentObject(aiContextPtr ctx, abcObject *obj)
 
 aiCLinkage aiExport void aiSetCurrentTime(aiContextPtr ctx, float time)
 {
-    aiDebugLog("aiSetCurrentTime(): %.2f\n", time);
+    aiDebugLogVerbose("aiSetCurrentTime(): %p %.2f\n", ctx, time);
     ctx->setCurrentTime(time);
 }
 
