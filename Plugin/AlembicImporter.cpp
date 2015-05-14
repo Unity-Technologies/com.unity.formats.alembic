@@ -148,7 +148,7 @@ void aiContext::setCurrentObject(abcObject *obj)
         if (hasXForm())
         {
             AbcGeom::IXform x(*obj, Abc::kWrapExisting);
-            x.getSchema().get(m_xf);
+            x.getSchema().get(m_xf, m_sample_selector);
         }
 
         if (hasPolyMesh())
