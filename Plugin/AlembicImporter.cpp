@@ -59,8 +59,8 @@ public:
     void        copyIndices(int *dst) const;
     void        copyVertices(abcV3 *dst) const;
     bool        getSplitedMeshInfo(aiSplitedMeshInfo &o_sp, const aiSplitedMeshInfo& prev, int max_vertices) const;
-    void        copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi);
-    void        copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi);
+    void        copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const;
+    void        copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
 
 private:
 #ifdef aiWithDebugLog
@@ -315,9 +315,7 @@ bool aiContext::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMesh
 {
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
-    const auto &positions = *m_positions;
     size_t nc = counts.size();
-    size_t ni = indices.size();
 
     aiSplitedMeshInfo smi = {0};
     smi.begin_face = prev.begin_face + prev.num_faces;
@@ -343,7 +341,7 @@ bool aiContext::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMesh
     return is_end;
 }
 
-void aiContext::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi)
+void aiContext::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const
 {
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
@@ -364,15 +362,13 @@ void aiContext::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi)
     }
 }
 
-void aiContext::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi)
+void aiContext::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
     const auto &positions = *m_positions;
 
     uint32_t a = 0;
-    uint32_t i1 = m_reverse_index ? 2 : 1;
-    uint32_t i2 = m_reverse_index ? 1 : 2;
     for (size_t fi = 0; fi < smi.num_faces; ++fi) {
         int ngon = counts[smi.begin_face + fi];
         for (int ni = 0; ni < ngon; ++ni) {
