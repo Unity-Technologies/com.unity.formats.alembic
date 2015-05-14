@@ -3,7 +3,6 @@
 
 #include "pch.h"
 
-#define aiWithDebugLog
 
 
 #ifdef _WIN32
@@ -19,13 +18,16 @@
 
 #ifdef aiWithDebugLog
     void aiDebugLogImpl(const char* fmt, ...);
-    #define aiDebugLog(...)         aiDebugLogImpl(__VA_ARGS__)
-    //#define aiDebugLogVerbose(...)  aiDebugLogImpl(__VA_ARGS__)
-    #define aiDebugLogVerbose(...)
-#else  // aiWithDebugLog
+    #define aiDebugLog(...) aiDebugLogImpl(__VA_ARGS__)
+    #ifdef aiWithVerboseDebugLog
+        #define aiDebugLogVerbose(...) aiDebugLogImpl(__VA_ARGS__)
+    #else
+        #define aiDebugLogVerbose(...)
+    #endif
+#else
     #define aiDebugLog(...)
     #define aiDebugLogVerbose(...)
-#endif // aiWithDebugLog
+#endif
 
 
 typedef Alembic::Abc::V2f       abcV2;
@@ -40,6 +42,17 @@ struct aiV2 { float v[2]; };
 struct aiV3 { float v[3]; };
 struct aiM44 { float v[4][4]; };
 
+struct aiSplitedMeshInfo
+{
+    int num_faces;
+    int num_indices;
+    int num_vertices;
+
+    int begin_face;
+    int begin_index;
+    int triangulated_index_count;
+};
+
 
 aiCLinkage aiExport aiContextPtr    aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContextPtr ctx);
@@ -50,6 +63,8 @@ aiCLinkage aiExport void            aiEnumerateMetaData(aiContextPtr ctx, abcObj
 aiCLinkage aiExport void            aiEnumerateChild(aiContextPtr ctx, abcObject *node, aiNodeEnumerator e, void *userdata);
 aiCLinkage aiExport void            aiSetCurrentObject(aiContextPtr ctx, abcObject *node);
 aiCLinkage aiExport void            aiSetCurrentTime(aiContextPtr ctx, float time);
+aiCLinkage aiExport void            aiEnableTriangulate(aiContextPtr ctx, bool v);
+aiCLinkage aiExport void            aiEnableReverseIndex(aiContextPtr ctx, bool v);
 
 aiCLinkage aiExport const char*     aiGetNameS(aiContextPtr ctx);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiContextPtr ctx);
@@ -66,10 +81,10 @@ aiCLinkage aiExport bool            aiIsNormalsIndexed(aiContextPtr ctx);
 aiCLinkage aiExport bool            aiIsUVsIndexed(aiContextPtr ctx);
 aiCLinkage aiExport uint32_t        aiGetIndexCount(aiContextPtr ctx);
 aiCLinkage aiExport uint32_t        aiGetVertexCount(aiContextPtr ctx);
-aiCLinkage aiExport void            aiCopyIndices(aiContextPtr ctx, int *indices, bool reverse);
-aiCLinkage aiExport void            aiCopyVertices(aiContextPtr ctx, abcV3 *o_vertices);
-aiCLinkage aiExport void            aiCopyNormals(aiContextPtr ctx, abcV3 *o_normals);
-aiCLinkage aiExport void            aiCopyUVs(aiContextPtr ctx, abcV2 *o_uvs);
-aiCLinkage aiExport void            aiCopyVelocities(aiContextPtr ctx, abcV3 *o_velocities);
+aiCLinkage aiExport void            aiCopyIndices(aiContextPtr ctx, int *dst);
+aiCLinkage aiExport void            aiCopyVertices(aiContextPtr ctx, abcV3 *dst);
+aiCLinkage aiExport bool            aiGetSplitedMeshInfo(aiContextPtr ctx, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices);
+aiCLinkage aiExport void            aiCopySplitedIndices(aiContextPtr ctx, int *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiCopySplitedVertices(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi);
 
 #endif // AlembicImporter_h
