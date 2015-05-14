@@ -35,7 +35,7 @@ public class AlembicStream : MonoBehaviour
     {
         if (!m_loaded)
         {
-            m_loaded = AlembicImporter.aiLoad(m_abc, m_path_to_abc);
+            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
         }
         if(m_loaded)
         {

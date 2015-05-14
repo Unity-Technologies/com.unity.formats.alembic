@@ -120,7 +120,7 @@ bool aiContext::load(const char *path)
         }
     }
 
-    if (m_archive->valid()) {
+    if (m_archive && m_archive->valid()) {
         m_top_object = m_archive->getTop();
         aiDebugLog("succeeded\n");
         return true;

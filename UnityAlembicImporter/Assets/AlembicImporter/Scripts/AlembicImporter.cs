@@ -67,15 +67,21 @@ public class AlembicImporter
     [MenuItem ("Assets/Import Alembic")]
     static void Import()
     {
-        var path = EditorUtility.OpenFilePanel("", "", "abc");
+        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
         ImportImpl(path, false);
     }
 
     [MenuItem("Assets/Import Alembic (reverse faces)")]
     static void ImportR()
     {
-        var path = EditorUtility.OpenFilePanel("", "", "abc");
+        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
         ImportImpl(path, true);
+    }
+
+    static string MakeRelativePath(string path)
+    {
+        Uri path_to_assets = new Uri(Application.streamingAssetsPath + "/");
+        return path_to_assets.MakeRelativeUri(new Uri(path)).ToString();
     }
 
     static void ImportImpl(string path, bool reverse_faces)
@@ -83,7 +89,7 @@ public class AlembicImporter
         if (path=="") return;
 
         IntPtr ctx = aiCreateContext();
-        if (!aiLoad(ctx, path))
+        if (!aiLoad(ctx, Application.streamingAssetsPath + "/" + path))
         {
             Debug.Log("aiLoad(\"" + path + "\") failed");
         }
@@ -173,7 +179,11 @@ public class AlembicImporter
                 index_cache = new int[0],
             };
             abcmesh.m_meshes.Add(entry);
+#if UNITY_EDITOR
+            trans.GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
+#endif
         }
+        Material material = trans.GetComponent<MeshRenderer>().sharedMaterial;
 
         if (!needs_split)
         {
@@ -237,6 +247,7 @@ public class AlembicImporter
                     child.localScale = Vector3.one;
                     Mesh mesh = AddMeshComponents(ctx, child);
                     mesh.name = name;
+                    child.GetComponent<MeshRenderer>().sharedMaterial = material;
 
                     entry = new AlembicMesh.Entry
                     {
@@ -277,9 +288,6 @@ public class AlembicImporter
             mesh_filter.sharedMesh = mesh;
 
             var mesh_renderer = trans.gameObject.AddComponent<MeshRenderer>();
-#if UNITY_EDITOR
-            mesh_renderer.material = GetDefaultMaterial();
-#endif
         }
         else
         {
