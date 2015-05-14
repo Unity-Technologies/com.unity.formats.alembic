@@ -14,9 +14,9 @@ public class AlembicImporter
 
     public struct aiSplitedMeshInfo
     {
-        public int num_faces;
-        public int num_indices;
-        public int num_vertices;
+        public int face_count;
+        public int index_count;
+        public int vertex_count;
         public int begin_face;
         public int begin_index;
         public int triangulated_index_count;
@@ -159,104 +159,112 @@ public class AlembicImporter
 
     public static void UpdateAbcMesh(IntPtr ctx, Transform trans)
     {
-        int max_vertices = 65000;
-
+        const int max_vertices = 65000;
         bool needs_split = aiGetVertexCount(ctx) >= max_vertices;
 
-        Mesh mainmesh = CreateOrGetMesh(ctx, trans);
+        AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
+        if(abcmesh==null)
+        {
+            abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
+            var entry = new AlembicMesh.Entry {
+                host = trans.gameObject,
+                mesh = AddMeshComponents(ctx, trans),
+                vertex_cache = new Vector3[0],
+                index_cache = new int[0],
+            };
+            abcmesh.m_meshes.Add(entry);
+        }
+
         if (!needs_split)
         {
-            int[] indices = new int[aiGetIndexCount(ctx)];
-            Vector3[] vertices = new Vector3[aiGetVertexCount(ctx)];
-            aiCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0));
-            aiCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0));
-            mainmesh.Clear();
-            mainmesh.vertices = vertices;
-            mainmesh.SetIndices(indices, MeshTopology.Triangles, 0);
-            mainmesh.RecalculateNormals();
+            AlembicMesh.Entry entry = abcmesh.m_meshes[0];
+            Array.Resize(ref entry.index_cache, aiGetIndexCount(ctx));
+            Array.Resize(ref entry.vertex_cache, aiGetVertexCount(ctx));
+            aiCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0));
+            aiCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0));
+            entry.mesh.Clear();
+            entry.mesh.vertices = entry.vertex_cache;
+            entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
+            entry.mesh.RecalculateNormals(); // 
 
-            for (int i = 0; DisableSubmesh(ctx, trans, i); ++i) { }
+            for (int i = 1; i < abcmesh.m_meshes.Count; ++i)
+            {
+                abcmesh.m_meshes[i].host.SetActive(false);
+            }
         }
         else
         {
             aiSplitedMeshInfo smi_prev = default(aiSplitedMeshInfo);
             aiSplitedMeshInfo smi = default(aiSplitedMeshInfo);
 
-            int nth_submesh = 0;
             bool is_end = aiGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
             {
-                int[] indices = new int[smi.triangulated_index_count];
-                Vector3[] vertices = new Vector3[smi.num_vertices];
-                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0), ref smi);
-                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0), ref smi);
-                mainmesh.vertices = vertices;
-                mainmesh.SetIndices(indices, MeshTopology.Triangles, 0);
-                mainmesh.RecalculateNormals();
+                AlembicMesh.Entry entry = abcmesh.m_meshes[0];
+                Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
+                Array.Resize(ref entry.vertex_cache, smi.vertex_count);
+                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
+                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                entry.mesh.Clear();
+                entry.mesh.vertices = entry.vertex_cache;
+                entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
+                entry.mesh.RecalculateNormals();
             }
 
+            int nth_submesh = 0;
             while (!is_end)
             {
+                ++nth_submesh;
                 smi_prev = smi;
                 smi = default(aiSplitedMeshInfo);
                 is_end = aiGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
 
-                Transform child;
-                Mesh submesh;
-                CreateOrGetSubmeshObject(ctx, trans, nth_submesh, out child, out submesh);
+                AlembicMesh.Entry entry;
+                if(nth_submesh < abcmesh.m_meshes.Count)
+                {
+                    entry = abcmesh.m_meshes[nth_submesh];
+                    entry.host.SetActive(true);
+                }
+                else
+                {
+                    string name = "Submesh_" + nth_submesh;
 
-                int[] indices = new int[smi.triangulated_index_count];
-                Vector3[] vertices = new Vector3[smi.num_vertices];
-                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0), ref smi);
-                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0), ref smi);
-                submesh.Clear();
-                submesh.vertices = vertices;
-                submesh.SetIndices(indices, MeshTopology.Triangles, 0);
-                submesh.RecalculateNormals();
+                    GameObject go = new GameObject();
+                    Transform child = go.GetComponent<Transform>();
+                    go.name = name;
+                    child.parent = trans;
+                    child.localPosition = Vector3.zero;
+                    child.localEulerAngles = Vector3.zero;
+                    child.localScale = Vector3.one;
+                    Mesh mesh = AddMeshComponents(ctx, child);
+                    mesh.name = name;
 
-                ++nth_submesh;
+                    entry = new AlembicMesh.Entry
+                    {
+                        host = go,
+                        mesh = mesh,
+                        vertex_cache = new Vector3[0],
+                        index_cache = new int[0],
+                    };
+                    abcmesh.m_meshes.Add(entry);
+                }
+
+                Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
+                Array.Resize(ref entry.vertex_cache, smi.vertex_count);
+                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
+                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                entry.mesh.Clear();
+                entry.mesh.vertices = entry.vertex_cache;
+                entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
+                entry.mesh.RecalculateNormals();
             }
-            while (DisableSubmesh(ctx, trans, nth_submesh)) { ++nth_submesh; }
+            for (int i = nth_submesh + 1; i < abcmesh.m_meshes.Count; ++i)
+            {
+                abcmesh.m_meshes[i].host.SetActive(false);
+            }
         }
     }
 
-    static void CreateOrGetSubmeshObject(IntPtr ctx, Transform parent, int nth, out Transform o_trans, out Mesh o_mesh)
-    {
-        string name = "Submesh_" + nth;
-        Transform child = parent.FindChild(name);
-        Mesh mesh;
-        if (child == null)
-        {
-            var go = new GameObject();
-            go.name = name;
-            child = go.GetComponent<Transform>();
-            child.parent = parent;
-            child.localPosition = Vector3.zero;
-            child.localEulerAngles = Vector3.zero;
-            child.localScale = Vector3.one;
-
-            mesh = CreateOrGetMesh(ctx, child);
-            mesh.name = name;
-        }
-        else
-        {
-            mesh = child.GetComponent<MeshFilter>().sharedMesh;
-        }
-        o_trans = child;
-        o_mesh = mesh;
-    }
-
-    static bool DisableSubmesh(IntPtr ctx, Transform parent, int nth)
-    {
-        string name = "Submesh_" + nth;
-        Transform child = parent.FindChild(name);
-        if (child != null) {
-            GameObject.DestroyImmediate(child.gameObject);
-            return true;
-        }
-        return false;
-    }
-
-    static Mesh CreateOrGetMesh(IntPtr ctx, Transform trans)
+    static Mesh AddMeshComponents(IntPtr ctx, Transform trans)
     {
         Mesh mesh;
         var mesh_filter = trans.GetComponent<MeshFilter>();
@@ -269,7 +277,9 @@ public class AlembicImporter
             mesh_filter.sharedMesh = mesh;
 
             var mesh_renderer = trans.gameObject.AddComponent<MeshRenderer>();
+#if UNITY_EDITOR
             mesh_renderer.material = GetDefaultMaterial();
+#endif
         }
         else
         {
@@ -279,6 +289,7 @@ public class AlembicImporter
     }
 
 
+#if UNITY_EDITOR
     static MethodInfo s_GetBuiltinExtraResourcesMethod;
 
     static Material GetDefaultMaterial()
@@ -290,4 +301,5 @@ public class AlembicImporter
         }
         return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
     }
+#endif
 }
