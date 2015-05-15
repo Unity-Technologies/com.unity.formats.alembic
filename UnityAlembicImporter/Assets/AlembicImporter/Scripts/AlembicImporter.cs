@@ -40,22 +40,23 @@ public class AlembicImporter
     public static string aiGetFullName(IntPtr ctx)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(ctx)); }
 
     [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(IntPtr ctx);
+
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetPosition(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetRotation(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiGetScale(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiGetMatrix(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetPosition(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetRotation(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetScale(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(IntPtr ctx);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiIsNormalsIndexed(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiIsUVsIndexed(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern int        aiGetIndexCount(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern int        aiGetVertexCount(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiCopyIndices(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiCopyVertices(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetSplitedMeshInfo(IntPtr ctx, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
-    [DllImport ("AlembicImporter")] public static extern void       aiCopySplitedIndices(IntPtr ctx, IntPtr indices, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiCopySplitedVertices(IntPtr ctx, IntPtr vertices, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstant(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetIndexCount(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexCount(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyIndices(IntPtr ctx, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyVertices(IntPtr ctx, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(IntPtr ctx, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedIndices(IntPtr ctx, IntPtr indices, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(IntPtr ctx, IntPtr vertices, ref aiSplitedMeshInfo smi);
 
 
     class ImportContext
@@ -143,9 +144,9 @@ public class AlembicImporter
 
         if (has_xform)
         {
-            trans.localPosition = aiGetPosition(ctx);
-            trans.localEulerAngles = aiGetRotation(ctx);
-            trans.localScale = aiGetScale(ctx);
+            trans.localPosition = aiXFormGetPosition(ctx);
+            trans.localEulerAngles = aiXFormGetRotation(ctx);
+            trans.localScale = aiXFormGetScale(ctx);
         }
         else
         {
@@ -166,7 +167,7 @@ public class AlembicImporter
     public static void UpdateAbcMesh(IntPtr ctx, Transform trans)
     {
         const int max_vertices = 65000;
-        bool needs_split = aiGetVertexCount(ctx) >= max_vertices;
+        bool needs_split = aiPolyMeshGetVertexCount(ctx) >= max_vertices;
 
         AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
         if(abcmesh==null)
@@ -188,10 +189,10 @@ public class AlembicImporter
         if (!needs_split)
         {
             AlembicMesh.Entry entry = abcmesh.m_meshes[0];
-            Array.Resize(ref entry.index_cache, aiGetIndexCount(ctx));
-            Array.Resize(ref entry.vertex_cache, aiGetVertexCount(ctx));
-            aiCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0));
-            aiCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0));
+            Array.Resize(ref entry.index_cache, aiPolyMeshGetIndexCount(ctx));
+            Array.Resize(ref entry.vertex_cache, aiPolyMeshGetVertexCount(ctx));
+            aiPolyMeshCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0));
+            aiPolyMeshCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0));
             entry.mesh.Clear();
             entry.mesh.vertices = entry.vertex_cache;
             entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
@@ -207,13 +208,13 @@ public class AlembicImporter
             aiSplitedMeshInfo smi_prev = default(aiSplitedMeshInfo);
             aiSplitedMeshInfo smi = default(aiSplitedMeshInfo);
 
-            bool is_end = aiGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
+            bool is_end = aiPolyMeshGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
             {
                 AlembicMesh.Entry entry = abcmesh.m_meshes[0];
                 Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
                 Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
-                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                aiPolyMeshCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
+                aiPolyMeshCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
                 entry.mesh.Clear();
                 entry.mesh.vertices = entry.vertex_cache;
                 entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
@@ -226,7 +227,7 @@ public class AlembicImporter
                 ++nth_submesh;
                 smi_prev = smi;
                 smi = default(aiSplitedMeshInfo);
-                is_end = aiGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
+                is_end = aiPolyMeshGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
 
                 AlembicMesh.Entry entry;
                 if(nth_submesh < abcmesh.m_meshes.Count)
@@ -261,8 +262,8 @@ public class AlembicImporter
 
                 Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
                 Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-                aiCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
-                aiCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                aiPolyMeshCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
+                aiPolyMeshCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
                 entry.mesh.Clear();
                 entry.mesh.vertices = entry.vertex_cache;
                 entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);

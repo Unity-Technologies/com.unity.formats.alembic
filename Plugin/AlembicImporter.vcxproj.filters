@@ -3,9 +3,13 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="AlembicImporter.cpp" />
+    <ClCompile Include="aiContext.cpp" />
+    <ClCompile Include="aiGeometry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AlembicImporter.h" />
+    <ClInclude Include="aiContext.h" />
+    <ClInclude Include="aiGeometry.h" />
   </ItemGroup>
 </Project>
