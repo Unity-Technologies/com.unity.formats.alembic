@@ -15,6 +15,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aiContext.cpp" />
+    <ClCompile Include="aiGeometry.cpp" />
     <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -23,6 +25,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aiContext.h" />
+    <ClInclude Include="aiGeometry.h" />
     <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
