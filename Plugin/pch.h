@@ -3,11 +3,12 @@
 #include <memory>
 #include <thread>
 #include <mutex>
-#include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/ErrorHandler.h>
+#include <Alembic/AbcGeom/All.h>
+#include <Alembic/AbcMaterial/All.h>
 
 #pragma comment(lib, "AlembicAbc.lib")
 #pragma comment(lib, "AlembicAbcCollection.lib")
