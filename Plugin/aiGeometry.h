@@ -38,22 +38,29 @@ public:
 
     bool        isTopologyConstant() const;
     bool        isTopologyConstantTriangles() const;
-    bool        isNormalIndexed() const;
-    bool        isUVIndexed() const;
+    bool        hasNormals() const;
+    bool        hasUVs() const;
+
     uint32_t    getIndexCount() const;
     uint32_t    getVertexCount() const;
     void        copyIndices(int *dst) const;
     void        copyVertices(abcV3 *dst) const;
+    void        copyNormals(abcV3 *dst) const;
+    void        copyUVs(abcV2 *dst) const;
 
     bool        getSplitedMeshInfo(aiSplitedMeshInfo &o_sp, const aiSplitedMeshInfo& prev, int max_vertices) const;
     void        copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
+    void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
+    void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
 private:
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
     Abc::P3fArraySamplePtr m_positions;
+    AbcGeom::IN3fGeomParam::Sample m_normals;
+    AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
     bool m_reverse_x;
     bool m_triangulate;

@@ -153,6 +153,7 @@ aiCLinkage aiExport aiM44 aiXFormGetMatrix(aiContextPtr ctx)
 }
 
 
+
 aiCLinkage aiExport bool aiHasPolyMesh(aiContextPtr ctx)
 {
     return ctx->hasPolyMesh();
@@ -167,6 +168,17 @@ aiCLinkage aiExport bool aiPolyMeshIsTopologyConstantTriangles(aiContextPtr ctx)
 {
     return ctx->getPolyMesh().isTopologyConstantTriangles();
 }
+
+aiCLinkage aiExport bool aiPolyMeshHasNormals(aiContextPtr ctx)
+{
+    return ctx->getPolyMesh().hasNormals();
+}
+
+aiCLinkage aiExport bool aiPolyMeshHasUVs(aiContextPtr ctx)
+{
+    return ctx->getPolyMesh().hasUVs();
+}
+
 
 aiCLinkage aiExport uint32_t aiPolyMeshGetIndexCount(aiContextPtr ctx)
 {
@@ -188,6 +200,16 @@ aiCLinkage aiExport void aiPolyMeshCopyVertices(aiContextPtr ctx, abcV3 *dst)
     return ctx->getPolyMesh().copyVertices(dst);
 }
 
+aiCLinkage aiExport void aiPolyMeshCopyNormals(aiContextPtr ctx, abcV3 *dst)
+{
+    return ctx->getPolyMesh().copyNormals(dst);
+}
+
+aiCLinkage aiExport void aiPolyMeshCopyUVs(aiContextPtr ctx, abcV2 *dst)
+{
+    return ctx->getPolyMesh().copyUVs(dst);
+}
+
 aiCLinkage aiExport bool aiPolyMeshGetSplitedMeshInfo(aiContextPtr ctx, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices)
 {
     return ctx->getPolyMesh().getSplitedMeshInfo(*o_smi, *prev, max_vertices);
@@ -201,6 +223,16 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedIndices(aiContextPtr ctx, int *dst
 aiCLinkage aiExport void aiPolyMeshCopySplitedVertices(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi)
 {
     return ctx->getPolyMesh().copySplitedVertices(dst, *smi);
+}
+
+aiCLinkage aiExport void aiPolyMeshCopySplitedNormals(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi)
+{
+    return ctx->getPolyMesh().copySplitedNormals(dst, *smi);
+}
+
+aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiContextPtr ctx, abcV2 *dst, const aiSplitedMeshInfo *smi)
+{
+    return ctx->getPolyMesh().copySplitedUVs(dst, *smi);
 }
 
 
