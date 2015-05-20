@@ -22,6 +22,7 @@ aiContext::aiContext()
     , m_has_polymesh(false)
     , m_has_curves(false)
     , m_has_points(false)
+    , m_has_camera(false)
     , m_has_material(false)
 {
 }
@@ -78,6 +79,7 @@ void aiContext::setCurrentObject(abcObject *obj)
         m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
         m_has_curves = AbcGeom::ICurvesSchema::matches(metadata);
         m_has_points = AbcGeom::IPointsSchema::matches(metadata);
+        m_has_camera = AbcGeom::ICameraSchema::matches(metadata);
         m_has_material = AbcMaterial::IMaterial::matches(metadata);
 
         if (m_has_xform)
@@ -97,6 +99,10 @@ void aiContext::setCurrentObject(abcObject *obj)
         if (m_has_points)
         {
             m_points = aiPoints(m_current, m_sample_selector);
+        }
+        if (m_has_camera)
+        {
+            m_camera = aiCamera(m_current, m_sample_selector);
         }
         if (m_has_material)
         {
@@ -143,11 +149,13 @@ bool aiContext::hasXForm() const    { return m_has_xform; }
 bool aiContext::hasPolyMesh() const { return m_has_polymesh; }
 bool aiContext::hasCurves() const   { return m_has_curves; }
 bool aiContext::hasPoints() const   { return m_has_points; }
+bool aiContext::hasCamera() const   { return m_has_camera; }
 bool aiContext::hasMaterial() const { return m_has_material; }
 
 aiXForm&    aiContext::getXForm()      { return m_xform; }
 aiPolyMesh& aiContext::getPolyMesh()   { return m_polymesh; }
 aiCurves&   aiContext::getCurves()     { return m_curves; }
 aiPoints&   aiContext::getPoints()     { return m_points; }
+aiCamera&   aiContext::getCamera()     { return m_camera; }
 aiMaterial& aiContext::getMaterial()   { return m_material; }
 
