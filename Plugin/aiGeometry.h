@@ -23,8 +23,9 @@ class aiPolyMesh
 public:
     aiPolyMesh();
     aiPolyMesh(abcObject obj, Abc::ISampleSelector ss);
-    void enableTriangulate(bool v);
-    void enableReverseIndex(bool v);
+
+    void        enableTriangulate(bool v);
+    void        enableReverseIndex(bool v);
 
     bool        isTopologyConstant() const;
     bool        isTopologyConstantTriangles() const;
@@ -69,6 +70,28 @@ public:
 
 private:
     AbcGeom::IPointsSchema m_schema;
+};
+
+
+
+struct aiCameraParams
+{
+    float field_of_view;
+    float focal_distance;
+    float focal_length;
+};
+
+class aiCamera
+{
+public:
+    aiCamera();
+    aiCamera(abcObject obj, Abc::ISampleSelector ss);
+
+    void getParams(aiCameraParams &o_params);
+
+private:
+    AbcGeom::ICameraSchema m_schema;
+    AbcGeom::CameraSample m_sample;
 };
 
 
