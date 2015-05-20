@@ -63,6 +63,7 @@ aiCLinkage aiExport abcObject*      aiGetTopObject(aiContextPtr ctx);
 aiCLinkage aiExport void            aiEnumerateChild(aiContextPtr ctx, abcObject *node, aiNodeEnumerator e, void *userdata);
 aiCLinkage aiExport void            aiSetCurrentObject(aiContextPtr ctx, abcObject *node);
 aiCLinkage aiExport void            aiSetCurrentTime(aiContextPtr ctx, float time);
+aiCLinkage aiExport void            aiEnableReverseX(aiContextPtr ctx, bool v);
 aiCLinkage aiExport void            aiEnableTriangulate(aiContextPtr ctx, bool v);
 aiCLinkage aiExport void            aiEnableReverseIndex(aiContextPtr ctx, bool v);
 

@@ -85,6 +85,11 @@ aiCLinkage aiExport void aiSetCurrentTime(aiContextPtr ctx, float time)
     ctx->setCurrentTime(time);
 }
 
+aiCLinkage aiExport void aiEnableReverseX(aiContextPtr ctx, bool v)
+{
+    ctx->enableReverseX(v);
+}
+
 aiCLinkage aiExport void aiEnableTriangulate(aiContextPtr ctx, bool v)
 {
     ctx->enableTriangulate(v);

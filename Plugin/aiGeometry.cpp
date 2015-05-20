@@ -6,11 +6,17 @@
 aiXForm::aiXForm() {}
 
 aiXForm::aiXForm(abcObject obj, Abc::ISampleSelector ss)
+    : m_reverse_x(true)
 {
     AbcGeom::IXform xf(obj, Abc::kWrapExisting);
     m_schema = xf.getSchema();
     m_schema.get(m_sample, ss);
     m_inherits = m_schema.getInheritsXforms(ss);
+}
+
+void aiXForm::enableReverseX(bool v)
+{
+    m_reverse_x = v;
 }
 
 bool aiXForm::getInherits() const
@@ -20,17 +26,29 @@ bool aiXForm::getInherits() const
 
 abcV3 aiXForm::getPosition() const
 {
-    return abcV3(m_sample.getTranslation());
+    abcV3 ret = m_sample.getTranslation();
+    if (m_reverse_x) {
+        ret.x *= -1.0f;
+    }
+    return ret;
 }
 
 abcV3 aiXForm::getAxis() const
 {
-    return m_sample.getAxis();
+    abcV3 ret = m_sample.getAxis();
+    if (m_reverse_x) {
+        ret.x *= -1.0f;
+    }
+    return ret;
 }
 
 float aiXForm::getAngle() const
 {
-    return m_sample.getAngle();
+    float ret = m_sample.getAngle();
+    if (m_reverse_x) {
+        ret *= -1.0f;
+    }
+    return ret;
 }
 
 abcV3 aiXForm::getScale() const
@@ -47,7 +65,8 @@ abcM44 aiXForm::getMatrix() const
 aiPolyMesh::aiPolyMesh() {}
 
 aiPolyMesh::aiPolyMesh(abcObject obj, Abc::ISampleSelector ss)
-    : m_triangulate(true)
+    : m_reverse_x(true)
+    , m_triangulate(true)
     , m_reverse_index(false)
 {
     AbcGeom::IPolyMesh pm(obj, Abc::kWrapExisting);
@@ -63,6 +82,11 @@ aiPolyMesh::aiPolyMesh(abcObject obj, Abc::ISampleSelector ss)
     }
 }
 
+void aiPolyMesh::enableReverseX(bool v)
+{
+    m_reverse_x = v;
+}
+
 void aiPolyMesh::enableTriangulate(bool v)
 {
     m_triangulate = v;
@@ -72,6 +96,7 @@ void aiPolyMesh::enableReverseIndex(bool v)
 {
     m_reverse_index = v;
 }
+
 
 bool aiPolyMesh::isTopologyConstant() const
 {
@@ -163,6 +188,11 @@ void aiPolyMesh::copyVertices(abcV3 *dst) const
     for (size_t i = 0; i < n; ++i) {
         dst[i] = cont[i];
     }
+    if (m_reverse_x) {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i].x *= -1.0f;
+        }
+    }
 }
 
 bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMeshInfo& prev, int max_vertices) const
@@ -236,18 +266,30 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
 aiCurves::aiCurves() {}
 
 aiCurves::aiCurves(abcObject obj, Abc::ISampleSelector ss)
+    : m_reverse_x(true)
 {
     AbcGeom::ICurves curves(obj, Abc::kWrapExisting);
     m_schema = curves.getSchema();
+}
+
+void aiCurves::enableReverseX(bool v)
+{
+    m_reverse_x = v;
 }
 
 
 aiPoints::aiPoints() {}
 
 aiPoints::aiPoints(abcObject obj, Abc::ISampleSelector ss)
+    : m_reverse_x(true)
 {
     AbcGeom::IPoints points(obj, Abc::kWrapExisting);
     m_schema = points.getSchema();
+}
+
+void aiPoints::enableReverseX(bool v)
+{
+    m_reverse_x = v;
 }
 
 
@@ -266,8 +308,8 @@ void aiCamera::getParams(aiCameraParams &o_params)
     o_params.near_clipping_plane = m_sample.getNearClippingPlane();
     o_params.far_clipping_plane = m_sample.getFarClippingPlane();
     o_params.field_of_view = m_sample.getFieldOfView();
-    o_params.focal_distance = m_sample.getFocusDistance();
-    o_params.focal_length = m_sample.getFocalLength();
+    o_params.focus_distance = m_sample.getFocusDistance() * 0.1f; // centimeter to meter
+    o_params.focal_length = m_sample.getFocalLength() * 0.01f; // milimeter to meter
 }
 
 aiMaterial::aiMaterial() {}

@@ -16,6 +16,7 @@ public:
     abcObject* getTopObject();
     void setCurrentObject(abcObject *obj);
     void setCurrentTime(float time);
+    void enableReverseX(bool v);
     void enableTriangulate(bool v);
     void enableReverseIndex(bool v);
 
@@ -38,6 +39,7 @@ public:
     aiMaterial& getMaterial();
 
 private:
+    bool m_reverse_x;
     bool m_triangulate;
     bool m_reverse_index;
 
