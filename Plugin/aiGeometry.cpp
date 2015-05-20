@@ -74,11 +74,20 @@ aiPolyMesh::aiPolyMesh(abcObject obj, Abc::ISampleSelector ss)
     m_schema.getFaceIndicesProperty().get(m_indices, ss);
     m_schema.getFaceCountsProperty().get(m_counts, ss);
     m_schema.getPositionsProperty().get(m_positions, ss);
+
+    m_velocities.reset();
     if (m_schema.getVelocitiesProperty().valid()) {
         m_schema.getVelocitiesProperty().get(m_velocities, ss);
     }
-    if (!m_schema.isConstant()) {
-        aiDebugLog("warning: topology is not consant\n");
+
+    m_normals.reset();
+    if (m_schema.getNormalsParam().valid()) {
+        m_schema.getNormalsParam().getIndexed(m_normals, ss);
+    }
+
+    m_uvs.reset();
+    if (m_schema.getUVsParam().valid()) {
+        m_schema.getUVsParam().getIndexed(m_uvs, ss);
     }
 }
 
@@ -108,14 +117,14 @@ bool aiPolyMesh::isTopologyConstantTriangles() const
     return m_schema.isConstant() && (*m_counts)[0] == 3;
 }
 
-bool aiPolyMesh::isNormalIndexed() const
+bool aiPolyMesh::hasNormals() const
 {
-    return m_schema.getNormalsParam().isIndexed();
+    return m_normals.valid();
 }
 
-bool aiPolyMesh::isUVIndexed() const
+bool aiPolyMesh::hasUVs() const
 {
-    return m_schema.getUVsParam().isIndexed();
+    return m_uvs.valid();
 }
 
 uint32_t aiPolyMesh::getIndexCount() const
@@ -194,6 +203,17 @@ void aiPolyMesh::copyVertices(abcV3 *dst) const
         }
     }
 }
+void aiPolyMesh::copyNormals(abcV3 *dst) const
+{
+    const auto &cont = *m_normals.getVals();
+    // todo
+}
+
+void aiPolyMesh::copyUVs(abcV2 *dst) const
+{
+    const auto &cont = *m_uvs.getVals();
+    // todo
+}
 
 bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMeshInfo& prev, int max_vertices) const
 {
@@ -259,6 +279,76 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
             dst[a + ni] = positions[indices[a + ni + smi.begin_index]];
         }
         a += ngon;
+    }
+    if (m_reverse_x) {
+        for (size_t i = 0; i < a; ++i) {
+            dst[i].x *= -1.0f;
+        }
+    }
+}
+
+void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const
+{
+    const auto &counts = *m_counts;
+    const auto &normals = *m_normals.getVals();
+    const auto &indices = *m_normals.getIndices();
+
+    if (m_normals.isIndexed())
+    {
+        uint32_t a = 0;
+        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni) {
+                dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
+            }
+            a += ngon;
+        }
+    }
+    else
+    {
+        uint32_t a = 0;
+        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni) {
+                dst[a + ni] = normals[a + ni];
+            }
+            a += ngon;
+        }
+        if (m_reverse_x) {
+            for (size_t i = 0; i < a; ++i) {
+                dst[i].x *= -1.0f;
+            }
+        }
+    }
+}
+
+void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
+{
+    const auto &counts = *m_counts;
+    const auto &uvs = *m_uvs.getVals();
+    const auto &indices = *m_uvs.getIndices();
+
+    if (m_uvs.isIndexed())
+    {
+        uint32_t a = 0;
+        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni) {
+                dst[a + ni] = uvs[indices[a + ni + smi.begin_index]];
+            }
+            a += ngon;
+        }
+    }
+    else
+    {
+        uint32_t a = 0;
+        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni) {
+                dst[a + ni] = uvs[a + ni];
+            }
+            a += ngon;
+        }
     }
 }
 
