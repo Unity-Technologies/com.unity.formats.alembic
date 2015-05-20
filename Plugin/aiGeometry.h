@@ -7,14 +7,17 @@ class aiXForm
 public:
     aiXForm();
     aiXForm(abcObject obj, Abc::ISampleSelector ss);
+    bool        getInherits() const;
     abcV3       getPosition() const;
-    abcV3       getRotation() const;
+    abcV3       getAxis() const;
+    float       getAngle() const;
     abcV3       getScale() const;
     abcM44      getMatrix() const;
 
 private:
     AbcGeom::IXformSchema m_schema;
     AbcGeom::XformSample m_sample;
+    bool m_inherits;
 };
 
 
@@ -76,6 +79,8 @@ private:
 
 struct aiCameraParams
 {
+    float near_clipping_plane;
+    float far_clipping_plane;
     float field_of_view;
     float focal_distance;
     float focal_length;

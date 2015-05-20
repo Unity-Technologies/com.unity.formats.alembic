@@ -117,14 +117,24 @@ aiCLinkage aiExport bool aiHasXForm(aiContextPtr ctx)
     return ctx->hasXForm();
 }
 
+aiCLinkage aiExport bool aiXFormGetInherits(aiContextPtr ctx)
+{
+    return ctx->getXForm().getInherits();
+}
+
 aiCLinkage aiExport aiV3 aiXFormGetPosition(aiContextPtr ctx)
 {
     return (aiV3&)ctx->getXForm().getPosition();
 }
 
-aiCLinkage aiExport aiV3 aiXFormGetRotation(aiContextPtr ctx)
+aiCLinkage aiExport aiV3 aiXFormGetAxis(aiContextPtr ctx)
 {
-    return (aiV3&)ctx->getXForm().getRotation();
+    return (aiV3&)ctx->getXForm().getAxis();
+}
+
+aiCLinkage aiExport float aiXFormGetAngle(aiContextPtr ctx)
+{
+    return ctx->getXForm().getAngle();
 }
 
 aiCLinkage aiExport aiV3 aiXFormGetScale(aiContextPtr ctx)

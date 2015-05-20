@@ -10,6 +10,12 @@ aiXForm::aiXForm(abcObject obj, Abc::ISampleSelector ss)
     AbcGeom::IXform xf(obj, Abc::kWrapExisting);
     m_schema = xf.getSchema();
     m_schema.get(m_sample, ss);
+    m_inherits = m_schema.getInheritsXforms(ss);
+}
+
+bool aiXForm::getInherits() const
+{
+    return m_inherits;
 }
 
 abcV3 aiXForm::getPosition() const
@@ -17,9 +23,14 @@ abcV3 aiXForm::getPosition() const
     return abcV3(m_sample.getTranslation());
 }
 
-abcV3 aiXForm::getRotation() const
+abcV3 aiXForm::getAxis() const
 {
-    return abcV3(m_sample.getXRotation(), m_sample.getYRotation(), m_sample.getZRotation());
+    return m_sample.getAxis();
+}
+
+float aiXForm::getAngle() const
+{
+    return m_sample.getAngle();
 }
 
 abcV3 aiXForm::getScale() const
@@ -252,6 +263,8 @@ aiCamera::aiCamera(abcObject obj, Abc::ISampleSelector ss)
 
 void aiCamera::getParams(aiCameraParams &o_params)
 {
+    o_params.near_clipping_plane = m_sample.getNearClippingPlane();
+    o_params.far_clipping_plane = m_sample.getFarClippingPlane();
     o_params.field_of_view = m_sample.getFieldOfView();
     o_params.focal_distance = m_sample.getFocusDistance();
     o_params.focal_length = m_sample.getFocalLength();
