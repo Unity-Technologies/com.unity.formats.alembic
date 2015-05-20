@@ -16,7 +16,8 @@ void aiContext::destroy(aiContextPtr ctx)
 }
 
 aiContext::aiContext()
-    : m_triangulate(true)
+    : m_reverse_x(true)
+    , m_triangulate(true)
     , m_reverse_index(false)
     , m_has_xform(false)
     , m_has_polymesh(false)
@@ -85,20 +86,24 @@ void aiContext::setCurrentObject(abcObject *obj)
         if (m_has_xform)
         {
             m_xform = aiXForm(m_current, m_sample_selector);
+            m_xform.enableReverseX(m_reverse_x);
         }
         if (m_has_polymesh)
         {
             m_polymesh = aiPolyMesh(m_current, m_sample_selector);
+            m_polymesh.enableReverseX(m_reverse_x);
             m_polymesh.enableTriangulate(m_triangulate);
             m_polymesh.enableReverseIndex(m_reverse_index);
         }
         if (m_has_curves)
         {
             m_curves = aiCurves(m_current, m_sample_selector);
+            m_curves.enableReverseX(m_reverse_x);
         }
         if (m_has_points)
         {
             m_points = aiPoints(m_current, m_sample_selector);
+            m_points.enableReverseX(m_reverse_x);
         }
         if (m_has_camera)
         {
@@ -118,6 +123,11 @@ void aiContext::setCurrentObject(abcObject *obj)
 void aiContext::setCurrentTime(float time)
 {
     m_sample_selector = Abc::ISampleSelector(time, Abc::ISampleSelector::kFloorIndex);
+}
+
+void aiContext::enableReverseX(bool v)
+{
+    m_reverse_x = v;
 }
 
 void aiContext::enableTriangulate(bool v)

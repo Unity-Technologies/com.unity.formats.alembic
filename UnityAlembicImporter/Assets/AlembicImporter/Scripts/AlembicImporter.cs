@@ -27,8 +27,8 @@ public class AlembicImporter
         public float near_clipping_plane;
         public float far_clipping_plane;
         public float field_of_view;
-        public float focal_distance;
-        public float focal_length;
+        public float focus_distance; // * centimeter * 
+        public float focal_length; // * millimeters * 
     }
 
 
@@ -40,6 +40,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(IntPtr ctx, IntPtr obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentObject(IntPtr ctx, IntPtr obj);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(IntPtr ctx, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(IntPtr ctx, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(IntPtr ctx, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(IntPtr ctx, bool v);
 
@@ -82,14 +83,14 @@ public class AlembicImporter
     static void Import()
     {
         var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportImpl(path, false);
+        ImportImpl(path, true, false);
     }
 
     [MenuItem("Assets/Import Alembic (reverse faces)")]
     static void ImportR()
     {
         var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportImpl(path, true);
+        ImportImpl(path, true, true);
     }
 
     static string MakeRelativePath(string path)
@@ -98,7 +99,7 @@ public class AlembicImporter
         return path_to_assets.MakeRelativeUri(new Uri(path)).ToString();
     }
 
-    static void ImportImpl(string path, bool reverse_faces)
+    static void ImportImpl(string path, bool reverse_x, bool reverse_faces)
     {
         if (path=="") return;
 
@@ -113,12 +114,14 @@ public class AlembicImporter
             root.name = System.IO.Path.GetFileNameWithoutExtension(path);
             var abcstream = root.AddComponent<AlembicStream>();
             abcstream.m_path_to_abc = path;
+            abcstream.m_reverse_x = reverse_x;
             abcstream.m_reverse_faces = reverse_faces;
 
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
 
             GCHandle gch = GCHandle.Alloc(ic);
+            aiEnableReverseX(ctx, reverse_x);
             aiEnableReverseIndex(ctx, reverse_faces);
             aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
         }
@@ -337,6 +340,15 @@ public class AlembicImporter
         cam.fieldOfView = cp.field_of_view;
         cam.nearClipPlane = cp.near_clipping_plane;
         cam.farClipPlane = cp.far_clipping_plane;
+
+        /*
+        var dof = trans.GetComponent<UnityStandardAssets.ImageEffects.DepthOfField>();
+        if(dof != null)
+        {
+            dof.focalLength = cp.focus_distance;
+            dof.focalSize = cp.focal_length;
+        }
+         */
     }
 
 
