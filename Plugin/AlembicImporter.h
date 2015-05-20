@@ -71,7 +71,10 @@ aiCLinkage aiExport const char*     aiGetFullNameS(aiContextPtr ctx);
 aiCLinkage aiExport uint32_t        aiGetNumChildren(aiContextPtr ctx);
 
 aiCLinkage aiExport bool            aiHasXForm(aiContextPtr ctx);
+aiCLinkage aiExport bool            aiXFormGetInherits(aiContextPtr ctx);
 aiCLinkage aiExport aiV3            aiXFormGetPosition(aiContextPtr ctx);
+aiCLinkage aiExport aiV3            aiXFormGetAxis(aiContextPtr ctx);
+aiCLinkage aiExport float           aiXFormGetAngle(aiContextPtr ctx);
 aiCLinkage aiExport aiV3            aiXFormGetRotation(aiContextPtr ctx);
 aiCLinkage aiExport aiV3            aiXFormGetScale(aiContextPtr ctx);
 aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiContextPtr ctx);

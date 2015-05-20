@@ -24,6 +24,8 @@ public class AlembicImporter
 
     public struct aiCameraParams
     {
+        public float near_clipping_plane;
+        public float far_clipping_plane;
         public float field_of_view;
         public float focal_distance;
         public float focal_length;
@@ -48,8 +50,10 @@ public class AlembicImporter
     public static string aiGetFullName(IntPtr ctx)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(ctx)); }
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetInherits(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetPosition(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetRotation(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetAxis(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern float      aiXFormGetAngle(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetScale(IntPtr ctx);
     [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(IntPtr ctx);
 
@@ -151,9 +155,21 @@ public class AlembicImporter
 
         if (aiHasXForm(ctx))
         {
-            trans.localPosition = aiXFormGetPosition(ctx);
-            trans.localEulerAngles = aiXFormGetRotation(ctx);
-            trans.localScale = aiXFormGetScale(ctx);
+            Vector3 pos = aiXFormGetPosition(ctx);
+            Quaternion rot = Quaternion.AngleAxis(aiXFormGetAngle(ctx), aiXFormGetAxis(ctx));
+            Vector3 scale = aiXFormGetScale(ctx);
+            if (aiXFormGetInherits(ctx))
+            {
+                trans.localPosition = pos;
+                trans.localRotation = rot;
+                trans.localScale = scale;
+            }
+            else
+            {
+                trans.position = pos;
+                trans.rotation = rot;
+                trans.localScale = scale;
+            }
         }
         else
         {
@@ -319,6 +335,8 @@ public class AlembicImporter
         aiCameraParams cp = default(aiCameraParams);
         aiCameraGetParams(ctx, ref cp);
         cam.fieldOfView = cp.field_of_view;
+        cam.nearClipPlane = cp.near_clipping_plane;
+        cam.farClipPlane = cp.far_clipping_plane;
     }
 
 
