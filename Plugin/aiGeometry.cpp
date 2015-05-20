@@ -240,6 +240,23 @@ aiPoints::aiPoints(abcObject obj, Abc::ISampleSelector ss)
 }
 
 
+
+aiCamera::aiCamera() {}
+
+aiCamera::aiCamera(abcObject obj, Abc::ISampleSelector ss)
+{
+    AbcGeom::ICamera cam(obj, Abc::kWrapExisting);
+    m_schema = cam.getSchema();
+    m_schema.get(m_sample, ss);
+}
+
+void aiCamera::getParams(aiCameraParams &o_params)
+{
+    o_params.field_of_view = m_sample.getFieldOfView();
+    o_params.focal_distance = m_sample.getFocusDistance();
+    o_params.focal_length = m_sample.getFocalLength();
+}
+
 aiMaterial::aiMaterial() {}
 
 aiMaterial::aiMaterial(abcObject obj, Abc::ISampleSelector ss)

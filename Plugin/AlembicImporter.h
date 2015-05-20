@@ -36,6 +36,7 @@ typedef Abc::V2f       abcV2;
 typedef Abc::V3f       abcV3;
 typedef Abc::M44f      abcM44;
 typedef Abc::IObject   abcObject;
+struct  aiCameraParams;
 class   aiContext;
 typedef aiContext* aiContextPtr;
 typedef void(__stdcall *aiNodeEnumerator)(aiContextPtr ctx, abcObject *node, void *userdata);
@@ -91,6 +92,9 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiContextPtr c
 aiCLinkage aiExport bool            aiHasCurves(aiContextPtr ctx);
 
 aiCLinkage aiExport bool            aiHasPoints(aiContextPtr ctx);
+
+aiCLinkage aiExport bool            aiHasCamera(aiContextPtr ctx);
+aiCLinkage aiExport void            aiCameraGetParams(aiContextPtr ctx, aiCameraParams *o_params);
 
 aiCLinkage aiExport bool            aiHasMaterial(aiContextPtr ctx);
 

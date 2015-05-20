@@ -201,6 +201,17 @@ aiCLinkage aiExport bool aiHasPoints(aiContextPtr ctx)
 }
 
 
+aiCLinkage aiExport bool aiHasCamera(aiContextPtr ctx)
+{
+    return ctx->hasCamera();
+}
+
+aiCLinkage aiExport void aiCameraGetParams(aiContextPtr ctx, aiCameraParams *o_params)
+{
+    ctx->getCamera().getParams(*o_params);
+}
+
+
 aiCLinkage aiExport bool aiHasMaterial(aiContextPtr ctx)
 {
     return ctx->hasMaterial();

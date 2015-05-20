@@ -27,12 +27,14 @@ public:
     bool        hasPolyMesh() const;
     bool        hasCurves() const;
     bool        hasPoints() const;
+    bool        hasCamera() const;
     bool        hasMaterial() const;
 
     aiXForm&    getXForm();
     aiPolyMesh& getPolyMesh();
     aiCurves&   getCurves();
     aiPoints&   getPoints();
+    aiCamera&   getCamera();
     aiMaterial& getMaterial();
 
 private:
@@ -43,6 +45,7 @@ private:
     bool m_has_polymesh;
     bool m_has_curves;
     bool m_has_points;
+    bool m_has_camera;
     bool m_has_material;
 
 #ifdef aiWithDebugLog
@@ -57,6 +60,7 @@ private:
     aiPolyMesh m_polymesh;
     aiCurves m_curves;
     aiPoints m_points;
+    aiCamera m_camera;
     aiMaterial m_material;
 };
 
