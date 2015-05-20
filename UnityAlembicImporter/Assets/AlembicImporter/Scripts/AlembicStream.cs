@@ -14,6 +14,7 @@ public class AlembicStream : MonoBehaviour
     public string m_path_to_abc;
     public float m_time;
     public float m_timescale = 1.0f;
+    public bool m_reverse_x;
     public bool m_reverse_faces;
     bool m_loaded;
     float m_time_prev;
@@ -39,6 +40,7 @@ public class AlembicStream : MonoBehaviour
         }
         if(m_loaded)
         {
+            AlembicImporter.aiEnableReverseX(m_abc, m_reverse_x);
             AlembicImporter.aiEnableReverseIndex(m_abc, m_reverse_faces);
             m_time += Time.deltaTime * m_timescale;
             if (m_time_prev != m_time)
