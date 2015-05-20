@@ -83,15 +83,19 @@ aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiContextPtr ctx);
 aiCLinkage aiExport bool            aiHasPolyMesh(aiContextPtr ctx);
 aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiContextPtr ctx);
 aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshIsNormalsIndexed(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshIsUVsIndexed(aiContextPtr ctx);
+aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiContextPtr ctx);
+aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiContextPtr ctx);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiContextPtr ctx);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexCount(aiContextPtr ctx);
 aiCLinkage aiExport void            aiPolyMeshCopyIndices(aiContextPtr ctx, int *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyVertices(aiContextPtr ctx, abcV3 *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyNormals(aiContextPtr ctx, abcV3 *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyUVs(aiContextPtr ctx, abcV2 *dst);
 aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiContextPtr ctx, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedIndices(aiContextPtr ctx, int *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiContextPtr ctx, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
 aiCLinkage aiExport bool            aiHasCurves(aiContextPtr ctx);
 
