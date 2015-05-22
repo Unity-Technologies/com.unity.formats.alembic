@@ -5,11 +5,14 @@
     <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="aiContext.cpp" />
     <ClCompile Include="aiGeometry.cpp" />
+    <ClCompile Include="aiGraphicsDevice.cpp" />
+    <ClCompile Include="aiGraphicsDeviceD3D11.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="aiContext.h" />
     <ClInclude Include="aiGeometry.h" />
+    <ClInclude Include="aiGraphicsDevice.h" />
   </ItemGroup>
 </Project>
