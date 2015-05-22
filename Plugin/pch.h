@@ -25,3 +25,36 @@
 #pragma comment(lib, "Half.lib")
 #pragma comment(lib, "Iex-2_2.lib")
 #pragma comment(lib, "IexMath-2_2.lib")
+
+
+#ifdef _WIN32
+#define aiWindows
+#endif // _WIN32
+
+#define aiCLinkage extern "C"
+#ifdef _MSC_VER
+#define aiExport __declspec(dllexport)
+#else
+#define aiExport
+#endif
+
+#ifdef aiWithDebugLog
+void aiDebugLogImpl(const char* fmt, ...);
+#define aiDebugLog(...) aiDebugLogImpl(__VA_ARGS__)
+#ifdef aiWithVerboseDebugLog
+#define aiDebugLogVerbose(...) aiDebugLogImpl(__VA_ARGS__)
+#else
+#define aiDebugLogVerbose(...)
+#endif
+#else
+#define aiDebugLog(...)
+#define aiDebugLogVerbose(...)
+#endif
+
+
+#ifdef aiWindows
+#include <windows.h>
+#include <d3d11.h>
+
+#define aiSupportD3D11
+#endif // aiWindows
