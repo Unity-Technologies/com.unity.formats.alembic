@@ -10,7 +10,7 @@ using UnityEditor;
 
 public class AlembicImporter
 {
-    public delegate void aiNodeEnumerator(IntPtr ctx, IntPtr obj, IntPtr userdata);
+    public delegate void aiNodeEnumerator(IntPtr obj, IntPtr userdata);
 
     public struct aiSplitedMeshInfo
     {
@@ -20,15 +20,26 @@ public class AlembicImporter
         public int begin_face;
         public int begin_index;
         public int triangulated_index_count;
-    };
+    }
+
+    public struct aiMeshData
+    {
+        public int index_count;
+        public bool is_normal_indexed;
+        public bool is_uv_indexed;
+        public IntPtr tex_indices;
+        public IntPtr tex_vertices;
+        public IntPtr tex_normals;
+        public IntPtr tex_uvs;
+    }
 
     public struct aiCameraParams
     {
         public float near_clipping_plane;
         public float far_clipping_plane;
         public float field_of_view;
-        public float focus_distance; // * centimeter * 
-        public float focal_length; // * millimeters * 
+        public float focus_distance;
+        public float focal_length;
     }
 
 
@@ -37,51 +48,53 @@ public class AlembicImporter
     
     [DllImport ("AlembicImporter")] public static extern bool       aiLoad(IntPtr ctx, string path);
     [DllImport ("AlembicImporter")] public static extern IntPtr     aiGetTopObject(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(IntPtr ctx, IntPtr obj, aiNodeEnumerator e, IntPtr userdata);
-    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentObject(IntPtr ctx, IntPtr obj);
-    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(IntPtr ctx, float time);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(IntPtr ctx, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(IntPtr ctx, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(IntPtr ctx, bool v);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(IntPtr obj, aiNodeEnumerator e, IntPtr userdata);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(IntPtr obj, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(IntPtr obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(IntPtr obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(IntPtr obj, bool v);
 
-    [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(IntPtr ctx);
-    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(IntPtr ctx);
-    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(IntPtr ctx);
-    public static string aiGetName(IntPtr ctx)      { return Marshal.PtrToStringAnsi(aiGetNameS(ctx)); }
-    public static string aiGetFullName(IntPtr ctx)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(ctx)); }
+    [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(IntPtr obj);
+    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(IntPtr obj);
+    [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(IntPtr obj);
+    public static string aiGetName(IntPtr obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
+    public static string aiGetFullName(IntPtr obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetInherits(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetPosition(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetAxis(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern float      aiXFormGetAngle(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetScale(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(IntPtr ctx);
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetInherits(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetPosition(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetAxis(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern float      aiXFormGetAngle(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetScale(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(IntPtr obj);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstant(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasNormals(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasUVs(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetIndexCount(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexCount(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyIndices(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyVertices(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyNormals(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyUVs(IntPtr ctx, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(IntPtr ctx, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedIndices(IntPtr ctx, IntPtr indices, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(IntPtr ctx, IntPtr vertices, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(IntPtr ctx, IntPtr normals, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(IntPtr ctx, IntPtr uvs, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstant(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasNormals(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasUVs(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetIndexCount(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexCount(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyIndices(IntPtr obj, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyVertices(IntPtr obj, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyNormals(IntPtr obj, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyUVs(IntPtr obj, IntPtr dst);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(IntPtr obj, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedIndices(IntPtr obj, IntPtr indices, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(IntPtr obj, IntPtr vertices, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(IntPtr obj, IntPtr normals, ref aiSplitedMeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(IntPtr obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(IntPtr ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(IntPtr ctx, ref aiCameraParams o_params);
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(IntPtr obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(IntPtr obj, ref aiCameraParams o_params);
 
 
     class ImportContext
     {
         public Transform parent;
+        public float time;
+        public bool reverse_x;
+        public bool reverse_faces;
     }
 
 #if UNITY_EDITOR
@@ -125,49 +138,53 @@ public class AlembicImporter
 
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
+            ic.reverse_x = reverse_x;
+            ic.reverse_faces = reverse_faces;
 
             GCHandle gch = GCHandle.Alloc(ic);
-            aiEnableReverseX(ctx, reverse_x);
-            aiEnableReverseIndex(ctx, reverse_faces);
-            aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
+            aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
         }
         aiDestroyContext(ctx);
     }
 #endif
 
-    public static void UpdateAbcTree(IntPtr ctx, Transform root, bool reverse_faces, float time)
+    public static void UpdateAbcTree(IntPtr ctx, Transform root, bool reverse_x, bool reverse_faces, float time)
     {
-        aiSetCurrentTime(ctx, time);
-
         var ic = new ImportContext();
         ic.parent = root;
+        ic.time = time;
+        ic.reverse_x = reverse_x;
+        ic.reverse_faces = reverse_faces;
 
         GCHandle gch = GCHandle.Alloc(ic);
-        aiEnumerateChild(ctx, aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
+        aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
     }
 
-    static void ImportEnumerator(IntPtr ctx, IntPtr node, IntPtr userdata)
+    static void ImportEnumerator(IntPtr obj, IntPtr userdata)
     {
         var ic = GCHandle.FromIntPtr(userdata).Target as ImportContext;
         Transform parent = ic.parent;
         //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
-        string child_name = aiGetName(ctx);
+        aiSetCurrentTime(obj, ic.time);
+        aiEnableReverseX(obj, ic.reverse_x);
+        aiEnableReverseIndex(obj, ic.reverse_faces);
+        string child_name = aiGetName(obj);
         var trans = parent.FindChild(child_name);
         if (trans == null)
         {
             GameObject go = new GameObject();
-            go.name = aiGetName(ctx);
+            go.name = child_name;
             trans = go.GetComponent<Transform>();
             trans.parent = parent;
         }
 
-        if (aiHasXForm(ctx))
+        if (aiHasXForm(obj))
         {
-            Vector3 pos = aiXFormGetPosition(ctx);
-            Quaternion rot = Quaternion.AngleAxis(aiXFormGetAngle(ctx), aiXFormGetAxis(ctx));
-            Vector3 scale = aiXFormGetScale(ctx);
-            if (aiXFormGetInherits(ctx))
+            Vector3 pos = aiXFormGetPosition(obj);
+            Quaternion rot = Quaternion.AngleAxis(aiXFormGetAngle(obj), aiXFormGetAxis(obj));
+            Vector3 scale = aiXFormGetScale(obj);
+            if (aiXFormGetInherits(obj))
             {
                 trans.localPosition = pos;
                 trans.localRotation = rot;
@@ -186,22 +203,23 @@ public class AlembicImporter
             trans.localEulerAngles = Vector3.zero;
             trans.localScale = Vector3.one;
         }
-        if (aiHasPolyMesh(ctx))
+        if (aiHasPolyMesh(obj))
         {
-            UpdateAbcMesh(ctx, trans);
+            UpdateAbcMesh(obj, trans);
         }
-        if(aiHasCamera(ctx))
+        if (aiHasCamera(obj))
         {
             trans.parent.forward = -trans.parent.forward;
-            UpdateAbcCamera(ctx, trans);
+            UpdateAbcCamera(obj, trans);
         }
 
         ic.parent = trans;
-        aiEnumerateChild(ctx, node, ImportEnumerator, userdata);
+        aiEnumerateChild(obj, ImportEnumerator, userdata);
         ic.parent = parent;
     }
 
-    public static void UpdateAbcMesh(IntPtr ctx, Transform trans)
+
+    public static void UpdateAbcMesh(IntPtr abc, Transform trans)
     {
         const int max_vertices = 65000;
 
@@ -211,7 +229,7 @@ public class AlembicImporter
             abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
             var entry = new AlembicMesh.Entry {
                 host = trans.gameObject,
-                mesh = AddMeshComponents(ctx, trans),
+                mesh = AddMeshComponents(abc, trans),
                 vertex_cache = new Vector3[0],
                 uv_cache = new Vector2[0],
                 index_cache = new int[0],
@@ -261,7 +279,7 @@ public class AlembicImporter
         {
             smi_prev = smi;
             smi = default(aiSplitedMeshInfo);
-            bool is_end = aiPolyMeshGetSplitedMeshInfo(ctx, ref smi, ref smi_prev, max_vertices);
+            bool is_end = aiPolyMeshGetSplitedMeshInfo(abc, ref smi, ref smi_prev, max_vertices);
 
             AlembicMesh.Entry entry;
             if (nth_submesh < abcmesh.m_meshes.Count)
@@ -280,7 +298,7 @@ public class AlembicImporter
                 child.localPosition = Vector3.zero;
                 child.localEulerAngles = Vector3.zero;
                 child.localScale = Vector3.one;
-                Mesh mesh = AddMeshComponents(ctx, child);
+                Mesh mesh = AddMeshComponents(abc, child);
                 mesh.name = name;
                 child.GetComponent<MeshRenderer>().sharedMaterial = material;
 
@@ -295,7 +313,7 @@ public class AlembicImporter
                 abcmesh.m_meshes.Add(entry);
             }
 
-            bool needs_index_update = entry.mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(ctx);
+            bool needs_index_update = entry.mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(abc);
             if (needs_index_update)
             {
                 entry.mesh.Clear();
@@ -304,36 +322,36 @@ public class AlembicImporter
             // update positions
             {
                 Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-                aiPolyMeshCopySplitedVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                aiPolyMeshCopySplitedVertices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
                 entry.mesh.vertices = entry.vertex_cache;
             }
 
             // update normals
-            if (aiPolyMeshHasNormals(ctx))
+            if (aiPolyMeshHasNormals(abc))
             {
                 // normals can reuse entry.vertex_cache
-                aiPolyMeshCopySplitedNormals(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
+                aiPolyMeshCopySplitedNormals(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
                 entry.mesh.normals = entry.vertex_cache;
             }
 
             if (needs_index_update)
             {
                 // update uvs
-                if (aiPolyMeshHasUVs(ctx))
+                if (aiPolyMeshHasUVs(abc))
                 {
                     Array.Resize(ref entry.uv_cache, smi.vertex_count);
-                    aiPolyMeshCopySplitedUVs(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0), ref smi);
+                    aiPolyMeshCopySplitedUVs(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0), ref smi);
                     entry.mesh.uv = entry.uv_cache;
                 }
 
                 // update indices
                 Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
-                aiPolyMeshCopySplitedIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
+                aiPolyMeshCopySplitedIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
                 entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
             }
 
             // recalculate normals
-            if (!aiPolyMeshHasNormals(ctx))
+            if (!aiPolyMeshHasNormals(abc))
             {
                 entry.mesh.RecalculateNormals();
             }
@@ -348,14 +366,15 @@ public class AlembicImporter
         }
     }
 
-    static Mesh AddMeshComponents(IntPtr ctx, Transform trans)
+
+    static Mesh AddMeshComponents(IntPtr abc, Transform trans)
     {
         Mesh mesh;
         var mesh_filter = trans.GetComponent<MeshFilter>();
         if (mesh_filter == null)
         {
             mesh = new Mesh();
-            mesh.name = aiGetName(ctx);
+            mesh.name = aiGetName(abc);
             mesh.MarkDynamic();
             mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
             mesh_filter.sharedMesh = mesh;
@@ -369,7 +388,8 @@ public class AlembicImporter
         return mesh;
     }
 
-    static void UpdateAbcCamera(IntPtr ctx, Transform trans)
+
+    static void UpdateAbcCamera(IntPtr abc, Transform trans)
     {
         var cam = trans.GetComponent<Camera>();
         if(cam == null)
@@ -377,7 +397,7 @@ public class AlembicImporter
             cam = trans.gameObject.AddComponent<Camera>();
         }
         aiCameraParams cp = default(aiCameraParams);
-        aiCameraGetParams(ctx, ref cp);
+        aiCameraGetParams(abc, ref cp);
         cam.fieldOfView = cp.field_of_view;
         cam.nearClipPlane = cp.near_clipping_plane;
         cam.farClipPlane = cp.far_clipping_plane;

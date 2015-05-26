@@ -1,16 +1,17 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiObject.h"
 #include "aiGeometry.h"
 #include "aiContext.h"
 
 
 
-aiContextPtr aiContext::create()
+aiContext* aiContext::create()
 {
     return new aiContext();
 }
 
-void aiContext::destroy(aiContextPtr ctx)
+void aiContext::destroy(aiContext* ctx)
 {
     delete ctx;
 }
@@ -19,13 +20,25 @@ aiContext::aiContext()
     : m_reverse_x(true)
     , m_triangulate(true)
     , m_reverse_index(false)
-    , m_has_xform(false)
-    , m_has_polymesh(false)
-    , m_has_curves(false)
-    , m_has_points(false)
-    , m_has_camera(false)
-    , m_has_material(false)
 {
+}
+
+aiContext::~aiContext()
+{
+    for (auto n : m_nodes) { delete n; }
+    m_nodes.clear();
+}
+
+void aiContext::gatherNodesRecursive(aiObject *n)
+{
+    m_nodes.push_back(n);
+    abcObject &abc = n->getAbcObject();
+    int num_children = abc.getNumChildren();
+    for (int i = 0; i < num_children; ++i) {
+        aiObject *child = new aiObject(this, abc.getChild(i));
+        n->addChild(child);
+        gatherNodesRecursive(child);
+    }
 }
 
 bool aiContext::load(const char *path)
@@ -51,7 +64,9 @@ bool aiContext::load(const char *path)
     }
 
     if (m_archive && m_archive->valid()) {
-        m_top_object = m_archive->getTop();
+        aiObject *top = new aiObject(this, m_archive->getTop());
+        gatherNodesRecursive(top);
+
         aiDebugLog("succeeded\n");
         return true;
     }
@@ -61,111 +76,14 @@ bool aiContext::load(const char *path)
     }
 }
 
-abcObject* aiContext::getTopObject()
+aiObject* aiContext::getTopObject()
 {
-    return &m_top_object;
+    return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
 void aiContext::setCurrentObject(abcObject *obj)
 {
     m_current = *obj;
-    if (m_current.valid())
-    {
-#ifdef aiWithDebugLog
-        m_dbg_current_object_name = obj->getFullName();
-#endif // aiWithDebugLog
 
-        const auto& metadata = m_current.getMetaData();
-        m_has_xform = AbcGeom::IXformSchema::matches(metadata);
-        m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
-        m_has_curves = AbcGeom::ICurvesSchema::matches(metadata);
-        m_has_points = AbcGeom::IPointsSchema::matches(metadata);
-        m_has_camera = AbcGeom::ICameraSchema::matches(metadata);
-        m_has_material = AbcMaterial::IMaterial::matches(metadata);
-
-        if (m_has_xform)
-        {
-            m_xform = aiXForm(m_current, m_sample_selector);
-            m_xform.enableReverseX(m_reverse_x);
-        }
-        if (m_has_polymesh)
-        {
-            m_polymesh = aiPolyMesh(m_current, m_sample_selector);
-            m_polymesh.enableReverseX(m_reverse_x);
-            m_polymesh.enableTriangulate(m_triangulate);
-            m_polymesh.enableReverseIndex(m_reverse_index);
-        }
-        if (m_has_curves)
-        {
-            m_curves = aiCurves(m_current, m_sample_selector);
-            m_curves.enableReverseX(m_reverse_x);
-        }
-        if (m_has_points)
-        {
-            m_points = aiPoints(m_current, m_sample_selector);
-            m_points.enableReverseX(m_reverse_x);
-        }
-        if (m_has_camera)
-        {
-            m_camera = aiCamera(m_current, m_sample_selector);
-        }
-        if (m_has_material)
-        {
-            m_material = aiMaterial(m_current, m_sample_selector);
-        }
-
-        //for (auto i : metadata) {
-        //    aiDebugLogVerbose("%s: %s\n", i.first.c_str(), i.second.c_str());
-        //}
-    }
 }
-
-void aiContext::setCurrentTime(float time)
-{
-    m_sample_selector = Abc::ISampleSelector(time, Abc::ISampleSelector::kFloorIndex);
-}
-
-void aiContext::enableReverseX(bool v)
-{
-    m_reverse_x = v;
-}
-
-void aiContext::enableTriangulate(bool v)
-{
-    m_triangulate = v;
-}
-
-void aiContext::enableReverseIndex(bool v)
-{
-    m_reverse_index = v;
-}
-
-const char* aiContext::getName() const
-{
-    return m_current.getName().c_str();
-}
-
-const char* aiContext::getFullName() const
-{
-    return m_current.getFullName().c_str();
-}
-
-uint32_t aiContext::getNumChildren() const
-{
-    return m_current.getNumChildren();
-}
-
-bool aiContext::hasXForm() const    { return m_has_xform; }
-bool aiContext::hasPolyMesh() const { return m_has_polymesh; }
-bool aiContext::hasCurves() const   { return m_has_curves; }
-bool aiContext::hasPoints() const   { return m_has_points; }
-bool aiContext::hasCamera() const   { return m_has_camera; }
-bool aiContext::hasMaterial() const { return m_has_material; }
-
-aiXForm&    aiContext::getXForm()      { return m_xform; }
-aiPolyMesh& aiContext::getPolyMesh()   { return m_polymesh; }
-aiCurves&   aiContext::getCurves()     { return m_curves; }
-aiPoints&   aiContext::getPoints()     { return m_points; }
-aiCamera&   aiContext::getCamera()     { return m_camera; }
-aiMaterial& aiContext::getMaterial()   { return m_material; }
 
