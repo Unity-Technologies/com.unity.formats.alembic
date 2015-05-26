@@ -46,7 +46,7 @@ public class AlembicStream : MonoBehaviour
             if (m_time_prev != m_time)
             {
                 m_time_prev = m_time;
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_faces, m_time);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, m_time);
             }
         }
     }

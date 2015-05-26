@@ -2,13 +2,20 @@
 #define aiGeometry_h
 
 
-class aiXForm
+class aiSchema
+{
+public:
+    virtual ~aiSchema();
+    virtual void updateSample() = 0;
+};
+
+
+class aiXForm : public aiSchema
 {
 public:
     aiXForm();
-    aiXForm(abcObject obj, Abc::ISampleSelector ss);
-
-    void        enableReverseX(bool v);
+    aiXForm(aiObject *obj);
+    void updateSample() override;
 
     bool        getInherits() const;
     abcV3       getPosition() const;
@@ -18,20 +25,21 @@ public:
     abcM44      getMatrix() const;
 
 private:
+    aiObject *m_obj;
     AbcGeom::IXformSchema m_schema;
     AbcGeom::XformSample m_sample;
     bool m_inherits;
-
-    bool m_reverse_x;
 };
 
 
-class aiPolyMesh
+class aiPolyMesh : public aiSchema
 {
 public:
     aiPolyMesh();
-    aiPolyMesh(abcObject obj, Abc::ISampleSelector ss);
+    aiPolyMesh(aiObject *obj);
+    void updateSample() override;
 
+    void        setCurrentTime(float t);
     void        enableReverseX(bool v);
     void        enableTriangulate(bool v);
     void        enableReverseIndex(bool v);
@@ -55,6 +63,7 @@ public:
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
 private:
+    aiObject *m_obj;
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
@@ -62,37 +71,32 @@ private:
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
-    bool m_reverse_x;
-    bool m_triangulate;
-    bool m_reverse_index;
 };
 
 
-class aiCurves
+class aiCurves : public aiSchema
 {
 public:
     aiCurves();
-    aiCurves(abcObject obj, Abc::ISampleSelector ss);
-
-    void        enableReverseX(bool v);
+    aiCurves(aiObject *obj);
+    void updateSample() override;
 
 private:
+    aiObject *m_obj;
     AbcGeom::ICurvesSchema m_schema;
-    bool m_reverse_x;
 };
 
 
-class aiPoints
+class aiPoints : public aiSchema
 {
 public:
     aiPoints();
-    aiPoints(abcObject obj, Abc::ISampleSelector ss);
-
-    void        enableReverseX(bool v);
+    aiPoints(aiObject *obj);
+    void updateSample() override;
 
 private:
+    aiObject *m_obj;
     AbcGeom::IPointsSchema m_schema;
-    bool m_reverse_x;
 };
 
 
@@ -106,29 +110,33 @@ struct aiCameraParams
     float focal_length;
 };
 
-class aiCamera
+class aiCamera : public aiSchema
 {
 public:
     aiCamera();
-    aiCamera(abcObject obj, Abc::ISampleSelector ss);
+    aiCamera(aiObject *obj);
+    void updateSample() override;
 
     void getParams(aiCameraParams &o_params);
 
 private:
+    aiObject *m_obj;
     AbcGeom::ICameraSchema m_schema;
     AbcGeom::CameraSample m_sample;
 };
 
 
-class aiMaterial
+class aiMaterial : public aiSchema
 {
 public:
     aiMaterial();
-    aiMaterial(abcObject obj, Abc::ISampleSelector ss);
+    aiMaterial(aiObject *obj);
+    void updateSample() override;
 
     // Maya の alembic エクスポータがマテリアル情報を書き出せないようなので保留。
 
 private:
+    aiObject *m_obj;
     AbcMaterial::IMaterialSchema m_schema;
 };
 

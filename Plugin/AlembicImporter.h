@@ -5,20 +5,11 @@
 
 
 
-
-using namespace Alembic;
-
-typedef Abc::V2f       abcV2;
-typedef Abc::V3f       abcV3;
-typedef Abc::M44f      abcM44;
-typedef Abc::IObject   abcObject;
-struct  aiCameraParams;
-class   aiContext;
-typedef aiContext* aiContextPtr;
-typedef void(__stdcall *aiNodeEnumerator)(aiContextPtr ctx, abcObject *node, void *userdata);
+typedef void(__stdcall *aiNodeEnumerator)(aiObject *node, void *userdata);
 struct aiV2 { float v[2]; };
 struct aiV3 { float v[3]; };
 struct aiM44 { float v[4][4]; };
+
 
 struct aiSplitedMeshInfo
 {
@@ -31,55 +22,67 @@ struct aiSplitedMeshInfo
 };
 
 
-aiCLinkage aiExport aiContextPtr    aiCreateContext();
-aiCLinkage aiExport void            aiDestroyContext(aiContextPtr ctx);
+aiCLinkage aiExport aiContext*      aiCreateContext();
+aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
 
-aiCLinkage aiExport bool            aiLoad(aiContextPtr ctx, const char *path);
-aiCLinkage aiExport abcObject*      aiGetTopObject(aiContextPtr ctx);
-aiCLinkage aiExport void            aiEnumerateChild(aiContextPtr ctx, abcObject *node, aiNodeEnumerator e, void *userdata);
-aiCLinkage aiExport void            aiSetCurrentObject(aiContextPtr ctx, abcObject *node);
-aiCLinkage aiExport void            aiSetCurrentTime(aiContextPtr ctx, float time);
-aiCLinkage aiExport void            aiEnableReverseX(aiContextPtr ctx, bool v);
-aiCLinkage aiExport void            aiEnableTriangulate(aiContextPtr ctx, bool v);
-aiCLinkage aiExport void            aiEnableReverseIndex(aiContextPtr ctx, bool v);
+aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);
+aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 
-aiCLinkage aiExport const char*     aiGetNameS(aiContextPtr ctx);
-aiCLinkage aiExport const char*     aiGetFullNameS(aiContextPtr ctx);
-aiCLinkage aiExport uint32_t        aiGetNumChildren(aiContextPtr ctx);
+aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
+aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
+aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
+aiCLinkage aiExport uint32_t        aiGetNumChildren(aiObject* obj);
+aiCLinkage aiExport void            aiSetCurrentTime(aiObject* obj, float time);
+aiCLinkage aiExport void            aiEnableReverseX(aiObject* obj, bool v);
+aiCLinkage aiExport void            aiEnableTriangulate(aiObject* obj, bool v);
+aiCLinkage aiExport void            aiEnableReverseIndex(aiObject* obj, bool v);
 
-aiCLinkage aiExport bool            aiHasXForm(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiXFormGetInherits(aiContextPtr ctx);
-aiCLinkage aiExport aiV3            aiXFormGetPosition(aiContextPtr ctx);
-aiCLinkage aiExport aiV3            aiXFormGetAxis(aiContextPtr ctx);
-aiCLinkage aiExport float           aiXFormGetAngle(aiContextPtr ctx);
-aiCLinkage aiExport aiV3            aiXFormGetRotation(aiContextPtr ctx);
-aiCLinkage aiExport aiV3            aiXFormGetScale(aiContextPtr ctx);
-aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiContextPtr ctx);
+aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
+aiCLinkage aiExport bool            aiXFormGetInherits(aiObject* obj);
+aiCLinkage aiExport aiV3            aiXFormGetPosition(aiObject* obj);
+aiCLinkage aiExport aiV3            aiXFormGetAxis(aiObject* obj);
+aiCLinkage aiExport float           aiXFormGetAngle(aiObject* obj);
+aiCLinkage aiExport aiV3            aiXFormGetRotation(aiObject* obj);
+aiCLinkage aiExport aiV3            aiXFormGetScale(aiObject* obj);
+aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiObject* obj);
 
-aiCLinkage aiExport bool            aiHasPolyMesh(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiContextPtr ctx);
-aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiContextPtr ctx);
-aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiContextPtr ctx);
-aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexCount(aiContextPtr ctx);
-aiCLinkage aiExport void            aiPolyMeshCopyIndices(aiContextPtr ctx, int *dst);
-aiCLinkage aiExport void            aiPolyMeshCopyVertices(aiContextPtr ctx, abcV3 *dst);
-aiCLinkage aiExport void            aiPolyMeshCopyNormals(aiContextPtr ctx, abcV3 *dst);
-aiCLinkage aiExport void            aiPolyMeshCopyUVs(aiContextPtr ctx, abcV2 *dst);
-aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiContextPtr ctx, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices);
-aiCLinkage aiExport void            aiPolyMeshCopySplitedIndices(aiContextPtr ctx, int *dst, const aiSplitedMeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiContextPtr ctx, abcV3 *dst, const aiSplitedMeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiContextPtr ctx, abcV2 *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiObject* obj);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexCount(aiObject* obj);
+aiCLinkage aiExport void            aiPolyMeshCopyIndices(aiObject* obj, int *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyVertices(aiObject* obj, abcV3 *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyNormals(aiObject* obj, abcV3 *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyUVs(aiObject* obj, abcV2 *dst);
+aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiObject* obj, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedIndices(aiObject* obj, int *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
-aiCLinkage aiExport bool            aiHasCurves(aiContextPtr ctx);
+struct aiTextureMeshData
+{
+    int num_indices;
+    bool is_normal_indexed;
+    bool is_uv_indexed;
+    void *tex_indices;
+    void *tex_vertices;
+    void *tex_normals;
+    void *tex_uvs;
+};
+aiCLinkage aiExport void            aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
 
-aiCLinkage aiExport bool            aiHasPoints(aiContextPtr ctx);
 
-aiCLinkage aiExport bool            aiHasCamera(aiContextPtr ctx);
-aiCLinkage aiExport void            aiCameraGetParams(aiContextPtr ctx, aiCameraParams *o_params);
+aiCLinkage aiExport bool            aiHasCurves(aiObject* obj);
 
-aiCLinkage aiExport bool            aiHasMaterial(aiContextPtr ctx);
+aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
+
+aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
+aiCLinkage aiExport void            aiCameraGetParams(aiObject* obj, aiCameraParams *o_params);
+
+aiCLinkage aiExport bool            aiHasMaterial(aiObject* obj);
 
 #endif // AlembicImporter_h

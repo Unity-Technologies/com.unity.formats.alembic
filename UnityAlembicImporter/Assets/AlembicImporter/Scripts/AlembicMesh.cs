@@ -22,5 +22,31 @@ public class AlembicMesh : MonoBehaviour
         public GameObject host;
     }
 
+    public IntPtr m_abc_mesh;
     public List<Entry> m_meshes = new List<Entry>();
+
+    public RenderTexture m_indices;
+    public RenderTexture m_vertices;
+    public RenderTexture m_normals;
+    public RenderTexture m_uvs;
+
+
+    static RenderTexture CreateDataTexture(int num_data, RenderTextureFormat format)
+    {
+        const int width = 1024;
+        var r = new RenderTexture(width, num_data / width, 0, format);
+        r.enableRandomWrite = true;
+        r.Create();
+        return r;
+    }
+
+    void Update()
+    {
+
+    }
+
+    void LateUpdate()
+    {
+
+    }
 }
