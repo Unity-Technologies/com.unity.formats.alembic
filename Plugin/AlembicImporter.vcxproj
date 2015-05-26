@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="aiContext.cpp" />
     <ClCompile Include="aiGeometry.cpp" />
+    <ClCompile Include="aiObject.cpp" />
     <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="aiGraphicsDevice.cpp" />
     <ClCompile Include="aiGraphicsDeviceD3D11.cpp" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClInclude Include="aiContext.h" />
     <ClInclude Include="aiGeometry.h" />
+    <ClInclude Include="aiObject.h" />
     <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="aiGraphicsDevice.h" />
     <ClInclude Include="pch.h" />

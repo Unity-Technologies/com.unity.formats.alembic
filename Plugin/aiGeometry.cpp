@@ -1,23 +1,29 @@
 #include "pch.h"
 #include "AlembicImporter.h"
 #include "aiGeometry.h"
+#include "aiObject.h"
+
+
+aiSchema::~aiSchema() {}
+
 
 
 aiXForm::aiXForm() {}
 
-aiXForm::aiXForm(abcObject obj, Abc::ISampleSelector ss)
-    : m_reverse_x(true)
+aiXForm::aiXForm(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcGeom::IXform xf(obj, Abc::kWrapExisting);
+    AbcGeom::IXform xf(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = xf.getSchema();
+}
+
+void aiXForm::updateSample()
+{
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
     m_schema.get(m_sample, ss);
     m_inherits = m_schema.getInheritsXforms(ss);
 }
 
-void aiXForm::enableReverseX(bool v)
-{
-    m_reverse_x = v;
-}
 
 bool aiXForm::getInherits() const
 {
@@ -27,7 +33,7 @@ bool aiXForm::getInherits() const
 abcV3 aiXForm::getPosition() const
 {
     abcV3 ret = m_sample.getTranslation();
-    if (m_reverse_x) {
+    if (m_obj->getReverseX()) {
         ret.x *= -1.0f;
     }
     return ret;
@@ -36,7 +42,7 @@ abcV3 aiXForm::getPosition() const
 abcV3 aiXForm::getAxis() const
 {
     abcV3 ret = m_sample.getAxis();
-    if (m_reverse_x) {
+    if (m_obj->getReverseX()) {
         ret.x *= -1.0f;
     }
     return ret;
@@ -45,7 +51,7 @@ abcV3 aiXForm::getAxis() const
 float aiXForm::getAngle() const
 {
     float ret = m_sample.getAngle();
-    if (m_reverse_x) {
+    if (m_obj->getReverseX()) {
         ret *= -1.0f;
     }
     return ret;
@@ -62,15 +68,19 @@ abcM44 aiXForm::getMatrix() const
 }
 
 
+
 aiPolyMesh::aiPolyMesh() {}
 
-aiPolyMesh::aiPolyMesh(abcObject obj, Abc::ISampleSelector ss)
-    : m_reverse_x(true)
-    , m_triangulate(true)
-    , m_reverse_index(false)
+aiPolyMesh::aiPolyMesh(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcGeom::IPolyMesh pm(obj, Abc::kWrapExisting);
+    AbcGeom::IPolyMesh pm(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = pm.getSchema();
+}
+
+void aiPolyMesh::updateSample()
+{
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
     m_schema.getFaceIndicesProperty().get(m_indices, ss);
     m_schema.getFaceCountsProperty().get(m_counts, ss);
     m_schema.getPositionsProperty().get(m_positions, ss);
@@ -90,22 +100,6 @@ aiPolyMesh::aiPolyMesh(abcObject obj, Abc::ISampleSelector ss)
         m_schema.getUVsParam().getIndexed(m_uvs, ss);
     }
 }
-
-void aiPolyMesh::enableReverseX(bool v)
-{
-    m_reverse_x = v;
-}
-
-void aiPolyMesh::enableTriangulate(bool v)
-{
-    m_triangulate = v;
-}
-
-void aiPolyMesh::enableReverseIndex(bool v)
-{
-    m_reverse_index = v;
-}
-
 
 bool aiPolyMesh::isTopologyConstant() const
 {
@@ -129,7 +123,7 @@ bool aiPolyMesh::hasUVs() const
 
 uint32_t aiPolyMesh::getIndexCount() const
 {
-    if (m_triangulate)
+    if (m_obj->getTriangulate())
     {
         uint32_t r = 0;
         const auto &counts = *m_counts;
@@ -153,15 +147,16 @@ uint32_t aiPolyMesh::getVertexCount() const
 
 void aiPolyMesh::copyIndices(int *dst) const
 {
+    bool reverse_index = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
 
-    if (m_triangulate)
+    if (m_obj->getTriangulate())
     {
         uint32_t a = 0;
         uint32_t b = 0;
-        uint32_t i1 = m_reverse_index ? 2 : 1;
-        uint32_t i2 = m_reverse_index ? 1 : 2;
+        uint32_t i1 = reverse_index ? 2 : 1;
+        uint32_t i2 = reverse_index ? 1 : 2;
         size_t n = counts.size();
         for (size_t fi = 0; fi < n; ++fi) {
             int ngon = counts[fi];
@@ -177,7 +172,7 @@ void aiPolyMesh::copyIndices(int *dst) const
     else
     {
         size_t n = indices.size();
-        if (m_reverse_index) {
+        if (reverse_index) {
             for (size_t i = 0; i < n; ++i) {
                 dst[i] = indices[n - i - 1];
             }
@@ -197,7 +192,7 @@ void aiPolyMesh::copyVertices(abcV3 *dst) const
     for (size_t i = 0; i < n; ++i) {
         dst[i] = cont[i];
     }
-    if (m_reverse_x) {
+    if (m_obj->getReverseX()) {
         for (size_t i = 0; i < n; ++i) {
             dst[i].x *= -1.0f;
         }
@@ -247,13 +242,14 @@ bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMes
 
 void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const
 {
+    bool reverse_index = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
 
     uint32_t a = 0;
     uint32_t b = 0;
-    uint32_t i1 = m_reverse_index ? 2 : 1;
-    uint32_t i2 = m_reverse_index ? 1 : 2;
+    uint32_t i1 = reverse_index ? 2 : 1;
+    uint32_t i2 = reverse_index ? 1 : 2;
     for (size_t fi = 0; fi < smi.num_faces; ++fi) {
         int ngon = counts[smi.begin_face + fi];
         for (int ni = 0; ni < (ngon - 2); ++ni) {
@@ -280,7 +276,7 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
         }
         a += ngon;
     }
-    if (m_reverse_x) {
+    if (m_obj->getReverseX()) {
         for (size_t i = 0; i < a; ++i) {
             dst[i].x *= -1.0f;
         }
@@ -314,7 +310,7 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
             }
             a += ngon;
         }
-        if (m_reverse_x) {
+        if (m_obj->getReverseX()) {
             for (size_t i = 0; i < a; ++i) {
                 dst[i].x *= -1.0f;
             }
@@ -355,43 +351,53 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
 
 aiCurves::aiCurves() {}
 
-aiCurves::aiCurves(abcObject obj, Abc::ISampleSelector ss)
-    : m_reverse_x(true)
+aiCurves::aiCurves(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcGeom::ICurves curves(obj, Abc::kWrapExisting);
+    AbcGeom::ICurves curves(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = curves.getSchema();
 }
 
-void aiCurves::enableReverseX(bool v)
+void aiCurves::updateSample()
 {
-    m_reverse_x = v;
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    // todo
 }
+
 
 
 aiPoints::aiPoints() {}
 
-aiPoints::aiPoints(abcObject obj, Abc::ISampleSelector ss)
-    : m_reverse_x(true)
+aiPoints::aiPoints(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcGeom::IPoints points(obj, Abc::kWrapExisting);
+    AbcGeom::IPoints points(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = points.getSchema();
 }
 
-void aiPoints::enableReverseX(bool v)
+void aiPoints::updateSample()
 {
-    m_reverse_x = v;
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    // todo
 }
 
 
 
 aiCamera::aiCamera() {}
 
-aiCamera::aiCamera(abcObject obj, Abc::ISampleSelector ss)
+aiCamera::aiCamera(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcGeom::ICamera cam(obj, Abc::kWrapExisting);
+    AbcGeom::ICamera cam(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = cam.getSchema();
-    m_schema.get(m_sample, ss);
 }
+
+void aiCamera::updateSample()
+{
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    // todo
+}
+
 
 void aiCamera::getParams(aiCameraParams &o_params)
 {
@@ -402,10 +408,19 @@ void aiCamera::getParams(aiCameraParams &o_params)
     o_params.focal_length = m_sample.getFocalLength() * 0.01f; // milimeter to meter
 }
 
+
+
 aiMaterial::aiMaterial() {}
 
-aiMaterial::aiMaterial(abcObject obj, Abc::ISampleSelector ss)
+aiMaterial::aiMaterial(aiObject *obj)
+    : m_obj(obj)
 {
-    AbcMaterial::IMaterial material(obj, Abc::kWrapExisting);
+    AbcMaterial::IMaterial material(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = material.getSchema();
+}
+
+void aiMaterial::updateSample()
+{
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    // todo
 }
