@@ -42,6 +42,7 @@ public class AlembicImporter
         public float focal_length;
     }
 
+    [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
 
     [DllImport ("AlembicImporter")] public static extern IntPtr     aiCreateContext();
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(IntPtr ctx);
@@ -122,6 +123,7 @@ public class AlembicImporter
     {
         if (path=="") return;
 
+        AlembicImporter.AddLibraryPath();
         IntPtr ctx = aiCreateContext();
         if (!aiLoad(ctx, Application.streamingAssetsPath + "/" + path))
         {

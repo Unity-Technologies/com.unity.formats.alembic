@@ -3,12 +3,14 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <functional>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
 #include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
+#include <tbb/tbb.h>
 
 #pragma comment(lib, "AlembicAbc.lib")
 #pragma comment(lib, "AlembicAbcCollection.lib")
@@ -38,10 +40,10 @@
 #define aiExport
 #endif
 
-#ifdef aiWithDebugLog
+#ifdef aiDebug
 void aiDebugLogImpl(const char* fmt, ...);
 #define aiDebugLog(...) aiDebugLogImpl(__VA_ARGS__)
-#ifdef aiWithVerboseDebugLog
+#ifdef aiVerboseDebug
 #define aiDebugLogVerbose(...) aiDebugLogImpl(__VA_ARGS__)
 #else
 #define aiDebugLogVerbose(...)

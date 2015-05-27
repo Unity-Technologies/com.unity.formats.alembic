@@ -20,15 +20,19 @@ public:
     bool load(const char *path);
     aiObject* getTopObject();
 
+    void runTask(const std::function<void ()> &task);
+    void waitTasks();
+
 private:
     void gatherNodesRecursive(aiObject *n);
 
 private:
-#ifdef aiWithDebugLog
+#ifdef aiDebug
     int m_magic;
-#endif // aiWithDebugLog
+#endif // aiDebug
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
+    tbb::task_group m_tasks;
 };
 
 
