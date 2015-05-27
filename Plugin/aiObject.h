@@ -3,6 +3,7 @@
 
 #include "aiGeometry.h"
 class aiContext;
+const int aiMagicObj = 0x004a424f; // "OBJ"
 
 
 class aiObject
@@ -44,6 +45,9 @@ public:
     bool        getTriangulate() const;
 
 private:
+#ifdef aiWithDebugLog
+    int m_magic;
+#endif // aiWithDebugLog
     aiContext   *m_ctx;
     abcObject   m_abc;
     std::vector<aiObject*> m_children;

@@ -40,8 +40,6 @@ public class AlembicStream : MonoBehaviour
         }
         if(m_loaded)
         {
-            AlembicImporter.aiEnableReverseX(m_abc, m_reverse_x);
-            AlembicImporter.aiEnableReverseIndex(m_abc, m_reverse_faces);
             m_time += Time.deltaTime * m_timescale;
             if (m_time_prev != m_time)
             {
