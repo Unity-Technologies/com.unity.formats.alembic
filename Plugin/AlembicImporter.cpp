@@ -306,6 +306,13 @@ aiCLinkage aiExport void aiCameraGetParams(aiObject* obj, aiCameraParams *o_para
 }
 
 
+aiCLinkage aiExport bool aiHasLight(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->hasLight();
+}
+
+
 aiCLinkage aiExport bool aiHasMaterial(aiObject* obj)
 {
     aiCheckObject(obj);

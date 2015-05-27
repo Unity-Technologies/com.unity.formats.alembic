@@ -5,13 +5,19 @@
 class aiSchema
 {
 public:
+    aiSchema();
+    aiSchema(aiObject *obj);
     virtual ~aiSchema();
     virtual void updateSample() = 0;
+
+protected:
+    aiObject *m_obj;
 };
 
 
 class aiXForm : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiXForm();
     aiXForm(aiObject *obj);
@@ -25,7 +31,6 @@ public:
     abcM44      getMatrix() const;
 
 private:
-    aiObject *m_obj;
     AbcGeom::IXformSchema m_schema;
     AbcGeom::XformSample m_sample;
     bool m_inherits;
@@ -34,6 +39,7 @@ private:
 
 class aiPolyMesh : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiPolyMesh();
     aiPolyMesh(aiObject *obj);
@@ -63,7 +69,6 @@ public:
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
 private:
-    aiObject *m_obj;
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
@@ -76,26 +81,26 @@ private:
 
 class aiCurves : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiCurves();
     aiCurves(aiObject *obj);
     void updateSample() override;
 
 private:
-    aiObject *m_obj;
     AbcGeom::ICurvesSchema m_schema;
 };
 
 
 class aiPoints : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiPoints();
     aiPoints(aiObject *obj);
     void updateSample() override;
 
 private:
-    aiObject *m_obj;
     AbcGeom::IPointsSchema m_schema;
 };
 
@@ -112,6 +117,7 @@ struct aiCameraParams
 
 class aiCamera : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiCamera();
     aiCamera(aiObject *obj);
@@ -120,14 +126,27 @@ public:
     void getParams(aiCameraParams &o_params);
 
 private:
-    aiObject *m_obj;
     AbcGeom::ICameraSchema m_schema;
     AbcGeom::CameraSample m_sample;
 };
 
 
+class aiLight : public aiSchema
+{
+typedef aiSchema super;
+public:
+    aiLight();
+    aiLight(aiObject *obj);
+    void updateSample() override;
+
+private:
+    AbcGeom::ILightSchema m_schema;
+};
+
+
 class aiMaterial : public aiSchema
 {
+typedef aiSchema super;
 public:
     aiMaterial();
     aiMaterial(aiObject *obj);
@@ -136,10 +155,7 @@ public:
     // Maya の alembic エクスポータがマテリアル情報を書き出せないようなので保留。
 
 private:
-    aiObject *m_obj;
     AbcMaterial::IMaterialSchema m_schema;
 };
-
-
 
 #endif // aiGeometry_h
