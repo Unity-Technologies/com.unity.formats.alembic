@@ -89,6 +89,8 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(IntPtr obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(IntPtr obj, ref aiCameraParams o_params);
 
+    [DllImport ("AlembicImporter")] public static extern bool       aiHasLight(IntPtr obj);
+
 
     class ImportContext
     {
@@ -213,6 +215,10 @@ public class AlembicImporter
         {
             trans.parent.forward = -trans.parent.forward;
             UpdateAbcCamera(obj, trans);
+        }
+        if (aiHasLight(obj))
+        {
+            UpdateAbcLight(obj, trans);
         }
 
         ic.parent = trans;
@@ -412,6 +418,15 @@ public class AlembicImporter
             dof.focalSize = cp.focal_length;
         }
          */
+    }
+
+    static void UpdateAbcLight(IntPtr abc, Transform trans)
+    {
+        var light = trans.GetComponent<Light>();
+        if (light == null)
+        {
+            light = trans.gameObject.AddComponent<Light>();
+        }
     }
 
 

@@ -19,39 +19,37 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
-        m_has_xform = AbcGeom::IXformSchema::matches(metadata);
-        m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
-        m_has_curves = AbcGeom::ICurvesSchema::matches(metadata);
-        m_has_points = AbcGeom::IPointsSchema::matches(metadata);
-        m_has_camera = AbcGeom::ICameraSchema::matches(metadata);
-        m_has_material = AbcMaterial::IMaterial::matches(metadata);
-
-        if (m_has_xform)
+        if (m_has_xform = AbcGeom::IXformSchema::matches(metadata))
         {
             m_xform = aiXForm(this);
             m_schemas.push_back(&m_xform);
         }
-        if (m_has_polymesh)
+        if (m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata))
         {
             m_polymesh = aiPolyMesh(this);
             m_schemas.push_back(&m_polymesh);
         }
-        if (m_has_curves)
+        if (m_has_curves = AbcGeom::ICurvesSchema::matches(metadata))
         {
             m_curves = aiCurves(this);
             m_schemas.push_back(&m_curves);
         }
-        if (m_has_points)
+        if (m_has_points = AbcGeom::IPointsSchema::matches(metadata))
         {
             m_points = aiPoints(this);
             m_schemas.push_back(&m_points);
         }
-        if (m_has_camera)
+        if (m_has_camera = AbcGeom::ICameraSchema::matches(metadata))
         {
             m_camera = aiCamera(this);
             m_schemas.push_back(&m_camera);
         }
-        if (m_has_material)
+        if (m_has_light = AbcGeom::ILight::matches(metadata))
+        {
+            m_light = aiLight(this);
+            m_schemas.push_back(&m_light);
+        }
+        if (m_has_material = AbcMaterial::IMaterial::matches(metadata))
         {
             m_material = aiMaterial(this);
             m_schemas.push_back(&m_material);
@@ -101,6 +99,7 @@ bool aiObject::hasPolyMesh() const { return m_has_polymesh; }
 bool aiObject::hasCurves() const   { return m_has_curves; }
 bool aiObject::hasPoints() const   { return m_has_points; }
 bool aiObject::hasCamera() const   { return m_has_camera; }
+bool aiObject::hasLight() const    { return m_has_light; }
 bool aiObject::hasMaterial() const { return m_has_material; }
 
 aiXForm&    aiObject::getXForm()      { return m_xform; }
@@ -108,6 +107,7 @@ aiPolyMesh& aiObject::getPolyMesh()   { return m_polymesh; }
 aiCurves&   aiObject::getCurves()     { return m_curves; }
 aiPoints&   aiObject::getPoints()     { return m_points; }
 aiCamera&   aiObject::getCamera()     { return m_camera; }
+aiLight&    aiObject::getLight()      { return m_light; }
 aiMaterial& aiObject::getMaterial()   { return m_material; }
 
 

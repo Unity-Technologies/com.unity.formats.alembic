@@ -4,6 +4,8 @@
 #include "aiObject.h"
 
 
+aiSchema::aiSchema() : m_obj(nullptr) {}
+aiSchema::aiSchema(aiObject *obj) : m_obj(obj) {}
 aiSchema::~aiSchema() {}
 
 
@@ -11,7 +13,7 @@ aiSchema::~aiSchema() {}
 aiXForm::aiXForm() {}
 
 aiXForm::aiXForm(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcGeom::IXform xf(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = xf.getSchema();
@@ -72,7 +74,7 @@ abcM44 aiXForm::getMatrix() const
 aiPolyMesh::aiPolyMesh() {}
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcGeom::IPolyMesh pm(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = pm.getSchema();
@@ -352,7 +354,7 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
 aiCurves::aiCurves() {}
 
 aiCurves::aiCurves(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcGeom::ICurves curves(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = curves.getSchema();
@@ -369,7 +371,7 @@ void aiCurves::updateSample()
 aiPoints::aiPoints() {}
 
 aiPoints::aiPoints(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcGeom::IPoints points(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = points.getSchema();
@@ -386,7 +388,7 @@ void aiPoints::updateSample()
 aiCamera::aiCamera() {}
 
 aiCamera::aiCamera(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcGeom::ICamera cam(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = cam.getSchema();
@@ -398,7 +400,6 @@ void aiCamera::updateSample()
     // todo
 }
 
-
 void aiCamera::getParams(aiCameraParams &o_params)
 {
     o_params.near_clipping_plane = m_sample.getNearClippingPlane();
@@ -409,11 +410,24 @@ void aiCamera::getParams(aiCameraParams &o_params)
 }
 
 
+aiLight::aiLight() {}
+aiLight::aiLight(aiObject *obj)
+    : super(obj)
+{
+}
+
+void aiLight::updateSample()
+{
+    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    // todo
+}
+
+
 
 aiMaterial::aiMaterial() {}
 
 aiMaterial::aiMaterial(aiObject *obj)
-    : m_obj(obj)
+    : super(obj)
 {
     AbcMaterial::IMaterial material(obj->getAbcObject(), Abc::kWrapExisting);
     m_schema = material.getSchema();

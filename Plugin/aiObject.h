@@ -27,12 +27,14 @@ public:
     bool        hasCurves() const;
     bool        hasPoints() const;
     bool        hasCamera() const;
+    bool        hasLight() const;
     bool        hasMaterial() const;
     aiXForm&    getXForm();
     aiPolyMesh& getPolyMesh();
     aiCurves&   getCurves();
     aiPoints&   getPoints();
     aiCamera&   getCamera();
+    aiLight&    getLight();
     aiMaterial& getMaterial();
 
 public:
@@ -58,12 +60,14 @@ private:
     aiCurves    m_curves;
     aiPoints    m_points;
     aiCamera    m_camera;
+    aiLight     m_light;
     aiMaterial  m_material;
     bool        m_has_xform;
     bool        m_has_polymesh;
     bool        m_has_curves;
     bool        m_has_points;
     bool        m_has_camera;
+    bool        m_has_light;
     bool        m_has_material;
 
     float m_time;
