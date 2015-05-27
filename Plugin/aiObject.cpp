@@ -12,6 +12,10 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_triangulate(true)
     , m_reverse_index(false)
 {
+#ifdef aiWithDebugLog
+    m_magic = aiMagicObj;
+#endif // aiWithDebugLog
+
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();

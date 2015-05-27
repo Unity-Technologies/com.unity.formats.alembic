@@ -17,10 +17,10 @@ void aiContext::destroy(aiContext* ctx)
 }
 
 aiContext::aiContext()
-    : m_reverse_x(true)
-    , m_triangulate(true)
-    , m_reverse_index(false)
 {
+#ifdef aiWithDebugLog
+    m_magic = aiMagicCtx;
+#endif // aiWithDebugLog
 }
 
 aiContext::~aiContext()
@@ -80,10 +80,3 @@ aiObject* aiContext::getTopObject()
 {
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
-
-void aiContext::setCurrentObject(abcObject *obj)
-{
-    m_current = *obj;
-
-}
-
