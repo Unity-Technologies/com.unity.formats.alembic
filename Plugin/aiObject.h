@@ -45,9 +45,9 @@ public:
     bool        getTriangulate() const;
 
 private:
-#ifdef aiWithDebugLog
+#ifdef aiDebug
     int m_magic;
-#endif // aiWithDebugLog
+#endif // aiDebug
     aiContext   *m_ctx;
     abcObject   m_abc;
     std::vector<aiObject*> m_children;

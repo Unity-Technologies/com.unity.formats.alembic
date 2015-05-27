@@ -23,6 +23,7 @@ public class AlembicStream : MonoBehaviour
 
     void OnEnable()
     {
+        AlembicImporter.AddLibraryPath();
         m_abc = AlembicImporter.aiCreateContext();
         m_loaded = AlembicImporter.aiLoad(m_abc, m_path_to_abc);
     }

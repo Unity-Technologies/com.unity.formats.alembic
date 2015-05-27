@@ -12,9 +12,9 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_triangulate(true)
     , m_reverse_index(false)
 {
-#ifdef aiWithDebugLog
+#ifdef aiDebug
     m_magic = aiMagicObj;
-#endif // aiWithDebugLog
+#endif // aiDebug
 
     if (m_abc.valid())
     {
