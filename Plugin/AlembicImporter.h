@@ -83,6 +83,8 @@ aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
 aiCLinkage aiExport void            aiCameraGetParams(aiObject* obj, aiCameraParams *o_params);
 
+aiCLinkage aiExport bool            aiHasLight(aiObject* obj);
+
 aiCLinkage aiExport bool            aiHasMaterial(aiObject* obj);
 
 #endif // AlembicImporter_h
