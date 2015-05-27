@@ -6,9 +6,14 @@
 
 #ifdef aiWindows
     #include <windows.h>
+
+#   define aiBreak() DebugBreak()
+#else // aiWindows
+#   define aiBreak() __builtin_trap()
 #endif // aiWindows
 
-#ifdef aiWithDebugLog
+
+#ifdef aiDebug
 void aiDebugLogImpl(const char* fmt, ...)
 {
     va_list vl;
@@ -24,16 +29,16 @@ void aiDebugLogImpl(const char* fmt, ...)
 
     va_end(vl);
 }
-#endif // aiWithDebugLog
+#endif // aiDebug
 
 
-#ifdef aiWithDebugLog
-#define aiCheckContext(v) assert(*(int*)v==aiMagicCtx)
-#define aiCheckObject(v)  assert(*(int*)v==aiMagicObj)
-#else  // aiWithDebugLog
+#ifdef aiDebug
+#define aiCheckContext(v) if(v==nullptr || *(int*)v!=aiMagicCtx) { aiBreak(); }
+#define aiCheckObject(v)  if(v==nullptr || *(int*)v!=aiMagicObj) { aiBreak(); }
+#else  // aiDebug
 #define aiCheckContext(v) 
 #define aiCheckObject(v)  
-#endif // aiWithDebugLog
+#endif // aiDebug
 
 
 

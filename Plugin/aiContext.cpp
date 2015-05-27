@@ -18,13 +18,14 @@ void aiContext::destroy(aiContext* ctx)
 
 aiContext::aiContext()
 {
-#ifdef aiWithDebugLog
+#ifdef aiDebug
     m_magic = aiMagicCtx;
-#endif // aiWithDebugLog
+#endif // aiDebug
 }
 
 aiContext::~aiContext()
 {
+    waitTasks();
     for (auto n : m_nodes) { delete n; }
     m_nodes.clear();
 }
@@ -79,4 +80,14 @@ bool aiContext::load(const char *path)
 aiObject* aiContext::getTopObject()
 {
     return m_nodes.empty() ? nullptr : m_nodes.front();
+}
+
+void aiContext::runTask(const std::function<void()> &task)
+{
+    m_tasks.run(task);
+}
+
+void aiContext::waitTasks()
+{
+    m_tasks.wait();
 }
