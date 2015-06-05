@@ -29,11 +29,13 @@ Import("RequireAlembic")
 
 env = excons.MakeBaseEnv()
 
+default_targets = ["AlembicImporter"]
+
 plugins = [
   { "name": "AlembicImporter",
     "type": "dynamicmodule",
     "prefix": prefix,
-    "defs": ["UNITY_ALEMBIC_NO_TBB"],
+    "defs": ["UNITY_ALEMBIC_NO_AUTOLINK", "UNITY_ALEMBIC_NO_TBB", "UNITY_ALEMBIC_NO_D3D11"],
     "srcs": sources,
     "custom": [RequireAlembic()],
     "install": install_files
@@ -45,8 +47,9 @@ if sys.platform == "win32":
                   "type": "dynamicmodule",
                   "prefix": prefix,
                   "srcs": ["Plugin/AddLibraryPath.cpp"]})
-
-
+  
+  default_targets.append("AddLibraryPath")
+  
 excons.DeclareTargets(env, plugins)
 
-Default(["AlembicImporter", "AddLibraryPath"])
+Default(default_targets)
