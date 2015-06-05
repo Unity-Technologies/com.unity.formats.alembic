@@ -10,8 +10,11 @@
 #include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
+#ifndef UNITY_ALEMBIC_NO_TBB
 #include <tbb/tbb.h>
+#endif // UNITY_ALEMBIC_NO_TBB
 
+#ifndef UNITY_ALEMBIC_NO_AUTOLINK
 #pragma comment(lib, "AlembicAbc.lib")
 #pragma comment(lib, "AlembicAbcCollection.lib")
 #pragma comment(lib, "AlembicAbcCoreAbstract.lib")
@@ -27,7 +30,7 @@
 #pragma comment(lib, "Half.lib")
 #pragma comment(lib, "Iex-2_2.lib")
 #pragma comment(lib, "IexMath-2_2.lib")
-
+#endif // UNITY_ALEMBIC_NO_AUTOLINK
 
 #ifdef _WIN32
 #define aiWindows
@@ -56,9 +59,12 @@ void aiDebugLogImpl(const char* fmt, ...);
 
 #ifdef aiWindows
 #include <windows.h>
-#include <d3d11.h>
 
+#ifndef UNITY_ALEMBIC_NO_D3D11
+#include <d3d11.h>
 #define aiSupportD3D11
+#endif // UNITY_ALEMBIC_NO_D3D11
+
 #endif // aiWindows
 
 using namespace Alembic;

@@ -25,7 +25,10 @@ aiContext::aiContext()
 
 aiContext::~aiContext()
 {
+#ifndef UNITY_ALEMBIC_NO_TBB
     waitTasks();
+#endif // UNITY_ALEMBIC_NO_TBB
+    
     for (auto n : m_nodes) { delete n; }
     m_nodes.clear();
 }
@@ -36,7 +39,8 @@ void aiContext::gatherNodesRecursive(aiObject *n)
     abcObject &abc = n->getAbcObject();
     int num_children = abc.getNumChildren();
     for (int i = 0; i < num_children; ++i) {
-        aiObject *child = new aiObject(this, abc.getChild(i));
+        abcObject abcChild = abc.getChild(i);
+        aiObject *child = new aiObject(this, abcChild);
         n->addChild(child);
         gatherNodesRecursive(child);
     }
@@ -65,7 +69,8 @@ bool aiContext::load(const char *path)
     }
 
     if (m_archive && m_archive->valid()) {
-        aiObject *top = new aiObject(this, m_archive->getTop());
+        abcObject abcTop = m_archive->getTop();
+        aiObject *top = new aiObject(this, abcTop);
         gatherNodesRecursive(top);
 
         aiDebugLog("succeeded\n");
@@ -82,6 +87,7 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
+#ifndef UNITY_ALEMBIC_NO_TBB
 void aiContext::runTask(const std::function<void()> &task)
 {
     m_tasks.run(task);
@@ -91,3 +97,5 @@ void aiContext::waitTasks()
 {
     m_tasks.wait();
 }
+#endif // UNITY_ALEMBIC_NO_TBB
+
