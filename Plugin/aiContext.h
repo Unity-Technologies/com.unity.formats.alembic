@@ -20,8 +20,10 @@ public:
     bool load(const char *path);
     aiObject* getTopObject();
 
+#ifndef UNITY_ALEMBIC_NO_TBB
     void runTask(const std::function<void ()> &task);
     void waitTasks();
+#endif // UNITY_ALEMBIC_NO_TBB
 
 private:
     void gatherNodesRecursive(aiObject *n);
@@ -32,7 +34,10 @@ private:
 #endif // aiDebug
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
+    
+#ifndef UNITY_ALEMBIC_NO_TBB
     tbb::task_group m_tasks;
+#endif // UNITY_ALEMBIC_NO_TBB
 };
 
 

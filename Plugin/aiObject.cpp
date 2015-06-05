@@ -19,37 +19,51 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
-        if (m_has_xform = AbcGeom::IXformSchema::matches(metadata))
+        
+        m_has_xform = AbcGeom::IXformSchema::matches(metadata);
+        if (m_has_xform)
         {
             m_xform = aiXForm(this);
             m_schemas.push_back(&m_xform);
         }
-        if (m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata))
+        
+        m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
+        if (m_has_polymesh)
         {
             m_polymesh = aiPolyMesh(this);
             m_schemas.push_back(&m_polymesh);
         }
-        if (m_has_curves = AbcGeom::ICurvesSchema::matches(metadata))
+        
+        m_has_curves = AbcGeom::ICurvesSchema::matches(metadata);
+        if (m_has_curves)
         {
             m_curves = aiCurves(this);
             m_schemas.push_back(&m_curves);
         }
-        if (m_has_points = AbcGeom::IPointsSchema::matches(metadata))
+        
+        m_has_points = AbcGeom::IPointsSchema::matches(metadata);
+        if (m_has_points)
         {
             m_points = aiPoints(this);
             m_schemas.push_back(&m_points);
         }
-        if (m_has_camera = AbcGeom::ICameraSchema::matches(metadata))
+        
+        m_has_camera = AbcGeom::ICameraSchema::matches(metadata);
+        if (m_has_camera)
         {
             m_camera = aiCamera(this);
             m_schemas.push_back(&m_camera);
         }
-        if (m_has_light = AbcGeom::ILight::matches(metadata))
+        
+        m_has_light = AbcGeom::ILight::matches(metadata);
+        if (m_has_light)
         {
             m_light = aiLight(this);
             m_schemas.push_back(&m_light);
         }
-        if (m_has_material = AbcMaterial::IMaterial::matches(metadata))
+        
+        m_has_material = AbcMaterial::IMaterial::matches(metadata);
+        if (m_has_material)
         {
             m_material = aiMaterial(this);
             m_schemas.push_back(&m_material);

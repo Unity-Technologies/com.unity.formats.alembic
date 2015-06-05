@@ -152,13 +152,17 @@ aiCLinkage aiExport bool aiXFormGetInherits(aiObject* obj)
 aiCLinkage aiExport aiV3 aiXFormGetPosition(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (aiV3&)obj->getXForm().getPosition();
+    abcV3 p = obj->getXForm().getPosition();
+    aiV3 rv = {p.x, p.y, p.z};
+    return rv;
 }
 
 aiCLinkage aiExport aiV3 aiXFormGetAxis(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (aiV3&)obj->getXForm().getAxis();
+    abcV3 a = obj->getXForm().getAxis();
+    aiV3 rv = {a.x, a.y, a.z};
+    return rv;
 }
 
 aiCLinkage aiExport float aiXFormGetAngle(aiObject* obj)
@@ -170,13 +174,20 @@ aiCLinkage aiExport float aiXFormGetAngle(aiObject* obj)
 aiCLinkage aiExport aiV3 aiXFormGetScale(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (aiV3&)obj->getXForm().getScale();
+    abcV3 s = obj->getXForm().getScale();
+    aiV3 rv = {s.x, s.y, s.z};
+    return rv;
 }
 
 aiCLinkage aiExport aiM44 aiXFormGetMatrix(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (aiM44&)obj->getXForm().getMatrix();
+    abcM44 m = obj->getXForm().getMatrix();
+    aiM44 rv;
+    for (int i=0; i<4; ++i)
+        for (int j=0; j<4; ++j)
+            rv.v[i][j] = m.x[i][j];
+    return rv;
 }
 
 
