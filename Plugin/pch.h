@@ -22,7 +22,7 @@
 #ifdef _MSC_VER
 #define aiExport __declspec(dllexport)
 #else
-#define aiExport
+#define aiExport __attribute__((visibility("default")))
 #endif
 
 #ifdef aiDebug
