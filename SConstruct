@@ -2,32 +2,10 @@ import os
 import sys
 import glob
 import excons
-
-
-install_files = {"unity/AlembicImporter/Scripts": glob.glob("UnityAlembicImporter/Assets/AlembicImporter/Scripts/*.cs")}
-
-if sys.platform == "win32":
-  prefix = "unity/AlembicImporter/Plugins/x86"
-  if excons.Build64():
-    prefix += "_64"
-
-elif sys.platform == "darwin":
-  bundle_contents = "unity/AlembicImporter/Plugins/AlembicImporter.bundle/Contents"
-  prefix = bundle_contents + "/MacOS"
-  install_files[bundle_contents] = ["Plugin/Info.plist"]
-
-else:
-  print("Unsupported platform")
-  sys.exit(1)
-
-sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPath.cpp"], glob.glob("Plugin/*.cpp"))
-
+from excons.tools import tbb
+from excons.tools import unity
 
 env = excons.MakeBaseEnv()
-
-default_targets = ["AlembicImporter"]
-
-loadable_ext = ("" if sys.platform == "darwin" else (".dll" if sys.platform == "win32" else ".so"))
 
 # I don't know whst this whole PatchLibrary is. Looks like a hack that we don't
 # really need. Let's disable it for now by defining aiMaster
@@ -36,6 +14,8 @@ inc_dirs = []
 lib_dirs = []
 libs = []
 customs = []
+install_files = {"unity/AlembicImporter/Scripts": glob.glob("UnityAlembicImporter/Assets/AlembicImporter/Scripts/*.cs")}
+sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPath.cpp"], glob.glob("Plugin/*.cpp"))
 
 if excons.GetArgument("debug", 0, int):
   defines.append("aiDebug")
@@ -72,17 +52,7 @@ else:
     defines.append("UNITY_ALEMBIC_NO_TBB")
   
   else:
-    print("TBB inc='%s', lib='%s'" % (tbb_incdir, tbb_libdir))
-    if tbb_incdir:
-      inc_dirs.append(tbb_incdir)
-    
-    if tbb_libdir:
-      lib_dirs.append(tbb_libdir)
-    
-    libname = excons.GetArgument("tbb-libname", None)
-    if not libname:
-      libname = "tbb%s" % (excons.GetArgument("tbb-libsuffix", ""))
-    libs.append(libname)
+    customs.append(tbb.Require)
   
   if sys.platform != "win32" or excons.GetArgument("d3d11", 0, int) == 0:
     defines.append("UNITY_ALEMBIC_NO_D3D11")
@@ -91,30 +61,25 @@ else:
 plugins = [
   { "name": "AlembicImporter",
     "type": "dynamicmodule",
-    "prefix": prefix,
     "defs": defines,
-    "ext": loadable_ext,
     "incdirs": inc_dirs,
     "libdirs": lib_dirs,
     "libs": libs,
     "custom": customs,
     "srcs": sources,
     "install": install_files
+  },
+  # This also looks like a ugly hack that may no be necessary if unity provided
+  # us with some per project directory where we can drop dependencies in...
+  { "name": "AddLibraryPath",
+    "type": "dynamicmodule",
+    "srcs": ["Plugin/AddLibraryPath.cpp"]
   }
 ]
 
-if sys.platform == "win32":
-  # This also looks like a ugly hack that may no be necessary if unity provided
-  # us with some per project directory where we can drop dependencies in...
-  plugins.append({"name": "AddLibraryPath",
-                  "type": "dynamicmodule",
-                  "prefix": prefix,
-                  "ext": loadable_ext,
-                  "srcs": ["Plugin/AddLibraryPath.cpp"]})
-  
-  default_targets.append("AddLibraryPath")
-
+unity.AsPlugin(plugins[0])
+unity.AsPlugin(plugins[1])
 
 excons.DeclareTargets(env, plugins)
 
-Default(default_targets)
+Default(["AlembicImporter", "AddLibraryPath"])
