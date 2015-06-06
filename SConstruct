@@ -4,6 +4,7 @@ import glob
 import excons
 from excons.tools import tbb
 from excons.tools import unity
+from excons.tools import dl
 
 env = excons.MakeBaseEnv()
 
@@ -73,6 +74,7 @@ plugins = [
   # us with some per project directory where we can drop dependencies in...
   { "name": "AddLibraryPath",
     "type": "dynamicmodule",
+    "custom": [dl.Require],
     "srcs": ["Plugin/AddLibraryPath.cpp"]
   }
 ]
