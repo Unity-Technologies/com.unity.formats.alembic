@@ -27,6 +27,8 @@ env = excons.MakeBaseEnv()
 
 default_targets = ["AlembicImporter"]
 
+loadable_ext = ("" if sys.platform == "darwin" else (".dll" if sys.platform == "win32" else ".so"))
+
 # I don't know whst this whole PatchLibrary is. Looks like a hack that we don't
 # really need. Let's disable it for now by defining aiMaster
 defines = ["aiMaster"]
@@ -38,7 +40,7 @@ customs = []
 if excons.GetArgument("debug", 0, int):
   defines.append("aiDebug")
 
-if sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 0, int) != 0:
+if sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0:
   if excons.GetArgument("d3d11", 0, int) == 0:
     defines.append("UNITY_ALEMBIC_NO_D3D11")
   
@@ -91,6 +93,7 @@ plugins = [
     "type": "dynamicmodule",
     "prefix": prefix,
     "defs": defines,
+    "ext": loadable_ext,
     "incdirs": inc_dirs,
     "libdirs": lib_dirs,
     "libs": libs,
@@ -106,6 +109,7 @@ if sys.platform == "win32":
   plugins.append({"name": "AddLibraryPath",
                   "type": "dynamicmodule",
                   "prefix": prefix,
+                  "ext": loadable_ext,
                   "srcs": ["Plugin/AddLibraryPath.cpp"]})
   
   default_targets.append("AddLibraryPath")
