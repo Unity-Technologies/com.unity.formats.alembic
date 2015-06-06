@@ -14,24 +14,6 @@
 #include <tbb/tbb.h>
 #endif // UNITY_ALEMBIC_NO_TBB
 
-#ifndef UNITY_ALEMBIC_NO_AUTOLINK
-#pragma comment(lib, "AlembicAbc.lib")
-#pragma comment(lib, "AlembicAbcCollection.lib")
-#pragma comment(lib, "AlembicAbcCoreAbstract.lib")
-#pragma comment(lib, "AlembicAbcCoreFactory.lib")
-#pragma comment(lib, "AlembicAbcCoreHDF5.lib")
-#pragma comment(lib, "AlembicAbcCoreOgawa.lib")
-#pragma comment(lib, "AlembicAbcGeom.lib")
-#pragma comment(lib, "AlembicAbcMaterial.lib")
-#pragma comment(lib, "AlembicOgawa.lib")
-#pragma comment(lib, "AlembicUtil.lib")
-#pragma comment(lib, "libhdf5.lib")
-#pragma comment(lib, "libhdf5_hl.lib")
-#pragma comment(lib, "Half.lib")
-#pragma comment(lib, "Iex-2_2.lib")
-#pragma comment(lib, "IexMath-2_2.lib")
-#endif // UNITY_ALEMBIC_NO_AUTOLINK
-
 #ifdef _WIN32
 #define aiWindows
 #endif // _WIN32
@@ -59,6 +41,24 @@ void aiDebugLogImpl(const char* fmt, ...);
 
 #ifdef aiWindows
 #include <windows.h>
+
+#ifndef UNITY_ALEMBIC_NO_AUTOLINK
+#pragma comment(lib, "AlembicAbc.lib")
+#pragma comment(lib, "AlembicAbcCollection.lib")
+#pragma comment(lib, "AlembicAbcCoreAbstract.lib")
+#pragma comment(lib, "AlembicAbcCoreFactory.lib")
+#pragma comment(lib, "AlembicAbcCoreHDF5.lib")
+#pragma comment(lib, "AlembicAbcCoreOgawa.lib")
+#pragma comment(lib, "AlembicAbcGeom.lib")
+#pragma comment(lib, "AlembicAbcMaterial.lib")
+#pragma comment(lib, "AlembicOgawa.lib")
+#pragma comment(lib, "AlembicUtil.lib")
+#pragma comment(lib, "libhdf5.lib")
+#pragma comment(lib, "libhdf5_hl.lib")
+#pragma comment(lib, "Half.lib")
+#pragma comment(lib, "Iex-2_2.lib")
+#pragma comment(lib, "IexMath-2_2.lib")
+#endif // UNITY_ALEMBIC_NO_AUTOLINK
 
 #ifndef UNITY_ALEMBIC_NO_D3D11
 #include <d3d11.h>
