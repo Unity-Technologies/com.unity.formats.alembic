@@ -8,7 +8,7 @@
 #include <windows.h>
 #define DLLEXPORT __declspec(dllexport)
 #else
-#define DLLEXPORT
+#define DLLEXPORT __attribute__((visibility("default")))
 #endif
 
 
@@ -60,5 +60,51 @@ extern "C" { int _afxForceUSRDLL; }
 #else
 extern "C" { int __afxForceUSRDLL; }
 #endif
-#endif // alpWindows
+#else // alpWindows
 
+#include <dlfcn.h>
+#include <cstdlib>
+
+#ifdef __APPLE__
+const char *gVarName = "DYLD_LIBRARY_PATH";
+#else
+const char *gVarName = "LD_LIBRARY_PATH";
+#endif
+
+__attribute__((constructor)) void AddLibraryPath_init(void)
+{
+   Dl_info info;
+   const void* addr = (const void*) &AddLibraryPath;
+   
+   if (dladdr(addr, &info) != 0)
+   {
+      std::string thisPath = info.dli_fname;
+      
+      size_t p = thisPath.rfind('/');
+      
+      if (p != std::string::npos)
+      {
+         thisPath = thisPath.substr(0, p);
+      }
+      
+      std::string searchPath;
+      
+      char *val = getenv(gVarName);
+      
+      if (val)
+      {
+         searchPath = val;
+      }
+      
+      if (searchPath.length() > 0 && searchPath[searchPath.length()-1] != ':')
+      {
+         searchPath += ":";
+      }
+      
+      searchPath += thisPath;
+      
+      setenv(gVarName, searchPath.c_str(), 1);
+   }
+}
+
+#endif // alpWindows
