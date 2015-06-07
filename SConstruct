@@ -39,6 +39,8 @@ if sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-exte
   
   lib_dirs.append("Plugin/external/libs/x86_64")
   
+  embed_libs = []
+  
 else:
   SConscript("alembic/SConstruct")
   
@@ -57,7 +59,25 @@ else:
   
   if sys.platform != "win32" or excons.GetArgument("d3d11", 0, int) == 0:
     defines.append("UNITY_ALEMBIC_NO_D3D11")
-
+  
+  embed_libs = excons.GetArgument("embed-libs", None)
+  
+  if embed_libs:
+    if os.path.isdir(embed_libs):
+      if sys.platform == "darwin":
+        embed_libs = glob.glob(embed_libs + "/*.dylib")
+      
+      elif sys.platform == "win32":
+        embed_libs = glob.glob(embed_libs + "/*.dll")
+      
+      else:
+        embed_libs = glob.glob(embed_libs + "/*.so")
+    
+    else:
+      embed_libs = [embed_libs]
+  
+  else:
+    embed_libs = []
 
 plugins = [
   { "name": "AlembicImporter",
@@ -79,7 +99,7 @@ plugins = [
   }
 ]
 
-unity.AsPlugin(plugins[0])
+unity.AsPlugin(plugins[0], libs=embed_libs)
 unity.AsPlugin(plugins[1])
 
 excons.DeclareTargets(env, plugins)

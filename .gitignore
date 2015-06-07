@@ -1,5 +1,6 @@
 release/
 debug/
+dependencies/
 .build/
 *.dblite
 excons.cache
