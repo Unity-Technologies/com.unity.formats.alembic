@@ -82,24 +82,13 @@ else:
   if sys.platform != "win32" or excons.GetArgument("d3d11", 0, int) == 0:
     defines.append("UNITY_ALEMBIC_NO_D3D11")
   
-  embed_libs = excons.GetArgument("embed-libs", None)
-  
+  embed_libs = excons.GetArgument("embed-libs", [])
   if embed_libs:
     if os.path.isdir(embed_libs):
-      if sys.platform == "darwin":
-        embed_libs = glob.glob(embed_libs + "/*.dylib")
-      
-      elif sys.platform == "win32":
-        embed_libs = glob.glob(embed_libs + "/*.dll")
-      
-      else:
-        embed_libs = glob.glob(embed_libs + "/*.so")
-    
+      pat = ("/*.dylib" if sys.platform == "darwin" else ("/*.dll" if sys.platform == "win32" else "/*.so"))
+      embed_libs = glob.glob(embed_libs + pat)
     else:
       embed_libs = [embed_libs]
-  
-  else:
-    embed_libs = []
 
   if sys.platform == "win32":
     # Cleanup build using provided external
@@ -107,29 +96,36 @@ else:
     if os.path.isfile(tbb_dll):
       os.remove(tbb_dll)
 
-targets = [
-  { "name": "AlembicImporter",
-    "type": "dynamicmodule",
-    "defs": defines,
-    "incdirs": inc_dirs,
-    "libdirs": lib_dirs,
-    "libs": libs,
-    "custom": customs,
-    "srcs": sources,
-    "install": install_files
-  },
+importer = {"name": "AlembicImporter",
+            "type": "dynamicmodule",
+            "defs": defines,
+            "incdirs": inc_dirs,
+            "libdirs": lib_dirs,
+            "libs": libs,
+            "custom": customs,
+            "srcs": sources,
+            "install": install_files}
+
+unity.Plugin(importer, libs=embed_libs)
+
+if sys.platform == "win32":
   # This also looks like a ugly hack that may no be necessary if unity provided
   # us with some per project directory where we can drop dependencies in...
-  { "name": "AddLibraryPath",
-    "type": "dynamicmodule",
-    "custom": [dl.Require],
-    "srcs": ["Plugin/AddLibraryPath.cpp"]
-  }
-]
+  path_hack = {"name": "AddLibraryPath",
+               "type": "dynamicmodule",
+               "custom": [dl.Require],
+               "srcs": ["Plugin/AddLibraryPath.cpp"]}
 
-unity.Plugin(targets[0], libs=embed_libs)
-unity.Plugin(targets[1], package="AlembicImporter")
+  unity.Plugin(path_hack, package="AlembicImporter")
+
+  # Add 'AddLibraryPath' as a dependency for 'AlembicImporter'
+  importer["deps"] = ["AddLibraryPath"]
+
+  targets = [path_hack, importer]
+
+else:
+  targets = [importer]
 
 excons.DeclareTargets(env, targets)
 
-Default(["AlembicImporter", "AddLibraryPath"])
+Default(["AlembicImporter"])
