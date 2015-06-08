@@ -1,10 +1,17 @@
 import os
 import sys
 import glob
+import shutil
 import excons
 from excons.tools import tbb
 from excons.tools import unity
 from excons.tools import dl
+
+use_externals = (sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0)
+if use_externals:
+  # Provided externals are built using runtime version 12.0
+  # 'mscver' has to be set before excons.MakeBaseEnv is called for the toolchain to be properly setup by SCons
+  excons.SetArgument("mscver", "12.0")
 
 env = excons.MakeBaseEnv()
 
@@ -21,7 +28,7 @@ sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPat
 if excons.GetArgument("debug", 0, int):
   defines.append("aiDebug")
 
-if sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0:
+if use_externals:
   if excons.GetArgument("d3d11", 0, int) == 0:
     defines.append("UNITY_ALEMBIC_NO_D3D11")
   
@@ -35,12 +42,27 @@ if sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-exte
                    "Plugin/external/hdf5-1.8.14/src",
                    "Plugin/external/hdf5-1.8.14",
                    "Plugin/external/alembic-1_05_08/lib",
-                   "Plugin/external/tbb"])
+                   "Plugin/external"])
   
   lib_dirs.append("Plugin/external/libs/x86_64")
   
-  embed_libs = []
+  embed_libs = ["Plugin/external/libs/x86_64/tbb.dll"]
   
+  # Cleanup build using custom alembic
+  inc_dir = os.path.join(excons.OutputBaseDirectory(), "include")
+  if os.path.isdir(inc_dir):
+    shutil.rmtree(inc_dir)
+
+  lib_dir = os.path.join(excons.OutputBaseDirectory(), "lib")
+  if os.path.isdir(lib_dir):
+    shutil.rmtree(lib_dir)
+
+  dll_pattern = os.path.join(excons.OutputBaseDirectory(), "unity", "AlembicImporter", "Plugins", "x86_64", "*.dll")
+  keep_names = ["tbb", "AlembicImporter", "AddLibraryPath"]
+  dlls_to_remove = filter(lambda x: os.path.splitext(os.path.basename(x))[0] not in keep_names, glob.glob(dll_pattern))
+  for dll in dlls_to_remove:
+    os.remove(dll)
+
 else:
   SConscript("alembic/SConstruct")
   
@@ -79,7 +101,13 @@ else:
   else:
     embed_libs = []
 
-plugins = [
+  if sys.platform == "win32":
+    # Cleanup build using provided external
+    tbb_dll = os.path.join(excons.OutputBaseDirectory(), "unity", "AlembicImporter", "Plugins", "x86_64", "tbb.dll")
+    if os.path.isfile(tbb_dll):
+      os.remove(tbb_dll)
+
+targets = [
   { "name": "AlembicImporter",
     "type": "dynamicmodule",
     "defs": defines,
@@ -99,9 +127,9 @@ plugins = [
   }
 ]
 
-unity.AsPlugin(plugins[0], libs=embed_libs)
-unity.AsPlugin(plugins[1])
+unity.Plugin(targets[0], libs=embed_libs)
+unity.Plugin(targets[1], package="AlembicImporter")
 
-excons.DeclareTargets(env, plugins)
+excons.DeclareTargets(env, targets)
 
 Default(["AlembicImporter", "AddLibraryPath"])
