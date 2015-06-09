@@ -1,6 +1,7 @@
 #ifndef aiContext_h
 #define aiContext_h
 
+#include "aiThreadPool.h"
 
 typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
 
@@ -32,7 +33,7 @@ private:
 #endif // aiDebug
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
-    tbb::task_group m_tasks;
+    aiTaskGroup m_tasks;
 };
 
 
