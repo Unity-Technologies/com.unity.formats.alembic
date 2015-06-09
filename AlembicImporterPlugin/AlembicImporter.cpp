@@ -24,7 +24,7 @@ void aiDebugLogImpl(const char* fmt, ...)
     vsprintf(buf, fmt, vl);
     ::OutputDebugStringA(buf);
 #else // aiWindows
-    vprintf(vl);
+    vprintf(fmt, vl);
 #endif // aiWindows
 
     va_end(vl);
