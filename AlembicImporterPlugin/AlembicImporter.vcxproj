@@ -18,6 +18,7 @@
     <ClCompile Include="aiContext.cpp" />
     <ClCompile Include="aiGeometry.cpp" />
     <ClCompile Include="aiObject.cpp" />
+    <ClCompile Include="aiThreadPool.cpp" />
     <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="aiGraphicsDevice.cpp" />
     <ClCompile Include="aiGraphicsDeviceD3D11.cpp" />
@@ -31,6 +32,7 @@
     <ClInclude Include="aiContext.h" />
     <ClInclude Include="aiGeometry.h" />
     <ClInclude Include="aiObject.h" />
+    <ClInclude Include="aiThreadPool.h" />
     <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="aiGraphicsDevice.h" />
     <ClInclude Include="pch.h" />
@@ -77,8 +79,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\UnityAlembicImporter\Assets\AlembicImporter\Plugins\x86_64\
-$(SolutionDir)PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\Plugins\x86_64\
+$(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -93,8 +95,8 @@ $(SolutionDir)PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(Ta
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\UnityAlembicImporter\Assets\AlembicImporter\Plugins\x86_64\
-$(SolutionDir)PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\Plugins\x86_64\
+$(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -109,8 +111,7 @@ $(SolutionDir)PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(Ta
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\UnityAlembicImporter\Assets\AlembicImporter\Plugins\x86_64\
-$(SolutionDir)PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
