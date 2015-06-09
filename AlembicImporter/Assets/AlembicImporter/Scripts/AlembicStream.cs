@@ -18,7 +18,7 @@ public class AlembicStream : MonoBehaviour
     public bool m_reverse_faces;
     bool m_loaded;
     float m_time_prev;
-    IntPtr m_abc;
+    AlembicImporter.aiContext m_abc;
 
 
     void OnEnable()
