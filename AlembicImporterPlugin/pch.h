@@ -10,7 +10,6 @@
 #include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
-#include <tbb/tbb.h>
 
 #pragma comment(lib, "AlembicAbc.lib")
 #pragma comment(lib, "AlembicAbcCollection.lib")

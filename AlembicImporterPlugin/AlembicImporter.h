@@ -1,6 +1,9 @@
 #ifndef AlembicImporter_h
 #define AlembicImporter_h
 
+//// options
+//#define aiWithTBB
+
 #include "pch.h"
 
 

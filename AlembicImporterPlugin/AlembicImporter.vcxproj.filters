@@ -8,6 +8,7 @@
     <ClCompile Include="aiGraphicsDevice.cpp" />
     <ClCompile Include="aiGraphicsDeviceD3D11.cpp" />
     <ClCompile Include="aiObject.cpp" />
+    <ClCompile Include="aiThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -16,5 +17,6 @@
     <ClInclude Include="aiGeometry.h" />
     <ClInclude Include="aiGraphicsDevice.h" />
     <ClInclude Include="aiObject.h" />
+    <ClInclude Include="aiThreadPool.h" />
   </ItemGroup>
 </Project>
