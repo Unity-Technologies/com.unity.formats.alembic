@@ -74,29 +74,36 @@ public class AlembicStream : MonoBehaviour
             float normalized_time = (out_time - m_start_time) / play_time;
             float play_repeat = (float)Math.Floor(normalized_time);
             float fraction = Math.Abs(normalized_time - play_repeat);
-
-            if (out_time < (m_start_time - m_time_eps) || out_time > (m_end_time + m_time_eps))
+            
+            if (m_cycle == CycleType.Reverse)
             {
-                // outside original alembic range
-                if (m_cycle == CycleType.Reverse)
+                if (out_time > (m_start_time + m_time_eps) && out_time < (m_end_time - m_time_eps))
                 {
-                    out_time = (out_time < m_start_time ? m_end_time : m_start_time);
+                    // inside alembic sample range
+                    out_time = end_time - fraction * play_time;
                 }
-                else if (m_cycle == CycleType.Loop || ((int)play_repeat % 2) == 0)
+                else if (out_time < (m_start_time + m_time_eps))
                 {
-                    out_time = m_start_time + fraction * play_time;
+                    out_time = end_time;
                 }
                 else
                 {
-                    out_time = m_end_time - fraction * play_time;
+                    out_time = start_time;
                 }
             }
             else
             {
-                // inside original alembic range
-                if (m_cycle == CycleType.Reverse)
+                if (out_time < (m_start_time - m_time_eps) || out_time > (m_end_time + m_time_eps))
                 {
-                    out_time = m_end_time - fraction * play_time;
+                    // outside alembic sample range
+                    if (m_cycle == CycleType.Loop || ((int)play_repeat % 2) == 0)
+                    {
+                        out_time = m_start_time + fraction * play_time;
+                    }
+                    else
+                    {
+                        out_time = m_end_time - fraction * play_time;
+                    }
                 }
             }
         }
