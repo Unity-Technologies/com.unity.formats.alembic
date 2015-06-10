@@ -4,6 +4,7 @@ import glob
 import shutil
 import excons
 from excons.tools import unity
+from excons.tools import tbb
 from excons.tools import dl
 
 use_externals = (sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0)
@@ -68,6 +69,10 @@ else:
   customs.append(RequireAlembic())
   
   defines.append("aiNoAutoLink")
+
+  if excons.GetArgument("tbb", 0, int) != 0:
+    defines.append("aiWithTBB")
+    customs.append(tbb.Require)
   
   if sys.platform == "win32" and excons.GetArgument("d3d11", 1, int) != 0:
     defines.append("aiSupportD3D11")
