@@ -80,15 +80,15 @@ public class AlembicStream : MonoBehaviour
                 if (out_time > (m_start_time + m_time_eps) && out_time < (m_end_time - m_time_eps))
                 {
                     // inside alembic sample range
-                    out_time = end_time - fraction * play_time;
+                    out_time = m_end_time - fraction * play_time;
                 }
                 else if (out_time < (m_start_time + m_time_eps))
                 {
-                    out_time = end_time;
+                    out_time = m_end_time;
                 }
                 else
                 {
-                    out_time = start_time;
+                    out_time = m_start_time;
                 }
             }
             else
