@@ -28,10 +28,8 @@ aiContext::aiContext()
 
 aiContext::~aiContext()
 {
-#ifndef UNITY_ALEMBIC_NO_TBB
     waitTasks();
-#endif // UNITY_ALEMBIC_NO_TBB
-    
+        
     for (auto n : m_nodes) { delete n; }
     m_nodes.clear();
 }
@@ -135,7 +133,6 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
-#ifndef UNITY_ALEMBIC_NO_TBB
 void aiContext::runTask(const std::function<void()> &task)
 {
     m_tasks.run(task);
@@ -145,5 +142,3 @@ void aiContext::waitTasks()
 {
     m_tasks.wait();
 }
-#endif // UNITY_ALEMBIC_NO_TBB
-
