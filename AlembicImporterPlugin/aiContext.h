@@ -20,6 +20,8 @@ public:
     ~aiContext();
     bool load(const char *path);
     aiObject* getTopObject();
+    float getStartTime() const;
+    float getEndTime() const;
 
     void runTask(const std::function<void ()> &task);
     void waitTasks();
@@ -34,6 +36,7 @@ private:
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
     aiTaskGroup m_tasks;
+    double m_time_range[2];
 };
 
 
