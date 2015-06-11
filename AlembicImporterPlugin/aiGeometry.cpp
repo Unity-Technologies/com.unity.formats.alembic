@@ -223,7 +223,7 @@ bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMes
     smi.begin_index = prev.begin_index + prev.num_indices;
 
     bool is_end = true;
-    uint32_t a = 0;
+    int a = 0;
     for (size_t i = smi.begin_face; i < nc; ++i) {
         int ngon = counts[i];
         if (a + ngon >= max_vertices) {
@@ -252,7 +252,7 @@ void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) cons
     uint32_t b = 0;
     uint32_t i1 = reverse_index ? 2 : 1;
     uint32_t i2 = reverse_index ? 1 : 2;
-    for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+    for (int fi = 0; fi < smi.num_faces; ++fi) {
         int ngon = counts[smi.begin_face + fi];
         for (int ni = 0; ni < (ngon - 2); ++ni) {
             dst[b + 0] = a;
@@ -271,7 +271,7 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
     const auto &positions = *m_positions;
 
     uint32_t a = 0;
-    for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+    for (int fi = 0; fi < smi.num_faces; ++fi) {
         int ngon = counts[smi.begin_face + fi];
         for (int ni = 0; ni < ngon; ++ni) {
             dst[a + ni] = positions[indices[a + ni + smi.begin_index]];
@@ -294,7 +294,7 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
     if (m_normals.isIndexed())
     {
         uint32_t a = 0;
-        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+        for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
                 dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
@@ -305,7 +305,7 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
     else
     {
         uint32_t a = 0;
-        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+        for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
                 dst[a + ni] = normals[a + ni];
@@ -329,7 +329,7 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
     if (m_uvs.isIndexed())
     {
         uint32_t a = 0;
-        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+        for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
                 dst[a + ni] = uvs[indices[a + ni + smi.begin_index]];
@@ -340,7 +340,7 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
     else
     {
         uint32_t a = 0;
-        for (size_t fi = 0; fi < smi.num_faces; ++fi) {
+        for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
                 dst[a + ni] = uvs[a + ni];
