@@ -66,6 +66,20 @@ aiCLinkage aiExport bool aiLoad(aiContext* ctx, const char *path)
     return ctx->load(path);
 }
 
+aiCLinkage aiExport float aiGetStartTime(aiContext* ctx)
+{
+    aiCheckContext(ctx);
+    aiDebugLog("aiGetStartTime(): %p\n", ctx);
+    return ctx->getStartTime();
+}
+
+aiCLinkage aiExport float aiGetEndTime(aiContext* ctx)
+{
+    aiCheckContext(ctx);
+    aiDebugLog("aiGetEndTime(): %p\n", ctx);
+    return ctx->getEndTime();
+}
+
 aiCLinkage aiExport aiObject* aiGetTopObject(aiContext* ctx)
 {
     aiCheckContext(ctx);
