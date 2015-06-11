@@ -11,23 +11,6 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
-#pragma comment(lib, "AlembicAbc.lib")
-#pragma comment(lib, "AlembicAbcCollection.lib")
-#pragma comment(lib, "AlembicAbcCoreAbstract.lib")
-#pragma comment(lib, "AlembicAbcCoreFactory.lib")
-#pragma comment(lib, "AlembicAbcCoreHDF5.lib")
-#pragma comment(lib, "AlembicAbcCoreOgawa.lib")
-#pragma comment(lib, "AlembicAbcGeom.lib")
-#pragma comment(lib, "AlembicAbcMaterial.lib")
-#pragma comment(lib, "AlembicOgawa.lib")
-#pragma comment(lib, "AlembicUtil.lib")
-#pragma comment(lib, "libhdf5.lib")
-#pragma comment(lib, "libhdf5_hl.lib")
-#pragma comment(lib, "Half.lib")
-#pragma comment(lib, "Iex-2_2.lib")
-#pragma comment(lib, "IexMath-2_2.lib")
-
-
 #ifdef _WIN32
 #define aiWindows
 #endif // _WIN32
@@ -36,7 +19,7 @@
 #ifdef _MSC_VER
 #define aiExport __declspec(dllexport)
 #else
-#define aiExport
+#define aiExport __attribute__((visibility("default")))
 #endif
 
 #ifdef aiDebug
@@ -55,9 +38,29 @@ void aiDebugLogImpl(const char* fmt, ...);
 
 #ifdef aiWindows
 #include <windows.h>
-#include <d3d11.h>
 
-#define aiSupportD3D11
+#ifndef aiNoAutoLink
+#pragma comment(lib, "AlembicAbc.lib")
+#pragma comment(lib, "AlembicAbcCollection.lib")
+#pragma comment(lib, "AlembicAbcCoreAbstract.lib")
+#pragma comment(lib, "AlembicAbcCoreFactory.lib")
+#pragma comment(lib, "AlembicAbcCoreHDF5.lib")
+#pragma comment(lib, "AlembicAbcCoreOgawa.lib")
+#pragma comment(lib, "AlembicAbcGeom.lib")
+#pragma comment(lib, "AlembicAbcMaterial.lib")
+#pragma comment(lib, "AlembicOgawa.lib")
+#pragma comment(lib, "AlembicUtil.lib")
+#pragma comment(lib, "libhdf5.lib")
+#pragma comment(lib, "libhdf5_hl.lib")
+#pragma comment(lib, "Half.lib")
+#pragma comment(lib, "Iex-2_2.lib")
+#pragma comment(lib, "IexMath-2_2.lib")
+#endif // aiNoAutoLink
+
+#ifdef aiSupportD3D11
+#include <d3d11.h>
+#endif // aiSupportD3D11
+
 #endif // aiWindows
 
 using namespace Alembic;
