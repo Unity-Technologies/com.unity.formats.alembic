@@ -60,6 +60,8 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
     [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
+    [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(aiObject obj, float time);
@@ -151,6 +153,11 @@ public class AlembicImporter
             root.name = System.IO.Path.GetFileNameWithoutExtension(path);
             var abcstream = root.AddComponent<AlembicStream>();
             abcstream.m_path_to_abc = path;
+            abcstream.m_start_time = aiGetStartTime(ctx);
+            abcstream.m_end_time = aiGetEndTime(ctx);
+            abcstream.m_time_offset = -abcstream.m_start_time;
+            abcstream.m_time_scale = 1.0f;
+            abcstream.m_preserve_start_time = true;
             abcstream.m_reverse_x = reverse_x;
             abcstream.m_reverse_faces = reverse_faces;
 

@@ -34,6 +34,8 @@ aiCLinkage aiExport aiContext*      aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
 
 aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);
+aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
+aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
