@@ -8,7 +8,12 @@
 
 
 
-typedef void(__stdcall *aiNodeEnumerator)(aiObject *node, void *userdata);
+#ifdef _WIN32
+typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userdata);
+#else
+typedef void (*aiNodeEnumerator)(aiObject *node, void *userdata);
+#endif
+
 struct aiV2 { float v[2]; };
 struct aiV3 { float v[3]; };
 struct aiM44 { float v[4][4]; };
