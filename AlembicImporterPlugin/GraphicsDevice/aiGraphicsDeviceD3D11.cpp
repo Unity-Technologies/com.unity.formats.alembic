@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "aiGraphicsDevice.h"
 
-#ifdef aiSupportD3D11
+#if defined(aiSupportTextureMesh) && defined(aiSupportD3D11)
+#include "aiGraphicsDevice.h"
 #include <d3d11.h>
 const int fcD3D11MaxStagingTextures = 32;
 

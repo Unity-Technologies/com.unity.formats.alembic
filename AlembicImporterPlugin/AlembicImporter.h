@@ -1,4 +1,4 @@
-#ifndef AlembicImporter_h
+﻿#ifndef AlembicImporter_h
 #define AlembicImporter_h
 
 // options:
@@ -45,6 +45,7 @@ aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);
 aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
 aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
+aiCLinkage aiExport void            aiWaitTasks(aiContext* ctx);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
@@ -82,18 +83,34 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, 
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
 #ifdef aiSupportTextureMesh
+
+// Unity の Mesh の vertices や normal の更新は信じられないくらい遅く、これで毎フレームでかいモデルを更新するのは現実的ではない。
+// ID3D11Buffer* などのネイティブグラフィック API のリソースを直接更新することで回避したい…、が、
+// 現在 Unity がネイティブリソースへのアクセス手段を提供しているものは Texture 一族だけである。
+// このため、テクスチャにモデルデータを格納して頂点シェーダで変形させるというややこしい手段を用いる。
+// 汚い手段だが Mesh を更新するよりは数十倍のオーダーで速い。
+
 struct aiTextureMeshData
 {
+    // in
+    int tex_width;
+    int tex_height;
+
+    // out
     int num_indices;
     int num_vertices;
     bool is_normal_indexed;
     bool is_uv_indexed;
     void *tex_indices;
     void *tex_vertices;
+    void *tex_velocities;
     void *tex_normals;
     void *tex_uvs;
 };
-aiCLinkage aiExport void            aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
+aiCLinkage aiExport void            aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst);
+aiCLinkage aiExport void            aiPolyMeshBeginCopyToTexture(aiObject* obj, aiTextureMeshData *dst);
+aiCLinkage aiExport void            aiPolyMeshEndCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
+
 #endif // aiSupportTextureMesh
 
 

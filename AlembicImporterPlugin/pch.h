@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <map>
 #include <memory>
 #include <thread>
@@ -65,10 +65,11 @@ void aiDebugLogImpl(const char* fmt, ...);
 
 using namespace Alembic;
 
-typedef Abc::V2f       abcV2;
-typedef Abc::V3f       abcV3;
-typedef Abc::M44f      abcM44;
-typedef Abc::IObject   abcObject;
+typedef Imath::V2f      abcV2;
+typedef Imath::V3f      abcV3;
+typedef Imath::V4f      abcV4;
+typedef Imath::M44f     abcM44;
+typedef Abc::IObject    abcObject;
 struct  aiCameraParams;
 class   aiObject;
 class   aiXForm;

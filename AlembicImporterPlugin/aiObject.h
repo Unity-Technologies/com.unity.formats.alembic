@@ -1,4 +1,4 @@
-#ifndef aiObject_h
+﻿#ifndef aiObject_h
 #define aiObject_h
 
 #include "aiGeometry.h"

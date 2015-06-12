@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "AlembicImporter.h"
 #include "aiObject.h"
 #include "aiGeometry.h"
@@ -132,7 +132,7 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
-void aiContext::runTask(const std::function<void()> &task)
+void aiContext::enqueueTask(const task_t &task)
 {
     m_tasks.run(task);
 }
