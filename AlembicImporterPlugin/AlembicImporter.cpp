@@ -86,6 +86,11 @@ aiCLinkage aiExport aiObject* aiGetTopObject(aiContext* ctx)
     return ctx->getTopObject();
 }
 
+aiCLinkage aiExport void aiWaitTasks(aiContext* ctx)
+{
+    ctx->waitTasks();
+}
+
 
 aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata)
 {
@@ -305,10 +310,19 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
 
 
 #ifdef aiSupportTextureMesh
-aiCLinkage aiExport void aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst)
+aiCLinkage aiExport void aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst)
 {
     // todo
 }
+aiCLinkage aiExport void aiPolyMeshBeginCopyToTexture(aiObject* obj, aiTextureMeshData *dst)
+{
+    obj->getPolyMesh().beginCopyMeshToTexture(*dst);
+}
+aiCLinkage aiExport void aiPolyMeshEndCopyToTexture(aiObject* obj)
+{
+    obj->getPolyMesh().endCopyMeshToTexture();
+}
+
 #endif // aiSupportTextureMesh
 
 

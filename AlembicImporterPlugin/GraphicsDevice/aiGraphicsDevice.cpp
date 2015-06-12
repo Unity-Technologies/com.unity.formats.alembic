@@ -1,4 +1,7 @@
 ﻿#include "pch.h"
+
+#if defined(aiSupportTextureMesh)
+
 #include "aiGraphicsDevice.h"
 
 
@@ -129,3 +132,5 @@ extern "C" { int __afxForceUSRDLL; }
 #endif
 
 #endif
+
+#endif 

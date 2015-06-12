@@ -1,7 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "AlembicImporter.h"
 #include "aiGeometry.h"
 #include "aiObject.h"
+#include "aiContext.h"
 
 
 aiSchema::aiSchema() : m_obj(nullptr) {}
@@ -187,9 +188,72 @@ void aiPolyMesh::copyIndices(int *dst) const
     }
 }
 
-void aiPolyMesh::copyVertices(abcV3 *dst) const
+
+template<class VecT>
+void aiPolyMesh::copyVertices(VecT *dst) const
 {
+    if (!m_positions) { return; }
+
     const auto &cont = *m_positions;
+    size_t n = cont.size();
+    for (size_t i = 0; i < n; ++i) {
+        (abcV3&)dst[i] = cont[i];
+    }
+    if (m_obj->getReverseX()) {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i].x *= -1.0f;
+        }
+    }
+}
+template void aiPolyMesh::copyVertices<abcV3>(abcV3 *dst) const;
+template void aiPolyMesh::copyVertices<abcV4>(abcV4 *dst) const;
+
+
+template<class VecT>
+void aiPolyMesh::copyVelocities(VecT *dst) const
+{
+    if (!m_velocities) { return; }
+
+    const auto &cont = *m_velocities;
+    size_t n = cont.size();
+    for (size_t i = 0; i < n; ++i) {
+        (abcV3&)dst[i] = cont[i];
+    }
+    if (m_obj->getReverseX()) {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i].x *= -1.0f;
+        }
+    }
+}
+template void aiPolyMesh::copyVelocities<abcV3>(abcV3 *dst) const;
+template void aiPolyMesh::copyVelocities<abcV4>(abcV4 *dst) const;
+
+
+template<class VecT>
+void aiPolyMesh::copyNormals(VecT *dst) const
+{
+    if (!m_normals) { return; }
+
+    const auto &cont = *m_normals.getVals();
+    size_t n = cont.size();
+    for (size_t i = 0; i < n; ++i) {
+        (abcV3&)dst[i] = cont[i];
+    }
+    if (m_obj->getReverseX()) {
+        for (size_t i = 0; i < n; ++i) {
+            dst[i].x *= -1.0f;
+        }
+    }
+}
+template void aiPolyMesh::copyNormals<abcV3>(abcV3 *dst) const;
+template void aiPolyMesh::copyNormals<abcV4>(abcV4 *dst) const;
+
+
+void aiPolyMesh::copyUVs(abcV2 *dst) const
+{
+    if (!m_uvs) { return; }
+
+    const auto &cont = *m_uvs.getVals();
     size_t n = cont.size();
     for (size_t i = 0; i < n; ++i) {
         dst[i] = cont[i];
@@ -200,17 +264,69 @@ void aiPolyMesh::copyVertices(abcV3 *dst) const
         }
     }
 }
-void aiPolyMesh::copyNormals(abcV3 *dst) const
+
+
+
+
+#ifdef aiSupportTextureMesh
+#include "GraphicsDevice//aiGraphicsDevice.h"
+
+void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
 {
-    const auto &cont = *m_normals.getVals();
-    // todo
+    aiIGraphicsDevice *dev = aiGetGraphicsDevice();
+    if (!dev) { return; }
+
+    dst.is_normal_indexed = m_normals && m_normals.isIndexed();
+    dst.is_uv_indexed = m_normals && m_uvs.isIndexed();
+
+    if (dst.tex_indices) {
+        uint32_t n = getIndexCount();
+        m_buf.resize(n);
+        copyIndices((int*)&m_buf[0]);
+        dev->writeTexture(dst.tex_indices, dst.tex_width, dst.tex_height, aiE_RInt, &m_buf[0], n*sizeof(int));
+    }
+
+    if (dst.tex_vertices && m_positions) {
+        uint32_t n = m_positions->size();
+        m_buf.resize(n * 4);
+        copyVertices((abcV4*)&m_buf[0]);
+        dev->writeTexture(dst.tex_vertices, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+    }
+
+    if (dst.tex_velocities && m_velocities) {
+        uint32_t n = m_velocities->size();
+        m_buf.resize(n * 4);
+        copyVertices((abcV4*)&m_buf[0]);
+        dev->writeTexture(dst.tex_velocities, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+    }
+
+    if (dst.tex_normals && m_normals) {
+        uint32_t n = m_normals.getVals()->size();
+        m_buf.resize(n * 4);
+        copyNormals((abcV4*)&m_buf[0]);
+        dev->writeTexture(dst.tex_normals, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+    }
+
+    if (dst.tex_uvs && m_uvs) {
+        uint32_t n = m_uvs.getVals()->size();
+        m_buf.resize(n * 2);
+        copyUVs((abcV2*)&m_buf[0]);
+        dev->writeTexture(dst.tex_uvs, dst.tex_width, dst.tex_height, aiE_RGFloat, &m_buf[0], n*sizeof(abcV2));
+    }
 }
 
-void aiPolyMesh::copyUVs(abcV2 *dst) const
+void aiPolyMesh::beginCopyMeshToTexture(aiTextureMeshData &dst) const
 {
-    const auto &cont = *m_uvs.getVals();
-    // todo
+    m_obj->getContext()->enqueueTask([this, &dst](){ copyMeshToTexture(dst); });
 }
+
+void aiPolyMesh::endCopyMeshToTexture() const
+{
+}
+
+#endif // aiSupportTextureMesh
+
+
 
 bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMeshInfo& prev, int max_vertices) const
 {
@@ -291,9 +407,9 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
     const auto &normals = *m_normals.getVals();
     const auto &indices = *m_normals.getIndices();
 
+    uint32_t a = 0;
     if (m_normals.isIndexed())
     {
-        uint32_t a = 0;
         for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
@@ -304,7 +420,6 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
     }
     else
     {
-        uint32_t a = 0;
         for (int fi = 0; fi < smi.num_faces; ++fi) {
             int ngon = counts[smi.begin_face + fi];
             for (int ni = 0; ni < ngon; ++ni) {
@@ -312,10 +427,10 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
             }
             a += ngon;
         }
-        if (m_obj->getReverseX()) {
-            for (size_t i = 0; i < a; ++i) {
-                dst[i].x *= -1.0f;
-            }
+    }
+    if (m_obj->getReverseX()) {
+        for (size_t i = 0; i < a; ++i) {
+            dst[i].x *= -1.0f;
         }
     }
 }
@@ -349,16 +464,6 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
         }
     }
 }
-
-#ifdef aiSupportTextureMesh
-#include "GraphicsDevice//aiGraphicsDevice.h"
-
-void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
-{
-
-}
-
-#endif // aiSupportTextureMesh
 
 
 

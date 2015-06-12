@@ -12,6 +12,8 @@ const int aiMagicCtx = 0x00585443; // "CTX"
 class aiContext
 {
 public:
+    typedef std::function<void()> task_t;
+
     static aiContext* create();
     static void destroy(aiContext* ctx);
 
@@ -23,7 +25,7 @@ public:
     float getStartTime() const;
     float getEndTime() const;
 
-    void runTask(const std::function<void ()> &task);
+    void enqueueTask(const task_t &task);
     void waitTasks();
 
 private:

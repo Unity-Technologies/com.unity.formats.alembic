@@ -22,6 +22,25 @@ public class AlembicImporter
         public int triangulated_index_count;
     }
 
+    public struct aiTextureMeshData
+    {
+        // in
+        public int tex_width;
+        public int tex_height;
+
+        // out
+        public int num_indices;
+        public int num_vertices;
+        public bool is_normal_indexed;
+        public bool is_uv_indexed;
+        public IntPtr tex_indices;
+        public IntPtr tex_vertices;
+        public IntPtr tex_velocities;
+        public IntPtr tex_normals;
+        public IntPtr tex_uvs;
+    }
+
+
     public struct aiMeshData
     {
         public int index_count;
@@ -63,6 +82,8 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiWaitTasks(aiContext ctx);
+
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(aiObject obj, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
@@ -99,6 +120,11 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(aiObject obj, IntPtr vertices, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(aiObject obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
+
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshBeginCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshEndCopyDataToTexture(aiObject obj, ref aiTextureMeshData dst);
+
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(aiObject obj, ref aiCameraParams o_params);

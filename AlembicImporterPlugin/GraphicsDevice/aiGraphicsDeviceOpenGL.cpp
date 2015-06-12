@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "aiGraphicsDevice.h"
 
-#ifdef aiSupportOpenGL
+#if defined(aiSupportTextureMesh) && defined(aiSupportOpenGL)
+#include "aiGraphicsDevice.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>

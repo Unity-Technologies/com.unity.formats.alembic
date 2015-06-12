@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "AlembicImporter.h"
 #include "aiGeometry.h"
 #include "aiContext.h"

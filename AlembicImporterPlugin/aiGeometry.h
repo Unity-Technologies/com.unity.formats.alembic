@@ -58,9 +58,12 @@ public:
     uint32_t    getIndexCount() const;
     uint32_t    getVertexCount() const;
     void        copyIndices(int *dst) const;
-    void        copyVertices(abcV3 *dst) const;
-    void        copyNormals(abcV3 *dst) const;
-    void        copyUVs(abcV2 *dst) const;
+
+    // 通常 VecT は vec3 (abcV3) だが、テクスチャにコピーするときは vec4 の配列にコピーしたいので template 化…
+    template<class VecT> void copyVertices(VecT *dst) const;
+    template<class VecT> void copyVelocities(VecT *dst) const;
+    template<class VecT> void copyNormals(VecT *dst) const;
+    void copyUVs(abcV2 *dst) const;
 
     bool        getSplitedMeshInfo(aiSplitedMeshInfo &o_sp, const aiSplitedMeshInfo& prev, int max_vertices) const;
     void        copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const;
@@ -70,6 +73,8 @@ public:
 
 #ifdef aiSupportTextureMesh
     void        copyMeshToTexture(aiTextureMeshData &dst) const;
+    void        beginCopyMeshToTexture(aiTextureMeshData &dst) const;
+    void        endCopyMeshToTexture() const;
 #endif // aiSupportTextureMesh
 
 private:
@@ -80,6 +85,7 @@ private:
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
+    mutable std::vector<float> m_buf;
 };
 
 
