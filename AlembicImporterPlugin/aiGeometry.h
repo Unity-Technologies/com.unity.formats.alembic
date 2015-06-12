@@ -68,6 +68,10 @@ public:
     void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
+#ifdef aiSupportTextureMesh
+    void        copyMeshToTexture(aiTextureMeshData &dst) const;
+#endif // aiSupportTextureMesh
+
 private:
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;

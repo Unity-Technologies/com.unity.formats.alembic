@@ -304,6 +304,15 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
 }
 
 
+#ifdef aiSupportTextureMesh
+aiCLinkage aiExport void aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst)
+{
+    // todo
+}
+#endif // aiSupportTextureMesh
+
+
+
 aiCLinkage aiExport bool aiHasCurves(aiObject* obj)
 {
     aiCheckObject(obj);

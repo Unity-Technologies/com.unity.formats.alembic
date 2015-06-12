@@ -1,8 +1,16 @@
 #ifndef AlembicImporter_h
 #define AlembicImporter_h
 
-//// options
-//#define aiWithTBB
+// options:
+// graphics device options are relevant only if aiSupportTextureMesh is defined
+// 
+// #define aiSupportTextureMesh
+//  #define aiSupportD3D11
+//  #define aiSupportD3D9
+//  #define aiSupportOpenGL
+// 
+// #define aiWithTBB
+
 
 #include "pch.h"
 
@@ -73,9 +81,11 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj,
 aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
+#ifdef aiSupportTextureMesh
 struct aiTextureMeshData
 {
     int num_indices;
+    int num_vertices;
     bool is_normal_indexed;
     bool is_uv_indexed;
     void *tex_indices;
@@ -84,6 +94,7 @@ struct aiTextureMeshData
     void *tex_uvs;
 };
 aiCLinkage aiExport void            aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
+#endif // aiSupportTextureMesh
 
 
 aiCLinkage aiExport bool            aiHasCurves(aiObject* obj);
