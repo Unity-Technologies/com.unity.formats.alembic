@@ -5,18 +5,32 @@
     <ClCompile Include="AlembicImporter.cpp" />
     <ClCompile Include="aiContext.cpp" />
     <ClCompile Include="aiGeometry.cpp" />
-    <ClCompile Include="aiGraphicsDevice.cpp" />
-    <ClCompile Include="aiGraphicsDeviceD3D11.cpp" />
     <ClCompile Include="aiObject.cpp" />
     <ClCompile Include="aiThreadPool.cpp" />
+    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D11.cpp">
+      <Filter>GraphicsDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceOpenGL.cpp">
+      <Filter>GraphicsDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsDevice\aiGraphicsDevice.cpp">
+      <Filter>GraphicsDevice</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AlembicImporter.h" />
     <ClInclude Include="aiContext.h" />
     <ClInclude Include="aiGeometry.h" />
-    <ClInclude Include="aiGraphicsDevice.h" />
     <ClInclude Include="aiObject.h" />
     <ClInclude Include="aiThreadPool.h" />
+    <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h">
+      <Filter>GraphicsDevice</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="GraphicsDevice">
+      <UniqueIdentifier>{a0e5e438-2063-4574-b032-d8b71c7d8d73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

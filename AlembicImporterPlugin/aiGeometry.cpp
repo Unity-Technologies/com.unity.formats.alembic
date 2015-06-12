@@ -350,6 +350,18 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
     }
 }
 
+#ifdef aiSupportTextureMesh
+#include "GraphicsDevice//aiGraphicsDevice.h"
+
+void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
+{
+
+}
+
+#endif // aiSupportTextureMesh
+
+
+
 
 aiCurves::aiCurves() {}
 
