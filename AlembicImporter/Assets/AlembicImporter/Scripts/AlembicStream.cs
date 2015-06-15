@@ -11,8 +11,10 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicStream : MonoBehaviour
 {
+    public enum MeshDataType { Mesh, Texture };
     public enum CycleType { Hold, Loop, Reverse, Bounce };
 
+    public MeshDataType m_data_type;
     public string m_path_to_abc;
     public float m_time;
     public float m_start_time;
@@ -28,6 +30,8 @@ public class AlembicStream : MonoBehaviour
     float m_time_eps = 0.001f;
     AlembicImporter.aiContext m_abc;
 
+    Mesh m_index_mesh;
+
 
     void OnEnable()
     {
@@ -36,10 +40,16 @@ public class AlembicStream : MonoBehaviour
 #endif
         m_abc = AlembicImporter.aiCreateContext();
         m_loaded = AlembicImporter.aiLoad(m_abc, m_path_to_abc);
+
+        if (m_data_type == MeshDataType.Texture)
+        {
+            m_index_mesh = AlembicUtils.CreateIndexOnlyMesh(65000);
+        }
     }
 
     void OnDisable()
     {
+        m_index_mesh = null;
         AlembicImporter.aiDestroyContext(m_abc);
     }
 

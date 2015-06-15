@@ -22,6 +22,7 @@ typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userdata);
 typedef void (*aiNodeEnumerator)(aiObject *node, void *userdata);
 #endif
 
+// to shut up compiler warnings
 struct aiV2 { float v[2]; };
 struct aiV3 { float v[3]; };
 struct aiM44 { float v[4][4]; };
