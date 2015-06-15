@@ -134,6 +134,7 @@ public class AlembicImporter
 
     class ImportContext
     {
+        public AlembicStream abcstream;
         public Transform parent;
         public float time;
         public bool reverse_x;
@@ -188,6 +189,7 @@ public class AlembicImporter
             abcstream.m_reverse_faces = reverse_faces;
 
             var ic = new ImportContext();
+            ic.abcstream = abcstream;
             ic.parent = root.GetComponent<Transform>();
             ic.reverse_x = reverse_x;
             ic.reverse_faces = reverse_faces;
@@ -202,6 +204,7 @@ public class AlembicImporter
     public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverse_x, bool reverse_faces, float time)
     {
         var ic = new ImportContext();
+        ic.abcstream = root.GetComponent<AlembicStream>();
         ic.parent = root;
         ic.time = time;
         ic.reverse_x = reverse_x;
@@ -256,7 +259,7 @@ public class AlembicImporter
         }
         if (aiHasPolyMesh(obj))
         {
-            UpdateAbcMesh(obj, trans);
+            UpdateAbcMesh(obj, trans, ic.abcstream);
         }
         if (aiHasCamera(obj))
         {
@@ -274,7 +277,7 @@ public class AlembicImporter
     }
 
 
-    public static void UpdateAbcMesh(aiObject abc, Transform trans)
+    public static void UpdateAbcMesh(aiObject abc, Transform trans, AlembicStream abcstream)
     {
         const int max_vertices = 65000;
 
@@ -282,6 +285,7 @@ public class AlembicImporter
         if(abcmesh==null)
         {
             abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
+            abcmesh.AbcSetup(abcstream);
             var entry = new AlembicMesh.Entry {
                 host = trans.gameObject,
                 mesh = AddMeshComponents(abc, trans),
@@ -490,4 +494,34 @@ public class AlembicImporter
         return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
     }
 #endif
+
+
+
+
+}
+
+class AlembicUtils
+{
+    public static Mesh CreateIndexOnlyMesh(int num_indices, int index_begin = 0)
+    {
+        Vector3[] vertices = new Vector3[num_indices];
+        int[] indices = new int[num_indices];
+        for (int i = 0; i < num_indices; ++i)
+        {
+            vertices[i].x = index_begin + i;
+            vertices[i].y = index_begin;
+            vertices[i].z = i;
+            indices[i] = i;
+        }
+
+        Mesh ret = new Mesh();
+        ret.vertices = vertices;
+        ret.triangles = indices;
+        return ret;
+    }
+
+    public static int ceildiv(int v, int d)
+    {
+        return v/d + (v%d==0 ? 0 : 1);
+    }
 }

@@ -312,7 +312,7 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
 #ifdef aiSupportTextureMesh
 aiCLinkage aiExport void aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst)
 {
-    // todo
+    obj->getPolyMesh().copyMeshToTexture(*dst);
 }
 aiCLinkage aiExport void aiPolyMeshBeginCopyToTexture(aiObject* obj, aiTextureMeshData *dst)
 {
