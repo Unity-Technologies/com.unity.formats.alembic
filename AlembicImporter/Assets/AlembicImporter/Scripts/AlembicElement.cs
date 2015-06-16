@@ -13,14 +13,27 @@ using UnityEditor;
 public class AlembicElement : MonoBehaviour
 {
     public AlembicStream m_abcstream;
+    public AlembicImporter.aiObject m_abcobj;
+    public float m_time;
 
+    public T GetOrAddComponent<T>() where T : Component
+    {
+        var c = gameObject.GetComponent<T>();
+        if (c == null)
+        {
+            c = gameObject.AddComponent<T>();
+        }
+        return c;
+    }
 
-    public virtual void AbcSetup(AlembicStream abcstream)
+    public virtual void AbcSetup(AlembicStream abcstream, AlembicImporter.aiObject abcobj)
     {
         m_abcstream = abcstream;
+        m_abcobj = abcobj;
     }
 
     public virtual void AbcUpdate()
     {
+        AlembicImporter.aiSetCurrentTime(m_abcobj, m_time);
     }
 }
