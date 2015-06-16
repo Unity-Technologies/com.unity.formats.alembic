@@ -54,9 +54,12 @@ public:
     bool        isTopologyConstantTriangles() const;
     bool        hasNormals() const;
     bool        hasUVs() const;
+    bool        hasVelocities() const;
 
     uint32_t    getIndexCount() const;
     uint32_t    getVertexCount() const;
+    uint32_t    getPeakIndexCount() const;
+    uint32_t    getPeakVertexCount() const;
     void        copyIndices(int *dst) const;
 
     // 通常 VecT は vec3 (abcV3) だが、テクスチャにコピーするときは vec4 の配列にコピーしたいので template 化…
@@ -85,7 +88,10 @@ private:
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
+
     mutable std::vector<float> m_buf;
+    mutable uint32_t m_peak_index_count;
+    mutable uint32_t m_peak_vertex_count;
 };
 
 

@@ -71,8 +71,13 @@ aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshHasVelocities(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshHasIsNormalIndexed(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshHasIsUVIndexed(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexCount(aiObject* obj);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetPeakIndexCount(aiObject* obj);     // トポロジが変化する場合のインデックス/頂点数の最大値
+aiCLinkage aiExport uint32_t        aiPolyMeshGetPeakVertexCount(aiObject* obj);    // 
 aiCLinkage aiExport void            aiPolyMeshCopyIndices(aiObject* obj, int *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyVertices(aiObject* obj, abcV3 *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyNormals(aiObject* obj, abcV3 *dst);

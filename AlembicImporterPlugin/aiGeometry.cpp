@@ -72,7 +72,10 @@ abcM44 aiXForm::getMatrix() const
 
 
 
-aiPolyMesh::aiPolyMesh() {}
+aiPolyMesh::aiPolyMesh()
+    : m_peak_index_count(0)
+    , m_peak_vertex_count(0)
+{}
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
     : super(obj)
@@ -124,12 +127,19 @@ bool aiPolyMesh::hasUVs() const
     return m_uvs.valid();
 }
 
-uint32_t aiPolyMesh::getIndexCount() const
+bool aiPolyMesh::hasVelocities() const
 {
-    if (m_obj->getTriangulate())
+    return m_velocities != nullptr;
+}
+
+inline uint32_t CalculateIndexCount(
+    Abc::Int32ArraySample &counts,
+    Abc::Int32ArraySample &indices,
+    bool triangulate)
+{
+    if (triangulate)
     {
         uint32_t r = 0;
-        const auto &counts = *m_counts;
         size_t n = counts.size();
         for (size_t fi = 0; fi < n; ++fi) {
             int ngon = counts[fi];
@@ -139,13 +149,81 @@ uint32_t aiPolyMesh::getIndexCount() const
     }
     else
     {
-        return m_indices->size();
+        return indices.size();
     }
+}
+
+uint32_t aiPolyMesh::getIndexCount() const
+{
+    return CalculateIndexCount(*m_counts, *m_indices, m_obj->getTriangulate());
 }
 
 uint32_t aiPolyMesh::getVertexCount() const
 {
     return m_positions->size();
+}
+
+uint32_t aiPolyMesh::getPeakIndexCount() const
+{
+    // 一応 caching しておく
+
+    if (m_peak_index_count == 0) {
+        Abc::Int32ArraySamplePtr counts;
+        Abc::Int32ArraySamplePtr indices;
+        auto &index_prop = m_schema.getFaceIndicesProperty();
+        auto &count_prop = m_schema.getFaceCountsProperty();
+        int num_samples = index_prop.getNumSamples();
+        if (num_samples == 0) { return 0; }
+
+        if (index_prop.isConstant()) {
+            index_prop.get(indices, Abc::ISampleSelector(int64_t(0)));
+            count_prop.get(counts, Abc::ISampleSelector(int64_t(0)));
+        }
+        else {
+            int i_max = 0;
+            int c_max = 0;
+            for (int i = 0; i < num_samples; ++i) {
+                index_prop.get(indices, Abc::ISampleSelector(int64_t(i)));
+                if (indices->size() > c_max) {
+                    c_max = indices->size();
+                    i_max = i;
+                }
+            }
+            index_prop.get(indices, Abc::ISampleSelector(int64_t(i_max)));
+            count_prop.get(counts, Abc::ISampleSelector(int64_t(i_max)));
+        }
+        m_peak_index_count = CalculateIndexCount(*counts, *indices, m_obj->getTriangulate());
+    }
+
+    return m_peak_index_count;
+}
+
+uint32_t aiPolyMesh::getPeakVertexCount() const
+{
+    if (m_peak_vertex_count == 0) {
+        Abc::P3fArraySamplePtr positions;
+        auto &positions_prop = m_schema.getPositionsProperty();
+        int num_samples = positions_prop.getNumSamples();
+        if (num_samples == 0) { return 0; }
+
+        if (positions_prop.isConstant()) {
+            positions_prop.get(positions, Abc::ISampleSelector(int64_t(0)));
+        }
+        else {
+            int i_max = 0;
+            int c_max = 0;
+            for (int i = 0; i < num_samples; ++i) {
+                positions_prop.get(positions, Abc::ISampleSelector(int64_t(i)));
+                if (positions->size() > c_max) {
+                    c_max = positions->size();
+                    i_max = i;
+                }
+            }
+            positions_prop.get(positions, Abc::ISampleSelector(int64_t(i_max)));
+        }
+        m_peak_vertex_count = positions->size();
+    }
+    return m_peak_vertex_count;
 }
 
 void aiPolyMesh::copyIndices(int *dst) const

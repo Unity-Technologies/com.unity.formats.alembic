@@ -53,7 +53,6 @@ aiCLinkage aiExport aiContext* aiCreateContext()
 
 aiCLinkage aiExport void aiDestroyContext(aiContext* ctx)
 {
-    aiCheckContext(ctx);
     aiDebugLog("aiDestroyContext(): %p\n", ctx);
     aiContext::destroy(ctx);
 }
@@ -241,6 +240,12 @@ aiCLinkage aiExport bool aiPolyMeshHasUVs(aiObject* obj)
     return obj->getPolyMesh().hasUVs();
 }
 
+aiCLinkage aiExport bool aiPolyMeshHasVelocities(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().hasVelocities();
+}
+
 
 aiCLinkage aiExport uint32_t aiPolyMeshGetIndexCount(aiObject* obj)
 {
@@ -252,6 +257,18 @@ aiCLinkage aiExport uint32_t aiPolyMeshGetVertexCount(aiObject* obj)
 {
     aiCheckObject(obj);
     return obj->getPolyMesh().getVertexCount();
+}
+
+aiCLinkage aiExport uint32_t aiPolyMeshGetPeakIndexCount(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().getPeakIndexCount();
+}
+
+aiCLinkage aiExport uint32_t aiPolyMeshGetPeakVertexCount(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().getPeakVertexCount();
 }
 
 aiCLinkage aiExport void aiPolyMeshCopyIndices(aiObject* obj, int *dst)

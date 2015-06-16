@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
@@ -28,26 +29,40 @@ public class AlembicStream : MonoBehaviour
     bool m_loaded;
     float m_time_prev;
     float m_time_eps = 0.001f;
-    AlembicImporter.aiContext m_abc;
 
+    public List<AlembicElement> m_elements = new List<AlembicElement>();
+
+    AlembicImporter.aiContext m_abc;
+    Transform m_trans;
     Mesh m_index_mesh;
 
 
-    void OnEnable()
-    {
-#if UNITY_STANDALONE_WIN
-        AlembicImporter.AddLibraryPath();
-#endif
-        m_abc = AlembicImporter.aiCreateContext();
-        m_loaded = AlembicImporter.aiLoad(m_abc, m_path_to_abc);
+    public void AddElement(AlembicElement e) { m_elements.Add(e); }
 
+
+    public void Awake()
+    {
+        if (m_path_to_abc==null) { return; }
+        Debug.Log(m_path_to_abc);
         if (m_data_type == MeshDataType.Texture)
         {
-            m_index_mesh = AlembicUtils.CreateIndexOnlyMesh(65000);
+            m_index_mesh = AlembicUtils.CreateIndexOnlyMesh(64998);
         }
+
+        m_trans = GetComponent<Transform>();
+        m_abc = AlembicImporter.aiCreateContext();
+        m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
+
+        m_start_time = AlembicImporter.aiGetStartTime(m_abc);
+        m_end_time = AlembicImporter.aiGetEndTime(m_abc);
+        m_time_offset = -m_start_time;
+        m_time_scale = 1.0f;
+        m_preserve_start_time = true;
+
+        AlembicImporter.UpdateAbcTree(m_abc, m_trans, m_reverse_x, m_reverse_faces, m_time);
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
         m_index_mesh = null;
         AlembicImporter.aiDestroyContext(m_abc);
@@ -129,19 +144,18 @@ public class AlembicStream : MonoBehaviour
 
     void Update()
     {
-        if (!m_loaded)
+        m_time += Time.deltaTime;
+        if (Math.Abs(m_time - m_time_prev) > m_time_eps)
         {
-            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
-        }
-        if(m_loaded)
-        {
-            m_time += Time.deltaTime;
-
-            if (Math.Abs(m_time - m_time_prev) > m_time_eps)
+            // update elements
+            int len = m_elements.Count;
+            for (int i = 0; i < len; ++i)
             {
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, AdjustTime(m_time));
-                m_time_prev = m_time;
+                m_elements[i].m_time = m_time;
+                m_elements[i].AbcUpdate();
             }
+
+            m_time_prev = m_time;
         }
     }
 }
