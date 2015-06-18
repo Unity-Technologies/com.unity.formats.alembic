@@ -273,6 +273,14 @@ public class AlembicImporter
 
 class AlembicUtils
 {
+#if UNITY_EDITOR
+    [MenuItem ("Assets/Create Index Only Mesh")]
+    public static void AddIndexOnlyMeshToAssetDatabase()
+    {
+        AssetDatabase.CreateAsset(CreateIndexOnlyMesh(64998), "Assets/IndexOnlyMesh.asset");
+    }
+#endif
+
     public static Mesh CreateIndexOnlyMesh(int num_indices, int index_begin = 0)
     {
         Vector3[] vertices = new Vector3[num_indices];
