@@ -26,18 +26,17 @@ public class AlembicImporter
     {
         // in
         public int tex_width;
-        public int tex_height;
 
         // out
-        public int num_indices;
-        public int num_vertices;
+        public int index_count;
+        public int vertex_count;
         public bool is_normal_indexed;
         public bool is_uv_indexed;
         public IntPtr tex_indices;
         public IntPtr tex_vertices;
-        public IntPtr tex_velocities;
         public IntPtr tex_normals;
         public IntPtr tex_uvs;
+        public IntPtr tex_velocities;
     }
 
 

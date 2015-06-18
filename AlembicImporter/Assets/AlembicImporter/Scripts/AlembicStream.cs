@@ -34,7 +34,6 @@ public class AlembicStream : MonoBehaviour
 
     AlembicImporter.aiContext m_abc;
     Transform m_trans;
-    Mesh m_index_mesh;
 
 
     public void AddElement(AlembicElement e) { m_elements.Add(e); }
@@ -45,10 +44,6 @@ public class AlembicStream : MonoBehaviour
     {
         if (m_path_to_abc==null) { return; }
         Debug.Log(m_path_to_abc);
-        if (m_data_type == MeshDataType.Texture)
-        {
-            m_index_mesh = AlembicUtils.CreateIndexOnlyMesh(64998);
-        }
 
         m_trans = GetComponent<Transform>();
         m_abc = AlembicImporter.aiCreateContext();
@@ -65,7 +60,6 @@ public class AlembicStream : MonoBehaviour
 
     void OnDestroy()
     {
-        m_index_mesh = null;
         AlembicImporter.aiDestroyContext(m_abc);
     }
 

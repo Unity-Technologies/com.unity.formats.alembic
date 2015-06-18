@@ -73,8 +73,8 @@ aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObje
 aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasVelocities(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshHasIsNormalIndexed(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshHasIsUVIndexed(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshIsNormalIndexed(aiObject* obj);
+aiCLinkage aiExport bool            aiPolyMeshIsUVIndexed(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexCount(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetPeakIndexCount(aiObject* obj);     // トポロジが変化する場合のインデックス/頂点数の最大値
@@ -101,18 +101,17 @@ struct aiTextureMeshData
 {
     // in
     int tex_width;
-    int tex_height;
 
     // out
-    int num_indices;
-    int num_vertices;
+    int index_count;
+    int vertex_count;
     bool is_normal_indexed;
     bool is_uv_indexed;
     void *tex_indices;
     void *tex_vertices;
-    void *tex_velocities;
     void *tex_normals;
     void *tex_uvs;
+    void *tex_velocities;
 };
 aiCLinkage aiExport void            aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst);
 aiCLinkage aiExport void            aiPolyMeshBeginCopyToTexture(aiObject* obj, aiTextureMeshData *dst);

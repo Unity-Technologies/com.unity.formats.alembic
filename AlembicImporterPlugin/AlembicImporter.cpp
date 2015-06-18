@@ -251,6 +251,18 @@ aiCLinkage aiExport bool aiPolyMeshHasVelocities(aiObject* obj)
     return obj->getPolyMesh().hasVelocities();
 }
 
+aiCLinkage aiExport bool aiPolyMeshIsNormalIndexed(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().isNormalIndexed();
+}
+
+aiCLinkage aiExport bool aiPolyMeshIsUVIndexed(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().isUVIndexed();
+}
+
 
 aiCLinkage aiExport uint32_t aiPolyMeshGetIndexCount(aiObject* obj)
 {
