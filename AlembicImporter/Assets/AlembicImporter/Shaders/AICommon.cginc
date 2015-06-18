@@ -3,18 +3,13 @@
 
 #include "UnityCG.cginc"
 
-struct DrawData
-{
-    int4 params; // [0]: begin_index, [1]: is_normal_indexed, [2]: is_uv_indexed
-};
-
 #if defined(SHADER_API_D3D11) || defined(SHADER_API_OPENGL)
 Texture2D<int>      _Indices;
 Texture2D<float4>   _Vertices;
 Texture2D<float4>   _Velocities;
 Texture2D<float4>   _Normals;
 Texture2D<float2>   _UVs;
-StructuredBuffer<DrawData> _DrawData;
+float4 _DrawData; // [0]: begin_index, [1]: index_count, [2]: is_normal_indexed, [3]: is_uv_indexed
 #endif
 
 
@@ -26,12 +21,17 @@ void vert_texturemesh(inout appdata_full v, out Input o)
 {
     UNITY_INITIALIZE_OUTPUT(Input,o);
 
-    int4 params = _DrawData[0].params;
-    int begin_index         = params[0];
-    int is_normal_indexed   = params[1];
-    int is_uv_indexed       = params[2];
+    int begin_index         = _DrawData[0];
+    int index_count         = _DrawData[1];
+    int is_normal_indexed   = _DrawData[2];
+    int is_uv_indexed       = _DrawData[3];
 
     int  ii1 = begin_index + (int)v.vertex.x;
+    if(ii1 > index_count) {
+        v.vertex = 0.0;
+        return;
+    }
+
     int2 ii2 = int2( ii1 & 0x3ff, ii1 >> 10 );  // assume texture width is 1024
     int  vi1 = _Indices[ii2];
     int2 vi2 = int2( vi1 & 0x3ff, vi1 >> 10 );  // 

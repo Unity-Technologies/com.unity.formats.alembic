@@ -19,6 +19,7 @@ public class AlembicMesh : AlembicElement
         public Vector3[] vertex_cache;
         public Vector2[] uv_cache;
         public Mesh mesh;
+        public MaterialPropertyBlock mpb;
         public GameObject host;
     }
 
@@ -28,14 +29,15 @@ public class AlembicMesh : AlembicElement
 
     Transform m_trans;
     public List<Entry> m_meshes = new List<Entry>();
-
     public RenderTexture m_indices;
     public RenderTexture m_vertices;
-    public RenderTexture m_velocities;
     public RenderTexture m_normals;
     public RenderTexture m_uvs;
-    public AlembicImporter.aiTextureMeshData m_texture_mesh;
-    public MaterialPropertyBlock m_mpb;
+    public RenderTexture m_velocities;
+    public AlembicImporter.aiTextureMeshData m_mesh_tex;
+
+    const int max_indices = 64498;
+    const int max_vertices = 65000;
 
 
     public static RenderTexture CreateDataTexture(int num_data, RenderTextureFormat format)
@@ -53,45 +55,91 @@ public class AlembicMesh : AlembicElement
         base.AbcSetup(abcstream, abcobj);
         m_trans = GetComponent<Transform>();
 
+        int peak_index_count = AlembicImporter.aiPolyMeshGetPeakIndexCount(abcobj);
+        int peak_vertex_count = AlembicImporter.aiPolyMeshGetPeakVertexCount(abcobj);
+
         if(GetComponent<MeshRenderer>()==null)
         {
-            AddMeshComponents(abcobj, m_trans);
+            int num_mesh_objects = AlembicUtils.ceildiv(peak_index_count, 64998);
+
+            AddMeshComponents(abcobj, m_trans, abcstream.m_data_type);
             var entry = new AlembicMesh.Entry
             {
                 host = m_trans.gameObject,
-                mesh = AddMeshComponents(abcobj, m_trans),
+                mesh = AddMeshComponents(abcobj, m_trans, abcstream.m_data_type),
                 vertex_cache = null,
                 uv_cache = null,
                 index_cache = null,
+                mpb = null,
             };
             m_meshes.Add(entry);
 #if UNITY_EDITOR
-            m_trans.GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
+            GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
 #endif
+
+            for (int i = 1; i < num_mesh_objects; ++i)
+            {
+                string name = "Submesh_" + i;
+
+                GameObject go = new GameObject();
+                Transform child = go.GetComponent<Transform>();
+                go.name = name;
+                child.parent = m_trans;
+                child.localPosition = Vector3.zero;
+                child.localEulerAngles = Vector3.zero;
+                child.localScale = Vector3.one;
+                Mesh mesh = AddMeshComponents(abcobj, child, m_abcstream.m_data_type);
+                mesh.name = name;
+                child.GetComponent<MeshRenderer>().sharedMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+
+                entry = new Entry
+                {
+                    host = go,
+                    mesh = mesh,
+                    vertex_cache = new Vector3[0],
+                    uv_cache = new Vector2[0],
+                    index_cache = new int[0],
+                    mpb = null,
+                };
+                m_meshes.Add(entry);
+            }
         }
 
         if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
         {
-            int index_count = AlembicImporter.aiPolyMeshGetPeakIndexCount(abcobj);
-            int vertex_count = AlembicImporter.aiPolyMeshGetPeakVertexCount(abcobj);
+            m_mesh_tex = new AlembicImporter.aiTextureMeshData();
+            m_mesh_tex.tex_width = MeshTextureWidth;
 
-            m_indices = CreateDataTexture(index_count, RenderTextureFormat.RInt);
-            m_vertices = CreateDataTexture(vertex_count, RenderTextureFormat.ARGBFloat);
+            m_indices = CreateDataTexture(peak_index_count, RenderTextureFormat.RInt);
+            m_mesh_tex.tex_indices = m_indices.GetNativeTexturePtr();
+
+            m_vertices = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
+            m_mesh_tex.tex_vertices = m_vertices.GetNativeTexturePtr();
+
             if (AlembicImporter.aiPolyMeshHasNormals(abcobj))
             {
                 bool is_normal_indexed = AlembicImporter.aiPolyMeshIsNormalIndexed(abcobj);
-                int normal_count = is_normal_indexed ? vertex_count : index_count;
+                int normal_count = is_normal_indexed ? peak_vertex_count : peak_index_count;
                 m_normals = CreateDataTexture(normal_count, RenderTextureFormat.ARGBFloat);
+                m_mesh_tex.tex_normals = m_normals.GetNativeTexturePtr();
             }
             if (AlembicImporter.aiPolyMeshHasUVs(abcobj))
             {
                 bool is_uv_indexed = AlembicImporter.aiPolyMeshIsUVIndexed(abcobj);
-                int uv_count = is_uv_indexed ? vertex_count : index_count;
+                int uv_count = is_uv_indexed ? peak_vertex_count : peak_index_count;
                 m_uvs = CreateDataTexture(uv_count, RenderTextureFormat.RGFloat);
+                m_mesh_tex.tex_uvs = m_uvs.GetNativeTexturePtr();
             }
             if (AlembicImporter.aiPolyMeshHasVelocities(abcobj))
             {
-                m_velocities = CreateDataTexture(vertex_count, RenderTextureFormat.ARGBFloat);
+                m_velocities = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
+                m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
+            }
+
+            for (int i = 0; i < m_meshes.Count; ++i )
+            {
+                m_meshes[i].mpb = new MaterialPropertyBlock();
+                m_meshes[i].mpb.SetVector("_DrawData", Vector4.zero);
             }
         }
     }
@@ -112,12 +160,20 @@ public class AlembicMesh : AlembicElement
 
     void AbcUpdateMeshTexture()
     {
-        // todo
+        AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
+        for (int i = 0; i < m_meshes.Count; ++i)
+        {
+            //[0]: begin_index, [1]: index_count, [2]: is_normal_indexed, [3]: is_uv_indexed
+            m_meshes[i].mpb.SetVector("_DrawData", new Vector4(
+                max_indices * i,
+                m_mesh_tex.index_count,
+                m_mesh_tex.is_normal_indexed ? 1.0f : 0.0f,
+                m_mesh_tex.is_uv_indexed ? 1.0f : 0.0f ));
+        }
     }
 
     void AbcUpdateMesh()
     {
-        const int max_vertices = 65000;
 
         var trans = GetComponent<Transform>();
         var abc = m_abcobj;
@@ -141,28 +197,8 @@ public class AlembicMesh : AlembicElement
             }
             else
             {
-                string name = "Submesh_" + nth_submesh;
-
-                GameObject go = new GameObject();
-                Transform child = go.GetComponent<Transform>();
-                go.name = name;
-                child.parent = trans;
-                child.localPosition = Vector3.zero;
-                child.localEulerAngles = Vector3.zero;
-                child.localScale = Vector3.one;
-                Mesh mesh = AddMeshComponents(abc, child);
-                mesh.name = name;
-                child.GetComponent<MeshRenderer>().sharedMaterial = material;
-
-                entry = new AlembicMesh.Entry
-                {
-                    host = go,
-                    mesh = mesh,
-                    vertex_cache = new Vector3[0],
-                    uv_cache = new Vector2[0],
-                    index_cache = new int[0],
-                };
-                m_meshes.Add(entry);
+                Debug.Log("AlembicMesh: not enough submeshes!");
+                break;
             }
 
             bool needs_index_update = entry.mesh.vertexCount == 0 ||
@@ -215,29 +251,40 @@ public class AlembicMesh : AlembicElement
 
         for (int i = nth_submesh + 1; i < m_meshes.Count; ++i)
         {
-            //m_meshes[i].host.SetActive(false);
+            m_meshes[i].host.SetActive(false);
         }
     }
 
 
-    static Mesh AddMeshComponents(AlembicImporter.aiObject abc, Transform trans)
+    static Mesh AddMeshComponents(AlembicImporter.aiObject abc, Transform trans, AlembicStream.MeshDataType mdt)
     {
-        Mesh mesh;
+        Mesh mesh = null;
+
         var mesh_filter = trans.GetComponent<MeshFilter>();
+        var mesh_renderer = trans.GetComponent<MeshRenderer>();
         if (mesh_filter == null)
+        {
+            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+        }
+        if (mesh_renderer == null)
+        {
+            trans.gameObject.AddComponent<MeshRenderer>();
+        }
+
+        if (mdt == AlembicStream.MeshDataType.Texture)
+        {
+#if UNITY_EDITOR
+            mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset");
+#endif
+        }
+        else
         {
             mesh = new Mesh();
             mesh.name = AlembicImporter.aiGetName(abc);
             mesh.MarkDynamic();
-            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
-            mesh_filter.sharedMesh = mesh;
+        }
+        mesh_filter.sharedMesh = mesh;
 
-            trans.gameObject.AddComponent<MeshRenderer>();
-        }
-        else
-        {
-            mesh = mesh_filter.sharedMesh;
-        }
         return mesh;
     }
 

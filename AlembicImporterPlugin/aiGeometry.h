@@ -58,6 +58,8 @@ public:
     bool        hasNormals() const;
     bool        hasUVs() const;
     bool        hasVelocities() const;
+    bool        isNormalIndexed() const;
+    bool        isUVIndexed() const;
 
     uint32_t    getIndexCount() const;
     uint32_t    getVertexCount() const;
@@ -95,6 +97,7 @@ private:
     mutable std::vector<float> m_buf;
     mutable uint32_t m_peak_index_count;
     mutable uint32_t m_peak_vertex_count;
+    mutable std::atomic<int> m_task_running;
 };
 
 

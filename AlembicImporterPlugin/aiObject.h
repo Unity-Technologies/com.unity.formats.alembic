@@ -56,21 +56,14 @@ private:
     abcObject   m_abc;
     std::vector<aiObject*> m_children;
 
-    std::vector<aiSchema*> m_schemas;
-    aiXForm     m_xform;
-    aiPolyMesh  m_polymesh;
-    aiCurves    m_curves;
-    aiPoints    m_points;
-    aiCamera    m_camera;
-    aiLight     m_light;
-    aiMaterial  m_material;
-    bool        m_has_xform;
-    bool        m_has_polymesh;
-    bool        m_has_curves;
-    bool        m_has_points;
-    bool        m_has_camera;
-    bool        m_has_light;
-    bool        m_has_material;
+    std::vector<aiSchema*>      m_schemas;
+    std::unique_ptr<aiXForm>    m_xform;
+    std::unique_ptr<aiPolyMesh> m_polymesh;
+    std::unique_ptr<aiCurves>   m_curves;
+    std::unique_ptr<aiPoints>   m_points;
+    std::unique_ptr<aiCamera>   m_camera;
+    std::unique_ptr<aiLight>    m_light;
+    std::unique_ptr<aiMaterial> m_material;
 
     float m_time;
     bool m_reverse_x;

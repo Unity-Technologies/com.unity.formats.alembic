@@ -80,6 +80,7 @@ abcM44 aiXForm::getMatrix() const
 aiPolyMesh::aiPolyMesh()
     : m_peak_index_count(0)
     , m_peak_vertex_count(0)
+    , m_task_running(0)
 {}
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
@@ -169,6 +170,16 @@ bool aiPolyMesh::hasUVs() const
 bool aiPolyMesh::hasVelocities() const
 {
     return m_velocities && m_velocities->valid();
+}
+
+bool aiPolyMesh::isNormalIndexed() const
+{
+    return m_normals.valid() && m_normals.isIndexed();
+}
+
+bool aiPolyMesh::isUVIndexed() const
+{
+    return m_uvs.valid() && m_uvs.isIndexed();
 }
 
 inline uint32_t CalculateIndexCount(
@@ -393,52 +404,61 @@ void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
     aiIGraphicsDevice *dev = aiGetGraphicsDevice();
     if (!dev) { return; }
 
-    dst.is_normal_indexed = m_normals && m_normals.isIndexed();
-    dst.is_uv_indexed = m_normals && m_uvs.isIndexed();
+    dst.is_normal_indexed = isNormalIndexed();
+    dst.is_uv_indexed = isUVIndexed();
+    dst.index_count = getIndexCount();
+    dst.vertex_count = getVertexCount();
 
     if (dst.tex_indices) {
-        uint32_t n = getIndexCount();
+        uint32_t n = dst.index_count;
         m_buf.resize(n);
         copyIndices((int*)&m_buf[0]);
-        dev->writeTexture(dst.tex_indices, dst.tex_width, dst.tex_height, aiE_RInt, &m_buf[0], n*sizeof(int));
+        dev->writeTexture(dst.tex_indices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RInt, &m_buf[0], n*sizeof(int));
     }
 
     if (dst.tex_vertices && m_positions) {
-        uint32_t n = m_positions->size();
+        uint32_t n = dst.vertex_count;
         m_buf.resize(n * 4);
         copyVertices((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_vertices, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
-    }
-
-    if (dst.tex_velocities && m_velocities) {
-        uint32_t n = m_velocities->size();
-        m_buf.resize(n * 4);
-        copyVertices((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_velocities, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+        dev->writeTexture(dst.tex_vertices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
     }
 
     if (dst.tex_normals && m_normals) {
         uint32_t n = m_normals.getVals()->size();
         m_buf.resize(n * 4);
         copyNormals((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_normals, dst.tex_width, dst.tex_height, aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+        dev->writeTexture(dst.tex_normals, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
     }
 
     if (dst.tex_uvs && m_uvs) {
         uint32_t n = m_uvs.getVals()->size();
         m_buf.resize(n * 2);
         copyUVs((abcV2*)&m_buf[0]);
-        dev->writeTexture(dst.tex_uvs, dst.tex_width, dst.tex_height, aiE_RGFloat, &m_buf[0], n*sizeof(abcV2));
+        dev->writeTexture(dst.tex_uvs, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RGFloat, &m_buf[0], n*sizeof(abcV2));
+    }
+
+    if (dst.tex_velocities && m_velocities && m_velocities->valid()) {
+        uint32_t n = m_velocities->size();
+        m_buf.resize(n * 4);
+        copyVertices((abcV4*)&m_buf[0]);
+        dev->writeTexture(dst.tex_velocities, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
     }
 }
 
 void aiPolyMesh::beginCopyMeshToTexture(aiTextureMeshData &dst) const
 {
-    m_obj->getContext()->enqueueTask([this, &dst](){ copyMeshToTexture(dst); });
+    ++m_task_running;
+    m_obj->getContext()->enqueueTask([this, &dst](){
+        copyMeshToTexture(dst);
+        --m_task_running;
+    });
 }
 
 void aiPolyMesh::endCopyMeshToTexture() const
 {
+    while (m_task_running.load()!=0) {
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
 }
 
 #endif // aiSupportTextureMesh
