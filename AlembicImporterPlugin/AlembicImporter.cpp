@@ -64,6 +64,11 @@ aiCLinkage aiExport bool aiLoad(aiContext* ctx, const char *path)
     aiDebugLog("aiLoad(): %p %s\n", ctx, path);
     return ctx->load(path);
 }
+aiCLinkage aiExport void aiDebugDump(aiContext* ctx)
+{
+    aiDebugLog("aiDebugDump(): %p\n", ctx);
+    ctx->debugDump();
+}
 
 aiCLinkage aiExport float aiGetStartTime(aiContext* ctx)
 {
@@ -216,10 +221,10 @@ aiCLinkage aiExport bool aiHasPolyMesh(aiObject* obj)
     return obj->hasPolyMesh();
 }
 
-aiCLinkage aiExport bool aiPolyMeshIsTopologyConstant(aiObject* obj)
+aiCLinkage aiExport int aiPolyMeshGetTopologyVariance(aiObject* obj)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().isTopologyConstant();
+    return obj->getPolyMesh().getTopologyVariance();
 }
 
 aiCLinkage aiExport bool aiPolyMeshIsTopologyConstantTriangles(aiObject* obj)

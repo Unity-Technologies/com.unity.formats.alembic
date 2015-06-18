@@ -165,7 +165,8 @@ public class AlembicMesh : AlembicElement
                 m_meshes.Add(entry);
             }
 
-            bool needs_index_update = entry.mesh.vertexCount == 0 || !AlembicImporter.aiPolyMeshIsTopologyConstant(abc);
+            bool needs_index_update = entry.mesh.vertexCount == 0 ||
+                AlembicImporter.aiPolyMeshGetTopologyVariance(abc) == AlembicImporter.aiTopologyVariance.Heterogeneous;
             if (needs_index_update)
             {
                 entry.mesh.Clear();

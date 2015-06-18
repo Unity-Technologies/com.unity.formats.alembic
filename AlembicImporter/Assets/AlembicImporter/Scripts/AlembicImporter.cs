@@ -71,6 +71,13 @@ public class AlembicImporter
         public System.IntPtr ptr;
     }
 
+    public enum aiTopologyVariance
+    {
+        Constant,
+        Homogeneous,
+        Heterogeneous
+    }
+
 //#if UNITY_STANDALONE_WIN
 //    [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
 //#endif
@@ -79,6 +86,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
     [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
+    [DllImport ("AlembicImporter")] public static extern void       aiDebugDump(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
@@ -105,7 +113,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstant(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern aiTopologyVariance aiPolyMeshGetTopologyVariance(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasNormals(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasUVs(aiObject obj);
@@ -176,6 +184,7 @@ public class AlembicImporter
         abcstream.m_reverse_x = reverse_x;
         abcstream.m_reverse_faces = reverse_faces;
         abcstream.Awake();
+        abcstream.DebugDump();
     }
 #endif
 

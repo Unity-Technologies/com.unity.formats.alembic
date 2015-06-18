@@ -12,8 +12,8 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicStream : MonoBehaviour
 {
-    public enum MeshDataType { Mesh, Texture };
-    public enum CycleType { Hold, Loop, Reverse, Bounce };
+    public enum MeshDataType { Mesh, Texture }
+    public enum CycleType { Hold, Loop, Reverse, Bounce }
 
     public MeshDataType m_data_type;
     public string m_path_to_abc;
@@ -39,6 +39,7 @@ public class AlembicStream : MonoBehaviour
 
     public void AddElement(AlembicElement e) { m_elements.Add(e); }
 
+    public void DebugDump() { AlembicImporter.aiDebugDump(m_abc); }
 
     public void Awake()
     {
