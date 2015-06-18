@@ -9,6 +9,7 @@ public:
     aiSchema(aiObject *obj);
     virtual ~aiSchema();
     virtual void updateSample() = 0;
+    virtual void debugDump() const {}
 
 protected:
     aiObject *m_obj;
@@ -22,6 +23,7 @@ public:
     aiXForm();
     aiXForm(aiObject *obj);
     void updateSample() override;
+    void debugDump() const override;
 
     bool        getInherits() const;
     abcV3       getPosition() const;
@@ -44,13 +46,14 @@ public:
     aiPolyMesh();
     aiPolyMesh(aiObject *obj);
     void updateSample() override;
+    void debugDump() const override;
 
     void        setCurrentTime(float t);
     void        enableReverseX(bool v);
     void        enableTriangulate(bool v);
     void        enableReverseIndex(bool v);
 
-    bool        isTopologyConstant() const;
+    int         getTopologyVariance() const;
     bool        isTopologyConstantTriangles() const;
     bool        hasNormals() const;
     bool        hasUVs() const;
@@ -138,6 +141,7 @@ public:
     aiCamera();
     aiCamera(aiObject *obj);
     void updateSample() override;
+    void debugDump() const override;
 
     void getParams(aiCameraParams &o_params);
 

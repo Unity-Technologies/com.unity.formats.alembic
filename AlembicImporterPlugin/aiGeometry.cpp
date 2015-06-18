@@ -1,4 +1,4 @@
-ï»¿#include "pch.h"
+#include "pch.h"
 #include "AlembicImporter.h"
 #include "aiGeometry.h"
 #include "aiObject.h"
@@ -27,6 +27,11 @@ void aiXForm::updateSample()
     m_inherits = m_schema.getInheritsXforms(ss);
 }
 
+
+void aiXForm::debugDump() const
+{
+
+}
 
 bool aiXForm::getInherits() const
 {
@@ -107,9 +112,43 @@ void aiPolyMesh::updateSample()
     }
 }
 
-bool aiPolyMesh::isTopologyConstant() const
+void aiPolyMesh::debugDump() const
 {
-    return m_schema.isConstant();
+    aiDebugLog("- poly mesh\n");
+
+    const char *topology_variance_s[] = {
+        "kConstantTopology",
+        "kHomogeneousTopology",
+        "kHeterogeneousTopology"
+    };
+    const char true_s[] = "true";
+    const char false_s[] = "false";
+
+    aiDebugLog("toology variance: %s", topology_variance_s[m_schema.getTopologyVariance()]);
+    if (getTopologyVariance()==AbcGeom::kConstantTopology) {
+        aiDebugLog(" (%d)", (*m_counts)[0]);
+    }
+    aiDebugLog("\n");
+    aiDebugLog("has normals: %s\n", hasNormals() ? true_s : false_s);
+    aiDebugLog("has uvs: %s\n", hasUVs() ? true_s : false_s);
+    aiDebugLog("has velocities: %s\n", hasVelocities() ? true_s : false_s);
+
+    aiDebugLog("index count: %u", getIndexCount());
+    if (getTopologyVariance() == AbcGeom::kHeterogeneousTopology) {
+        aiDebugLog(" (peak %u)", getPeakIndexCount());
+    }
+    aiDebugLog("\n");
+
+    aiDebugLog("vertex count: %u", getVertexCount());
+    if (getTopologyVariance() == AbcGeom::kHeterogeneousTopology) {
+        aiDebugLog(" (peak %u)", getPeakVertexCount());
+    }
+    aiDebugLog("\n");
+}
+
+int aiPolyMesh::getTopologyVariance() const
+{
+    return (int)m_schema.getTopologyVariance();
 }
 
 bool aiPolyMesh::isTopologyConstantTriangles() const
@@ -129,7 +168,7 @@ bool aiPolyMesh::hasUVs() const
 
 bool aiPolyMesh::hasVelocities() const
 {
-    return m_velocities != nullptr;
+    return m_velocities && m_velocities->valid();
 }
 
 inline uint32_t CalculateIndexCount(
@@ -165,7 +204,7 @@ uint32_t aiPolyMesh::getVertexCount() const
 
 uint32_t aiPolyMesh::getPeakIndexCount() const
 {
-    // ä¸€å¿œ caching ã—ã¦ãŠã
+    // ˆê‰ž caching ‚µ‚Ä‚¨‚­
 
     if (m_peak_index_count == 0) {
         Abc::Int32ArraySamplePtr counts;
@@ -593,6 +632,11 @@ void aiCamera::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
     // todo
+}
+
+void aiCamera::debugDump() const
+{
+
 }
 
 void aiCamera::getParams(aiCameraParams &o_params)

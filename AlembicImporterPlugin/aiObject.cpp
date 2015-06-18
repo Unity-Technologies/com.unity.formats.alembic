@@ -68,10 +68,6 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
             m_material = aiMaterial(this);
             m_schemas.push_back(&m_material);
         }
-
-        //for (auto i : metadata) {
-        //    aiDebugLogVerbose("%s: %s\n", i.first.c_str(), i.second.c_str());
-        //}
     }
 }
 
@@ -124,4 +120,22 @@ aiCamera&   aiObject::getCamera()     { return m_camera; }
 aiLight&    aiObject::getLight()      { return m_light; }
 aiMaterial& aiObject::getMaterial()   { return m_material; }
 
+void aiObject::debugDump() const
+{
+    if (!m_abc.valid()) return;
+
+    aiDebugLog("node \"%s\"\n", getFullName());
+
+    aiDebugLog("- metadata\n");
+    const auto& metadata = m_abc.getMetaData();
+    for (auto i : metadata) {
+        aiDebugLog("%s: %s\n", i.first.c_str(), i.second.c_str());
+    }
+
+    for (auto &s : m_schemas) {
+        s->debugDump();
+    }
+
+    aiDebugLog("\n");
+}
 

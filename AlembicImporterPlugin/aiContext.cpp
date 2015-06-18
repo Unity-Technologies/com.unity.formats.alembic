@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "AlembicImporter.h"
 #include "aiObject.h"
 #include "aiGeometry.h"
@@ -140,4 +140,11 @@ void aiContext::enqueueTask(const task_t &task)
 void aiContext::waitTasks()
 {
     m_tasks.wait();
+}
+
+void aiContext::debugDump() const
+{
+    for (const auto &e : m_nodes) {
+        e->debugDump();
+    }
 }

@@ -28,6 +28,8 @@ public:
     void enqueueTask(const task_t &task);
     void waitTasks();
 
+    void debugDump() const;
+
 private:
     void gatherNodesRecursive(aiObject *n);
 

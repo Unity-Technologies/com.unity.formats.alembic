@@ -1,4 +1,4 @@
-﻿#ifndef aiObject_h
+#ifndef aiObject_h
 #define aiObject_h
 
 #include "aiGeometry.h"
@@ -36,6 +36,8 @@ public:
     aiCamera&   getCamera();
     aiLight&    getLight();
     aiMaterial& getMaterial();
+
+    void debugDump() const;
 
 public:
     aiContext*  getContext();

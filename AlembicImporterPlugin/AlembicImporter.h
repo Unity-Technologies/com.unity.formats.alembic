@@ -43,6 +43,7 @@ aiCLinkage aiExport aiContext*      aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
 
 aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);
+aiCLinkage aiExport void            aiDebugDump(aiContext* ctx);
 aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
 aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
@@ -67,7 +68,7 @@ aiCLinkage aiExport aiV3            aiXFormGetScale(aiObject* obj);
 aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiObject* obj);
+aiCLinkage aiExport int             aiPolyMeshGetTopologyVariance(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
