@@ -1,5 +1,8 @@
 #include <algorithm>
 #include <map>
+#include <set>
+#include <vector>
+#include <deque>
 #include <memory>
 #include <thread>
 #include <mutex>

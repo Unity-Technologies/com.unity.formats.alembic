@@ -97,6 +97,11 @@ importer = {"name": "AlembicImporter",
 
 unity.Plugin(importer, libs=embed_libs)
 
+tester = {"name": "tester",
+          "type": "program",
+          "custom": [dl.Require],
+          "srcs": ["TestData/tester.cpp"]}
+
 if sys.platform == "win32":
   # This also looks like a ugly hack that may no be necessary if unity provided
   # us with some per project directory where we can drop dependencies in...
@@ -110,10 +115,10 @@ if sys.platform == "win32":
   # Add 'AddLibraryPath' as a dependency for 'AlembicImporter'
   importer["deps"] = ["AddLibraryPath"]
 
-  targets = [path_hack, importer]
+  targets = [path_hack, importer, tester]
 
 else:
-  targets = [importer]
+  targets = [importer, tester]
 
 excons.DeclareTargets(env, targets)
 
