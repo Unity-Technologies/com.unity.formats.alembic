@@ -76,6 +76,28 @@ public:
     void        copySubmeshUVs(abcV2 *dst, const aiSubmeshInfo &smi) const;
 
 private:
+
+    template <typename NormalIndexArray>
+    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi) const
+    {
+        const auto &counts = *m_counts;
+        const auto &normals = *m_normals.getVals();
+
+        uint32_t a = 0;
+        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+        
+        for (int fi = 0; fi < smi.num_faces; ++fi)
+        {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni)
+            {
+                dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
+                dst[a + ni].x *= x_scale;
+            }
+            a += ngon;
+        }
+    }
+
     // may be a little more that just that then
     // submesh should also contain vertex indices
     typedef std::set<size_t> Faceset;

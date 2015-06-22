@@ -321,22 +321,13 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
 
 void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
-    const auto &counts = *m_counts;
-    const auto &normals = *m_normals.getVals();
-    const auto &indices = *m_normals.getIndices();
-
-    uint32_t a = 0;
-    for (int fi = 0; fi < smi.num_faces; ++fi) {
-        int ngon = counts[smi.begin_face + fi];
-        for (int ni = 0; ni < ngon; ++ni) {
-            dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
-        }
-        a += ngon;
+    if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
+    {
+        copySplitedNormals(dst, *(m_normals.getIndices()), smi);
     }
-    if (m_obj->getReverseX()) {
-        for (size_t i = 0; i < a; ++i) {
-            dst[i].x *= -1.0f;
-        }
+    else
+    {
+        copySplitedNormals(dst, *m_indices, smi);
     }
 }
 
