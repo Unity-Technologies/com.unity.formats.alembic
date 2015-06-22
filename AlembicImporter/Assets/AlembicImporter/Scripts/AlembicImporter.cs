@@ -319,21 +319,25 @@ public class AlembicImporter
             // Setup materials
             MeshRenderer renderer = trans.GetComponent<MeshRenderer>();
             int nmat = renderer.sharedMaterials.Length;
-            Material[] materials = new Material[nsm];
-            
-            for (int i=0; i<nmat; ++i)
+
+            if (nmat < nsm)
             {
-                materials[i] = renderer.sharedMaterials[i];
+                Material[] materials = new Material[nsm];
+                
+                for (int i=0; i<nmat; ++i)
+                {
+                    materials[i] = renderer.sharedMaterials[i];
+                }
+
+                for (int i=nmat; i<nsm; ++i)
+                {
+                    materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                    materials[i].name = "Material " + Convert.ToString(i);
+                }
+
+                renderer.sharedMaterials = materials;
             }
 
-            for (int i=nmat; i<nsm; ++i)
-            {
-                materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-                materials[i].name = "Material " + Convert.ToString(i);
-            }
-
-            renderer.sharedMaterials = materials;
-            
             // Setup submeshes
             while (aiPolyMeshGetNextSubmesh(abc, ref smi))
             {
