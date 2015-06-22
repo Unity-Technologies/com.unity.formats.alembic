@@ -96,7 +96,7 @@ void aiPolyMesh::updateSample()
     }
     
     // only sample topology if we don't already have valid topology data or the mesh has varying topology
-    if (!hasValidTopology || m_schema.getTopologyVariance() == AbcGeom::kHomogeneousTopology)
+    if (!hasValidTopology || m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology)
     {
         m_schema.getFaceIndicesProperty().get(m_indices, ss);
         m_schema.getFaceCountsProperty().get(m_counts, ss);
