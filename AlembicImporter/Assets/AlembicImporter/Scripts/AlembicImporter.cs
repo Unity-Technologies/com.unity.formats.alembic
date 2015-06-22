@@ -293,6 +293,8 @@ public class AlembicImporter
 
         if (needs_index_update)
         {
+            mesh.Clear();
+
             Array.Resize(ref abcmesh.uv_cache, (has_uvs ? nvertices : 0));
         }
 
