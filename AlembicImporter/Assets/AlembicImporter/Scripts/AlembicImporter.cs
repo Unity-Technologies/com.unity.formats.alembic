@@ -305,10 +305,11 @@ public class AlembicImporter
 
         mesh.vertices = abcmesh.position_cache;
         mesh.normals = abcmesh.normal_cache;
-        mesh.uv = abcmesh.uv_cache;
-
+        
         if (needs_index_update)
         {
+            mesh.uv = abcmesh.uv_cache;
+
             aiSubmeshInfo smi = default(aiSubmeshInfo);
 
             int nsm = aiPolyMeshPrepareSubmeshes(abc);
