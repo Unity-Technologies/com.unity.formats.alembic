@@ -534,7 +534,7 @@ void aiPolyMesh::copySubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
             
             // Triangle faning
             int nt = nv - 2;
-            for (int ti = 0; ti < nt; ++it)
+            for (int ti = 0; ti < nt; ++ti)
             {
                 dst[offset + 0] = index;
                 dst[offset + 1] = index + ti + i1;
