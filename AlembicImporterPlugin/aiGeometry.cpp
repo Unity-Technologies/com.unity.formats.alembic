@@ -140,14 +140,9 @@ void aiPolyMesh::updateSample()
     }
 }
 
-bool aiPolyMesh::isTopologyConstant() const
+int aiPolyMesh::getTopologyVariance() const
 {
-    return m_schema.isConstant();
-}
-
-bool aiPolyMesh::isTopologyConstantTriangles() const
-{
-    return m_schema.isConstant() && (*m_counts)[0] == 3;
+    return (int) m_schema.getTopologyVariance();
 }
 
 bool aiPolyMesh::hasNormals() const

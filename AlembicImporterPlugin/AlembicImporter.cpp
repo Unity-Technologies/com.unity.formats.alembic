@@ -212,16 +212,10 @@ aiCLinkage aiExport bool aiHasPolyMesh(aiObject* obj)
     return obj->hasPolyMesh();
 }
 
-aiCLinkage aiExport bool aiPolyMeshIsTopologyConstant(aiObject* obj)
+aiCLinkage aiExport int aiPolyMeshGetTopologyVariance(aiObject* obj)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().isTopologyConstant();
-}
-
-aiCLinkage aiExport bool aiPolyMeshIsTopologyConstantTriangles(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->getPolyMesh().isTopologyConstantTriangles();
+    return obj->getPolyMesh().getTopologyVariance();
 }
 
 aiCLinkage aiExport bool aiPolyMeshHasNormals(aiObject* obj)

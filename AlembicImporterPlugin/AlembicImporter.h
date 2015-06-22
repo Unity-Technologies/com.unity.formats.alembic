@@ -63,8 +63,7 @@ aiCLinkage aiExport aiV3            aiXFormGetScale(aiObject* obj);
 aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObject* obj);
+aiCLinkage aiExport int             aiPolyMeshGetTopologyVariance(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiObject* obj);
