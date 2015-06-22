@@ -32,8 +32,6 @@ struct aiSplitedMeshInfo
 struct aiSubmeshInfo
 {
     int index;
-    int face_count;
-    int vertex_count;
     int triangle_count;
 };
 
@@ -81,12 +79,11 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj,
 aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
-aiCLinkage aiExport void            aiPolyMeshPrepareSubmeshes(aiObject* obj, int max_vertices);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
+aiCLinkage aiExport uint32_t        aiPolyMeshPrepareSubmeshes(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi);
-aiCLinkage aiExport void            aiPolyMeshCopySubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySubmeshVertices(aiObject* obj, abcV3 *dst, const aiSubmeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySubmeshNormals(aiObject* obj, abcV3 *dst, const aiSubmeshInfo *smi);
-aiCLinkage aiExport void            aiPolyMeshCopySubmeshUVs(aiObject* obj, abcV2 *dst, const aiSubmeshInfo *smi);
+aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi);
 
 struct aiTextureMeshData
 {

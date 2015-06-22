@@ -358,19 +358,150 @@ aiPolyMesh::UVTileID aiPolyMesh::uvTileID(float u, float v) const
     return (1000 * utile + vtile);
 }
 
-bool aiPolyMesh::fillUVTileFacesets(std::vector<aiPolyMesh::UVTileID> &face_uvtile)
+uint32_t aiPolyMesh::getVertexBufferLength() const
 {
-    face_uvtile.clear();
+    return (uint32_t) (m_indices ? m_indices->size() : 0);
+}
+
+void aiPolyMesh::fillVertexBuffer(abcV3 *P, abcV3 *N, abcV2 *UV) const
+{
+    bool copy_normals = (m_normals.valid() && N);
+    bool copy_uvs = (m_uvs.valid() && UV);
+    float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+
+    const auto &counts = *m_counts;
+    const auto &indices = *m_indices;
+    const auto &positions = *m_positions;
+
+    size_t n = counts.size();
+    size_t o = 0;
+
+    if (copy_normals && copy_uvs)
+    {
+        const auto &normals = *(m_normals.getVals());
+        const auto &uvs = *(m_uvs.getVals());
+        const auto &uv_indices = *(m_uvs.getIndices());
+
+        if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
+        {
+            const auto &n_indices = *(m_normals.getIndices());
+            
+            for (size_t i = 0; i < n; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o)
+                {
+                    P[o] = positions[indices[o]];
+                    P[o].x *= x_scale;
+                    N[o] = normals[n_indices[o]];
+                    N[o].x *= x_scale;
+                    UV[o] = uvs[uv_indices[o]];
+                }
+            }
+        }
+        else
+        {
+            const auto &n_indices = *m_indices;
+            
+            for (size_t i = 0; i < n; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o)
+                {
+                    P[o] = positions[indices[o]];
+                    P[o].x *= x_scale;
+                    N[o] = normals[n_indices[o]];
+                    N[o].x *= x_scale;
+                    UV[o] = uvs[uv_indices[o]];
+                }
+            }
+        }
+    }
+    else if (copy_normals)
+    {
+        const auto &normals = *(m_normals.getVals());
+
+        if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
+        {
+            const auto &n_indices = *(m_normals.getIndices());
+            
+            for (size_t i = 0; i < n; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o)
+                {
+                    P[o] = positions[indices[o]];
+                    P[o].x *= x_scale;
+                    N[o] = normals[n_indices[o]];
+                    N[o].x *= x_scale;
+                }
+            }
+        }
+        else
+        {
+            const auto &n_indices = *m_indices;
+            
+            for (size_t i = 0; i < n; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o)
+                {
+                    P[o] = positions[indices[o]];
+                    P[o].x *= x_scale;
+                    N[o] = normals[n_indices[o]];
+                    N[o].x *= x_scale;
+                }
+            }
+        }
+    }
+    else if (copy_uvs)
+    {
+        const auto &uvs = *(m_uvs.getVals());
+        const auto &uv_indices = *(m_uvs.getIndices());
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            int nv = counts[i];
+            for (int j = 0; j < nv; ++j, ++o)
+            {
+                P[o] = positions[indices[o]];
+                P[o].x *= x_scale;
+                UV[o] = uvs[uv_indices[o]];
+            }
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < n; ++i)
+        {
+            int nv = counts[i];
+            for (int j = 0; j < nv; ++j, ++o)
+            {
+                P[o] = positions[indices[o]];
+                P[o].x *= x_scale;
+            }
+        }
+    }
+}
+
+uint32_t aiPolyMesh::prepareSubmeshes()
+{
+    std::map<UVTileID, std::vector<size_t> > uvtile_submesh_indices;
+
+    const auto &counts = *m_counts;
+    
+    Submesh *cur_mesh = 0;
+    int vertex_index = 0;
+
+    m_submeshes.clear();
 
     if (m_uvs.valid())
     {
-        const Abc::Int32ArraySample &counts = *m_counts;
-        const Abc::V2fArraySample &uv_values = *(m_uvs.getVals());
-        const Abc::UInt32ArraySample &uv_indices = *(m_uvs.getIndices());
+        const auto &indices = *m_indices;
+        const auto &uv_values = *(m_uvs.getVals());
+        const auto &uv_indices = *(m_uvs.getIndices());
 
-        face_uvtile.resize(counts.size(), InvalidUVTileID);
-
-        for (size_t i=0, fv=0; i<counts.size(); ++i)
+        for (size_t i=0; i<counts.size(); ++i)
         {
             int nv = counts[i];
 
@@ -380,105 +511,60 @@ bool aiPolyMesh::fillUVTileFacesets(std::vector<aiPolyMesh::UVTileID> &face_uvti
                 float v_acc = 0.0f;
                 float inv_nv = 1.0f / float(nv);
 
-                for (int v=0; v<nv; ++v, ++fv)
+                for (int j=0; j<nv; ++j)
                 {
-                    Abc::V2f uv = uv_values[uv_indices[fv]];
+                    Abc::V2f uv = uv_values[uv_indices[vertex_index + j]];
                     u_acc += uv.x;
                     v_acc += uv.y;
                 }
 
                 UVTileID tid = uvTileID(u_acc * inv_nv, v_acc * inv_nv);
                 
-                face_uvtile[i] = tid;
+                std::vector<size_t> &submesh_indices = uvtile_submesh_indices[tid];
+
+                if (submesh_indices.size() == 0)
+                {
+                    submesh_indices.push_back(m_submeshes.size());
+                    m_submeshes.push_back(Submesh());
+                    m_submeshes.back().triangle_count = 0;
+                    m_submeshes.back().vertex_indices.reserve(indices.size());
+                }
+                
+                cur_mesh = &(m_submeshes[submesh_indices.back()]);
+                cur_mesh->faces.insert(i);
+                cur_mesh->triangle_count += (nv - 2);
+
+                for (int j=0; j<nv; ++j, ++vertex_index)
+                {
+                    cur_mesh->vertex_indices.push_back(vertex_index);
+                }
             }
         }
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void aiPolyMesh::prepareSubmeshes(int max_vertices)
-{
-    // Build face sets based on UV tiles
-
-    std::vector<UVTileID> face_uvtile;
-
-    if (!fillUVTileFacesets(face_uvtile))
-    {
-        face_uvtile.resize(m_counts->size(), InvalidUVTileID);
-    }
-
-    // Create a submesh for each face set (also splitting based on vertex count)
-
-    IndexPassthrough index_passthrough;
-
-    if (m_normals.valid())
-    {
-        if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
+        for (size_t i=0; i<m_submeshes.size(); ++i)
         {
-            if (m_uvs.valid())
-            {
-                fillSubmeshIndices(face_uvtile, *(m_normals.getIndices()), *(m_uvs.getIndices()), size_t(max_vertices));
-            }
-            else
-            {
-                fillSubmeshIndices(face_uvtile, *(m_normals.getIndices()), index_passthrough, size_t(max_vertices));
-            }
-        }
-        else
-        {
-            if (m_uvs.valid())
-            {
-                fillSubmeshIndices(face_uvtile, *m_indices, *(m_uvs.getIndices()), size_t(max_vertices));
-            }
-            else
-            {
-                fillSubmeshIndices(face_uvtile, *m_indices, index_passthrough, size_t(max_vertices));
-            }
+            m_submeshes[i].vertex_indices.shrink_to_fit();
         }
     }
     else
     {
-        if (m_uvs.valid())
-        {
-            fillSubmeshIndices(face_uvtile, index_passthrough, *(m_uvs.getIndices()), size_t(max_vertices));
-        }
-        else
-        {
-            fillSubmeshIndices(face_uvtile, index_passthrough, index_passthrough, size_t(max_vertices));
-        }
-    }
-
-    // Optimize allocated memory
-
-    for (size_t i=0; i<m_submeshes.size(); ++i)
-    {
-        m_submeshes[i].vertex_indices.shrink_to_fit();
+        // single submesh, only set triangle count
         
-        if (m_normals.valid())
-        {
-            m_submeshes[i].normal_indices.shrink_to_fit();
-        }
-        else
-        {
-            m_submeshes[i].normal_indices.clear();
-        }
+        m_submeshes.push_back(Submesh());
+        
+        Submesh &submesh = m_submeshes.back();
 
-        if (m_uvs.valid())
+        submesh.triangle_count = 0;
+
+        for (size_t i=0; i<counts.size(); ++i)
         {
-            m_submeshes[i].uv_indices.shrink_to_fit();
-        }
-        else
-        {
-            m_submeshes[i].uv_indices.clear();
+            submesh.triangle_count += (counts[i] - 2);
         }
     }
 
     m_cur_submesh = m_submeshes.begin();
+
+    return (uint32_t) m_submeshes.size();
 }
 
 bool aiPolyMesh::getNextSubmesh(aiSubmeshInfo &o_smi)
@@ -492,8 +578,6 @@ bool aiPolyMesh::getNextSubmesh(aiSubmeshInfo &o_smi)
         Submesh &submesh = *m_cur_submesh;
 
         o_smi.index = int(m_cur_submesh - m_submeshes.begin());
-        o_smi.face_count = int(submesh.faces.size());
-        o_smi.vertex_count = int(submesh.vertex_indices.size());
         o_smi.triangle_count = int(submesh.triangle_count);
 
         ++m_cur_submesh;
@@ -502,7 +586,7 @@ bool aiPolyMesh::getNextSubmesh(aiSubmeshInfo &o_smi)
     }
 }
 
-void aiPolyMesh::copySubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
+void aiPolyMesh::fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
 {
     Submeshes::const_iterator it = m_submeshes.begin() + smi.index;
     
@@ -512,103 +596,48 @@ void aiPolyMesh::copySubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
         const auto &counts = *m_counts;
         const Submesh &submesh = *it;
 
-        // Note: do not need m_indices as vertex/normals/uvs are duplicated and re-index per submesh
-
         int index = 0;
         int i1 = (reverse_index ? 2 : 1);
         int i2 = (reverse_index ? 1 : 2);
         int offset = 0;
         
-        for (Faceset::const_iterator fit = submesh.faces.begin(); fit != submesh.faces.end(); ++fit)
+        if (submesh.faces.size() == 0 && submesh.vertex_indices.size() == 0)
         {
-            int nv = counts[*fit];
-            
-            // Triangle faning
-            int nt = nv - 2;
-            for (int ti = 0; ti < nt; ++ti)
+            // single submesh case, faces and vertex_indices not populated
+
+            for (size_t i=0; i<counts.size(); ++i)
             {
-                dst[offset + 0] = index;
-                dst[offset + 1] = index + ti + i1;
-                dst[offset + 2] = index + ti + i2;
-                offset += 3;
-            }
+                int nv = counts[i];
+                
+                int nt = nv - 2;
+                for (int ti=0; ti<nt; ++ti)
+                {
+                    dst[offset + 0] = index;
+                    dst[offset + 1] = index + ti + i1;
+                    dst[offset + 2] = index + ti + i2;
+                    offset += 3;
+                }
 
-            index += nv;
-        }
-    }
-}
-
-void aiPolyMesh::copySubmeshVertices(abcV3 *dst, const aiSubmeshInfo &smi) const
-{
-    Submeshes::const_iterator it = m_submeshes.begin() + smi.index;
-    
-    if (it != m_submeshes.end())
-    {
-        const auto &counts = *m_counts;
-        const auto &positions = *m_positions;
-        const Submesh &submesh = *it;
-
-        size_t offset = 0;
-        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
-
-        for (Faceset::const_iterator fit = submesh.faces.begin(); fit != submesh.faces.end(); ++fit)
-        {
-            int nv = counts[*fit];
-
-            for (int fv = 0; fv < nv; ++fv, ++offset)
-            {
-                dst[offset] = positions[submesh.vertex_indices[offset]];
-                dst[offset].x *= x_scale;
+                index += nv;
             }
         }
-    }
-}
-
-void aiPolyMesh::copySubmeshNormals(abcV3 *dst, const aiSubmeshInfo &smi) const
-{
-    Submeshes::const_iterator it = m_submeshes.begin() + smi.index;
-    
-    if (it != m_submeshes.end())
-    {
-        const auto &counts = *m_counts;
-        const auto &normals = *m_normals.getVals();
-        const Submesh &submesh = *it;
-
-        size_t offset = 0;
-        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
-
-        for (Faceset::const_iterator fit = submesh.faces.begin(); fit != submesh.faces.end(); ++fit)
+        else
         {
-            int nv = counts[*fit];
-
-            for (int fv = 0; fv < nv; ++fv, ++offset)
+            for (Faceset::const_iterator fit = submesh.faces.begin(); fit != submesh.faces.end(); ++fit)
             {
-                dst[offset] = normals[submesh.normal_indices[offset]];
-                dst[offset].x *= x_scale;
-            }
-        }
-    }
-}
+                int nv = counts[*fit];
+                
+                // Triangle faning
+                int nt = nv - 2;
+                for (int ti = 0; ti < nt; ++ti)
+                {
+                    dst[offset + 0] = submesh.vertex_indices[index];
+                    dst[offset + 1] = submesh.vertex_indices[index + ti + i1];
+                    dst[offset + 2] = submesh.vertex_indices[index + ti + i2];
+                    offset += 3;
+                }
 
-void aiPolyMesh::copySubmeshUVs(abcV2 *dst, const aiSubmeshInfo &smi) const
-{
-    Submeshes::const_iterator it = m_submeshes.begin() + smi.index;
-    
-    if (it != m_submeshes.end())
-    {
-        const auto &counts = *m_counts;
-        const auto &uvs = *m_uvs.getVals();
-        const Submesh &submesh = *it;
-
-        size_t offset = 0;
-
-        for (Faceset::const_iterator fit = submesh.faces.begin(); fit != submesh.faces.end(); ++fit)
-        {
-            int nv = counts[*fit];
-
-            for (int fv = 0; fv < nv; ++fv, ++offset)
-            {
-                dst[offset] = uvs[submesh.uv_indices[offset]];
+                index += nv;
             }
         }
     }

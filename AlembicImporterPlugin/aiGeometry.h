@@ -68,12 +68,11 @@ public:
     void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
-    void        prepareSubmeshes(int max_vertices);
+    uint32_t    getVertexBufferLength() const;
+    void        fillVertexBuffer(abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    uint32_t    prepareSubmeshes();
     bool        getNextSubmesh(aiSubmeshInfo &o_smi);
-    void        copySubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
-    void        copySubmeshVertices(abcV3 *dst, const aiSubmeshInfo &smi) const;
-    void        copySubmeshNormals(abcV3 *dst, const aiSubmeshInfo &smi) const;
-    void        copySubmeshUVs(abcV2 *dst, const aiSubmeshInfo &smi) const;
+    void        fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
 
 private:
 
@@ -109,8 +108,6 @@ private:
         // original faceset if had to be splitted
         Faceset faces;
         std::vector<int> vertex_indices;
-        std::vector<int> normal_indices;
-        std::vector<int> uv_indices;
         size_t triangle_count;
     };
 
@@ -124,63 +121,6 @@ private:
     UVTileID uvTileID(float u, float v) const;
 
     static const UVTileID InvalidUVTileID;
-
-    bool fillUVTileFacesets(std::vector<UVTileID> &face_uvtile);
-
-    template <typename NormalIndexArray, typename UVIndexArray>
-    void fillSubmeshIndices(const std::vector<UVTileID> &face_uvtile,
-                            const NormalIndexArray &normal_indices,
-                            const UVIndexArray &uv_indices,
-                            size_t max_vertices)
-    {
-        const auto &counts = *m_counts;
-        const auto &indices = *m_indices;
-
-        m_submeshes.clear();
-
-        std::map<UVTileID, std::vector<size_t> > uvtile_submesh_indices;
-
-        size_t vertex_index = 0;
-        Submesh *cur_mesh = 0;
-
-        for (size_t f=0; f<counts.size(); ++f)
-        {
-            int nv = counts[f];
-
-            if (nv == 0)
-            {
-                continue;
-            }
-
-            std::vector<size_t> &submesh_indices = uvtile_submesh_indices[face_uvtile[f]];
-
-            if (submesh_indices.size() == 0 ||
-                m_submeshes[submesh_indices.back()].vertex_indices.size() + nv > max_vertices)
-            {
-                submesh_indices.push_back(m_submeshes.size());
-                m_submeshes.push_back(Submesh());
-
-                // allocate indices for position, normals and indices
-                m_submeshes.back().triangle_count = 0;
-                m_submeshes.back().vertex_indices.reserve(indices.size());
-                m_submeshes.back().normal_indices.reserve(indices.size());
-                m_submeshes.back().uv_indices.reserve(indices.size());
-            }
-            
-            cur_mesh = &(m_submeshes[submesh_indices.back()]);
-            cur_mesh->faces.insert(f);
-            cur_mesh->triangle_count += (nv - 2);
-
-            for (int v=0; v<nv; ++v)
-            {
-                cur_mesh->vertex_indices.push_back(indices[vertex_index + v]);
-                cur_mesh->normal_indices.push_back(normal_indices[vertex_index + v]);
-                cur_mesh->uv_indices.push_back(uv_indices[vertex_index + v]);
-            }
-
-            vertex_index += nv;
-        }
-    }
 
 private:
     AbcGeom::IPolyMeshSchema m_schema;
