@@ -13,17 +13,16 @@ using UnityEditor;
 public class AlembicMesh : MonoBehaviour
 {
     [Serializable]
-    public class Entry
+    public class Submesh
     {
         public int[] index_cache;
-        public Vector3[] vertex_cache;
-        public Vector2[] uv_cache;
-        public Mesh mesh;
-        public GameObject host;
     }
 
     public IntPtr m_abc_mesh;
-    public List<Entry> m_meshes = new List<Entry>();
+    public List<Submesh> m_submeshes = new List<Submesh>();
+    public Vector3[] position_cache = new Vector3[0];
+    public Vector3[] normal_cache = new Vector3[0];
+    public Vector2[] uv_cache = new Vector2[0];
 
     public RenderTexture m_indices;
     public RenderTexture m_vertices;

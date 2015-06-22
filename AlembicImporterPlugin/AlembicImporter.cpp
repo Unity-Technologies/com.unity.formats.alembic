@@ -303,10 +303,22 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
     return obj->getPolyMesh().copySplitedUVs(dst, *smi);
 }
 
-aiCLinkage aiExport void aiPolyMeshPrepareSubmeshes(aiObject* obj, int max_vertices)
+aiCLinkage aiExport uint32_t aiPolyMeshGetVertexBufferLength(aiObject* obj)
 {
     aiCheckObject(obj);
-    obj->getPolyMesh().prepareSubmeshes(max_vertices);
+    return obj->getPolyMesh().getVertexBufferLength();
+}
+
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positions, abcV3 *normals, abcV2 *uvs)
+{
+    aiCheckObject(obj);
+    obj->getPolyMesh().fillVertexBuffer(positions, normals, uvs);
+}
+
+aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().prepareSubmeshes();
 }
 
 aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi)
@@ -315,28 +327,10 @@ aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *
     return obj->getPolyMesh().getNextSubmesh(*o_smi);
 }
 
-aiCLinkage aiExport void aiPolyMeshCopySubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi)
+aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi)
 {
     aiCheckObject(obj);
-    obj->getPolyMesh().copySubmeshIndices(dst, *smi);
-}
-
-aiCLinkage aiExport void aiPolyMeshCopySubmeshVertices(aiObject* obj, abcV3 *dst, const aiSubmeshInfo *smi)
-{
-    aiCheckObject(obj);
-    obj->getPolyMesh().copySubmeshVertices(dst, *smi);
-}
-
-aiCLinkage aiExport void aiPolyMeshCopySubmeshNormals(aiObject* obj, abcV3 *dst, const aiSubmeshInfo *smi)
-{
-    aiCheckObject(obj);
-    obj->getPolyMesh().copySubmeshNormals(dst, *smi);
-}
-
-aiCLinkage aiExport void aiPolyMeshCopySubmeshUVs(aiObject* obj, abcV2 *dst, const aiSubmeshInfo *smi)
-{
-    aiCheckObject(obj);
-    obj->getPolyMesh().copySubmeshUVs(dst, *smi);
+    obj->getPolyMesh().fillSubmeshIndices(dst, *smi);
 }
 
 

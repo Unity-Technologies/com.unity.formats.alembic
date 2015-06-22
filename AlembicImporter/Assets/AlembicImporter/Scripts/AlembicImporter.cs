@@ -25,8 +25,6 @@ public class AlembicImporter
     public struct aiSubmeshInfo
     {
         public int index;
-        public int face_count;
-        public int vertex_count;
         public int triangle_count;
     }
 
@@ -108,12 +106,11 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(aiObject obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
 
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshPrepareSubmeshes(aiObject obj, int max_vertices);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, IntPtr positions, IntPtr normals, IntPtr uvs);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo o_smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySubmeshIndices(aiObject obj, IntPtr indices, ref aiSubmeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySubmeshVertices(aiObject obj, IntPtr vertices, ref aiSubmeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySubmeshNormals(aiObject obj, IntPtr normals, ref aiSubmeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySubmeshUVs(aiObject obj, IntPtr uvs, ref aiSubmeshInfo smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiObject obj, IntPtr indices, ref aiSubmeshInfo smi);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(aiObject obj, ref aiCameraParams o_params);
@@ -265,237 +262,95 @@ public class AlembicImporter
 
     public static void UpdateAbcMesh(aiObject abc, Transform trans)
     {
-        const int max_vertices = 65000;
+        int nvertices = aiPolyMeshGetVertexBufferLength(abc);
+
+        if (nvertices == 0)
+        {
+            return;
+        }
 
         AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
-        if(abcmesh==null)
+        
+        if (abcmesh == null)
         {
             abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
-            var entry = new AlembicMesh.Entry {
-                host = trans.gameObject,
-                mesh = AddMeshComponents(abc, trans),
-                vertex_cache = new Vector3[0],
-                uv_cache = new Vector2[0],
-                index_cache = new int[0],
-            };
-            abcmesh.m_meshes.Add(entry);
-#if UNITY_EDITOR
-            trans.GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
-#endif
         }
-        Material material = trans.GetComponent<MeshRenderer>().sharedMaterial;
 
-        /*
+        Mesh mesh = AddMeshComponents(abc, trans);
+
+        bool has_normals = aiPolyMeshHasNormals(abc);
+        bool has_uvs = aiPolyMeshHasUVs(abc);
+        bool needs_index_update = (mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(abc));
+
+        Array.Resize(ref abcmesh.position_cache, nvertices);
+        Array.Resize(ref abcmesh.normal_cache, (has_normals ? nvertices : 0));
+
+        if (needs_index_update)
         {
-            AlembicMesh.Entry entry = abcmesh.m_meshes[0];
-            Array.Resize(ref entry.index_cache, aiPolyMeshGetIndexCount(ctx));
-            Array.Resize(ref entry.vertex_cache, aiPolyMeshGetVertexCount(ctx));
-            aiPolyMeshCopyIndices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0));
-            aiPolyMeshCopyVertices(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0));
-            entry.mesh.Clear();
-            entry.mesh.vertices = entry.vertex_cache;
-            if(aiPolyMeshHasNormals(ctx))
-            {
-                aiPolyMeshCopyNormals(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0));
-                entry.mesh.normals = entry.vertex_cache;
-            }
-            if (aiPolyMeshHasUVs(ctx))
-            {
-                Array.Resize(ref entry.uv_cache, aiPolyMeshGetVertexCount(ctx));
-                aiPolyMeshCopyUVs(ctx, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0));
-                entry.mesh.uv = entry.uv_cache;
-            }
-            entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
-            //entry.mesh.RecalculateNormals(); // 
-
-            for (int i = 1; i < abcmesh.m_meshes.Count; ++i)
-            {
-                abcmesh.m_meshes[i].host.SetActive(false);
-            }
+            Array.Resize(ref abcmesh.uv_cache, (has_uvs ? nvertices : 0));
         }
-        */
 
-        aiSubmeshInfo smi = default(aiSubmeshInfo);
+        aiPolyMeshFillVertexBuffer(abc,
+                                   Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.position_cache, 0),
+                                   (has_normals ? Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.normal_cache, 0) : (IntPtr)0),
+                                   ((needs_index_update && has_uvs) ? Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.uv_cache, 0) : (IntPtr)0));
 
-        aiPolyMeshPrepareSubmeshes(abc, max_vertices);
+        mesh.vertices = abcmesh.position_cache;
+        mesh.normals = abcmesh.normal_cache;
+        mesh.uv = abcmesh.uv_cache;
 
-        int nth_submesh = 0;
-
-        while (aiPolyMeshGetNextSubmesh(abc, ref smi))
+        if (needs_index_update)
         {
-            AlembicMesh.Entry entry;
+            aiSubmeshInfo smi = default(aiSubmeshInfo);
 
-            if (nth_submesh < abcmesh.m_meshes.Count)
-            {
-                entry = abcmesh.m_meshes[nth_submesh];
-                entry.host.SetActive(true);
-            }
-            else
-            {
-                string name = "Submesh_" + nth_submesh;
+            int nsm = aiPolyMeshPrepareSubmeshes(abc);
 
-                GameObject go = new GameObject();
-                Transform child = go.GetComponent<Transform>();
-                go.name = name;
-                child.parent = trans;
-                child.localPosition = Vector3.zero;
-                child.localEulerAngles = Vector3.zero;
-                child.localScale = Vector3.one;
-                Mesh mesh = AddMeshComponents(abc, child);
-                mesh.name = name;
-                child.GetComponent<MeshRenderer>().sharedMaterial = material;
+            mesh.subMeshCount = nsm;
 
-                entry = new AlembicMesh.Entry
-                {
-                    host = go,
-                    mesh = mesh,
-                    vertex_cache = new Vector3[0],
-                    uv_cache = new Vector2[0],
-                    index_cache = new int[0],
-                };
-                abcmesh.m_meshes.Add(entry);
-            }
-
-            bool needs_index_update = entry.mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(abc);
+            // Setup materials
+            MeshRenderer renderer = trans.GetComponent<MeshRenderer>();
+            int nmat = renderer.sharedMaterials.Length;
+            Material[] materials = new Material[nsm];
             
-            if (needs_index_update)
+            for (int i=0; i<nmat; ++i)
             {
-                entry.mesh.Clear();
+                materials[i] = renderer.sharedMaterials[i];
             }
 
-            // update positions
-            Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-            aiPolyMeshCopySubmeshVertices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-            entry.mesh.vertices = entry.vertex_cache;
+            for (int i=nmat; i<nsm; ++i)
+            {
+                materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                materials[i].name = "Material " + Convert.ToString(i);
+            }
+
+            renderer.sharedMaterials = materials;
             
-            // update normals
-            if (aiPolyMeshHasNormals(abc))
+            // Setup submeshes
+            while (aiPolyMeshGetNextSubmesh(abc, ref smi))
             {
-                // normals can reuse entry.vertex_cache
-                aiPolyMeshCopySubmeshNormals(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-                entry.mesh.normals = entry.vertex_cache;
-            }
+                AlembicMesh.Submesh submesh;
 
-            if (needs_index_update)
-            {
-                // update uvs
-                if (aiPolyMeshHasUVs(abc))
+                if (smi.index < abcmesh.m_submeshes.Count)
                 {
-                    Array.Resize(ref entry.uv_cache, smi.vertex_count);
-                    aiPolyMeshCopySubmeshUVs(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0), ref smi);
-                    entry.mesh.uv = entry.uv_cache;
+                    submesh = abcmesh.m_submeshes[smi.index];
+                }
+                else
+                {
+                    submesh = new AlembicMesh.Submesh { index_cache = new int[0] };
+                    abcmesh.m_submeshes.Add(submesh);
                 }
 
                 // update indices
-                Array.Resize(ref entry.index_cache, smi.triangle_count * 3);
-                aiPolyMeshCopySubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
-                entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
+                Array.Resize(ref submesh.index_cache, smi.triangle_count * 3);
+                aiPolyMeshFillSubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(submesh.index_cache, 0), ref smi);
+                
+                mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.index);
             }
-
-            // recalculate normals
-            if (!aiPolyMeshHasNormals(abc))
-            {
-                entry.mesh.RecalculateNormals();
-            }
-
-            ++nth_submesh;
         }
 
-        /*
-        aiSplitedMeshInfo smi_prev = default(aiSplitedMeshInfo);
-        aiSplitedMeshInfo smi = default(aiSplitedMeshInfo);
-
-        int nth_submesh = 0;
-        for (; ; )
+        if (!has_normals)
         {
-            smi_prev = smi;
-            smi = default(aiSplitedMeshInfo);
-            bool is_end = aiPolyMeshGetSplitedMeshInfo(abc, ref smi, ref smi_prev, max_vertices);
-
-            AlembicMesh.Entry entry;
-            if (nth_submesh < abcmesh.m_meshes.Count)
-            {
-                entry = abcmesh.m_meshes[nth_submesh];
-                entry.host.SetActive(true);
-            }
-            else
-            {
-                string name = "Submesh_" + nth_submesh;
-
-                GameObject go = new GameObject();
-                Transform child = go.GetComponent<Transform>();
-                go.name = name;
-                child.parent = trans;
-                child.localPosition = Vector3.zero;
-                child.localEulerAngles = Vector3.zero;
-                child.localScale = Vector3.one;
-                Mesh mesh = AddMeshComponents(abc, child);
-                mesh.name = name;
-                child.GetComponent<MeshRenderer>().sharedMaterial = material;
-
-                entry = new AlembicMesh.Entry
-                {
-                    host = go,
-                    mesh = mesh,
-                    vertex_cache = new Vector3[0],
-                    uv_cache = new Vector2[0],
-                    index_cache = new int[0],
-                };
-                abcmesh.m_meshes.Add(entry);
-            }
-
-            bool needs_index_update = entry.mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(abc);
-            if (needs_index_update)
-            {
-                entry.mesh.Clear();
-            }
-
-            // update positions
-            {
-                Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-                aiPolyMeshCopySplitedVertices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-                entry.mesh.vertices = entry.vertex_cache;
-            }
-
-            // update normals
-            if (aiPolyMeshHasNormals(abc))
-            {
-                // normals can reuse entry.vertex_cache
-                aiPolyMeshCopySplitedNormals(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-                entry.mesh.normals = entry.vertex_cache;
-            }
-
-            if (needs_index_update)
-            {
-                // update uvs
-                if (aiPolyMeshHasUVs(abc))
-                {
-                    Array.Resize(ref entry.uv_cache, smi.vertex_count);
-                    aiPolyMeshCopySplitedUVs(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0), ref smi);
-                    entry.mesh.uv = entry.uv_cache;
-                }
-
-                // update indices
-                Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
-                aiPolyMeshCopySplitedIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
-                entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
-            }
-
-            // recalculate normals
-            if (!aiPolyMeshHasNormals(abc))
-            {
-                entry.mesh.RecalculateNormals();
-            }
-
-            ++nth_submesh;
-            if (is_end) { break; }
-        }
-        */
-
-        // activate remaining meshes if any...
-        for (int i = nth_submesh + 1; i < abcmesh.m_meshes.Count; ++i)
-        {
-            abcmesh.m_meshes[i].host.SetActive(false);
+            mesh.RecalculateNormals();
         }
     }
 
@@ -512,7 +367,9 @@ public class AlembicImporter
             mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
             mesh_filter.sharedMesh = mesh;
 
-            trans.gameObject.AddComponent<MeshRenderer>();
+            MeshRenderer renderer = trans.gameObject.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+            renderer.sharedMaterial.name = "Material 0";
         }
         else
         {
