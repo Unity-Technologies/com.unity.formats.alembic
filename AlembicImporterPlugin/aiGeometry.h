@@ -50,8 +50,7 @@ public:
     void        enableTriangulate(bool v);
     void        enableReverseIndex(bool v);
 
-    bool        isTopologyConstant() const;
-    bool        isTopologyConstantTriangles() const;
+    int         getTopologyVariance() const;
     bool        hasNormals() const;
     bool        hasUVs() const;
 

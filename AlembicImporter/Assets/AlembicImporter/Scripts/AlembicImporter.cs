@@ -58,6 +58,13 @@ public class AlembicImporter
         public System.IntPtr ptr;
     }
 
+    public enum aiTopologyVariance
+    {
+        Constant,
+        Homogeneous,
+        Heterogeneous
+    }
+
 #if UNITY_STANDALONE_WIN
     [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
 #endif
@@ -90,8 +97,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstant(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern aiTopologyVariance aiPolyMeshGetTopologyVariance(aiObject obj);    
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasNormals(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasUVs(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetIndexCount(aiObject obj);
@@ -280,7 +286,7 @@ public class AlembicImporter
 
         bool has_normals = aiPolyMeshHasNormals(abc);
         bool has_uvs = aiPolyMeshHasUVs(abc);
-        bool needs_index_update = (mesh.vertexCount == 0 || !aiPolyMeshIsTopologyConstant(abc));
+        bool needs_index_update = (mesh.vertexCount == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
 
         Array.Resize(ref abcmesh.position_cache, nvertices);
         Array.Resize(ref abcmesh.normal_cache, (has_normals ? nvertices : 0));
