@@ -139,6 +139,7 @@ private:
                 m_submeshes.push_back(Submesh());
 
                 // allocate indices for position, normals and indices
+                m_submeshes.back().triangle_count = 0;
                 m_submeshes.back().vertex_indices.reserve(indices.size());
                 m_submeshes.back().normal_indices.reserve(indices.size());
                 m_submeshes.back().uv_indices.reserve(indices.size());
