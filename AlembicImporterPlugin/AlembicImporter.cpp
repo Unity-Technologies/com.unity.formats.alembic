@@ -309,10 +309,10 @@ aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positi
     obj->getPolyMesh().fillVertexBuffer(positions, normals, uvs);
 }
 
-aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj)
+aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().prepareSubmeshes();
+    return obj->getPolyMesh().prepareSubmeshes(facesets);
 }
 
 aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi)

@@ -23,6 +23,7 @@ public class AlembicMesh : MonoBehaviour
     public Vector3[] position_cache = new Vector3[0];
     public Vector3[] normal_cache = new Vector3[0];
     public Vector2[] uv_cache = new Vector2[0];
+    public bool has_facesets = false;
 
     public RenderTexture m_indices;
     public RenderTexture m_vertices;

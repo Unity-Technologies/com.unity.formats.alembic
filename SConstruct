@@ -23,7 +23,8 @@ lib_dirs = []
 libs = []
 embed_libs = []
 customs = []
-install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs")}
+install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs"),
+                 "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs")}
 sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPath.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
 
 if excons.GetArgument("debug", 0, int) != 0:

@@ -69,7 +69,7 @@ public:
 
     uint32_t    getVertexBufferLength() const;
     void        fillVertexBuffer(abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
-    uint32_t    prepareSubmeshes();
+    uint32_t    prepareSubmeshes(const aiFacesets *facesets);
     bool        getNextSubmesh(aiSubmeshInfo &o_smi);
     void        fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
 
@@ -99,8 +99,9 @@ private:
     // may be a little more that just that then
     // submesh should also contain vertex indices
     typedef std::set<size_t> Faceset;
+    typedef std::vector<Faceset> Facesets;
     
-    typedef Alembic::Util::int64_t UVTileID;
+    typedef Alembic::Util::int64_t SubmeshID;
 
     struct Submesh
     {
@@ -108,6 +109,7 @@ private:
         Faceset faces;
         std::vector<int> vertex_indices;
         size_t triangle_count;
+        int faceset_index;
     };
 
     typedef std::deque<Submesh> Submeshes;
@@ -117,9 +119,7 @@ private:
         inline size_t operator[](size_t idx) const { return idx; }
     };
 
-    UVTileID uvTileID(float u, float v) const;
-
-    static const UVTileID InvalidUVTileID;
+    SubmeshID computeSubmeshID(float u, float v, int faceset) const;
 
 private:
     AbcGeom::IPolyMeshSchema m_schema;
