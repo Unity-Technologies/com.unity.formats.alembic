@@ -26,6 +26,14 @@ public class AlembicImporter
     {
         public int index;
         public int triangle_count;
+        public int faceset_index;
+    }
+
+    public struct aiFacesets
+    {
+        public int count;
+        public IntPtr face_counts;
+        public IntPtr face_indices;
     }
 
     public struct aiMeshData
@@ -114,7 +122,7 @@ public class AlembicImporter
 
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, IntPtr positions, IntPtr normals, IntPtr uvs);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj, ref aiFacesets facesets);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo o_smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiObject obj, IntPtr indices, ref aiSubmeshInfo smi);
 
@@ -288,6 +296,20 @@ public class AlembicImporter
         bool has_uvs = aiPolyMeshHasUVs(abc);
         bool needs_index_update = (mesh.vertexCount == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
 
+        aiFacesets facesets = default(aiFacesets);
+
+        AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
+        if (abcmaterials != null)
+        {
+            needs_index_update = needs_index_update || abcmaterials.UpdateCache(ref facesets);
+            abcmesh.has_facesets = (facesets.count > 0);
+        }
+        else if (abcmesh.has_facesets)
+        {
+            needs_index_update = true;
+            abcmesh.has_facesets = false;
+        }
+
         Array.Resize(ref abcmesh.position_cache, nvertices);
         Array.Resize(ref abcmesh.normal_cache, (has_normals ? nvertices : 0));
 
@@ -312,7 +334,7 @@ public class AlembicImporter
 
             aiSubmeshInfo smi = default(aiSubmeshInfo);
 
-            int nsm = aiPolyMeshPrepareSubmeshes(abc);
+            int nsm = aiPolyMeshPrepareSubmeshes(abc, ref facesets);
 
             mesh.subMeshCount = nsm;
 
@@ -320,9 +342,14 @@ public class AlembicImporter
             MeshRenderer renderer = trans.GetComponent<MeshRenderer>();
             int nmat = renderer.sharedMaterials.Length;
 
-            if (nmat < nsm)
+            Material[] materials;
+            bool update_materials = false;
+
+            if (nmat != nsm)
             {
-                Material[] materials = new Material[nsm];
+                update_materials = true;
+
+                materials = new Material[nsm];
                 
                 for (int i=0; i<nmat; ++i)
                 {
@@ -334,8 +361,10 @@ public class AlembicImporter
                     materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
                     materials[i].name = "Material " + Convert.ToString(i);
                 }
-
-                renderer.sharedMaterials = materials;
+            }
+            else
+            {
+                materials = renderer.sharedMaterials;
             }
 
             // Setup submeshes
@@ -358,6 +387,22 @@ public class AlembicImporter
                 aiPolyMeshFillSubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(submesh.index_cache, 0), ref smi);
                 
                 mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.index);
+
+                if (abcmaterials != null && smi.faceset_index != -1)
+                {
+                    Material material = abcmaterials.assignments[smi.faceset_index].material;
+
+                    if (material != materials[smi.index])
+                    {
+                        materials[smi.index] = material;
+                        update_materials = true;
+                    }
+                }
+            }
+
+            if (update_materials)
+            {
+                renderer.sharedMaterials = materials;
             }
         }
 
