@@ -50,8 +50,7 @@ public:
     void        enableTriangulate(bool v);
     void        enableReverseIndex(bool v);
 
-    bool        isTopologyConstant() const;
-    bool        isTopologyConstantTriangles() const;
+    int         getTopologyVariance() const;
     bool        hasNormals() const;
     bool        hasUVs() const;
 
@@ -68,6 +67,60 @@ public:
     void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
+    uint32_t    getVertexBufferLength() const;
+    void        fillVertexBuffer(abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    uint32_t    prepareSubmeshes(const aiFacesets *facesets);
+    bool        getNextSubmesh(aiSubmeshInfo &o_smi);
+    void        fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
+
+private:
+
+    template <typename NormalIndexArray>
+    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi) const
+    {
+        const auto &counts = *m_counts;
+        const auto &normals = *m_normals.getVals();
+
+        uint32_t a = 0;
+        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+        
+        for (int fi = 0; fi < smi.num_faces; ++fi)
+        {
+            int ngon = counts[smi.begin_face + fi];
+            for (int ni = 0; ni < ngon; ++ni)
+            {
+                dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
+                dst[a + ni].x *= x_scale;
+            }
+            a += ngon;
+        }
+    }
+
+    // may be a little more that just that then
+    // submesh should also contain vertex indices
+    typedef std::set<size_t> Faceset;
+    typedef std::vector<Faceset> Facesets;
+    
+    typedef Alembic::Util::int64_t SubmeshID;
+
+    struct Submesh
+    {
+        // original faceset if had to be splitted
+        Faceset faces;
+        std::vector<int> vertex_indices;
+        size_t triangle_count;
+        int faceset_index;
+    };
+
+    typedef std::deque<Submesh> Submeshes;
+
+    struct IndexPassthrough
+    {
+        inline size_t operator[](size_t idx) const { return idx; }
+    };
+
+    SubmeshID computeSubmeshID(float u, float v, int faceset) const;
+
 private:
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
@@ -76,6 +129,9 @@ private:
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
+
+    Submeshes m_submeshes;
+    Submeshes::iterator m_cur_submesh;
 };
 
 

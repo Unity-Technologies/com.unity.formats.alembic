@@ -15,16 +15,20 @@ public class AlembicStream : MonoBehaviour
 
     public string m_path_to_abc;
     public float m_time;
-    public float m_start_time;
-    public float m_end_time;
-    public float m_time_offset;
+    public float m_start_time = 0.0f;
+    public float m_end_time = 0.0f;
+    public float m_time_offset = 0.0f;
     public float m_time_scale = 1.0f;
     public bool m_preserve_start_time = true;
     public CycleType m_cycle = CycleType.Hold;
     public bool m_reverse_x;
     public bool m_reverse_faces;
+    public bool m_force_refresh;
+    
     bool m_loaded;
-    float m_time_prev;
+    float m_adjusted_time_prev;
+    bool m_reverse_x_prev;
+    bool m_reverse_faces_prev;
     float m_time_eps = 0.001f;
     AlembicImporter.aiContext m_abc;
 
@@ -113,8 +117,12 @@ public class AlembicStream : MonoBehaviour
 
     void Start()
     {
-        m_time_prev = 0.0f;
         m_time = 0.0f;
+
+        m_adjusted_time_prev = AdjustTime(0.0f);
+        m_reverse_x_prev = m_reverse_x;
+        m_reverse_faces_prev = m_reverse_faces;
+        m_force_refresh = false;
     }
 
     void Update()
@@ -123,14 +131,23 @@ public class AlembicStream : MonoBehaviour
         {
             m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
         }
-        if(m_loaded)
+        if (m_loaded)
         {
             m_time += Time.deltaTime;
 
-            if (Math.Abs(m_time - m_time_prev) > m_time_eps)
+            float adjusted_time = AdjustTime(m_time);
+
+            if (m_force_refresh || 
+                m_reverse_x != m_reverse_x_prev ||
+                m_reverse_faces != m_reverse_faces_prev ||
+                Math.Abs(adjusted_time - m_adjusted_time_prev) > m_time_eps)
             {
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, AdjustTime(m_time));
-                m_time_prev = m_time;
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, adjusted_time);
+                
+                m_adjusted_time_prev = adjusted_time;
+                m_reverse_x_prev = m_reverse_x;
+                m_reverse_faces_prev = m_reverse_faces;
+                m_force_refresh = false;
             }
         }
     }
