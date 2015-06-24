@@ -29,6 +29,20 @@ struct aiSplitedMeshInfo
     int triangulated_index_count;
 };
 
+struct aiSubmeshInfo
+{
+    int index;
+    int triangle_count;
+    int faceset_index;
+};
+
+struct aiFacesets
+{
+    int count;
+    int *face_counts;
+    int *face_indices;
+};
+
 
 aiCLinkage aiExport aiContext*      aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
@@ -57,8 +71,7 @@ aiCLinkage aiExport aiV3            aiXFormGetScale(aiObject* obj);
 aiCLinkage aiExport aiM44           aiXFormGetMatrix(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstant(aiObject* obj);
-aiCLinkage aiExport bool            aiPolyMeshIsTopologyConstantTriangles(aiObject* obj);
+aiCLinkage aiExport int             aiPolyMeshGetTopologyVariance(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasNormals(aiObject* obj);
 aiCLinkage aiExport bool            aiPolyMeshHasUVs(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetIndexCount(aiObject* obj);
@@ -72,6 +85,12 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedIndices(aiObject* obj, 
 aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
+
+aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
+aiCLinkage aiExport uint32_t        aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets);
+aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi);
+aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi);
 
 struct aiTextureMeshData
 {

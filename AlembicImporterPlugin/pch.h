@@ -1,9 +1,13 @@
 #include <algorithm>
 #include <map>
+#include <set>
+#include <vector>
+#include <deque>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <limits>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>

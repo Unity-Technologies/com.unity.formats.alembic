@@ -212,16 +212,10 @@ aiCLinkage aiExport bool aiHasPolyMesh(aiObject* obj)
     return obj->hasPolyMesh();
 }
 
-aiCLinkage aiExport bool aiPolyMeshIsTopologyConstant(aiObject* obj)
+aiCLinkage aiExport int aiPolyMeshGetTopologyVariance(aiObject* obj)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().isTopologyConstant();
-}
-
-aiCLinkage aiExport bool aiPolyMeshIsTopologyConstantTriangles(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->getPolyMesh().isTopologyConstantTriangles();
+    return obj->getPolyMesh().getTopologyVariance();
 }
 
 aiCLinkage aiExport bool aiPolyMeshHasNormals(aiObject* obj)
@@ -301,6 +295,36 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
 {
     aiCheckObject(obj);
     return obj->getPolyMesh().copySplitedUVs(dst, *smi);
+}
+
+aiCLinkage aiExport uint32_t aiPolyMeshGetVertexBufferLength(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().getVertexBufferLength();
+}
+
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positions, abcV3 *normals, abcV2 *uvs)
+{
+    aiCheckObject(obj);
+    obj->getPolyMesh().fillVertexBuffer(positions, normals, uvs);
+}
+
+aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().prepareSubmeshes(facesets);
+}
+
+aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi)
+{
+    aiCheckObject(obj);
+    return obj->getPolyMesh().getNextSubmesh(*o_smi);
+}
+
+aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi)
+{
+    aiCheckObject(obj);
+    obj->getPolyMesh().fillSubmeshIndices(dst, *smi);
 }
 
 
