@@ -12,7 +12,12 @@ class Materials : EditorWindow
     string materialFolder = "";
     GameObject assetRoot = null;
 
-    [MenuItem ("Window/Alembic/Materials")]
+    static char[] PathSep = new char[1] { '/' };
+    static char[] FaceSep = new char[1] { ',' };
+    static char[] RangeSep = new char[1] { '-' };
+
+    //[MenuItem ("Window/Alembic/Materials")]
+    [MenuItem ("Assets/Import Alembic Materials")]
     public static void ShowWindow()
     {
         EditorWindow.GetWindow (typeof(Materials));
@@ -135,7 +140,7 @@ class Materials : EditorWindow
             return null;
         }
 
-        string[] paths = path.Split(new char[1] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] paths = path.Split(PathSep, StringSplitOptions.RemoveEmptyEntries);
 
         if (paths.Length == 0)
         {
@@ -317,11 +322,11 @@ class Materials : EditorWindow
 
                 if (faceset.Length > 0 && (newlyAssigned || a.faces.Count > 0))
                 {
-                    string[] items = faceset.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] items = faceset.Split(FaceSep, StringSplitOptions.RemoveEmptyEntries);
 
                     for (int i=0; i<items.Length; ++i)
                     {
-                        string[] rng = items[i].Split(new char[1] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] rng = items[i].Split(RangeSep, StringSplitOptions.RemoveEmptyEntries);
 
                         if (rng.Length == 1)
                         {

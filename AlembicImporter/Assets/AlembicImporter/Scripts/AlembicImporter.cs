@@ -148,13 +148,6 @@ public class AlembicImporter
         ImportImpl(path, true, false);
     }
 
-    [MenuItem("Assets/Import Alembic (reverse faces)")]
-    static void ImportR()
-    {
-        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportImpl(path, true, true);
-    }
-
     static string MakeRelativePath(string path)
     {
         Uri path_to_assets = new Uri(Application.streamingAssetsPath + "/");
