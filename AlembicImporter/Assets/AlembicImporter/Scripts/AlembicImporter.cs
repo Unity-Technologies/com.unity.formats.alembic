@@ -154,18 +154,48 @@ public class AlembicImporter
     }
 
 #if UNITY_EDITOR
-    [MenuItem ("Assets/Import Alembic")]
+
+    public class ImportParams
+    {
+        public bool reverse_x = true;
+        public bool reverse_faces = false;
+        public AlembicStream.MeshDataType data_type = AlembicStream.MeshDataType.Mesh;
+    }
+
+    [MenuItem ("Assets/Alembic/Import")]
     static void Import()
     {
         var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportImpl(path, true, false);
+        ImportParams p = new ImportParams();
+        ImportImpl(path, p);
     }
 
-    [MenuItem("Assets/Import Alembic (reverse faces)")]
+    [MenuItem("Assets/Alembic/Import (reverse faces)")]
     static void ImportR()
     {
         var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportImpl(path, true, true);
+        ImportParams p = new ImportParams();
+        p.reverse_faces = true;
+        ImportImpl(path, p);
+    }
+
+    [MenuItem("Assets/Alembic/Import (texture mesh)")]
+    static void ImportT()
+    {
+        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
+        ImportParams p = new ImportParams();
+        p.data_type = AlembicStream.MeshDataType.Texture;
+        ImportImpl(path, p);
+    }
+
+    [MenuItem("Assets/Alembic/Import (texture mesh, reverse faces)")]
+    static void ImportTR()
+    {
+        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
+        ImportParams p = new ImportParams();
+        p.data_type = AlembicStream.MeshDataType.Texture;
+        p.reverse_faces = true;
+        ImportImpl(path, p);
     }
 
     static string MakeRelativePath(string path)
@@ -174,14 +204,15 @@ public class AlembicImporter
         return path_to_assets.MakeRelativeUri(new Uri(path)).ToString();
     }
 
-    static void ImportImpl(string path, bool reverse_x, bool reverse_faces)
+    static void ImportImpl(string path, ImportParams p)
     {
         GameObject root = new GameObject();
         root.name = System.IO.Path.GetFileNameWithoutExtension(path);
         var abcstream = root.AddComponent<AlembicStream>();
         abcstream.m_path_to_abc = path;
-        abcstream.m_reverse_x = reverse_x;
-        abcstream.m_reverse_faces = reverse_faces;
+        abcstream.m_reverse_x = p.reverse_x;
+        abcstream.m_reverse_faces = p.reverse_faces;
+        abcstream.m_data_type = p.data_type;
         abcstream.Awake();
         abcstream.DebugDump();
     }
