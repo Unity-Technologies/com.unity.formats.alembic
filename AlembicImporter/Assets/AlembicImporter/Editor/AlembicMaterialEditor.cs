@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-class Materials : EditorWindow
+class AlembicMaterialEditor : EditorWindow
 {
     string xmlPath = "";
     string materialFolder = "";
@@ -16,11 +16,10 @@ class Materials : EditorWindow
     static char[] FaceSep = new char[1] { ',' };
     static char[] RangeSep = new char[1] { '-' };
 
-    //[MenuItem ("Window/Alembic/Materials")]
     [MenuItem ("Assets/Import Alembic Materials")]
     public static void ShowWindow()
     {
-        EditorWindow.GetWindow (typeof(Materials));
+        EditorWindow.GetWindow (typeof(AlembicMaterialEditor));
     }
 
     Rect NewControlRect(bool hasLabel, float height, float hpad, float vpad)
@@ -59,6 +58,11 @@ class Materials : EditorWindow
         {
             string startFolder = (xmlPath.Length > 0 ? Path.GetDirectoryName(xmlPath) : Application.dataPath);
             xmlPath = EditorUtility.OpenFilePanel("Select Material Assignment File", startFolder, "xml");
+
+            if (xmlPath.Length > 0 && materialFolder.Length == 0)
+            {
+                materialFolder = Path.GetDirectoryName(xmlPath);
+            }
         }
 
         // Material folder controls
