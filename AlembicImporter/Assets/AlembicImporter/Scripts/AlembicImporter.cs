@@ -289,13 +289,11 @@ public class AlembicImporter
         bool has_uvs = aiPolyMeshHasUVs(abc);
         bool needs_index_update = (mesh.vertexCount == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
 
-        aiFacesets facesets = default(aiFacesets);
-
         AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
         if (abcmaterials != null)
         {
-            needs_index_update = needs_index_update || abcmaterials.UpdateCache(ref facesets);
-            abcmesh.has_facesets = (facesets.count > 0);
+            needs_index_update = needs_index_update || abcmaterials.HasFacesetsChanged();
+            abcmesh.has_facesets = (abcmaterials.GetFacesetsCount() > 0);
         }
         else if (abcmesh.has_facesets)
         {
@@ -326,6 +324,12 @@ public class AlembicImporter
             mesh.uv = abcmesh.uv_cache;
 
             aiSubmeshInfo smi = default(aiSubmeshInfo);
+            aiFacesets facesets = default(aiFacesets);
+
+            if (abcmaterials != null)
+            {
+                abcmaterials.GetFacesets(ref facesets);
+            }
 
             int nsm = aiPolyMeshPrepareSubmeshes(abc, ref facesets);
 
@@ -335,14 +339,9 @@ public class AlembicImporter
             MeshRenderer renderer = trans.GetComponent<MeshRenderer>();
             int nmat = renderer.sharedMaterials.Length;
 
-            Material[] materials;
-            bool update_materials = false;
-
             if (nmat != nsm)
             {
-                update_materials = true;
-
-                materials = new Material[nsm];
+                Material[] materials = new Material[nsm];
                 
                 for (int i=0; i<nmat; ++i)
                 {
@@ -354,10 +353,8 @@ public class AlembicImporter
                     materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
                     materials[i].name = "Material " + Convert.ToString(i);
                 }
-            }
-            else
-            {
-                materials = renderer.sharedMaterials;
+
+                renderer.sharedMaterials = materials;
             }
 
             // Setup submeshes
@@ -371,7 +368,7 @@ public class AlembicImporter
                 }
                 else
                 {
-                    submesh = new AlembicMesh.Submesh { index_cache = new int[0] };
+                    submesh = new AlembicMesh.Submesh { index_cache = new int[0], faceset_index = -1 };
                     abcmesh.m_submeshes.Add(submesh);
                 }
 
@@ -381,21 +378,12 @@ public class AlembicImporter
                 
                 mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.index);
 
-                if (abcmaterials != null && smi.faceset_index != -1)
-                {
-                    Material material = abcmaterials.assignments[smi.faceset_index].material;
-
-                    if (material != materials[smi.index])
-                    {
-                        materials[smi.index] = material;
-                        update_materials = true;
-                    }
-                }
+                submesh.faceset_index = smi.faceset_index;
             }
 
-            if (update_materials)
+            if (abcmaterials != null)
             {
-                renderer.sharedMaterials = materials;
+                abcmaterials.AknowledgeFacesetsChanges();
             }
         }
 

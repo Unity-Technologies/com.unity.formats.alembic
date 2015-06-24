@@ -16,6 +16,7 @@ public class AlembicMesh : MonoBehaviour
     public class Submesh
     {
         public int[] index_cache;
+        public int faceset_index;
     }
 
     public IntPtr m_abc_mesh;
