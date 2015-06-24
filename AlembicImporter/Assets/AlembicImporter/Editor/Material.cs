@@ -234,6 +234,8 @@ class Materials : EditorWindow
         
         XmlNodeList nodes = xmlRoot.SelectNodes("/assignments/node");
 
+        Dictionary<GameObject, List<AlembicMaterial.Assignment> > all_assignments = new Dictionary<GameObject, List<AlembicMaterial.Assignment> >();
+
         foreach (XmlNode node in nodes)
         {
             string path = node.Attributes["path"].Value;
@@ -273,11 +275,16 @@ class Materials : EditorWindow
                     continue;
                 }
 
-                AlembicMaterial aa = target.GetComponent<AlembicMaterial>();
+                List<AlembicMaterial.Assignment> assignments;
 
-                if (aa == null)
+                if (!all_assignments.ContainsKey(target))
                 {
-                    aa = target.AddComponent<AlembicMaterial>();
+                    assignments = new List<AlembicMaterial.Assignment>();
+                    all_assignments.Add(target, assignments);
+                }
+                else
+                {
+                    assignments = all_assignments[target];
                 }
 
                 Material material = GetMaterial(name.Value, materialFolder);
@@ -296,15 +303,6 @@ class Materials : EditorWindow
                 // Get or create material assignment
                 bool newlyAssigned = false;
                 AlembicMaterial.Assignment a = null;
-
-                for (int i=0; i<aa.assignments.Count; ++i)
-                {
-                    if (aa.assignments[i].material == material)
-                    {
-                        a = aa.assignments[i];
-                        break;
-                    }
-                }
                 
                 if (a == null)
                 {
@@ -312,7 +310,7 @@ class Materials : EditorWindow
                     a.material = material;
                     a.faces = new List<int>();
 
-                    aa.assignments.Add(a);
+                    assignments.Add(a);
 
                     newlyAssigned = true;
                 }
@@ -355,6 +353,27 @@ class Materials : EditorWindow
                     a.faces.Clear();
                 }
             }
+        }
+
+        // Update AlembicMaterial components
+        foreach (KeyValuePair<GameObject, List<AlembicMaterial.Assignment> > pair in all_assignments)
+        {
+            AlembicMaterial abcmaterial = pair.Key.GetComponent<AlembicMaterial>();
+
+            if (abcmaterial == null)
+            {
+                abcmaterial = pair.Key.AddComponent<AlembicMaterial>();
+            }
+
+            abcmaterial.UpdateAssignments(pair.Value);
+        }
+
+        // Force refresh
+        AlembicStream abcstream = root.GetComponent<AlembicStream>();
+            
+        if (abcstream != null)
+        {
+            abcstream.m_force_refresh = true;
         }
     }
 
