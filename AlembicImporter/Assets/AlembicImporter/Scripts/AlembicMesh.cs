@@ -74,7 +74,14 @@ public class AlembicMesh : AlembicElement
             };
             m_meshes.Add(entry);
 #if UNITY_EDITOR
-            GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
+            if (abcstream.m_data_type == AlembicStream.MeshDataType.Mesh)
+            {
+                GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
+            }
+            else if(abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
+            {
+                GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicStandard.mat");
+            }
 #endif
 
             for (int i = 1; i < num_mesh_objects; ++i)
@@ -140,6 +147,12 @@ public class AlembicMesh : AlembicElement
             {
                 m_meshes[i].mpb = new MaterialPropertyBlock();
                 m_meshes[i].mpb.SetVector("_DrawData", Vector4.zero);
+
+                m_meshes[i].mpb.SetTexture("_Indices", m_indices);
+                m_meshes[i].mpb.SetTexture("_Vertices", m_vertices);
+                if (m_normals != null)      { m_meshes[i].mpb.SetTexture("_Normals", m_normals); }
+                if (m_uvs != null)          { m_meshes[i].mpb.SetTexture("_UVs", m_uvs); }
+                if (m_velocities != null)   { m_meshes[i].mpb.SetTexture("_Velocities", m_velocities); }
             }
         }
     }
