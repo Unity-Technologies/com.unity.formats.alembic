@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
@@ -280,10 +280,16 @@ public class AlembicImporter
             abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
         }
 
-        bool combine = false;
+        aiTopologyVariance topo_variance = aiPolyMeshGetTopologyVariance(abc);
         bool has_normals = aiPolyMeshHasNormals(abc);
         bool has_uvs = aiPolyMeshHasUVs(abc);
-        bool needs_index_update = (abcmesh.m_submeshes.Count == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
+        bool needs_index_update = (abcmesh.m_submeshes.Count == 0 || topo_variance == aiTopologyVariance.Heterogeneous);
+
+        if (!needs_index_update && topo_variance == aiTopologyVariance.Constant)
+        {
+            // Nothing to update
+            return;
+        }
 
         AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
         if (abcmaterials != null)
@@ -313,22 +319,22 @@ public class AlembicImporter
                     split = abcmesh.m_splits[s];
 
                     // Mesh with heterogeneous topology may start with a single split
-                    // and grow bigger after
+                    //   but grow bigger later
                     if (s == 0 && split.host == trans.gameObject)
                     {
-						split.mesh.Clear();
+                        split.mesh.Clear();
 
-						Transform split0 = trans.FindChild("Split0");
-						
+                        Transform split0 = trans.FindChild("Split_0");
+
                         if (split0 != null)
-						{
-							split.host = split0.gameObject;
-							split.mesh = split0.gameObject.GetComponent<MeshFilter>().sharedMesh;
-						}
-						else
-						{
-							init_split = true;
-						}
+                        {
+                            split.host = split0.gameObject;
+                            split.mesh = split0.gameObject.GetComponent<MeshFilter>().sharedMesh;
+                        }
+                        else
+                        {
+                            init_split = true;
+                        }
                     }
                 }
                 else
@@ -350,7 +356,7 @@ public class AlembicImporter
                 if (init_split)
                 {
                     GameObject go = new GameObject();
-                    go.name = "Split" + s;
+                    go.name = "Split_" + s;
 
                     Transform got = go.GetComponent<Transform>();
                     got.parent = trans;
@@ -358,19 +364,19 @@ public class AlembicImporter
                     got.localEulerAngles = Vector3.zero;
                     got.localScale = Vector3.one;
 
-                    Mesh mesh = AddMeshComponents(abc, got, combine);
+                    Mesh mesh = AddMeshComponents(abc, got, null);
                     mesh.name = go.name;
 
                     split.mesh = mesh;
                     split.host = go;
                 }
 
-                split.host.SetActive(!combine);
+                split.host.SetActive(true);
             }
         }
         else
         {
-            Mesh mesh = AddMeshComponents(abc, trans, false);
+            Mesh mesh = AddMeshComponents(abc, trans, null);
 
             if (abcmesh.m_splits.Count == 0)
             {
@@ -379,7 +385,6 @@ public class AlembicImporter
                     position_cache = new Vector3[0],
                     normal_cache = new Vector3[0],
                     uv_cache = new Vector2[0],
-
                     mesh = mesh,
                     host = trans.gameObject
                 };
@@ -390,10 +395,11 @@ public class AlembicImporter
             {
                 split = abcmesh.m_splits[0];
 
-				if (split.host != trans.gameObject)
-				{
-					split.host.SetActive(false);
-				}
+                if (split.host != trans.gameObject)
+                {
+                    // Shrinking back from multi objects to a single one: deactivate sub object
+                    split.host.SetActive(false);
+                }
 
                 split.mesh = mesh;
                 split.host = trans.gameObject;
@@ -402,7 +408,7 @@ public class AlembicImporter
             split.host.SetActive(true);
         }
 
-        // disable extra splits
+        // deactivate unused splits (sub objects)
         for (int s=nsplits; s<abcmesh.m_splits.Count; ++s)
         {
             abcmesh.m_splits[s].host.SetActive(false);
@@ -460,30 +466,26 @@ public class AlembicImporter
 
                 split.mesh.subMeshCount = ssm;
 
-                // if not combining meshes, setup material on subobjects
-                if (nsplits == 1 || !combine)
-                {
-                    MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
+                MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
                     
-                    int nmat = renderer.sharedMaterials.Length;
+                int nmat = renderer.sharedMaterials.Length;
 
-                    if (nmat != ssm)
+                if (nmat != ssm)
+                {
+                    Material[] materials = new Material[ssm];
+                    
+                    for (int i=0; i<nmat; ++i)
                     {
-                        Material[] materials = new Material[ssm];
-                        
-                        for (int i=0; i<nmat; ++i)
-                        {
-                            materials[i] = renderer.sharedMaterials[i];
-                        }
-
-                        for (int i=nmat; i<ssm; ++i)
-                        {
-                            materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-                            materials[i].name = "Material " + Convert.ToString(i);
-                        }
-
-                        renderer.sharedMaterials = materials;
+                        materials[i] = renderer.sharedMaterials[i];
                     }
+
+                    for (int i=nmat; i<ssm; ++i)
+                    {
+                        materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                        materials[i].name = "Material_" + Convert.ToString(i);
+                    }
+
+                    renderer.sharedMaterials = materials;
                 }
             }
 
@@ -503,6 +505,7 @@ public class AlembicImporter
                 if (smi.index < abcmesh.m_submeshes.Count)
                 {
                     submesh = abcmesh.m_submeshes[smi.index];
+
                     submesh.faceset_index = smi.faceset_index;
                     submesh.split_index = smi.split_index;
                 }
@@ -514,6 +517,7 @@ public class AlembicImporter
                         faceset_index = smi.faceset_index,
                         split_index = smi.split_index
                     };
+
                     abcmesh.m_submeshes.Add(submesh);
                 }
 
@@ -528,11 +532,6 @@ public class AlembicImporter
             {
                 abcmaterials.AknowledgeFacesetsChanges();
             }
-
-            if (nsplits > 1 && combine)
-            {
-                AddCombinedMeshComponent(abc, trans, nsplits);
-            }
         }
 
         if (!has_normals)
@@ -544,7 +543,7 @@ public class AlembicImporter
         }
     }
 
-    static Mesh AddMeshComponents(aiObject abc, Transform trans, bool ignore_material)
+    static Mesh AddMeshComponents(aiObject abc, Transform trans, Material material)
     {
         Mesh mesh;
         
@@ -563,17 +562,21 @@ public class AlembicImporter
 
             mesh_filter.sharedMesh = mesh;
 
-            if (!ignore_material)
+            MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
+                
+            if (renderer == null)
             {
-                MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
-                
-                if (renderer == null)
-                {
-                    renderer = trans.gameObject.AddComponent<MeshRenderer>();
-                }
-                
+                renderer = trans.gameObject.AddComponent<MeshRenderer>();
+            }
+            
+            if (material != null)
+            {
+                renderer.sharedMaterial = material;
+            }
+            else
+            {
                 renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-                renderer.sharedMaterial.name = "Material 0";
+                renderer.sharedMaterial.name = "Material_0";
             }
         }
         else
@@ -582,53 +585,6 @@ public class AlembicImporter
         }
 
         return mesh;
-    }
-
-    static void AddCombinedMeshComponent(aiObject abc, Transform trans, int count)
-    {
-        MeshFilter mesh_filter = trans.gameObject.GetComponent<MeshFilter>();
-
-        if (mesh_filter == null)
-        {
-            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
-            
-            MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
-
-            if (renderer == null)
-            {
-                renderer = trans.gameObject.AddComponent<MeshRenderer>();
-            }
-
-            renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-            renderer.sharedMaterial.name = "Material 0";
-        }
-        else if (mesh_filter.sharedMesh != null)
-        {
-            Debug.Log("Set shared mesh null");
-            mesh_filter.sharedMesh = null;
-        }
-
-        MeshFilter[] sub_mesh_filters = trans.GetComponentsInChildren<MeshFilter>();
-        
-        int combine_count = Math.Min(count, sub_mesh_filters.Length);
-
-        CombineInstance[] combine = new CombineInstance[combine_count];
-
-        for (int i=0; i<combine_count; ++i)
-        {
-            combine[i].mesh = sub_mesh_filters[i].sharedMesh;
-            combine[i].transform = sub_mesh_filters[i].transform.localToWorldMatrix;
-            
-            sub_mesh_filters[i].gameObject.SetActive(false);
-        }
-
-        for (int i=combine_count; i<sub_mesh_filters.Length; ++i)
-        {
-            sub_mesh_filters[i].gameObject.SetActive(false);
-        }
-
-        mesh_filter.sharedMesh = new Mesh();
-        mesh_filter.sharedMesh.CombineMeshes(combine, false, false);
     }
 
     static void UpdateAbcCamera(aiObject abc, Transform trans)
