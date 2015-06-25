@@ -25,6 +25,8 @@ public class AlembicImporter
     public struct aiSubmeshInfo
     {
         public int index;
+        public int split_index;
+        public int split_submesh_index;
         public int triangle_count;
         public int faceset_index;
     }
@@ -120,9 +122,11 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(aiObject obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
 
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, IntPtr positions, IntPtr normals, IntPtr uvs);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitCount(aiObject obj, bool force_refresh);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj, int split);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj, ref aiFacesets facesets);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiObject obj, int split);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo o_smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiObject obj, IntPtr indices, ref aiSubmeshInfo smi);
 
@@ -269,13 +273,6 @@ public class AlembicImporter
 
     public static void UpdateAbcMesh(aiObject abc, Transform trans)
     {
-        int nvertices = aiPolyMeshGetVertexBufferLength(abc);
-
-        if (nvertices == 0)
-        {
-            return;
-        }
-
         AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
         
         if (abcmesh == null)
@@ -283,11 +280,10 @@ public class AlembicImporter
             abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
         }
 
-        Mesh mesh = AddMeshComponents(abc, trans);
-
+        bool combine = false;
         bool has_normals = aiPolyMeshHasNormals(abc);
         bool has_uvs = aiPolyMeshHasUVs(abc);
-        bool needs_index_update = (mesh.vertexCount == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
+        bool needs_index_update = (abcmesh.m_submeshes.Count == 0 || aiPolyMeshGetTopologyVariance(abc) == aiTopologyVariance.Heterogeneous);
 
         AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
         if (abcmaterials != null)
@@ -301,28 +297,150 @@ public class AlembicImporter
             abcmesh.has_facesets = false;
         }
 
-        Array.Resize(ref abcmesh.position_cache, nvertices);
-        Array.Resize(ref abcmesh.normal_cache, (has_normals ? nvertices : 0));
+        AlembicMesh.Split split;
 
-        if (needs_index_update)
+        int nsplits = aiPolyMeshGetSplitCount(abc, needs_index_update);
+        
+        // create necessary splits
+        if (nsplits > 1)
         {
-            mesh.Clear();
+            for (int s=0; s<nsplits; ++s)
+            {
+                bool init_split = false;
 
-            Array.Resize(ref abcmesh.uv_cache, (has_uvs ? nvertices : 0));
+                if (s < abcmesh.m_splits.Count)
+                {
+                    split = abcmesh.m_splits[s];
+
+                    // Mesh with heterogeneous topology may start with a single split
+                    // and grow bigger after
+                    if (s == 0 && split.host == trans.gameObject)
+                    {
+						split.mesh.Clear();
+
+						Transform split0 = trans.FindChild("Split0");
+						
+                        if (split0 != null)
+						{
+							split.host = split0.gameObject;
+							split.mesh = split0.gameObject.GetComponent<MeshFilter>().sharedMesh;
+						}
+						else
+						{
+							init_split = true;
+						}
+                    }
+                }
+                else
+                {
+                    split = new AlembicMesh.Split
+                    {
+                        position_cache = new Vector3[0],
+                        normal_cache = new Vector3[0],
+                        uv_cache = new Vector2[0],
+                        mesh = null,
+                        host = null
+                    };
+
+                    abcmesh.m_splits.Add(split);
+
+                    init_split = true;
+                }
+
+                if (init_split)
+                {
+                    GameObject go = new GameObject();
+                    go.name = "Split" + s;
+
+                    Transform got = go.GetComponent<Transform>();
+                    got.parent = trans;
+                    got.localPosition = Vector3.zero;
+                    got.localEulerAngles = Vector3.zero;
+                    got.localScale = Vector3.one;
+
+                    Mesh mesh = AddMeshComponents(abc, got, combine);
+                    mesh.name = go.name;
+
+                    split.mesh = mesh;
+                    split.host = go;
+                }
+
+                split.host.SetActive(!combine);
+            }
+        }
+        else
+        {
+            Mesh mesh = AddMeshComponents(abc, trans, false);
+
+            if (abcmesh.m_splits.Count == 0)
+            {
+                split = new AlembicMesh.Split
+                {
+                    position_cache = new Vector3[0],
+                    normal_cache = new Vector3[0],
+                    uv_cache = new Vector2[0],
+
+                    mesh = mesh,
+                    host = trans.gameObject
+                };
+
+                abcmesh.m_splits.Add(split);
+            }
+            else
+            {
+                split = abcmesh.m_splits[0];
+
+				if (split.host != trans.gameObject)
+				{
+					split.host.SetActive(false);
+				}
+
+                split.mesh = mesh;
+                split.host = trans.gameObject;
+            }
+
+            split.host.SetActive(true);
         }
 
-        aiPolyMeshFillVertexBuffer(abc,
-                                   Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.position_cache, 0),
-                                   (has_normals ? Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.normal_cache, 0) : (IntPtr)0),
-                                   ((needs_index_update && has_uvs) ? Marshal.UnsafeAddrOfPinnedArrayElement(abcmesh.uv_cache, 0) : (IntPtr)0));
+        // disable extra splits
+        for (int s=nsplits; s<abcmesh.m_splits.Count; ++s)
+        {
+            abcmesh.m_splits[s].host.SetActive(false);
+        }
 
-        mesh.vertices = abcmesh.position_cache;
-        mesh.normals = abcmesh.normal_cache;
-        
+        // read splits vertices
+        for (int s=0; s<nsplits; ++s)
+        {
+            split = abcmesh.m_splits[s];
+
+            int nvertices = aiPolyMeshGetVertexBufferLength(abc, s);
+
+            Array.Resize(ref split.position_cache, nvertices);
+            Array.Resize(ref split.normal_cache, (has_normals ? nvertices : 0));
+
+            if (needs_index_update)
+            {
+                split.mesh.Clear();
+
+                Array.Resize(ref split.uv_cache, (has_uvs ? nvertices : 0));
+            }
+
+            aiPolyMeshFillVertexBuffer(abc, s,
+                                       Marshal.UnsafeAddrOfPinnedArrayElement(split.position_cache, 0),
+                                       (has_normals ? Marshal.UnsafeAddrOfPinnedArrayElement(split.normal_cache, 0) : (IntPtr)0),
+                                       ((needs_index_update && has_uvs) ? Marshal.UnsafeAddrOfPinnedArrayElement(split.uv_cache, 0) : (IntPtr)0));
+
+            split.mesh.vertices = split.position_cache;
+            split.mesh.normals = split.normal_cache;
+
+            if (needs_index_update)
+            {
+                split.mesh.uv = split.uv_cache;
+            }
+        }
+
         if (needs_index_update)
         {
-            mesh.uv = abcmesh.uv_cache;
-
             aiSubmeshInfo smi = default(aiSubmeshInfo);
             aiFacesets facesets = default(aiFacesets);
 
@@ -331,30 +449,42 @@ public class AlembicImporter
                 abcmaterials.GetFacesets(ref facesets);
             }
 
-            int nsm = aiPolyMeshPrepareSubmeshes(abc, ref facesets);
+            aiPolyMeshPrepareSubmeshes(abc, ref facesets);
 
-            mesh.subMeshCount = nsm;
-
-            // Setup materials
-            MeshRenderer renderer = trans.GetComponent<MeshRenderer>();
-            int nmat = renderer.sharedMaterials.Length;
-
-            if (nmat != nsm)
+            // Setup materials and submeshes for each split
+            for (int s=0; s<nsplits; ++s)
             {
-                Material[] materials = new Material[nsm];
-                
-                for (int i=0; i<nmat; ++i)
-                {
-                    materials[i] = renderer.sharedMaterials[i];
-                }
+                int ssm = aiPolyMeshGetSplitSubmeshCount(abc, s);
 
-                for (int i=nmat; i<nsm; ++i)
-                {
-                    materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-                    materials[i].name = "Material " + Convert.ToString(i);
-                }
+                split = abcmesh.m_splits[s];
 
-                renderer.sharedMaterials = materials;
+                split.mesh.subMeshCount = ssm;
+
+                // if not combining meshes, setup material on subobjects
+                if (nsplits == 1 || !combine)
+                {
+                    MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
+                    
+                    int nmat = renderer.sharedMaterials.Length;
+
+                    if (nmat != ssm)
+                    {
+                        Material[] materials = new Material[ssm];
+                        
+                        for (int i=0; i<nmat; ++i)
+                        {
+                            materials[i] = renderer.sharedMaterials[i];
+                        }
+
+                        for (int i=nmat; i<ssm; ++i)
+                        {
+                            materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                            materials[i].name = "Material " + Convert.ToString(i);
+                        }
+
+                        renderer.sharedMaterials = materials;
+                    }
+                }
             }
 
             // Setup submeshes
@@ -362,13 +492,28 @@ public class AlembicImporter
             {
                 AlembicMesh.Submesh submesh;
 
+                if (smi.split_index >= abcmesh.m_splits.Count)
+                {
+                    Debug.Log("Invalid split index");
+                    continue;
+                }
+
+                split = abcmesh.m_splits[smi.split_index];
+
                 if (smi.index < abcmesh.m_submeshes.Count)
                 {
                     submesh = abcmesh.m_submeshes[smi.index];
+                    submesh.faceset_index = smi.faceset_index;
+                    submesh.split_index = smi.split_index;
                 }
                 else
                 {
-                    submesh = new AlembicMesh.Submesh { index_cache = new int[0], faceset_index = -1 };
+                    submesh = new AlembicMesh.Submesh
+                    {
+                        index_cache = new int[0],
+                        faceset_index = smi.faceset_index,
+                        split_index = smi.split_index
+                    };
                     abcmesh.m_submeshes.Add(submesh);
                 }
 
@@ -376,47 +521,115 @@ public class AlembicImporter
                 Array.Resize(ref submesh.index_cache, smi.triangle_count * 3);
                 aiPolyMeshFillSubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(submesh.index_cache, 0), ref smi);
                 
-                mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.index);
-
-                submesh.faceset_index = smi.faceset_index;
+                split.mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.split_submesh_index);
             }
 
             if (abcmaterials != null)
             {
                 abcmaterials.AknowledgeFacesetsChanges();
             }
+
+            if (nsplits > 1 && combine)
+            {
+                AddCombinedMeshComponent(abc, trans, nsplits);
+            }
         }
 
         if (!has_normals)
         {
-            mesh.RecalculateNormals();
+            for (int s=0; s<nsplits; ++s)
+            {
+                abcmesh.m_splits[s].mesh.RecalculateNormals();
+            }
         }
     }
 
-
-    static Mesh AddMeshComponents(aiObject abc, Transform trans)
+    static Mesh AddMeshComponents(aiObject abc, Transform trans, bool ignore_material)
     {
         Mesh mesh;
-        var mesh_filter = trans.GetComponent<MeshFilter>();
-        if (mesh_filter == null)
+        
+        MeshFilter mesh_filter = trans.gameObject.GetComponent<MeshFilter>();
+        
+        if (mesh_filter == null || mesh_filter.sharedMesh == null)
         {
             mesh = new Mesh();
             mesh.name = aiGetName(abc);
             mesh.MarkDynamic();
-            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+
+            if (mesh_filter == null)
+            {
+                mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+            }
+
             mesh_filter.sharedMesh = mesh;
 
-            MeshRenderer renderer = trans.gameObject.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
-            renderer.sharedMaterial.name = "Material 0";
+            if (!ignore_material)
+            {
+                MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
+                
+                if (renderer == null)
+                {
+                    renderer = trans.gameObject.AddComponent<MeshRenderer>();
+                }
+                
+                renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                renderer.sharedMaterial.name = "Material 0";
+            }
         }
         else
         {
             mesh = mesh_filter.sharedMesh;
         }
+
         return mesh;
     }
 
+    static void AddCombinedMeshComponent(aiObject abc, Transform trans, int count)
+    {
+        MeshFilter mesh_filter = trans.gameObject.GetComponent<MeshFilter>();
+
+        if (mesh_filter == null)
+        {
+            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+            
+            MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
+
+            if (renderer == null)
+            {
+                renderer = trans.gameObject.AddComponent<MeshRenderer>();
+            }
+
+            renderer.sharedMaterial = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+            renderer.sharedMaterial.name = "Material 0";
+        }
+        else if (mesh_filter.sharedMesh != null)
+        {
+            Debug.Log("Set shared mesh null");
+            mesh_filter.sharedMesh = null;
+        }
+
+        MeshFilter[] sub_mesh_filters = trans.GetComponentsInChildren<MeshFilter>();
+        
+        int combine_count = Math.Min(count, sub_mesh_filters.Length);
+
+        CombineInstance[] combine = new CombineInstance[combine_count];
+
+        for (int i=0; i<combine_count; ++i)
+        {
+            combine[i].mesh = sub_mesh_filters[i].sharedMesh;
+            combine[i].transform = sub_mesh_filters[i].transform.localToWorldMatrix;
+            
+            sub_mesh_filters[i].gameObject.SetActive(false);
+        }
+
+        for (int i=combine_count; i<sub_mesh_filters.Length; ++i)
+        {
+            sub_mesh_filters[i].gameObject.SetActive(false);
+        }
+
+        mesh_filter.sharedMesh = new Mesh();
+        mesh_filter.sharedMesh.CombineMeshes(combine, false, false);
+    }
 
     static void UpdateAbcCamera(aiObject abc, Transform trans)
     {

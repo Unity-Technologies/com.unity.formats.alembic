@@ -13,17 +13,29 @@ using UnityEditor;
 public class AlembicMesh : MonoBehaviour
 {
     [Serializable]
+    public class Split
+    {
+        public Vector3[] position_cache;
+        public Vector3[] normal_cache;
+        public Vector2[] uv_cache;
+        public Mesh mesh;
+        public GameObject host;
+    }
+
+    [Serializable]
     public class Submesh
     {
         public int[] index_cache;
         public int faceset_index;
+        public int split_index;
     }
 
-    public IntPtr m_abc_mesh;
+    //public IntPtr m_abc_mesh;
     public List<Submesh> m_submeshes = new List<Submesh>();
-    public Vector3[] position_cache = new Vector3[0];
-    public Vector3[] normal_cache = new Vector3[0];
-    public Vector2[] uv_cache = new Vector2[0];
+    public List<Split> m_splits = new List<Split>();
+    //public Vector3[] position_cache = new Vector3[0];
+    //public Vector3[] normal_cache = new Vector3[0];
+    //public Vector2[] uv_cache = new Vector2[0];
     public bool has_facesets = false;
 
     public RenderTexture m_indices;

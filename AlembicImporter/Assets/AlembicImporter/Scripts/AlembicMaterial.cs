@@ -46,12 +46,14 @@ public class AlembicMaterial : MonoBehaviour
                 if (abcmesh.m_submeshes.Count < materials.Count)
                 {
                     // should have at least materials.Count submeshes
+                    Debug.Log("AlembicMaterial.Update: Not enough submeshes");
                     return;
                 }
 
                 if (assigned_materials.Length != abcmesh.m_submeshes.Count)
                 {
                     // should have one material for each submesh
+                    Debug.Log("AlembicMaterial.Update: Submesh count doesn't match material count");
                     return;
                 }
 
@@ -62,6 +64,7 @@ public class AlembicMaterial : MonoBehaviour
                         if (submesh.faceset_index < 0 || submesh.faceset_index >= materials.Count)
                         {
                             // invalid faceset_index, do no update material assignments at all
+                            Debug.Log("AlembicMaterial.Update: Invalid faceset index");
                             return;
                         }
 
