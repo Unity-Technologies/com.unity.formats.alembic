@@ -277,7 +277,8 @@ uint32_t aiPolyMesh::getPeakVertexCount() const
     return m_peak_vertex_count;
 }
 
-void aiPolyMesh::copyIndices(int *dst) const
+template<class ScalarT>
+void aiPolyMesh::copyIndices(ScalarT *dst) const
 {
     bool reverse_index = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
@@ -316,6 +317,8 @@ void aiPolyMesh::copyIndices(int *dst) const
         }
     }
 }
+template void aiPolyMesh::copyIndices<int>(int *dst) const;
+template void aiPolyMesh::copyIndices<float>(float *dst) const;
 
 
 template<class VecT>
@@ -415,8 +418,8 @@ void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
     if (dst.tex_indices) {
         uint32_t n = dst.index_count;
         m_buf.resize(ceilup<uint32_t>(n, dst.tex_width));
-        copyIndices((int*)&m_buf[0]);
-        dev->writeTexture(dst.tex_indices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RInt, &m_buf[0], n*sizeof(int));
+        copyIndices((float*)&m_buf[0]);
+        dev->writeTexture(dst.tex_indices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RFloat, &m_buf[0], n*sizeof(float));
     }
 
     if (dst.tex_vertices && m_positions) {
