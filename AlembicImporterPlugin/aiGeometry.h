@@ -79,13 +79,12 @@ public:
 private:
 
     template <typename NormalIndexArray>
-    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi) const
+    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi, float x_scale) const
     {
         const auto &counts = *m_counts;
         const auto &normals = *m_normals.getVals();
-
+        
         uint32_t a = 0;
-        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
         
         for (int fi = 0; fi < smi.num_faces; ++fi)
         {
