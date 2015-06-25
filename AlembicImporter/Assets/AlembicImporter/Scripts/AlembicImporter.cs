@@ -30,8 +30,9 @@ public class AlembicImporter
         // out
         public int index_count;
         public int vertex_count;
-        public bool is_normal_indexed;
-        public bool is_uv_indexed;
+        public int is_normal_indexed;
+        public int is_uv_indexed;
+        int pad;
         public IntPtr tex_indices;
         public IntPtr tex_vertices;
         public IntPtr tex_normals;
