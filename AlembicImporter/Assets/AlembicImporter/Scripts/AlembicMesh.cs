@@ -19,6 +19,7 @@ public class AlembicMesh : AlembicElement
         public Vector3[] vertex_cache;
         public Vector2[] uv_cache;
         public Mesh mesh;
+        public MeshRenderer renderer;
         public MaterialPropertyBlock mpb;
         public GameObject host;
     }
@@ -58,17 +59,19 @@ public class AlembicMesh : AlembicElement
         base.AbcSetup(abcstream, abcobj);
         m_trans = GetComponent<Transform>();
 
+        int peak_index_count = AlembicImporter.aiPolyMeshGetPeakIndexCount(abcobj);
+        int peak_vertex_count = AlembicImporter.aiPolyMeshGetPeakVertexCount(abcobj);
+
         if(GetComponent<MeshRenderer>()==null)
         {
-            int peak_index_count = AlembicImporter.aiPolyMeshGetPeakIndexCount(abcobj);
-            int peak_vertex_count = AlembicImporter.aiPolyMeshGetPeakVertexCount(abcobj);
             int num_mesh_objects = AlembicUtils.ceildiv(peak_index_count, 64998);
 
             AddMeshComponents(abcobj, m_trans, abcstream.m_data_type);
             var entry = new AlembicMesh.Entry
             {
                 host = m_trans.gameObject,
-                mesh = AddMeshComponents(abcobj, m_trans, abcstream.m_data_type),
+                mesh = GetComponent<MeshFilter>().sharedMesh,
+                renderer = GetComponent<MeshRenderer>(),
                 vertex_cache = null,
                 uv_cache = null,
                 index_cache = null,
@@ -105,6 +108,7 @@ public class AlembicMesh : AlembicElement
                 {
                     host = go,
                     mesh = mesh,
+                    renderer = child.GetComponent<MeshRenderer>(),
                     vertex_cache = new Vector3[0],
                     uv_cache = new Vector2[0],
                     index_cache = new int[0],
@@ -112,49 +116,51 @@ public class AlembicMesh : AlembicElement
                 };
                 m_meshes.Add(entry);
             }
+        }
 
-            if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
+        if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
+        {
+            m_mesh_tex = new AlembicImporter.aiTextureMeshData();
+            m_mesh_tex.tex_width = MeshTextureWidth;
+
+            m_indices = CreateDataTexture(peak_index_count, RenderTextureFormat.RFloat);
+            m_mesh_tex.tex_indices = m_indices.GetNativeTexturePtr();
+
+            m_vertices = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
+            m_mesh_tex.tex_vertices = m_vertices.GetNativeTexturePtr();
+
+            if (AlembicImporter.aiPolyMeshHasNormals(abcobj))
             {
-                m_mesh_tex = new AlembicImporter.aiTextureMeshData();
-                m_mesh_tex.tex_width = MeshTextureWidth;
+                bool is_normal_indexed = AlembicImporter.aiPolyMeshIsNormalIndexed(abcobj);
+                int normal_count = is_normal_indexed ? peak_vertex_count : peak_index_count;
+                m_normals = CreateDataTexture(normal_count, RenderTextureFormat.ARGBFloat);
+                m_mesh_tex.tex_normals = m_normals.GetNativeTexturePtr();
+            }
+            if (AlembicImporter.aiPolyMeshHasUVs(abcobj))
+            {
+                bool is_uv_indexed = AlembicImporter.aiPolyMeshIsUVIndexed(abcobj);
+                int uv_count = is_uv_indexed ? peak_vertex_count : peak_index_count;
+                m_uvs = CreateDataTexture(uv_count, RenderTextureFormat.RGFloat);
+                m_mesh_tex.tex_uvs = m_uvs.GetNativeTexturePtr();
+            }
+            if (AlembicImporter.aiPolyMeshHasVelocities(abcobj))
+            {
+                m_velocities = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
+                m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
+            }
 
-                m_indices = CreateDataTexture(peak_index_count, RenderTextureFormat.RInt);
-                m_mesh_tex.tex_indices = m_indices.GetNativeTexturePtr();
+            for (int i = 0; i < m_meshes.Count; ++i)
+            {
+                m_meshes[i].mpb = new MaterialPropertyBlock();
+                m_meshes[i].mpb.SetVector("_DrawData", Vector4.zero);
 
-                m_vertices = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
-                m_mesh_tex.tex_vertices = m_vertices.GetNativeTexturePtr();
+                m_meshes[i].mpb.SetTexture("_Indices", m_indices);
+                m_meshes[i].mpb.SetTexture("_Vertices", m_vertices);
+                if (m_normals != null) { m_meshes[i].mpb.SetTexture("_Normals", m_normals); }
+                if (m_uvs != null) { m_meshes[i].mpb.SetTexture("_UVs", m_uvs); }
+                if (m_velocities != null) { m_meshes[i].mpb.SetTexture("_Velocities", m_velocities); }
 
-                if (AlembicImporter.aiPolyMeshHasNormals(abcobj))
-                {
-                    bool is_normal_indexed = AlembicImporter.aiPolyMeshIsNormalIndexed(abcobj);
-                    int normal_count = is_normal_indexed ? peak_vertex_count : peak_index_count;
-                    m_normals = CreateDataTexture(normal_count, RenderTextureFormat.ARGBFloat);
-                    m_mesh_tex.tex_normals = m_normals.GetNativeTexturePtr();
-                }
-                if (AlembicImporter.aiPolyMeshHasUVs(abcobj))
-                {
-                    bool is_uv_indexed = AlembicImporter.aiPolyMeshIsUVIndexed(abcobj);
-                    int uv_count = is_uv_indexed ? peak_vertex_count : peak_index_count;
-                    m_uvs = CreateDataTexture(uv_count, RenderTextureFormat.RGFloat);
-                    m_mesh_tex.tex_uvs = m_uvs.GetNativeTexturePtr();
-                }
-                if (AlembicImporter.aiPolyMeshHasVelocities(abcobj))
-                {
-                    m_velocities = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
-                    m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
-                }
-
-                for (int i = 0; i < m_meshes.Count; ++i)
-                {
-                    m_meshes[i].mpb = new MaterialPropertyBlock();
-                    m_meshes[i].mpb.SetVector("_DrawData", Vector4.zero);
-
-                    m_meshes[i].mpb.SetTexture("_Indices", m_indices);
-                    m_meshes[i].mpb.SetTexture("_Vertices", m_vertices);
-                    if (m_normals != null) { m_meshes[i].mpb.SetTexture("_Normals", m_normals); }
-                    if (m_uvs != null) { m_meshes[i].mpb.SetTexture("_UVs", m_uvs); }
-                    if (m_velocities != null) { m_meshes[i].mpb.SetTexture("_Velocities", m_velocities); }
-                }
+                m_meshes[i].renderer.SetPropertyBlock(m_meshes[i].mpb);
             }
         }
     }
@@ -175,7 +181,7 @@ public class AlembicMesh : AlembicElement
 
     void AbcUpdateMeshTexture()
     {
-        //AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
+        AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
         for (int i = 0; i < m_meshes.Count; ++i)
         {
             //[0]: begin_index, [1]: index_count, [2]: is_normal_indexed, [3]: is_uv_indexed
@@ -184,6 +190,7 @@ public class AlembicMesh : AlembicElement
                 m_mesh_tex.index_count,
                 m_mesh_tex.is_normal_indexed != 0 ? 1.0f : 0.0f,
                 m_mesh_tex.is_uv_indexed != 0 ? 1.0f : 0.0f));
+            m_meshes[i].renderer.SetPropertyBlock(m_meshes[i].mpb);
         }
     }
 

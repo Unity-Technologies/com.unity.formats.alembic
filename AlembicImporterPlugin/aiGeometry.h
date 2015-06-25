@@ -65,7 +65,8 @@ public:
     uint32_t    getVertexCount() const;
     uint32_t    getPeakIndexCount() const;
     uint32_t    getPeakVertexCount() const;
-    void        copyIndices(int *dst) const;
+
+    template<class ScalarT> void copyIndices(ScalarT *dst) const;
 
     // 通常 VecT は vec3 (abcV3) だが、テクスチャにコピーするときは vec4 の配列にコピーしたいので template 化…
     template<class VecT> void copyVertices(VecT *dst) const;

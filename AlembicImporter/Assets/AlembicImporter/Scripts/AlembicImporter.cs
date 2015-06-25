@@ -312,15 +312,15 @@ class AlembicUtils
     }
 #endif
 
-    public static Mesh CreateIndexOnlyMesh(int num_indices, int index_begin = 0)
+    public static Mesh CreateIndexOnlyMesh(int num_indices)
     {
         Vector3[] vertices = new Vector3[num_indices];
+        Vector2[] uv = new Vector2[num_indices];
         int[] indices = new int[num_indices];
         for (int i = 0; i < num_indices; ++i)
         {
-            vertices[i].x = index_begin + i;
-            vertices[i].y = index_begin;
-            vertices[i].z = i;
+            vertices[i].x = i;
+            uv[i].x = i;
             indices[i] = i;
         }
 
