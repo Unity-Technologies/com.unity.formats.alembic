@@ -105,8 +105,9 @@ struct aiTextureMeshData
     // out
     int index_count;
     int vertex_count;
-    bool is_normal_indexed;
-    bool is_uv_indexed;
+    int is_normal_indexed;
+    int is_uv_indexed;
+    int pad;
     void *tex_indices;
     void *tex_vertices;
     void *tex_normals;
