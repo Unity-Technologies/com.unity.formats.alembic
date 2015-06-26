@@ -32,6 +32,8 @@ struct aiSplitedMeshInfo
 struct aiSubmeshInfo
 {
     int index;
+    int split_index;
+    int split_submesh_index;
     int triangle_count;
     int faceset_index;
 };
@@ -86,9 +88,11 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj,
 aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
-aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj);
-aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitCount(aiObject *obj, bool force_refresh);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t split_index);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t split_index, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
 aiCLinkage aiExport uint32_t        aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t split_index);
 aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi);
 aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi);
 

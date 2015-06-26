@@ -35,50 +35,95 @@ public class AlembicMaterial : MonoBehaviour
         {
             AlembicMesh abcmesh = gameObject.GetComponent<AlembicMesh>();
 
-            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-
-            if (abcmesh != null && renderer != null)
+            if (abcmesh != null)
             {
-                bool changed = false;
+                int split_index = 0;
                 int submesh_index = 0;
-                Material[] assigned_materials = renderer.sharedMaterials;
 
                 if (abcmesh.m_submeshes.Count < materials.Count)
                 {
                     // should have at least materials.Count submeshes
+                    Debug.Log("Not enough submeshes for all assigned materials.");
                     return;
                 }
 
-                if (assigned_materials.Length != abcmesh.m_submeshes.Count)
-                {
-                    // should have one material for each submesh
-                    return;
-                }
+                MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
 
                 foreach (AlembicMesh.Submesh submesh in abcmesh.m_submeshes)
                 {
+                    if (submesh.split_index != split_index)
+                    {
+                        submesh_index = 0;
+                    }
+
+                    MeshRenderer split_renderer = null;
+
+                    Transform split = gameObject.transform.FindChild("Split_" + submesh.split_index);
+
+                    if (split == null)
+                    {
+                        if (submesh.split_index > 0)
+                        {
+                            Debug.Log("Invalid split index");
+                            return;
+                        }
+
+                        split_renderer = renderer;
+                    }
+                    else
+                    {
+                        if (submesh.split_index == 0 && !split.gameObject.activeSelf)
+                        {
+                            // First split sub object not active means the mesh is hold be the current object
+                            split_renderer = renderer;
+                        }
+                        else
+                        {
+                            split_renderer = split.gameObject.GetComponent<MeshRenderer>();
+                        }
+                    }
+
+                    if (split_renderer == null)
+                    {
+                        Debug.Log("No renderer on \"" + gameObject.name + "\" to assign materials to");
+                    }
+
+                    Material[] assigned_materials = split_renderer.sharedMaterials;
+
                     if (submesh.faceset_index != -1)
                     {
                         if (submesh.faceset_index < 0 || submesh.faceset_index >= materials.Count)
                         {
                             // invalid faceset_index, do no update material assignments at all
+                            Debug.Log("Invalid faceset index");
                             return;
                         }
 
-                        assigned_materials[submesh_index] = materials[submesh.faceset_index];
-                        changed = true;
+                        if (submesh_index >= assigned_materials.Length)
+                        {
+                            Debug.Log("No material for submesh");
+                            return;
+                        }
+
+                        if (assigned_materials[submesh_index] != materials[submesh.faceset_index])
+                        {
+                            assigned_materials[submesh_index] = materials[submesh.faceset_index];
+                            split_renderer.sharedMaterials = assigned_materials;
+
+                            // propagate first split single material assignment to parent renderer if it exists
+                            if (submesh.split_index == 0 && split_renderer != renderer && renderer != null && assigned_materials.Length == 1)
+                            {
+                                renderer.sharedMaterials = assigned_materials;
+                            }
+                        }
                     }
                     else
                     {
                         // should I reset to default material or leave it as it is
                     }
 
+                    split_index = submesh.split_index;
                     ++submesh_index;
-                }
-
-                if (changed)
-                {
-                    renderer.sharedMaterials = assigned_materials;
                 }
             }
 
@@ -300,20 +345,7 @@ public class AlembicMaterial : MonoBehaviour
                 
                 if (target == null)
                 {
-                    continue;
-                }
-                
-                MeshFilter mesh = target.GetComponent<MeshFilter>();
-
-                if (mesh == null)
-                {
-                    continue;
-                }
-
-                Renderer renderer = target.GetComponent<Renderer>();
-
-                if (renderer == null)
-                {
+                    Debug.LogWarning("Could not find node: " + path);
                     continue;
                 }
 
