@@ -142,6 +142,7 @@ public class AlembicImporter
         public float time;
         public bool reverse_x;
         public bool reverse_faces;
+        public bool ignore_missing_nodes;
     }
 
 #if UNITY_EDITOR
@@ -188,6 +189,7 @@ public class AlembicImporter
             ic.parent = root.GetComponent<Transform>();
             ic.reverse_x = reverse_x;
             ic.reverse_faces = reverse_faces;
+            ic.ignore_missing_nodes = false;
 
             GCHandle gch = GCHandle.Alloc(ic);
             aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -196,13 +198,14 @@ public class AlembicImporter
     }
 #endif
 
-    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverse_x, bool reverse_faces, float time)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverse_x, bool reverse_faces, float time, bool ignore_missing_nodes)
     {
         var ic = new ImportContext();
         ic.parent = root;
         ic.time = time;
         ic.reverse_x = reverse_x;
         ic.reverse_faces = reverse_faces;
+        ic.ignore_missing_nodes = ignore_missing_nodes;
 
         GCHandle gch = GCHandle.Alloc(ic);
         aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -214,24 +217,34 @@ public class AlembicImporter
         Transform parent = ic.parent;
         //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
+        string child_name = aiGetName(obj);
+        var trans = parent.FindChild(child_name);
+
+        if (trans == null)
+        {
+            if (ic.ignore_missing_nodes)
+            {
+                return;
+            }
+            else
+            {
+                GameObject go = new GameObject();
+                go.name = child_name;
+                trans = go.GetComponent<Transform>();
+                trans.parent = parent;
+            }
+        }
+
         aiSetCurrentTime(obj, ic.time);
         aiEnableReverseX(obj, ic.reverse_x);
         aiEnableReverseIndex(obj, ic.reverse_faces);
-        string child_name = aiGetName(obj);
-        var trans = parent.FindChild(child_name);
-        if (trans == null)
-        {
-            GameObject go = new GameObject();
-            go.name = child_name;
-            trans = go.GetComponent<Transform>();
-            trans.parent = parent;
-        }
-
+        
         if (aiHasXForm(obj))
         {
             Vector3 pos = aiXFormGetPosition(obj);
             Quaternion rot = Quaternion.AngleAxis(aiXFormGetAngle(obj), aiXFormGetAxis(obj));
             Vector3 scale = aiXFormGetScale(obj);
+            
             if (aiXFormGetInherits(obj))
             {
                 trans.localPosition = pos;
@@ -251,15 +264,18 @@ public class AlembicImporter
             trans.localEulerAngles = Vector3.zero;
             trans.localScale = Vector3.one;
         }
+
         if (aiHasPolyMesh(obj))
         {
             UpdateAbcMesh(obj, trans);
         }
+
         if (aiHasCamera(obj))
         {
             trans.parent.forward = -trans.parent.forward;
             UpdateAbcCamera(obj, trans);
         }
+
         if (aiHasLight(obj))
         {
             UpdateAbcLight(obj, trans);
@@ -269,8 +285,7 @@ public class AlembicImporter
         aiEnumerateChild(obj, ImportEnumerator, userdata);
         ic.parent = parent;
     }
-
-
+    
     public static void UpdateAbcMesh(aiObject abc, Transform trans)
     {
         AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
