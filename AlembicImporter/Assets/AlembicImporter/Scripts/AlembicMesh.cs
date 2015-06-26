@@ -30,12 +30,8 @@ public class AlembicMesh : MonoBehaviour
         public int split_index;
     }
 
-    //public IntPtr m_abc_mesh;
     public List<Submesh> m_submeshes = new List<Submesh>();
     public List<Split> m_splits = new List<Split>();
-    //public Vector3[] position_cache = new Vector3[0];
-    //public Vector3[] normal_cache = new Vector3[0];
-    //public Vector2[] uv_cache = new Vector2[0];
     public bool has_facesets = false;
 
     public RenderTexture m_indices;
