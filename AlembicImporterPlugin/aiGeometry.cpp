@@ -20,9 +20,9 @@ aiXForm::aiXForm(aiObject *obj)
     m_schema = xf.getSchema();
 }
 
-void aiXForm::updateSample()
+void aiXForm::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     m_schema.get(m_sample, ss);
     m_inherits = m_schema.getInheritsXforms(ss);
 }
@@ -30,7 +30,6 @@ void aiXForm::updateSample()
 
 void aiXForm::debugDump() const
 {
-
 }
 
 bool aiXForm::getInherits() const
@@ -83,6 +82,7 @@ aiPolyMesh::aiPolyMesh()
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
     : super(obj)
+    , m_dst_textures(nullptr)
     , m_peak_index_count(0)
     , m_peak_vertex_count(0)
     , m_task_running(0)
@@ -91,9 +91,9 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     m_schema = pm.getSchema();
 }
 
-void aiPolyMesh::updateSample()
+void aiPolyMesh::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     m_schema.getFaceIndicesProperty().get(m_indices, ss);
     m_schema.getFaceCountsProperty().get(m_counts, ss);
     m_schema.getPositionsProperty().get(m_positions, ss);
@@ -112,6 +112,13 @@ void aiPolyMesh::updateSample()
     if (m_schema.getUVsParam().valid()) {
         m_schema.getUVsParam().getIndexed(m_uvs, ss);
     }
+
+
+#ifdef aiSupportTextureMesh
+    if (m_dst_textures) {
+        copyMeshToTexture(*m_dst_textures);
+    }
+#endif // aiSupportTextureMesh
 }
 
 void aiPolyMesh::debugDump() const
@@ -318,7 +325,6 @@ void aiPolyMesh::copyIndices(ScalarT *dst) const
     }
 }
 template void aiPolyMesh::copyIndices<int>(int *dst) const;
-template void aiPolyMesh::copyIndices<float>(float *dst) const;
 
 
 template<class VecT>
@@ -338,7 +344,6 @@ void aiPolyMesh::copyVertices(VecT *dst) const
     }
 }
 template void aiPolyMesh::copyVertices<abcV3>(abcV3 *dst) const;
-template void aiPolyMesh::copyVertices<abcV4>(abcV4 *dst) const;
 
 
 template<class VecT>
@@ -358,7 +363,6 @@ void aiPolyMesh::copyVelocities(VecT *dst) const
     }
 }
 template void aiPolyMesh::copyVelocities<abcV3>(abcV3 *dst) const;
-template void aiPolyMesh::copyVelocities<abcV4>(abcV4 *dst) const;
 
 
 template<class VecT>
@@ -378,7 +382,6 @@ void aiPolyMesh::copyNormals(VecT *dst) const
     }
 }
 template void aiPolyMesh::copyNormals<abcV3>(abcV3 *dst) const;
-template void aiPolyMesh::copyNormals<abcV4>(abcV4 *dst) const;
 
 
 void aiPolyMesh::copyUVs(abcV2 *dst) const
@@ -403,10 +406,15 @@ void aiPolyMesh::copyUVs(abcV2 *dst) const
 #ifdef aiSupportTextureMesh
 #include "GraphicsDevice/aiGraphicsDevice.h"
 
+void aiPolyMesh::setDstTexture(aiTextureMeshData *dst)
+{
+    m_dst_textures = dst;
+}
+
 void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
 {
     aiIGraphicsDevice *dev = aiGetGraphicsDevice();
-    if (!dev) { return; }
+    if (!dev || !m_indices) { return; }
 
     aiDebugLogVerbose("void aiPolyMesh::copyMeshToTexture(): %s\n", m_obj->getName());
 
@@ -417,37 +425,42 @@ void aiPolyMesh::copyMeshToTexture(aiTextureMeshData &dst) const
 
     if (dst.tex_indices) {
         uint32_t n = dst.index_count;
-        m_buf.resize(ceilup<uint32_t>(n, dst.tex_width));
-        copyIndices((float*)&m_buf[0]);
-        dev->writeTexture(dst.tex_indices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RFloat, &m_buf[0], n*sizeof(float));
+        uint32_t w = dst.tex_width;
+        m_buf.resize(ceilup<uint32_t>(n, w));
+        copyIndices((int*)&m_buf[0]);
+        dev->writeTexture(dst.tex_indices, w, ceildiv<uint32_t>(n, w), aiE_RInt, &m_buf[0], n*sizeof(int));
     }
 
     if (dst.tex_vertices && m_positions) {
-        uint32_t n = dst.vertex_count;
-        m_buf.resize(ceilup<uint32_t>(n, dst.tex_width) * 4);
-        copyVertices((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_vertices, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+        uint32_t n = dst.vertex_count * 3;
+        uint32_t w = dst.tex_width * 3;
+        m_buf.resize(ceilup<uint32_t>(n, w));
+        copyVertices((abcV3*)&m_buf[0]);
+        dev->writeTexture(dst.tex_vertices, w, ceildiv<uint32_t>(n, w), aiE_RFloat, &m_buf[0], n*sizeof(float));
     }
 
     if (dst.tex_normals && m_normals) {
-        uint32_t n = m_normals.getVals()->size();
-        m_buf.resize(ceilup<uint32_t>(n, dst.tex_width) * 4);
-        copyNormals((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_normals, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+        uint32_t n = m_normals.getVals()->size() * 3;
+        uint32_t w = dst.tex_width * 3;
+        m_buf.resize(ceilup<uint32_t>(n, w));
+        copyNormals((abcV3*)&m_buf[0]);
+        dev->writeTexture(dst.tex_normals, w, ceildiv<uint32_t>(n, w), aiE_RFloat, &m_buf[0], n*sizeof(float));
     }
 
     if (dst.tex_uvs && m_uvs) {
-        uint32_t n = m_uvs.getVals()->size();
-        m_buf.resize(ceilup<uint32_t>(n, dst.tex_width) * 2);
+        uint32_t n = m_uvs.getVals()->size() * 2;
+        uint32_t w = dst.tex_width * 2;
+        m_buf.resize(ceilup<uint32_t>(n, w));
         copyUVs((abcV2*)&m_buf[0]);
-        dev->writeTexture(dst.tex_uvs, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_RGFloat, &m_buf[0], n*sizeof(abcV2));
+        dev->writeTexture(dst.tex_uvs, w, ceildiv<uint32_t>(n, w), aiE_RFloat, &m_buf[0], n*sizeof(float));
     }
 
     if (dst.tex_velocities && m_velocities && m_velocities->valid()) {
-        uint32_t n = m_velocities->size();
-        m_buf.resize(ceilup<uint32_t>(n, dst.tex_width) * 4);
-        copyVertices((abcV4*)&m_buf[0]);
-        dev->writeTexture(dst.tex_velocities, dst.tex_width, ceildiv<uint32_t>(n, dst.tex_width), aiE_ARGBFloat, &m_buf[0], n*sizeof(abcV4));
+        uint32_t n = m_velocities->size() * 3;
+        uint32_t w = dst.tex_width * 3;
+        m_buf.resize(ceilup<uint32_t>(n, w));
+        copyVertices((abcV3*)&m_buf[0]);
+        dev->writeTexture(dst.tex_velocities, w, ceildiv<uint32_t>(n, w), aiE_RFloat, &m_buf[0], n*sizeof(float));
     }
 }
 
@@ -473,6 +486,7 @@ void aiPolyMesh::endCopyMeshToTexture() const
 
 bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMeshInfo& prev, int max_vertices) const
 {
+    if (!m_counts) { return false; }
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
     size_t nc = counts.size();
@@ -503,6 +517,7 @@ bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMes
 
 void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const
 {
+    if (!m_counts) { return; }
     bool reverse_index = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
@@ -525,6 +540,7 @@ void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) cons
 
 void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
+    if (!m_counts) { return; }
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
     const auto &positions = *m_positions;
@@ -546,6 +562,7 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
 
 void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
+    if (!m_counts) { return; }
     const auto &counts = *m_counts;
     const auto &normals = *m_normals.getVals();
     const auto &indices = *m_normals.getIndices();
@@ -580,6 +597,7 @@ void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) co
 
 void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
 {
+    if (!m_counts) { return; }
     const auto &counts = *m_counts;
     const auto &uvs = *m_uvs.getVals();
     const auto &indices = *m_uvs.getIndices();
@@ -620,9 +638,9 @@ aiCurves::aiCurves(aiObject *obj)
     m_schema = curves.getSchema();
 }
 
-void aiCurves::updateSample()
+void aiCurves::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     // todo
 }
 
@@ -637,9 +655,9 @@ aiPoints::aiPoints(aiObject *obj)
     m_schema = points.getSchema();
 }
 
-void aiPoints::updateSample()
+void aiPoints::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     // todo
 }
 
@@ -654,9 +672,9 @@ aiCamera::aiCamera(aiObject *obj)
     m_schema = cam.getSchema();
 }
 
-void aiCamera::updateSample()
+void aiCamera::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     // todo
 }
 
@@ -681,9 +699,9 @@ aiLight::aiLight(aiObject *obj)
 {
 }
 
-void aiLight::updateSample()
+void aiLight::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     // todo
 }
 
@@ -698,8 +716,8 @@ aiMaterial::aiMaterial(aiObject *obj)
     m_schema = material.getSchema();
 }
 
-void aiMaterial::updateSample()
+void aiMaterial::updateSample(float time)
 {
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
+    Abc::ISampleSelector ss(time);
     // todo
 }

@@ -22,7 +22,6 @@ public class AlembicXForm : AlembicElement
 
     public override void AbcUpdate()
     {
-        base.AbcUpdate();
         var trans = m_trans;
         var abc = m_abcobj;
 

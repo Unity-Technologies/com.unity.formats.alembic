@@ -90,10 +90,11 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
-    [DllImport ("AlembicImporter")] public static extern void       aiWaitTasks(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
-    [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(aiObject obj, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(aiObject obj, bool v);
@@ -134,6 +135,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(aiObject obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
 
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshSetDstMeshTextures(aiObject obj, ref aiTextureMeshData dst);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshBeginCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshEndCopyDataToTexture(aiObject obj, ref aiTextureMeshData dst);
@@ -238,7 +240,6 @@ public class AlembicImporter
         Transform parent = ic.parent;
         //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
-        aiSetCurrentTime(obj, ic.time);
         aiEnableReverseX(obj, ic.reverse_x);
         aiEnableReverseIndex(obj, ic.reverse_faces);
 

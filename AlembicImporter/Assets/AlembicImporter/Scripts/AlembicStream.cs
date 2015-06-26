@@ -29,6 +29,7 @@ public class AlembicStream : MonoBehaviour
     bool m_loaded;
     float m_time_prev;
     float m_time_eps = 0.001f;
+    bool m_needs_update_sample;
 
     public List<AlembicElement> m_elements = new List<AlembicElement>();
 
@@ -61,6 +62,7 @@ public class AlembicStream : MonoBehaviour
     void OnDestroy()
     {
         AlembicImporter.aiDestroyContext(m_abc);
+        m_abc.ptr = IntPtr.Zero;
     }
 
     float AdjustTime(float in_time)
@@ -142,15 +144,33 @@ public class AlembicStream : MonoBehaviour
         m_time += Time.deltaTime;
         if (Math.Abs(m_time - m_time_prev) > m_time_eps)
         {
-            // update elements
-            int len = m_elements.Count;
-            for (int i = 0; i < len; ++i)
-            {
-                m_elements[i].m_time = m_time;
-                m_elements[i].AbcUpdate();
-            }
-
+            m_needs_update_sample = true;
             m_time_prev = m_time;
+        }
+
+        if (m_needs_update_sample)
+        {
+            AlembicImporter.aiUpdateSamplesBegin(m_abc, m_time);
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (m_needs_update_sample)
+        {
+            AlembicImporter.aiUpdateSamplesEnd(m_abc);
+            UpdateElements();
+        }
+
+        m_needs_update_sample = false;
+    }
+
+    void UpdateElements()
+    {
+        int len = m_elements.Count;
+        for (int i = 0; i < len; ++i)
+        {
+            m_elements[i].AbcUpdate();
         }
     }
 }

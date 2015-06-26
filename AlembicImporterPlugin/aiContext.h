@@ -25,6 +25,10 @@ public:
     float getStartTime() const;
     float getEndTime() const;
 
+    void updateSamples(float time);
+    void updateSamplesBegin(float time);
+    void updateSamplesEnd();
+
     void enqueueTask(const task_t &task);
     void waitTasks();
 

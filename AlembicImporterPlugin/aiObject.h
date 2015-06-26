@@ -17,7 +17,7 @@ public:
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
 
-    void setCurrentTime(float time);
+    void updateSample(float time);
     void enableReverseX(bool v);
     void enableTriangulate(bool v);
     void enableReverseIndex(bool v);
@@ -43,7 +43,6 @@ public:
     aiContext*  getContext();
     abcObject&  getAbcObject();
     void        addChild(aiObject *c);
-    float       getCurrentTime() const;
     bool        getReverseX() const;
     bool        getReverseIndex() const;
     bool        getTriangulate() const;
@@ -65,7 +64,6 @@ private:
     std::unique_ptr<aiLight>    m_light;
     std::unique_ptr<aiMaterial> m_material;
 
-    float m_time;
     bool m_reverse_x;
     bool m_triangulate;
     bool m_reverse_index;

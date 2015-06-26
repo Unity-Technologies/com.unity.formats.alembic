@@ -14,7 +14,6 @@ public class AlembicElement : MonoBehaviour
 {
     public AlembicStream m_abcstream;
     public AlembicImporter.aiObject m_abcobj;
-    public float m_time;
 
     public T GetOrAddComponent<T>() where T : Component
     {
@@ -34,6 +33,5 @@ public class AlembicElement : MonoBehaviour
 
     public virtual void AbcUpdate()
     {
-        AlembicImporter.aiSetCurrentTime(m_abcobj, m_time);
     }
 }
