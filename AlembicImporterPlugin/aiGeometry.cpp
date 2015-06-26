@@ -848,23 +848,38 @@ aiCamera::aiCamera() {}
 aiCamera::aiCamera(aiObject *obj)
     : super(obj)
 {
-    AbcGeom::ICamera cam(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = cam.getSchema();
 }
 
 void aiCamera::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
-    // todo
+
+    if (!m_schema.valid())
+    {
+        AbcGeom::ICamera cam(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = cam.getSchema();
+    }
+    else if (m_schema.isConstant())
+    {
+        return;
+    }
+
+    m_schema.get(m_sample, ss);
 }
 
 void aiCamera::getParams(aiCameraParams &o_params)
 {
-    o_params.near_clipping_plane = m_sample.getNearClippingPlane();
-    o_params.far_clipping_plane = m_sample.getFarClippingPlane();
-    o_params.field_of_view = m_sample.getFieldOfView();
-    o_params.focus_distance = m_sample.getFocusDistance() * 0.1f; // centimeter to meter
-    o_params.focal_length = m_sample.getFocalLength() * 0.01f; // milimeter to meter
+    static float sRad2Deg = 180.0f / float(M_PI);
+
+    float vertical_aperture = (float) m_sample.getVerticalAperture();
+    float focal_length = (float) m_sample.getFocalLength();
+
+    o_params.near_clipping_plane = (float) m_sample.getNearClippingPlane();
+    o_params.far_clipping_plane = (float) m_sample.getFarClippingPlane();
+    // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
+    o_params.field_of_view = 2.0f * atanf(vertical_aperture * 10.0f / (2.0f * focal_length)) * sRad2Deg;
+    o_params.focus_distance = (float) m_sample.getFocusDistance() * 0.1f; // centimeter to meter
+    o_params.focal_length = focal_length * 0.01f; // milimeter to meter
 }
 
 
