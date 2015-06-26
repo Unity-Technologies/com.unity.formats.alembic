@@ -24,6 +24,7 @@ public class AlembicStream : MonoBehaviour
     public bool m_reverse_x;
     public bool m_reverse_faces;
     public bool m_force_refresh;
+    public bool m_ignore_missing_nodes = true;
     
     bool m_loaded;
     float m_adjusted_time_prev;
@@ -31,6 +32,7 @@ public class AlembicStream : MonoBehaviour
     bool m_reverse_faces_prev;
     float m_time_eps = 0.001f;
     AlembicImporter.aiContext m_abc;
+    bool m_ignore_missing_nodes_prev;
 
 
     void OnEnable()
@@ -122,6 +124,7 @@ public class AlembicStream : MonoBehaviour
         m_adjusted_time_prev = AdjustTime(0.0f);
         m_reverse_x_prev = m_reverse_x;
         m_reverse_faces_prev = m_reverse_faces;
+        m_ignore_missing_nodes_prev = m_ignore_missing_nodes;
         m_force_refresh = false;
     }
 
@@ -140,9 +143,10 @@ public class AlembicStream : MonoBehaviour
             if (m_force_refresh || 
                 m_reverse_x != m_reverse_x_prev ||
                 m_reverse_faces != m_reverse_faces_prev ||
+                m_ignore_missing_nodes != m_ignore_missing_nodes_prev ||
                 Math.Abs(adjusted_time - m_adjusted_time_prev) > m_time_eps)
             {
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, adjusted_time);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, adjusted_time, m_ignore_missing_nodes);
                 
                 m_adjusted_time_prev = adjusted_time;
                 m_reverse_x_prev = m_reverse_x;
