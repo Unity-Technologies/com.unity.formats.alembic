@@ -285,12 +285,6 @@ public class AlembicImporter
         bool has_uvs = aiPolyMeshHasUVs(abc);
         bool needs_index_update = (abcmesh.m_submeshes.Count == 0 || topo_variance == aiTopologyVariance.Heterogeneous);
 
-        if (!needs_index_update && topo_variance == aiTopologyVariance.Constant)
-        {
-            // Nothing to update
-            return;
-        }
-
         AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
         if (abcmaterials != null)
         {
@@ -301,6 +295,12 @@ public class AlembicImporter
         {
             needs_index_update = true;
             abcmesh.has_facesets = false;
+        }
+
+        if (!needs_index_update && topo_variance == aiTopologyVariance.Constant)
+        {
+            //Debug.Log("Nothing to update for \"" + trans.name + "\"");
+            return;
         }
 
         AlembicMesh.Split split;
@@ -364,7 +364,9 @@ public class AlembicImporter
                     got.localEulerAngles = Vector3.zero;
                     got.localScale = Vector3.one;
 
-                    Mesh mesh = AddMeshComponents(abc, got, null);
+                    MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
+
+                    Mesh mesh = AddMeshComponents(abc, got, (renderer != null ? renderer.sharedMaterial : null));
                     mesh.name = go.name;
 
                     split.mesh = mesh;
@@ -543,7 +545,7 @@ public class AlembicImporter
         }
     }
 
-    static Mesh AddMeshComponents(aiObject abc, Transform trans, Material material)
+    static Mesh AddMeshComponents(aiObject abc, Transform trans, Material material=null)
     {
         Mesh mesh;
         
