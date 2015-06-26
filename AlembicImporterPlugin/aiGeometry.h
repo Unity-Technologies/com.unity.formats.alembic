@@ -67,22 +67,24 @@ public:
     void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
-    uint32_t    getVertexBufferLength() const;
-    void        fillVertexBuffer(abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    uint32_t    getSplitCount() const;
+    uint32_t    getSplitCount(bool force_refresh);
+    uint32_t    getVertexBufferLength(uint32_t split_index) const;
+    void        fillVertexBuffer(uint32_t split_index, abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
     uint32_t    prepareSubmeshes(const aiFacesets *facesets);
+    uint32_t    getSplitSubmeshCount(uint32_t split_index) const;
     bool        getNextSubmesh(aiSubmeshInfo &o_smi);
     void        fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
 
 private:
 
     template <typename NormalIndexArray>
-    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi) const
+    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi, float x_scale) const
     {
         const auto &counts = *m_counts;
         const auto &normals = *m_normals.getVals();
-
+        
         uint32_t a = 0;
-        float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
         
         for (int fi = 0; fi < smi.num_faces; ++fi)
         {
@@ -96,12 +98,71 @@ private:
         }
     }
 
-    // may be a little more that just that then
-    // submesh should also contain vertex indices
+    void updateSplits();
+
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
     
-    typedef Alembic::Util::int64_t SubmeshID;
+    struct SubmeshID
+    {
+        int u_tile;
+        int v_tile;
+        int faceset_index;
+        int split_index;
+
+        inline SubmeshID(float u, float v, int fi=-1, int si=0)
+            : u_tile((int)floor(u))
+            , v_tile((int)floor(v))
+            , faceset_index(fi)
+            , split_index(si)
+        {
+        }
+
+        inline bool operator<(const SubmeshID &rhs) const
+        {
+            if (split_index < rhs.split_index)
+            {
+                return true;
+            }
+            else if (split_index == rhs.split_index)
+            {
+                if (faceset_index < rhs.faceset_index)
+                {
+                    return true;
+                }
+                else if (faceset_index == rhs.faceset_index)
+                {
+                    if (u_tile < rhs.u_tile)
+                    {
+                        return true;
+                    }
+                    else if (u_tile == rhs.u_tile)
+                    {
+                        return (v_tile < rhs.v_tile);
+                    }
+                }
+            }
+            return false;
+        }
+    };
+
+    struct SplitInfo
+    {
+        size_t first_face;
+        size_t last_face;
+        size_t index_offset;
+        size_t indices_count;
+        size_t submesh_count;
+
+        inline SplitInfo(size_t ff=0, size_t io=0)
+            : first_face(ff)
+            , last_face(ff)
+            , index_offset(io)
+            , indices_count(0)
+            , submesh_count(0)
+        {
+        }
+    };
 
     struct Submesh
     {
@@ -110,16 +171,19 @@ private:
         std::vector<int> vertex_indices;
         size_t triangle_count;
         int faceset_index;
+        int split_index;
+        int index; // submesh index in split
+
+        inline Submesh(int fsi=-1, int si=0)
+            : triangle_count(0)
+            , faceset_index(fsi)
+            , split_index(si)
+            , index(0)
+        {
+        }
     };
 
     typedef std::deque<Submesh> Submeshes;
-
-    struct IndexPassthrough
-    {
-        inline size_t operator[](size_t idx) const { return idx; }
-    };
-
-    SubmeshID computeSubmeshID(float u, float v, int faceset) const;
 
 private:
     AbcGeom::IPolyMeshSchema m_schema;
@@ -132,6 +196,10 @@ private:
 
     Submeshes m_submeshes;
     Submeshes::iterator m_cur_submesh;
+
+    // Need to split mesh to work around the 65000 vertices per mesh limit
+    std::vector<int> m_face_split_indices;
+    std::vector<SplitInfo> m_splits;
 };
 
 
