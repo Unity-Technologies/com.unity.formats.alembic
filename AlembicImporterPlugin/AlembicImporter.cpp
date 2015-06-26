@@ -90,11 +90,18 @@ aiCLinkage aiExport aiObject* aiGetTopObject(aiContext* ctx)
     return ctx->getTopObject();
 }
 
-aiCLinkage aiExport void aiWaitTasks(aiContext* ctx)
+aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time)
 {
-    ctx->waitTasks();
+    ctx->updateSamples(time);
 }
-
+aiCLinkage aiExport void aiUpdateSamplesBegin(aiContext* ctx, float time)
+{
+    ctx->updateSamplesBegin(time);
+}
+aiCLinkage aiExport void aiUpdateSamplesEnd(aiContext* ctx)
+{
+    ctx->updateSamplesEnd();
+}
 
 aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata)
 {
@@ -113,13 +120,6 @@ aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, voi
     }
 }
 
-
-aiCLinkage aiExport void aiSetCurrentTime(aiObject* obj, float time)
-{
-    aiCheckObject(obj);
-    //aiDebugLogVerbose("aiSetCurrentTime(): %.2f\n", time);
-    obj->setCurrentTime(time);
-}
 
 aiCLinkage aiExport void aiEnableReverseX(aiObject* obj, bool v)
 {
@@ -344,6 +344,11 @@ aiCLinkage aiExport void aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, con
 
 
 #ifdef aiSupportTextureMesh
+aiCLinkage aiExport void aiPolyMeshSetDstMeshTextures(aiObject* obj, aiTextureMeshData *dst)
+{
+    obj->getPolyMesh().setDstTexture(dst);
+}
+
 aiCLinkage aiExport void aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst)
 {
     obj->getPolyMesh().copyMeshToTexture(*dst);

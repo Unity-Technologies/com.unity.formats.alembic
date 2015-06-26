@@ -7,7 +7,6 @@
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
-    , m_time(0.0f)
     , m_reverse_x(true)
     , m_triangulate(true)
     , m_reverse_index(false)
@@ -61,6 +60,8 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
             m_material.reset(new aiMaterial(this));
             m_schemas.push_back(&*m_material);
         }
+
+        updateSample(0.0f);
     }
 }
 
@@ -80,18 +81,17 @@ const char* aiObject::getFullName() const   { return m_abc.getFullName().c_str()
 uint32_t    aiObject::getNumChildren() const{ return m_children.size(); }
 aiObject*   aiObject::getChild(int i)       { return m_children[i]; }
 
-void aiObject::setCurrentTime(float time)
+void aiObject::updateSample(float time)
 {
-    m_time = time;
     for (auto s : m_schemas) {
-        s->updateSample();
+        s->updateSample(time);
     }
 }
+
 void aiObject::enableReverseX(bool v)       { m_reverse_x = v; }
 void aiObject::enableTriangulate(bool v)    { m_triangulate = v; }
 void aiObject::enableReverseIndex(bool v)   { m_reverse_index = v; }
 
-float aiObject::getCurrentTime() const      { return m_time; }
 bool aiObject::getReverseX() const          { return m_reverse_x; }
 bool aiObject::getReverseIndex() const      { return m_reverse_index; }
 bool aiObject::getTriangulate() const       { return m_triangulate; }

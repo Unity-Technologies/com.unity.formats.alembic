@@ -132,6 +132,21 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
+void aiContext::updateSamples(float time)
+{
+    for (const auto &e : m_nodes) {
+        e->updateSample(time);
+    }
+}
+void aiContext::updateSamplesBegin(float time)
+{
+    enqueueTask([this, time](){ updateSamples(time); });
+}
+void aiContext::updateSamplesEnd()
+{
+    waitTasks();
+}
+
 void aiContext::enqueueTask(const task_t &task)
 {
     m_tasks.run(task);

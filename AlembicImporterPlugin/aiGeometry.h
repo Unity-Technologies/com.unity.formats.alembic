@@ -8,7 +8,7 @@ public:
     aiSchema();
     aiSchema(aiObject *obj);
     virtual ~aiSchema();
-    virtual void updateSample() = 0;
+    virtual void updateSample(float time) = 0;
     virtual void debugDump() const {}
 
 protected:
@@ -22,7 +22,7 @@ typedef aiSchema super;
 public:
     aiXForm();
     aiXForm(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
     void debugDump() const override;
 
     bool        getInherits() const;
@@ -45,7 +45,7 @@ typedef aiSchema super;
 public:
     aiPolyMesh();
     aiPolyMesh(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
     void debugDump() const override;
 
     void        setCurrentTime(float t);
@@ -81,6 +81,7 @@ public:
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
 #ifdef aiSupportTextureMesh
+    void        setDstTexture(aiTextureMeshData *dst);
     void        copyMeshToTexture(aiTextureMeshData &dst) const;
     void        beginCopyMeshToTexture(aiTextureMeshData &dst) const;
     void        endCopyMeshToTexture() const;
@@ -95,6 +96,7 @@ private:
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
 
+    aiTextureMeshData *m_dst_textures;
     mutable std::vector<float> m_buf;
     mutable uint32_t m_peak_index_count;
     mutable uint32_t m_peak_vertex_count;
@@ -108,7 +110,7 @@ typedef aiSchema super;
 public:
     aiCurves();
     aiCurves(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
 
 private:
     AbcGeom::ICurvesSchema m_schema;
@@ -121,7 +123,7 @@ typedef aiSchema super;
 public:
     aiPoints();
     aiPoints(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
 
 private:
     AbcGeom::IPointsSchema m_schema;
@@ -144,7 +146,7 @@ typedef aiSchema super;
 public:
     aiCamera();
     aiCamera(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
     void debugDump() const override;
 
     void getParams(aiCameraParams &o_params);
@@ -161,7 +163,7 @@ typedef aiSchema super;
 public:
     aiLight();
     aiLight(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
 
 private:
     AbcGeom::ILightSchema m_schema;
@@ -174,7 +176,7 @@ typedef aiSchema super;
 public:
     aiMaterial();
     aiMaterial(aiObject *obj);
-    void updateSample() override;
+    void updateSample(float time) override;
 
     // Maya の alembic エクスポータがマテリアル情報を書き出せないようなので保留。
 

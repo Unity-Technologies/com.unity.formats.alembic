@@ -37,18 +37,19 @@ public class AlembicMesh : AlembicElement
     public RenderTexture m_velocities;
     public AlembicImporter.aiTextureMeshData m_mesh_tex = new AlembicImporter.aiTextureMeshData();
 
-    const int max_indices = 64498;
+    const int max_indices = 64998;
     const int max_vertices = 65000;
 
 
-    public static RenderTexture CreateDataTexture(int num_data, RenderTextureFormat format)
+    public static RenderTexture CreateDataTexture(int num_data, int num_elements, RenderTextureFormat format)
     {
         if (num_data == 0) { return null; }
-        int width = MeshTextureWidth;
+        int width = MeshTextureWidth * num_elements;
         int height = AlembicUtils.ceildiv(num_data, MeshTextureWidth);
         //Debug.Log("CreateDataTexture(): " + width + " x " + height + " " + format);
         var r = new RenderTexture(width, height, 0, format);
         r.filterMode = FilterMode.Point;
+        r.wrapMode = TextureWrapMode.Repeat;
         r.enableRandomWrite = true;
         r.Create();
         return r;
@@ -64,7 +65,7 @@ public class AlembicMesh : AlembicElement
 
         if(GetComponent<MeshRenderer>()==null)
         {
-            int num_mesh_objects = AlembicUtils.ceildiv(peak_index_count, 64998);
+            int num_mesh_objects = AlembicUtils.ceildiv(peak_index_count, max_indices);
 
             AddMeshComponents(abcobj, m_trans, abcstream.m_data_type);
             var entry = new AlembicMesh.Entry
@@ -123,31 +124,34 @@ public class AlembicMesh : AlembicElement
             m_mesh_tex = new AlembicImporter.aiTextureMeshData();
             m_mesh_tex.tex_width = MeshTextureWidth;
 
-            m_indices = CreateDataTexture(peak_index_count, RenderTextureFormat.RFloat);
+            m_indices = CreateDataTexture(peak_index_count, 1, RenderTextureFormat.RInt);
             m_mesh_tex.tex_indices = m_indices.GetNativeTexturePtr();
 
-            m_vertices = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
+            m_vertices = CreateDataTexture(peak_vertex_count, 3, RenderTextureFormat.RFloat);
             m_mesh_tex.tex_vertices = m_vertices.GetNativeTexturePtr();
 
-            if (AlembicImporter.aiPolyMeshHasNormals(abcobj))
-            {
-                bool is_normal_indexed = AlembicImporter.aiPolyMeshIsNormalIndexed(abcobj);
-                int normal_count = is_normal_indexed ? peak_vertex_count : peak_index_count;
-                m_normals = CreateDataTexture(normal_count, RenderTextureFormat.ARGBFloat);
-                m_mesh_tex.tex_normals = m_normals.GetNativeTexturePtr();
-            }
-            if (AlembicImporter.aiPolyMeshHasUVs(abcobj))
-            {
-                bool is_uv_indexed = AlembicImporter.aiPolyMeshIsUVIndexed(abcobj);
-                int uv_count = is_uv_indexed ? peak_vertex_count : peak_index_count;
-                m_uvs = CreateDataTexture(uv_count, RenderTextureFormat.RGFloat);
-                m_mesh_tex.tex_uvs = m_uvs.GetNativeTexturePtr();
-            }
-            if (AlembicImporter.aiPolyMeshHasVelocities(abcobj))
-            {
-                m_velocities = CreateDataTexture(peak_vertex_count, RenderTextureFormat.ARGBFloat);
-                m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
-            }
+            //if (AlembicImporter.aiPolyMeshHasNormals(abcobj))
+            //{
+            //    bool is_normal_indexed = AlembicImporter.aiPolyMeshIsNormalIndexed(abcobj);
+            //    int normal_count = is_normal_indexed ? peak_vertex_count : peak_index_count;
+            //    m_normals = CreateDataTexture(normal_count, 3, RenderTextureFormat.RFloat);
+            //    m_mesh_tex.tex_normals = m_normals.GetNativeTexturePtr();
+            //}
+            //if (AlembicImporter.aiPolyMeshHasUVs(abcobj))
+            //{
+            //    bool is_uv_indexed = AlembicImporter.aiPolyMeshIsUVIndexed(abcobj);
+            //    int uv_count = is_uv_indexed ? peak_vertex_count : peak_index_count;
+            //    m_uvs = CreateDataTexture(uv_count, 2, RenderTextureFormat.RFloat);
+            //    m_mesh_tex.tex_uvs = m_uvs.GetNativeTexturePtr();
+            //}
+            //if (AlembicImporter.aiPolyMeshHasVelocities(abcobj))
+            //{
+            //    m_velocities = CreateDataTexture(peak_vertex_count, 3, RenderTextureFormat.RFloat);
+            //    m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
+            //}
+
+            AlembicImporter.aiPolyMeshCopyToTexture(abcobj, ref m_mesh_tex);
+            AlembicImporter.aiPolyMeshSetDstMeshTextures(abcobj, ref m_mesh_tex);
 
             for (int i = 0; i < m_meshes.Count; ++i)
             {
@@ -167,7 +171,6 @@ public class AlembicMesh : AlembicElement
 
     public override void AbcUpdate()
     {
-        base.AbcUpdate();
         switch (m_abcstream.m_data_type)
         {
             case AlembicStream.MeshDataType.Texture:
@@ -181,22 +184,18 @@ public class AlembicMesh : AlembicElement
 
     void AbcUpdateMeshTexture()
     {
-        AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
+        //AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
         for (int i = 0; i < m_meshes.Count; ++i)
         {
-            //[0]: begin_index, [1]: index_count, [2]: is_normal_indexed, [3]: is_uv_indexed
-            m_meshes[i].mpb.SetVector("_DrawData", new Vector4(
-                max_indices * i,
-                m_mesh_tex.index_count,
-                m_mesh_tex.is_normal_indexed != 0 ? 1.0f : 0.0f,
-                m_mesh_tex.is_uv_indexed != 0 ? 1.0f : 0.0f));
+            //[0]: begin_index, [1]: index_count, [2]: vertex_count
+            var drawdata = new Vector4(max_indices * i, m_mesh_tex.index_count, m_mesh_tex.vertex_count, 0.0f);
+            m_meshes[i].mpb.SetVector("_DrawData", drawdata);
             m_meshes[i].renderer.SetPropertyBlock(m_meshes[i].mpb);
         }
     }
 
     void AbcUpdateMesh()
     {
-
         var trans = GetComponent<Transform>();
         var abc = m_abcobj;
         Material material = trans.GetComponent<MeshRenderer>().sharedMaterial;

@@ -9,9 +9,12 @@ SubShader {
     Tags { "RenderType"="Opaque" "Queue"="Geometry" }
 
 CGPROGRAM
-#pragma multi_compile ___ HAS_UVS
-#pragma multi_compile ___ HAS_NORMALS
-#pragma multi_compile ___ HAS_VELOCITIES
+//#pragma multi_compile ___ HAS_UVS
+//#pragma multi_compile ___ IS_UV_INDEXED
+//#pragma multi_compile ___ HAS_NORMALS
+//#pragma multi_compile ___ IS_NORMAL_INDEXED
+//#pragma multi_compile ___ HAS_VELOCITIES
+
 
 #pragma target 5.0
 #pragma only_renderers d3d11 opengl

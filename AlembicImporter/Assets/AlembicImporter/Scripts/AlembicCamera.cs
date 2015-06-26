@@ -25,7 +25,6 @@ public class AlembicCamera : AlembicElement
 
     public override void AbcUpdate()
     {
-        base.AbcUpdate();
         var trans = m_trans;
         var cam = m_camera;
         var abc = m_abcobj;

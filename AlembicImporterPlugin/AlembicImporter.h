@@ -38,6 +38,24 @@ struct aiSplitedMeshInfo
     int triangulated_index_count;
 };
 
+struct aiTextureMeshData
+{
+    // in
+    int tex_width;
+
+    // out
+    int index_count;
+    int vertex_count;
+    int is_normal_indexed;
+    int is_uv_indexed;
+    int pad;
+    void *tex_indices;
+    void *tex_vertices;
+    void *tex_normals;
+    void *tex_uvs;
+    void *tex_velocities;
+};
+
 
 aiCLinkage aiExport aiContext*      aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
@@ -47,13 +65,14 @@ aiCLinkage aiExport void            aiDebugDump(aiContext* ctx);
 aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
 aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
-aiCLinkage aiExport void            aiWaitTasks(aiContext* ctx);
+aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
+aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);
+aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiGetNumChildren(aiObject* obj);
-aiCLinkage aiExport void            aiSetCurrentTime(aiObject* obj, float time);
 aiCLinkage aiExport void            aiEnableReverseX(aiObject* obj, bool v);
 aiCLinkage aiExport void            aiEnableTriangulate(aiObject* obj, bool v);
 aiCLinkage aiExport void            aiEnableReverseIndex(aiObject* obj, bool v);
@@ -91,29 +110,7 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV
 
 #ifdef aiSupportTextureMesh
 
-// Unity の Mesh の vertices や normal の更新は信じられないくらい遅く、これで毎フレームでかいモデルを更新するのは現実的ではない。
-// ID3D11Buffer* などのネイティブグラフィック API のリソースを直接更新することで回避したい…、が、
-// 現在 Unity がネイティブリソースへのアクセス手段を提供しているものは Texture 一族だけである。
-// このため、テクスチャにモデルデータを格納して頂点シェーダで変形させるというややこしい手段を用いる。
-// 汚い手段だが Mesh を更新するよりは数十倍のオーダーで速い。
-
-struct aiTextureMeshData
-{
-    // in
-    int tex_width;
-
-    // out
-    int index_count;
-    int vertex_count;
-    int is_normal_indexed;
-    int is_uv_indexed;
-    int pad;
-    void *tex_indices;
-    void *tex_vertices;
-    void *tex_normals;
-    void *tex_uvs;
-    void *tex_velocities;
-};
+aiCLinkage aiExport void            aiPolyMeshSetDstMeshTextures(aiObject* obj, aiTextureMeshData *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyToTexture(aiObject* obj, aiTextureMeshData *dst);
 aiCLinkage aiExport void            aiPolyMeshBeginCopyToTexture(aiObject* obj, aiTextureMeshData *dst);
 aiCLinkage aiExport void            aiPolyMeshEndCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
