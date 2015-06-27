@@ -13,32 +13,40 @@ using UnityEditor;
 public class AlembicXForm : AlembicElement
 {
     Transform m_trans;
+    AbcAPI.aiXFormData m_abcdata;
+    public int c;
 
-    public override void AbcSetup(AlembicStream abcstream, AlembicImporter.aiObject abcobj)
+    public override void AbcSetup(
+        AlembicStream abcstream,
+        AbcAPI.aiObject abcobj,
+        AbcAPI.aiSchema abcschema)
     {
-        base.AbcSetup(abcstream, abcobj);
+        base.AbcSetup(abcstream, abcobj, abcschema);
         m_trans = GetComponent<Transform>();
+    }
+
+    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    {
+        AbcAPI.aiXFormGetData(sample, ref m_abcdata);
+        ++c;
     }
 
     public override void AbcUpdate()
     {
         var trans = m_trans;
-        var abc = m_abcobj;
 
-        Vector3 pos = AlembicImporter.aiXFormGetPosition(abc);
-        Quaternion rot = Quaternion.AngleAxis(AlembicImporter.aiXFormGetAngle(abc), AlembicImporter.aiXFormGetAxis(abc));
-        Vector3 scale = AlembicImporter.aiXFormGetScale(abc);
-        if (AlembicImporter.aiXFormGetInherits(abc))
+        //AlembicImporter.aiXFormGetData(sample, ref m_abcdata);
+        if (m_abcdata.inherits != 0)
         {
-            trans.localPosition = pos;
-            trans.localRotation = rot;
-            trans.localScale = scale;
+            trans.localPosition = m_abcdata.translation;
+            trans.localRotation = m_abcdata.rotation;
+            trans.localScale = m_abcdata.scale;
         }
         else
         {
-            trans.position = pos;
-            trans.rotation = rot;
-            trans.localScale = scale;
+            trans.position = m_abcdata.translation;
+            trans.rotation = m_abcdata.rotation;
+            trans.localScale = m_abcdata.scale;
         }
     }
 }

@@ -14,27 +14,33 @@ public class AlembicCamera : AlembicElement
 {
     Transform m_trans;
     Camera m_camera;
-    AlembicImporter.aiCameraParams m_camera_params;
+    AbcAPI.aiCameraData m_abcdata;
 
-    public override void AbcSetup(AlembicStream abcstream, AlembicImporter.aiObject abcobj)
+    public override void AbcSetup(
+        AlembicStream abcstream,
+        AbcAPI.aiObject abcobj,
+        AbcAPI.aiSchema abcschema)
     {
-        base.AbcSetup(abcstream, abcobj);
+        base.AbcSetup(abcstream, abcobj, abcschema);
         m_trans = GetComponent<Transform>();
         m_camera = GetOrAddComponent<Camera>();
+    }
+
+    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    {
+        AbcAPI.aiCameraGetData(sample, ref m_abcdata);
     }
 
     public override void AbcUpdate()
     {
         var trans = m_trans;
         var cam = m_camera;
-        var abc = m_abcobj;
 
         trans.parent.forward = -trans.parent.forward;
 
-        AlembicImporter.aiCameraGetParams(abc, ref m_camera_params);
-        cam.fieldOfView = m_camera_params.field_of_view;
-        cam.nearClipPlane = m_camera_params.near_clipping_plane;
-        cam.farClipPlane = m_camera_params.far_clipping_plane;
+        cam.fieldOfView = m_abcdata.field_of_view;
+        cam.nearClipPlane = m_abcdata.near_clipping_plane;
+        cam.farClipPlane = m_abcdata.far_clipping_plane;
 
         // alembic が持つカメラパラメータを DoF のパラメータに流し込みたい…、が、
         // Standard Assets (ImageEffects) が import されていない場合エラーになってしまうのでどうしたもんか考え中。

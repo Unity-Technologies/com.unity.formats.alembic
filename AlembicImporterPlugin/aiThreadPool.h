@@ -20,6 +20,7 @@ class aiThreadPool
 friend class aiWorkerThread;
 friend class aiTaskGroup;
 public:
+    static void releaseInstance();
     static aiThreadPool& getInstance();
     void enqueue(const std::function<void()> &f);
 

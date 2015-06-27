@@ -6,13 +6,22 @@
 class aiWorkerThread
 {
 public:
+    aiWorkerThread(aiThreadPool *pool);
     void operator()();
+
+private:
+    aiThreadPool *m_pool;
 };
 
 
+aiWorkerThread::aiWorkerThread(aiThreadPool *pool)
+    : m_pool(pool)
+{
+}
+
 void aiWorkerThread::operator()()
 {
-    aiThreadPool &pool = aiThreadPool::getInstance();
+    aiThreadPool &pool = *m_pool;
     std::function<void()> task;
     while (true)
     {
@@ -34,7 +43,7 @@ aiThreadPool::aiThreadPool(size_t threads)
     : m_stop(false)
 {
     for (size_t i = 0; i < threads; ++i) {
-        m_workers.push_back(std::thread(aiWorkerThread()));
+        m_workers.push_back(std::thread(aiWorkerThread(this)));
     }
 }
 
@@ -48,10 +57,20 @@ aiThreadPool::~aiThreadPool()
     }
 }
 
+static aiThreadPool *g_instance;
+
+void aiThreadPool::releaseInstance()
+{
+    delete g_instance;
+    g_instance = nullptr;
+}
+
 aiThreadPool& aiThreadPool::getInstance()
 {
-    static aiThreadPool s_instance(std::thread::hardware_concurrency());
-    return s_instance;
+    if (g_instance == nullptr) {
+        g_instance = new aiThreadPool(std::thread::hardware_concurrency());
+    }
+    return *g_instance;
 }
 
 void aiThreadPool::enqueue(const std::function<void()> &f)

@@ -15,16 +15,18 @@ public class AlembicMesh : AlembicElement
     [Serializable]
     public class Entry
     {
-        public int[] index_cache;
-        public Vector3[] vertex_cache;
-        public Vector2[] uv_cache;
+        public int[] buf_indices;
+        public Vector3[] buf_vertices;
+        public Vector3[] buf_normals;
+        public Vector2[] buf_uvs;
+        public Vector3[] buf_velocities;
         public Mesh mesh;
         public MeshRenderer renderer;
         public MaterialPropertyBlock mpb;
         public GameObject host;
+        public bool update_index;
+        public bool active;
     }
-
-
 
     const int MeshTextureWidth = 1024;
 
@@ -35,7 +37,9 @@ public class AlembicMesh : AlembicElement
     public RenderTexture m_normals;
     public RenderTexture m_uvs;
     public RenderTexture m_velocities;
-    public AlembicImporter.aiTextureMeshData m_mesh_tex = new AlembicImporter.aiTextureMeshData();
+    public AbcAPI.aiTextureMeshData m_mesh_tex = default(AbcAPI.aiTextureMeshData);
+
+    AbcAPI.aiPolyMeshSummary m_mesh_summary;
 
     const int max_indices = 64998;
     const int max_vertices = 65000;
@@ -55,13 +59,16 @@ public class AlembicMesh : AlembicElement
         return r;
     }
 
-    public override void AbcSetup(AlembicStream abcstream, AlembicImporter.aiObject abcobj)
+    public override void AbcSetup(
+        AlembicStream abcstream,
+        AbcAPI.aiObject abcobj,
+        AbcAPI.aiSchema abcschema)
     {
-        base.AbcSetup(abcstream, abcobj);
+        base.AbcSetup(abcstream, abcobj, abcschema);
         m_trans = GetComponent<Transform>();
 
-        int peak_index_count = AlembicImporter.aiPolyMeshGetPeakIndexCount(abcobj);
-        int peak_vertex_count = AlembicImporter.aiPolyMeshGetPeakVertexCount(abcobj);
+        int peak_index_count = AbcAPI.aiPolyMeshGetPeakIndexCount(abcschema);
+        int peak_vertex_count = AbcAPI.aiPolyMeshGetPeakVertexCount(abcschema);
 
         if(GetComponent<MeshRenderer>()==null)
         {
@@ -73,10 +80,6 @@ public class AlembicMesh : AlembicElement
                 host = m_trans.gameObject,
                 mesh = GetComponent<MeshFilter>().sharedMesh,
                 renderer = GetComponent<MeshRenderer>(),
-                vertex_cache = null,
-                uv_cache = null,
-                index_cache = null,
-                mpb = null,
             };
             m_meshes.Add(entry);
 #if UNITY_EDITOR
@@ -110,18 +113,24 @@ public class AlembicMesh : AlembicElement
                     host = go,
                     mesh = mesh,
                     renderer = child.GetComponent<MeshRenderer>(),
-                    vertex_cache = new Vector3[0],
-                    uv_cache = new Vector2[0],
-                    index_cache = new int[0],
-                    mpb = null,
                 };
                 m_meshes.Add(entry);
             }
         }
 
-        if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
+        if (abcstream.m_data_type == AlembicStream.MeshDataType.Mesh)
         {
-            m_mesh_tex = new AlembicImporter.aiTextureMeshData();
+            for (int i = 0; i < m_meshes.Count; ++i)
+            {
+                m_meshes[i].buf_indices = new int[0];
+                m_meshes[i].buf_vertices = new Vector3[0];
+                m_meshes[i].buf_normals = new Vector3[0];
+                m_meshes[i].buf_uvs = new Vector2[0];
+            }
+        }
+        else if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
+        {
+            m_mesh_tex = new AbcAPI.aiTextureMeshData();
             m_mesh_tex.tex_width = MeshTextureWidth;
 
             m_indices = CreateDataTexture(peak_index_count, 1, RenderTextureFormat.RInt);
@@ -150,8 +159,6 @@ public class AlembicMesh : AlembicElement
             //    m_mesh_tex.tex_velocities = m_velocities.GetNativeTexturePtr();
             //}
 
-            AlembicImporter.aiPolyMeshCopyToTexture(abcobj, ref m_mesh_tex);
-            AlembicImporter.aiPolyMeshSetDstMeshTextures(abcobj, ref m_mesh_tex);
 
             for (int i = 0; i < m_meshes.Count; ++i)
             {
@@ -169,22 +176,107 @@ public class AlembicMesh : AlembicElement
         }
     }
 
+
+    // called by loading thread
+    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    {
+        switch (m_abcstream.m_data_type)
+        {
+            case AlembicStream.MeshDataType.Texture:
+                AbcOnUpdateSample_Texture(sample);
+                break;
+            case AlembicStream.MeshDataType.Mesh:
+                AbcOnUpdateSample_Mesh(sample);
+                break;
+        }
+    }
+
+    // called by loading thread
+    void AbcOnUpdateSample_Texture(AbcAPI.aiSample sample)
+    {
+        AbcAPI.aiPolyMeshCopyToTexture(sample, ref m_mesh_tex);
+    }
+
+    // called by loading thread
+    void AbcOnUpdateSample_Mesh(AbcAPI.aiSample sample)
+    {
+        var schema = m_abcschema;
+        var smi_prev = default(AbcAPI.aiSplitedMeshInfo);
+        var smi = default(AbcAPI.aiSplitedMeshInfo);
+        AbcAPI.aiPolyMeshGetSummary(sample, ref m_mesh_summary);
+
+        int nth_submesh = 0;
+        for (; ; )
+        {
+            smi_prev = smi;
+            smi = default(AbcAPI.aiSplitedMeshInfo);
+            bool is_end = AbcAPI.aiPolyMeshGetSplitedMeshInfo(sample, ref smi, ref smi_prev, max_vertices);
+
+            AlembicMesh.Entry entry;
+            if (nth_submesh < m_meshes.Count)
+            {
+                entry = m_meshes[nth_submesh];
+                entry.active = true;
+            }
+            else
+            {
+                Debug.Log("AlembicMesh: not enough submeshes!");
+                break;
+            }
+
+            entry.update_index = entry.buf_indices.Length == 0 ||
+                AbcAPI.aiPolyMeshGetTopologyVariance(schema) == AbcAPI.aiTopologyVariance.Heterogeneous;
+
+            Array.Resize(ref entry.buf_vertices, (int)smi.vertex_count);
+            smi.dst_vertices = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_vertices, 0);
+
+            if (m_mesh_summary.has_normals != 0)
+            {
+                Array.Resize(ref entry.buf_normals, (int)smi.vertex_count);
+                smi.dst_normals = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_normals, 0);
+            }
+
+            if (entry.update_index)
+            {
+                if (m_mesh_summary.has_uvs != 0)
+                {
+                    Array.Resize(ref entry.buf_uvs, (int)smi.vertex_count);
+                    smi.dst_uvs = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_uvs, 0);
+                }
+
+                Array.Resize(ref entry.buf_indices, (int)smi.triangulated_index_count);
+                smi.dst_indices = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_indices, 0);
+            }
+
+            AbcAPI.aiPolyMeshCopySplitedMesh(sample, ref smi);
+
+            ++nth_submesh;
+            if (is_end) { break; }
+        }
+
+        for (int i = nth_submesh + 1; i < m_meshes.Count; ++i)
+        {
+            m_meshes[i].active = false;
+        }
+    }
+
+
+
     public override void AbcUpdate()
     {
         switch (m_abcstream.m_data_type)
         {
             case AlembicStream.MeshDataType.Texture:
-                AbcUpdateMeshTexture();
+                AbcUpdate_Texture();
                 break;
             case AlembicStream.MeshDataType.Mesh:
-                AbcUpdateMesh();
+                AbcUpdate_Mesh();
                 break;
         }
     }
 
-    void AbcUpdateMeshTexture()
+    void AbcUpdate_Texture()
     {
-        //AlembicImporter.aiPolyMeshCopyToTexture(m_abcobj, ref m_mesh_tex);
         for (int i = 0; i < m_meshes.Count; ++i)
         {
             //[0]: begin_index, [1]: index_count, [2]: vertex_count
@@ -194,90 +286,42 @@ public class AlembicMesh : AlembicElement
         }
     }
 
-    void AbcUpdateMesh()
+    void AbcUpdate_Mesh()
     {
-        var trans = GetComponent<Transform>();
-        var abc = m_abcobj;
-        Material material = trans.GetComponent<MeshRenderer>().sharedMaterial;
-
-        var smi_prev = new AlembicImporter.aiSplitedMeshInfo();
-        var smi = new AlembicImporter.aiSplitedMeshInfo();
-
-        int nth_submesh = 0;
-        for (; ; )
+        for (int i = 0; i < m_meshes.Count; ++i)
         {
-            smi_prev = smi;
-            smi = new AlembicImporter.aiSplitedMeshInfo();
-            bool is_end = AlembicImporter.aiPolyMeshGetSplitedMeshInfo(abc, ref smi, ref smi_prev, max_vertices);
+            AlembicMesh.Entry entry = m_meshes[i];
+            entry.host.SetActive(entry.active);
 
-            AlembicMesh.Entry entry;
-            if (nth_submesh < m_meshes.Count)
-            {
-                entry = m_meshes[nth_submesh];
-                entry.host.SetActive(true);
-            }
-            else
-            {
-                Debug.Log("AlembicMesh: not enough submeshes!");
-                break;
-            }
-
-            bool needs_index_update = entry.mesh.vertexCount == 0 ||
-                AlembicImporter.aiPolyMeshGetTopologyVariance(abc) == AlembicImporter.aiTopologyVariance.Heterogeneous;
-            if (needs_index_update)
+            if (entry.update_index)
             {
                 entry.mesh.Clear();
             }
 
-            // update positions
-            {
-                Array.Resize(ref entry.vertex_cache, smi.vertex_count);
-                AlembicImporter.aiPolyMeshCopySplitedVertices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-                entry.mesh.vertices = entry.vertex_cache;
+            entry.mesh.vertices = entry.buf_vertices;
+            if (m_mesh_summary.has_normals != 0) {
+                entry.mesh.normals = entry.buf_normals;
             }
-
-            // update normals
-            if (AlembicImporter.aiPolyMeshHasNormals(abc))
+            if (entry.update_index)
             {
-                // normals can reuse entry.vertex_cache
-                AlembicImporter.aiPolyMeshCopySplitedNormals(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.vertex_cache, 0), ref smi);
-                entry.mesh.normals = entry.vertex_cache;
-            }
-
-            if (needs_index_update)
-            {
-                // update uvs
-                if (AlembicImporter.aiPolyMeshHasUVs(abc))
+                if (m_mesh_summary.has_uvs != 0)
                 {
-                    Array.Resize(ref entry.uv_cache, smi.vertex_count);
-                    AlembicImporter.aiPolyMeshCopySplitedUVs(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.uv_cache, 0), ref smi);
-                    entry.mesh.uv = entry.uv_cache;
+                    entry.mesh.uv = entry.buf_uvs;
                 }
-
-                // update indices
-                Array.Resize(ref entry.index_cache, smi.triangulated_index_count);
-                AlembicImporter.aiPolyMeshCopySplitedIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(entry.index_cache, 0), ref smi);
-                entry.mesh.SetIndices(entry.index_cache, MeshTopology.Triangles, 0);
+                entry.mesh.SetIndices(entry.buf_indices, MeshTopology.Triangles, 0);
+                entry.update_index = false;
             }
 
-            // recalculate normals
-            if (!AlembicImporter.aiPolyMeshHasNormals(abc))
+            // recalculate normals if needed
+            if (m_mesh_summary.has_normals == 0)
             {
                 entry.mesh.RecalculateNormals();
             }
-
-            ++nth_submesh;
-            if (is_end) { break; }
-        }
-
-        for (int i = nth_submesh + 1; i < m_meshes.Count; ++i)
-        {
-            m_meshes[i].host.SetActive(false);
         }
     }
 
 
-    static Mesh AddMeshComponents(AlembicImporter.aiObject abc, Transform trans, AlembicStream.MeshDataType mdt)
+    static Mesh AddMeshComponents(AbcAPI.aiObject abc, Transform trans, AlembicStream.MeshDataType mdt)
     {
         Mesh mesh = null;
 
@@ -301,7 +345,7 @@ public class AlembicMesh : AlembicElement
         else
         {
             mesh = new Mesh();
-            mesh.name = AlembicImporter.aiGetName(abc);
+            mesh.name = AbcAPI.aiGetName(abc);
             mesh.MarkDynamic();
         }
         mesh_filter.sharedMesh = mesh;
