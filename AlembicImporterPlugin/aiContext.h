@@ -6,7 +6,16 @@
 typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
 
 class aiObject;
-const int aiMagicCtx = 0x00585443; // "CTX"
+
+
+struct aiImportConfig
+{
+    uint8_t triangulate;
+    uint8_t revert_x;
+    uint8_t revert_face;
+
+    aiImportConfig() : triangulate(true), revert_x(true), revert_face(false) {}
+};
 
 
 class aiContext
@@ -22,12 +31,16 @@ public:
     ~aiContext();
     bool load(const char *path);
     aiObject* getTopObject();
+    const aiImportConfig& getImportConfig() const;
+    void setImportConfig(const aiImportConfig &conf);
+
     float getStartTime() const;
     float getEndTime() const;
 
     void updateSamples(float time);
     void updateSamplesBegin(float time);
     void updateSamplesEnd();
+    void erasePastSamples(float time, float range_keep);
 
     void enqueueTask(const task_t &task);
     void waitTasks();
@@ -38,11 +51,10 @@ private:
     void gatherNodesRecursive(aiObject *n);
 
 private:
-#ifdef aiDebug
-    int m_magic;
-#endif // aiDebug
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
+
+    aiImportConfig m_iconfig;
     aiTaskGroup m_tasks;
     double m_time_range[2];
 };

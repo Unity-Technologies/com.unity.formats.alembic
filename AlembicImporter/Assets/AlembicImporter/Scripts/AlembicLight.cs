@@ -12,5 +12,20 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicLight : AlembicElement
 {
+    public override void AbcSetup(
+        AlembicStream abcstream,
+        AbcAPI.aiObject abcobj,
+        AbcAPI.aiSchema abcschema)
+    {
+        base.AbcSetup(abcstream, abcobj, abcschema);
+    }
 
+
+    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    {
+    }
+
+    public override void AbcUpdate()
+    {
+    }
 }

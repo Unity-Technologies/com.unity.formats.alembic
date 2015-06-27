@@ -21,48 +21,82 @@ public class AlembicStream : MonoBehaviour
     public float m_start_time;
     public float m_end_time;
     public float m_time_offset;
+    public float m_time_interval = 1.0f / 30.0f;
     public float m_time_scale = 1.0f;
     public bool m_preserve_start_time = true;
     public CycleType m_cycle = CycleType.Hold;
-    public bool m_reverse_x;
-    public bool m_reverse_faces;
-    bool m_loaded;
+    public bool m_revert_x = true;
+    public bool m_revert_faces = false;
+    bool m_load_succeeded;
     float m_time_prev;
+    float m_time_next;
     float m_time_eps = 0.001f;
-    bool m_needs_update_sample;
 
     public List<AlembicElement> m_elements = new List<AlembicElement>();
 
-    AlembicImporter.aiContext m_abc;
+    AbcAPI.aiContext m_abc;
     Transform m_trans;
 
 
+    public float time { get { return m_time; } }
+    public float time_prev { get { return m_time_prev; } }
+
     public void AddElement(AlembicElement e) { m_elements.Add(e); }
 
-    public void DebugDump() { AlembicImporter.aiDebugDump(m_abc); }
+    public void DebugDump() { AbcAPI.aiDebugDump(m_abc); }
 
-    public void Awake()
+
+
+    public void AbcLoad()
     {
-        if (m_path_to_abc==null) { return; }
+        if (m_path_to_abc == null) { return; }
         Debug.Log(m_path_to_abc);
 
         m_trans = GetComponent<Transform>();
-        m_abc = AlembicImporter.aiCreateContext();
-        m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
+        m_abc = AbcAPI.aiCreateContext();
+        m_load_succeeded = AbcAPI.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
 
-        m_start_time = AlembicImporter.aiGetStartTime(m_abc);
-        m_end_time = AlembicImporter.aiGetEndTime(m_abc);
-        m_time_offset = -m_start_time;
-        m_time_scale = 1.0f;
-        m_preserve_start_time = true;
+        if (m_load_succeeded)
+        {
+            m_start_time = AbcAPI.aiGetStartTime(m_abc);
+            m_end_time = AbcAPI.aiGetEndTime(m_abc);
+            m_time_offset = -m_start_time;
+            m_time_scale = 1.0f;
+            m_preserve_start_time = true;
 
-        AlembicImporter.UpdateAbcTree(m_abc, m_trans, m_reverse_x, m_reverse_faces, m_time);
+            AbcAPI.aiImportConfig ic;
+            ic.triangulate = 1;
+            ic.revert_x = (byte)(m_revert_x ? 1 : 0);
+            ic.revert_faces = (byte)(m_revert_faces ? 1 : 0);
+            AbcAPI.aiSetImportConfig(m_abc, ref ic);
+            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_revert_x, m_revert_faces, m_time);
+        }
+    }
+
+    void AbcUpdateElements()
+    {
+        int len = m_elements.Count;
+        for (int i = 0; i < len; ++i)
+        {
+            m_elements[i].AbcUpdate();
+        }
+    }
+
+
+    void OnApplicationQuit()
+    {
+        AbcAPI.aiCleanup();
+    }
+
+    public void Awake()
+    {
+        AbcLoad();
     }
 
     void OnDestroy()
     {
-        AlembicImporter.aiDestroyContext(m_abc);
-        m_abc.ptr = IntPtr.Zero;
+        AbcAPI.aiDestroyContext(m_abc);
+        m_abc = default(AbcAPI.aiContext);
     }
 
     float AdjustTime(float in_time)
@@ -135,42 +169,40 @@ public class AlembicStream : MonoBehaviour
 
     void Start()
     {
-        m_time_prev = 0.0f;
-        m_time = 0.0f;
+        m_time_prev = m_time_next = m_time;
     }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        m_time_next = m_time;
+    }
+#endif
 
     void Update()
     {
+        if (!m_load_succeeded) { return; }
+
+        bool needs_update_sample = false;
         m_time += Time.deltaTime;
-        if (Math.Abs(m_time - m_time_prev) > m_time_eps)
+        if (Math.Abs(m_time - m_time_prev) > m_time_interval)
         {
-            m_needs_update_sample = true;
-            m_time_prev = m_time;
+            needs_update_sample = true;
+            m_time_prev = m_time_next;
+            m_time_next = m_time_prev + m_time_interval;
         }
 
-        if (m_needs_update_sample)
+        if (needs_update_sample)
         {
-            AlembicImporter.aiUpdateSamplesBegin(m_abc, m_time);
-        }
-    }
+            // end preload
+            AbcAPI.aiUpdateSamplesEnd(m_abc);
 
-    void LateUpdate()
-    {
-        if (m_needs_update_sample)
-        {
-            AlembicImporter.aiUpdateSamplesEnd(m_abc);
-            UpdateElements();
-        }
+            AbcUpdateElements();
 
-        m_needs_update_sample = false;
-    }
+            AbcAPI.aiErasePastSamples(m_abc, m_time_prev, 0.1f);
 
-    void UpdateElements()
-    {
-        int len = m_elements.Count;
-        for (int i = 0; i < len; ++i)
-        {
-            m_elements[i].AbcUpdate();
+            // begin preload
+            AbcAPI.aiUpdateSamplesBegin(m_abc, m_time_next);
         }
     }
 }

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "AlembicImporter.h"
 #include "aiObject.h"
-#include "aiGeometry.h"
+#include "Schema/aiSchema.h"
 #include "aiContext.h"
 #include <limits>
 
@@ -18,10 +18,6 @@ void aiContext::destroy(aiContext* ctx)
 
 aiContext::aiContext()
 {
-#ifdef aiDebug
-    m_magic = aiMagicCtx;
-#endif // aiDebug
-
     m_time_range[0] = 0;
     m_time_range[1] = 0;
 }
@@ -132,6 +128,15 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
+const aiImportConfig& aiContext::getImportConfig() const
+{
+    return m_iconfig;
+}
+void aiContext::setImportConfig(const aiImportConfig &conf)
+{
+    m_iconfig = conf;
+}
+
 void aiContext::updateSamples(float time)
 {
     for (const auto &e : m_nodes) {
@@ -145,6 +150,13 @@ void aiContext::updateSamplesBegin(float time)
 void aiContext::updateSamplesEnd()
 {
     waitTasks();
+}
+
+void aiContext::erasePastSamples(float time, float range_keep)
+{
+    for (const auto &e : m_nodes) {
+        e->erasePastSamples(time, range_keep);
+    }
 }
 
 void aiContext::enqueueTask(const task_t &task)

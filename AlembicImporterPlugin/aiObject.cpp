@@ -1,20 +1,16 @@
 ﻿#include "pch.h"
 #include "AlembicImporter.h"
-#include "aiGeometry.h"
+#include "Schema/aiSchema.h"
+#include "Schema/aiXForm.h"
+#include "Schema/aiPolyMesh.h"
+#include "Schema/aiCamera.h"
 #include "aiContext.h"
 #include "aiObject.h"
 
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
-    , m_reverse_x(true)
-    , m_triangulate(true)
-    , m_reverse_index(false)
 {
-#ifdef aiDebug
-    m_magic = aiMagicObj;
-#endif // aiDebug
-
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
@@ -30,38 +26,38 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
             m_polymesh.reset(new aiPolyMesh(this));
             m_schemas.push_back(&*m_polymesh);
         }
-        
-        if (AbcGeom::ICurvesSchema::matches(metadata))
-        {
-            m_curves.reset(new aiCurves(this));
-            m_schemas.push_back(&*m_curves);
-        }
 
-        if (AbcGeom::IPointsSchema::matches(metadata))
-        {
-            m_points.reset(new aiPoints(this));
-            m_schemas.push_back(&*m_points);
-        }
-        
         if (AbcGeom::ICameraSchema::matches(metadata))
         {
             m_camera.reset(new aiCamera(this));
             m_schemas.push_back(&*m_camera);
         }
         
-        if (AbcGeom::ILight::matches(metadata))
-        {
-            m_light.reset(new aiLight(this));
-            m_schemas.push_back(&*m_light);
-        }
-        
-        if (AbcMaterial::IMaterial::matches(metadata))
-        {
-            m_material.reset(new aiMaterial(this));
-            m_schemas.push_back(&*m_material);
-        }
+        //if (AbcGeom::ICurvesSchema::matches(metadata))
+        //{
+        //    m_curves.reset(new aiCurves(this));
+        //    m_schemas.push_back(&*m_curves);
+        //}
 
-        updateSample(0.0f);
+        //if (AbcGeom::IPointsSchema::matches(metadata))
+        //{
+        //    m_points.reset(new aiPoints(this));
+        //    m_schemas.push_back(&*m_points);
+        //}
+        
+        //if (AbcGeom::ILight::matches(metadata))
+        //{
+        //    m_light.reset(new aiLight(this));
+        //    m_schemas.push_back(&*m_light);
+        //}
+        //
+        //if (AbcMaterial::IMaterial::matches(metadata))
+        //{
+        //    m_material.reset(new aiMaterial(this));
+        //    m_schemas.push_back(&*m_material);
+        //}
+
+        updateSample(0u);
     }
 }
 
@@ -88,30 +84,28 @@ void aiObject::updateSample(float time)
     }
 }
 
-void aiObject::enableReverseX(bool v)       { m_reverse_x = v; }
-void aiObject::enableTriangulate(bool v)    { m_triangulate = v; }
-void aiObject::enableReverseIndex(bool v)   { m_reverse_index = v; }
-
-bool aiObject::getReverseX() const          { return m_reverse_x; }
-bool aiObject::getReverseIndex() const      { return m_reverse_index; }
-bool aiObject::getTriangulate() const       { return m_triangulate; }
-
+void aiObject::erasePastSamples(float time, float range_keep)
+{
+    for (auto s : m_schemas) {
+        s->erasePastSamples(time, range_keep);
+    }
+}
 
 bool aiObject::hasXForm() const    { return m_xform != nullptr; }
 bool aiObject::hasPolyMesh() const { return m_polymesh != nullptr; }
-bool aiObject::hasCurves() const   { return m_curves != nullptr; }
-bool aiObject::hasPoints() const   { return m_points != nullptr; }
 bool aiObject::hasCamera() const   { return m_camera != nullptr; }
-bool aiObject::hasLight() const    { return m_light != nullptr; }
-bool aiObject::hasMaterial() const { return m_material != nullptr; }
+//bool aiObject::hasCurves() const   { return m_curves != nullptr; }
+//bool aiObject::hasPoints() const   { return m_points != nullptr; }
+//bool aiObject::hasLight() const    { return m_light != nullptr; }
+//bool aiObject::hasMaterial() const { return m_material != nullptr; }
 
 aiXForm&    aiObject::getXForm()      { return *m_xform; }
 aiPolyMesh& aiObject::getPolyMesh()   { return *m_polymesh; }
-aiCurves&   aiObject::getCurves()     { return *m_curves; }
-aiPoints&   aiObject::getPoints()     { return *m_points; }
 aiCamera&   aiObject::getCamera()     { return *m_camera; }
-aiLight&    aiObject::getLight()      { return *m_light; }
-aiMaterial& aiObject::getMaterial()   { return *m_material; }
+//aiCurves&   aiObject::getCurves()     { return *m_curves; }
+//aiPoints&   aiObject::getPoints()     { return *m_points; }
+//aiLight&    aiObject::getLight()      { return *m_light; }
+//aiMaterial& aiObject::getMaterial()   { return *m_material; }
 
 void aiObject::debugDump() const
 {

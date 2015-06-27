@@ -8,30 +8,62 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class AlembicImporter
+public class AbcAPI
 {
     public delegate void aiNodeEnumerator(aiObject obj, IntPtr userdata);
+    public delegate void aiSampleCallback(IntPtr _this, aiSample sample);
+
+    public struct aiImportConfig
+    {
+        public byte triangulate;
+        public byte revert_x;
+        public byte revert_faces;
+
+        public void SetDefaults()
+        {
+            triangulate = 1;
+            revert_x = 1;
+            revert_faces = 0;
+        }
+    };
+
+    public struct aiPolyMeshSummary
+    {
+        public uint index_count;
+        public uint vertex_count;
+        public byte has_normals;
+        public byte has_uvs;
+        public byte has_velocities;
+        public byte is_notmal_indexed;
+        public byte is_uv_indexed;
+    };
 
     public struct aiSplitedMeshInfo
     {
-        public int face_count;
-        public int index_count;
-        public int vertex_count;
-        public int begin_face;
-        public int begin_index;
-        public int triangulated_index_count;
+        public uint face_count;
+        public uint index_count;
+        public uint vertex_count;
+        public uint begin_face;
+        public uint begin_index;
+        public uint triangulated_index_count;
+
+        public IntPtr dst_indices;
+        public IntPtr dst_vertices;
+        public IntPtr dst_normals;
+        public IntPtr dst_uvs;
+        public IntPtr dst_velocities;
     }
 
     public struct aiTextureMeshData
     {
         // in
-        public int tex_width;
+        public uint tex_width;
 
         // out
-        public int index_count;
-        public int vertex_count;
-        public int is_normal_indexed;
-        public int is_uv_indexed;
+        public uint index_count;
+        public uint vertex_count;
+        public uint is_normal_indexed;
+        public uint is_uv_indexed;
         int pad;
         public IntPtr tex_indices;
         public IntPtr tex_vertices;
@@ -40,19 +72,15 @@ public class AlembicImporter
         public IntPtr tex_velocities;
     }
 
-
-    public struct aiMeshData
+    public struct aiXFormData
     {
-        public int index_count;
-        public bool is_normal_indexed;
-        public bool is_uv_indexed;
-        public IntPtr tex_indices;
-        public IntPtr tex_vertices;
-        public IntPtr tex_normals;
-        public IntPtr tex_uvs;
-    }
+        public Vector3 translation;
+        public Quaternion rotation;
+        public Vector3 scale;
+        public byte inherits;
+    };
 
-    public struct aiCameraParams
+    public struct aiCameraData
     {
         public float near_clipping_plane;
         public float far_clipping_plane;
@@ -61,15 +89,10 @@ public class AlembicImporter
         public float focal_length;
     }
 
-    public struct aiContext
-    {
-        public System.IntPtr ptr;
-    }
-
-    public struct aiObject
-    {
-        public System.IntPtr ptr;
-    }
+    public struct aiContext { public System.IntPtr ptr; }
+    public struct aiObject { public System.IntPtr ptr; }
+    public struct aiSchema { public System.IntPtr ptr; }
+    public struct aiSample { public System.IntPtr ptr; }
 
     public enum aiTopologyVariance
     {
@@ -82,10 +105,12 @@ public class AlembicImporter
 //    [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
 //#endif
 
+    [DllImport ("AlembicImporter")] public static extern void       aiCleanup();
     [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext();
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
     [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetImportConfig(aiContext ctx, ref aiImportConfig conf);
     [DllImport ("AlembicImporter")] public static extern void       aiDebugDump(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
@@ -93,58 +118,36 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern int        aiErasePastSamples(aiContext ctx, float time, float keep_range);
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(aiObject obj, bool v);
-
-    [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
     public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
     public static string aiGetFullName(aiObject obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
 
+    [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
+    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaReadSample(aiSchema schema, float time);
+    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, float time);
+    [DllImport ("AlembicImporter")] public static extern float      aiSampleGetTime(aiSample sample);
+
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetInherits(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetPosition(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetAxis(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern float      aiXFormGetAngle(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern Vector3    aiXFormGetScale(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern Matrix4x4  aiXFormGetMatrix(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern aiTopologyVariance aiPolyMeshGetTopologyVariance(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsTopologyConstantTriangles(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasNormals(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasUVs(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshHasVelocities(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsNormalIndexed(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshIsUVIndexed(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetIndexCount(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexCount(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakIndexCount(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakVertexCount(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyIndices(aiObject obj, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyVertices(aiObject obj, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyNormals(aiObject obj, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyUVs(aiObject obj, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(aiObject obj, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedIndices(aiObject obj, IntPtr indices, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(aiObject obj, IntPtr vertices, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedUVs(aiObject obj, IntPtr uvs, ref aiSplitedMeshInfo smi);
-
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshSetDstMeshTextures(aiObject obj, ref aiTextureMeshData dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshBeginCopyToTexture(aiObject obj, ref aiTextureMeshData dst);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshEndCopyDataToTexture(aiObject obj, ref aiTextureMeshData dst);
-
+    [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern aiTopologyVariance aiPolyMeshGetTopologyVariance(aiSchema obj);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakIndexCount(aiSchema obj);
+    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakVertexCount(aiSchema obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSample sample, ref aiPolyMeshSummary summary);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(aiSample sample, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshCopySplitedMesh(aiSample sample, ref aiSplitedMeshInfo o_smi);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyToTexture(aiSample sample, ref aiTextureMeshData dst);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(aiObject obj, ref aiCameraParams o_params);
-
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasLight(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetCamera(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData o_params);
 
 
     class ImportContext
@@ -152,8 +155,12 @@ public class AlembicImporter
         public AlembicStream abcstream;
         public Transform parent;
         public float time;
-        public bool reverse_x;
-        public bool reverse_faces;
+        public aiImportConfig iconf;
+
+        public ImportContext()
+        {
+            iconf.SetDefaults();
+        }
     }
 
 #if UNITY_EDITOR
@@ -213,22 +220,22 @@ public class AlembicImporter
         root.name = System.IO.Path.GetFileNameWithoutExtension(path);
         var abcstream = root.AddComponent<AlembicStream>();
         abcstream.m_path_to_abc = path;
-        abcstream.m_reverse_x = p.reverse_x;
-        abcstream.m_reverse_faces = p.reverse_faces;
+        abcstream.m_revert_x = p.reverse_x;
+        abcstream.m_revert_faces = p.reverse_faces;
         abcstream.m_data_type = p.data_type;
-        abcstream.Awake();
+        abcstream.AbcLoad();
         abcstream.DebugDump();
     }
 #endif
 
-    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverse_x, bool reverse_faces, float time)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, bool revert_x, bool revert_faces, float time)
     {
         var ic = new ImportContext();
         ic.abcstream = root.GetComponent<AlembicStream>();
         ic.parent = root;
         ic.time = time;
-        ic.reverse_x = reverse_x;
-        ic.reverse_faces = reverse_faces;
+        ic.iconf.revert_x = (byte)(revert_x ? 1 : 0);
+        ic.iconf.revert_faces = (byte)(revert_faces ? 1 : 0);
 
         GCHandle gch = GCHandle.Alloc(ic);
         aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -239,9 +246,6 @@ public class AlembicImporter
         var ic = GCHandle.FromIntPtr(userdata).Target as ImportContext;
         Transform parent = ic.parent;
         //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
-
-        aiEnableReverseX(obj, ic.reverse_x);
-        aiEnableReverseIndex(obj, ic.reverse_faces);
 
         string child_name = aiGetName(obj);
         var trans = parent.FindChild(child_name);
@@ -259,26 +263,27 @@ public class AlembicImporter
         }
 
         AlembicElement elem = null;
+        aiSchema schema = default(aiSchema);
         if (aiHasXForm(obj))
         {
             elem = GetOrAddComponent<AlembicXForm>(trans.gameObject);
+            schema = aiGetXForm(obj);
         }
         if (aiHasPolyMesh(obj))
         {
             elem = GetOrAddComponent<AlembicMesh>(trans.gameObject);
+            schema = aiGetPolyMesh(obj);
         }
         if (aiHasCamera(obj))
         {
             elem = GetOrAddComponent<AlembicCamera>(trans.gameObject);
-        }
-        if (aiHasLight(obj))
-        {
-            elem = GetOrAddComponent<AlembicLight>(trans.gameObject);
+            schema = aiGetCamera(obj);
         }
 
         if (elem)
         {
-            elem.AbcSetup(ic.abcstream, obj);
+            elem.AbcSetup(ic.abcstream, obj, schema);
+            aiSchemaReadSample(schema, 0.0f);
             elem.AbcUpdate();
             if (created)
             {
