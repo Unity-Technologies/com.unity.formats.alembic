@@ -27,15 +27,34 @@ public class AbcAPI
         }
     };
 
-    public struct aiPolyMeshSummary
+    public enum aiTopologyVariance
+    {
+        Constant,
+        Homogeneous,
+        Heterogeneous
+    }
+
+    public struct aiPolyMeshSchemaSummary
+    {
+        public aiTopologyVariance topology_variance;
+        public uint peak_index_count;
+        public uint peak_vertex_count;
+        public byte has_normals;
+        public byte has_uvs;
+        public byte has_velocities;
+        public byte is_normals_indexed;
+        public byte is_uvs_indexed;
+    };
+
+    public struct aiPolyMeshSampleSummary
     {
         public uint index_count;
         public uint vertex_count;
         public byte has_normals;
         public byte has_uvs;
         public byte has_velocities;
-        public byte is_notmal_indexed;
-        public byte is_uv_indexed;
+        public byte is_normals_indexed;
+        public byte is_uvs_indexed;
     };
 
     public struct aiSplitedMeshInfo
@@ -94,13 +113,6 @@ public class AbcAPI
     public struct aiSchema { public System.IntPtr ptr; }
     public struct aiSample { public System.IntPtr ptr; }
 
-    public enum aiTopologyVariance
-    {
-        Constant,
-        Homogeneous,
-        Heterogeneous
-    }
-
 //#if UNITY_STANDALONE_WIN
 //    [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
 //#endif
@@ -118,6 +130,7 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetTimeRangeToKeepSamples(aiContext ctx, float time, float keep_range);
     [DllImport ("AlembicImporter")] public static extern int        aiErasePastSamples(aiContext ctx, float time, float keep_range);
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
@@ -127,7 +140,7 @@ public class AbcAPI
     public static string aiGetFullName(aiObject obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
 
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
-    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaReadSample(aiSchema schema, float time);
+    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, float time);
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, float time);
     [DllImport ("AlembicImporter")] public static extern float      aiSampleGetTime(aiSample sample);
 
@@ -137,10 +150,8 @@ public class AbcAPI
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern aiTopologyVariance aiPolyMeshGetTopologyVariance(aiSchema obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakIndexCount(aiSchema obj);
-    [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetPeakVertexCount(aiSchema obj);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSample sample, ref aiPolyMeshSummary summary);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSchemaSummary(aiSchema schema, ref aiPolyMeshSchemaSummary summary);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiPolyMeshSampleSummary summary);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(aiSample sample, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshCopySplitedMesh(aiSample sample, ref aiSplitedMeshInfo o_smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyToTexture(aiSample sample, ref aiTextureMeshData dst);
@@ -283,7 +294,7 @@ public class AbcAPI
         if (elem)
         {
             elem.AbcSetup(ic.abcstream, obj, schema);
-            aiSchemaReadSample(schema, 0.0f);
+            aiSchemaUpdateSample(schema, 0.0f);
             elem.AbcUpdate();
             if (created)
             {

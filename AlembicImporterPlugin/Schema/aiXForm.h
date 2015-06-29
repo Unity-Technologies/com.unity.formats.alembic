@@ -14,7 +14,7 @@ class aiXFormSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiXFormSample(aiXForm *xf, aiIndex index);
+    aiXFormSample(aiXForm *xf, float time);
     void getData(aiXFormData &o_data) const;
 
 public:

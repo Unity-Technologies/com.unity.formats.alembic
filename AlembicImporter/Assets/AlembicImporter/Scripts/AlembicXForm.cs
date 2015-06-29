@@ -35,7 +35,6 @@ public class AlembicXForm : AlembicElement
     {
         var trans = m_trans;
 
-        //AlembicImporter.aiXFormGetData(sample, ref m_abcdata);
         if (m_abcdata.inherits != 0)
         {
             trans.localPosition = m_abcdata.translation;

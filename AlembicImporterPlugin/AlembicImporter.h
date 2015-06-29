@@ -39,14 +39,15 @@ aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
 aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);
 aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);
-aiCLinkage aiExport void            aiErasePastSamples(aiContext* ctx, float time, float range_keep);
+aiCLinkage aiExport void            aiSetTimeRangeToKeepSamples(aiContext *ctx, float time, float range);
+aiCLinkage aiExport void            aiErasePastSamples(aiContext* ctx, float time, float range);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
 
 aiCLinkage aiExport void            aiSchemaSetCallback(aiSchemaBase* schema, aiSampleCallback cb, void *arg);
-aiCLinkage aiExport const aiSampleBase* aiSchemaReadSample(aiSchemaBase* schema, float time);
+aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time);
 aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, float time);
 aiCLinkage aiExport uint32_t        aiSampleGetTime(aiSampleBase* sample);
 
@@ -57,11 +58,8 @@ aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFor
 
 aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
-aiCLinkage aiExport int             aiPolyMeshGetTopologyVariance(aiPolyMesh* schema);
-aiCLinkage aiExport uint32_t        aiPolyMeshGetPeakIndexCount(aiPolyMesh* schema);     // トポロジが変化する場合のインデックス/頂点数の最大値
-aiCLinkage aiExport uint32_t        aiPolyMeshGetPeakVertexCount(aiPolyMesh* schema);    // 
-
-aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMeshSample* sample, aiPolyMeshSummary *o_summary);
+aiCLinkage aiExport void            aiPolyMeshGetSchemaSummary(aiPolyMesh* schema, aiPolyMeshSchemaSummary *o_summary);
+aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiPolyMeshSampleSummary *o_summary);
 aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiPolyMeshSample* sample, aiSplitedMeshData *o_smi, const aiSplitedMeshData *prev, int max_vertices);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedMesh(aiPolyMeshSample* sample, aiSplitedMeshData *smi);
 aiCLinkage aiExport void            aiPolyMeshCopyToTexture(aiPolyMeshSample* sample, aiTextureMeshData *dst);

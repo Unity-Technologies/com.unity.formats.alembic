@@ -7,8 +7,8 @@
 
 
 
-aiCameraSample::aiCameraSample(aiCamera *schema, aiIndex index)
-    : super(schema, index)
+aiCameraSample::aiCameraSample(aiCamera *schema, float time)
+    : super(schema, time)
 {
 }
 

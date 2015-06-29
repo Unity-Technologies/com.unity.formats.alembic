@@ -31,8 +31,8 @@ static inline uint32_t CalculateIndexCount(
 
 
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, aiIndex index)
-    : super(schema, index)
+aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, float time)
+    : super(schema, time)
 {
 }
 
@@ -73,13 +73,13 @@ uint32_t aiPolyMeshSample::getVertexCount() const
 
 
 
-void aiPolyMeshSample::getSummary(aiPolyMeshSummary &o_summary) const
+void aiPolyMeshSample::getSummary(aiPolyMeshSampleSummary &o_summary) const
 {
     o_summary.has_normals = hasNormals();
     o_summary.has_uvs = hasUVs();
     o_summary.has_velocities = hasVelocities();
-    o_summary.is_notmal_indexed = isNormalIndexed();
-    o_summary.is_uv_indexed = isUVIndexed();
+    o_summary.is_normals_indexed = isNormalIndexed();
+    o_summary.is_uvs_indexed = isUVIndexed();
     o_summary.index_count = getIndexCount();
     o_summary.vertex_count = getVertexCount();
 }
@@ -566,5 +566,20 @@ uint32_t aiPolyMesh::getPeakVertexCount() const
         m_peak_vertex_count = positions->size();
     }
     return m_peak_vertex_count;
+}
+
+void aiPolyMesh::getSummary(aiPolyMeshSchemaSummary &o_summary) const
+{
+    o_summary.topology_variance = getTopologyVariance();
+    o_summary.peak_index_count = getPeakIndexCount();
+    o_summary.peak_vertex_count = getPeakVertexCount();
+
+    const auto &normal_param = m_schema.getNormalsParam();
+    o_summary.has_normals = normal_param.valid();
+    o_summary.is_normals_indexed = normal_param.valid() && normal_param.isIndexed();
+
+    const auto &uv_param = m_schema.getUVsParam();
+    o_summary.has_uvs = uv_param.valid();
+    o_summary.is_uvs_indexed = uv_param.valid() && uv_param.isIndexed();
 }
 

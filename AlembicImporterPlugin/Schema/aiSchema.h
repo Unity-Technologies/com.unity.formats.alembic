@@ -37,7 +37,7 @@ public:
     virtual void debugDump() const {}
 
     static Abc::ISampleSelector makeSampleSelector(float time);
-    static Abc::ISampleSelector makeSampleSelector(aiIndex index);
+    static Abc::ISampleSelector makeSampleSelector(uint32_t index);
 
 protected:
     aiObject *m_obj;

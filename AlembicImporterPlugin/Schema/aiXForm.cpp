@@ -8,8 +8,8 @@
 #define aiPI 3.14159265f
 
 
-aiXFormSample::aiXFormSample(aiXForm *xf, aiIndex index)
-    : super(xf, index)
+aiXFormSample::aiXFormSample(aiXForm *xf, float time)
+    : super(xf, time)
 {
 }
 
