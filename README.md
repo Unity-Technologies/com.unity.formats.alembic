@@ -5,10 +5,11 @@ Alembic ファイルのジオメトリを Unity 上で再生するプラグイ�
 Alembic は主に映画業界で使われているデータフォーマットで、フレーム毎に bake された巨大な頂点群を格納するのに用いられます。(詳しくは: http://www.alembic.io/ )  
 
 ![example](Screenshots/menu.png)  
-[このパッケージ](Packages/FrameCapturer.unitypackage?raw=true)をインポートし、上記スクリーンショットのメニューから .abc ファイルを選択して読み込みます。  
+[このパッケージ](https://github.com/unity3d-jp/AlembicImporter/blob/master/Packages/FrameCapturer.unitypackage?raw=true)をインポートし、上記スクリーンショットのメニューから .abc ファイルを選択して読み込みます。  
 読み込むとその .abc ファイルに含まれるノード群に対応する GameObject が生成され、ポリゴンメッシュを含むノードは MeshFilter や MeshRenderer も生成されます。(subdiv や NURBS は未対応で、無視されます)
 
-Alembic ファイルから直接ストリーミングでデータを読み込み、Mesh オブジェクトの頂点とインデックスを毎フレーム更新することで再生しています。このため、**Alembic ファイルは Assets/StreamingAssets 以下に格納されている必要があります**。
+Alembic ファイルから直接ストリーミングでデータを読み込み、Mesh オブジェクトの頂点とインデックスを毎フレーム更新することで再生しています。このため、**Alembic ファイルは Assets/StreamingAssets 以下に格納されている必要があります**。  
+また、ストリーミングはファイルごとに並列に行われます。なので、適度にファイルを分けたほうが再生は高速になります。
 
 現状まだまだ開発中ですが、とりあえず遅いながらもジオメトリの再生ができるようになっています。  
 ちなみ冒頭の gif アニメのデータは TestData/Bifrost_milk.7z に含まれています。(そのままだと github で扱えるファイルサイズの上限 100MB を超えるため、Assets/StreamingAssets には置いていません)  
