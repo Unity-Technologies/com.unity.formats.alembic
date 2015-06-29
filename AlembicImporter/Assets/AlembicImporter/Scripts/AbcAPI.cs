@@ -200,24 +200,24 @@ public class AbcAPI
         ImportImpl(path, p);
     }
 
-    [MenuItem("Assets/Alembic/Import (texture mesh)")]
-    static void ImportT()
-    {
-        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportParams p = new ImportParams();
-        p.data_type = AlembicStream.MeshDataType.Texture;
-        ImportImpl(path, p);
-    }
+    //[MenuItem("Assets/Alembic/Import (texture mesh)")]
+    //static void ImportT()
+    //{
+    //    var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
+    //    ImportParams p = new ImportParams();
+    //    p.data_type = AlembicStream.MeshDataType.Texture;
+    //    ImportImpl(path, p);
+    //}
 
-    [MenuItem("Assets/Alembic/Import (texture mesh, reverse faces)")]
-    static void ImportTR()
-    {
-        var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-        ImportParams p = new ImportParams();
-        p.data_type = AlembicStream.MeshDataType.Texture;
-        p.reverse_faces = true;
-        ImportImpl(path, p);
-    }
+    //[MenuItem("Assets/Alembic/Import (texture mesh, reverse faces)")]
+    //static void ImportTR()
+    //{
+    //    var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
+    //    ImportParams p = new ImportParams();
+    //    p.data_type = AlembicStream.MeshDataType.Texture;
+    //    p.reverse_faces = true;
+    //    ImportImpl(path, p);
+    //}
 
     static string MakeRelativePath(string path)
     {
@@ -256,7 +256,6 @@ public class AbcAPI
     {
         var ic = GCHandle.FromIntPtr(userdata).Target as ImportContext;
         Transform parent = ic.parent;
-        //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
         string child_name = aiGetName(obj);
         var trans = parent.FindChild(child_name);
@@ -322,11 +321,11 @@ public class AbcAPI
 class AlembicUtils
 {
 #if UNITY_EDITOR
-    [MenuItem ("Assets/Create Index Only Mesh")]
-    public static void AddIndexOnlyMeshToAssetDatabase()
-    {
-        AssetDatabase.CreateAsset(CreateIndexOnlyMesh(64998), "Assets/IndexOnlyMesh.asset");
-    }
+    //[MenuItem ("Assets/Alembic/Create Index Only Mesh")]
+    //public static void AddIndexOnlyMeshToAssetDatabase()
+    //{
+    //    AssetDatabase.CreateAsset(CreateIndexOnlyMesh(64998), "Assets/IndexOnlyMesh.asset");
+    //}
 #endif
 
     public static Mesh CreateIndexOnlyMesh(int num_indices)

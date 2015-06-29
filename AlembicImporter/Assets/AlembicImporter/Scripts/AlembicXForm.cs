@@ -14,7 +14,6 @@ public class AlembicXForm : AlembicElement
 {
     Transform m_trans;
     AbcAPI.aiXFormData m_abcdata;
-    public int c;
 
     public override void AbcSetup(
         AlembicStream abcstream,
@@ -28,7 +27,6 @@ public class AlembicXForm : AlembicElement
     public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
     {
         AbcAPI.aiXFormGetData(sample, ref m_abcdata);
-        ++c;
     }
 
     public override void AbcUpdate()

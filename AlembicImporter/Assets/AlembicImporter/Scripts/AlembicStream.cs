@@ -18,8 +18,6 @@ public class AlembicStream : MonoBehaviour
     public MeshDataType m_data_type;
     public string m_path_to_abc;
     public float m_time;
-    public float m_start_time;
-    public float m_end_time;
     public float m_time_offset;
     public float m_time_interval = 1.0f / 30.0f;
     public float m_time_scale = 1.0f;
@@ -28,9 +26,11 @@ public class AlembicStream : MonoBehaviour
     public bool m_revert_x = true;
     public bool m_revert_faces = false;
     bool m_load_succeeded;
-    float m_time_prev;
-    float m_time_next;
-    float m_time_eps = 0.001f;
+    public float m_start_time;
+    public float m_end_time;
+    public float m_time_prev;
+    public float m_time_next;
+    public float m_time_eps = 0.001f;
 
     public List<AlembicElement> m_elements = new List<AlembicElement>();
 
@@ -184,17 +184,14 @@ public class AlembicStream : MonoBehaviour
     {
         if (!m_load_succeeded) { return; }
 
-        bool needs_update_sample = false;
+        float at1 = AdjustTime(m_time);
         m_time += Time.deltaTime;
-        if (Math.Abs(m_time - m_time_prev) > m_time_interval)
+        float at2 = AdjustTime(m_time);
+        if (at1 != at2)
         {
-            needs_update_sample = true;
-            m_time_prev = m_time_next;
-            m_time_next = m_time_prev + m_time_interval;
-        }
+            m_time_prev = m_time;
+            m_time_next = AdjustTime(m_time + m_time_eps);
 
-        if (needs_update_sample)
-        {
             // end preload
             AbcAPI.aiUpdateSamplesEnd(m_abc);
 
