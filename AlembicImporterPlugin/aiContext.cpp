@@ -137,10 +137,21 @@ void aiContext::setImportConfig(const aiImportConfig &conf)
     m_iconfig = conf;
 }
 
+void aiContext::setTimeRangeToKeepSamples(float time, float range)
+{
+    m_time_range_to_keep_samples = std::make_tuple(time, range);
+}
+
 void aiContext::updateSamples(float time)
 {
     for (const auto &e : m_nodes) {
         e->updateSample(time);
+    }
+
+    float tk = std::get<0>(m_time_range_to_keep_samples);
+    float tr = std::get<1>(m_time_range_to_keep_samples);
+    if (tr > 0.0f) {
+        erasePastSamples(tk, tr);
     }
 }
 void aiContext::updateSamplesBegin(float time)

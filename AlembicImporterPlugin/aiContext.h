@@ -33,6 +33,7 @@ public:
     aiObject* getTopObject();
     const aiImportConfig& getImportConfig() const;
     void setImportConfig(const aiImportConfig &conf);
+    void setTimeRangeToKeepSamples(float time, float range);
 
     float getStartTime() const;
     float getEndTime() const;
@@ -53,6 +54,7 @@ private:
 private:
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
+    std::tuple<float, float> m_time_range_to_keep_samples;
 
     aiImportConfig m_iconfig;
     aiTaskGroup m_tasks;

@@ -103,9 +103,13 @@ aiCLinkage aiExport void aiUpdateSamplesEnd(aiContext* ctx)
 {
     ctx->updateSamplesEnd();
 }
-aiCLinkage aiExport void aiErasePastSamples(aiContext* ctx, float time, float range_keep)
+aiCLinkage aiExport void aiSetTimeRangeToKeepSamples(aiContext *ctx, float time, float range)
 {
-    ctx->erasePastSamples(time, range_keep);
+    ctx->setTimeRangeToKeepSamples(time, range);
+}
+aiCLinkage aiExport void aiErasePastSamples(aiContext* ctx, float time, float range)
+{
+    ctx->erasePastSamples(time, range);
 }
 
 aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata)
@@ -143,7 +147,7 @@ aiCLinkage aiExport void aiSchemaSetCallback(aiSchemaBase* schema, aiSampleCallb
     schema->setCallback(cb, arg);
 }
 
-aiCLinkage aiExport const aiSampleBase* aiSchemaReadSample(aiSchemaBase* schema, float time)
+aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time)
 {
     return schema->updateSample(time);
 }
@@ -172,6 +176,7 @@ aiCLinkage aiExport aiXForm* aiGetXForm(aiObject* obj)
 
 aiCLinkage aiExport void aiXFormGetData(aiXFormSample* sample, aiXFormData *o_data)
 {
+    if (!sample) { return; }
     sample->getData(*o_data);
 }
 
@@ -201,25 +206,33 @@ aiCLinkage aiExport uint32_t aiPolyMeshGetPeakVertexCount(aiPolyMesh* schema)
     return schema->getPeakVertexCount();
 }
 
-
-aiCLinkage aiExport void aiPolyMeshGetSummary(aiPolyMeshSample* sample, aiPolyMeshSummary *o_summary)
+aiCLinkage aiExport void aiPolyMeshGetSchemaSummary(aiPolyMesh* schema, aiPolyMeshSchemaSummary *o_summary)
 {
+    schema->getSummary(*o_summary);
+}
+
+aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiPolyMeshSampleSummary *o_summary)
+{
+    if (!sample) { return; }
     sample->getSummary(*o_summary);
 }
 
 aiCLinkage aiExport bool aiPolyMeshGetSplitedMeshInfo(aiPolyMeshSample* sample, aiSplitedMeshData *o_smi, const aiSplitedMeshData *prev, int max_vertices)
 {
+    if (!sample) { return true; }
     return sample->getSplitedMeshInfo(*o_smi, *prev, max_vertices);
 }
 
 aiCLinkage aiExport void aiPolyMeshCopySplitedMesh(aiPolyMeshSample* sample, aiSplitedMeshData *o_smi)
 {
+    if (!sample) { return; }
     return sample->copySplitedMesh(*o_smi);
 }
 
 aiCLinkage aiExport void aiPolyMeshCopyToTexture(aiPolyMeshSample* sample, aiTextureMeshData *dst)
 {
 #ifdef aiSupportTextureMesh
+    if (!sample) { return; }
     sample->copyMeshToTexture(*dst);
 #endif // aiSupportTextureMesh
 }
@@ -238,5 +251,6 @@ aiCLinkage aiExport aiCamera* aiGetCamera(aiObject* obj)
 
 aiCLinkage aiExport void aiCameraGetData(aiCameraSample* sample, aiCameraData *o_params)
 {
+    if (!sample) { return; }
     sample->getParams(*o_params);
 }

@@ -72,11 +72,11 @@ typedef Imath::V4f      abcV4;
 typedef Imath::M44f     abcM44;
 typedef Abc::IObject    abcObject;
 
-typedef uint32_t aiIndex;
-struct aiImportConfig;
+struct  aiImportConfig;
 struct  aiCameraData;
 struct  aiXFormData;
-struct  aiPolyMeshSummary;
+struct  aiPolyMeshSchemaSummary;
+struct  aiPolyMeshSampleSummary;
 struct  aiSplitedMeshData;
 struct  aiTextureMeshData;
 

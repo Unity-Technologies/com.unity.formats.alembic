@@ -1,17 +1,31 @@
 ﻿#ifndef aiPolyMesh_h
 #define aiPolyMesh_h
 
-struct aiPolyMeshSummary
+struct aiPolyMeshSchemaSummary
+{
+    int         topology_variance;
+    uint32_t    peak_index_count;
+    uint32_t    peak_vertex_count;
+    uint8_t     has_normals;
+    uint8_t     has_uvs;
+    uint8_t     has_velocities;
+    uint8_t     is_normals_indexed;
+    uint8_t     is_uvs_indexed;
+
+    aiPolyMeshSchemaSummary() { memset(this, 0, sizeof(*this)); }
+};
+
+struct aiPolyMeshSampleSummary
 {
     uint32_t index_count;
     uint32_t vertex_count;
     uint8_t has_normals;
     uint8_t has_uvs;
     uint8_t has_velocities;
-    uint8_t is_notmal_indexed;
-    uint8_t is_uv_indexed;
+    uint8_t is_normals_indexed;
+    uint8_t is_uvs_indexed;
 
-    aiPolyMeshSummary() { memset(this, 0 , sizeof(*this)); }
+    aiPolyMeshSampleSummary() { memset(this, 0 , sizeof(*this)); }
 };
 
 struct aiSplitedMeshData
@@ -57,7 +71,7 @@ class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, aiIndex index);
+    aiPolyMeshSample(aiPolyMesh *schema, float time);
 
     bool        hasNormals() const;
     bool        hasUVs() const;
@@ -73,7 +87,7 @@ public:
     void        copyNormals(abcV3 *dst) const;
     void        copyUVs(abcV2 *dst) const;
 
-    void        getSummary(aiPolyMeshSummary &o_summary) const;
+    void        getSummary(aiPolyMeshSampleSummary &o_summary) const;
     bool        getSplitedMeshInfo(aiSplitedMeshData &o_sp, const aiSplitedMeshData& prev, int max_vertices) const;
     void        copySplitedMesh(aiSplitedMeshData &o_sp) const;
     void        copySplitedIndices(int *dst, const aiSplitedMeshData &smi) const;
@@ -114,6 +128,8 @@ public:
     int         getTopologyVariance() const;
     uint32_t    getPeakIndexCount() const;
     uint32_t    getPeakVertexCount() const;
+
+    void        getSummary(aiPolyMeshSchemaSummary &o_summary) const;
 
 private:
     mutable uint32_t m_peak_index_count;

@@ -17,7 +17,7 @@ class aiCameraSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiCameraSample(aiCamera *schema, aiIndex index);
+    aiCameraSample(aiCamera *schema, float time);
     void getParams(aiCameraData &o_params);
 
 public:

@@ -40,6 +40,7 @@ public class AlembicStream : MonoBehaviour
 
     public float time { get { return m_time; } }
     public float time_prev { get { return m_time_prev; } }
+    public float time_next { get { return m_time_next; } }
 
     public void AddElement(AlembicElement e) { m_elements.Add(e); }
 
@@ -199,7 +200,7 @@ public class AlembicStream : MonoBehaviour
 
             AbcUpdateElements();
 
-            AbcAPI.aiErasePastSamples(m_abc, m_time_prev, 0.1f);
+            AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, m_time_prev, 0.1f);
 
             // begin preload
             AbcAPI.aiUpdateSamplesBegin(m_abc, m_time_next);
