@@ -19,7 +19,6 @@ public class AlembicStream : MonoBehaviour
     public string m_path_to_abc;
     public float m_time;
     public float m_time_offset;
-    public float m_time_interval = 1.0f / 30.0f;
     public float m_time_scale = 1.0f;
     public bool m_preserve_start_time = true;
     public CycleType m_cycle = CycleType.Hold;
@@ -197,7 +196,7 @@ public class AlembicStream : MonoBehaviour
 
             AbcUpdateElements();
 
-            AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, m_time_prev, 0.1f);
+            AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, at2, 0.1f);
 
             // begin preload
             AbcAPI.aiUpdateSamplesBegin(m_abc, m_time_next);
