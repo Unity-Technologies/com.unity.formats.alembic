@@ -13,7 +13,26 @@ public class AlembicStreamSync : MonoBehaviour
    public class SyncItem
    {
       public GameObject stream;
-      public bool sync = true;
+      public bool sync;
+
+      public SyncItem()
+      {
+         sync = true;
+         stream = null;
+      }
+
+      public void Sync(float time)
+      {
+         if (sync == true && stream != null)
+         {
+            AlembicStream abcstream = stream.GetComponent<AlembicStream>();
+
+            if (abcstream != null)
+            {
+               abcstream.m_time = time;
+            }
+         }
+      }
    }
 
    [CustomPropertyDrawer(typeof(SyncItem))]
@@ -44,37 +63,18 @@ public class AlembicStreamSync : MonoBehaviour
 
    public SyncItem[] m_streams;
 
-   float m_time_prev;
-   float m_time_eps = 0.001f;
-
    void Start()
    {
       m_time = 0.0f;
-      m_time_prev = 0.0f;
    }
    
    void Update()
    {
       m_time += Time.deltaTime;
 
-      if (Math.Abs(m_time - m_time_prev) > m_time_eps)
+      foreach (SyncItem item in m_streams)
       {
-         foreach (SyncItem si in m_streams)
-         {
-            if (si.stream == null || si.sync == false)
-            {
-               continue;
-            }
-
-            AlembicStream abcstream = si.stream.GetComponent<AlembicStream>();
-
-            if (abcstream != null)
-            {
-               abcstream.m_time = m_time;
-            }
-         }
+         item.Sync(m_time);
       }
-
-      m_time_prev = m_time;
    }
 }
