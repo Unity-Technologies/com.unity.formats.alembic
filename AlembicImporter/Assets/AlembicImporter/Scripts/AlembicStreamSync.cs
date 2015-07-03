@@ -9,6 +9,9 @@ public class AlembicStreamSync : MonoBehaviour
 {
    public float m_time;
 
+   float m_time_prev;
+   float m_time_eps = 0.001f;
+
    [Serializable]
    public class SyncItem
    {
@@ -25,12 +28,7 @@ public class AlembicStreamSync : MonoBehaviour
       {
          if (sync == true && stream != null)
          {
-            AlembicStream abcstream = stream.GetComponent<AlembicStream>();
-
-            if (abcstream != null)
-            {
-               abcstream.m_time = time;
-            }
+            stream.SendMessage("UpdateAbc", time, SendMessageOptions.DontRequireReceiver);
          }
       }
    }
@@ -66,15 +64,21 @@ public class AlembicStreamSync : MonoBehaviour
    void Start()
    {
       m_time = 0.0f;
+      m_time_prev = 0.0f;
    }
    
    void Update()
    {
       m_time += Time.deltaTime;
 
-      foreach (SyncItem item in m_streams)
+      if (Math.Abs(m_time - m_time_prev) > m_time_eps)
       {
-         item.Sync(m_time);
+         foreach (SyncItem item in m_streams)
+         {
+            item.Sync(m_time);
+         }
       }
+
+      m_time_prev = m_time;
    }
 }

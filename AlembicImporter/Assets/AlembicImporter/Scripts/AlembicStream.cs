@@ -128,15 +128,16 @@ public class AlembicStream : MonoBehaviour
         m_force_refresh = false;
     }
 
-    void Update()
+    void UpdateAbc(float time)
     {
         if (!m_loaded)
         {
             m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
         }
+
         if (m_loaded)
         {
-            m_time += Time.deltaTime;
+            m_time = time;
 
             float adjusted_time = AdjustTime(m_time);
 
@@ -154,5 +155,10 @@ public class AlembicStream : MonoBehaviour
                 m_force_refresh = false;
             }
         }
+    }
+
+    void Update()
+    {
+        UpdateAbc(m_time + Time.deltaTime);
     }
 }
