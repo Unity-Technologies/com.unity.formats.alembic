@@ -29,7 +29,7 @@ public class AlembicStreamSync : MonoBehaviour
 
       public void Sync(float time)
       {
-         if (sync == true && stream != null)
+         if (sync == true && stream != null && stream.activeInHierarchy)
          {
             stream.SendMessage("UpdateAbc", time, SendMessageOptions.DontRequireReceiver);
          }
