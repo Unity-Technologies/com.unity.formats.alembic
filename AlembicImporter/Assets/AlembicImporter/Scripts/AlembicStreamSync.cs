@@ -1,8 +1,11 @@
-﻿using UnityEngine;
-using UnityEditor;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 
 [ExecuteInEditMode]
 public class AlembicStreamSync : MonoBehaviour
@@ -33,6 +36,8 @@ public class AlembicStreamSync : MonoBehaviour
       }
    }
 
+#if UNITY_EDITOR
+
    [CustomPropertyDrawer(typeof(SyncItem))]
    public class SyncItemDrawer : PropertyDrawer
    {
@@ -59,6 +64,8 @@ public class AlembicStreamSync : MonoBehaviour
       }
    }
 
+#endif
+
    public SyncItem[] m_streams;
 
    void Start()
@@ -69,6 +76,7 @@ public class AlembicStreamSync : MonoBehaviour
 
    void Update()
    {
+      // Do not trigger stream update if we're in play mode
       if (!Application.isPlaying)
       {
          if (Math.Abs(m_time - m_time_prev) > m_time_eps)
