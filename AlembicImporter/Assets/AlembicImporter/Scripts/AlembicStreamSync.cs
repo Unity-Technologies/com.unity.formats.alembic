@@ -77,9 +77,9 @@ public class AlembicStreamSync : MonoBehaviour
             {
                item.Sync(m_time);
             }
+            
+            m_time_prev = m_time;
          }
-
-         m_time_prev = m_time;
       }
    }
 }
