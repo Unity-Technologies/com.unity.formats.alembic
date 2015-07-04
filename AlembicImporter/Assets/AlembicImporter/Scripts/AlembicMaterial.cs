@@ -4,7 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 [ExecuteInEditMode]
 public class AlembicMaterial : MonoBehaviour
@@ -194,7 +196,7 @@ public class AlembicMaterial : MonoBehaviour
         }
     }
 
-    // --- Import / Export methods
+#if UNITY_EDITOR
 
     static char[] PathSep = new char[1] { '/' };
     static char[] FaceSep = new char[1] { ',' };
@@ -456,4 +458,6 @@ public class AlembicMaterial : MonoBehaviour
         // Not Yet Implemented
         Debug.Log("Material assignment export not yet implemented");
     }
+    
+#endif
 }
