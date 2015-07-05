@@ -159,6 +159,13 @@ public class AlembicStream : MonoBehaviour
 
     void Update()
     {
-        UpdateAbc(m_time + Time.deltaTime);
+        if (Application.isPlaying)
+        {
+            UpdateAbc(Time.time);
+        }
+        else
+        {
+            UpdateAbc(m_time);
+        }
     }
 }
