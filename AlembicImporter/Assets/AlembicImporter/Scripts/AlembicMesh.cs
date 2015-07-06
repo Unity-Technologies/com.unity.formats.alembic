@@ -95,7 +95,7 @@ public class AlembicMesh : AlembicElement
             }
             else if(abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
             {
-                GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicStandard.mat");
+                GetComponent<MeshRenderer>().sharedMaterial = AlembicUtils.LoadAsset<Material>("AlembicStandard", "material");
             }
 #endif
 
@@ -343,7 +343,7 @@ public class AlembicMesh : AlembicElement
         if (mdt == AlembicStream.MeshDataType.Texture)
         {
 #if UNITY_EDITOR
-            mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset");
+            mesh = AlembicUtils.LoadAsset<Mesh>("IndexOnlyMesh", "mesh");
 #endif
         }
         else
