@@ -1,0 +1,5 @@
+release/
+debug/
+.build/
+*.dblite
+excons.cache
