@@ -326,6 +326,43 @@ class AlembicUtils
     //{
     //    AssetDatabase.CreateAsset(CreateIndexOnlyMesh(64998), "Assets/IndexOnlyMesh.asset");
     //}
+
+    public static T LoadAsset<T>(string name, string type="") where T : class
+    {
+        string search_string = name;
+
+        if (type.Length > 0)
+        {
+            search_string += " t:" + type;
+        }
+
+        string[] guids = AssetDatabase.FindAssets(search_string);
+
+        if (guids.Length >= 1)
+        {
+            if (guids.Length > 1)
+            {
+                foreach (string guid in guids)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    
+                    if (path.Contains("AlembicImporter"))
+                    {
+                        return AssetDatabase.LoadAssetAtPath(path, typeof(T)) as T;
+                    }
+                }
+
+                Debug.LogWarning("Found several " + (type.Length > 0 ? type : "asset") + " named '" + name + "'. Use first found.");
+            }
+            
+            return AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(T)) as T;
+        }
+        else
+        {
+            Debug.LogWarning("Could not find " + (type.Length > 0 ? type : "asset") + " '" + name + "'");
+            return null;
+        }
+    }
 #endif
 
     public static Mesh CreateIndexOnlyMesh(int num_indices)
