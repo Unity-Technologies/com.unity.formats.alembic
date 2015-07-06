@@ -3,10 +3,16 @@
 #if defined(aiSupportTextureMesh) && defined(aiSupportOpenGL)
 #include "aiGraphicsDevice.h"
 
+#ifndef aiDontForceStaticGLEW
 #define GLEW_STATIC
+#endif
+
 #include <GL/glew.h>
+
+#if defined(aiWindows) && !defined(aiNoAutoLink)
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glew32s.lib")
+#endif
 
 
 class aiGraphicsDeviceOpenGL : public aiIGraphicsDevice
