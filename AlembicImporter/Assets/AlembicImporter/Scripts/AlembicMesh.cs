@@ -203,7 +203,7 @@ public class AlembicMesh : AlembicElement
     // called by loading thread
     void AbcOnUpdateSample_Mesh(AbcAPI.aiSample sample)
     {
-        var schema = m_abcschema;
+        // var schema = m_abcschema;
         var smi_prev = default(AbcAPI.aiSplitedMeshInfo);
         var smi = default(AbcAPI.aiSplitedMeshInfo);
         AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_mesh_summary);
@@ -257,7 +257,7 @@ public class AlembicMesh : AlembicElement
             if (is_end) { break; }
         }
 
-        for (int i = nth_submesh + 1; i < m_meshes.Count; ++i)
+        for (int i = nth_submesh; i < m_meshes.Count; ++i)
         {
             m_meshes[i].active = false;
         }
