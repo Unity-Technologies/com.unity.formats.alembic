@@ -25,6 +25,7 @@ public class AlembicStream : MonoBehaviour
     public bool m_reverse_faces;
     public bool m_force_refresh;
     public bool m_ignore_missing_nodes = true;
+    public bool m_verbose = false;
     
     bool m_loaded;
     float m_adjusted_time_prev;
@@ -132,6 +133,10 @@ public class AlembicStream : MonoBehaviour
     {
         if (!m_loaded)
         {
+            if (m_verbose)
+            {
+                Debug.Log("Load alembic '" + Application.streamingAssetsPath + "/" + m_path_to_abc);
+            }
             m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
         }
 
@@ -147,12 +152,24 @@ public class AlembicStream : MonoBehaviour
                 m_ignore_missing_nodes != m_ignore_missing_nodes_prev ||
                 Math.Abs(adjusted_time - m_adjusted_time_prev) > m_time_eps)
             {
+                if (m_verbose)
+                {
+                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjusted_time + ")");
+                }
+                
                 AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, adjusted_time, m_ignore_missing_nodes);
                 
                 m_adjusted_time_prev = adjusted_time;
                 m_reverse_x_prev = m_reverse_x;
                 m_reverse_faces_prev = m_reverse_faces;
                 m_force_refresh = false;
+            }
+            else
+            {
+                if (m_verbose)
+                {
+                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + adjusted_time + ")");
+                }
             }
         }
     }
