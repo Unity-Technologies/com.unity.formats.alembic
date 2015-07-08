@@ -31,8 +31,8 @@ class AlembicMaterialEditor : EditorWindow
     {
         if (path.Length > 0)
         {
-            Uri base_uri = new Uri(Application.dataPath + "/");
-            return base_uri.MakeRelativeUri(new Uri(path)).ToString();
+            Uri baseUri = new Uri(Application.dataPath + "/");
+            return baseUri.MakeRelativeUri(new Uri(path)).ToString();
         }
         else
         {

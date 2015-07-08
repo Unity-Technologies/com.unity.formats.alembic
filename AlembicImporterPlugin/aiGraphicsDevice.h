@@ -10,7 +10,7 @@ public:
 
 private:
     void *m_device;
-    int m_device_type;
+    int m_deviceType;
 };
 aiGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
 aiGraphicsDevice* aiCreateGraphicsDeviceOpenGL(void *device);

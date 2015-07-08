@@ -36,7 +36,7 @@ private:
     abcArchivePtr m_archive;
     std::vector<aiObject*> m_nodes;
     aiTaskGroup m_tasks;
-    double m_time_range[2];
+    double m_timeRange[2];
 };
 
 

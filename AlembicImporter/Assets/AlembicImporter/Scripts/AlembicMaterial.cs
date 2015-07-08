@@ -19,13 +19,13 @@ public class AlembicMaterial : MonoBehaviour
 
     public class Facesets
     {
-        public int[] face_counts;
-        public int[] face_indices;
+        public int[] faceCounts;
+        public int[] faceIndices;
     }
 
     bool dirty = false;
     List<Material> materials = new List<Material>();
-    Facesets facesets_cache = new Facesets { face_counts = new int[0], face_indices = new int[0] };
+    Facesets facesetsCache = new Facesets { faceCounts = new int[0], faceIndices = new int[0] };
     
     void Start()
     {
@@ -39,8 +39,8 @@ public class AlembicMaterial : MonoBehaviour
 
             if (abcmesh != null)
             {
-                int split_index = 0;
-                int submesh_index = 0;
+                int splitIndex = 0;
+                int submeshIndex = 0;
 
                 if (abcmesh.m_submeshes.Count < materials.Count)
                 {
@@ -53,69 +53,69 @@ public class AlembicMaterial : MonoBehaviour
 
                 foreach (AlembicMesh.Submesh submesh in abcmesh.m_submeshes)
                 {
-                    if (submesh.split_index != split_index)
+                    if (submesh.splitIndex != splitIndex)
                     {
-                        submesh_index = 0;
+                        submeshIndex = 0;
                     }
 
-                    MeshRenderer split_renderer = null;
+                    MeshRenderer splitRenderer = null;
 
-                    Transform split = gameObject.transform.FindChild("Split_" + submesh.split_index);
+                    Transform split = gameObject.transform.FindChild("Split_" + submesh.splitIndex);
 
                     if (split == null)
                     {
-                        if (submesh.split_index > 0)
+                        if (submesh.splitIndex > 0)
                         {
                             Debug.Log("Invalid split index");
                             return;
                         }
 
-                        split_renderer = renderer;
+                        splitRenderer = renderer;
                     }
                     else
                     {
-                        if (submesh.split_index == 0 && !split.gameObject.activeSelf)
+                        if (submesh.splitIndex == 0 && !split.gameObject.activeSelf)
                         {
                             // First split sub object not active means the mesh is hold be the current object
-                            split_renderer = renderer;
+                            splitRenderer = renderer;
                         }
                         else
                         {
-                            split_renderer = split.gameObject.GetComponent<MeshRenderer>();
+                            splitRenderer = split.gameObject.GetComponent<MeshRenderer>();
                         }
                     }
 
-                    if (split_renderer == null)
+                    if (splitRenderer == null)
                     {
                         Debug.Log("No renderer on \"" + gameObject.name + "\" to assign materials to");
                     }
 
-                    Material[] assigned_materials = split_renderer.sharedMaterials;
+                    Material[] assignedMaterials = splitRenderer.sharedMaterials;
 
-                    if (submesh.faceset_index != -1)
+                    if (submesh.facesetIndex != -1)
                     {
-                        if (submesh.faceset_index < 0 || submesh.faceset_index >= materials.Count)
+                        if (submesh.facesetIndex < 0 || submesh.facesetIndex >= materials.Count)
                         {
-                            // invalid faceset_index, do no update material assignments at all
+                            // invalid facesetIndex, do no update material assignments at all
                             Debug.Log("Invalid faceset index");
                             return;
                         }
 
-                        if (submesh_index >= assigned_materials.Length)
+                        if (submeshIndex >= assignedMaterials.Length)
                         {
                             Debug.Log("No material for submesh");
                             return;
                         }
 
-                        if (assigned_materials[submesh_index] != materials[submesh.faceset_index])
+                        if (assignedMaterials[submeshIndex] != materials[submesh.facesetIndex])
                         {
-                            assigned_materials[submesh_index] = materials[submesh.faceset_index];
-                            split_renderer.sharedMaterials = assigned_materials;
+                            assignedMaterials[submeshIndex] = materials[submesh.facesetIndex];
+                            splitRenderer.sharedMaterials = assignedMaterials;
 
                             // propagate first split single material assignment to parent renderer if it exists
-                            if (submesh.split_index == 0 && split_renderer != renderer && renderer != null && assigned_materials.Length == 1)
+                            if (submesh.splitIndex == 0 && splitRenderer != renderer && renderer != null && assignedMaterials.Length == 1)
                             {
-                                renderer.sharedMaterials = assigned_materials;
+                                renderer.sharedMaterials = assignedMaterials;
                             }
                         }
                     }
@@ -124,8 +124,8 @@ public class AlembicMaterial : MonoBehaviour
                         // should I reset to default material or leave it as it is
                     }
 
-                    split_index = submesh.split_index;
-                    ++submesh_index;
+                    splitIndex = submesh.splitIndex;
+                    ++submeshIndex;
                 }
             }
 
@@ -135,14 +135,14 @@ public class AlembicMaterial : MonoBehaviour
 
     public int GetFacesetsCount()
     {
-        return facesets_cache.face_counts.Length;
+        return facesetsCache.faceCounts.Length;
     }
 
     public void GetFacesets(ref AlembicImporter.aiFacesets facesets)
     {
-        facesets.count = facesets_cache.face_counts.Length;
-        facesets.face_counts = Marshal.UnsafeAddrOfPinnedArrayElement(facesets_cache.face_counts, 0);
-        facesets.face_indices = Marshal.UnsafeAddrOfPinnedArrayElement(facesets_cache.face_indices, 0);
+        facesets.count = facesetsCache.faceCounts.Length;
+        facesets.faceCounts = Marshal.UnsafeAddrOfPinnedArrayElement(facesetsCache.faceCounts, 0);
+        facesets.faceIndices = Marshal.UnsafeAddrOfPinnedArrayElement(facesetsCache.faceIndices, 0);
     }
 
     public bool HasFacesetsChanged()
@@ -158,14 +158,14 @@ public class AlembicMaterial : MonoBehaviour
     public void UpdateAssignments(List<Assignment> assignments)
     {
         int count = 0;
-        int indices_count = 0;
+        int indicesCount = 0;
 
         // keep list of materials for next update
         materials.Clear();
 
-        if (facesets_cache.face_counts.Length < assignments.Count)
+        if (facesetsCache.faceCounts.Length < assignments.Count)
         {
-            Array.Resize(ref facesets_cache.face_counts, assignments.Count);
+            Array.Resize(ref facesetsCache.faceCounts, assignments.Count);
             dirty = true;
         }
 
@@ -175,23 +175,23 @@ public class AlembicMaterial : MonoBehaviour
 
             int face_count = assignments[i].faces.Count;
 
-            dirty = dirty || (facesets_cache.face_counts[count] != face_count);
+            dirty = dirty || (facesetsCache.faceCounts[count] != face_count);
             
-            facesets_cache.face_counts[count++] = face_count;
+            facesetsCache.faceCounts[count++] = face_count;
 
-            if (facesets_cache.face_indices.Length < (indices_count + face_count))
+            if (facesetsCache.faceIndices.Length < (indicesCount + face_count))
             {
-                Array.Resize(ref facesets_cache.face_indices, indices_count + face_count);
+                Array.Resize(ref facesetsCache.faceIndices, indicesCount + face_count);
                 dirty = true;
             }
 
-            for (int j=0; j<face_count; ++j, ++indices_count)
+            for (int j=0; j<face_count; ++j, ++indicesCount)
             {
                 int face_index = assignments[i].faces[j];
 
-                dirty = dirty || (facesets_cache.face_indices[indices_count] != face_index);
+                dirty = dirty || (facesetsCache.faceIndices[indicesCount] != face_index);
                 
-                facesets_cache.face_indices[indices_count] = face_index;
+                facesetsCache.faceIndices[indicesCount] = face_index;
             }
         }
     }
@@ -323,7 +323,7 @@ public class AlembicMaterial : MonoBehaviour
         
         XmlNodeList nodes = xmlRoot.SelectNodes("/assignments/node");
 
-        Dictionary<GameObject, List<AlembicMaterial.Assignment> > all_assignments = new Dictionary<GameObject, List<AlembicMaterial.Assignment> >();
+        Dictionary<GameObject, List<AlembicMaterial.Assignment> > allAssignments = new Dictionary<GameObject, List<AlembicMaterial.Assignment> >();
 
         foreach (XmlNode node in nodes)
         {
@@ -353,14 +353,14 @@ public class AlembicMaterial : MonoBehaviour
 
                 List<AlembicMaterial.Assignment> assignments;
 
-                if (!all_assignments.ContainsKey(target))
+                if (!allAssignments.ContainsKey(target))
                 {
                     assignments = new List<AlembicMaterial.Assignment>();
-                    all_assignments.Add(target, assignments);
+                    allAssignments.Add(target, assignments);
                 }
                 else
                 {
-                    assignments = all_assignments[target];
+                    assignments = allAssignments[target];
                 }
 
                 Material material = GetMaterial(name.Value, materialFolder);
@@ -432,7 +432,7 @@ public class AlembicMaterial : MonoBehaviour
         }
 
         // Update AlembicMaterial components
-        foreach (KeyValuePair<GameObject, List<AlembicMaterial.Assignment> > pair in all_assignments)
+        foreach (KeyValuePair<GameObject, List<AlembicMaterial.Assignment> > pair in allAssignments)
         {
             AlembicMaterial abcmaterial = pair.Key.GetComponent<AlembicMaterial>();
 
@@ -449,7 +449,7 @@ public class AlembicMaterial : MonoBehaviour
             
         if (abcstream != null)
         {
-            abcstream.m_force_refresh = true;
+            abcstream.m_forceRefresh = true;
         }
     }
 

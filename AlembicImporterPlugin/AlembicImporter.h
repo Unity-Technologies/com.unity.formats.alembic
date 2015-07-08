@@ -9,9 +9,9 @@
 
 
 #ifdef _WIN32
-typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userdata);
+typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userData);
 #else
-typedef void (*aiNodeEnumerator)(aiObject *node, void *userdata);
+typedef void (*aiNodeEnumerator)(aiObject *node, void *userData);
 #endif
 
 struct aiV2 { float v[2]; };
@@ -21,28 +21,28 @@ struct aiM44 { float v[4][4]; };
 
 struct aiSplitedMeshInfo
 {
-    int num_faces;
-    int num_indices;
-    int num_vertices;
-    int begin_face;
-    int begin_index;
-    int triangulated_index_count;
+    int numFaces;
+    int numIndices;
+    int numVertices;
+    int beginFace;
+    int beginIndex;
+    int triangulatedIndexCount;
 };
 
 struct aiSubmeshInfo
 {
     int index;
-    int split_index;
-    int split_submesh_index;
-    int triangle_count;
-    int faceset_index;
+    int splitIndex;
+    int splitSubmeshIndex;
+    int triangleCount;
+    int facesetIndex;
 };
 
 struct aiFacesets
 {
     int count;
-    int *face_counts;
-    int *face_indices;
+    int *faceCounts;
+    int *faceIndices;
 };
 
 
@@ -54,7 +54,7 @@ aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
 aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 
-aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata);
+aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiGetNumChildren(aiObject* obj);
@@ -82,29 +82,29 @@ aiCLinkage aiExport void            aiPolyMeshCopyIndices(aiObject* obj, int *ds
 aiCLinkage aiExport void            aiPolyMeshCopyVertices(aiObject* obj, abcV3 *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyNormals(aiObject* obj, abcV3 *dst);
 aiCLinkage aiExport void            aiPolyMeshCopyUVs(aiObject* obj, abcV2 *dst);
-aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiObject* obj, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices);
+aiCLinkage aiExport bool            aiPolyMeshGetSplitedMeshInfo(aiObject* obj, aiSplitedMeshInfo *smi, const aiSplitedMeshInfo *prev, int maxVertices);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedIndices(aiObject* obj, int *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedVertices(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedNormals(aiObject* obj, abcV3 *dst, const aiSplitedMeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV2 *dst, const aiSplitedMeshInfo *smi);
 
 aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitCount(aiObject *obj, bool force_refresh);
-aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t split_index);
-aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t split_index, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t splitIndex);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
 aiCLinkage aiExport uint32_t        aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets);
-aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t split_index);
-aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi);
+aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t splitIndex);
+aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *smi);
 aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi);
 
 struct aiTextureMeshData
 {
-    int num_indices;
-    bool is_normal_indexed;
-    bool is_uv_indexed;
-    void *tex_indices;
-    void *tex_vertices;
-    void *tex_normals;
-    void *tex_uvs;
+    int numIndices;
+    bool isNormalIndexed;
+    bool isUvIndexed;
+    void *texIndices;
+    void *texVertices;
+    void *texNormals;
+    void *texUvs;
 };
 aiCLinkage aiExport void            aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
 
@@ -114,7 +114,7 @@ aiCLinkage aiExport bool            aiHasCurves(aiObject* obj);
 aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
-aiCLinkage aiExport void            aiCameraGetParams(aiObject* obj, aiCameraParams *o_params);
+aiCLinkage aiExport void            aiCameraGetParams(aiObject* obj, aiCameraParams *params);
 
 aiCLinkage aiExport bool            aiHasLight(aiObject* obj);
 

@@ -30,7 +30,7 @@ private:
 private:
     std::vector< std::thread > m_workers;
     std::deque< std::function<void()> > m_tasks;
-    std::mutex m_queue_mutex;
+    std::mutex m_queueMutex;
     std::condition_variable m_condition;
     bool m_stop;
 };
@@ -46,16 +46,16 @@ public:
     void wait();
 
 private:
-    std::atomic<int> m_active_tasks;
+    std::atomic<int> m_activeTasks;
 };
 
 template<class F>
 void aiTaskGroup::run(const F &f)
 {
-    ++m_active_tasks;
+    ++m_activeTasks;
     aiThreadPool::getInstance().enqueue([this, f](){
         f();
-        --m_active_tasks;
+        --m_activeTasks;
     });
 }
 

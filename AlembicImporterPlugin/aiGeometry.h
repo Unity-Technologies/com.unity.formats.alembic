@@ -61,38 +61,38 @@ public:
     void        copyNormals(abcV3 *dst) const;
     void        copyUVs(abcV2 *dst) const;
 
-    bool        getSplitedMeshInfo(aiSplitedMeshInfo &o_sp, const aiSplitedMeshInfo& prev, int max_vertices) const;
+    bool        getSplitedMeshInfo(aiSplitedMeshInfo &sp, const aiSplitedMeshInfo& prev, int maxVertices) const;
     void        copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const;
     void        copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const;
 
     uint32_t    getSplitCount() const;
-    uint32_t    getSplitCount(bool force_refresh);
-    uint32_t    getVertexBufferLength(uint32_t split_index) const;
-    void        fillVertexBuffer(uint32_t split_index, abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    uint32_t    getSplitCount(bool forceRefresh);
+    uint32_t    getVertexBufferLength(uint32_t splitIndex) const;
+    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
     uint32_t    prepareSubmeshes(const aiFacesets *facesets);
-    uint32_t    getSplitSubmeshCount(uint32_t split_index) const;
-    bool        getNextSubmesh(aiSubmeshInfo &o_smi);
+    uint32_t    getSplitSubmeshCount(uint32_t splitIndex) const;
+    bool        getNextSubmesh(aiSubmeshInfo &smi);
     void        fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const;
 
 private:
 
     template <typename NormalIndexArray>
-    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi, float x_scale) const
+    void copySplitedNormals(abcV3 *dst, const NormalIndexArray &indices, const aiSplitedMeshInfo &smi, float xScale) const
     {
         const auto &counts = *m_counts;
         const auto &normals = *m_normals.getVals();
         
         uint32_t a = 0;
         
-        for (int fi = 0; fi < smi.num_faces; ++fi)
+        for (int fi = 0; fi < smi.numFaces; ++fi)
         {
-            int ngon = counts[smi.begin_face + fi];
+            int ngon = counts[smi.beginFace + fi];
             for (int ni = 0; ni < ngon; ++ni)
             {
-                dst[a + ni] = normals[indices[a + ni + smi.begin_index]];
-                dst[a + ni].x *= x_scale;
+                dst[a + ni] = normals[indices[a + ni + smi.beginIndex]];
+                dst[a + ni].x *= xScale;
             }
             a += ngon;
         }
@@ -105,40 +105,40 @@ private:
     
     struct SubmeshID
     {
-        int u_tile;
-        int v_tile;
-        int faceset_index;
-        int split_index;
+        int uTile;
+        int vTile;
+        int facesetIndex;
+        int splitIndex;
 
         inline SubmeshID(float u, float v, int fi=-1, int si=0)
-            : u_tile((int)floor(u))
-            , v_tile((int)floor(v))
-            , faceset_index(fi)
-            , split_index(si)
+            : uTile((int)floor(u))
+            , vTile((int)floor(v))
+            , facesetIndex(fi)
+            , splitIndex(si)
         {
         }
 
         inline bool operator<(const SubmeshID &rhs) const
         {
-            if (split_index < rhs.split_index)
+            if (splitIndex < rhs.splitIndex)
             {
                 return true;
             }
-            else if (split_index == rhs.split_index)
+            else if (splitIndex == rhs.splitIndex)
             {
-                if (faceset_index < rhs.faceset_index)
+                if (facesetIndex < rhs.facesetIndex)
                 {
                     return true;
                 }
-                else if (faceset_index == rhs.faceset_index)
+                else if (facesetIndex == rhs.facesetIndex)
                 {
-                    if (u_tile < rhs.u_tile)
+                    if (uTile < rhs.uTile)
                     {
                         return true;
                     }
-                    else if (u_tile == rhs.u_tile)
+                    else if (uTile == rhs.uTile)
                     {
-                        return (v_tile < rhs.v_tile);
+                        return (vTile < rhs.vTile);
                     }
                 }
             }
@@ -148,18 +148,18 @@ private:
 
     struct SplitInfo
     {
-        size_t first_face;
-        size_t last_face;
-        size_t index_offset;
-        size_t indices_count;
-        size_t submesh_count;
+        size_t firstFace;
+        size_t lastFace;
+        size_t indexOffset;
+        size_t indicesCount;
+        size_t submeshCount;
 
         inline SplitInfo(size_t ff=0, size_t io=0)
-            : first_face(ff)
-            , last_face(ff)
-            , index_offset(io)
-            , indices_count(0)
-            , submesh_count(0)
+            : firstFace(ff)
+            , lastFace(ff)
+            , indexOffset(io)
+            , indicesCount(0)
+            , submeshCount(0)
         {
         }
     };
@@ -168,16 +168,16 @@ private:
     {
         // original faceset if had to be splitted
         Faceset faces;
-        std::vector<int> vertex_indices;
-        size_t triangle_count;
-        int faceset_index;
-        int split_index;
+        std::vector<int> vertexIndices;
+        size_t triangleCount;
+        int facesetIndex;
+        int splitIndex;
         int index; // submesh index in split
 
         inline Submesh(int fsi=-1, int si=0)
-            : triangle_count(0)
-            , faceset_index(fsi)
-            , split_index(si)
+            : triangleCount(0)
+            , facesetIndex(fsi)
+            , splitIndex(si)
             , index(0)
         {
         }
@@ -195,10 +195,10 @@ private:
     Abc::V3fArraySamplePtr m_velocities;
 
     Submeshes m_submeshes;
-    Submeshes::iterator m_cur_submesh;
+    Submeshes::iterator m_curSubmesh;
 
     // Need to split mesh to work around the 65000 vertices per mesh limit
-    std::vector<int> m_face_split_indices;
+    std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
 };
 
@@ -232,11 +232,11 @@ private:
 
 struct aiCameraParams
 {
-    float near_clipping_plane;
-    float far_clipping_plane;
-    float field_of_view;
-    float focus_distance;
-    float focal_length;
+    float nearClippingPlane;
+    float farClippingPlane;
+    float fieldOfView;
+    float focusDistance;
+    float focalLength;
 };
 
 class aiCamera : public aiSchema
@@ -247,7 +247,7 @@ public:
     aiCamera(aiObject *obj);
     void updateSample() override;
 
-    void getParams(aiCameraParams &o_params);
+    void getParams(aiCameraParams &params);
 
 private:
     AbcGeom::ICameraSchema m_schema;
