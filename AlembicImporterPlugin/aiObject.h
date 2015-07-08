@@ -62,18 +62,18 @@ private:
     aiCamera    m_camera;
     aiLight     m_light;
     aiMaterial  m_material;
-    bool        m_has_xform;
-    bool        m_has_polymesh;
-    bool        m_has_curves;
-    bool        m_has_points;
-    bool        m_has_camera;
-    bool        m_has_light;
-    bool        m_has_material;
+    bool        m_hasXform;
+    bool        m_hasPolymesh;
+    bool        m_hasCurves;
+    bool        m_hasPoints;
+    bool        m_hasCamera;
+    bool        m_hasLight;
+    bool        m_hasMaterial;
 
     float m_time;
-    bool m_reverse_x;
+    bool m_reverseX;
     bool m_triangulate;
-    bool m_reverse_index;
+    bool m_reverseIndex;
 };
 
 

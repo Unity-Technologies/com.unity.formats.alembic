@@ -12,9 +12,9 @@ public class AlembicMesh : MonoBehaviour
     [Serializable]
     public class Split
     {
-        public Vector3[] position_cache;
-        public Vector3[] normal_cache;
-        public Vector2[] uv_cache;
+        public Vector3[] positionCache;
+        public Vector3[] normalCache;
+        public Vector2[] uvCache;
         public Mesh mesh;
         public GameObject host;
     }
@@ -22,14 +22,14 @@ public class AlembicMesh : MonoBehaviour
     [Serializable]
     public class Submesh
     {
-        public int[] index_cache;
-        public int faceset_index;
-        public int split_index;
+        public int[] indexCache;
+        public int facesetIndex;
+        public int splitIndex;
     }
 
     public List<Submesh> m_submeshes = new List<Submesh>();
     public List<Split> m_splits = new List<Split>();
-    public bool has_facesets = false;
+    public bool hasFacesets = false;
 
     public RenderTexture m_indices;
     public RenderTexture m_vertices;
@@ -37,10 +37,10 @@ public class AlembicMesh : MonoBehaviour
     public RenderTexture m_uvs;
 
 
-    static RenderTexture CreateDataTexture(int num_data, RenderTextureFormat format)
+    static RenderTexture CreateDataTexture(int numData, RenderTextureFormat format)
     {
         const int width = 1024;
-        var r = new RenderTexture(width, num_data / width, 0, format);
+        var r = new RenderTexture(width, numData / width, 0, format);
         r.enableRandomWrite = true;
         r.Create();
         return r;

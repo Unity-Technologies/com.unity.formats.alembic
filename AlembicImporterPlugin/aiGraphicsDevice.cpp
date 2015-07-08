@@ -2,11 +2,11 @@
 #include "AlembicImporter.h"
 #include "aiGraphicsDevice.h"
 
-aiGraphicsDevice::aiGraphicsDevice(void *device, int device_type)
-    : m_device(device), m_device_type(device_type) {}
+aiGraphicsDevice::aiGraphicsDevice(void *device, int deviceType)
+    : m_device(device), m_deviceType(deviceType) {}
 aiGraphicsDevice::~aiGraphicsDevice() {}
 void* aiGraphicsDevice::getDevicePtr() { return m_device; }
-int aiGraphicsDevice::getDeviceType() { return m_device_type; }
+int aiGraphicsDevice::getDeviceType() { return m_deviceType; }
 
 
 
@@ -57,9 +57,9 @@ aiCLinkage aiExport void UnityRenderEvent(int eventID)
 
 // PatchLibrary で突っ込まれたモジュールは UnitySetGraphicsDevice() が呼ばれないので、
 // DLL_PROCESS_ATTACH のタイミングで先にロードされているモジュールからデバイスをもらって同等の処理を行う。
-BOOL WINAPI DllMain(HINSTANCE module_handle, DWORD reason_for_call, LPVOID reserved)
+BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
 {
-    if (reason_for_call == DLL_PROCESS_ATTACH)
+    if (reasonForCall == DLL_PROCESS_ATTACH)
     {
         HMODULE m = ::GetModuleHandleA("AlembicImporter.dll");
         if (m) {
@@ -72,7 +72,7 @@ BOOL WINAPI DllMain(HINSTANCE module_handle, DWORD reason_for_call, LPVOID reser
             }
         }
     }
-    else if (reason_for_call == DLL_PROCESS_DETACH)
+    else if (reasonForCall == DLL_PROCESS_DETACH)
     {
     }
     return TRUE;

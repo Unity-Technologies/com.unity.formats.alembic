@@ -87,7 +87,7 @@ aiCLinkage aiExport aiObject* aiGetTopObject(aiContext* ctx)
 }
 
 
-aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata)
+aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 {
     aiCheckObject(obj);
     //aiDebugLogVerbose("aiEnumerateChild(): %s (%d children)\n", obj->getName(), obj->getNumChildren());
@@ -95,7 +95,7 @@ aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, voi
     for (size_t i = 0; i < n; ++i) {
         try {
             aiObject *child = obj->getChild(i);
-            e(child, userdata);
+            e(child, userData);
         }
         catch (Alembic::Util::Exception e)
         {
@@ -267,10 +267,10 @@ aiCLinkage aiExport void aiPolyMeshCopyUVs(aiObject* obj, abcV2 *dst)
     return obj->getPolyMesh().copyUVs(dst);
 }
 
-aiCLinkage aiExport bool aiPolyMeshGetSplitedMeshInfo(aiObject* obj, aiSplitedMeshInfo *o_smi, const aiSplitedMeshInfo *prev, int max_vertices)
+aiCLinkage aiExport bool aiPolyMeshGetSplitedMeshInfo(aiObject* obj, aiSplitedMeshInfo *smi, const aiSplitedMeshInfo *prev, int maxVertices)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().getSplitedMeshInfo(*o_smi, *prev, max_vertices);
+    return obj->getPolyMesh().getSplitedMeshInfo(*smi, *prev, maxVertices);
 }
 
 aiCLinkage aiExport void aiPolyMeshCopySplitedIndices(aiObject* obj, int *dst, const aiSplitedMeshInfo *smi)
@@ -303,16 +303,16 @@ aiCLinkage aiExport uint32_t aiPolyMeshGetSplitCount(aiObject *obj, bool force_r
     return obj->getPolyMesh().getSplitCount(force_refresh);
 }
 
-aiCLinkage aiExport uint32_t aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t split_index)
+aiCLinkage aiExport uint32_t aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t splitIndex)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().getVertexBufferLength(split_index);
+    return obj->getPolyMesh().getVertexBufferLength(splitIndex);
 }
 
-aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t split_index, abcV3 *positions, abcV3 *normals, abcV2 *uvs)
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs)
 {
     aiCheckObject(obj);
-    obj->getPolyMesh().fillVertexBuffer(split_index, positions, normals, uvs);
+    obj->getPolyMesh().fillVertexBuffer(splitIndex, positions, normals, uvs);
 }
 
 aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets)
@@ -321,16 +321,16 @@ aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiF
     return obj->getPolyMesh().prepareSubmeshes(facesets);
 }
 
-aiCLinkage aiExport uint32_t aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t split_index)
+aiCLinkage aiExport uint32_t aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t splitIndex)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().getSplitSubmeshCount(split_index);
+    return obj->getPolyMesh().getSplitSubmeshCount(splitIndex);
 }
 
-aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *o_smi)
+aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *smi)
 {
     aiCheckObject(obj);
-    return obj->getPolyMesh().getNextSubmesh(*o_smi);
+    return obj->getPolyMesh().getNextSubmesh(*smi);
 }
 
 aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, const aiSubmeshInfo *smi)
@@ -360,10 +360,10 @@ aiCLinkage aiExport bool aiHasCamera(aiObject* obj)
     return obj->hasCamera();
 }
 
-aiCLinkage aiExport void aiCameraGetParams(aiObject* obj, aiCameraParams *o_params)
+aiCLinkage aiExport void aiCameraGetParams(aiObject* obj, aiCameraParams *params)
 {
     aiCheckObject(obj);
-    obj->getCamera().getParams(*o_params);
+    obj->getCamera().getParams(*params);
 }
 
 

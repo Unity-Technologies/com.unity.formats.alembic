@@ -8,9 +8,9 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
     , m_time(0.0f)
-    , m_reverse_x(true)
+    , m_reverseX(true)
     , m_triangulate(true)
-    , m_reverse_index(false)
+    , m_reverseIndex(false)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -20,50 +20,50 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     {
         const auto& metadata = m_abc.getMetaData();
         
-        m_has_xform = AbcGeom::IXformSchema::matches(metadata);
-        if (m_has_xform)
+        m_hasXform = AbcGeom::IXformSchema::matches(metadata);
+        if (m_hasXform)
         {
             m_xform = aiXForm(this);
             m_schemas.push_back(&m_xform);
         }
         
-        m_has_polymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
-        if (m_has_polymesh)
+        m_hasPolymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
+        if (m_hasPolymesh)
         {
             m_polymesh = aiPolyMesh(this);
             m_schemas.push_back(&m_polymesh);
         }
         
-        m_has_curves = AbcGeom::ICurvesSchema::matches(metadata);
-        if (m_has_curves)
+        m_hasCurves = AbcGeom::ICurvesSchema::matches(metadata);
+        if (m_hasCurves)
         {
             m_curves = aiCurves(this);
             m_schemas.push_back(&m_curves);
         }
         
-        m_has_points = AbcGeom::IPointsSchema::matches(metadata);
-        if (m_has_points)
+        m_hasPoints = AbcGeom::IPointsSchema::matches(metadata);
+        if (m_hasPoints)
         {
             m_points = aiPoints(this);
             m_schemas.push_back(&m_points);
         }
         
-        m_has_camera = AbcGeom::ICameraSchema::matches(metadata);
-        if (m_has_camera)
+        m_hasCamera = AbcGeom::ICameraSchema::matches(metadata);
+        if (m_hasCamera)
         {
             m_camera = aiCamera(this);
             m_schemas.push_back(&m_camera);
         }
         
-        m_has_light = AbcGeom::ILight::matches(metadata);
-        if (m_has_light)
+        m_hasLight = AbcGeom::ILight::matches(metadata);
+        if (m_hasLight)
         {
             m_light = aiLight(this);
             m_schemas.push_back(&m_light);
         }
         
-        m_has_material = AbcMaterial::IMaterial::matches(metadata);
-        if (m_has_material)
+        m_hasMaterial = AbcMaterial::IMaterial::matches(metadata);
+        if (m_hasMaterial)
         {
             m_material = aiMaterial(this);
             m_schemas.push_back(&m_material);
@@ -98,23 +98,23 @@ void aiObject::setCurrentTime(float time)
         s->updateSample();
     }
 }
-void aiObject::enableReverseX(bool v)       { m_reverse_x = v; }
+void aiObject::enableReverseX(bool v)       { m_reverseX = v; }
 void aiObject::enableTriangulate(bool v)    { m_triangulate = v; }
-void aiObject::enableReverseIndex(bool v)   { m_reverse_index = v; }
+void aiObject::enableReverseIndex(bool v)   { m_reverseIndex = v; }
 
 float aiObject::getCurrentTime() const      { return m_time; }
-bool aiObject::getReverseX() const          { return m_reverse_x; }
-bool aiObject::getReverseIndex() const      { return m_reverse_index; }
+bool aiObject::getReverseX() const          { return m_reverseX; }
+bool aiObject::getReverseIndex() const      { return m_reverseIndex; }
 bool aiObject::getTriangulate() const       { return m_triangulate; }
 
 
-bool aiObject::hasXForm() const    { return m_has_xform; }
-bool aiObject::hasPolyMesh() const { return m_has_polymesh; }
-bool aiObject::hasCurves() const   { return m_has_curves; }
-bool aiObject::hasPoints() const   { return m_has_points; }
-bool aiObject::hasCamera() const   { return m_has_camera; }
-bool aiObject::hasLight() const    { return m_has_light; }
-bool aiObject::hasMaterial() const { return m_has_material; }
+bool aiObject::hasXForm() const    { return m_hasXform; }
+bool aiObject::hasPolyMesh() const { return m_hasPolymesh; }
+bool aiObject::hasCurves() const   { return m_hasCurves; }
+bool aiObject::hasPoints() const   { return m_hasPoints; }
+bool aiObject::hasCamera() const   { return m_hasCamera; }
+bool aiObject::hasLight() const    { return m_hasLight; }
+bool aiObject::hasMaterial() const { return m_hasMaterial; }
 
 aiXForm&    aiObject::getXForm()      { return m_xform; }
 aiPolyMesh& aiObject::getPolyMesh()   { return m_polymesh; }

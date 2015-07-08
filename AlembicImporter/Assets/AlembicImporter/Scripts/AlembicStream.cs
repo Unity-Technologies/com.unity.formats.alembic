@@ -13,27 +13,27 @@ public class AlembicStream : MonoBehaviour
 {
     public enum CycleType { Hold, Loop, Reverse, Bounce };
 
-    public string m_path_to_abc;
+    public string m_pathToAbc;
     public float m_time;
-    public float m_start_time = 0.0f;
-    public float m_end_time = 0.0f;
-    public float m_time_offset = 0.0f;
-    public float m_time_scale = 1.0f;
-    public bool m_preserve_start_time = true;
+    public float m_startTime = 0.0f;
+    public float m_endTime = 0.0f;
+    public float m_timeOffset = 0.0f;
+    public float m_timeScale = 1.0f;
+    public bool m_preserveStartTime = true;
     public CycleType m_cycle = CycleType.Hold;
-    public bool m_reverse_x;
-    public bool m_reverse_faces;
-    public bool m_force_refresh;
-    public bool m_ignore_missing_nodes = true;
+    public bool m_reverseX;
+    public bool m_reverseFaces;
+    public bool m_forceRefresh;
+    public bool m_ignoreMissingNodes = true;
     public bool m_verbose = false;
     
     bool m_loaded;
-    float m_adjusted_time_prev;
-    bool m_reverse_x_prev;
-    bool m_reverse_faces_prev;
-    float m_time_eps = 0.001f;
+    float m_lastAdjustedTime;
+    bool m_lastReverseX;
+    bool m_lastReverseFaces;
+    float m_timeEps = 0.001f;
     AlembicImporter.aiContext m_abc;
-    bool m_ignore_missing_nodes_prev;
+    bool m_lastIgnoreMissingNodes;
 
 
     void OnEnable()
@@ -42,7 +42,7 @@ public class AlembicStream : MonoBehaviour
         AlembicImporter.AddLibraryPath();
 #endif
         m_abc = AlembicImporter.aiCreateContext();
-        m_loaded = AlembicImporter.aiLoad(m_abc, m_path_to_abc);
+        m_loaded = AlembicImporter.aiLoad(m_abc, m_pathToAbc);
     }
 
     void OnDisable()
@@ -50,83 +50,83 @@ public class AlembicStream : MonoBehaviour
         AlembicImporter.aiDestroyContext(m_abc);
     }
 
-    float AdjustTime(float in_time)
+    float AdjustTime(float inTime)
     {
-        float extra_offset = 0.0f;
+        float extraOffset = 0.0f;
 
-        // compute extra time offset to counter-balance effect of m_time_scale on m_start_time
-        if (m_preserve_start_time)
+        // compute extra time offset to counter-balance effect of m_timeScale on m_startTime
+        if (m_preserveStartTime)
         {
-            extra_offset = m_start_time * (m_time_scale - 1.0f);
+            extraOffset = m_startTime * (m_timeScale - 1.0f);
         }
 
-        float play_time = m_end_time - m_start_time;
+        float playTime = m_endTime - m_startTime;
 
         // apply speed and offset
-        float out_time = m_time_scale * (in_time - m_time_offset) - extra_offset;
+        float outTime = m_timeScale * (inTime - m_timeOffset) - extraOffset;
 
         if (m_cycle == CycleType.Hold)
         {
-            if (out_time < (m_start_time - m_time_eps))
+            if (outTime < (m_startTime - m_timeEps))
             {
-                out_time = m_start_time;
+                outTime = m_startTime;
             }
-            else if (out_time > (m_end_time + m_time_eps))
+            else if (outTime > (m_endTime + m_timeEps))
             {
-                out_time = m_end_time;
+                outTime = m_endTime;
             }
         }
         else
         {
-            float normalized_time = (out_time - m_start_time) / play_time;
-            float play_repeat = (float)Math.Floor(normalized_time);
-            float fraction = Math.Abs(normalized_time - play_repeat);
+            float normalizedTime = (outTime - m_startTime) / playTime;
+            float playRepeat = (float)Math.Floor(normalizedTime);
+            float fraction = Math.Abs(normalizedTime - playRepeat);
             
             if (m_cycle == CycleType.Reverse)
             {
-                if (out_time > (m_start_time + m_time_eps) && out_time < (m_end_time - m_time_eps))
+                if (outTime > (m_startTime + m_timeEps) && outTime < (m_endTime - m_timeEps))
                 {
                     // inside alembic sample range
-                    out_time = m_end_time - fraction * play_time;
+                    outTime = m_endTime - fraction * playTime;
                 }
-                else if (out_time < (m_start_time + m_time_eps))
+                else if (outTime < (m_startTime + m_timeEps))
                 {
-                    out_time = m_end_time;
+                    outTime = m_endTime;
                 }
                 else
                 {
-                    out_time = m_start_time;
+                    outTime = m_startTime;
                 }
             }
             else
             {
-                if (out_time < (m_start_time - m_time_eps) || out_time > (m_end_time + m_time_eps))
+                if (outTime < (m_startTime - m_timeEps) || outTime > (m_endTime + m_timeEps))
                 {
                     // outside alembic sample range
-                    if (m_cycle == CycleType.Loop || ((int)play_repeat % 2) == 0)
+                    if (m_cycle == CycleType.Loop || ((int)playRepeat % 2) == 0)
                     {
-                        out_time = m_start_time + fraction * play_time;
+                        outTime = m_startTime + fraction * playTime;
                     }
                     else
                     {
-                        out_time = m_end_time - fraction * play_time;
+                        outTime = m_endTime - fraction * playTime;
                     }
                 }
             }
         }
 
-        return out_time;
+        return outTime;
     }
 
     void Start()
     {
         m_time = 0.0f;
 
-        m_adjusted_time_prev = AdjustTime(0.0f);
-        m_reverse_x_prev = m_reverse_x;
-        m_reverse_faces_prev = m_reverse_faces;
-        m_ignore_missing_nodes_prev = m_ignore_missing_nodes;
-        m_force_refresh = false;
+        m_lastAdjustedTime = AdjustTime(0.0f);
+        m_lastReverseX = m_reverseX;
+        m_lastReverseFaces = m_reverseFaces;
+        m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
+        m_forceRefresh = false;
     }
 
     void UpdateAbc(float time)
@@ -135,40 +135,40 @@ public class AlembicStream : MonoBehaviour
         {
             if (m_verbose)
             {
-                Debug.Log("Load alembic '" + Application.streamingAssetsPath + "/" + m_path_to_abc);
+                Debug.Log("Load alembic '" + Application.streamingAssetsPath + "/" + m_pathToAbc);
             }
-            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
+            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
         }
 
         if (m_loaded)
         {
             m_time = time;
 
-            float adjusted_time = AdjustTime(m_time);
+            float adjustedTime = AdjustTime(m_time);
 
-            if (m_force_refresh || 
-                m_reverse_x != m_reverse_x_prev ||
-                m_reverse_faces != m_reverse_faces_prev ||
-                m_ignore_missing_nodes != m_ignore_missing_nodes_prev ||
-                Math.Abs(adjusted_time - m_adjusted_time_prev) > m_time_eps)
+            if (m_forceRefresh || 
+                m_reverseX != m_lastReverseX ||
+                m_reverseFaces != m_lastReverseFaces ||
+                m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
+                Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps)
             {
                 if (m_verbose)
                 {
-                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjusted_time + ")");
+                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
                 }
                 
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverse_x, m_reverse_faces, adjusted_time, m_ignore_missing_nodes);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverseX, m_reverseFaces, adjustedTime, m_ignoreMissingNodes);
                 
-                m_adjusted_time_prev = adjusted_time;
-                m_reverse_x_prev = m_reverse_x;
-                m_reverse_faces_prev = m_reverse_faces;
-                m_force_refresh = false;
+                m_lastAdjustedTime = adjustedTime;
+                m_lastReverseX = m_reverseX;
+                m_lastReverseFaces = m_reverseFaces;
+                m_forceRefresh = false;
             }
             else
             {
                 if (m_verbose)
                 {
-                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + adjusted_time + ")");
+                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
                 }
             }
         }

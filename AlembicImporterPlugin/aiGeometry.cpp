@@ -181,7 +181,7 @@ uint32_t aiPolyMesh::getVertexCount() const
 
 void aiPolyMesh::copyIndices(int *dst) const
 {
-    bool reverse_index = m_obj->getReverseIndex();
+    bool reverseIndex = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
 
@@ -189,8 +189,8 @@ void aiPolyMesh::copyIndices(int *dst) const
     {
         uint32_t a = 0;
         uint32_t b = 0;
-        uint32_t i1 = reverse_index ? 2 : 1;
-        uint32_t i2 = reverse_index ? 1 : 2;
+        uint32_t i1 = reverseIndex ? 2 : 1;
+        uint32_t i2 = reverseIndex ? 1 : 2;
         size_t n = counts.size();
         for (size_t fi = 0; fi < n; ++fi) {
             int ngon = counts[fi];
@@ -206,7 +206,7 @@ void aiPolyMesh::copyIndices(int *dst) const
     else
     {
         size_t n = indices.size();
-        if (reverse_index) {
+        if (reverseIndex) {
             for (size_t i = 0; i < n; ++i) {
                 dst[i] = indices[n - i - 1];
             }
@@ -243,46 +243,46 @@ void aiPolyMesh::copyUVs(abcV2 *) const
     // todo
 }
 
-bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &o_smi, const aiSplitedMeshInfo& prev, int max_vertices) const
+bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &outSmi, const aiSplitedMeshInfo& prev, int maxVertices) const
 {
     const auto &counts = *m_counts;
     size_t nc = counts.size();
 
     aiSplitedMeshInfo smi = { 0 };
-    smi.begin_face = prev.begin_face + prev.num_faces;
-    smi.begin_index = prev.begin_index + prev.num_indices;
+    smi.beginFace = prev.beginFace + prev.numFaces;
+    smi.beginIndex = prev.beginIndex + prev.numIndices;
 
-    bool is_end = true;
+    bool isEnd = true;
     int a = 0;
-    for (size_t i = smi.begin_face; i < nc; ++i) {
+    for (size_t i = smi.beginFace; i < nc; ++i) {
         int ngon = counts[i];
-        if (a + ngon >= max_vertices) {
-            is_end = false;
+        if (a + ngon >= maxVertices) {
+            isEnd = false;
             break;
         }
 
         a += ngon;
-        smi.num_faces++;
-        smi.num_indices = a;
-        smi.triangulated_index_count += (ngon - 2) * 3;
+        smi.numFaces++;
+        smi.numIndices = a;
+        smi.triangulatedIndexCount += (ngon - 2) * 3;
     }
 
-    smi.num_vertices = a;
-    o_smi = smi;
-    return is_end;
+    smi.numVertices = a;
+    outSmi = smi;
+    return isEnd;
 }
 
 void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const
 {
-    bool reverse_index = m_obj->getReverseIndex();
+    bool reverseIndex = m_obj->getReverseIndex();
     const auto &counts = *m_counts;
 
     uint32_t a = 0;
     uint32_t b = 0;
-    uint32_t i1 = reverse_index ? 2 : 1;
-    uint32_t i2 = reverse_index ? 1 : 2;
-    for (int fi = 0; fi < smi.num_faces; ++fi) {
-        int ngon = counts[smi.begin_face + fi];
+    uint32_t i1 = reverseIndex ? 2 : 1;
+    uint32_t i2 = reverseIndex ? 1 : 2;
+    for (int fi = 0; fi < smi.numFaces; ++fi) {
+        int ngon = counts[smi.beginFace + fi];
         for (int ni = 0; ni < (ngon - 2); ++ni) {
             dst[b + 0] = a;
             dst[b + 1] = a + i1 + ni;
@@ -300,10 +300,10 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
     const auto &positions = *m_positions;
 
     uint32_t a = 0;
-    for (int fi = 0; fi < smi.num_faces; ++fi) {
-        int ngon = counts[smi.begin_face + fi];
+    for (int fi = 0; fi < smi.numFaces; ++fi) {
+        int ngon = counts[smi.beginFace + fi];
         for (int ni = 0; ni < ngon; ++ni) {
-            dst[a + ni] = positions[indices[a + ni + smi.begin_index]];
+            dst[a + ni] = positions[indices[a + ni + smi.beginIndex]];
         }
         a += ngon;
     }
@@ -316,15 +316,15 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
 
 void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
-    float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+    float xScale = (m_obj->getReverseX() ? -1.0f : 1.0f);
     
     if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
     {
-        copySplitedNormals(dst, *(m_normals.getIndices()), smi, x_scale);
+        copySplitedNormals(dst, *(m_normals.getIndices()), smi, xScale);
     }
     else
     {
-        copySplitedNormals(dst, *m_indices, smi, x_scale);
+        copySplitedNormals(dst, *m_indices, smi, xScale);
     }
 }
 
@@ -335,10 +335,10 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
     const auto &indices = *m_uvs.getIndices();
 
     uint32_t a = 0;
-    for (int fi = 0; fi < smi.num_faces; ++fi) {
-        int ngon = counts[smi.begin_face + fi];
+    for (int fi = 0; fi < smi.numFaces; ++fi) {
+        int ngon = counts[smi.beginFace + fi];
         for (int ni = 0; ni < ngon; ++ni) {
-            dst[a + ni] = uvs[indices[a + ni + smi.begin_index]];
+            dst[a + ni] = uvs[indices[a + ni + smi.beginIndex]];
         }
         a += ngon;
     }
@@ -353,7 +353,7 @@ uint32_t aiPolyMesh::getSplitCount(bool force_refresh)
 {
     if (m_counts && m_indices)
     {
-        if (m_face_split_indices.size() != m_counts->size() || force_refresh)
+        if (m_faceSplitIndices.size() != m_counts->size() || force_refresh)
         {
             updateSplits();
         }
@@ -361,7 +361,7 @@ uint32_t aiPolyMesh::getSplitCount(bool force_refresh)
     else
     {
         m_splits.clear();
-        m_face_split_indices.clear();
+        m_faceSplitIndices.clear();
     }
 
     return (uint32_t) m_splits.size();
@@ -371,223 +371,223 @@ void aiPolyMesh::updateSplits()
 {
     const auto &counts = *m_counts;
 
-    m_face_split_indices.resize(counts.size());
+    m_faceSplitIndices.resize(counts.size());
 
     m_splits.clear();
     m_splits.reserve(1 + m_indices->size() / 65000);
 
-    int split_index = 0;
+    int splitIndex = 0;
     size_t ncounts = counts.size();
-    size_t index_offset = 0;
+    size_t indexOffset = 0;
 
     m_splits.push_back(SplitInfo());
 
-    SplitInfo *cur_split = &(m_splits.back());
+    SplitInfo *curSplit = &(m_splits.back());
     
     for (size_t i=0; i<ncounts; ++i)
     {
         size_t nv = (size_t) counts[i];
 
-        if (cur_split->indices_count + nv > 65000)
+        if (curSplit->indicesCount + nv > 65000)
         {
-            m_splits.push_back(SplitInfo(i, index_offset));
+            m_splits.push_back(SplitInfo(i, indexOffset));
             
-            ++split_index;
+            ++splitIndex;
 
-            cur_split = &(m_splits.back());
+            curSplit = &(m_splits.back());
         }
         
-        m_face_split_indices[i] = split_index;
+        m_faceSplitIndices[i] = splitIndex;
 
-        cur_split->last_face = i;
-        cur_split->indices_count += nv;
+        curSplit->lastFace = i;
+        curSplit->indicesCount += nv;
 
-        index_offset += nv;
+        indexOffset += nv;
     }
 }
 
-uint32_t aiPolyMesh::getVertexBufferLength(uint32_t split_index) const
+uint32_t aiPolyMesh::getVertexBufferLength(uint32_t splitIndex) const
 {
-    if (split_index >= m_splits.size())
+    if (splitIndex >= m_splits.size())
     {
         return 0;
     }
     else
     {
-        return (uint32_t) m_splits[split_index].indices_count;
+        return (uint32_t) m_splits[splitIndex].indicesCount;
     }
 }
 
-void aiPolyMesh::fillVertexBuffer(uint32_t split_index, abcV3 *P, abcV3 *N, abcV2 *UV) const
+void aiPolyMesh::fillVertexBuffer(uint32_t splitIndex, abcV3 *P, abcV3 *N, abcV2 *UV) const
 {
-    if (split_index >= m_splits.size())
+    if (splitIndex >= m_splits.size())
     {
         return;
     }
 
-    bool copy_normals = (m_normals.valid() && N);
-    bool copy_uvs = (m_uvs.valid() && UV);
-    float x_scale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+    bool copyNormals = (m_normals.valid() && N);
+    bool copyUvs = (m_uvs.valid() && UV);
+    float xScale = (m_obj->getReverseX() ? -1.0f : 1.0f);
 
-    const SplitInfo &split = m_splits[split_index];
+    const SplitInfo &split = m_splits[splitIndex];
 
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
     const auto &positions = *m_positions;
 
     size_t k = 0;
-    size_t o = split.index_offset;
+    size_t o = split.indexOffset;
 
-    if (copy_normals && copy_uvs)
+    if (copyNormals && copyUvs)
     {
         const auto &normals = *(m_normals.getVals());
         const auto &uvs = *(m_uvs.getVals());
-        const auto &uv_indices = *(m_uvs.getIndices());
+        const auto &uvIndices = *(m_uvs.getIndices());
 
         if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
         {
-            const auto &n_indices = *(m_normals.getIndices());
+            const auto &nIndices = *(m_normals.getIndices());
             
-            for (size_t i=split.first_face; i<=split.last_face; ++i)
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
             {
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
                     P[k] = positions[indices[o]];
-                    P[k].x *= x_scale;
-                    N[k] = normals[n_indices[o]];
-                    N[k].x *= x_scale;
-                    UV[k] = uvs[uv_indices[o]];
+                    P[k].x *= xScale;
+                    N[k] = normals[nIndices[o]];
+                    N[k].x *= xScale;
+                    UV[k] = uvs[uvIndices[o]];
                 }
             }
         }
         else
         {
-            const auto &n_indices = *m_indices;
+            const auto &nIndices = *m_indices;
             
-            for (size_t i=split.first_face; i<=split.last_face; ++i)
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
             {
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
                     P[k] = positions[indices[o]];
-                    P[k].x *= x_scale;
-                    N[k] = normals[n_indices[o]];
-                    N[k].x *= x_scale;
-                    UV[k] = uvs[uv_indices[o]];
+                    P[k].x *= xScale;
+                    N[k] = normals[nIndices[o]];
+                    N[k].x *= xScale;
+                    UV[k] = uvs[uvIndices[o]];
                 }
             }
         }
     }
-    else if (copy_normals)
+    else if (copyNormals)
     {
         const auto &normals = *(m_normals.getVals());
 
         if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
         {
-            const auto &n_indices = *(m_normals.getIndices());
+            const auto &nIndices = *(m_normals.getIndices());
             
-            for (size_t i=split.first_face; i<=split.last_face; ++i)
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
             {
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
                     P[k] = positions[indices[o]];
-                    P[k].x *= x_scale;
-                    N[k] = normals[n_indices[o]];
-                    N[k].x *= x_scale;
+                    P[k].x *= xScale;
+                    N[k] = normals[nIndices[o]];
+                    N[k].x *= xScale;
                 }
             }
         }
         else
         {
-            const auto &n_indices = *m_indices;
+            const auto &nIndices = *m_indices;
             
-            for (size_t i=split.first_face; i<=split.last_face; ++i)
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
             {
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
                     P[k] = positions[indices[o]];
-                    P[k].x *= x_scale;
-                    N[k] = normals[n_indices[o]];
-                    N[k].x *= x_scale;
+                    P[k].x *= xScale;
+                    N[k] = normals[nIndices[o]];
+                    N[k].x *= xScale;
                 }
             }
         }
     }
-    else if (copy_uvs)
+    else if (copyUvs)
     {
         const auto &uvs = *(m_uvs.getVals());
-        const auto &uv_indices = *(m_uvs.getIndices());
+        const auto &uvIndices = *(m_uvs.getIndices());
 
-        for (size_t i=split.first_face; i<=split.last_face; ++i)
+        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
         {
             int nv = counts[i];
             for (int j = 0; j < nv; ++j, ++o, ++k)
             {
                 P[k] = positions[indices[o]];
-                P[k].x *= x_scale;
-                UV[k] = uvs[uv_indices[o]];
+                P[k].x *= xScale;
+                UV[k] = uvs[uvIndices[o]];
             }
         }
     }
     else
     {
-        for (size_t i=split.first_face; i<=split.last_face; ++i)
+        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
         {
             int nv = counts[i];
             for (int j = 0; j < nv; ++j, ++o, ++k)
             {
                 P[k] = positions[indices[o]];
-                P[k].x *= x_scale;
+                P[k].x *= xScale;
             }
         }
     }
 }
 
-uint32_t aiPolyMesh::prepareSubmeshes(const aiFacesets *in_facesets)
+uint32_t aiPolyMesh::prepareSubmeshes(const aiFacesets *inFacesets)
 {
     const auto &counts = *m_counts;
 
     Facesets facesets;
-    std::map<size_t, int> faceset_indices;
+    std::map<size_t, int> facesetIndices;
     
     m_submeshes.clear();
 
-    if (in_facesets && in_facesets->count > 0)
+    if (inFacesets && inFacesets->count > 0)
     {
         size_t index = 0;
-        int default_faceset_index = -1;
+        int defaultFacesetIndex = -1;
 
-        facesets.resize(in_facesets->count);
+        facesets.resize(inFacesets->count);
 
-        for (int i=0; i<in_facesets->count; ++i)
+        for (int i=0; i<inFacesets->count; ++i)
         {
             Faceset &faceset = facesets[i];
 
-            if (in_facesets->face_counts[i] == 0)
+            if (inFacesets->faceCounts[i] == 0)
             {
-                default_faceset_index = i;
+                defaultFacesetIndex = i;
             }
             else
             {
-                for (int j=0; j<in_facesets->face_counts[i]; ++j)
+                for (int j=0; j<inFacesets->faceCounts[i]; ++j)
                 {
-                    size_t f = size_t(in_facesets->face_indices[index++]);
+                    size_t f = size_t(inFacesets->faceIndices[index++]);
 
                     faceset.insert(f);
 
-                    faceset_indices[f] = i;
+                    facesetIndices[f] = i;
                 }
             }
         }
 
         for (size_t i=0; i<counts.size(); ++i)
         {
-            if (faceset_indices.find(i) == faceset_indices.end())
+            if (facesetIndices.find(i) == facesetIndices.end())
             {
-                faceset_indices[i] = default_faceset_index;
+                facesetIndices[i] = defaultFacesetIndex;
             }
         }
     }
@@ -604,7 +604,7 @@ uint32_t aiPolyMesh::prepareSubmeshes(const aiFacesets *in_facesets)
             {
                 faceset.insert(i);
 
-                faceset_indices[i] = -1;
+                facesetIndices[i] = -1;
             }
         }
     }
@@ -620,30 +620,30 @@ uint32_t aiPolyMesh::prepareSubmeshes(const aiFacesets *in_facesets)
 
         for (size_t i=0; i<counts.size(); ++i)
         {
-            submesh.triangle_count += (counts[i] - 2);
+            submesh.triangleCount += (counts[i] - 2);
         }
 
-        m_splits[0].submesh_count = 1;
+        m_splits[0].submeshCount = 1;
     }
     else
     {
-        int vertex_index = 0;
-        Submesh *cur_mesh = 0;
-        const Util::uint32_t *uv_indices = 0;
-        const Abc::V2f *uv_values = 0;
+        int vertexIndex = 0;
+        Submesh *curMesh = 0;
+        const Util::uint32_t *uvIndices = 0;
+        const Abc::V2f *uvValues = 0;
 
         const auto &indices = *m_indices;
         
         if (m_uvs.valid())
         {
-            uv_values = m_uvs.getVals()->get();
-            uv_indices = m_uvs.getIndices()->get();
+            uvValues = m_uvs.getVals()->get();
+            uvIndices = m_uvs.getIndices()->get();
         }
 
-        std::map<SubmeshID, size_t> submesh_indices;
-        std::map<SubmeshID, size_t>::iterator submesh_index_it;
+        std::map<SubmeshID, size_t> submeshIndices;
+        std::map<SubmeshID, size_t>::iterator submeshIndexIt;
 
-        std::vector<int> split_submesh_indices(nsplits, 0);
+        std::vector<int> splitSubmeshIndices(nsplits, 0);
 
         for (size_t i=0; i<counts.size(); ++i)
         {
@@ -654,97 +654,97 @@ uint32_t aiPolyMesh::prepareSubmeshes(const aiFacesets *in_facesets)
                 continue;
             }
 
-            int faceset_index = faceset_indices[i];
-            int split_index = m_face_split_indices[i];
+            int facesetIndex = facesetIndices[i];
+            int splitIndex = m_faceSplitIndices[i];
 
-            SplitInfo &split = m_splits[split_index];
+            SplitInfo &split = m_splits[splitIndex];
 
             // Compute submesh ID based on face's average UV coordinate and it faceset index
-            float u_acc = 0.0f;
-            float v_acc = 0.0f;
-            float inv_nv = 1.0f / float(nv);
+            float uAcc = 0.0f;
+            float vAcc = 0.0f;
+            float invNv = 1.0f / float(nv);
 
-            if (uv_values)
+            if (uvValues)
             {
                 for (int j=0; j<nv; ++j)
                 {
-                    Abc::V2f uv = uv_values[uv_indices[vertex_index + j]];
-                    u_acc += uv.x;
-                    v_acc += uv.y;
+                    Abc::V2f uv = uvValues[uvIndices[vertexIndex + j]];
+                    uAcc += uv.x;
+                    vAcc += uv.y;
                 }
             }
 
-            SubmeshID sid(u_acc * inv_nv, v_acc * inv_nv, faceset_index, split_index);
+            SubmeshID sid(uAcc * invNv, vAcc * invNv, facesetIndex, splitIndex);
 
-            submesh_index_it = submesh_indices.find(sid);
+            submeshIndexIt = submeshIndices.find(sid);
 
-            if (submesh_index_it == submesh_indices.end())
+            if (submeshIndexIt == submeshIndices.end())
             {
-                submesh_indices[sid] = m_submeshes.size();
+                submeshIndices[sid] = m_submeshes.size();
 
-                m_submeshes.push_back(Submesh(faceset_index, split_index));
+                m_submeshes.push_back(Submesh(facesetIndex, splitIndex));
 
-                cur_mesh = &(m_submeshes.back());
+                curMesh = &(m_submeshes.back());
 
-                cur_mesh->index = split_submesh_indices[split_index]++;
-                cur_mesh->vertex_indices.reserve(indices.size());
+                curMesh->index = splitSubmeshIndices[splitIndex]++;
+                curMesh->vertexIndices.reserve(indices.size());
 
-                split.submesh_count = split_submesh_indices[split_index];
+                split.submeshCount = splitSubmeshIndices[splitIndex];
             }
             else
             {
-                cur_mesh = &(m_submeshes[submesh_index_it->second]);
+                curMesh = &(m_submeshes[submeshIndexIt->second]);
             }
 
-            cur_mesh->faces.insert(i);
-            cur_mesh->triangle_count += (nv - 2);
+            curMesh->faces.insert(i);
+            curMesh->triangleCount += (nv - 2);
 
-            for (int j=0; j<nv; ++j, ++vertex_index)
+            for (int j=0; j<nv; ++j, ++vertexIndex)
             {
-                cur_mesh->vertex_indices.push_back(vertex_index - split.index_offset);
+                curMesh->vertexIndices.push_back(vertexIndex - split.indexOffset);
             }
         }
 
         for (size_t i=0; i<m_submeshes.size(); ++i)
         {
-            m_submeshes[i].vertex_indices.shrink_to_fit();
+            m_submeshes[i].vertexIndices.shrink_to_fit();
         }
     }
 
-    m_cur_submesh = m_submeshes.begin();
+    m_curSubmesh = m_submeshes.begin();
 
     return (uint32_t) m_submeshes.size();
 }
 
-uint32_t aiPolyMesh::getSplitSubmeshCount(uint32_t split_index) const
+uint32_t aiPolyMesh::getSplitSubmeshCount(uint32_t splitIndex) const
 {
-    if (split_index >= m_splits.size())
+    if (splitIndex >= m_splits.size())
     {
         return 0;
     }
     else
     {
-        return (uint32_t) m_splits[split_index].submesh_count;
+        return (uint32_t) m_splits[splitIndex].submeshCount;
     }
 }
 
-bool aiPolyMesh::getNextSubmesh(aiSubmeshInfo &o_smi)
+bool aiPolyMesh::getNextSubmesh(aiSubmeshInfo &smi)
 {
-    if (m_cur_submesh == m_submeshes.end())
+    if (m_curSubmesh == m_submeshes.end())
     {
         return false;
     }
     else
     {
-        Submesh &submesh = *m_cur_submesh;
+        Submesh &submesh = *m_curSubmesh;
 
-        o_smi.index = int(m_cur_submesh - m_submeshes.begin());
-        o_smi.split_index = submesh.split_index;
-        o_smi.split_submesh_index = submesh.index;
-        o_smi.faceset_index = submesh.faceset_index;
-        o_smi.triangle_count = int(submesh.triangle_count);
+        smi.index = int(m_curSubmesh - m_submeshes.begin());
+        smi.splitIndex = submesh.splitIndex;
+        smi.splitSubmeshIndex = submesh.index;
+        smi.facesetIndex = submesh.facesetIndex;
+        smi.triangleCount = int(submesh.triangleCount);
 
-        ++m_cur_submesh;
+        ++m_curSubmesh;
 
         return true;
     }
@@ -756,18 +756,18 @@ void aiPolyMesh::fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
     
     if (it != m_submeshes.end())
     {
-        bool reverse_index = m_obj->getReverseIndex();
+        bool reverseIndex = m_obj->getReverseIndex();
         const auto &counts = *m_counts;
         const Submesh &submesh = *it;
 
         int index = 0;
-        int i1 = (reverse_index ? 2 : 1);
-        int i2 = (reverse_index ? 1 : 2);
+        int i1 = (reverseIndex ? 2 : 1);
+        int i2 = (reverseIndex ? 1 : 2);
         int offset = 0;
         
-        if (submesh.faces.size() == 0 && submesh.vertex_indices.size() == 0)
+        if (submesh.faces.size() == 0 && submesh.vertexIndices.size() == 0)
         {
-            // single submesh case, faces and vertex_indices not populated
+            // single submesh case, faces and vertexIndices not populated
 
             for (size_t i=0; i<counts.size(); ++i)
             {
@@ -795,9 +795,9 @@ void aiPolyMesh::fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
                 int nt = nv - 2;
                 for (int ti = 0; ti < nt; ++ti)
                 {
-                    dst[offset + 0] = submesh.vertex_indices[index];
-                    dst[offset + 1] = submesh.vertex_indices[index + ti + i1];
-                    dst[offset + 2] = submesh.vertex_indices[index + ti + i2];
+                    dst[offset + 0] = submesh.vertexIndices[index];
+                    dst[offset + 1] = submesh.vertexIndices[index + ti + i1];
+                    dst[offset + 2] = submesh.vertexIndices[index + ti + i2];
                     offset += 3;
                 }
 
@@ -867,19 +867,19 @@ void aiCamera::updateSample()
     m_schema.get(m_sample, ss);
 }
 
-void aiCamera::getParams(aiCameraParams &o_params)
+void aiCamera::getParams(aiCameraParams &params)
 {
     static float sRad2Deg = 180.0f / float(M_PI);
 
-    float vertical_aperture = (float) m_sample.getVerticalAperture();
-    float focal_length = (float) m_sample.getFocalLength();
+    float verticalAperture = (float) m_sample.getVerticalAperture();
+    float focalLength = (float) m_sample.getFocalLength();
 
-    o_params.near_clipping_plane = (float) m_sample.getNearClippingPlane();
-    o_params.far_clipping_plane = (float) m_sample.getFarClippingPlane();
+    params.nearClippingPlane = (float) m_sample.getNearClippingPlane();
+    params.farClippingPlane = (float) m_sample.getFarClippingPlane();
     // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
-    o_params.field_of_view = 2.0f * atanf(vertical_aperture * 10.0f / (2.0f * focal_length)) * sRad2Deg;
-    o_params.focus_distance = (float) m_sample.getFocusDistance() * 0.1f; // centimeter to meter
-    o_params.focal_length = focal_length * 0.01f; // milimeter to meter
+    params.fieldOfView = 2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
+    params.focusDistance = (float) m_sample.getFocusDistance() * 0.1f; // centimeter to meter
+    params.focalLength = focalLength * 0.01f; // milimeter to meter
 }
 
 

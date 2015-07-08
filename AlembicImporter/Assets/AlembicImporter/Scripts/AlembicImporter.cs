@@ -14,48 +14,48 @@ public class AlembicImporter
 
     public struct aiSplitedMeshInfo
     {
-        public int face_count;
-        public int index_count;
-        public int vertex_count;
-        public int begin_face;
-        public int begin_index;
-        public int triangulated_index_count;
+        public int faceCount;
+        public int indexCount;
+        public int vertexCount;
+        public int beginFace;
+        public int beginIndex;
+        public int triangulatedIndexCount;
     }
 
     public struct aiSubmeshInfo
     {
         public int index;
-        public int split_index;
-        public int split_submesh_index;
-        public int triangle_count;
-        public int faceset_index;
+        public int splitIndex;
+        public int splitSubmeshIndex;
+        public int triangleCount;
+        public int facesetIndex;
     }
 
     public struct aiFacesets
     {
         public int count;
-        public IntPtr face_counts;
-        public IntPtr face_indices;
+        public IntPtr faceCounts;
+        public IntPtr faceIndices;
     }
 
     public struct aiMeshData
     {
-        public int index_count;
-        public bool is_normal_indexed;
-        public bool is_uv_indexed;
-        public IntPtr tex_indices;
-        public IntPtr tex_vertices;
-        public IntPtr tex_normals;
-        public IntPtr tex_uvs;
+        public int indexCount;
+        public bool isNormalIndexed;
+        public bool isUvIndexed;
+        public IntPtr texIndices;
+        public IntPtr texVertices;
+        public IntPtr texNormals;
+        public IntPtr texUvs;
     }
 
     public struct aiCameraParams
     {
-        public float near_clipping_plane;
-        public float far_clipping_plane;
-        public float field_of_view;
-        public float focus_distance;
-        public float focal_length;
+        public float nearClippingPlane;
+        public float faceClippingPlane;
+        public float fieldOfView;
+        public float focusDistance;
+        public float focalLength;
     }
 
     public struct aiContext
@@ -116,7 +116,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyVertices(aiObject obj, IntPtr dst);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyNormals(aiObject obj, IntPtr dst);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopyUVs(aiObject obj, IntPtr dst);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(aiObject obj, ref aiSplitedMeshInfo o_smi, ref aiSplitedMeshInfo prev, int max_vertices);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetSplitedMeshInfo(aiObject obj, ref aiSplitedMeshInfo smi, ref aiSplitedMeshInfo prev, int maxVertices);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedIndices(aiObject obj, IntPtr indices, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedVertices(aiObject obj, IntPtr vertices, ref aiSplitedMeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshCopySplitedNormals(aiObject obj, IntPtr normals, ref aiSplitedMeshInfo smi);
@@ -127,7 +127,7 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj, ref aiFacesets facesets);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiObject obj, int split);
-    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo o_smi);
+    [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiObject obj, IntPtr indices, ref aiSubmeshInfo smi);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
@@ -140,9 +140,9 @@ public class AlembicImporter
     {
         public Transform parent;
         public float time;
-        public bool reverse_x;
-        public bool reverse_faces;
-        public bool ignore_missing_nodes;
+        public bool reverseX;
+        public bool reverseFaces;
+        public bool ignoreMissingNodes;
     }
 
 #if UNITY_EDITOR
@@ -155,13 +155,16 @@ public class AlembicImporter
 
     static string MakeRelativePath(string path)
     {
-        Uri path_to_assets = new Uri(Application.streamingAssetsPath + "/");
-        return path_to_assets.MakeRelativeUri(new Uri(path)).ToString();
+        Uri pathToAssets = new Uri(Application.streamingAssetsPath + "/");
+        return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
     }
 
-    static void ImportImpl(string path, bool reverse_x, bool reverse_faces)
+    static void ImportImpl(string path, bool reverseX, bool reverseFaces)
     {
-        if (path=="") return;
+        if (path == "")
+        {
+            return;
+        }
 
 #if UNITY_STANDALONE_WIN
         AlembicImporter.AddLibraryPath();
@@ -176,20 +179,20 @@ public class AlembicImporter
             GameObject root = new GameObject();
             root.name = System.IO.Path.GetFileNameWithoutExtension(path);
             var abcstream = root.AddComponent<AlembicStream>();
-            abcstream.m_path_to_abc = path;
-            abcstream.m_start_time = aiGetStartTime(ctx);
-            abcstream.m_end_time = aiGetEndTime(ctx);
-            abcstream.m_time_offset = -abcstream.m_start_time;
-            abcstream.m_time_scale = 1.0f;
-            abcstream.m_preserve_start_time = true;
-            abcstream.m_reverse_x = reverse_x;
-            abcstream.m_reverse_faces = reverse_faces;
+            abcstream.m_pathToAbc = path;
+            abcstream.m_startTime = aiGetStartTime(ctx);
+            abcstream.m_endTime = aiGetEndTime(ctx);
+            abcstream.m_timeOffset = -abcstream.m_startTime;
+            abcstream.m_timeScale = 1.0f;
+            abcstream.m_preserveStartTime = true;
+            abcstream.m_reverseX = reverseX;
+            abcstream.m_reverseFaces = reverseFaces;
 
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
-            ic.reverse_x = reverse_x;
-            ic.reverse_faces = reverse_faces;
-            ic.ignore_missing_nodes = false;
+            ic.reverseX = reverseX;
+            ic.reverseFaces = reverseFaces;
+            ic.ignoreMissingNodes = false;
 
             GCHandle gch = GCHandle.Alloc(ic);
             aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -198,14 +201,14 @@ public class AlembicImporter
     }
 #endif
 
-    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverse_x, bool reverse_faces, float time, bool ignore_missing_nodes)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverseX, bool reverseFaces, float time, bool ignoreMissingNodes)
     {
         var ic = new ImportContext();
         ic.parent = root;
         ic.time = time;
-        ic.reverse_x = reverse_x;
-        ic.reverse_faces = reverse_faces;
-        ic.ignore_missing_nodes = ignore_missing_nodes;
+        ic.reverseX = reverseX;
+        ic.reverseFaces = reverseFaces;
+        ic.ignoreMissingNodes = ignoreMissingNodes;
 
         GCHandle gch = GCHandle.Alloc(ic);
         aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
@@ -217,27 +220,27 @@ public class AlembicImporter
         Transform parent = ic.parent;
         //Debug.Log("Node: " + aiGetFullName(ctx) + " (" + (xf ? "x" : "") + (mesh ? "p" : "") + ")");
 
-        string child_name = aiGetName(obj);
-        var trans = parent.FindChild(child_name);
+        string childName = aiGetName(obj);
+        var trans = parent.FindChild(childName);
 
         if (trans == null)
         {
-            if (ic.ignore_missing_nodes)
+            if (ic.ignoreMissingNodes)
             {
                 return;
             }
             else
             {
                 GameObject go = new GameObject();
-                go.name = child_name;
+                go.name = childName;
                 trans = go.GetComponent<Transform>();
                 trans.parent = parent;
             }
         }
 
         aiSetCurrentTime(obj, ic.time);
-        aiEnableReverseX(obj, ic.reverse_x);
-        aiEnableReverseIndex(obj, ic.reverse_faces);
+        aiEnableReverseX(obj, ic.reverseX);
+        aiEnableReverseIndex(obj, ic.reverseFaces);
         
         if (aiHasXForm(obj))
         {
@@ -288,31 +291,31 @@ public class AlembicImporter
     
     public static void UpdateAbcMesh(aiObject abc, Transform trans)
     {
-        AlembicMesh abcmesh = trans.GetComponent<AlembicMesh>();
+        AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
         
-        if (abcmesh == null)
+        if (abcMesh == null)
         {
-            abcmesh = trans.gameObject.AddComponent<AlembicMesh>();
+            abcMesh = trans.gameObject.AddComponent<AlembicMesh>();
         }
 
-        aiTopologyVariance topo_variance = aiPolyMeshGetTopologyVariance(abc);
-        bool has_normals = aiPolyMeshHasNormals(abc);
-        bool has_uvs = aiPolyMeshHasUVs(abc);
-        bool needs_index_update = (abcmesh.m_submeshes.Count == 0 || topo_variance == aiTopologyVariance.Heterogeneous);
+        aiTopologyVariance topoVariance = aiPolyMeshGetTopologyVariance(abc);
+        bool hasNormals = aiPolyMeshHasNormals(abc);
+        bool hasUVs = aiPolyMeshHasUVs(abc);
+        bool needsIndexUpdate = (abcMesh.m_submeshes.Count == 0 || topoVariance == aiTopologyVariance.Heterogeneous);
 
-        AlembicMaterial abcmaterials = trans.GetComponent<AlembicMaterial>();
-        if (abcmaterials != null)
+        AlembicMaterial abcMaterials = trans.GetComponent<AlembicMaterial>();
+        if (abcMaterials != null)
         {
-            needs_index_update = needs_index_update || abcmaterials.HasFacesetsChanged();
-            abcmesh.has_facesets = (abcmaterials.GetFacesetsCount() > 0);
+            needsIndexUpdate = needsIndexUpdate || abcMaterials.HasFacesetsChanged();
+            abcMesh.hasFacesets = (abcMaterials.GetFacesetsCount() > 0);
         }
-        else if (abcmesh.has_facesets)
+        else if (abcMesh.hasFacesets)
         {
-            needs_index_update = true;
-            abcmesh.has_facesets = false;
+            needsIndexUpdate = true;
+            abcMesh.hasFacesets = false;
         }
 
-        if (!needs_index_update && topo_variance == aiTopologyVariance.Constant)
+        if (!needsIndexUpdate && topoVariance == aiTopologyVariance.Constant)
         {
             //Debug.Log("Nothing to update for \"" + trans.name + "\"");
             return;
@@ -320,18 +323,18 @@ public class AlembicImporter
 
         AlembicMesh.Split split;
 
-        int nsplits = aiPolyMeshGetSplitCount(abc, needs_index_update);
+        int numSplits = aiPolyMeshGetSplitCount(abc, needsIndexUpdate);
         
         // create necessary splits
-        if (nsplits > 1)
+        if (numSplits > 1)
         {
-            for (int s=0; s<nsplits; ++s)
+            for (int s=0; s<numSplits; ++s)
             {
-                bool init_split = false;
+                bool initSplit = false;
 
-                if (s < abcmesh.m_splits.Count)
+                if (s < abcMesh.m_splits.Count)
                 {
-                    split = abcmesh.m_splits[s];
+                    split = abcMesh.m_splits[s];
 
                     // Mesh with heterogeneous topology may start with a single split
                     //   but grow bigger later
@@ -348,7 +351,7 @@ public class AlembicImporter
                         }
                         else
                         {
-                            init_split = true;
+                            initSplit = true;
                         }
                     }
                 }
@@ -356,19 +359,19 @@ public class AlembicImporter
                 {
                     split = new AlembicMesh.Split
                     {
-                        position_cache = new Vector3[0],
-                        normal_cache = new Vector3[0],
-                        uv_cache = new Vector2[0],
+                        positionCache = new Vector3[0],
+                        normalCache = new Vector3[0],
+                        uvCache = new Vector2[0],
                         mesh = null,
                         host = null
                     };
 
-                    abcmesh.m_splits.Add(split);
+                    abcMesh.m_splits.Add(split);
 
-                    init_split = true;
+                    initSplit = true;
                 }
 
-                if (init_split)
+                if (initSplit)
                 {
                     GameObject go = new GameObject();
                     go.name = "Split_" + s;
@@ -395,22 +398,22 @@ public class AlembicImporter
         {
             Mesh mesh = AddMeshComponents(abc, trans, null);
 
-            if (abcmesh.m_splits.Count == 0)
+            if (abcMesh.m_splits.Count == 0)
             {
                 split = new AlembicMesh.Split
                 {
-                    position_cache = new Vector3[0],
-                    normal_cache = new Vector3[0],
-                    uv_cache = new Vector2[0],
+                    positionCache = new Vector3[0],
+                    normalCache = new Vector3[0],
+                    uvCache = new Vector2[0],
                     mesh = mesh,
                     host = trans.gameObject
                 };
 
-                abcmesh.m_splits.Add(split);
+                abcMesh.m_splits.Add(split);
             }
             else
             {
-                split = abcmesh.m_splits[0];
+                split = abcMesh.m_splits[0];
 
                 if (split.host != trans.gameObject)
                 {
@@ -426,60 +429,60 @@ public class AlembicImporter
         }
 
         // deactivate unused splits (sub objects)
-        for (int s=nsplits; s<abcmesh.m_splits.Count; ++s)
+        for (int s=numSplits; s<abcMesh.m_splits.Count; ++s)
         {
-            abcmesh.m_splits[s].host.SetActive(false);
+            abcMesh.m_splits[s].host.SetActive(false);
         }
 
         // read splits vertices
-        for (int s=0; s<nsplits; ++s)
+        for (int s=0; s<numSplits; ++s)
         {
-            split = abcmesh.m_splits[s];
+            split = abcMesh.m_splits[s];
 
-            int nvertices = aiPolyMeshGetVertexBufferLength(abc, s);
+            int numVertices = aiPolyMeshGetVertexBufferLength(abc, s);
 
-            Array.Resize(ref split.position_cache, nvertices);
-            Array.Resize(ref split.normal_cache, (has_normals ? nvertices : 0));
+            Array.Resize(ref split.positionCache, numVertices);
+            Array.Resize(ref split.normalCache, (hasNormals ? numVertices : 0));
 
-            if (needs_index_update)
+            if (needsIndexUpdate)
             {
                 split.mesh.Clear();
 
-                Array.Resize(ref split.uv_cache, (has_uvs ? nvertices : 0));
+                Array.Resize(ref split.uvCache, (hasUVs ? numVertices : 0));
             }
 
             aiPolyMeshFillVertexBuffer(abc, s,
-                                       Marshal.UnsafeAddrOfPinnedArrayElement(split.position_cache, 0),
-                                       (has_normals ? Marshal.UnsafeAddrOfPinnedArrayElement(split.normal_cache, 0) : (IntPtr)0),
-                                       ((needs_index_update && has_uvs) ? Marshal.UnsafeAddrOfPinnedArrayElement(split.uv_cache, 0) : (IntPtr)0));
+                                       Marshal.UnsafeAddrOfPinnedArrayElement(split.positionCache, 0),
+                                       (hasNormals ? Marshal.UnsafeAddrOfPinnedArrayElement(split.normalCache, 0) : (IntPtr)0),
+                                       ((needsIndexUpdate && hasUVs) ? Marshal.UnsafeAddrOfPinnedArrayElement(split.uvCache, 0) : (IntPtr)0));
 
-            split.mesh.vertices = split.position_cache;
-            split.mesh.normals = split.normal_cache;
+            split.mesh.vertices = split.positionCache;
+            split.mesh.normals = split.normalCache;
 
-            if (needs_index_update)
+            if (needsIndexUpdate)
             {
-                split.mesh.uv = split.uv_cache;
+                split.mesh.uv = split.uvCache;
             }
         }
 
-        if (needs_index_update)
+        if (needsIndexUpdate)
         {
             aiSubmeshInfo smi = default(aiSubmeshInfo);
             aiFacesets facesets = default(aiFacesets);
 
-            if (abcmaterials != null)
+            if (abcMaterials != null)
             {
-                abcmaterials.GetFacesets(ref facesets);
+                abcMaterials.GetFacesets(ref facesets);
             }
 
             aiPolyMeshPrepareSubmeshes(abc, ref facesets);
 
             // Setup materials and submeshes for each split
-            for (int s=0; s<nsplits; ++s)
+            for (int s=0; s<numSplits; ++s)
             {
                 int ssm = aiPolyMeshGetSplitSubmeshCount(abc, s);
 
-                split = abcmesh.m_splits[s];
+                split = abcMesh.m_splits[s];
 
                 split.mesh.subMeshCount = ssm;
 
@@ -511,51 +514,51 @@ public class AlembicImporter
             {
                 AlembicMesh.Submesh submesh;
 
-                if (smi.split_index >= abcmesh.m_splits.Count)
+                if (smi.splitIndex >= abcMesh.m_splits.Count)
                 {
                     Debug.Log("Invalid split index");
                     continue;
                 }
 
-                split = abcmesh.m_splits[smi.split_index];
+                split = abcMesh.m_splits[smi.splitIndex];
 
-                if (smi.index < abcmesh.m_submeshes.Count)
+                if (smi.index < abcMesh.m_submeshes.Count)
                 {
-                    submesh = abcmesh.m_submeshes[smi.index];
+                    submesh = abcMesh.m_submeshes[smi.index];
 
-                    submesh.faceset_index = smi.faceset_index;
-                    submesh.split_index = smi.split_index;
+                    submesh.facesetIndex = smi.facesetIndex;
+                    submesh.splitIndex = smi.splitIndex;
                 }
                 else
                 {
                     submesh = new AlembicMesh.Submesh
                     {
-                        index_cache = new int[0],
-                        faceset_index = smi.faceset_index,
-                        split_index = smi.split_index
+                        indexCache = new int[0],
+                        facesetIndex = smi.facesetIndex,
+                        splitIndex = smi.splitIndex
                     };
 
-                    abcmesh.m_submeshes.Add(submesh);
+                    abcMesh.m_submeshes.Add(submesh);
                 }
 
                 // update indices
-                Array.Resize(ref submesh.index_cache, smi.triangle_count * 3);
-                aiPolyMeshFillSubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(submesh.index_cache, 0), ref smi);
+                Array.Resize(ref submesh.indexCache, smi.triangleCount * 3);
+                aiPolyMeshFillSubmeshIndices(abc, Marshal.UnsafeAddrOfPinnedArrayElement(submesh.indexCache, 0), ref smi);
                 
-                split.mesh.SetIndices(submesh.index_cache, MeshTopology.Triangles, smi.split_submesh_index);
+                split.mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, smi.splitSubmeshIndex);
             }
 
-            if (abcmaterials != null)
+            if (abcMaterials != null)
             {
-                abcmaterials.AknowledgeFacesetsChanges();
+                abcMaterials.AknowledgeFacesetsChanges();
             }
         }
 
-        if (!has_normals)
+        if (!hasNormals)
         {
-            for (int s=0; s<nsplits; ++s)
+            for (int s=0; s<numSplits; ++s)
             {
-                abcmesh.m_splits[s].mesh.RecalculateNormals();
+                abcMesh.m_splits[s].mesh.RecalculateNormals();
             }
         }
     }
@@ -564,20 +567,20 @@ public class AlembicImporter
     {
         Mesh mesh;
         
-        MeshFilter mesh_filter = trans.gameObject.GetComponent<MeshFilter>();
+        MeshFilter meshFilter = trans.gameObject.GetComponent<MeshFilter>();
         
-        if (mesh_filter == null || mesh_filter.sharedMesh == null)
+        if (meshFilter == null || meshFilter.sharedMesh == null)
         {
             mesh = new Mesh();
             mesh.name = aiGetName(abc);
             mesh.MarkDynamic();
 
-            if (mesh_filter == null)
+            if (meshFilter == null)
             {
-                mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
+                meshFilter = trans.gameObject.AddComponent<MeshFilter>();
             }
 
-            mesh_filter.sharedMesh = mesh;
+            meshFilter.sharedMesh = mesh;
 
             MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
                 
@@ -598,7 +601,7 @@ public class AlembicImporter
         }
         else
         {
-            mesh = mesh_filter.sharedMesh;
+            mesh = meshFilter.sharedMesh;
         }
 
         return mesh;
@@ -613,16 +616,16 @@ public class AlembicImporter
         }
         aiCameraParams cp = default(aiCameraParams);
         aiCameraGetParams(abc, ref cp);
-        cam.fieldOfView = cp.field_of_view;
-        cam.nearClipPlane = cp.near_clipping_plane;
-        cam.farClipPlane = cp.far_clipping_plane;
+        cam.fieldOfView = cp.fieldOfView;
+        cam.nearClipPlane = cp.nearClippingPlane;
+        cam.farClipPlane = cp.faceClippingPlane;
 
         /*
         var dof = trans.GetComponent<UnityStandardAssets.ImageEffects.DepthOfField>();
         if(dof != null)
         {
-            dof.focalLength = cp.focus_distance;
-            dof.focalSize = cp.focal_length;
+            dof.focalLength = cp.focusDistance;
+            dof.focalSize = cp.focalLength;
         }
          */
     }

@@ -12,8 +12,8 @@ public class AlembicStreamSync : MonoBehaviour
 {
    public float m_time;
 
-   float m_time_prev;
-   float m_time_eps = 0.001f;
+   float m_lastTime;
+   float m_timeEps = 0.001f;
 
    [Serializable]
    public class SyncItem
@@ -71,7 +71,7 @@ public class AlembicStreamSync : MonoBehaviour
    void Start()
    {
       m_time = 0.0f;
-      m_time_prev = 0.0f;
+      m_lastTime = 0.0f;
    }
 
    void Update()
@@ -79,14 +79,14 @@ public class AlembicStreamSync : MonoBehaviour
       // Do not trigger stream update if we're in play mode
       if (!Application.isPlaying)
       {
-         if (Math.Abs(m_time - m_time_prev) > m_time_eps)
+         if (Math.Abs(m_time - m_lastTime) > m_timeEps)
          {
             foreach (SyncItem item in m_streams)
             {
                item.Sync(m_time);
             }
             
-            m_time_prev = m_time;
+            m_lastTime = m_time;
          }
       }
    }
