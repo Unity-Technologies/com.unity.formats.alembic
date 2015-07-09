@@ -126,7 +126,7 @@ public class AlembicStream : MonoBehaviour
         m_lastReverseX = m_reverseX;
         m_lastReverseFaces = m_reverseFaces;
         m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
-        m_forceRefresh = false;
+        m_forceRefresh = true;
     }
 
     void UpdateAbc(float time)
