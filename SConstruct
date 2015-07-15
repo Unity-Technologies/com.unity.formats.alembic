@@ -25,7 +25,7 @@ embed_libs = []
 customs = []
 install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs"),
                  "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs")}
-sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPath.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
+sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
 
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
@@ -57,7 +57,7 @@ if use_externals:
     shutil.rmtree(lib_dir)
 
   dll_pattern = os.path.join(excons.OutputBaseDirectory(), "unity", "AlembicImporter", "Plugins", "x86_64", "*.dll")
-  keep_names = ["AlembicImporter", "AddLibraryPath"]
+  keep_names = ["AlembicImporter"]
   dlls_to_remove = filter(lambda x: os.path.splitext(os.path.basename(x))[0] not in keep_names, glob.glob(dll_pattern))
   for dll in dlls_to_remove:
     os.remove(dll)
@@ -103,23 +103,7 @@ tester = {"name": "tester",
           "custom": [dl.Require],
           "srcs": ["TestData/tester.cpp"]}
 
-if sys.platform == "win32":
-  # This also looks like a ugly hack that may no be necessary if unity provided
-  # us with some per project directory where we can drop dependencies in...
-  path_hack = {"name": "AddLibraryPath",
-               "type": "dynamicmodule",
-               "custom": [dl.Require],
-               "srcs": ["AlembicImporterPlugin/AddLibraryPath.cpp"]}
-
-  unity.Plugin(path_hack, package="AlembicImporter")
-
-  # Add 'AddLibraryPath' as a dependency for 'AlembicImporter'
-  importer["deps"] = ["AddLibraryPath"]
-
-  targets = [path_hack, importer, tester]
-
-else:
-  targets = [importer, tester]
+targets = [importer, tester]
 
 excons.DeclareTargets(env, targets)
 

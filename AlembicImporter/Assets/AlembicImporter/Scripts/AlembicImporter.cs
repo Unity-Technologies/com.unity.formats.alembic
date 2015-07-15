@@ -75,10 +75,6 @@ public class AlembicImporter
         Heterogeneous
     }
 
-#if UNITY_STANDALONE_WIN
-    [DllImport ("AddLibraryPath")] public static extern void        AddLibraryPath();
-#endif
-
     [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext();
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
@@ -166,9 +162,6 @@ public class AlembicImporter
             return;
         }
 
-#if UNITY_STANDALONE_WIN
-        AlembicImporter.AddLibraryPath();
-#endif
         aiContext ctx = aiCreateContext();
         if (!aiLoad(ctx, Application.streamingAssetsPath + "/" + path))
         {
