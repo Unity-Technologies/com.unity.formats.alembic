@@ -4,6 +4,26 @@
 #include "aiContext.h"
 #include "aiObject.h"
 
+aiObject::aiObject()
+    : m_ctx(0)
+    , m_hasXform(false)
+    , m_hasPolymesh(false)
+    , m_hasCurves(false)
+    , m_hasPoints(false)
+    , m_hasCamera(false)
+    , m_hasLight(false)
+    , m_hasMaterial(false)
+    , m_time(0.0f)
+    , m_reverseX(true)
+    , m_triangulate(true)
+    , m_reverseIndex(false)
+    , m_forceSmoothNormals(false)
+{
+#ifdef aiDebug
+    m_magic = aiMagicObj;
+#endif // aiDebug
+}
+
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
@@ -11,6 +31,7 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_reverseX(true)
     , m_triangulate(true)
     , m_reverseIndex(false)
+    , m_forceSmoothNormals(false)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -101,11 +122,13 @@ void aiObject::setCurrentTime(float time)
 void aiObject::enableReverseX(bool v)       { m_reverseX = v; }
 void aiObject::enableTriangulate(bool v)    { m_triangulate = v; }
 void aiObject::enableReverseIndex(bool v)   { m_reverseIndex = v; }
+void aiObject::forceSmoothNormals(bool v)   { m_forceSmoothNormals = v; }
 
 float aiObject::getCurrentTime() const      { return m_time; }
 bool aiObject::getReverseX() const          { return m_reverseX; }
 bool aiObject::getReverseIndex() const      { return m_reverseIndex; }
 bool aiObject::getTriangulate() const       { return m_triangulate; }
+bool aiObject::getForceSmoothNormals() const { return m_forceSmoothNormals; }
 
 
 bool aiObject::hasXForm() const    { return m_hasXform; }

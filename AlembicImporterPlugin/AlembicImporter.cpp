@@ -130,6 +130,29 @@ aiCLinkage aiExport void aiEnableReverseIndex(aiObject* obj, bool v)
     obj->enableReverseIndex(v);
 }
 
+aiCLinkage aiExport void aiForceSmoothNormals(aiObject* obj, bool v)
+{
+    aiCheckObject(obj);
+    obj->forceSmoothNormals(v);
+}
+
+aiCLinkage aiExport bool aiGetReverseX(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getReverseX();
+}
+
+aiCLinkage aiExport bool aiGetReverseIndex(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getReverseIndex();
+}
+
+aiCLinkage aiExport bool aiGetForceSmoothNormals(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->getForceSmoothNormals();
+}
 
 
 aiCLinkage aiExport const char* aiGetNameS(aiObject* obj)

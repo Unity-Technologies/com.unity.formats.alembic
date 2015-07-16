@@ -62,6 +62,10 @@ aiCLinkage aiExport void            aiSetCurrentTime(aiObject* obj, float time);
 aiCLinkage aiExport void            aiEnableReverseX(aiObject* obj, bool v);
 aiCLinkage aiExport void            aiEnableTriangulate(aiObject* obj, bool v);
 aiCLinkage aiExport void            aiEnableReverseIndex(aiObject* obj, bool v);
+aiCLinkage aiExport void            aiForceSmoothNormals(aiObject* obj, bool v);
+aiCLinkage aiExport bool            aiGetReverseX(aiObject* obj);
+aiCLinkage aiExport bool            aiGetReverseIndex(aiObject* obj);
+aiCLinkage aiExport bool            aiGetForceSmoothNormals(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport bool            aiXFormGetInherits(aiObject* obj);

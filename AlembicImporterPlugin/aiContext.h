@@ -18,6 +18,7 @@ public:
 public:
     aiContext();
     ~aiContext();
+    
     bool load(const char *path);
     aiObject* getTopObject();
     float getStartTime() const;

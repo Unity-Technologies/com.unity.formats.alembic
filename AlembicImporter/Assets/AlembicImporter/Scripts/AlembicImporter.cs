@@ -87,6 +87,10 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern void       aiForceSmoothNormals(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseX(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseIndex(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern bool       aiGetForceSmoothNormals(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
@@ -138,6 +142,7 @@ public class AlembicImporter
         public float time;
         public bool reverseX;
         public bool reverseFaces;
+        public bool forceSmoothNormals;
         public bool ignoreMissingNodes;
     }
 
@@ -185,6 +190,7 @@ public class AlembicImporter
             ic.parent = root.GetComponent<Transform>();
             ic.reverseX = reverseX;
             ic.reverseFaces = reverseFaces;
+            ic.forceSmoothNormals = false;
             ic.ignoreMissingNodes = false;
 
             GCHandle gch = GCHandle.Alloc(ic);
@@ -194,13 +200,14 @@ public class AlembicImporter
     }
 #endif
 
-    public static void UpdateAbcTree(aiContext ctx, Transform root, bool reverseX, bool reverseFaces, float time, bool ignoreMissingNodes)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool reverseX, bool reverseFaces, bool forceSmoothNormals, bool ignoreMissingNodes)
     {
         var ic = new ImportContext();
         ic.parent = root;
         ic.time = time;
         ic.reverseX = reverseX;
         ic.reverseFaces = reverseFaces;
+        ic.forceSmoothNormals = forceSmoothNormals;
         ic.ignoreMissingNodes = ignoreMissingNodes;
 
         GCHandle gch = GCHandle.Alloc(ic);
@@ -231,9 +238,26 @@ public class AlembicImporter
             }
         }
 
-        aiSetCurrentTime(obj, ic.time);
+
+        bool reverseFaces = ic.reverseFaces;
+        bool forceSmoothNormals = ic.forceSmoothNormals;
+
+        AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
+        if (abcMesh != null)
+        {
+            // AlembicMesh level flags have higher priority
+            reverseFaces = reverseFaces || abcMesh.m_reverseFaces;
+            forceSmoothNormals = forceSmoothNormals || abcMesh.m_forceSmoothNormals;
+        }
+
+        // Check if polygon winding has change in order to force topology update
+        bool windingChanged = (aiGetReverseIndex(obj) != reverseFaces);
+
         aiEnableReverseX(obj, ic.reverseX);
-        aiEnableReverseIndex(obj, ic.reverseFaces);
+        aiEnableReverseIndex(obj, reverseFaces);
+        aiForceSmoothNormals(obj, forceSmoothNormals);
+
+        aiSetCurrentTime(obj, ic.time);
         
         if (aiHasXForm(obj))
         {
@@ -263,7 +287,7 @@ public class AlembicImporter
 
         if (aiHasPolyMesh(obj))
         {
-            UpdateAbcMesh(obj, trans);
+            UpdateAbcMesh(obj, trans, windingChanged);
         }
 
         if (aiHasCamera(obj))
@@ -282,7 +306,7 @@ public class AlembicImporter
         ic.parent = parent;
     }
     
-    public static void UpdateAbcMesh(aiObject abc, Transform trans)
+    public static void UpdateAbcMesh(aiObject abc, Transform trans, bool forceIndexUpdate=false)
     {
         AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
         
@@ -294,7 +318,7 @@ public class AlembicImporter
         aiTopologyVariance topoVariance = aiPolyMeshGetTopologyVariance(abc);
         bool hasNormals = aiPolyMeshHasNormals(abc);
         bool hasUVs = aiPolyMeshHasUVs(abc);
-        bool needsIndexUpdate = (abcMesh.m_submeshes.Count == 0 || topoVariance == aiTopologyVariance.Heterogeneous);
+        bool needsIndexUpdate = (abcMesh.m_submeshes.Count == 0 || topoVariance == aiTopologyVariance.Heterogeneous || forceIndexUpdate);
 
         AlembicMaterial abcMaterials = trans.GetComponent<AlembicMaterial>();
         if (abcMaterials != null)

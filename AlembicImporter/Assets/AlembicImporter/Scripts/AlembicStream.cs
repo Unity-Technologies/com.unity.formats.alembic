@@ -23,14 +23,16 @@ public class AlembicStream : MonoBehaviour
     public CycleType m_cycle = CycleType.Hold;
     public bool m_reverseX;
     public bool m_reverseFaces;
-    public bool m_forceRefresh;
+    public bool m_forceSmoothNormals;
     public bool m_ignoreMissingNodes = true;
+    public bool m_forceRefresh;
     public bool m_verbose = false;
     
     bool m_loaded;
     float m_lastAdjustedTime;
     bool m_lastReverseX;
     bool m_lastReverseFaces;
+    bool m_lastForceSmoothNormals;
     float m_timeEps = 0.001f;
     AlembicImporter.aiContext m_abc;
     bool m_lastIgnoreMissingNodes;
@@ -122,6 +124,7 @@ public class AlembicStream : MonoBehaviour
         m_lastAdjustedTime = AdjustTime(0.0f);
         m_lastReverseX = m_reverseX;
         m_lastReverseFaces = m_reverseFaces;
+        m_lastForceSmoothNormals = m_forceSmoothNormals;
         m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
         m_forceRefresh = true;
     }
@@ -146,6 +149,7 @@ public class AlembicStream : MonoBehaviour
             if (m_forceRefresh || 
                 m_reverseX != m_lastReverseX ||
                 m_reverseFaces != m_lastReverseFaces ||
+                m_forceSmoothNormals != m_lastForceSmoothNormals ||
                 m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
                 Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps)
             {
@@ -154,11 +158,12 @@ public class AlembicStream : MonoBehaviour
                     Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
                 }
                 
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), m_reverseX, m_reverseFaces, adjustedTime, m_ignoreMissingNodes);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime, m_reverseX, m_reverseFaces, m_forceSmoothNormals, m_ignoreMissingNodes);
                 
                 m_lastAdjustedTime = adjustedTime;
                 m_lastReverseX = m_reverseX;
                 m_lastReverseFaces = m_reverseFaces;
+                m_lastForceSmoothNormals = m_forceSmoothNormals;
                 m_forceRefresh = false;
             }
             else
