@@ -335,7 +335,7 @@ public class AlembicImporter
                     {
                         split.mesh.Clear();
 
-                        Transform split0 = trans.FindChild("Split_0");
+                        Transform split0 = trans.FindChild(trans.gameObject.name + "_split_0");
 
                         if (split0 != null)
                         {
@@ -367,7 +367,7 @@ public class AlembicImporter
                 if (initSplit)
                 {
                     GameObject go = new GameObject();
-                    go.name = "Split_" + s;
+                    go.name = trans.gameObject.name + "_split_" + s;
 
                     Transform got = go.GetComponent<Transform>();
                     got.parent = trans;
