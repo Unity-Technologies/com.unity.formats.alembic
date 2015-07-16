@@ -9,6 +9,7 @@ const int aiMagicObj = 0x004a424f; // "OBJ"
 class aiObject
 {
 public:
+    aiObject();
     aiObject(aiContext *ctx, abcObject &abc);
     ~aiObject();
 
@@ -21,6 +22,7 @@ public:
     void enableReverseX(bool v);
     void enableTriangulate(bool v);
     void enableReverseIndex(bool v);
+    void forceSmoothNormals(bool v);
 
     bool        hasXForm() const;
     bool        hasPolyMesh() const;
@@ -45,6 +47,7 @@ public:
     bool        getReverseX() const;
     bool        getReverseIndex() const;
     bool        getTriangulate() const;
+    bool        getForceSmoothNormals() const;
 
 private:
 #ifdef aiDebug
@@ -74,6 +77,7 @@ private:
     bool m_reverseX;
     bool m_triangulate;
     bool m_reverseIndex;
+    bool m_forceSmoothNormals;
 };
 
 

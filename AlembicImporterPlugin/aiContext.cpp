@@ -30,7 +30,11 @@ aiContext::~aiContext()
 {
     waitTasks();
         
-    for (auto n : m_nodes) { delete n; }
+    for (auto n : m_nodes)
+    {
+        delete n;
+    }
+
     m_nodes.clear();
 }
 
@@ -39,7 +43,9 @@ void aiContext::gatherNodesRecursive(aiObject *n)
     m_nodes.push_back(n);
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
-    for (size_t i = 0; i < numChildren; ++i) {
+    
+    for (size_t i = 0; i < numChildren; ++i)
+    {
         abcObject abcChild = abc.getChild(i);
         aiObject *child = new aiObject(this, abcChild);
         n->addChild(child);

@@ -27,15 +27,17 @@ public class AlembicMesh : MonoBehaviour
         public int splitIndex;
     }
 
-    public List<Submesh> m_submeshes = new List<Submesh>();
-    public List<Split> m_splits = new List<Split>();
+    public bool m_reverseFaces = false;
+    public bool m_forceSmoothNormals = false;
     public bool hasFacesets = false;
 
+    public List<Submesh> m_submeshes = new List<Submesh>();
+    public List<Split> m_splits = new List<Split>();
+    
     public RenderTexture m_indices;
     public RenderTexture m_vertices;
     public RenderTexture m_normals;
     public RenderTexture m_uvs;
-
 
     static RenderTexture CreateDataTexture(int numData, RenderTextureFormat format)
     {
@@ -48,11 +50,5 @@ public class AlembicMesh : MonoBehaviour
 
     void Update()
     {
-
-    }
-
-    void LateUpdate()
-    {
-
     }
 }

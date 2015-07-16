@@ -8,12 +8,14 @@ public:
     aiSchema();
     aiSchema(aiObject *obj);
     virtual ~aiSchema();
+
     virtual void updateSample() = 0;
 
 protected:
     aiObject *m_obj;
 };
 
+// ---
 
 class aiXForm : public aiSchema
 {
@@ -21,6 +23,8 @@ typedef aiSchema super;
 public:
     aiXForm();
     aiXForm(aiObject *obj);
+    virtual ~aiXForm();
+
     void updateSample() override;
 
     bool        getInherits() const;
@@ -36,6 +40,7 @@ private:
     bool m_inherits;
 };
 
+// ---
 
 class aiPolyMesh : public aiSchema
 {
@@ -43,6 +48,8 @@ typedef aiSchema super;
 public:
     aiPolyMesh();
     aiPolyMesh(aiObject *obj);
+    virtual ~aiPolyMesh();
+
     void updateSample() override;
 
     void        setCurrentTime(float t);
@@ -99,6 +106,9 @@ private:
     }
 
     void updateSplits();
+    bool updateUVs(Abc::ISampleSelector &ss);
+    bool updateNormals(Abc::ISampleSelector &ss);
+    bool computeSmoothNormals();
 
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
@@ -200,8 +210,14 @@ private:
     // Need to split mesh to work around the 65000 vertices per mesh limit
     std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
+
+    size_t m_smoothNormalsCount;
+    Abc::N3f *m_smoothNormals;
+
+    bool m_lastReverseIndex;
 };
 
+// ---
 
 class aiCurves : public aiSchema
 {
@@ -209,12 +225,15 @@ typedef aiSchema super;
 public:
     aiCurves();
     aiCurves(aiObject *obj);
+    virtual ~aiCurves();
+
     void updateSample() override;
 
 private:
     AbcGeom::ICurvesSchema m_schema;
 };
 
+// ---
 
 class aiPoints : public aiSchema
 {
@@ -222,13 +241,15 @@ typedef aiSchema super;
 public:
     aiPoints();
     aiPoints(aiObject *obj);
+    virtual ~aiPoints();
+
     void updateSample() override;
 
 private:
     AbcGeom::IPointsSchema m_schema;
 };
 
-
+// ---
 
 struct aiCameraParams
 {
@@ -245,6 +266,8 @@ typedef aiSchema super;
 public:
     aiCamera();
     aiCamera(aiObject *obj);
+    virtual ~aiCamera();
+
     void updateSample() override;
 
     void getParams(aiCameraParams &params);
@@ -254,6 +277,7 @@ private:
     AbcGeom::CameraSample m_sample;
 };
 
+// ---
 
 class aiLight : public aiSchema
 {
@@ -261,12 +285,15 @@ typedef aiSchema super;
 public:
     aiLight();
     aiLight(aiObject *obj);
+    virtual ~aiLight();
+
     void updateSample() override;
 
 private:
     AbcGeom::ILightSchema m_schema;
 };
 
+// ---
 
 class aiMaterial : public aiSchema
 {
@@ -274,6 +301,8 @@ typedef aiSchema super;
 public:
     aiMaterial();
     aiMaterial(aiObject *obj);
+    virtual ~aiMaterial();
+
     void updateSample() override;
 
     // Maya の alembic エクスポータがマテリアル情報を書き出せないようなので保留。
