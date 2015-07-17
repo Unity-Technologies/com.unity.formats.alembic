@@ -59,13 +59,20 @@ aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
 aiCLinkage aiExport uint32_t        aiGetNumChildren(aiObject* obj);
 aiCLinkage aiExport void            aiSetCurrentTime(aiObject* obj, float time);
-aiCLinkage aiExport void            aiEnableReverseX(aiObject* obj, bool v);
+
 aiCLinkage aiExport void            aiEnableTriangulate(aiObject* obj, bool v);
-aiCLinkage aiExport void            aiEnableReverseIndex(aiObject* obj, bool v);
-aiCLinkage aiExport void            aiForceSmoothNormals(aiObject* obj, bool v);
-aiCLinkage aiExport bool            aiGetReverseX(aiObject* obj);
-aiCLinkage aiExport bool            aiGetReverseIndex(aiObject* obj);
-aiCLinkage aiExport bool            aiGetForceSmoothNormals(aiObject* obj);
+
+aiCLinkage aiExport void            aiSwapHandedness(aiObject* obj, bool v);
+aiCLinkage aiExport bool            aiIsHandednessSwapped(aiObject* obj);
+
+aiCLinkage aiExport void            aiSwapFaceWinding(aiObject* obj, bool v);
+aiCLinkage aiExport bool            aiIsFaceWindingSwapped(aiObject* obj);
+
+aiCLinkage aiExport void            aiSetNormalMode(aiObject* obj, int m);
+aiCLinkage aiExport int             aiGetNormalMode(aiObject* obj);
+
+aiCLinkage aiExport void            aiEnableTangents(aiObject* obj, bool v);
+aiCLinkage aiExport bool            aiAreTangentsEnabled(aiObject*);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport bool            aiXFormGetInherits(aiObject* obj);
@@ -94,7 +101,7 @@ aiCLinkage aiExport void            aiPolyMeshCopySplitedUVs(aiObject* obj, abcV
 
 aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitCount(aiObject *obj, bool force_refresh);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetVertexBufferLength(aiObject* obj, uint32_t splitIndex);
-aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *tangents);
 aiCLinkage aiExport uint32_t        aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets);
 aiCLinkage aiExport uint32_t        aiPolyMeshGetSplitSubmeshCount(aiObject* obj, uint32_t splitIndex);
 aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiObject* obj, aiSubmeshInfo *smi);

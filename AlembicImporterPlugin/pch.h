@@ -71,6 +71,7 @@ using namespace Alembic;
 
 typedef Abc::V2f       abcV2;
 typedef Abc::V3f       abcV3;
+typedef Imath::V4f     abcV4;
 typedef Abc::M44f      abcM44;
 typedef Abc::IObject   abcObject;
 struct  aiCameraParams;
