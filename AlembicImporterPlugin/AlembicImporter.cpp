@@ -112,48 +112,59 @@ aiCLinkage aiExport void aiSetCurrentTime(aiObject* obj, float time)
     obj->setCurrentTime(time);
 }
 
-aiCLinkage aiExport void aiEnableReverseX(aiObject* obj, bool v)
-{
-    aiCheckObject(obj);
-    obj->enableReverseX(v);
-}
-
 aiCLinkage aiExport void aiEnableTriangulate(aiObject* obj, bool v)
 {
     aiCheckObject(obj);
     obj->enableTriangulate(v);
 }
 
-aiCLinkage aiExport void aiEnableReverseIndex(aiObject* obj, bool v)
+aiCLinkage aiExport void aiSwapHandedness(aiObject* obj, bool v)
 {
     aiCheckObject(obj);
-    obj->enableReverseIndex(v);
+    obj->swapHandedness(v);
 }
 
-aiCLinkage aiExport void aiForceSmoothNormals(aiObject* obj, bool v)
+aiCLinkage aiExport bool aiIsHandednessSwapped(aiObject* obj)
 {
     aiCheckObject(obj);
-    obj->forceSmoothNormals(v);
+    return obj->isHandednessSwapped();
 }
 
-aiCLinkage aiExport bool aiGetReverseX(aiObject* obj)
+aiCLinkage aiExport void aiSwapFaceWinding(aiObject* obj, bool v)
 {
     aiCheckObject(obj);
-    return obj->getReverseX();
+    obj->swapFaceWinding(v);
 }
 
-aiCLinkage aiExport bool aiGetReverseIndex(aiObject* obj)
+aiCLinkage aiExport bool aiIsFaceWindingSwapped(aiObject* obj)
 {
     aiCheckObject(obj);
-    return obj->getReverseIndex();
+    return obj->isFaceWindingSwapped();
 }
 
-aiCLinkage aiExport bool aiGetForceSmoothNormals(aiObject* obj)
+aiCLinkage aiExport void aiSetNormalMode(aiObject* obj, int m)
 {
     aiCheckObject(obj);
-    return obj->getForceSmoothNormals();
+    obj->setNormalMode((aiObject::NormalMode) m);
 }
 
+aiCLinkage aiExport int aiGetNormalMode(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return (int) obj->getNormalMode();
+}
+
+aiCLinkage aiExport void aiEnableTangents(aiObject* obj, bool v)
+{
+    aiCheckObject(obj);
+    obj->enableTangents(v);
+}
+
+aiCLinkage aiExport bool aiAreTangentsEnabled(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return (int) obj->areTangentsEnabled();
+}
 
 aiCLinkage aiExport const char* aiGetNameS(aiObject* obj)
 {
@@ -332,10 +343,10 @@ aiCLinkage aiExport uint32_t aiPolyMeshGetVertexBufferLength(aiObject* obj, uint
     return obj->getPolyMesh().getVertexBufferLength(splitIndex);
 }
 
-aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs)
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiObject* obj, uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *tangents)
 {
     aiCheckObject(obj);
-    obj->getPolyMesh().fillVertexBuffer(splitIndex, positions, normals, uvs);
+    obj->getPolyMesh().fillVertexBuffer(splitIndex, positions, normals, uvs, tangents);
 }
 
 aiCLinkage aiExport uint32_t aiPolyMeshPrepareSubmeshes(aiObject* obj, const aiFacesets* facesets)

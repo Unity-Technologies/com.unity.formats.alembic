@@ -77,7 +77,7 @@ public:
     uint32_t    getSplitCount() const;
     uint32_t    getSplitCount(bool forceRefresh);
     uint32_t    getVertexBufferLength(uint32_t splitIndex) const;
-    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *T) const;
     uint32_t    prepareSubmeshes(const aiFacesets *facesets);
     uint32_t    getSplitSubmeshCount(uint32_t splitIndex) const;
     bool        getNextSubmesh(aiSubmeshInfo &smi);
@@ -108,7 +108,14 @@ private:
     void updateSplits();
     bool updateUVs(Abc::ISampleSelector &ss);
     bool updateNormals(Abc::ISampleSelector &ss);
-    bool computeSmoothNormals();
+
+    bool smoothNormalsRequired() const;
+    bool smoothNormalsUpdateRequired() const;
+    bool tangentsUpdateRequired() const;
+
+    void updateSmoothNormals() const;
+    // 'updateTangents' will update smooth tangents if necessary
+    void updateTangents() const;
 
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
@@ -211,10 +218,14 @@ private:
     std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
 
-    size_t m_smoothNormalsCount;
-    Abc::N3f *m_smoothNormals;
+    mutable bool m_smoothNormalsDirty;
+    mutable size_t m_smoothNormalsCount;
+    mutable Abc::V3f *m_smoothNormals;
+    mutable bool m_smoothNormalsCCW;
 
-    bool m_lastReverseIndex;
+    mutable bool m_tangentsDirty;
+    mutable size_t m_tangentsCount;
+    mutable Imath::V4f *m_tangents;
 };
 
 // ---

@@ -78,6 +78,14 @@ public class AlembicImporter
         Heterogeneous
     }
 
+    public enum aiNormalMode
+    {
+        ReadFromFile,
+        ComputeIfMissing,
+        AlwaysCompute,
+        Ignore
+    }
+
     [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext();
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
@@ -87,13 +95,16 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(aiObject obj, float time);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiForceSmoothNormals(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseX(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseIndex(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetForceSmoothNormals(aiObject obj);
+    
+    [DllImport ("AlembicImporter")] public static extern void       aiSwapHandedness(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiIsHandednessSwapped(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiSwapFaceWinding(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiIsFaceWindingSwapped(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableTangents(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiAreTangentsEnabled(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetNormalMode(aiObject obj, int m);
+    [DllImport ("AlembicImporter")] public static extern int        aiGetNormalMode(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
@@ -127,7 +138,7 @@ public class AlembicImporter
 
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitCount(aiObject obj, bool force_refresh);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj, int split);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs, IntPtr tangents);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj, ref aiFacesets facesets);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiObject obj, int split);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo smi);
