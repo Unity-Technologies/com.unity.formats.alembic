@@ -1107,6 +1107,11 @@ void aiCamera::getParams(aiCameraParams &params)
     float verticalAperture = (float) m_sample.getVerticalAperture();
     float focalLength = (float) m_sample.getFocalLength();
 
+    if (params.targetAspect > 0.0f)
+    {
+        verticalAperture = (float) m_sample.getHorizontalAperture() / params.targetAspect;
+    }
+    
     params.nearClippingPlane = (float) m_sample.getNearClippingPlane();
     params.farClippingPlane = (float) m_sample.getFarClippingPlane();
     // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
