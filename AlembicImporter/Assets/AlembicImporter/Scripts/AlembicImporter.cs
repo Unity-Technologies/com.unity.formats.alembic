@@ -12,6 +12,8 @@ public class AlembicImporter
 {
     public delegate void aiNodeEnumerator(aiObject obj, IntPtr userdata);
 
+    public enum AspectRatioMode { CurrentResolution = 0, DefaultResolution, CameraAperture };
+
     public struct aiSplitedMeshInfo
     {
         public int faceCount;
@@ -51,6 +53,7 @@ public class AlembicImporter
 
     public struct aiCameraParams
     {
+        public float targetAspect;
         public float nearClippingPlane;
         public float faceClippingPlane;
         public float fieldOfView;
@@ -143,7 +146,29 @@ public class AlembicImporter
         public bool reverseX;
         public bool reverseFaces;
         public bool forceSmoothNormals;
+        public float aspectRatio;
         public bool ignoreMissingNodes;
+    }
+
+    public static float GetAspectRatio(AspectRatioMode mode)
+    {
+        if (mode == AspectRatioMode.CameraAperture)
+        {
+            return 0.0f;
+        }
+        else if (mode == AspectRatioMode.CurrentResolution)
+        {
+            return (float) Screen.width / (float) Screen.height;
+        }
+        else
+        {
+#if UNITY_EDITOR
+            return (float) PlayerSettings.defaultScreenWidth / (float) PlayerSettings.defaultScreenHeight;
+#else
+            // fallback on current resoltution
+            return (float) Screen.width / (float) Screen.height;
+#endif
+        }
     }
 
 #if UNITY_EDITOR
@@ -191,6 +216,7 @@ public class AlembicImporter
             ic.reverseX = reverseX;
             ic.reverseFaces = reverseFaces;
             ic.forceSmoothNormals = false;
+            ic.aspectRatio = GetAspectRatio(abcstream.m_aspectRatioMode);
             ic.ignoreMissingNodes = false;
 
             GCHandle gch = GCHandle.Alloc(ic);
@@ -199,8 +225,8 @@ public class AlembicImporter
         aiDestroyContext(ctx);
     }
 #endif
-
-    public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool reverseX, bool reverseFaces, bool forceSmoothNormals, bool ignoreMissingNodes)
+    
+    public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool reverseX, bool reverseFaces, bool forceSmoothNormals, float aspectRatio, bool ignoreMissingNodes)
     {
         var ic = new ImportContext();
         ic.parent = root;
@@ -208,6 +234,7 @@ public class AlembicImporter
         ic.reverseX = reverseX;
         ic.reverseFaces = reverseFaces;
         ic.forceSmoothNormals = forceSmoothNormals;
+        ic.aspectRatio = aspectRatio;
         ic.ignoreMissingNodes = ignoreMissingNodes;
 
         GCHandle gch = GCHandle.Alloc(ic);
@@ -293,7 +320,7 @@ public class AlembicImporter
         if (aiHasCamera(obj))
         {
             trans.parent.forward = -trans.parent.forward;
-            UpdateAbcCamera(obj, trans);
+            UpdateAbcCamera(obj, trans, ic.aspectRatio);
         }
 
         if (aiHasLight(obj))
@@ -624,15 +651,21 @@ public class AlembicImporter
         return mesh;
     }
 
-    static void UpdateAbcCamera(aiObject abc, Transform trans)
+    static void UpdateAbcCamera(aiObject abc, Transform trans, float aspectRatio)
     {
         var cam = trans.GetComponent<Camera>();
-        if(cam == null)
+        
+        if (cam == null)
         {
             cam = trans.gameObject.AddComponent<Camera>();
         }
+
         aiCameraParams cp = default(aiCameraParams);
+
+        cp.targetAspect = aspectRatio;
+
         aiCameraGetParams(abc, ref cp);
+
         cam.fieldOfView = cp.fieldOfView;
         cam.nearClipPlane = cp.nearClippingPlane;
         cam.farClipPlane = cp.faceClippingPlane;

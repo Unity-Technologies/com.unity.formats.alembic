@@ -24,6 +24,7 @@ public class AlembicStream : MonoBehaviour
     public bool m_reverseX;
     public bool m_reverseFaces;
     public bool m_forceSmoothNormals;
+    public AlembicImporter.AspectRatioMode m_aspectRatioMode = AlembicImporter.AspectRatioMode.CurrentResolution;
     public bool m_ignoreMissingNodes = true;
     public bool m_forceRefresh;
     public bool m_verbose = false;
@@ -36,6 +37,7 @@ public class AlembicStream : MonoBehaviour
     float m_timeEps = 0.001f;
     AlembicImporter.aiContext m_abc;
     bool m_lastIgnoreMissingNodes;
+    float m_lastAspectRatio = -1.0f;
 
 
     void OnEnable()
@@ -145,25 +147,28 @@ public class AlembicStream : MonoBehaviour
             m_time = time;
 
             float adjustedTime = AdjustTime(m_time);
+            float aspectRatio = AlembicImporter.GetAspectRatio(m_aspectRatioMode);
 
             if (m_forceRefresh || 
                 m_reverseX != m_lastReverseX ||
                 m_reverseFaces != m_lastReverseFaces ||
                 m_forceSmoothNormals != m_lastForceSmoothNormals ||
                 m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
-                Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps)
+                Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps ||
+                aspectRatio != m_lastAspectRatio)
             {
                 if (m_verbose)
                 {
                     Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
                 }
                 
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime, m_reverseX, m_reverseFaces, m_forceSmoothNormals, m_ignoreMissingNodes);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime, m_reverseX, m_reverseFaces, m_forceSmoothNormals, aspectRatio, m_ignoreMissingNodes);
                 
                 m_lastAdjustedTime = adjustedTime;
                 m_lastReverseX = m_reverseX;
                 m_lastReverseFaces = m_reverseFaces;
                 m_lastForceSmoothNormals = m_forceSmoothNormals;
+                m_lastAspectRatio = aspectRatio;
                 m_forceRefresh = false;
             }
             else

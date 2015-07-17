@@ -253,6 +253,7 @@ private:
 
 struct aiCameraParams
 {
+    float targetAspect;
     float nearClippingPlane;
     float farClippingPlane;
     float fieldOfView;
