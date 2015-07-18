@@ -21,9 +21,10 @@ public class AlembicStream : MonoBehaviour
     public float m_timeScale = 1.0f;
     public bool m_preserveStartTime = true;
     public CycleType m_cycle = CycleType.Hold;
-    public bool m_reverseX;
-    public bool m_reverseFaces;
-    public bool m_forceSmoothNormals;
+    public bool m_swapHandedness;
+    public bool m_swapFaceWinding;
+    public AlembicImporter.aiNormalMode m_normalMode = AlembicImporter.aiNormalMode.ComputeIfMissing;
+    public bool m_enableTangents;
     public AlembicImporter.AspectRatioMode m_aspectRatioMode = AlembicImporter.AspectRatioMode.CurrentResolution;
     public bool m_ignoreMissingNodes = true;
     public bool m_forceRefresh;
@@ -31,9 +32,10 @@ public class AlembicStream : MonoBehaviour
     
     bool m_loaded;
     float m_lastAdjustedTime;
-    bool m_lastReverseX;
-    bool m_lastReverseFaces;
-    bool m_lastForceSmoothNormals;
+    bool m_lastSwapHandedness;
+    bool m_lastSwapFaceWinding;
+    AlembicImporter.aiNormalMode m_lastNormalMode;
+    bool m_lastEnableTangents;
     float m_timeEps = 0.001f;
     AlembicImporter.aiContext m_abc;
     bool m_lastIgnoreMissingNodes;
@@ -124,10 +126,11 @@ public class AlembicStream : MonoBehaviour
         m_time = 0.0f;
 
         m_lastAdjustedTime = AdjustTime(0.0f);
-        m_lastReverseX = m_reverseX;
-        m_lastReverseFaces = m_reverseFaces;
-        m_lastForceSmoothNormals = m_forceSmoothNormals;
+        m_lastSwapHandedness = m_swapHandedness;
+        m_lastSwapFaceWinding = m_swapFaceWinding;
+        m_lastNormalMode = m_normalMode;
         m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
+        m_lastEnableTangents = m_enableTangents;
         m_forceRefresh = true;
     }
 
@@ -150,10 +153,11 @@ public class AlembicStream : MonoBehaviour
             float aspectRatio = AlembicImporter.GetAspectRatio(m_aspectRatioMode);
 
             if (m_forceRefresh || 
-                m_reverseX != m_lastReverseX ||
-                m_reverseFaces != m_lastReverseFaces ||
-                m_forceSmoothNormals != m_lastForceSmoothNormals ||
+                m_swapHandedness != m_lastSwapHandedness ||
+                m_swapFaceWinding != m_lastSwapFaceWinding ||
+                m_normalMode != m_lastNormalMode ||
                 m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
+                m_enableTangents != m_lastEnableTangents ||
                 Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps ||
                 aspectRatio != m_lastAspectRatio)
             {
@@ -162,13 +166,17 @@ public class AlembicStream : MonoBehaviour
                     Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
                 }
                 
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime, m_reverseX, m_reverseFaces, m_forceSmoothNormals, aspectRatio, m_ignoreMissingNodes);
+                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime,
+                                              m_swapHandedness, m_swapFaceWinding,
+                                              m_normalMode, m_enableTangents, aspectRatio,
+                                              m_ignoreMissingNodes);
                 
                 m_lastAdjustedTime = adjustedTime;
-                m_lastReverseX = m_reverseX;
-                m_lastReverseFaces = m_reverseFaces;
-                m_lastForceSmoothNormals = m_forceSmoothNormals;
+                m_lastSwapHandedness = m_swapHandedness;
+                m_lastSwapFaceWinding = m_swapFaceWinding;
+                m_lastNormalMode = m_normalMode;
                 m_lastAspectRatio = aspectRatio;
+                m_lastEnableTangents = m_enableTangents;
                 m_forceRefresh = false;
             }
             else
