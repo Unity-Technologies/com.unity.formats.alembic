@@ -347,41 +347,30 @@ void aiPolyMesh::updateTangents() const
         delete[] m_tangents;
         m_tangents = new Imath::V4f[tangentsCount];
     }
-    else
-    {
-        memset(m_tangents, 0, tangentsCount * sizeof(Imath::V4f));
-    }
 
     m_tangentsCount = tangentsCount;
+
+    if (!m_smoothNormals)
+    {
+        m_smoothNormals = new Abc::V3f[tangentsCount];
+    }
+    else if (m_smoothNormalsCount != tangentsCount)
+    {
+        delete[] m_smoothNormals;
+        m_smoothNormals = new Abc::V3f[tangentsCount];
+    }
+    else
+    {
+        memset(m_smoothNormals, 0, tangentsCount * sizeof(Abc::V3f));
+    }
+
+    m_smoothNormalsCount = tangentsCount;
 
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
     const auto &positions = *m_positions;
     const auto &uvVals = *(m_uvs.getVals());
     const auto &uvIdxs = *(m_uvs.getIndices());
-
-    bool computeSmoothNormals = false;
-
-    if (smoothNormalsUpdateRequired())
-    {
-        if (!m_smoothNormals)
-        {
-            m_smoothNormals = new Abc::V3f[tangentsCount];
-        }
-        else if (m_smoothNormalsCount != tangentsCount)
-        {
-            delete[] m_smoothNormals;
-            m_smoothNormals = new Abc::V3f[tangentsCount];
-        }
-        else
-        {
-            memset(m_smoothNormals, 0, tangentsCount * sizeof(Abc::V3f));
-        }
-
-        m_smoothNormalsCount = tangentsCount;
-
-        computeSmoothNormals = true;
-    }
 
     Abc::V3f *tan1 = new Abc::V3f[2 * tangentsCount];
     Abc::V3f *tan2 = tan1 + tangentsCount;
@@ -400,11 +389,7 @@ void aiPolyMesh::updateTangents() const
 
         if (nfv >= 3)
         {
-            if (computeSmoothNormals)
-            {
-                N.setValue(0.0f, 0.0f, 0.0f);
-            }
-            
+            N.setValue(0.0f, 0.0f, 0.0f);
             T.setValue(0.0f, 0.0f, 0.0f);
             B.setValue(0.0f, 0.0f, 0.0f);
 
@@ -419,23 +404,20 @@ void aiPolyMesh::updateTangents() const
                 const Abc::V2f &UV1 = uvVals[uvIdxs[off + fv + ti1]];
                 const Abc::V2f &UV2 = uvVals[uvIdxs[off + fv + ti2]];
 
-                // P1 - P0 = T * (UV1.x - UV0.x) + B * (UV1.y - UV0.y)
-                // P2 - P0 = T * (UV2.x - UV0.x) + B * (UV2.y - UV0.y)
-                
                 dP1 = P1 - P0;
                 dP2 = P2 - P0;
-                
-                if (computeSmoothNormals)
-                {
-                    N += dP2.cross(dP1).normalize();
-                }
                 
                 dUV1 = UV1 - UV0;
                 dUV2 = UV2 - UV0;
 
-                float r = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
+                // dP1 = T * dUV1.x + B * dUV1.y
+                // dP2 = T * dUV2.x + B * dUV2.y
 
-                if (r >= 0.000001f)
+                N += dP2.cross(dP1).normalize();
+                
+                float r = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
+                
+                if (fabsf(r) >= 0.000001f)
                 {
                     r = 1.0f / r;
                     
@@ -451,10 +433,7 @@ void aiPolyMesh::updateTangents() const
 
             if (nfv > 3)
             {
-                if (computeSmoothNormals)
-                {
-                    N.normalize();
-                }
+                N.normalize();
                 T.normalize();
                 B.normalize();
             }
@@ -463,11 +442,7 @@ void aiPolyMesh::updateTangents() const
             {
                 int v = indices[off + fv];
                 
-                if (computeSmoothNormals)
-                {
-                    m_smoothNormals[v] += N;
-                }
-                
+                m_smoothNormals[v] += N;
                 tan1[v] += T;
                 tan2[v] += B;
             }
@@ -482,11 +457,7 @@ void aiPolyMesh::updateTangents() const
         Abc::V3f &Tv = tan1[i];
         Abc::V3f &Bv = tan2[i];
         
-        if (computeSmoothNormals)
-        {
-            Nv.normalize();
-        }
-        
+        Nv.normalize();
         Tv.normalize();
         Bv.normalize();
 
@@ -494,12 +465,8 @@ void aiPolyMesh::updateTangents() const
         m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f ? -1.0f : 1.0f);
     }
 
-    if (computeSmoothNormals)
-    {
-        m_smoothNormalsDirty = false;
-        m_smoothNormalsCCW = ccw;
-    }
-
+    m_smoothNormalsCCW = ccw;
+    m_smoothNormalsDirty = false;
     m_tangentsDirty = false;
     
     delete[] tan1;
