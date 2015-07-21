@@ -146,28 +146,28 @@ aiCLinkage aiExport bool aiIsFaceWindingSwapped(aiObject* obj)
     return obj->isFaceWindingSwapped();
 }
 
-aiCLinkage aiExport void aiSetNormalMode(aiObject* obj, int m)
+aiCLinkage aiExport void aiSetNormalsMode(aiObject* obj, int m)
 {
     aiCheckObject(obj);
-    obj->setNormalMode((aiObject::NormalMode) m);
+    obj->setNormalsMode((aiNormalsMode) m);
 }
 
-aiCLinkage aiExport int aiGetNormalMode(aiObject* obj)
+aiCLinkage aiExport int aiGetNormalsMode(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (int) obj->getNormalMode();
+    return (int) obj->getNormalsMode();
 }
 
-aiCLinkage aiExport void aiEnableTangents(aiObject* obj, bool v)
+aiCLinkage aiExport void aiSetTangentsMode(aiObject* obj, int m)
 {
     aiCheckObject(obj);
-    obj->enableTangents(v);
+    obj->setTangentsMode((aiTangentsMode) m);
 }
 
-aiCLinkage aiExport bool aiAreTangentsEnabled(aiObject* obj)
+aiCLinkage aiExport int aiGetTangentsMode(aiObject* obj)
 {
     aiCheckObject(obj);
-    return (int) obj->areTangentsEnabled();
+    return (int) obj->getTangentsMode();
 }
 
 aiCLinkage aiExport const char* aiGetNameS(aiObject* obj)

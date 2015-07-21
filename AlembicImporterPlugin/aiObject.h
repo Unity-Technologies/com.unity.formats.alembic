@@ -5,18 +5,8 @@
 class aiContext;
 const int aiMagicObj = 0x004a424f; // "OBJ"
 
-
 class aiObject
 {
-public:
-    enum NormalMode
-    {
-        NM_ReadFromFile = 0,
-        NM_ComputeIfMissing,
-        NM_AlwaysCompute,
-        NM_Ignore
-    };
-
 public:
     aiObject();
     aiObject(aiContext *ctx, abcObject &abc);
@@ -32,8 +22,8 @@ public:
     void enableTriangulate(bool v);
     void swapHandedness(bool v);
     void swapFaceWinding(bool v);
-    void setNormalMode(NormalMode m);
-    void enableTangents(bool v);
+    void setNormalsMode(aiNormalsMode m);
+    void setTangentsMode(aiTangentsMode m);
     
     bool        hasXForm() const;
     bool        hasPolyMesh() const;
@@ -59,11 +49,11 @@ public:
     
     float       getCurrentTime() const;
     
-    bool        getTriangulate() const;
-    bool        isHandednessSwapped() const;
-    bool        isFaceWindingSwapped() const;
-    NormalMode  getNormalMode() const;
-    bool        areTangentsEnabled() const;
+    bool           getTriangulate() const;
+    bool           isHandednessSwapped() const;
+    bool           isFaceWindingSwapped() const;
+    aiNormalsMode  getNormalsMode() const;
+    aiTangentsMode getTangentsMode() const;
 
 private:
 #ifdef aiDebug
@@ -93,8 +83,8 @@ private:
     bool m_triangulate;
     bool m_swapHandedness;
     bool m_swapFaceWinding;
-    NormalMode m_normalMode;
-    bool m_tangents;
+    aiNormalsMode m_normalsMode;
+    aiTangentsMode m_tangentsMode;
 };
 
 

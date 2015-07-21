@@ -69,11 +69,11 @@ aiCLinkage aiExport bool            aiIsHandednessSwapped(aiObject* obj);
 aiCLinkage aiExport void            aiSwapFaceWinding(aiObject* obj, bool v);
 aiCLinkage aiExport bool            aiIsFaceWindingSwapped(aiObject* obj);
 
-aiCLinkage aiExport void            aiSetNormalMode(aiObject* obj, int m);
-aiCLinkage aiExport int             aiGetNormalMode(aiObject* obj);
+aiCLinkage aiExport void            aiSetNormalsMode(aiObject* obj, int m);
+aiCLinkage aiExport int             aiGetNormalsMode(aiObject* obj);
 
-aiCLinkage aiExport void            aiEnableTangents(aiObject* obj, bool v);
-aiCLinkage aiExport bool            aiAreTangentsEnabled(aiObject*);
+aiCLinkage aiExport void            aiSetTangentsMode(aiObject* obj, int m);
+aiCLinkage aiExport int             aiGetTangentsMode(aiObject* obj);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport bool            aiXFormGetInherits(aiObject* obj);
