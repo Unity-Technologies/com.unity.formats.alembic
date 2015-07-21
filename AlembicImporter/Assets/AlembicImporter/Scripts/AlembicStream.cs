@@ -25,7 +25,7 @@ public class AlembicStream : MonoBehaviour
     public bool m_swapFaceWinding;
     public AlembicImporter.aiNormalMode m_normalMode = AlembicImporter.aiNormalMode.ComputeIfMissing;
     public bool m_enableTangents;
-    public AlembicImporter.AspectRatioMode m_aspectRatioMode = AlembicImporter.AspectRatioMode.CurrentResolution;
+    public AlembicImporter.aiAspectRatioMode m_aspectRatioMode = AlembicImporter.aiAspectRatioMode.CurrentResolution;
     public bool m_ignoreMissingNodes = true;
     public bool m_forceRefresh;
     public bool m_verbose = false;
