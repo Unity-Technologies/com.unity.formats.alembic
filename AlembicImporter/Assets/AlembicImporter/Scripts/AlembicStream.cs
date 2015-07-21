@@ -29,6 +29,8 @@ public class AlembicStream : MonoBehaviour
     public bool m_ignoreMissingNodes = true;
     public bool m_forceRefresh;
     public bool m_verbose = false;
+    public bool m_logToFile = false;
+    public string m_logPath = "";
     
     bool m_loaded;
     float m_lastAdjustedTime;
@@ -136,6 +138,8 @@ public class AlembicStream : MonoBehaviour
 
     void UpdateAbc(float time)
     {
+        AlembicImporter.aiEnableFileLog(m_logToFile, m_logPath);
+        
         if (!m_loaded)
         {
             if (m_verbose)

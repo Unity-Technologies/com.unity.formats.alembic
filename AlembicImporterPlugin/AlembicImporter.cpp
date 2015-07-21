@@ -3,6 +3,7 @@
 #include "aiGeometry.h"
 #include "aiObject.h"
 #include "aiContext.h"
+#include "aiLogger.h"
 
 #ifdef aiWindows
     #include <windows.h>
@@ -42,7 +43,10 @@ void aiDebugLogImpl(const char* fmt, ...)
 
 
 
-
+aiCLinkage aiExport void aiEnableFileLog(bool on, const char *path)
+{
+    aiLogger::Enable(on, path);
+}
 
 aiCLinkage aiExport aiContext* aiCreateContext()
 {

@@ -45,6 +45,7 @@ struct aiFacesets
     int *faceIndices;
 };
 
+aiCLinkage aiExport void            aiEnableFileLog(bool on, const char *path);
 
 aiCLinkage aiExport aiContext*      aiCreateContext();
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
