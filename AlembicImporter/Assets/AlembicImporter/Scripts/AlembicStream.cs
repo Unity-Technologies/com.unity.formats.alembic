@@ -23,8 +23,8 @@ public class AlembicStream : MonoBehaviour
     public CycleType m_cycle = CycleType.Hold;
     public bool m_swapHandedness;
     public bool m_swapFaceWinding;
-    public AlembicImporter.aiNormalMode m_normalMode = AlembicImporter.aiNormalMode.ComputeIfMissing;
-    public bool m_enableTangents;
+    public AlembicImporter.aiNormalsMode m_normalsMode = AlembicImporter.aiNormalsMode.ComputeIfMissing;
+    public AlembicImporter.aiTangentsMode m_tangentsMode = AlembicImporter.aiTangentsMode.None;
     public AlembicImporter.aiAspectRatioMode m_aspectRatioMode = AlembicImporter.aiAspectRatioMode.CurrentResolution;
     public bool m_ignoreMissingNodes = true;
     public bool m_forceRefresh;
@@ -36,8 +36,8 @@ public class AlembicStream : MonoBehaviour
     float m_lastAdjustedTime;
     bool m_lastSwapHandedness;
     bool m_lastSwapFaceWinding;
-    AlembicImporter.aiNormalMode m_lastNormalMode;
-    bool m_lastEnableTangents;
+    AlembicImporter.aiNormalsMode m_lastNormalsMode;
+    AlembicImporter.aiTangentsMode m_lastTangentsMode;
     float m_timeEps = 0.001f;
     AlembicImporter.aiContext m_abc;
     bool m_lastIgnoreMissingNodes;
@@ -130,9 +130,9 @@ public class AlembicStream : MonoBehaviour
         m_lastAdjustedTime = AdjustTime(0.0f);
         m_lastSwapHandedness = m_swapHandedness;
         m_lastSwapFaceWinding = m_swapFaceWinding;
-        m_lastNormalMode = m_normalMode;
+        m_lastNormalsMode = m_normalsMode;
         m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
-        m_lastEnableTangents = m_enableTangents;
+        m_lastTangentsMode = m_tangentsMode;
         m_forceRefresh = true;
     }
 
@@ -159,9 +159,9 @@ public class AlembicStream : MonoBehaviour
             if (m_forceRefresh || 
                 m_swapHandedness != m_lastSwapHandedness ||
                 m_swapFaceWinding != m_lastSwapFaceWinding ||
-                m_normalMode != m_lastNormalMode ||
+                m_normalsMode != m_lastNormalsMode ||
                 m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
-                m_enableTangents != m_lastEnableTangents ||
+                m_tangentsMode != m_lastTangentsMode ||
                 Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps ||
                 aspectRatio != m_lastAspectRatio)
             {
@@ -172,15 +172,15 @@ public class AlembicStream : MonoBehaviour
                 
                 AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime,
                                               m_swapHandedness, m_swapFaceWinding,
-                                              m_normalMode, m_enableTangents, aspectRatio,
+                                              m_normalsMode, m_tangentsMode, aspectRatio,
                                               m_ignoreMissingNodes);
                 
                 m_lastAdjustedTime = adjustedTime;
                 m_lastSwapHandedness = m_swapHandedness;
                 m_lastSwapFaceWinding = m_swapFaceWinding;
-                m_lastNormalMode = m_normalMode;
+                m_lastNormalsMode = m_normalsMode;
                 m_lastAspectRatio = aspectRatio;
-                m_lastEnableTangents = m_enableTangents;
+                m_lastTangentsMode = m_tangentsMode;
                 m_forceRefresh = false;
             }
             else

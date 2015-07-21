@@ -4,13 +4,6 @@
 #include "aiContext.h"
 #include "aiObject.h"
 
-/*
-bool m_triangulate;
-    bool m_swapHandedness;
-    bool m_swapFaceWinding;
-    NormalMode m_normalMode;
-*/
-
 aiObject::aiObject()
     : m_ctx(0)
     , m_hasXform(false)
@@ -24,7 +17,8 @@ aiObject::aiObject()
     , m_triangulate(true)
     , m_swapHandedness(true)
     , m_swapFaceWinding(false)
-    , m_normalMode(aiObject::NM_ComputeIfMissing)
+    , m_normalsMode(NM_ComputeIfMissing)
+    , m_tangentsMode(TM_None)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -38,7 +32,8 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_triangulate(true)
     , m_swapHandedness(true)
     , m_swapFaceWinding(false)
-    , m_normalMode(aiObject::NM_ComputeIfMissing)
+    , m_normalsMode(NM_ComputeIfMissing)
+    , m_tangentsMode(TM_None)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -127,18 +122,18 @@ void aiObject::setCurrentTime(float time)
     }
 }
 
-void aiObject::enableTriangulate(bool v)             { m_triangulate = v; }
-void aiObject::swapHandedness(bool v)                { m_swapHandedness = v; }
-void aiObject::swapFaceWinding(bool v)               { m_swapFaceWinding = v; }
-void aiObject::setNormalMode(aiObject::NormalMode m) { m_normalMode = m; }
-void aiObject::enableTangents(bool v)                { m_tangents = v; }
+void aiObject::enableTriangulate(bool v)         { m_triangulate = v; }
+void aiObject::swapHandedness(bool v)            { m_swapHandedness = v; }
+void aiObject::swapFaceWinding(bool v)           { m_swapFaceWinding = v; }
+void aiObject::setNormalsMode(aiNormalsMode m)   { m_normalsMode = m; }
+void aiObject::setTangentsMode(aiTangentsMode m) { m_tangentsMode = m; }
 
-float aiObject::getCurrentTime() const               { return m_time; }
-bool aiObject::getTriangulate() const                { return m_triangulate; }
-bool aiObject::isHandednessSwapped() const           { return m_swapHandedness; }
-bool aiObject::isFaceWindingSwapped() const          { return m_swapFaceWinding; }
-aiObject::NormalMode aiObject::getNormalMode() const { return m_normalMode; }
-bool aiObject::areTangentsEnabled() const            { return m_tangents; }
+float aiObject::getCurrentTime() const           { return m_time; }
+bool aiObject::getTriangulate() const            { return m_triangulate; }
+bool aiObject::isHandednessSwapped() const       { return m_swapHandedness; }
+bool aiObject::isFaceWindingSwapped() const      { return m_swapFaceWinding; }
+aiNormalsMode aiObject::getNormalsMode() const   { return m_normalsMode; }
+aiTangentsMode aiObject::getTangentsMode() const { return m_tangentsMode; }
 
 
 bool aiObject::hasXForm() const    { return m_hasXform; }

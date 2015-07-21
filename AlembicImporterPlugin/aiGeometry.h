@@ -42,6 +42,21 @@ private:
 
 // ---
 
+enum aiNormalsMode
+{
+    NM_ReadFromFile = 0,
+    NM_ComputeIfMissing,
+    NM_AlwaysCompute,
+    NM_Ignore
+};
+
+enum aiTangentsMode
+{
+    TM_None = 0,
+    TM_Smooth,
+    TM_Split
+};
+
 class aiPolyMesh : public aiSchema
 {
 typedef aiSchema super;
@@ -51,11 +66,6 @@ public:
     virtual ~aiPolyMesh();
 
     void updateSample() override;
-
-    void        setCurrentTime(float t);
-    void        enableReverseX(bool v);
-    void        enableTriangulate(bool v);
-    void        enableReverseIndex(bool v);
 
     int         getTopologyVariance() const;
     bool        hasNormals() const;
@@ -77,7 +87,7 @@ public:
     uint32_t    getSplitCount() const;
     uint32_t    getSplitCount(bool forceRefresh);
     uint32_t    getVertexBufferLength(uint32_t splitIndex) const;
-    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *T) const;
+    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *T);
     uint32_t    prepareSubmeshes(const aiFacesets *facesets);
     uint32_t    getSplitSubmeshCount(uint32_t splitIndex) const;
     bool        getNextSubmesh(aiSubmeshInfo &smi);
@@ -110,12 +120,13 @@ private:
     bool updateNormals(Abc::ISampleSelector &ss);
 
     bool smoothNormalsRequired() const;
+    bool tangentsRequired() const;
     bool smoothNormalsUpdateRequired() const;
     bool tangentsUpdateRequired() const;
 
-    void updateSmoothNormals() const;
+    void updateSmoothNormals();
     // 'updateTangents' will update smooth tangents if necessary
-    void updateTangents() const;
+    void updateTangents(bool smooth);
 
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
@@ -218,14 +229,15 @@ private:
     std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
 
-    mutable bool m_smoothNormalsDirty;
-    mutable size_t m_smoothNormalsCount;
-    mutable Abc::V3f *m_smoothNormals;
-    mutable bool m_smoothNormalsCCW;
+    bool m_smoothNormalsDirty;
+    size_t m_smoothNormalsCount;
+    Abc::V3f *m_smoothNormals;
+    bool m_smoothNormalsCCW;
 
-    mutable bool m_tangentsDirty;
-    mutable size_t m_tangentsCount;
-    mutable Imath::V4f *m_tangents;
+    bool m_tangentsDirty;
+    size_t m_tangentsCount;
+    Imath::V4f *m_tangents;
+    bool m_smoothTangents;
 };
 
 // ---

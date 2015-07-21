@@ -28,9 +28,9 @@ public class AlembicMesh : MonoBehaviour
         public int splitIndex;
     }
 
-    public bool m_swapFaceWinding = false;
-    public AlembicImporter.aiNormalModeOverride m_normalMode = AlembicImporter.aiNormalModeOverride.InheritStreamSetting;
-    public bool m_enableTangents = false;
+    public AlembicImporter.aiFaceWindingOverride m_faceWinding = AlembicImporter.aiFaceWindingOverride.InheritStreamSetting;
+    public AlembicImporter.aiNormalsModeOverride m_normalsMode = AlembicImporter.aiNormalsModeOverride.InheritStreamSetting;
+    public AlembicImporter.aiTangentsModeOverride m_tangentsMode = AlembicImporter.aiTangentsModeOverride.InheritStreamSetting;
     
     public bool hasFacesets = false;
 
