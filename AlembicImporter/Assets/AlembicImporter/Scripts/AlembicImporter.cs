@@ -95,6 +95,8 @@ public class AlembicImporter
         Ignore
     }
 
+    [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
+
     [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext();
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
