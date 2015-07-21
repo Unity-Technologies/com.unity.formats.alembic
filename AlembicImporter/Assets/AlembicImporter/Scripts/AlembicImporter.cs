@@ -12,8 +12,6 @@ public class AlembicImporter
 {
     public delegate void aiNodeEnumerator(aiObject obj, IntPtr userdata);
 
-    public enum AspectRatioMode { CurrentResolution = 0, DefaultResolution, CameraAperture };
-
     public struct aiSplitedMeshInfo
     {
         public int faceCount;
@@ -77,6 +75,13 @@ public class AlembicImporter
         Homogeneous,
         Heterogeneous
     }
+
+    public enum aiAspectRatioMode
+    {
+        CurrentResolution = 0,
+        DefaultResolution,
+        CameraAperture
+    };
 
     public enum aiNormalMode
     {
@@ -173,13 +178,13 @@ public class AlembicImporter
         public bool ignoreMissingNodes;
     }
 
-    public static float GetAspectRatio(AspectRatioMode mode)
+    public static float GetAspectRatio(aiAspectRatioMode mode)
     {
-        if (mode == AspectRatioMode.CameraAperture)
+        if (mode == aiAspectRatioMode.CameraAperture)
         {
             return 0.0f;
         }
-        else if (mode == AspectRatioMode.CurrentResolution)
+        else if (mode == aiAspectRatioMode.CurrentResolution)
         {
             return (float) Screen.width / (float) Screen.height;
         }
@@ -235,7 +240,7 @@ public class AlembicImporter
             abcstream.m_swapFaceWinding = swapFaceWinding;
             abcstream.m_normalMode = aiNormalMode.ComputeIfMissing;
             abcstream.m_enableTangents = false;
-            abcstream.m_aspectRatioMode = AspectRatioMode.CurrentResolution;
+            abcstream.m_aspectRatioMode = aiAspectRatioMode.CurrentResolution;
 
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
