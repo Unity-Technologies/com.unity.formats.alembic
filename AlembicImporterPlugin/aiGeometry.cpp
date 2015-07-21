@@ -456,7 +456,7 @@ void aiPolyMesh::updateTangents(bool smooth)
             }
 
             // normalize face normal, tangent and bitangent if current polygon had to be splitted
-            // into several triangles
+            //   into several triangles
             if (nfv > 3)
             {
                 N.normalize();
@@ -506,9 +506,7 @@ void aiPolyMesh::updateTangents(bool smooth)
         Abc::V3f &Tv = tan1[i];
         Abc::V3f &Bv = tan2[i];
         
-        //Nv.normalize();
-        //Tv.normalize();
-        //Bv.normalize();
+        // Normalize Tv and Bv?
         
         T = Tv - Nv * Tv.dot(Nv);
         T.normalize();
