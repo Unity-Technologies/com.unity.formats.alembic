@@ -436,7 +436,7 @@ public class AlembicImporter
 
         if (!updateTopology && topoVariance == aiTopologyVariance.Constant && !forceVerticesUpdate)
         {
-            Debug.Log("Nothing to update for \"" + trans.name + "\"");
+            //Debug.Log("Nothing to update for \"" + trans.name + "\"");
             return;
         }
 
