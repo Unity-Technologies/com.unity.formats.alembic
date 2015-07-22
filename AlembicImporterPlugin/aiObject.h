@@ -24,6 +24,7 @@ public:
     void swapFaceWinding(bool v);
     void setNormalsMode(aiNormalsMode m);
     void setTangentsMode(aiTangentsMode m);
+    void cacheTangentsSplits(bool v);
     
     bool        hasXForm() const;
     bool        hasPolyMesh() const;
@@ -54,6 +55,7 @@ public:
     bool           isFaceWindingSwapped() const;
     aiNormalsMode  getNormalsMode() const;
     aiTangentsMode getTangentsMode() const;
+    bool           areTangentsSplitsCached() const;
 
 private:
 #ifdef aiDebug
@@ -85,6 +87,7 @@ private:
     bool m_swapFaceWinding;
     aiNormalsMode m_normalsMode;
     aiTangentsMode m_tangentsMode;
+    bool m_cacheTangentsSplits;
 };
 
 

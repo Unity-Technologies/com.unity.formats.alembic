@@ -170,6 +170,18 @@ aiCLinkage aiExport int aiGetTangentsMode(aiObject* obj)
     return (int) obj->getTangentsMode();
 }
 
+aiCLinkage aiExport void aiCacheTangentsSplits(aiObject* obj, bool v)
+{
+    aiCheckObject(obj);
+    obj->cacheTangentsSplits(v);
+}
+
+aiCLinkage aiExport bool aiAreTangentsSplitsCached(aiObject* obj)
+{
+    aiCheckObject(obj);
+    return obj->areTangentsSplitsCached();
+}
+
 aiCLinkage aiExport const char* aiGetNameS(aiObject* obj)
 {
     aiCheckObject(obj);

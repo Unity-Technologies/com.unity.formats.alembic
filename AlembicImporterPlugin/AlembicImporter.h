@@ -75,6 +75,9 @@ aiCLinkage aiExport int             aiGetNormalsMode(aiObject* obj);
 aiCLinkage aiExport void            aiSetTangentsMode(aiObject* obj, int m);
 aiCLinkage aiExport int             aiGetTangentsMode(aiObject* obj);
 
+aiCLinkage aiExport void            aiCacheTangentsSplits(aiObject* obj, bool v);
+aiCLinkage aiExport bool            aiAreTangentsSplitsCached(aiObject* obj);
+
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport bool            aiXFormGetInherits(aiObject* obj);
 aiCLinkage aiExport aiV3            aiXFormGetPosition(aiObject* obj);
