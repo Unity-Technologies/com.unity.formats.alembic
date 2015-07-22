@@ -14,10 +14,12 @@ aiObject::aiObject()
     , m_hasLight(false)
     , m_hasMaterial(false)
     , m_time(0.0f)
-    , m_reverseX(true)
     , m_triangulate(true)
-    , m_reverseIndex(false)
-    , m_forceSmoothNormals(false)
+    , m_swapHandedness(true)
+    , m_swapFaceWinding(false)
+    , m_normalsMode(NM_ComputeIfMissing)
+    , m_tangentsMode(TM_None)
+    , m_cacheTangentsSplits(true)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -28,10 +30,12 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
     , m_time(0.0f)
-    , m_reverseX(true)
     , m_triangulate(true)
-    , m_reverseIndex(false)
-    , m_forceSmoothNormals(false)
+    , m_swapHandedness(true)
+    , m_swapFaceWinding(false)
+    , m_normalsMode(NM_ComputeIfMissing)
+    , m_tangentsMode(TM_None)
+    , m_cacheTangentsSplits(true)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -105,12 +109,12 @@ void aiObject::addChild(aiObject *c)
     m_children.push_back(c);
 }
 
-aiContext*  aiObject::getContext()          { return m_ctx; }
-abcObject&  aiObject::getAbcObject()        { return m_abc; }
-const char* aiObject::getName() const       { return m_abc.getName().c_str(); }
-const char* aiObject::getFullName() const   { return m_abc.getFullName().c_str(); }
-uint32_t    aiObject::getNumChildren() const{ return m_children.size(); }
-aiObject*   aiObject::getChild(int i)       { return m_children[i]; }
+aiContext*  aiObject::getContext()           { return m_ctx; }
+abcObject&  aiObject::getAbcObject()         { return m_abc; }
+const char* aiObject::getName() const        { return m_abc.getName().c_str(); }
+const char* aiObject::getFullName() const    { return m_abc.getFullName().c_str(); }
+uint32_t    aiObject::getNumChildren() const { return m_children.size(); }
+aiObject*   aiObject::getChild(int i)        { return m_children[i]; }
 
 void aiObject::setCurrentTime(float time)
 {
@@ -119,16 +123,21 @@ void aiObject::setCurrentTime(float time)
         s->updateSample();
     }
 }
-void aiObject::enableReverseX(bool v)       { m_reverseX = v; }
-void aiObject::enableTriangulate(bool v)    { m_triangulate = v; }
-void aiObject::enableReverseIndex(bool v)   { m_reverseIndex = v; }
-void aiObject::forceSmoothNormals(bool v)   { m_forceSmoothNormals = v; }
 
-float aiObject::getCurrentTime() const      { return m_time; }
-bool aiObject::getReverseX() const          { return m_reverseX; }
-bool aiObject::getReverseIndex() const      { return m_reverseIndex; }
-bool aiObject::getTriangulate() const       { return m_triangulate; }
-bool aiObject::getForceSmoothNormals() const { return m_forceSmoothNormals; }
+void aiObject::enableTriangulate(bool v)         { m_triangulate = v; }
+void aiObject::swapHandedness(bool v)            { m_swapHandedness = v; }
+void aiObject::swapFaceWinding(bool v)           { m_swapFaceWinding = v; }
+void aiObject::setNormalsMode(aiNormalsMode m)   { m_normalsMode = m; }
+void aiObject::setTangentsMode(aiTangentsMode m) { m_tangentsMode = m; }
+void aiObject::cacheTangentsSplits(bool v)       { m_cacheTangentsSplits = v; }
+
+float aiObject::getCurrentTime() const           { return m_time; }
+bool aiObject::getTriangulate() const            { return m_triangulate; }
+bool aiObject::isHandednessSwapped() const       { return m_swapHandedness; }
+bool aiObject::isFaceWindingSwapped() const      { return m_swapFaceWinding; }
+aiNormalsMode aiObject::getNormalsMode() const   { return m_normalsMode; }
+aiTangentsMode aiObject::getTangentsMode() const { return m_tangentsMode; }
+bool aiObject::areTangentsSplitsCached() const   { return m_cacheTangentsSplits; }
 
 
 bool aiObject::hasXForm() const    { return m_hasXform; }

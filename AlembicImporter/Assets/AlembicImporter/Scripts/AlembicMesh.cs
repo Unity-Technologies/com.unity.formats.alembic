@@ -15,6 +15,7 @@ public class AlembicMesh : MonoBehaviour
         public Vector3[] positionCache;
         public Vector3[] normalCache;
         public Vector2[] uvCache;
+        public Vector4[] tangentCache;
         public Mesh mesh;
         public GameObject host;
     }
@@ -27,8 +28,11 @@ public class AlembicMesh : MonoBehaviour
         public int splitIndex;
     }
 
-    public bool m_reverseFaces = false;
-    public bool m_forceSmoothNormals = false;
+    public AlembicImporter.aiFaceWindingOverride m_faceWinding = AlembicImporter.aiFaceWindingOverride.InheritStreamSetting;
+    public AlembicImporter.aiNormalsModeOverride m_normalsMode = AlembicImporter.aiNormalsModeOverride.InheritStreamSetting;
+    public AlembicImporter.aiTangentsModeOverride m_tangentsMode = AlembicImporter.aiTangentsModeOverride.InheritStreamSetting;
+    public bool m_cacheTangentsSplits = true;
+    
     public bool hasFacesets = false;
 
     public List<Submesh> m_submeshes = new List<Submesh>();
@@ -38,6 +42,7 @@ public class AlembicMesh : MonoBehaviour
     public RenderTexture m_vertices;
     public RenderTexture m_normals;
     public RenderTexture m_uvs;
+    public RenderTexture m_tangents;
 
     static RenderTexture CreateDataTexture(int numData, RenderTextureFormat format)
     {

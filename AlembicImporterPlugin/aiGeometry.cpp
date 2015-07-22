@@ -2,7 +2,10 @@
 #include "AlembicImporter.h"
 #include "aiGeometry.h"
 #include "aiObject.h"
+#include "aiLogger.h"
+#include <sstream>
 
+// ---
 
 aiSchema::aiSchema()
     : m_obj(nullptr)
@@ -30,8 +33,6 @@ aiXForm::aiXForm(aiObject *obj)
     : super(obj)
     , m_inherits(true)
 {
-    AbcGeom::IXform xf(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = xf.getSchema();
 }
 
 aiXForm::~aiXForm()
@@ -41,6 +42,17 @@ aiXForm::~aiXForm()
 void aiXForm::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
+
+    if (!m_schema.valid())
+    {
+        AbcGeom::IXform xf(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = xf.getSchema();
+    }
+    else if (m_schema.isConstant())
+    {
+        return;
+    }
+
     m_schema.get(m_sample, ss);
     m_inherits = m_schema.getInheritsXforms(ss);
 }
@@ -53,7 +65,8 @@ bool aiXForm::getInherits() const
 abcV3 aiXForm::getPosition() const
 {
     abcV3 ret = m_sample.getTranslation();
-    if (m_obj->getReverseX()) {
+    if (m_obj->isHandednessSwapped())
+    {
         ret.x *= -1.0f;
     }
     return ret;
@@ -62,7 +75,8 @@ abcV3 aiXForm::getPosition() const
 abcV3 aiXForm::getAxis() const
 {
     abcV3 ret = m_sample.getAxis();
-    if (m_obj->getReverseX()) {
+    if (m_obj->isHandednessSwapped())
+    {
         ret.x *= -1.0f;
     }
     return ret;
@@ -71,7 +85,8 @@ abcV3 aiXForm::getAxis() const
 float aiXForm::getAngle() const
 {
     float ret = float(m_sample.getAngle());
-    if (m_obj->getReverseX()) {
+    if (m_obj->isHandednessSwapped())
+    {
         ret *= -1.0f;
     }
     return ret;
@@ -89,22 +104,103 @@ abcM44 aiXForm::getMatrix() const
 
 // ---
 
+class TangentKey
+{
+public:
+
+    Abc::V3f N;
+    Abc::V2f UV;
+    
+    inline TangentKey()
+        : N(0.0f, 0.0f, 0.0f)
+        , UV(0.0f, 0.0f)
+    {
+    }
+    
+    inline TangentKey(const Abc::V3f &iN, const Abc::V2f &iUV)
+        : N(iN)
+        , UV(iUV)
+    {
+    }
+    
+    inline TangentKey(const TangentKey &rhs)
+        : N(rhs.N)
+        , UV(rhs.UV)
+    {
+    }
+    
+    inline TangentKey& operator=(const TangentKey &rhs)
+    {
+        if (this != &rhs)
+        {
+            N = rhs.N;
+            UV = rhs.UV;
+        }
+        return *this;
+    }
+    
+    inline bool operator<(const TangentKey &rhs) const
+    {
+        if (N.x < rhs.N.x) return true;
+        if (N.x > rhs.N.x) return false;
+
+        if (N.y < rhs.N.y) return true;
+        if (N.y > rhs.N.y) return false;
+
+        if (N.z < rhs.N.z) return true;
+        if (N.z > rhs.N.z) return false;
+
+        if (UV.x < rhs.UV.x) return true;
+        if (UV.x > rhs.UV.x) return false;
+
+        if (UV.y < rhs.UV.y) return true;
+        if (UV.y > rhs.UV.y) return false;
+
+        return false;
+    }
+
+    std::string toString() const
+    {
+        std::ostringstream oss;
+        oss << "N=" << N << ", UV=" << UV;
+        return oss.str();
+    }
+};
+
+typedef std::map<TangentKey, int> TangentIndexMap;
+
 aiPolyMesh::aiPolyMesh()
     : super()
+    , m_smoothNormalsDirty(true)
     , m_smoothNormalsCount(0)
     , m_smoothNormals(0)
-    , m_lastReverseIndex(false)
+    , m_smoothNormalsCCW(false)
+    , m_tangentsDirty(true)
+    , m_tangentIndicesCount(0)
+    , m_tangentIndices(0)
+    , m_tangentsCount(0)
+    , m_tangents(0)
+    , m_tangentsSmooth(true)
+    , m_tangentsCCW(false)
+    , m_tangentsUseSmoothNormals(false)
 {
 }
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
     : super(obj)
+    , m_smoothNormalsDirty(true)
     , m_smoothNormalsCount(0)
     , m_smoothNormals(0)
-    , m_lastReverseIndex(false)
+    , m_smoothNormalsCCW(false)
+    , m_tangentsDirty(true)
+    , m_tangentIndicesCount(0)
+    , m_tangentIndices(0)
+    , m_tangentsCount(0)
+    , m_tangents(0)
+    , m_tangentsSmooth(true)
+    , m_tangentsCCW(false)
+    , m_tangentsUseSmoothNormals(false)
 {
-    AbcGeom::IPolyMesh pm(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = pm.getSchema();
 }
 
 aiPolyMesh::~aiPolyMesh()
@@ -114,80 +210,77 @@ aiPolyMesh::~aiPolyMesh()
         delete[] m_smoothNormals;
         m_smoothNormals = 0;
     }
+    
+    if (m_tangentIndices)
+    {
+        delete[] m_tangentIndices;
+        m_tangentIndices = 0;
+    }
+
+    if (m_tangents)
+    {
+        delete[] m_tangents;
+        m_tangents = 0;
+    }
 }
 
 void aiPolyMesh::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
 
-    bool hasValidTopology = (m_counts && m_indices);
+    bool readTopology = false;
 
-    if (m_schema.isConstant() && hasValidTopology)
+    if (!m_schema.valid())
     {
-        if (m_normals.valid())
-        {
-            // we are using alembic's file normals
-            if (m_obj->getForceSmoothNormals())
-            {
-                // switch to smooth normals
-                computeSmoothNormals();
-            }
-        }
-        else
-        {
-            // we are using computed smooth normals
-            if (m_obj->getForceSmoothNormals())
-            {
-                // check if we need to update them
-                if (m_lastReverseIndex != m_obj->getReverseIndex())
-                {
-                    // winding changed, re-compute normals
-                    computeSmoothNormals();
-                }
-            }
-            else
-            {
-                // switch back to alembic's file normals
-                updateNormals(ss);
-            }
-        }
+        AbcGeom::IPolyMesh pm(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = pm.getSchema();
+        readTopology = true;
     }
-    else
+    else if (m_schema.isConstant())
     {
-        // only sample topology if we don't already have valid topology data or the mesh has varying topology
-        if (!hasValidTopology || m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology)
-        {
-            m_schema.getFaceIndicesProperty().get(m_indices, ss);
-            m_schema.getFaceCountsProperty().get(m_counts, ss);
+        // Note: normals and uvs sampling may differ from that of the schema
+        updateNormals(ss);
 
-            // invalidate normals and uvs
-            m_normals.reset();
-            m_uvs.reset();
+        if (updateUVs(ss))
+        {
+            // tangents depend on uvs
+            m_tangentsDirty = true;
         }
 
-        // positions and velocities change with time if shema is not constant
-        m_schema.getPositionsProperty().get(m_positions, ss);
-
-        if (m_schema.getVelocitiesProperty().valid())
-        {
-            m_schema.getVelocitiesProperty().get(m_velocities, ss);
-        }
-
-        // normals and uvs sampling may differ from that of the schema
-        if (!updateNormals(ss))
-        {
-            computeSmoothNormals();
-        }
-
-        updateUVs(ss);
+        return;
     }
 
-    m_lastReverseIndex = m_obj->getReverseIndex();
+    if (readTopology || m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology)
+    {
+        m_schema.getFaceIndicesProperty().get(m_indices, ss);
+        m_schema.getFaceCountsProperty().get(m_counts, ss);
+
+        // invalidate normals and uvs
+        m_normals.reset();
+        m_uvs.reset();
+    }
+
+    m_schema.getPositionsProperty().get(m_positions, ss);
+
+    if (m_schema.getVelocitiesProperty().valid())
+    {
+        m_schema.getVelocitiesProperty().get(m_velocities, ss);
+    }
+
+    updateNormals(ss);
+    updateUVs(ss);
+
+    // positions have changed, set smooth normals dirty
+    m_smoothNormalsDirty = true;
+
+    // also set tangents dirty as they depend on smooth normals
+    m_tangentsDirty = true;
 }
 
 bool aiPolyMesh::updateUVs(Abc::ISampleSelector &ss)
 {
     auto uvparam = m_schema.getUVsParam();
+    
     if (uvparam.valid() &&
         uvparam.getScope() == AbcGeom::kFacevaryingScope)
     {
@@ -195,129 +288,394 @@ bool aiPolyMesh::updateUVs(Abc::ISampleSelector &ss)
         if (!m_uvs.valid() || !uvparam.isConstant())
         {
             uvparam.getIndexed(m_uvs, ss);
+            return true;
         }
+    }
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 bool aiPolyMesh::updateNormals(Abc::ISampleSelector &ss)
 {
     auto nparam = m_schema.getNormalsParam();
 
-    if (!m_obj->getForceSmoothNormals() &&
-        nparam.valid() &&
+    if (nparam.valid() &&
         (nparam.getScope() == AbcGeom::kFacevaryingScope ||
          nparam.getScope() == AbcGeom::kVaryingScope ||
          nparam.getScope() == AbcGeom::kVertexScope))
     {
         // do not re-read normals if sampling is constant and we already have valid normals
+        
         if (!m_normals.valid() || !nparam.isConstant())
         {
             nparam.getIndexed(m_normals, ss);
+            return true;
         }
-
-        if (m_smoothNormals)
-        {
-            delete[] m_smoothNormals;
-            m_smoothNormals = 0;
-            m_smoothNormalsCount = 0;
-        }
-
-        return true;
     }
-    else
+
+    return false;
+}
+
+bool aiPolyMesh::smoothNormalsRequired() const
+{
+    return (m_obj->getNormalsMode() == NM_AlwaysCompute ||
+            m_obj->getTangentsMode() == TM_Smooth ||
+            (!m_normals.valid() && m_obj->getNormalsMode() == NM_ComputeIfMissing));
+}
+
+bool aiPolyMesh::smoothNormalsUpdateRequired() const
+{
+    return (!m_smoothNormals ||
+             m_smoothNormalsDirty ||
+             m_smoothNormalsCCW != m_obj->isFaceWindingSwapped());
+}
+
+bool aiPolyMesh::tangentsRequired() const
+{
+    return (m_obj->getTangentsMode() != TM_None);
+}
+
+bool aiPolyMesh::tangentsUseSmoothNormals() const
+{
+    switch (m_obj->getTangentsMode())
     {
+    case TM_Smooth:
+        return true;
+    case TM_Split:
+        switch (m_obj->getNormalsMode())
+        {
+        case NM_ReadFromFile:
+            return false;
+        case NM_ComputeIfMissing:
+            return !m_normals.valid();
+        case NM_AlwaysCompute:
+            return true;
+        case NM_Ignore:
+        default:
+            return false;
+        }
+    default:
         return false;
     }
 }
 
-bool aiPolyMesh::computeSmoothNormals()
+bool aiPolyMesh::tangentsUpdateRequired() const
 {
-    if (m_normals.valid())
-    {
-        m_normals.reset();
-    }
+    return (!m_tangents ||
+            !m_tangentIndices ||
+             m_tangentsDirty ||
+             m_tangentsCCW != m_obj->isFaceWindingSwapped() ||
+             m_tangentsSmooth != (m_obj->getTangentsMode() == TM_Smooth) ||
+             m_tangentsUseSmoothNormals != tangentsUseSmoothNormals() ||
+             (m_tangentsUseSmoothNormals && smoothNormalsUpdateRequired()));
+}
 
-    if (m_smoothNormals && m_smoothNormalsCount != m_positions->size())
+void aiPolyMesh::updateSmoothNormals()
+{
+    aiLogger::Info("%s: Compute smooth normals\n", m_obj->getFullName());
+
+    size_t smoothNormalsCount = m_positions->size();
+
+    if (!m_smoothNormals)
+    {
+        m_smoothNormals = new Abc::V3f[smoothNormalsCount];
+    }
+    else if (m_smoothNormalsCount != smoothNormalsCount)
     {
         delete[] m_smoothNormals;
-        m_smoothNormals = 0;
-        m_smoothNormalsCount = 0;
+        m_smoothNormals = new Abc::V3f[smoothNormalsCount];
     }
+    
+    // always reset as V3f default constructor doesn't initialize its members
+    memset(m_smoothNormals, 0, smoothNormalsCount * sizeof(Abc::V3f));
 
-    if (!m_smoothNormals || !m_schema.isConstant() || m_lastReverseIndex != m_obj->getReverseIndex())
+    m_smoothNormalsCount = smoothNormalsCount;
+
+    const auto &counts = *m_counts;
+    const auto &indices = *m_indices;
+    const auto &positions = *m_positions;
+
+    size_t nf = counts.size();
+    size_t off = 0;
+    bool ccw = m_obj->isFaceWindingSwapped();
+    int ti1 = ccw ? 2 : 1;
+    int ti2 = ccw ? 1 : 2;
+    Abc::V3f N, dP1, dP2;
+
+    for (size_t f=0; f<nf; ++f)
     {
-        if (!m_smoothNormals)
+        int nfv = counts[f];
+
+        if (nfv >= 3)
         {
-            m_smoothNormals = new Abc::V3f[m_positions->size()];
-            m_smoothNormalsCount = m_positions->size();
+            // Compute average normal for current face
+            N.setValue(0.0f, 0.0f, 0.0f);
+
+            const Abc::V3f &P0 = positions[indices[off]];
+            
+            for (int fv=0; fv<nfv-2; ++fv)
+            {
+                const Abc::V3f &P1 = positions[indices[off + fv + ti1]];
+                const Abc::V3f &P2 = positions[indices[off + fv + ti2]];
+
+                dP1 = P1 - P0;
+                dP2 = P2 - P0;
+                
+                N += dP2.cross(dP1).normalize();
+            }
+
+            if (nfv > 3)
+            {
+                N.normalize();
+            }
+
+            // Accumulate for all vertices participating to this face
+            for (int fv=0; fv<nfv; ++fv)
+            {
+                m_smoothNormals[indices[off + fv]] += N;
+            }
         }
 
-        const auto &counts = *m_counts;
-        const auto &indices = *m_indices;
-        const auto &positions = *m_positions;
+        off += nfv;
+    }
 
-        bool rev = m_obj->getReverseIndex();
-        int ti1 = rev ? 2 : 1;
-        int ti2 = rev ? 1 : 2;
-        size_t nf = counts.size();
-        size_t off = 0;
-        Abc::V3f P0, P1, N, e0, e1;
+    // Normalize normal vectors
+    for (size_t i=0; i<m_smoothNormalsCount; ++i)
+    {
+        m_smoothNormals[i].normalize();
+    }
 
-        for (size_t f=0; f<nf; ++f)
+    m_smoothNormalsCCW = ccw;
+    m_smoothNormalsDirty = false;
+}
+
+void aiPolyMesh::updateTangents(bool smooth, const Abc::V3f *inN, bool indexedNormals)
+{
+    const auto &counts = *m_counts;
+    const auto &indices = *m_indices;
+    const auto &positions = *m_positions;
+    const auto &uvVals = *(m_uvs.getVals());
+    const auto &uvIdxs = *(m_uvs.getIndices());
+
+    size_t nf = counts.size();
+    size_t off = 0;
+    bool ccw = m_obj->isFaceWindingSwapped();
+    int ti1 = (ccw ? 2 : 1);
+    int ti2 = (ccw ? 1 : 2);
+
+    aiLogger::Info("%s: Compute %stangents\n", m_obj->getFullName(), (smooth ? "smooth " : ""));
+    
+    size_t tangentsCount = 0;
+
+    bool useSmoothNormals = (inN == m_smoothNormals);
+    
+    // Unique tangents not affect by polygon winding or handedness
+    bool updateIndices = (m_tangentIndices == 0 ||
+                          m_tangentIndicesCount != indices.size() ||
+                          m_tangentsUseSmoothNormals != useSmoothNormals || // swapped normals set
+                          m_tangentsSmooth != smooth || // swapped tangent smoothing
+                          m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology ||
+                          !m_obj->areTangentsSplitsCached());
+    
+    const Util::uint32_t *Nidxs = (indexedNormals ? m_normals.getIndices()->get() : 0);
+
+    if (updateIndices)
+    {
+        aiLogger::Info("  Update tangent splits...\n");
+
+        size_t tangentIndicesCount = indices.size();
+
+        if (!m_tangentIndices)
         {
-            int nfv = counts[f];
+            m_tangentIndices = new int[tangentIndicesCount];
+        }
+        else if (m_tangentIndicesCount != tangentIndicesCount)
+        {
+            delete[] m_tangentIndices;
+            m_tangentIndices = new int[tangentIndicesCount];
+        }
 
-            if (nfv >= 3)
+        m_tangentIndicesCount = tangentIndicesCount;
+        
+        if (smooth)
+        {
+            for (size_t i=0; i<tangentIndicesCount; ++i)
             {
-                // Compute average normal for current face
-                N.setValue(0.0f, 0.0f, 0.0f);
+                m_tangentIndices[i] = indices[i];
+            }
 
-                P0 = positions[indices[off]];
-                
-                for (int fv=0; fv<nfv-2; ++fv)
+            tangentsCount = m_positions->size();
+        }
+        else
+        {
+            TangentIndexMap uniqueIndices;
+            TangentIndexMap::iterator it;
+
+            for (size_t f=0, v=0; f<nf; ++f)
+            {
+                int nfv = counts[f];
+            
+                for (int fv=0; fv<nfv; ++fv, ++v)
                 {
-                    P1 = positions[indices[off + fv + ti1]];
-
-                    e0 = P1 - P0;
-                    e1 = positions[indices[off + fv + ti2]] - P1;
+                    TangentKey key(inN[Nidxs ? Nidxs[v] : indices[v]], uvVals[uvIdxs[v]]);
                     
-                    N += e1.cross(e0).normalize();
-                }
+                    #ifdef _DEBUG
+                    aiLogger::Info("  Face-vertex %lu: Tangent Key => %s\n", v, key.toString().c_str());
+                    #endif
 
-                if (nfv > 3)
-                {
-                    N.normalize();
-                }
+                    it = uniqueIndices.find(key);
+                    
+                    if (it == uniqueIndices.end())
+                    {
+                        #ifdef _DEBUG
+                        aiLogger::Info("    Not found: Add new unique tangent\n");
+                        #endif
 
-                // Accumulate for all vertices participating to this face
-                for (int fv=0; fv<nfv; ++fv)
-                {
-                    m_smoothNormals[indices[off + fv]] += N;
+                        int idx = (int) uniqueIndices.size();
+                        
+                        m_tangentIndices[v] = idx;
+                        uniqueIndices[key] = idx;
+                    }
+                    else
+                    {
+                        #ifdef _DEBUG
+                        aiLogger::Info("    Found: Use tangent %d\n", it->second);
+                        #endif
+
+                        m_tangentIndices[v] = it->second;
+                    }
                 }
             }
 
-            off += nfv;
+            tangentsCount = uniqueIndices.size(); 
         }
-
-        // Normalize normal vectors
-        for (size_t i=0; i<m_smoothNormalsCount; ++i)
-        {
-            m_smoothNormals[i].normalize();
-        }
-
-        return true;
+        
+        aiLogger::Info("  %lu unique tangent(s)\n", tangentsCount);
     }
     else
     {
-        // no update required
-        return false;
+        // re-use current value
+        tangentsCount = m_tangentsCount;
     }
+    
+    if (!m_tangents)
+    {
+        m_tangents = new Imath::V4f[tangentsCount];
+    }
+    else if (m_tangentsCount != tangentsCount)
+    {
+        delete[] m_tangents;
+        m_tangents = new Imath::V4f[tangentsCount];       
+    }
+
+    m_tangentsCount = tangentsCount;
+
+    Abc::V3f *tan1 = new Abc::V3f[2 * tangentsCount];
+    Abc::V3f *tan2 = tan1 + tangentsCount;
+    // See note above in updateSmoothNormals
+    memset(tan1, 0, 2 * tangentsCount * sizeof(Abc::V3f));
+    // Also keep track of normal index for each tangents for ortho normalization step
+    int *tanNidxs = new int[tangentsCount];
+
+    Abc::V3f T, B, dP1, dP2, tmp;
+    Abc::V2f dUV1, dUV2;
+
+    for (size_t f=0; f<nf; ++f)
+    {
+        int nfv = counts[f];
+
+        if (nfv >= 3)
+        {
+            // reset face tangent and bitangent
+            T.setValue(0.0f, 0.0f, 0.0f);
+            B.setValue(0.0f, 0.0f, 0.0f);
+
+            const Abc::V3f &P0 = positions[indices[off]];
+            const Abc::V2f &UV0 = uvVals[uvIdxs[off]];
+
+            // for each triangle making up current polygon
+            for (int fv=0; fv<nfv-2; ++fv)
+            {
+                const Abc::V3f &P1 = positions[indices[off + fv + ti1]];
+                const Abc::V3f &P2 = positions[indices[off + fv + ti2]];
+
+                const Abc::V2f &UV1 = uvVals[uvIdxs[off + fv + ti1]];
+                const Abc::V2f &UV2 = uvVals[uvIdxs[off + fv + ti2]];
+
+                dP1 = P1 - P0;
+                dP2 = P2 - P0;
+                
+                dUV1 = UV1 - UV0;
+                dUV2 = UV2 - UV0;
+
+                float r = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
+                
+                if (r < -0.000001f || 0.000001f < r)
+                {
+                    r = 1.0f / r;
+                    
+                    tmp.setValue(r * (dUV2.y * dP1.x - dUV1.y * dP2.x),
+                                 r * (dUV2.y * dP1.y - dUV1.y * dP2.y),
+                                 r * (dUV2.y * dP1.z - dUV1.y * dP2.z));
+                    tmp.normalize();
+                    // accumulate face tangent
+                    T += tmp;
+
+                    tmp.setValue(r * (dUV1.x * dP2.x - dUV2.x * dP1.x),
+                                 r * (dUV1.x * dP2.y - dUV2.x * dP1.y),
+                                 r * (dUV1.x * dP2.z - dUV2.x * dP1.z));
+                    tmp.normalize();
+                    // accumulte face bitangent
+                    B += tmp;
+                }
+            }
+
+            // normalize face tangent and bitangent if current polygon had to be splitted
+            //   into several triangles
+            if (nfv > 3)
+            {
+                T.normalize();
+                B.normalize();
+            }
+
+            // accumulate normals, tangent and bitangent for each vertex
+            for (int fv=0; fv<nfv; ++fv)
+            {
+                int v = m_tangentIndices[off + fv];
+                tan1[v] += T;
+                tan2[v] += B;
+                tanNidxs[v] = (Nidxs ? Nidxs[off + fv] : indices[off + fv]);
+            }
+        }
+
+        off += nfv;
+    }
+
+    // compute final tangent space for each point
+    for (size_t i=0; i<tangentsCount; ++i)
+    {
+        const Abc::V3f &Nv = inN[tanNidxs[i]];
+        Abc::V3f &Tv = tan1[i];
+        Abc::V3f &Bv = tan2[i];
+        
+        // Normalize Tv and Bv?
+        
+        T = Tv - Nv * Tv.dot(Nv);
+        T.normalize();
+        
+        m_tangents[i].x = T.x;
+        m_tangents[i].y = T.y;
+        m_tangents[i].z = T.z;
+        m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f ? -1.0f : 1.0f);
+    }
+
+    m_tangentsDirty = false;
+    m_tangentsSmooth = smooth;
+    m_tangentsCCW = ccw;
+    m_tangentsUseSmoothNormals = useSmoothNormals;
+    
+    delete[] tanNidxs;
+    delete[] tan1;
 }
 
 int aiPolyMesh::getTopologyVariance() const
@@ -327,7 +685,11 @@ int aiPolyMesh::getTopologyVariance() const
 
 bool aiPolyMesh::hasNormals() const
 {
-    return (m_normals.valid() || m_smoothNormals);
+    // if mode is 'Ignore' or 'ReadFromFile', should not return smooth normals even if computed
+    // to build the tangents
+    return (m_normals.valid() ||
+            m_obj->getNormalsMode() == NM_AlwaysCompute ||
+            m_obj->getNormalsMode() == NM_ComputeIfMissing);
 }
 
 bool aiPolyMesh::hasUVs() const
@@ -342,10 +704,13 @@ uint32_t aiPolyMesh::getIndexCount() const
         uint32_t r = 0;
         const auto &counts = *m_counts;
         size_t n = counts.size();
-        for (size_t fi = 0; fi < n; ++fi) {
+        
+        for (size_t fi = 0; fi < n; ++fi)
+        {
             int ngon = counts[fi];
             r += (ngon - 2) * 3;
         }
+
         return r;
     }
     else
@@ -361,7 +726,7 @@ uint32_t aiPolyMesh::getVertexCount() const
 
 void aiPolyMesh::copyIndices(int *dst) const
 {
-    bool reverseIndex = m_obj->getReverseIndex();
+    bool ccw = m_obj->isFaceWindingSwapped();
     const auto &counts = *m_counts;
     const auto &indices = *m_indices;
 
@@ -369,12 +734,15 @@ void aiPolyMesh::copyIndices(int *dst) const
     {
         uint32_t a = 0;
         uint32_t b = 0;
-        uint32_t i1 = reverseIndex ? 2 : 1;
-        uint32_t i2 = reverseIndex ? 1 : 2;
+        uint32_t i1 = ccw ? 2 : 1;
+        uint32_t i2 = ccw ? 1 : 2;
         size_t n = counts.size();
-        for (size_t fi = 0; fi < n; ++fi) {
+
+        for (size_t fi = 0; fi < n; ++fi)
+        {
             int ngon = counts[fi];
-            for (int ni = 0; ni < (ngon - 2); ++ni) {
+            for (int ni = 0; ni < (ngon - 2); ++ni)
+            {
                 dst[b + 0] = std::max<int>(indices[a], 0);
                 dst[b + 1] = std::max<int>(indices[a + i1 + ni], 0);
                 dst[b + 2] = std::max<int>(indices[a + i2 + ni], 0);
@@ -386,13 +754,18 @@ void aiPolyMesh::copyIndices(int *dst) const
     else
     {
         size_t n = indices.size();
-        if (reverseIndex) {
-            for (size_t i = 0; i < n; ++i) {
+
+        if (ccw)
+        {
+            for (size_t i = 0; i < n; ++i)
+            {
                 dst[i] = indices[n - i - 1];
             }
         }
-        else {
-            for (size_t i = 0; i < n; ++i) {
+        else
+        {
+            for (size_t i = 0; i < n; ++i)
+            {
                 dst[i] = indices[i];
             }
         }
@@ -403,11 +776,16 @@ void aiPolyMesh::copyVertices(abcV3 *dst) const
 {
     const auto &cont = *m_positions;
     size_t n = cont.size();
-    for (size_t i = 0; i < n; ++i) {
+
+    for (size_t i = 0; i < n; ++i)
+    {
         dst[i] = cont[i];
     }
-    if (m_obj->getReverseX()) {
-        for (size_t i = 0; i < n; ++i) {
+    
+    if (m_obj->isHandednessSwapped())
+    {
+        for (size_t i = 0; i < n; ++i)
+        {
             dst[i].x *= -1.0f;
         }
     }
@@ -434,9 +812,12 @@ bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &outSmi, const aiSplitedMe
 
     bool isEnd = true;
     int a = 0;
-    for (size_t i = smi.beginFace; i < nc; ++i) {
+
+    for (size_t i = smi.beginFace; i < nc; ++i)
+    {
         int ngon = counts[i];
-        if (a + ngon >= maxVertices) {
+        if (a + ngon >= maxVertices)
+        {
             isEnd = false;
             break;
         }
@@ -449,26 +830,32 @@ bool aiPolyMesh::getSplitedMeshInfo(aiSplitedMeshInfo &outSmi, const aiSplitedMe
 
     smi.numVertices = a;
     outSmi = smi;
+
     return isEnd;
 }
 
 void aiPolyMesh::copySplitedIndices(int *dst, const aiSplitedMeshInfo &smi) const
 {
-    bool reverseIndex = m_obj->getReverseIndex();
+    bool ccw = m_obj->isFaceWindingSwapped();
     const auto &counts = *m_counts;
 
     uint32_t a = 0;
     uint32_t b = 0;
-    uint32_t i1 = reverseIndex ? 2 : 1;
-    uint32_t i2 = reverseIndex ? 1 : 2;
-    for (int fi = 0; fi < smi.numFaces; ++fi) {
+    uint32_t i1 = ccw ? 2 : 1;
+    uint32_t i2 = ccw ? 1 : 2;
+
+    for (int fi = 0; fi < smi.numFaces; ++fi)
+    {
         int ngon = counts[smi.beginFace + fi];
-        for (int ni = 0; ni < (ngon - 2); ++ni) {
+
+        for (int ni = 0; ni < (ngon - 2); ++ni)
+        {
             dst[b + 0] = a;
             dst[b + 1] = a + i1 + ni;
             dst[b + 2] = a + i2 + ni;
             b += 3;
         }
+        
         a += ngon;
     }
 }
@@ -480,15 +867,23 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
     const auto &positions = *m_positions;
 
     uint32_t a = 0;
-    for (int fi = 0; fi < smi.numFaces; ++fi) {
+
+    for (int fi = 0; fi < smi.numFaces; ++fi)
+    {
         int ngon = counts[smi.beginFace + fi];
-        for (int ni = 0; ni < ngon; ++ni) {
+        
+        for (int ni = 0; ni < ngon; ++ni)
+        {
             dst[a + ni] = positions[indices[a + ni + smi.beginIndex]];
         }
+
         a += ngon;
     }
-    if (m_obj->getReverseX()) {
-        for (size_t i = 0; i < a; ++i) {
+
+    if (m_obj->isHandednessSwapped())
+    {
+        for (size_t i = 0; i < a; ++i)
+        {
             dst[i].x *= -1.0f;
         }
     }
@@ -496,7 +891,7 @@ void aiPolyMesh::copySplitedVertices(abcV3 *dst, const aiSplitedMeshInfo &smi) c
 
 void aiPolyMesh::copySplitedNormals(abcV3 *dst, const aiSplitedMeshInfo &smi) const
 {
-    float xScale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+    float xScale = (m_obj->isHandednessSwapped() ? -1.0f : 1.0f);
     
     if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
     {
@@ -515,11 +910,16 @@ void aiPolyMesh::copySplitedUVs(abcV2 *dst, const aiSplitedMeshInfo &smi) const
     const auto &indices = *m_uvs.getIndices();
 
     uint32_t a = 0;
-    for (int fi = 0; fi < smi.numFaces; ++fi) {
+
+    for (int fi = 0; fi < smi.numFaces; ++fi)
+    {
         int ngon = counts[smi.beginFace + fi];
-        for (int ni = 0; ni < ngon; ++ni) {
+        
+        for (int ni = 0; ni < ngon; ++ni)
+        {
             dst[a + ni] = uvs[indices[a + ni + smi.beginIndex]];
         }
+        
         a += ngon;
     }
 }
@@ -598,16 +998,26 @@ uint32_t aiPolyMesh::getVertexBufferLength(uint32_t splitIndex) const
     }
 }
 
-void aiPolyMesh::fillVertexBuffer(uint32_t splitIndex, abcV3 *P, abcV3 *N, abcV2 *UV) const
+void aiPolyMesh::fillVertexBuffer(uint32_t splitIndex, abcV3 *P, abcV3 *N, abcV2 *UV, abcV4 *T)
 {
     if (splitIndex >= m_splits.size())
     {
         return;
     }
 
-    bool copyNormals = (hasNormals() && N);
+    aiLogger::Info("%s: Fill vertex buffer %u\n", m_obj->getFullName(), splitIndex);
+
+    aiNormalsMode normalsMode = m_obj->getNormalsMode();
+    aiTangentsMode tangentsMode = m_obj->getTangentsMode();
+    
+    bool copyNormals = (hasNormals() && N && normalsMode != NM_Ignore);
     bool copyUvs = (hasUVs() && UV);
-    float xScale = (m_obj->getReverseX() ? -1.0f : 1.0f);
+    bool copyTangents = (hasUVs() && T && tangentsMode != TM_None);
+    
+    bool useAbcNormals = (m_normals.valid() && (normalsMode == NM_ReadFromFile || normalsMode == NM_ComputeIfMissing));
+    bool smoothTangents = (tangentsMode == TM_Smooth);
+    
+    float xScale = (m_obj->isHandednessSwapped() ? -1.0f : 1.0f);
 
     const SplitInfo &split = m_splits[splitIndex];
 
@@ -617,142 +1027,402 @@ void aiPolyMesh::fillVertexBuffer(uint32_t splitIndex, abcV3 *P, abcV3 *N, abcV2
 
     size_t k = 0;
     size_t o = split.indexOffset;
-
-    if (copyNormals && copyUvs)
+    bool smoothNormalsUpdated = false;
+    
+    // update smooth normals if necessary
+    
+    if (smoothNormalsRequired())
     {
-        const auto &uvs = *(m_uvs.getVals());
-        const auto &uvIndices = *(m_uvs.getIndices());
-
-        if (m_normals.valid())
+        if (smoothNormalsUpdateRequired())
         {
-            const auto &normals = *(m_normals.getVals());
-
-            if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
+            updateSmoothNormals();
+            smoothNormalsUpdated = true;
+        }
+    }
+    else
+    {
+        if (m_smoothNormals)
+        {
+            delete[] m_smoothNormals;
+            m_smoothNormals = 0;
+        }
+        
+        m_smoothNormalsCount = 0;
+    }
+    
+    // update tangents if necessary
+    
+    if (tangentsRequired())
+    {
+        if (tangentsUpdateRequired() || (smoothTangents && smoothNormalsUpdated))
+        {
+            const Abc::V3f *normals = 0;
+            bool indexedNormals = false;
+            
+            if (tangentsUseSmoothNormals())
             {
-                const auto &nIndices = *(m_normals.getIndices());
-                
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                aiLogger::Info("  Use computed smooth normals for tangents update.\n");
+                normals = m_smoothNormals;
+            }
+            else if (m_normals.valid())
+            {
+                aiLogger::Info("  Use alembic file's normals for tangents update.\n");
+                normals = m_normals.getVals()->get();
+                indexedNormals = (m_normals.getScope() == AbcGeom::kFacevaryingScope);
+            }
+            
+            if (normals)
+            {
+                if (indexedNormals)
                 {
-                    int nv = counts[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        P[k] = positions[indices[o]];
-                        P[k].x *= xScale;
-                        N[k] = normals[nIndices[o]];
-                        N[k].x *= xScale;
-                        UV[k] = uvs[uvIndices[o]];
-                    }
+                    aiLogger::Info("  Normals are indexed.\n");
                 }
+
+                updateTangents(smoothTangents, normals, indexedNormals);
             }
             else
             {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
-                    int nv = counts[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        P[k] = positions[indices[o]];
-                        P[k].x *= xScale;
-                        N[k] = normals[indices[o]];
-                        N[k].x *= xScale;
-                        UV[k] = uvs[uvIndices[o]];
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-            {
-                int nv = counts[i];
-                for (int j = 0; j < nv; ++j, ++o, ++k)
-                {
-                    P[k] = positions[indices[o]];
-                    P[k].x *= xScale;
-                    N[k] = m_smoothNormals[indices[o]];
-                    N[k].x *= xScale;
-                    UV[k] = uvs[uvIndices[o]];
-                }
-            }
-        }
-    }
-    else if (copyNormals)
-    {
-        if (m_normals.valid())
-        {
-            const auto &normals = *(m_normals.getVals());
-
-            if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
-            {
-                const auto &nIndices = *(m_normals.getIndices());
-                
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
-                    int nv = counts[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        P[k] = positions[indices[o]];
-                        P[k].x *= xScale;
-                        N[k] = normals[nIndices[o]];
-                        N[k].x *= xScale;
-                    }
-                }
-            }
-            else
-            {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
-                    int nv = counts[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        P[k] = positions[indices[o]];
-                        P[k].x *= xScale;
-                        N[k] = normals[indices[o]];
-                        N[k].x *= xScale;
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-            {
-                int nv = counts[i];
-                for (int j = 0; j < nv; ++j, ++o, ++k)
-                {
-                    P[k] = positions[indices[o]];
-                    P[k].x *= xScale;
-                    N[k] = m_smoothNormals[indices[o]];
-                    N[k].x *= xScale;
-                }
-            }
-        }
-    }
-    else if (copyUvs)
-    {
-        const auto &uvs = *(m_uvs.getVals());
-        const auto &uvIndices = *(m_uvs.getIndices());
-
-        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-        {
-            int nv = counts[i];
-            for (int j = 0; j < nv; ++j, ++o, ++k)
-            {
-                P[k] = positions[indices[o]];
-                P[k].x *= xScale;
-                UV[k] = uvs[uvIndices[o]];
+                aiLogger::Warning("%s: No normals found. Cannot compute tangents.", m_obj->getFullName());
+                copyTangents = false;
             }
         }
     }
     else
     {
-        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+        if (m_tangents)
         {
-            int nv = counts[i];
-            for (int j = 0; j < nv; ++j, ++o, ++k)
+            delete[] m_tangents;
+            m_tangents = 0;
+        }
+        
+        if (m_tangentIndices)
+        {
+            delete[] m_tangentIndices;
+            m_tangentIndices = 0;
+        }
+        
+        m_tangentsCount = 0;
+        
+        copyTangents = false;
+    }
+    
+    // reset unused data arrays
+    
+    if (N && !copyNormals)
+    {
+        aiLogger::Info("Reset normals\n");
+        memset(N, 0, split.indicesCount * sizeof(Abc::V3f));
+    }
+    
+    if (UV && !copyUvs)
+    {
+        aiLogger::Info("Reset UVs\n");
+        memset(UV, 0, split.indicesCount * sizeof(Abc::V2f));
+    }
+    
+    if (T && !copyTangents)
+    {
+        aiLogger::Info("Reset tangents\n");
+        memset(T, 0, split.indicesCount * sizeof(Imath::V4f));
+    }
+    
+    // fill data arrays
+
+    if (copyNormals)
+    {
+        if (useAbcNormals)
+        {
+            const auto &normals = *(m_normals.getVals());
+
+            if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
             {
-                P[k] = positions[indices[o]];
-                P[k].x *= xScale;
+                const auto &nIndices = *(m_normals.getIndices());
+                
+                if (copyUvs)
+                {
+                    const auto &uvs = *(m_uvs.getVals());
+                    const auto &uvIndices = *(m_uvs.getIndices());
+                    
+                    if (copyTangents)
+                    {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                        {
+                            int nv = counts[i];
+                            for (int j = 0; j < nv; ++j, ++o, ++k)
+                            {
+                                int v = indices[o];
+                                P[k] = positions[v];
+                                P[k].x *= xScale;
+                                N[k] = normals[nIndices[o]];
+                                N[k].x *= xScale;
+                                T[k] = m_tangents[m_tangentIndices[o]];
+                                T[k].x *= xScale;
+                                UV[k] = uvs[uvIndices[o]];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                        {
+                            int nv = counts[i];
+                            for (int j = 0; j < nv; ++j, ++o, ++k)
+                            {
+                                P[k] = positions[indices[o]];
+                                P[k].x *= xScale;
+                                N[k] = normals[nIndices[o]];
+                                N[k].x *= xScale;
+                                UV[k] = uvs[uvIndices[o]];
+                            }
+                        }
+                    }
+                }
+                else if (copyTangents)
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            int v = indices[o];
+                            P[k] = positions[v];
+                            P[k].x *= xScale;
+                            N[k] = normals[nIndices[o]];
+                            N[k].x *= xScale;
+                            T[k] = m_tangents[m_tangentIndices[o]];
+                            T[k].x *= xScale;
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            P[k] = positions[indices[o]];
+                            P[k].x *= xScale;
+                            N[k] = normals[nIndices[o]];
+                            N[k].x *= xScale;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (copyUvs)
+                {
+                    const auto &uvs = *(m_uvs.getVals());
+                    const auto &uvIndices = *(m_uvs.getIndices());
+                    
+                    if (copyTangents)
+                    {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                        {
+                            int nv = counts[i];
+                            for (int j = 0; j < nv; ++j, ++o, ++k)
+                            {
+                                int v = indices[o];
+                                P[k] = positions[v];
+                                P[k].x *= xScale;
+                                N[k] = normals[v];
+                                N[k].x *= xScale;
+                                T[k] = m_tangents[m_tangentIndices[o]];
+                                T[k].x *= xScale;
+                                UV[k] = uvs[uvIndices[o]];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                        {
+                            int nv = counts[i];
+                            for (int j = 0; j < nv; ++j, ++o, ++k)
+                            {
+                                int v = indices[o];
+                                P[k] = positions[v];
+                                P[k].x *= xScale;
+                                N[k] = normals[v];
+                                N[k].x *= xScale;
+                                UV[k] = uvs[uvIndices[o]];
+                            }
+                        }
+                    }
+                }
+                else if (copyTangents)
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            int v = indices[o];
+                            P[k] = positions[v];
+                            P[k].x *= xScale;
+                            N[k] = normals[v];
+                            N[k].x *= xScale;
+                            T[k] = m_tangents[m_tangentIndices[o]];
+                            T[k].x *= xScale;
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            int v = indices[o];
+                            P[k] = positions[v];
+                            P[k].x *= xScale;
+                            N[k] = normals[v];
+                            N[k].x *= xScale;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (copyUvs)
+            {
+                const auto &uvs = *(m_uvs.getVals());
+                const auto &uvIndices = *(m_uvs.getIndices());
+                
+                if (copyTangents)
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            int v = indices[o];
+                            P[k] = positions[v];
+                            P[k].x *= xScale;
+                            N[k] = m_smoothNormals[v];
+                            N[k].x *= xScale;
+                            T[k] = m_tangents[m_tangentIndices[o]];
+                            T[k].x *= xScale;
+                            UV[k] = uvs[uvIndices[o]];
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                    {
+                        int nv = counts[i];
+                        for (int j = 0; j < nv; ++j, ++o, ++k)
+                        {
+                            int v = indices[o];
+                            P[k] = positions[v];
+                            P[k].x *= xScale;
+                            N[k] = m_smoothNormals[v];
+                            N[k].x *= xScale;
+                            UV[k] = uvs[uvIndices[o]];
+                        }
+                    }
+                }
+            }
+            else if (copyTangents)
+            {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                {
+                    int nv = counts[i];
+                    for (int j = 0; j < nv; ++j, ++o, ++k)
+                    {
+                        int v = indices[o];
+                        P[k] = positions[v];
+                        P[k].x *= xScale;
+                        N[k] = m_smoothNormals[v];
+                        N[k].x *= xScale;
+                        T[k] = m_tangents[m_tangentIndices[o]];
+                        T[k].x *= xScale;
+                    }
+                }
+            }
+            else
+            {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                {
+                    int nv = counts[i];
+                    for (int j = 0; j < nv; ++j, ++o, ++k)
+                    {
+                        int v = indices[o];
+                        P[k] = positions[v];
+                        P[k].x *= xScale;
+                        N[k] = m_smoothNormals[v];
+                        N[k].x *= xScale;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if (copyUvs)
+        {
+            const auto &uvs = *(m_uvs.getVals());
+            const auto &uvIndices = *(m_uvs.getIndices());
+            
+            if (copyTangents)
+            {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                {
+                    int nv = counts[i];
+                    for (int j = 0; j < nv; ++j, ++o, ++k)
+                    {
+                        int v = indices[o];
+                        P[k] = positions[v];
+                        P[k].x *= xScale;
+                        T[k] = m_tangents[m_tangentIndices[o]];
+                        T[k].x *= xScale;
+                        UV[k] = uvs[uvIndices[o]];
+                    }
+                }
+            }
+            else
+            {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+                {
+                    int nv = counts[i];
+                    for (int j = 0; j < nv; ++j, ++o, ++k)
+                    {
+                        P[k] = positions[indices[o]];
+                        P[k].x *= xScale;
+                        UV[k] = uvs[uvIndices[o]];
+                    }
+                }
+            }
+        }
+        else if (copyTangents)
+        {
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o, ++k)
+                {
+                    int v = indices[o];
+                    P[k] = positions[v];
+                    P[k].x *= xScale;
+                    T[k] = m_tangents[m_tangentIndices[o]];
+                    T[k].x *= xScale;
+                }
+            }
+        }
+        else
+        {
+            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
+            {
+                int nv = counts[i];
+                for (int j = 0; j < nv; ++j, ++o, ++k)
+                {
+                    P[k] = positions[indices[o]];
+                    P[k].x *= xScale;
+                }
             }
         }
     }
@@ -968,13 +1638,13 @@ void aiPolyMesh::fillSubmeshIndices(int *dst, const aiSubmeshInfo &smi) const
     
     if (it != m_submeshes.end())
     {
-        bool reverseIndex = m_obj->getReverseIndex();
+        bool ccw = m_obj->isFaceWindingSwapped();
         const auto &counts = *m_counts;
         const Submesh &submesh = *it;
 
         int index = 0;
-        int i1 = (reverseIndex ? 2 : 1);
-        int i2 = (reverseIndex ? 1 : 2);
+        int i1 = (ccw ? 2 : 1);
+        int i2 = (ccw ? 1 : 2);
         int offset = 0;
         
         if (submesh.faces.size() == 0 && submesh.vertexIndices.size() == 0)
@@ -1029,8 +1699,6 @@ aiCurves::aiCurves()
 aiCurves::aiCurves(aiObject *obj)
     : super(obj)
 {
-    AbcGeom::ICurves curves(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = curves.getSchema();
 }
 
 aiCurves::~aiCurves()
@@ -1040,7 +1708,17 @@ aiCurves::~aiCurves()
 void aiCurves::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
-    // todo
+    
+    if (!m_schema.valid())
+    {
+        AbcGeom::ICurves curves(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = curves.getSchema();
+    }
+    else if (m_schema.isConstant())
+    {
+        return;
+    }
+
 }
 
 // ---
@@ -1053,8 +1731,6 @@ aiPoints::aiPoints()
 aiPoints::aiPoints(aiObject *obj)
     : super(obj)
 {
-    AbcGeom::IPoints points(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = points.getSchema();
 }
 
 aiPoints::~aiPoints()
@@ -1064,7 +1740,16 @@ aiPoints::~aiPoints()
 void aiPoints::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
-    // todo
+
+    if (!m_schema.valid())
+    {
+        AbcGeom::IPoints points(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = points.getSchema();
+    }
+    else if (m_schema.isConstant())
+    {
+        return;
+    }
 }
 
 // ---
@@ -1111,7 +1796,7 @@ void aiCamera::getParams(aiCameraParams &params)
     {
         verticalAperture = (float) m_sample.getHorizontalAperture() / params.targetAspect;
     }
-    
+
     params.nearClippingPlane = (float) m_sample.getNearClippingPlane();
     params.farClippingPlane = (float) m_sample.getFarClippingPlane();
     // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
@@ -1152,8 +1837,6 @@ aiMaterial::aiMaterial()
 aiMaterial::aiMaterial(aiObject *obj)
     : super(obj)
 {
-    AbcMaterial::IMaterial material(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = material.getSchema();
 }
 
 aiMaterial::~aiMaterial()
@@ -1164,4 +1847,10 @@ void aiMaterial::updateSample()
 {
     Abc::ISampleSelector ss(m_obj->getCurrentTime());
     // todo
+
+    if (!m_schema.valid())
+    {
+        AbcMaterial::IMaterial material(m_obj->getAbcObject(), Abc::kWrapExisting);
+        m_schema = material.getSchema();
+    }
 }

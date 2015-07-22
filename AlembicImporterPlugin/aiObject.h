@@ -5,7 +5,6 @@
 class aiContext;
 const int aiMagicObj = 0x004a424f; // "OBJ"
 
-
 class aiObject
 {
 public:
@@ -19,11 +18,14 @@ public:
     aiObject*   getChild(int i);
 
     void setCurrentTime(float time);
-    void enableReverseX(bool v);
-    void enableTriangulate(bool v);
-    void enableReverseIndex(bool v);
-    void forceSmoothNormals(bool v);
 
+    void enableTriangulate(bool v);
+    void swapHandedness(bool v);
+    void swapFaceWinding(bool v);
+    void setNormalsMode(aiNormalsMode m);
+    void setTangentsMode(aiTangentsMode m);
+    void cacheTangentsSplits(bool v);
+    
     bool        hasXForm() const;
     bool        hasPolyMesh() const;
     bool        hasCurves() const;
@@ -40,14 +42,20 @@ public:
     aiMaterial& getMaterial();
 
 public:
+
     aiContext*  getContext();
     abcObject&  getAbcObject();
+    
     void        addChild(aiObject *c);
+    
     float       getCurrentTime() const;
-    bool        getReverseX() const;
-    bool        getReverseIndex() const;
-    bool        getTriangulate() const;
-    bool        getForceSmoothNormals() const;
+    
+    bool           getTriangulate() const;
+    bool           isHandednessSwapped() const;
+    bool           isFaceWindingSwapped() const;
+    aiNormalsMode  getNormalsMode() const;
+    aiTangentsMode getTangentsMode() const;
+    bool           areTangentsSplitsCached() const;
 
 private:
 #ifdef aiDebug
@@ -74,10 +82,12 @@ private:
     bool        m_hasMaterial;
 
     float m_time;
-    bool m_reverseX;
     bool m_triangulate;
-    bool m_reverseIndex;
-    bool m_forceSmoothNormals;
+    bool m_swapHandedness;
+    bool m_swapFaceWinding;
+    aiNormalsMode m_normalsMode;
+    aiTangentsMode m_tangentsMode;
+    bool m_cacheTangentsSplits;
 };
 
 

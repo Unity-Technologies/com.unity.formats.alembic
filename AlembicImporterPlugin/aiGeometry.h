@@ -42,6 +42,21 @@ private:
 
 // ---
 
+enum aiNormalsMode
+{
+    NM_ReadFromFile = 0,
+    NM_ComputeIfMissing,
+    NM_AlwaysCompute,
+    NM_Ignore
+};
+
+enum aiTangentsMode
+{
+    TM_None = 0,
+    TM_Smooth,
+    TM_Split
+};
+
 class aiPolyMesh : public aiSchema
 {
 typedef aiSchema super;
@@ -51,11 +66,6 @@ public:
     virtual ~aiPolyMesh();
 
     void updateSample() override;
-
-    void        setCurrentTime(float t);
-    void        enableReverseX(bool v);
-    void        enableTriangulate(bool v);
-    void        enableReverseIndex(bool v);
 
     int         getTopologyVariance() const;
     bool        hasNormals() const;
@@ -77,7 +87,7 @@ public:
     uint32_t    getSplitCount() const;
     uint32_t    getSplitCount(bool forceRefresh);
     uint32_t    getVertexBufferLength(uint32_t splitIndex) const;
-    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs) const;
+    void        fillVertexBuffer(uint32_t splitIndex, abcV3 *positions, abcV3 *normals, abcV2 *uvs, abcV4 *T);
     uint32_t    prepareSubmeshes(const aiFacesets *facesets);
     uint32_t    getSplitSubmeshCount(uint32_t splitIndex) const;
     bool        getNextSubmesh(aiSubmeshInfo &smi);
@@ -108,7 +118,15 @@ private:
     void updateSplits();
     bool updateUVs(Abc::ISampleSelector &ss);
     bool updateNormals(Abc::ISampleSelector &ss);
-    bool computeSmoothNormals();
+
+    bool smoothNormalsRequired() const;
+    bool smoothNormalsUpdateRequired() const;
+    void updateSmoothNormals();
+
+    bool tangentsRequired() const;
+    bool tangentsUpdateRequired() const;
+    bool tangentsUseSmoothNormals() const;
+    void updateTangents(bool smooth, const Abc::V3f *inN, bool indexedNormals);
 
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
@@ -196,6 +214,7 @@ private:
     typedef std::deque<Submesh> Submeshes;
 
 private:
+
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
@@ -211,10 +230,19 @@ private:
     std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
 
+    bool m_smoothNormalsDirty;
     size_t m_smoothNormalsCount;
-    Abc::N3f *m_smoothNormals;
+    Abc::V3f *m_smoothNormals;
+    bool m_smoothNormalsCCW;
 
-    bool m_lastReverseIndex;
+    bool m_tangentsDirty;
+    size_t m_tangentIndicesCount;
+    int *m_tangentIndices;
+    size_t m_tangentsCount;
+    Imath::V4f *m_tangents;
+    bool m_tangentsSmooth;
+    bool m_tangentsCCW;
+    bool m_tangentsUseSmoothNormals;
 };
 
 // ---
