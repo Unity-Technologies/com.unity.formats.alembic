@@ -3,8 +3,6 @@
 
 #include "aiThreadPool.h"
 
-typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
-
 class aiObject;
 const int aiMagicCtx = 0x00585443; // "CTX"
 
@@ -12,11 +10,11 @@ const int aiMagicCtx = 0x00585443; // "CTX"
 class aiContext
 {
 public:
-    static aiContext* create();
+    static aiContext* create(int uid);
     static void destroy(aiContext* ctx);
 
 public:
-    aiContext();
+    aiContext(int uid=-1);
     ~aiContext();
     
     bool load(const char *path);
@@ -27,17 +25,25 @@ public:
     void runTask(const std::function<void ()> &task);
     void waitTasks();
 
+    Abc::IArchive getArchive() const;
+    const std::string& getPath() const;
+    int getUid() const;
+
 private:
+    std::string normalizePath(const char *path) const;
+    void reset();
     void gatherNodesRecursive(aiObject *n);
 
 private:
 #ifdef aiDebug
     int m_magic;
 #endif // aiDebug
-    abcArchivePtr m_archive;
+    std::string m_path;
+    Abc::IArchive m_archive;
     std::vector<aiObject*> m_nodes;
     aiTaskGroup m_tasks;
     double m_timeRange[2];
+    int m_uid;
 };
 
 

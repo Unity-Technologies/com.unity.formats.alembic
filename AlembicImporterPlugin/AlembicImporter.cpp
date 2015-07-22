@@ -48,10 +48,10 @@ aiCLinkage aiExport void aiEnableFileLog(bool on, const char *path)
     aiLogger::Enable(on, path);
 }
 
-aiCLinkage aiExport aiContext* aiCreateContext()
+aiCLinkage aiExport aiContext* aiCreateContext(int uid)
 {
-    auto ctx = aiContext::create();
-    aiDebugLog("aiCreateContext(): %p\n", ctx);
+    auto ctx = aiContext::create(uid);
+    aiDebugLog("aiCreateContext(%d): %p\n", uid, ctx);
     return ctx;
 }
 

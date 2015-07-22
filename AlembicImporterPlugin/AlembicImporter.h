@@ -47,7 +47,7 @@ struct aiFacesets
 
 aiCLinkage aiExport void            aiEnableFileLog(bool on, const char *path);
 
-aiCLinkage aiExport aiContext*      aiCreateContext();
+aiCLinkage aiExport aiContext*      aiCreateContext(int uid);
 aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
 
 aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);

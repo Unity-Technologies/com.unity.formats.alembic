@@ -80,7 +80,7 @@ public class AlembicImporter
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
 
-    [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext();
+    [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext(int uid);
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
     
     [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
@@ -194,15 +194,29 @@ public class AlembicImporter
             return;
         }
 
-        aiContext ctx = aiCreateContext();
+        string baseName = System.IO.Path.GetFileNameWithoutExtension(path);
+        string name = baseName;
+        int index = 1;
+        
+        while (GameObject.Find("/" + name) != null)
+        {
+            name = baseName + index;
+            ++index;
+        }
+
+        GameObject root = new GameObject();
+        root.name = name;
+
+        aiContext ctx = aiCreateContext(root.GetInstanceID());
+
         if (!aiLoad(ctx, Application.streamingAssetsPath + "/" + path))
         {
             Debug.Log("aiLoad(\"" + path + "\") failed");
+            GameObject.DestroyImmediate(root);
+            aiDestroyContext(ctx);
         }
         else
         {
-            GameObject root = new GameObject();
-            root.name = System.IO.Path.GetFileNameWithoutExtension(path);
             var abcstream = root.AddComponent<AlembicStream>();
             abcstream.m_pathToAbc = path;
             abcstream.m_startTime = aiGetStartTime(ctx);
@@ -213,6 +227,8 @@ public class AlembicImporter
             abcstream.m_reverseX = reverseX;
             abcstream.m_reverseFaces = reverseFaces;
 
+            abcstream.Init();
+
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
             ic.reverseX = reverseX;
@@ -222,9 +238,14 @@ public class AlembicImporter
             ic.ignoreMissingNodes = false;
 
             GCHandle gch = GCHandle.Alloc(ic);
-            aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
+
+            aiObject top = aiGetTopObject(ctx);
+
+            if (top.ptr != (IntPtr)0)
+            {
+                aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(gch));
+            }
         }
-        aiDestroyContext(ctx);
     }
 #endif
     
@@ -240,7 +261,13 @@ public class AlembicImporter
         ic.ignoreMissingNodes = ignoreMissingNodes;
 
         GCHandle gch = GCHandle.Alloc(ic);
-        aiEnumerateChild(aiGetTopObject(ctx), ImportEnumerator, GCHandle.ToIntPtr(gch));
+
+        aiObject top = aiGetTopObject(ctx);
+
+        if (top.ptr != (IntPtr)0)
+        {
+            aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(gch));
+        }
     }
 
     static void ImportEnumerator(aiObject obj, IntPtr userdata)
