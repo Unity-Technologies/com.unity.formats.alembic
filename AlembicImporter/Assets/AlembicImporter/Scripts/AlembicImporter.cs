@@ -12,8 +12,6 @@ public class AlembicImporter
 {
     public delegate void aiNodeEnumerator(aiObject obj, IntPtr userdata);
 
-    public enum AspectRatioMode { CurrentResolution = 0, DefaultResolution, CameraAperture };
-
     public struct aiSplitedMeshInfo
     {
         public int faceCount;
@@ -78,6 +76,52 @@ public class AlembicImporter
         Heterogeneous
     }
 
+    public enum aiAspectRatioMode
+    {
+        CurrentResolution = 0,
+        DefaultResolution,
+        CameraAperture
+    };
+
+    public enum aiNormalsMode
+    {
+        ReadFromFile = 0,
+        ComputeIfMissing,
+        AlwaysCompute,
+        Ignore
+    }
+    
+    public enum aiNormalsModeOverride
+    {
+        InheritStreamSetting = -1,
+        ReadFromFile,
+        ComputeIfMissing,
+        AlwaysCompute,
+        Ignore
+    }
+
+    public enum aiTangentsMode
+    {
+        None = 0,
+        Smooth,
+        Split
+    }
+
+    public enum aiTangentsModeOverride
+    {
+        InheritStreamSetting = -1,
+        None,
+        Smooth,
+        Split
+    }
+
+    public enum aiFaceWindingOverride
+    {
+        InheritStreamSetting = -1,
+        Preserve,
+        Swap
+    }
+
     [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
 
     [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext(int uid);
@@ -89,13 +133,18 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userdata);
     [DllImport ("AlembicImporter")] public static extern void       aiSetCurrentTime(aiObject obj, float time);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseX(aiObject obj, bool v);
     [DllImport ("AlembicImporter")] public static extern void       aiEnableTriangulate(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiEnableReverseIndex(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern void       aiForceSmoothNormals(aiObject obj, bool v);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseX(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetReverseIndex(aiObject obj);
-    [DllImport ("AlembicImporter")] public static extern bool       aiGetForceSmoothNormals(aiObject obj);
+    
+    [DllImport ("AlembicImporter")] public static extern void       aiSwapHandedness(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiIsHandednessSwapped(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiSwapFaceWinding(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiIsFaceWindingSwapped(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetNormalsMode(aiObject obj, int m);
+    [DllImport ("AlembicImporter")] public static extern int        aiGetNormalsMode(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiSetTangentsMode(aiObject obj, int m);
+    [DllImport ("AlembicImporter")] public static extern int        aiGetTangentsMode(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiCacheTangentsSplits(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiAreTangentsSplitsCached(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
@@ -129,7 +178,7 @@ public class AlembicImporter
 
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitCount(aiObject obj, bool force_refresh);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiObject obj, int split);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiObject obj, int split, IntPtr positions, IntPtr normals, IntPtr uvs, IntPtr tangents);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiObject obj, ref aiFacesets facesets);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiObject obj, int split);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiObject obj, ref aiSubmeshInfo smi);
@@ -145,20 +194,21 @@ public class AlembicImporter
     {
         public Transform parent;
         public float time;
-        public bool reverseX;
-        public bool reverseFaces;
-        public bool forceSmoothNormals;
+        public bool swapHandedness;
+        public bool swapFaceWinding;
+        public aiNormalsMode normalsMode;
+        public aiTangentsMode tangentsMode;
         public float aspectRatio;
         public bool ignoreMissingNodes;
     }
 
-    public static float GetAspectRatio(AspectRatioMode mode)
+    public static float GetAspectRatio(aiAspectRatioMode mode)
     {
-        if (mode == AspectRatioMode.CameraAperture)
+        if (mode == aiAspectRatioMode.CameraAperture)
         {
             return 0.0f;
         }
-        else if (mode == AspectRatioMode.CurrentResolution)
+        else if (mode == aiAspectRatioMode.CurrentResolution)
         {
             return (float) Screen.width / (float) Screen.height;
         }
@@ -187,7 +237,7 @@ public class AlembicImporter
         return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
     }
 
-    static void ImportImpl(string path, bool reverseX, bool reverseFaces)
+    static void ImportImpl(string path, bool swapHandedness, bool swapFaceWinding)
     {
         if (path == "")
         {
@@ -224,16 +274,20 @@ public class AlembicImporter
             abcstream.m_timeOffset = -abcstream.m_startTime;
             abcstream.m_timeScale = 1.0f;
             abcstream.m_preserveStartTime = true;
-            abcstream.m_reverseX = reverseX;
-            abcstream.m_reverseFaces = reverseFaces;
+            abcstream.m_swapHandedness = swapHandedness;
+            abcstream.m_swapFaceWinding = swapFaceWinding;
+            abcstream.m_normalsMode = aiNormalsMode.ComputeIfMissing;
+            abcstream.m_tangentsMode = aiTangentsMode.None;
+            abcstream.m_aspectRatioMode = aiAspectRatioMode.CurrentResolution;
 
             abcstream.Init();
 
             var ic = new ImportContext();
             ic.parent = root.GetComponent<Transform>();
-            ic.reverseX = reverseX;
-            ic.reverseFaces = reverseFaces;
-            ic.forceSmoothNormals = false;
+            ic.swapHandedness = swapHandedness;
+            ic.swapFaceWinding = swapFaceWinding;
+            ic.normalsMode = aiNormalsMode.ComputeIfMissing;
+            ic.tangentsMode = aiTangentsMode.None;
             ic.aspectRatio = GetAspectRatio(abcstream.m_aspectRatioMode);
             ic.ignoreMissingNodes = false;
 
@@ -249,14 +303,18 @@ public class AlembicImporter
     }
 #endif
     
-    public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool reverseX, bool reverseFaces, bool forceSmoothNormals, float aspectRatio, bool ignoreMissingNodes)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, float time,
+                                     bool swapHandedness, bool swapFaceWinding,
+                                     aiNormalsMode normalsMode, aiTangentsMode tangentsMode,
+                                     float aspectRatio, bool ignoreMissingNodes)
     {
         var ic = new ImportContext();
         ic.parent = root;
         ic.time = time;
-        ic.reverseX = reverseX;
-        ic.reverseFaces = reverseFaces;
-        ic.forceSmoothNormals = forceSmoothNormals;
+        ic.swapHandedness = swapHandedness;
+        ic.swapFaceWinding = swapFaceWinding;
+        ic.normalsMode = normalsMode;
+        ic.tangentsMode = tangentsMode;
         ic.aspectRatio = aspectRatio;
         ic.ignoreMissingNodes = ignoreMissingNodes;
 
@@ -294,24 +352,41 @@ public class AlembicImporter
             }
         }
 
-
-        bool reverseFaces = ic.reverseFaces;
-        bool forceSmoothNormals = ic.forceSmoothNormals;
+        bool swapFaceWinding = ic.swapFaceWinding;
+        int normalsMode = (int) ic.normalsMode;
+        int tangentsMode = (int) ic.tangentsMode;
+        bool cacheTangentsSplits = true;
 
         AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
         if (abcMesh != null)
         {
-            // AlembicMesh level flags have higher priority
-            reverseFaces = reverseFaces || abcMesh.m_reverseFaces;
-            forceSmoothNormals = forceSmoothNormals || abcMesh.m_forceSmoothNormals;
+            if (abcMesh.m_faceWinding != aiFaceWindingOverride.InheritStreamSetting)
+            {
+                swapFaceWinding = (abcMesh.m_faceWinding == aiFaceWindingOverride.Swap);
+            }
+            if (abcMesh.m_normalsMode != aiNormalsModeOverride.InheritStreamSetting)
+            {
+                normalsMode = (int) abcMesh.m_normalsMode;
+            }
+            if (abcMesh.m_tangentsMode != aiTangentsModeOverride.InheritStreamSetting)
+            {
+                tangentsMode = (int) abcMesh.m_tangentsMode;
+            }
+            cacheTangentsSplits = abcMesh.m_cacheTangentsSplits;
         }
 
         // Check if polygon winding has change in order to force topology update
-        bool windingChanged = (aiGetReverseIndex(obj) != reverseFaces);
+        bool forceTopology = (aiIsFaceWindingSwapped(obj) != swapFaceWinding);
+        // Check if we need force a vertex buffer update
+        bool forceVertices = (aiGetNormalsMode(obj) != normalsMode ||
+                              aiGetTangentsMode(obj) != tangentsMode ||
+                              aiIsHandednessSwapped(obj) != ic.swapHandedness);
 
-        aiEnableReverseX(obj, ic.reverseX);
-        aiEnableReverseIndex(obj, reverseFaces);
-        aiForceSmoothNormals(obj, forceSmoothNormals);
+        aiSwapHandedness(obj, ic.swapHandedness);
+        aiSwapFaceWinding(obj, swapFaceWinding);
+        aiSetNormalsMode(obj, normalsMode);
+        aiSetTangentsMode(obj, tangentsMode);
+        aiCacheTangentsSplits(obj, cacheTangentsSplits);
 
         aiSetCurrentTime(obj, ic.time);
         
@@ -343,7 +418,7 @@ public class AlembicImporter
 
         if (aiHasPolyMesh(obj))
         {
-            UpdateAbcMesh(obj, trans, windingChanged);
+            UpdateAbcMesh(obj, trans, forceTopology, forceVertices);
         }
 
         if (aiHasCamera(obj))
@@ -362,7 +437,7 @@ public class AlembicImporter
         ic.parent = parent;
     }
     
-    public static void UpdateAbcMesh(aiObject abc, Transform trans, bool forceIndexUpdate=false)
+    public static void UpdateAbcMesh(aiObject abc, Transform trans, bool forceTopologyUpdate=false, bool forceVerticesUpdate=false)
     {
         AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
         
@@ -374,21 +449,24 @@ public class AlembicImporter
         aiTopologyVariance topoVariance = aiPolyMeshGetTopologyVariance(abc);
         bool hasNormals = aiPolyMeshHasNormals(abc);
         bool hasUVs = aiPolyMeshHasUVs(abc);
-        bool needsIndexUpdate = (abcMesh.m_submeshes.Count == 0 || topoVariance == aiTopologyVariance.Heterogeneous || forceIndexUpdate);
+        bool hasTangents = (hasUVs && aiGetTangentsMode(abc) != (int) aiTangentsMode.None);
+        bool updateTopology = (abcMesh.m_submeshes.Count == 0 ||
+                               topoVariance == aiTopologyVariance.Heterogeneous ||
+                               forceTopologyUpdate);
 
         AlembicMaterial abcMaterials = trans.GetComponent<AlembicMaterial>();
         if (abcMaterials != null)
         {
-            needsIndexUpdate = needsIndexUpdate || abcMaterials.HasFacesetsChanged();
+            updateTopology = updateTopology || abcMaterials.HasFacesetsChanged();
             abcMesh.hasFacesets = (abcMaterials.GetFacesetsCount() > 0);
         }
         else if (abcMesh.hasFacesets)
         {
-            needsIndexUpdate = true;
+            updateTopology = true;
             abcMesh.hasFacesets = false;
         }
 
-        if (!needsIndexUpdate && topoVariance == aiTopologyVariance.Constant)
+        if (!updateTopology && topoVariance == aiTopologyVariance.Constant && !forceVerticesUpdate)
         {
             //Debug.Log("Nothing to update for \"" + trans.name + "\"");
             return;
@@ -396,7 +474,7 @@ public class AlembicImporter
 
         AlembicMesh.Split split;
 
-        int numSplits = aiPolyMeshGetSplitCount(abc, needsIndexUpdate);
+        int numSplits = aiPolyMeshGetSplitCount(abc, updateTopology);
         
         // create necessary splits
         if (numSplits > 1)
@@ -435,6 +513,7 @@ public class AlembicImporter
                         positionCache = new Vector3[0],
                         normalCache = new Vector3[0],
                         uvCache = new Vector2[0],
+                        tangentCache = new Vector4[0],
                         mesh = null,
                         host = null
                     };
@@ -478,6 +557,7 @@ public class AlembicImporter
                     positionCache = new Vector3[0],
                     normalCache = new Vector3[0],
                     uvCache = new Vector2[0],
+                    tangentCache = new Vector4[0],
                     mesh = mesh,
                     host = trans.gameObject
                 };
@@ -516,8 +596,9 @@ public class AlembicImporter
 
             Array.Resize(ref split.positionCache, numVertices);
             Array.Resize(ref split.normalCache, (hasNormals ? numVertices : 0));
-
-            if (needsIndexUpdate)
+            Array.Resize(ref split.tangentCache, (hasTangents ? numVertices : 0));
+            
+            if (updateTopology)
             {
                 split.mesh.Clear();
 
@@ -527,18 +608,20 @@ public class AlembicImporter
             aiPolyMeshFillVertexBuffer(abc, s,
                                        Marshal.UnsafeAddrOfPinnedArrayElement(split.positionCache, 0),
                                        (hasNormals ? Marshal.UnsafeAddrOfPinnedArrayElement(split.normalCache, 0) : (IntPtr)0),
-                                       ((needsIndexUpdate && hasUVs) ? Marshal.UnsafeAddrOfPinnedArrayElement(split.uvCache, 0) : (IntPtr)0));
+                                       ((updateTopology && hasUVs) ? Marshal.UnsafeAddrOfPinnedArrayElement(split.uvCache, 0) : (IntPtr)0),
+                                       (hasTangents ? Marshal.UnsafeAddrOfPinnedArrayElement(split.tangentCache, 0) : (IntPtr)0));
 
             split.mesh.vertices = split.positionCache;
             split.mesh.normals = split.normalCache;
+            split.mesh.tangents = split.tangentCache;
 
-            if (needsIndexUpdate)
+            if (updateTopology)
             {
                 split.mesh.uv = split.uvCache;
             }
         }
 
-        if (needsIndexUpdate)
+        if (updateTopology)
         {
             aiSubmeshInfo smi = default(aiSubmeshInfo);
             aiFacesets facesets = default(aiFacesets);
@@ -627,7 +710,8 @@ public class AlembicImporter
             }
         }
 
-        if (!hasNormals)
+        // Do not call RecalculateNormals if we have tangents computed
+        if (!hasNormals && !hasTangents)
         {
             for (int s=0; s<numSplits; ++s)
             {
