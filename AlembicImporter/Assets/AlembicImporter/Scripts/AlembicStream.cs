@@ -41,16 +41,39 @@ public class AlembicStream : MonoBehaviour
     bool m_lastIgnoreMissingNodes;
     float m_lastAspectRatio = -1.0f;
 
+    public void Init()
+    {
+        if (m_pathToAbc != null)
+        {
+            m_abc = AlembicImporter.aiCreateContext(gameObject.GetInstanceID());
+            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
+        }
+    }
 
     void OnEnable()
     {
-        m_abc = AlembicImporter.aiCreateContext();
-        m_loaded = AlembicImporter.aiLoad(m_abc, m_pathToAbc);
+        Init();
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
-        AlembicImporter.aiDestroyContext(m_abc);
+        if (m_abc.ptr == (IntPtr)0)
+        {
+            Debug.Log("AlembicStream: Nothing to destroy");
+            return;
+        }
+
+        if (!Application.isPlaying)
+        {
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                AlembicImporter.aiDestroyContext(m_abc);
+            }
+#else
+            AlembicImporter.aiDestroyContext(m_abc);
+#endif
+        }
     }
 
     float AdjustTime(float inTime)
