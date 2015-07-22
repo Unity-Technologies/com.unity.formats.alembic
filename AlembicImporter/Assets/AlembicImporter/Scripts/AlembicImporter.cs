@@ -143,6 +143,8 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern int        aiGetNormalsMode(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiSetTangentsMode(aiObject obj, int m);
     [DllImport ("AlembicImporter")] public static extern int        aiGetTangentsMode(aiObject obj);
+    [DllImport ("AlembicImporter")] public static extern void       aiCacheTangentsSplits(aiObject obj, bool v);
+    [DllImport ("AlembicImporter")] public static extern bool       aiAreTangentsSplitsCached(aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern int        aiGetNumChildren(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
@@ -326,6 +328,7 @@ public class AlembicImporter
         bool swapFaceWinding = ic.swapFaceWinding;
         int normalsMode = (int) ic.normalsMode;
         int tangentsMode = (int) ic.tangentsMode;
+        bool cacheTangentsSplits = true;
 
         AlembicMesh abcMesh = trans.GetComponent<AlembicMesh>();
         if (abcMesh != null)
@@ -342,6 +345,7 @@ public class AlembicImporter
             {
                 tangentsMode = (int) abcMesh.m_tangentsMode;
             }
+            cacheTangentsSplits = abcMesh.m_cacheTangentsSplits;
         }
 
         // Check if polygon winding has change in order to force topology update
@@ -355,6 +359,7 @@ public class AlembicImporter
         aiSwapFaceWinding(obj, swapFaceWinding);
         aiSetNormalsMode(obj, normalsMode);
         aiSetTangentsMode(obj, tangentsMode);
+        aiCacheTangentsSplits(obj, cacheTangentsSplits);
 
         aiSetCurrentTime(obj, ic.time);
         

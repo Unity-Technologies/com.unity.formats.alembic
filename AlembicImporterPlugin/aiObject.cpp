@@ -19,6 +19,7 @@ aiObject::aiObject()
     , m_swapFaceWinding(false)
     , m_normalsMode(NM_ComputeIfMissing)
     , m_tangentsMode(TM_None)
+    , m_cacheTangentsSplits(true)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -34,6 +35,7 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_swapFaceWinding(false)
     , m_normalsMode(NM_ComputeIfMissing)
     , m_tangentsMode(TM_None)
+    , m_cacheTangentsSplits(true)
 {
 #ifdef aiDebug
     m_magic = aiMagicObj;
@@ -127,6 +129,7 @@ void aiObject::swapHandedness(bool v)            { m_swapHandedness = v; }
 void aiObject::swapFaceWinding(bool v)           { m_swapFaceWinding = v; }
 void aiObject::setNormalsMode(aiNormalsMode m)   { m_normalsMode = m; }
 void aiObject::setTangentsMode(aiTangentsMode m) { m_tangentsMode = m; }
+void aiObject::cacheTangentsSplits(bool v)       { m_cacheTangentsSplits = v; }
 
 float aiObject::getCurrentTime() const           { return m_time; }
 bool aiObject::getTriangulate() const            { return m_triangulate; }
@@ -134,6 +137,7 @@ bool aiObject::isHandednessSwapped() const       { return m_swapHandedness; }
 bool aiObject::isFaceWindingSwapped() const      { return m_swapFaceWinding; }
 aiNormalsMode aiObject::getNormalsMode() const   { return m_normalsMode; }
 aiTangentsMode aiObject::getTangentsMode() const { return m_tangentsMode; }
+bool aiObject::areTangentsSplitsCached() const   { return m_cacheTangentsSplits; }
 
 
 bool aiObject::hasXForm() const    { return m_hasXform; }

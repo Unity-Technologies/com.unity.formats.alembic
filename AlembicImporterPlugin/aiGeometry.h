@@ -120,13 +120,13 @@ private:
     bool updateNormals(Abc::ISampleSelector &ss);
 
     bool smoothNormalsRequired() const;
-    bool tangentsRequired() const;
     bool smoothNormalsUpdateRequired() const;
-    bool tangentsUpdateRequired() const;
-
     void updateSmoothNormals();
-    // 'updateTangents' will update smooth tangents if necessary
-    void updateTangents(bool smooth);
+
+    bool tangentsRequired() const;
+    bool tangentsUpdateRequired() const;
+    bool tangentsUseSmoothNormals() const;
+    void updateTangents(bool smooth, const Abc::V3f *inN, bool indexedNormals);
 
     typedef std::set<size_t> Faceset;
     typedef std::vector<Faceset> Facesets;
@@ -214,6 +214,7 @@ private:
     typedef std::deque<Submesh> Submeshes;
 
 private:
+
     AbcGeom::IPolyMeshSchema m_schema;
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
@@ -235,9 +236,13 @@ private:
     bool m_smoothNormalsCCW;
 
     bool m_tangentsDirty;
+    size_t m_tangentIndicesCount;
+    int *m_tangentIndices;
     size_t m_tangentsCount;
     Imath::V4f *m_tangents;
-    bool m_smoothTangents;
+    bool m_tangentsSmooth;
+    bool m_tangentsCCW;
+    bool m_tangentsUseSmoothNormals;
 };
 
 // ---
