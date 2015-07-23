@@ -123,16 +123,7 @@ struct aiTextureMeshData
 };
 aiCLinkage aiExport void            aiPolyMeshCopyDataToTexture(aiObject* obj, aiTextureMeshData *dst);
 
-
-aiCLinkage aiExport bool            aiHasCurves(aiObject* obj);
-
-aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
-
 aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
 aiCLinkage aiExport void            aiCameraGetParams(aiObject* obj, aiCameraParams *params);
-
-aiCLinkage aiExport bool            aiHasLight(aiObject* obj);
-
-aiCLinkage aiExport bool            aiHasMaterial(aiObject* obj);
 
 #endif // AlembicImporter_h

@@ -1,6 +1,9 @@
 ﻿#include "pch.h"
 #include "AlembicImporter.h"
-#include "aiGeometry.h"
+#include "Schema/aiSchema.h"
+#include "Schema/aiXForm.h"
+#include "Schema/aiPolyMesh.h"
+#include "Schema/aiCamera.h"
 #include "aiObject.h"
 #include "aiContext.h"
 #include "aiLogger.h"
@@ -34,8 +37,8 @@ void aiDebugLogImpl(const char* fmt, ...)
 
 
 #ifdef aiDebug
-#define aiCheckContext(v) if(v==nullptr || *(int*)v!=aiMagicCtx) { aiBreak(); }
-#define aiCheckObject(v)  if(v==nullptr || *(int*)v!=aiMagicObj) { aiBreak(); }
+#define aiCheckContext(v) if(v==nullptr) { aiBreak(); }
+#define aiCheckObject(v)  if(v==nullptr) { aiBreak(); }
 #else  // aiDebug
 #define aiCheckContext(v) 
 #define aiCheckObject(v)  
@@ -390,20 +393,6 @@ aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiObject* obj, int *dst, c
 }
 
 
-aiCLinkage aiExport bool aiHasCurves(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->hasCurves();
-}
-
-
-aiCLinkage aiExport bool aiHasPoints(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->hasPoints();
-}
-
-
 aiCLinkage aiExport bool aiHasCamera(aiObject* obj)
 {
     aiCheckObject(obj);
@@ -414,19 +403,4 @@ aiCLinkage aiExport void aiCameraGetParams(aiObject* obj, aiCameraParams *params
 {
     aiCheckObject(obj);
     obj->getCamera().getParams(*params);
-}
-
-
-aiCLinkage aiExport bool aiHasLight(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->hasLight();
-}
-
-
-aiCLinkage aiExport bool aiHasMaterial(aiObject* obj)
-{
-    aiCheckObject(obj);
-    return obj->hasMaterial();
-
 }

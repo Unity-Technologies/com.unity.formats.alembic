@@ -4,8 +4,6 @@
 #include "aiThreadPool.h"
 
 class aiObject;
-const int aiMagicCtx = 0x00585443; // "CTX"
-
 
 class aiContext
 {
@@ -35,9 +33,6 @@ private:
     void gatherNodesRecursive(aiObject *n);
 
 private:
-#ifdef aiDebug
-    int m_magic;
-#endif // aiDebug
     std::string m_path;
     Abc::IArchive m_archive;
     std::vector<aiObject*> m_nodes;

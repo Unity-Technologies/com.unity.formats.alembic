@@ -18,7 +18,7 @@ env = excons.MakeBaseEnv()
 # I don't know whst this whole PatchLibrary is. Looks like a hack that we don't
 # really need. Let's disable it for now by defining aiMaster
 defines = ["aiMaster"]
-inc_dirs = []
+inc_dirs = ["AlembicImporterPlugin"]
 lib_dirs = []
 libs = []
 embed_libs = []
@@ -27,13 +27,25 @@ install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Ass
                  "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs"),
                  "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/*.shader")}
 sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
+sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
+sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
 
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
 
+if excons.GetArgument("opengl", 0, int) != 0:
+  defines.append("aiSupportOpenGL")
+  # device source?
+
 if use_externals:
+  # we're in windows
+  if excons.GetArgument("d3d9", 0, int) != 0:
+    defines.append("aiSupportD3D9")
+    # device source?
+
   if excons.GetArgument("d3d11", 1, int) != 0:
     defines.append("aiSupportD3D11")
+    sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
   
   inc_dirs.extend(["AlembicImporterPlugin/external/ilmbase-2.2.0/Half",
                    "AlembicImporterPlugin/external/ilmbase-2.2.0/Iex",
@@ -76,8 +88,14 @@ else:
     defines.append("aiWithTBB")
     customs.append(tbb.Require)
   
-  if sys.platform == "win32" and excons.GetArgument("d3d11", 1, int) != 0:
-    defines.append("aiSupportD3D11")
+  if sys.platform == "win32":
+    if excons.GetArgument("d3d9", 0, int) != 0:
+      defines.append("aiSupportD3D9")
+      # device source?
+
+    if excons.GetArgument("d3d11", 1, int) != 0:
+      defines.append("aiSupportD3D11")
+      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
   
   embed_libs = excons.GetArgument("embed-libs", [])
   if embed_libs:

@@ -12,8 +12,14 @@ private:
     void *m_device;
     int m_deviceType;
 };
+
+#ifdef aiSupportD3D11
 aiGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
+#endif
+
+#ifdef aiSupportOpenGL
 aiGraphicsDevice* aiCreateGraphicsDeviceOpenGL(void *device);
+#endif
 
 
 
