@@ -187,8 +187,6 @@ public class AlembicImporter
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetParams(aiObject obj, ref aiCameraParams o_params);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasLight(aiObject obj);
-
 
     class ImportContext
     {
@@ -425,11 +423,6 @@ public class AlembicImporter
         {
             trans.parent.forward = -trans.parent.forward;
             UpdateAbcCamera(obj, trans, ic.aspectRatio);
-        }
-
-        if (aiHasLight(obj))
-        {
-            UpdateAbcLight(obj, trans);
         }
 
         ic.parent = trans;
@@ -792,16 +785,6 @@ public class AlembicImporter
         }
          */
     }
-
-    static void UpdateAbcLight(aiObject abc, Transform trans)
-    {
-        var light = trans.GetComponent<Light>();
-        if (light == null)
-        {
-            light = trans.gameObject.AddComponent<Light>();
-        }
-    }
-
 
 #if UNITY_EDITOR
     static MethodInfo s_GetBuiltinExtraResourcesMethod;

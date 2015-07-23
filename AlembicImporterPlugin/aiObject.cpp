@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "AlembicImporter.h"
-#include "aiGeometry.h"
+#include "Schema/aiSchema.h"
+#include "Schema/aiXForm.h"
+#include "Schema/aiPolyMesh.h"
+#include "Schema/aiCamera.h"
 #include "aiContext.h"
 #include "aiObject.h"
 
@@ -8,11 +11,7 @@ aiObject::aiObject()
     : m_ctx(0)
     , m_hasXform(false)
     , m_hasPolymesh(false)
-    , m_hasCurves(false)
-    , m_hasPoints(false)
     , m_hasCamera(false)
-    , m_hasLight(false)
-    , m_hasMaterial(false)
     , m_time(0.0f)
     , m_triangulate(true)
     , m_swapHandedness(true)
@@ -21,9 +20,6 @@ aiObject::aiObject()
     , m_tangentsMode(TM_None)
     , m_cacheTangentsSplits(true)
 {
-#ifdef aiDebug
-    m_magic = aiMagicObj;
-#endif // aiDebug
 }
 
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
@@ -37,10 +33,6 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
     , m_tangentsMode(TM_None)
     , m_cacheTangentsSplits(true)
 {
-#ifdef aiDebug
-    m_magic = aiMagicObj;
-#endif // aiDebug
-
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
@@ -59,44 +51,12 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
             m_schemas.push_back(&m_polymesh);
         }
         
-        m_hasCurves = AbcGeom::ICurvesSchema::matches(metadata);
-        if (m_hasCurves)
-        {
-            m_curves = aiCurves(this);
-            m_schemas.push_back(&m_curves);
-        }
-        
-        m_hasPoints = AbcGeom::IPointsSchema::matches(metadata);
-        if (m_hasPoints)
-        {
-            m_points = aiPoints(this);
-            m_schemas.push_back(&m_points);
-        }
-        
         m_hasCamera = AbcGeom::ICameraSchema::matches(metadata);
         if (m_hasCamera)
         {
             m_camera = aiCamera(this);
             m_schemas.push_back(&m_camera);
         }
-        
-        m_hasLight = AbcGeom::ILight::matches(metadata);
-        if (m_hasLight)
-        {
-            m_light = aiLight(this);
-            m_schemas.push_back(&m_light);
-        }
-        
-        m_hasMaterial = AbcMaterial::IMaterial::matches(metadata);
-        if (m_hasMaterial)
-        {
-            m_material = aiMaterial(this);
-            m_schemas.push_back(&m_material);
-        }
-
-        //for (auto i : metadata) {
-        //    aiDebugLogVerbose("%s: %s\n", i.first.c_str(), i.second.c_str());
-        //}
     }
 }
 
@@ -142,18 +102,10 @@ bool aiObject::areTangentsSplitsCached() const   { return m_cacheTangentsSplits;
 
 bool aiObject::hasXForm() const    { return m_hasXform; }
 bool aiObject::hasPolyMesh() const { return m_hasPolymesh; }
-bool aiObject::hasCurves() const   { return m_hasCurves; }
-bool aiObject::hasPoints() const   { return m_hasPoints; }
 bool aiObject::hasCamera() const   { return m_hasCamera; }
-bool aiObject::hasLight() const    { return m_hasLight; }
-bool aiObject::hasMaterial() const { return m_hasMaterial; }
 
 aiXForm&    aiObject::getXForm()      { return m_xform; }
 aiPolyMesh& aiObject::getPolyMesh()   { return m_polymesh; }
-aiCurves&   aiObject::getCurves()     { return m_curves; }
-aiPoints&   aiObject::getPoints()     { return m_points; }
 aiCamera&   aiObject::getCamera()     { return m_camera; }
-aiLight&    aiObject::getLight()      { return m_light; }
-aiMaterial& aiObject::getMaterial()   { return m_material; }
 
 

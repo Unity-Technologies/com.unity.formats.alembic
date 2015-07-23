@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "Schema/aiSchema.h"
+#include "Schema/aiXForm.h"
+#include "Schema/aiPolyMesh.h"
+#include "Schema/aiCamera.h"
 #include "aiObject.h"
-#include "aiGeometry.h"
 #include "aiContext.h"
 #include "aiLogger.h"
 #include <limits>
@@ -195,10 +198,6 @@ aiContext::aiContext(int uid)
     : m_path("")
     , m_uid(uid)
 {
-#ifdef aiDebug
-    m_magic = aiMagicCtx;
-#endif // aiDebug
-
     m_timeRange[0] = 0;
     m_timeRange[1] = 0;
 }
