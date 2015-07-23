@@ -33,27 +33,7 @@ public class AlembicMesh : MonoBehaviour
     public AlembicImporter.aiTangentsModeOverride m_tangentsMode = AlembicImporter.aiTangentsModeOverride.InheritStreamSetting;
     public bool m_cacheTangentsSplits = true;
     
-    public bool hasFacesets = false;
-
-    public List<Submesh> m_submeshes = new List<Submesh>();
-    public List<Split> m_splits = new List<Split>();
-    
-    public RenderTexture m_indices;
-    public RenderTexture m_vertices;
-    public RenderTexture m_normals;
-    public RenderTexture m_uvs;
-    public RenderTexture m_tangents;
-
-    static RenderTexture CreateDataTexture(int numData, RenderTextureFormat format)
-    {
-        const int width = 1024;
-        var r = new RenderTexture(width, numData / width, 0, format);
-        r.enableRandomWrite = true;
-        r.Create();
-        return r;
-    }
-
-    void Update()
-    {
-    }
+    [HideInInspector] public bool hasFacesets = false;
+    [HideInInspector] public List<Submesh> m_submeshes = new List<Submesh>();
+    [HideInInspector] public List<Split> m_splits = new List<Split>();
 }
