@@ -6,6 +6,7 @@ import excons
 from excons.tools import unity
 from excons.tools import tbb
 from excons.tools import dl
+from excons.tools import glew
 
 use_externals = (sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0)
 if use_externals:
@@ -25,27 +26,37 @@ embed_libs = []
 customs = []
 install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs"),
                  "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs"),
-                 "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/*.shader")}
+                 "unity/AlembicImporter/Shaders": ["AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader"]}
 sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
 sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
-sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
 
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
 
-if excons.GetArgument("opengl", 0, int) != 0:
-  defines.append("aiSupportOpenGL")
-  # device source?
+if excons.GetArgument("texture-mesh", 0, int) != 0:
+  defines.append("aiSupportTextureMesh")
+  sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
+  install_files["unity/AlembicImporter/Meshes"] = ["AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset"]
+  install_files["unity/AlembicImporter/Materials"] = ["AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat"]
+  install_files["unity/AlembicImporter/Shaders"].extend(["AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc",
+                                                         "AlembicImporter/Assets/AlembicImporter/Shaders/AIStandard.shader"])
+  
+  if excons.GetArgument("opengl", 1, int) != 0:
+    defines.extend(["aiSupportOpenGL", "aiDontForceStaticGLEW"])
+    sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceOpenGL.cpp")
+    customs.append(glew.Require)
+
+  if sys.platform == "win32":
+    if excons.GetArgument("d3d9", 1, int) != 0:
+      defines.append("aiSupportD3D9")
+      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D9.cpp")
+
+    if excons.GetArgument("d3d11", 1, int) != 0:
+      defines.append("aiSupportD3D11")
+      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
 
 if use_externals:
-  # we're in windows
-  if excons.GetArgument("d3d9", 0, int) != 0:
-    defines.append("aiSupportD3D9")
-    # device source?
-
-  if excons.GetArgument("d3d11", 1, int) != 0:
-    defines.append("aiSupportD3D11")
-    sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
+  # we're on windows if we fall here
   
   inc_dirs.extend(["AlembicImporterPlugin/external/ilmbase-2.2.0/Half",
                    "AlembicImporterPlugin/external/ilmbase-2.2.0/Iex",
@@ -56,7 +67,8 @@ if use_externals:
                    "AlembicImporterPlugin/external/hdf5-1.8.14/hl/src",
                    "AlembicImporterPlugin/external/hdf5-1.8.14/src",
                    "AlembicImporterPlugin/external/hdf5-1.8.14",
-                   "AlembicImporterPlugin/external/alembic-1_05_08/lib"])
+                   "AlembicImporterPlugin/external/alembic-1_05_08/lib",
+                   "AlembicImporterPlugin/external/glew-1.12.0/include"])
   
   lib_dirs.append("AlembicImporterPlugin/external/libs/x86_64")
   
@@ -87,15 +99,6 @@ else:
   if excons.GetArgument("tbb", 0, int) != 0:
     defines.append("aiWithTBB")
     customs.append(tbb.Require)
-  
-  if sys.platform == "win32":
-    if excons.GetArgument("d3d9", 0, int) != 0:
-      defines.append("aiSupportD3D9")
-      # device source?
-
-    if excons.GetArgument("d3d11", 1, int) != 0:
-      defines.append("aiSupportD3D11")
-      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
   
   embed_libs = excons.GetArgument("embed-libs", [])
   if embed_libs:
