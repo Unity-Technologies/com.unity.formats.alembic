@@ -88,6 +88,7 @@ public class AlembicMaterial : MonoBehaviour
                     if (splitRenderer == null)
                     {
                         Debug.Log("No renderer on \"" + gameObject.name + "\" to assign materials to");
+                        return;
                     }
 
                     Material[] assignedMaterials = splitRenderer.sharedMaterials;
@@ -138,7 +139,7 @@ public class AlembicMaterial : MonoBehaviour
         return facesetsCache.faceCounts.Length;
     }
 
-    public void GetFacesets(ref AlembicImporter.aiFacesets facesets)
+    public void GetFacesets(ref AbcAPI.aiFacesets facesets)
     {
         facesets.count = facesetsCache.faceCounts.Length;
         facesets.faceCounts = Marshal.UnsafeAddrOfPinnedArrayElement(facesetsCache.faceCounts, 0);

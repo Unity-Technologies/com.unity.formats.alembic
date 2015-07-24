@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
@@ -23,62 +24,54 @@ public class AlembicStream : MonoBehaviour
     public CycleType m_cycle = CycleType.Hold;
     public bool m_swapHandedness;
     public bool m_swapFaceWinding;
-    public AlembicImporter.aiNormalsMode m_normalsMode = AlembicImporter.aiNormalsMode.ComputeIfMissing;
-    public AlembicImporter.aiTangentsMode m_tangentsMode = AlembicImporter.aiTangentsMode.None;
-    public AlembicImporter.aiAspectRatioMode m_aspectRatioMode = AlembicImporter.aiAspectRatioMode.CurrentResolution;
-    public bool m_ignoreMissingNodes = true;
+    public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
+    public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
+    public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
     public bool m_forceRefresh;
     public bool m_verbose = false;
     public bool m_logToFile = false;
     public string m_logPath = "";
-    
+    [HideInInspector] public HashSet<AlembicElement> m_elements = new HashSet<AlembicElement>();
+    [HideInInspector] public AbcAPI.aiConfig m_config;
+
     bool m_loaded;
-    float m_lastAdjustedTime;
+    float m_lastAbcTime;
     bool m_lastSwapHandedness;
     bool m_lastSwapFaceWinding;
-    AlembicImporter.aiNormalsMode m_lastNormalsMode;
-    AlembicImporter.aiTangentsMode m_lastTangentsMode;
-    float m_timeEps = 0.001f;
-    AlembicImporter.aiContext m_abc;
+    AbcAPI.aiNormalsMode m_lastNormalsMode;
+    AbcAPI.aiTangentsMode m_lastTangentsMode;
     bool m_lastIgnoreMissingNodes;
     float m_lastAspectRatio = -1.0f;
+    float m_timeEps = 0.001f;
+    AbcAPI.aiContext m_abc;
+    Transform m_trans;
+    // keep a list of aiObjects to update?
 
-    public void Init()
+    // --- For internal use ---
+
+    bool AbcIsValid()
     {
-        if (m_pathToAbc != null)
+        return (m_abc.ptr != (IntPtr)0);
+    }
+
+    void AbcSyncConfig()
+    {
+        m_config.triangulate = true;
+        m_config.swapHandedness = m_swapHandedness;
+        m_config.swapFaceWinding = m_swapFaceWinding;
+        m_config.normalsMode = m_normalsMode;
+        m_config.tangentsMode = m_tangentsMode;
+        m_config.cacheTangentsSplits = true;
+        m_config.aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
+        m_config.forceUpdate = false;
+
+        if (AbcIsValid())
         {
-            m_abc = AlembicImporter.aiCreateContext(gameObject.GetInstanceID());
-            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
+            AbcAPI.aiSetConfig(m_abc, ref m_config);
         }
     }
 
-    void OnEnable()
-    {
-        Init();
-    }
-
-    void OnDestroy()
-    {
-        if (m_abc.ptr == (IntPtr)0)
-        {
-            Debug.Log("AlembicStream: Nothing to destroy");
-            return;
-        }
-
-        if (!Application.isPlaying)
-        {
-#if UNITY_EDITOR
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                AlembicImporter.aiDestroyContext(m_abc);
-            }
-#else
-            AlembicImporter.aiDestroyContext(m_abc);
-#endif
-        }
-    }
-
-    float AdjustTime(float inTime)
+    float AbcTime(float inTime)
     {
         float extraOffset = 0.0f;
 
@@ -146,85 +139,179 @@ public class AlembicStream : MonoBehaviour
         return outTime;
     }
 
-    void Start()
+    bool AbcUpdateRequired(float abcTime, float aspectRatio)
     {
-        m_time = 0.0f;
+        if (m_forceRefresh || 
+            m_swapHandedness != m_lastSwapHandedness ||
+            m_swapFaceWinding != m_lastSwapFaceWinding ||
+            m_normalsMode != m_lastNormalsMode ||
+            m_tangentsMode != m_lastTangentsMode ||
+            Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
+            aspectRatio != m_lastAspectRatio)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-        m_lastAdjustedTime = AdjustTime(0.0f);
+    void AbcSetLastUpdateState(float abcTime, float aspectRatio)
+    {
+        m_lastAbcTime = abcTime;
         m_lastSwapHandedness = m_swapHandedness;
         m_lastSwapFaceWinding = m_swapFaceWinding;
         m_lastNormalsMode = m_normalsMode;
-        m_lastIgnoreMissingNodes = m_ignoreMissingNodes;
         m_lastTangentsMode = m_tangentsMode;
-        m_forceRefresh = true;
+        m_lastAspectRatio = aspectRatio;
+        m_forceRefresh = false;
     }
 
-    void UpdateAbc(float time)
+    void AbcUpdateElements()
     {
-        AlembicImporter.aiEnableFileLog(m_logToFile, m_logPath);
-        
-        if (!m_loaded)
+        for (AlembicElement e in m_elements)
         {
-            if (m_verbose)
+            if (e != null)
             {
-                Debug.Log("Load alembic '" + Application.streamingAssetsPath + "/" + m_pathToAbc);
+                e.AbcUpdate();
             }
-            m_loaded = AlembicImporter.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
         }
+    }
 
+    void AbcUpdate(float time)
+    {
+        AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
+        
         if (m_loaded)
         {
             m_time = time;
 
-            float adjustedTime = AdjustTime(m_time);
-            float aspectRatio = AlembicImporter.GetAspectRatio(m_aspectRatioMode);
+            float abcTime = AbcTime(m_time);
+            float aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
 
-            if (m_forceRefresh || 
-                m_swapHandedness != m_lastSwapHandedness ||
-                m_swapFaceWinding != m_lastSwapFaceWinding ||
-                m_normalsMode != m_lastNormalsMode ||
-                m_ignoreMissingNodes != m_lastIgnoreMissingNodes ||
-                m_tangentsMode != m_lastTangentsMode ||
-                Math.Abs(adjustedTime - m_lastAdjustedTime) > m_timeEps ||
-                aspectRatio != m_lastAspectRatio)
+            if (AbcUpdateRequired(abcTime, aspectRatio))
             {
                 if (m_verbose)
                 {
-                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
+                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + abcTime + ")");
                 }
                 
-                AlembicImporter.UpdateAbcTree(m_abc, GetComponent<Transform>(), adjustedTime,
-                                              m_swapHandedness, m_swapFaceWinding,
-                                              m_normalsMode, m_tangentsMode, aspectRatio,
-                                              m_ignoreMissingNodes);
+                AbcSyncConfig();
+
+                AbcAPI.aiUpdateSamples(m_abc, m_time, 1); // single threaded for first tests
+
+                AbcUpdateElements();
                 
-                m_lastAdjustedTime = adjustedTime;
-                m_lastSwapHandedness = m_swapHandedness;
-                m_lastSwapFaceWinding = m_swapFaceWinding;
-                m_lastNormalsMode = m_normalsMode;
-                m_lastAspectRatio = aspectRatio;
-                m_lastTangentsMode = m_tangentsMode;
-                m_forceRefresh = false;
+                AbcSetLastUpdateState(abcTime, aspectRatio);
             }
             else
             {
                 if (m_verbose)
                 {
-                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + adjustedTime + ")");
+                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + abcTime + ")");
                 }
             }
         }
+    }
+
+    // --- public api ---
+    
+    public void AbcAddElement(AlembicElement e)
+    {
+        if (e != null)
+        {
+            m_elements.Add(e);
+        }
+    }
+
+    public void AbcRemoveElement(AlembicElement e)
+    {
+        if (e != null)
+        {
+            AbcAPI.aiDestroyObject(m_abc, e.m_abcObj);
+            m_elements.Remove(e);
+        }
+    }
+
+    public void AbcLoad()
+    {
+        if (m_pathToAbc == null)
+        {
+            return;
+        }
+
+        m_trans = GetComponent<Transform>();
+        m_abc = AbcAPI.aiCreateContext(gameObject.GetInstanceID());
+        m_loaded = AbcAPI.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
+
+        if (m_loaded)
+        {
+            m_startTime = AbcAPI.aiGetStartTime(m_abc);
+            m_endTime = AbcAPI.aiGetEndTime(m_abc);
+            m_timeOffset = -m_startTime;
+            m_timeScale = 1.0f;
+            m_preserveStartTime = true;
+
+            AbcSyncConfig();
+
+            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_time);
+        }
+    }
+
+    // --- method overrides ---
+
+    void OnApplicationQuit()
+    {
+        AbcAPI.aiCleanup();
+    }
+
+    public void Awake()
+    {
+        AbcLoad();
+        AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
+    }
+
+    void OnDestroy()
+    {
+        if (!AbcIsValid())
+        {
+            Debug.Log("AlembicStream: Nothing to destroy");
+            return;
+        }
+
+        if (!Application.isPlaying)
+        {
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                AbcAPI.aiDestroyContext(m_abc);
+                m_abc = default(AbcAPI.aiContext);
+            }
+#else
+            AbcAPI.aiDestroyContext(m_abc);
+            m_abc = default(AbcAPI.aiContext);
+#endif
+        }
+    }
+
+    void Start()
+    {
+        m_time = 0.0f;
+
+        AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(m_aspectRatioMode));
+        m_forceRefresh = true;
     }
 
     void Update()
     {
         if (Application.isPlaying)
         {
-            UpdateAbc(Time.time);
+            AbcUpdate(Time.time);
         }
         else
         {
-            UpdateAbc(m_time);
+            AbcUpdate(m_time);
         }
     }
 }
