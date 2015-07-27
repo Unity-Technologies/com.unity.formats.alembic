@@ -66,6 +66,11 @@ aiCLinkage aiExport bool aiLoad(aiContext* ctx, const char *path)
     return ctx->load(path);
 }
 
+aiCLinkage aiExport void aiSetConfig(aiContext* ctx, const aiConfig* conf)
+{
+    ctx->setConfig(*conf);
+}
+
 aiCLinkage aiExport float aiGetStartTime(aiContext* ctx)
 {
     return ctx->getStartTime();
