@@ -87,8 +87,8 @@ struct aiCameraData
 struct aiMeshSummary
 {
     int topologyVariance;
-    uint32_t peakIndexCount;
-    uint32_t peakVertexCount;
+    int peakIndexCount;
+    int peakVertexCount;
 
     inline aiMeshSummary()
         : topologyVariance(0)
@@ -100,7 +100,7 @@ struct aiMeshSummary
 
 struct aiMeshSampleSummary
 {
-    uint32_t splitCount;
+    int splitCount;
     bool hasNormals;
     bool hasUVs;
     bool hasTangents;
@@ -132,11 +132,11 @@ struct aiMeshSampleData
 
 struct aiSubmeshSummary
 {
-    uint32_t index;
-    uint32_t splitIndex;
-    uint32_t splitSubmeshIndex;
-    int32_t facesetIndex;
-    uint32_t triangleCount;
+    int index;
+    int splitIndex;
+    int splitSubmeshIndex;
+    int facesetIndex;
+    int triangleCount;
 
     inline aiSubmeshSummary()
         : index(0)

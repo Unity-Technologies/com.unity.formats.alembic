@@ -56,7 +56,6 @@ public class AlembicStream : MonoBehaviour
 
     void AbcSyncConfig()
     {
-        m_config.triangulate = true;
         m_config.swapHandedness = m_swapHandedness;
         m_config.swapFaceWinding = m_swapFaceWinding;
         m_config.normalsMode = m_normalsMode;
@@ -170,7 +169,7 @@ public class AlembicStream : MonoBehaviour
 
     void AbcUpdateElements()
     {
-        for (AlembicElement e in m_elements)
+        foreach (AlembicElement e in m_elements)
         {
             if (e != null)
             {

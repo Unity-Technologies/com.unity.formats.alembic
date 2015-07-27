@@ -40,7 +40,7 @@ public class AlembicXForm : AlembicElement
     {
         if (m_pendingUpdate)
         {
-            if (m_abcData.inherits != 0)
+            if (m_abcData.inherits)
             {
                 m_trans.localPosition = m_abcData.translation;
                 m_trans.localRotation = m_abcData.rotation;

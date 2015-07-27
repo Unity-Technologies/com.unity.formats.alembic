@@ -139,14 +139,14 @@ public:
     Topology();
     ~Topology();
 
-    uint32_t getSplitCount() const;
-    uint32_t getSplitCount(bool forceRefresh);
+    int getSplitCount() const;
+    int getSplitCount(bool forceRefresh);
     
     void updateSplits();
 
-    uint32_t getVertexBufferLength(uint32_t splitIndex) const;
-    uint32_t prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets);
-    uint32_t getSplitSubmeshCount(uint32_t splitIndex) const;
+    int getVertexBufferLength(int splitIndex) const;
+    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets);
+    int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return submeshes.begin(); }
     inline Submeshes::iterator submeshEnd() { return submeshes.end(); }
@@ -191,11 +191,11 @@ public:
     void computeTangents(const aiConfig &config, const Abc::V3f *N, bool Nindexed);
     void computeSmoothNormals(const aiConfig &config);
 
-    uint32_t getVertexBufferLength(uint32_t splitIndex) const;
-    void fillVertexBuffer(uint32_t splitIndex, aiMeshSampleData &data);
+    int getVertexBufferLength(int splitIndex) const;
+    void fillVertexBuffer(int splitIndex, aiMeshSampleData &data);
 
-    uint32_t prepareSubmeshes(const aiFacesets &inFacesets);
-    uint32_t getSplitSubmeshCount(uint32_t splitIndex) const;
+    int prepareSubmeshes(const aiFacesets &inFacesets);
+    int getSplitSubmeshCount(int splitIndex) const;
     bool getNextSubmesh(aiSubmeshSummary &summary);
     void fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const;
 
@@ -230,14 +230,14 @@ public:
     Sample* readSample(float time) override;
 
     int getTopologyVariance() const;
-    uint32_t getPeakIndexCount() const;
-    uint32_t getPeakVertexCount() const;
+    int getPeakIndexCount() const;
+    int getPeakVertexCount() const;
 
     void getSummary(aiMeshSummary &summary) const;
 
 private:
-    mutable uint32_t m_peakIndexCount;
-    mutable uint32_t m_peakVertexCount;
+    mutable int m_peakIndexCount;
+    mutable int m_peakVertexCount;
 
     bool m_ignoreNormals;
     bool m_ignoreUVs;
