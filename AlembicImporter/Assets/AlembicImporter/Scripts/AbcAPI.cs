@@ -99,7 +99,7 @@ public class AbcAPI
 
     public struct aiFacesets
     {
-        public uint count;
+        public int count;
 
         public IntPtr faceCounts;
         public IntPtr faceIndices;
@@ -108,13 +108,13 @@ public class AbcAPI
     public struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance;
-        public uint peakIndexCount;
-        public uint peakVertexCount;
+        public int peakIndexCount;
+        public int peakVertexCount;
     }
 
     public struct aiMeshSampleSummary
     {
-        public uint splitCount;
+        public int splitCount;
         public bool hasNormals;
         public bool hasUVs;
         public bool hasTangents;
@@ -130,11 +130,11 @@ public class AbcAPI
 
     public struct aiSubmeshSummary
     {
-        public uint index;
-        public uint splitIndex;
-        public uint splitSubmeshIndex;
+        public int index;
+        public int splitIndex;
+        public int splitSubmeshIndex;
         public int facesetIndex;
-        public uint triangleCount;
+        public int triangleCount;
     }
 
     public struct aiSubmeshData
@@ -153,7 +153,7 @@ public class AbcAPI
     public struct aiCameraData
     {
         public float nearClippingPlane;
-        public float faceClippingPlane;
+        public float farClippingPlane;
         public float fieldOfView;
         public float focusDistance;
         public float focalLength;
@@ -264,8 +264,8 @@ public class AbcAPI
 
     public class ImportParams
     {
-        bool swapHandedness = true;
-        bool swapFaceWinding = false;
+        public bool swapHandedness = true;
+        public bool swapFaceWinding = false;
     }
 
     static string MakeRelativePath(string path)
@@ -335,7 +335,7 @@ public class AbcAPI
 
         string childName = aiGetName(obj);
         var trans = parent.FindChild(childName);
-        bool created false;
+        bool created = false;
 
         if (trans == null)
         {
@@ -376,12 +376,12 @@ public class AbcAPI
             
             if (created)
             {
-                ic.abcStream.AddElement(elem);
+                ic.abcStream.AbcAddElement(elem);
             }
         }
 
         ic.parent = trans;
-        aiEnumerateChild(obj, ImportEnumerator, userdata);
+        aiEnumerateChild(obj, ImportEnumerator, userData);
         ic.parent = parent;
     }
     
@@ -402,7 +402,7 @@ public class AbcUtils
     
     static MethodInfo s_GetBuiltinExtraResourcesMethod;
 
-    static Material GetDefaultMaterial()
+    public static Material GetDefaultMaterial()
     {
         if (s_GetBuiltinExtraResourcesMethod == null)
         {

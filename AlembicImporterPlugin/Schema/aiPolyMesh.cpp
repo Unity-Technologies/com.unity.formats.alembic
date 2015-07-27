@@ -10,9 +10,9 @@
 
 // ---
 
-static inline uint32_t CalculateIndexCount(Abc::Int32ArraySample &counts)
+static inline int CalculateIndexCount(Abc::Int32ArraySample &counts)
 {
-    uint32_t r = 0;
+    int r = 0;
     size_t n = counts.size();
     
     for (size_t fi = 0; fi < n; ++fi)
@@ -43,12 +43,12 @@ Topology::~Topology()
     }
 }
 
-uint32_t Topology::getSplitCount() const
+int Topology::getSplitCount() const
 {
-    return (uint32_t) splits.size();
+    return (int) splits.size();
 }
 
-uint32_t Topology::getSplitCount(bool forceRefresh)
+int Topology::getSplitCount(bool forceRefresh)
 {
     if (counts && indices)
     {
@@ -63,7 +63,7 @@ uint32_t Topology::getSplitCount(bool forceRefresh)
         faceSplitIndices.clear();
     }
 
-    return (uint32_t) splits.size();
+    return (int) splits.size();
 }
 
 void Topology::updateSplits()
@@ -102,7 +102,7 @@ void Topology::updateSplits()
     }
 }
 
-uint32_t Topology::getVertexBufferLength(uint32_t splitIndex) const
+int Topology::getVertexBufferLength(int splitIndex) const
 {
     if (splitIndex >= splits.size())
     {
@@ -110,12 +110,12 @@ uint32_t Topology::getVertexBufferLength(uint32_t splitIndex) const
     }
     else
     {
-        return (uint32_t) splits[splitIndex].indicesCount;
+        return (int) splits[splitIndex].indicesCount;
     }
 }
 
-uint32_t Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
-                                    const aiFacesets &inFacesets)
+int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
+                               const aiFacesets &inFacesets)
 {
     Facesets facesets;
     std::map<size_t, int> facesetIndices;
@@ -176,7 +176,7 @@ uint32_t Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         }
     }
 
-    uint32_t nsplits = getSplitCount(false);
+    int nsplits = getSplitCount(false);
 
     if (facesets.size() == 0 && nsplits == 1)
     {
@@ -276,10 +276,10 @@ uint32_t Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         }
     }
 
-    return (uint32_t) submeshes.size();
+    return (int) submeshes.size();
 }
 
-uint32_t Topology::getSplitSubmeshCount(uint32_t splitIndex) const
+int Topology::getSplitSubmeshCount(int splitIndex) const
 {
     if (splitIndex >= splits.size())
     {
@@ -287,7 +287,7 @@ uint32_t Topology::getSplitSubmeshCount(uint32_t splitIndex) const
     }
     else
     {
-        return (uint32_t) splits[splitIndex].submeshCount;
+        return (int) splits[splitIndex].submeshCount;
     }
 }
 
@@ -763,12 +763,12 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
     summary.hasTangents = hasTangents();
 }
 
-uint32_t aiPolyMeshSample::getVertexBufferLength(uint32_t splitIndex) const
+int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
 {
     return m_topology->getVertexBufferLength(splitIndex);
 }
 
-void aiPolyMeshSample::fillVertexBuffer(uint32_t splitIndex, aiMeshSampleData &data)
+void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
 {
     if (splitIndex >= m_topology->splits.size())
     {
@@ -1148,16 +1148,16 @@ void aiPolyMeshSample::fillVertexBuffer(uint32_t splitIndex, aiMeshSampleData &d
     }
 }
 
-uint32_t aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
+int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
 {
-    uint32_t rv = m_topology->prepareSubmeshes(m_uvs, inFacesets);
+    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets);
 
     m_curSubmesh = m_topology->submeshBegin();
 
     return rv;
 }
 
-uint32_t aiPolyMeshSample::getSplitSubmeshCount(uint32_t splitIndex) const
+int aiPolyMeshSample::getSplitSubmeshCount(int splitIndex) const
 {
     return m_topology->getSplitSubmeshCount(splitIndex);
 }
@@ -1362,7 +1362,7 @@ int aiPolyMesh::getTopologyVariance() const
     return (int) m_schema.getTopologyVariance();
 }
 
-uint32_t aiPolyMesh::getPeakIndexCount() const
+int aiPolyMesh::getPeakIndexCount() const
 {
     if (m_peakIndexCount == 0)
     {
@@ -1409,7 +1409,7 @@ uint32_t aiPolyMesh::getPeakIndexCount() const
     return m_peakIndexCount;
 }
 
-uint32_t aiPolyMesh::getPeakVertexCount() const
+int aiPolyMesh::getPeakVertexCount() const
 {
     if (m_peakVertexCount == 0)
     {

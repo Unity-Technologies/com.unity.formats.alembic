@@ -20,7 +20,7 @@ public class AlembicMesh : AlembicElement
         public GameObject host;
 
         public bool clear;
-        public bool submeshCount;
+        public int submeshCount;
         public bool active;
     }
 
@@ -187,39 +187,39 @@ public class AlembicMesh : AlembicElement
 
             int vertexCount = AbcAPI.aiPolyMeshGetVertexBufferLength(sample, s);
 
-            Array.Resize(split.positionCache, vertexCount);
+            Array.Resize(ref split.positionCache, vertexCount);
             vertexData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(split.positionCache, 0);
 
-            if (m_summary.hasNormals)
+            if (m_sampleSummary.hasNormals)
             {
-                Array.Resize(split.normalCache, vertexCount);
+                Array.Resize(ref split.normalCache, vertexCount);
                 vertexData.normals = Marshal.UnsafeAddrOfPinnedArrayElement(split.normalCache, 0);
             }
             else
             {
-                Array.Resize(split.normalCache, 0);
+                Array.Resize(ref split.normalCache, 0);
                 vertexData.normals = (IntPtr)0;
             }
 
-            if (m_summary.hasUVs)
+            if (m_sampleSummary.hasUVs)
             {
-                Array.Resize(split.uvCache, vertexCount);
+                Array.Resize(ref split.uvCache, vertexCount);
                 vertexData.uvs = Marshal.UnsafeAddrOfPinnedArrayElement(split.uvCache, 0);
             }
             else
             {
-                Array.Resize(split.uvCache, 0);
+                Array.Resize(ref split.uvCache, 0);
                 vertexData.uvs = (IntPtr)0;
             }
 
-            if (m_summary.hasTangents)
+            if (m_sampleSummary.hasTangents)
             {
-                Array.Resize(split.tangentCache, vertexCount);
+                Array.Resize(ref split.tangentCache, vertexCount);
                 vertexData.tangents = Marshal.UnsafeAddrOfPinnedArrayElement(split.tangentCache, 0);
             }
             else
             {
-                Array.Resize(split.tangentCache, 0);
+                Array.Resize(ref split.tangentCache, 0);
                 vertexData.tangents = (IntPtr)0;
             }
 
@@ -254,7 +254,7 @@ public class AlembicMesh : AlembicElement
                 m_splits[s].submeshCount = AbcAPI.aiPolyMeshGetSplitSubmeshCount(sample, s);
             }
 
-            while (aiPolyMeshGetNextSubmesh(abc, ref submeshSummary))
+            while (AbcAPI.aiPolyMeshGetNextSubmesh(sample, ref submeshSummary))
             {
                 if (submeshSummary.splitIndex >= m_splits.Count)
                 {
@@ -277,7 +277,7 @@ public class AlembicMesh : AlembicElement
                         splitIndex = -1,
                         index = -1,
                         update = true
-                    }
+                    };
                 }
 
                 submesh.facesetIndex = submeshSummary.facesetIndex;
@@ -285,7 +285,7 @@ public class AlembicMesh : AlembicElement
                 submesh.index = submeshSummary.splitSubmeshIndex;
                 submesh.update = true;
 
-                Array.Resize(submesh.indexCache, 3 * submeshSummary.triangleCount);
+                Array.Resize(ref submesh.indexCache, 3 * submeshSummary.triangleCount);
 
                 submeshData.indices = Marshal.UnsafeAddrOfPinnedArrayElement(submesh.indexCache, 0);
 
@@ -317,7 +317,7 @@ public class AlembicMesh : AlembicElement
 
         for (int s=0; s<m_splits.Count; ++s)
         {
-            Split split = m_splits[i];
+            Split split = m_splits[s];
 
             if (split.active)
             {
@@ -350,7 +350,7 @@ public class AlembicMesh : AlembicElement
 
                         for (int i=nmat; i<split.submeshCount; ++i)
                         {
-                            materials[i] = UnityEngine.Object.Instantiate(GetDefaultMaterial());
+                            materials[i] = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
                             materials[i].name = "Material_" + Convert.ToString(i);
                         }
 
@@ -381,7 +381,7 @@ public class AlembicMesh : AlembicElement
 
         if (!m_sampleSummary.hasNormals && !m_sampleSummary.hasTangents)
         {
-            for (int s=0; s<numSplits; ++s)
+            for (int s=0; s<m_sampleSummary.splitCount; ++s)
             {
                 m_splits[s].mesh.RecalculateNormals();
             }
@@ -390,7 +390,7 @@ public class AlembicMesh : AlembicElement
         m_pendingUpdate = false;
     }
 
-    static Mesh AddMeshComponents(aiObject abc, Transform trans)
+    static Mesh AddMeshComponents(AbcAPI.aiObject abc, Transform trans)
     {
         Mesh mesh = null;
         
