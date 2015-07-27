@@ -800,14 +800,17 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
             indexedNormals = (m_normals.getScope() == AbcGeom::kFacevaryingScope);
         }
 
-        if (!m_topology->tangentIndices)
+        if (normals)
         {
-            computeTangentIndices(m_config, normals, indexedNormals);
-        }
+            if (!m_topology->tangentIndices)
+            {
+                computeTangentIndices(m_config, normals, indexedNormals);
+            }
 
-        if (!m_tangents)
-        {
-            computeTangents(m_config, normals, indexedNormals);
+            if (!m_tangents)
+            {
+                computeTangents(m_config, normals, indexedNormals);
+            }
         }
     }
 
