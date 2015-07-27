@@ -1,87 +1,57 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiContext.h"
+#include "aiObject.h"
 #include "aiSchema.h"
 #include "aiCamera.h"
 #include "aiPolyMesh.h"
 #include "aiXForm.h"
-#include "aiObject.h"
-#include "aiContext.h"
 
-aiXForm::aiXForm()
-    : super()
-    , m_inherits(true)
+
+aiXFormSample::aiXFormSample(aiXForm *schema, float time)
+    : super(schema, time)
 {
 }
+
+void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
+{
+    topoChanged = false;
+    dataChanged = (config.swapHandedness != m_config.swapHandedness);
+    m_config = config;
+}
+
+void aiXFormSample::getData(aiXFormData &outData) const
+{
+    abcV3 axis = m_sample.getAxis();
+    float angle = m_sample.getAngle() * (aiPI / 180.0f);
+
+    if (m_config.swapHandedness)
+    {
+        outData.translation.x *= -1.0f;
+        axis.x *= -1.0f;
+        angle *= -1.0f;
+    }
+
+    outData.inherits = m_sample.getInheritsXforms();
+    outData.translation = m_sample.getTranslation();
+    outData.scale = abcV3(m_sample.getScale());
+    outData.rotation = abcV4(axis.x * std::sin(angle * 0.5f),
+                             axis.y * std::sin(angle * 0.5f),
+                             axis.z * std::sin(angle * 0.5f),
+                             std::cos(angle * 0.5f) );
+}
+
+
 
 aiXForm::aiXForm(aiObject *obj)
     : super(obj)
-    , m_inherits(true)
 {
 }
 
-aiXForm::~aiXForm()
+aiXForm::Sample* aiXForm::readSample(float time)
 {
-}
-
-void aiXForm::updateSample()
-{
-    Abc::ISampleSelector ss(m_obj->getCurrentTime());
-
-    if (!m_schema.valid())
-    {
-        AbcGeom::IXform xf(m_obj->getAbcObject(), Abc::kWrapExisting);
-        m_schema = xf.getSchema();
-    }
-    else if (m_schema.isConstant())
-    {
-        return;
-    }
-
-    m_schema.get(m_sample, ss);
-    m_inherits = m_schema.getInheritsXforms(ss);
-}
-
-bool aiXForm::getInherits() const
-{
-    return m_inherits;
-}
-
-abcV3 aiXForm::getPosition() const
-{
-    abcV3 ret = m_sample.getTranslation();
-    if (m_obj->isHandednessSwapped())
-    {
-        ret.x *= -1.0f;
-    }
+    Sample *ret = new Sample(this, time);
+    m_schema.get(ret->m_sample, MakeSampleSelector(time));
     return ret;
 }
 
-abcV3 aiXForm::getAxis() const
-{
-    abcV3 ret = m_sample.getAxis();
-    if (m_obj->isHandednessSwapped())
-    {
-        ret.x *= -1.0f;
-    }
-    return ret;
-}
-
-float aiXForm::getAngle() const
-{
-    float ret = float(m_sample.getAngle());
-    if (m_obj->isHandednessSwapped())
-    {
-        ret *= -1.0f;
-    }
-    return ret;
-}
-
-abcV3 aiXForm::getScale() const
-{
-    return abcV3(m_sample.getScale());
-}
-
-abcM44 aiXForm::getMatrix() const
-{
-    return abcM44(m_sample.getMatrix());
-}

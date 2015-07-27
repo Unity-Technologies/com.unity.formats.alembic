@@ -63,7 +63,7 @@ public class AlembicStream : MonoBehaviour
         m_config.tangentsMode = m_tangentsMode;
         m_config.cacheTangentsSplits = true;
         m_config.aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
-        m_config.forceUpdate = false;
+        m_config.forceUpdate = false; // m_forceRefresh; ?
 
         if (AbcIsValid())
         {
@@ -199,7 +199,7 @@ public class AlembicStream : MonoBehaviour
                 
                 AbcSyncConfig();
 
-                AbcAPI.aiUpdateSamples(m_abc, m_time, 1); // single threaded for first tests
+                AbcAPI.aiUpdateSamples(m_abc, m_time, false); // single threaded for first tests
 
                 AbcUpdateElements();
                 

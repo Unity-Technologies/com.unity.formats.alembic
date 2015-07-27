@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiContext.h"
+#include "aiObject.h"
 #include "Schema/aiSchema.h"
 #include "Schema/aiXForm.h"
 #include "Schema/aiPolyMesh.h"
 #include "Schema/aiCamera.h"
-#include "aiObject.h"
-#include "aiContext.h"
 #include "aiLogger.h"
 #include <limits>
 
@@ -200,6 +200,7 @@ aiContext::aiContext(int uid)
 {
     m_timeRange[0] = 0;
     m_timeRange[1] = 0;
+    m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
 }
 
 aiContext::~aiContext()
@@ -229,9 +230,20 @@ int aiContext::getUid() const
     return m_uid;
 }
 
+const aiConfig& aiContext::getConfig() const
+{
+    return m_config;
+}
+
+void aiContext::setConfig(const aiConfig &config)
+{
+    m_config = config;
+}
+
 void aiContext::gatherNodesRecursive(aiObject *n)
 {
     m_nodes.push_back(n);
+
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
     
@@ -241,6 +253,41 @@ void aiContext::gatherNodesRecursive(aiObject *n)
         aiObject *child = new aiObject(this, abcChild);
         n->addChild(child);
         gatherNodesRecursive(child);
+    }
+}
+
+void aiContext::destroyObject(aiObject *obj)
+{
+    destroyObject(obj, m_nodes.begin());
+}
+
+std::vector<aiObject*>::iterator aiContext::destroyObject(aiObject *obj, std::vector<aiObject*>::iterator searchFrom)
+{
+    std::vector<aiObject*>::iterator it = std::find(searchFrom, m_nodes.end(), obj);
+    
+    if (it != m_nodes.end())
+    {
+        size_t fromIndex = searchFrom - m_nodes.begin();
+
+        // it now points to next element after found object
+        // (its first child or next sibling if it hasn't got any child)
+        it = m_nodes.erase(it);
+
+        // also destroy all the childrens
+        uint32_t numChildren = obj->getNumChildren();
+        
+        for (uint32_t c=0; c<numChildren; ++c)
+        {
+            it = destroyObject(obj->getChild(c), it);
+        }
+
+        delete obj;
+
+        return (m_nodes.begin() + fromIndex);
+    }
+    else
+    {
+        return searchFrom;
     }
 }
 
@@ -259,6 +306,10 @@ void aiContext::reset()
     
     m_path = "";
     m_archive.reset();
+
+    m_timeRange[0] = 0.0f;
+    m_timeRange[1] = 0.0f;
+    m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
 }
 
 std::string aiContext::normalizePath(const char *inPath) const
@@ -415,7 +466,73 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
-void aiContext::runTask(const std::function<void()> &task)
+void aiContext::setTimeRangeToKeepSamples(float time, float range)
+{
+    m_timeRangeToKeepSamples = std::make_tuple(time, range);
+}
+
+void aiContext::updateSamples(float time, bool useThreads)
+{
+    if (useThreads)
+    {
+        // queue all updates in task pool...
+        updateSamplesBegin(time);
+        // ... and wait for completion
+        updateSamplesEnd();
+    }
+    else
+    {
+        float eraseStart = std::get<0>(m_timeRangeToKeepSamples);
+        float eraseRange = std::get<1>(m_timeRangeToKeepSamples);
+
+        for (auto &e : m_nodes)
+        {
+            e->updateSample(time);
+        }
+
+        if (eraseRange > 0.0f)
+        {
+            erasePastSamples(eraseStart, eraseRange);
+        }
+    }
+}
+
+void aiContext::updateSamplesBegin(float time)
+{
+    float eraseStart = std::get<0>(m_timeRangeToKeepSamples);
+    float eraseRange = std::get<1>(m_timeRangeToKeepSamples);
+
+    // enqueueTask([this, time](){ updateSamples(time); });
+    
+    for (aiObject *obj : m_nodes)
+    {
+        enqueueTask(
+            [obj, time, eraseStart, eraseRange]()
+            {
+                obj->updateSample(time);
+                if (eraseRange > 0.0f)
+                {
+                    obj->erasePastSamples(eraseStart, eraseRange);
+                }
+            }
+        );
+    }
+}
+
+void aiContext::updateSamplesEnd()
+{
+    waitTasks();
+}
+
+void aiContext::erasePastSamples(float time, float rangeKeep)
+{
+    for (auto &e : m_nodes)
+    {
+        e->erasePastSamples(time, rangeKeep);
+    }
+}
+
+void aiContext::enqueueTask(const std::function<void()> &task)
 {
     m_tasks.run(task);
 }

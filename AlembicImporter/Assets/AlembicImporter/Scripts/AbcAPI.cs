@@ -77,7 +77,6 @@ public class AbcAPI
 
     public struct aiConfig
     {
-        public bool triangulate;
         public bool swapHandedness;
         public bool swapFaceWinding;
         public aiNormalsMode normalsMode;
@@ -88,7 +87,6 @@ public class AbcAPI
 
         public void SetDefaults()
         {
-            triangulate = true;
             swapHandedness = true;
             swapFaceWinding = false;
             normalsMode = aiNormalsMode.ComputeIfMissing;
@@ -135,7 +133,7 @@ public class AbcAPI
         public uint index;
         public uint splitIndex;
         public uint splitSubmeshIndex;
-        public uint facesetIndex;
+        public int facesetIndex;
         public uint triangleCount;
     }
 
@@ -194,10 +192,11 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
+    [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
-    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time, int threads=0);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time, bool useThreads);
     [DllImport ("AlembicImporter")] public static extern void       aiSetTimeRangeToKeepSamples(aiContext ctx, float time, float keepRange);
-    [DllImport ("AlembicImporter")] public static extern int        aiErasePastSamples(aiContext ctx, float time, float keepRange);
+    [DllImport ("AlembicImporter")] public static extern void       aiErasePastSamples(aiContext ctx, float time, float keepRange);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time, float keepRange);
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
 
@@ -206,8 +205,7 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
     public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
     public static string aiGetFullName(aiObject obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
-    [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
-
+    
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, float time);
@@ -222,7 +220,6 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, bool forceRefresh);
-    //[DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitCount(aiSample sample, bool forceRefresh);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiMeshSampleData data);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);

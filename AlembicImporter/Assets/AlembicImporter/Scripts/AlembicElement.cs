@@ -88,7 +88,9 @@ public abstract class AlembicElement : MonoBehaviour
     {
     }
 
+    // Called by loading thread (not necessarily the main thread)
     public abstract void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged);
 
+    // Called in main thread
     public abstract void AbcUpdate();
 }

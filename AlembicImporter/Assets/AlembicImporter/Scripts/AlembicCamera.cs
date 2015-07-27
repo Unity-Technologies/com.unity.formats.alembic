@@ -41,11 +41,8 @@ public class AlembicCamera : AlembicElement
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
-        if (sample.ptr != (IntPtr)0)
-        {
-            AbcAPI.aiCameraGetData(sample, ref m_abcData);
-            m_pendingUpdate = true;
-        }
+        AbcAPI.aiCameraGetData(sample, ref m_abcData);
+        m_pendingUpdate = true;
     }
 
     public override void AbcUpdate()
