@@ -146,8 +146,8 @@ public class AlembicMesh : AlembicElement
 
         config.cacheTangentsSplits = m_cacheTangentsSplits;
 
-        // if set true, even if alembic sample data do not change at all
-        // AbcSampleUpdated will be called with a non-null aiSample pointer (topologyChanged will be false)
+        // if 'forceUpdate' is set true, even if alembic sample data do not change at all
+        // AbcSampleUpdated will still be called (topologyChanged will be false)
 
         AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
 
@@ -156,11 +156,6 @@ public class AlembicMesh : AlembicElement
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
-        if (sample.ptr == (IntPtr)0)
-        {
-            return;
-        }
-
         AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
 
         if (abcMaterials != null)
@@ -311,7 +306,6 @@ public class AlembicMesh : AlembicElement
         }
 
         m_pendingUpdate = true;
-        }
     }
 
     public override void AbcUpdate()

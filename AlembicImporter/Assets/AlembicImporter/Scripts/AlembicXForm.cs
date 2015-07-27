@@ -31,11 +31,9 @@ public class AlembicXForm : AlembicElement
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
-        if (sample.ptr != (IntPtr)0)
-        {
-            AbcAPI.aiXFormGetData(sample, ref m_abcData);
-            m_pendingUpdate = true;
-        }
+        AbcAPI.aiXFormGetData(sample, ref m_abcData);
+        
+        m_pendingUpdate = true;
     }
 
     public override void AbcUpdate()

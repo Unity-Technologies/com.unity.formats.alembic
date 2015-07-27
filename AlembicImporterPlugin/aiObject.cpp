@@ -1,61 +1,41 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiContext.h"
+#include "aiObject.h"
 #include "Schema/aiSchema.h"
 #include "Schema/aiXForm.h"
 #include "Schema/aiPolyMesh.h"
 #include "Schema/aiCamera.h"
-#include "aiContext.h"
-#include "aiObject.h"
 
 aiObject::aiObject()
     : m_ctx(0)
-    , m_hasXform(false)
-    , m_hasPolymesh(false)
-    , m_hasCamera(false)
-    , m_time(0.0f)
-    , m_triangulate(true)
-    , m_swapHandedness(true)
-    , m_swapFaceWinding(false)
-    , m_normalsMode(NM_ComputeIfMissing)
-    , m_tangentsMode(TM_None)
-    , m_cacheTangentsSplits(true)
 {
 }
 
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
-    , m_time(0.0f)
-    , m_triangulate(true)
-    , m_swapHandedness(true)
-    , m_swapFaceWinding(false)
-    , m_normalsMode(NM_ComputeIfMissing)
-    , m_tangentsMode(TM_None)
-    , m_cacheTangentsSplits(true)
 {
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
         
-        m_hasXform = AbcGeom::IXformSchema::matches(metadata);
-        if (m_hasXform)
+        if (AbcGeom::IXformSchema::matches(metadata))
         {
-            m_xform = aiXForm(this);
-            m_schemas.push_back(&m_xform);
+            m_xform.reset(new aiXForm(this));
+            m_schemas.push_back(m_xform.get());
         }
         
-        m_hasPolymesh = AbcGeom::IPolyMeshSchema::matches(metadata);
-        if (m_hasPolymesh)
+        if (AbcGeom::IPolyMeshSchema::matches(metadata))
         {
-            m_polymesh = aiPolyMesh(this);
-            m_schemas.push_back(&m_polymesh);
+            m_polymesh.reset(new aiPolyMesh(this));
+            m_schemas.push_back(m_polymesh.get());
         }
         
-        m_hasCamera = AbcGeom::ICameraSchema::matches(metadata);
-        if (m_hasCamera)
+        if (AbcGeom::ICameraSchema::matches(metadata))
         {
-            m_camera = aiCamera(this);
-            m_schemas.push_back(&m_camera);
+            m_camera.reset(new aiCamera(this));
+            m_schemas.push_back(m_camera.get());
         }
     }
 }
@@ -69,6 +49,22 @@ void aiObject::addChild(aiObject *c)
     m_children.push_back(c);
 }
 
+void aiObject::updateSample(float time)
+{
+    for (auto s : m_schemas)
+    {
+        s->updateSample(time);
+    }
+}
+
+void aiObject::erasePastSamples(float from, float range)
+{
+    for (auto s : m_schemas)
+    {
+        s->erasePastSamples(from, range);
+    }
+}
+
 aiContext*  aiObject::getContext()           { return m_ctx; }
 abcObject&  aiObject::getAbcObject()         { return m_abc; }
 const char* aiObject::getName() const        { return m_abc.getName().c_str(); }
@@ -76,36 +72,13 @@ const char* aiObject::getFullName() const    { return m_abc.getFullName().c_str(
 uint32_t    aiObject::getNumChildren() const { return m_children.size(); }
 aiObject*   aiObject::getChild(int i)        { return m_children[i]; }
 
-void aiObject::setCurrentTime(float time)
-{
-    m_time = time;
-    for (auto s : m_schemas) {
-        s->updateSample();
-    }
-}
 
-void aiObject::enableTriangulate(bool v)         { m_triangulate = v; }
-void aiObject::swapHandedness(bool v)            { m_swapHandedness = v; }
-void aiObject::swapFaceWinding(bool v)           { m_swapFaceWinding = v; }
-void aiObject::setNormalsMode(aiNormalsMode m)   { m_normalsMode = m; }
-void aiObject::setTangentsMode(aiTangentsMode m) { m_tangentsMode = m; }
-void aiObject::cacheTangentsSplits(bool v)       { m_cacheTangentsSplits = v; }
+bool aiObject::hasXForm() const    { return m_xform != nullptr; }
+bool aiObject::hasPolyMesh() const { return m_polymesh != nullptr; }
+bool aiObject::hasCamera() const   { return m_camera != nullptr; }
 
-float aiObject::getCurrentTime() const           { return m_time; }
-bool aiObject::getTriangulate() const            { return m_triangulate; }
-bool aiObject::isHandednessSwapped() const       { return m_swapHandedness; }
-bool aiObject::isFaceWindingSwapped() const      { return m_swapFaceWinding; }
-aiNormalsMode aiObject::getNormalsMode() const   { return m_normalsMode; }
-aiTangentsMode aiObject::getTangentsMode() const { return m_tangentsMode; }
-bool aiObject::areTangentsSplitsCached() const   { return m_cacheTangentsSplits; }
-
-
-bool aiObject::hasXForm() const    { return m_hasXform; }
-bool aiObject::hasPolyMesh() const { return m_hasPolymesh; }
-bool aiObject::hasCamera() const   { return m_hasCamera; }
-
-aiXForm&    aiObject::getXForm()      { return m_xform; }
-aiPolyMesh& aiObject::getPolyMesh()   { return m_polymesh; }
-aiCamera&   aiObject::getCamera()     { return m_camera; }
+aiXForm&    aiObject::getXForm()      { return *m_xform; }
+aiPolyMesh& aiObject::getPolyMesh()   { return *m_polymesh; }
+aiCamera&   aiObject::getCamera()     { return *m_camera; }
 
 

@@ -8,6 +8,8 @@ class aiObject;
 class aiContext
 {
 public:
+    typedef std::function<void ()> task_t;
+
     static aiContext* create(int uid);
     static void destroy(aiContext* ctx);
 
@@ -16,11 +18,23 @@ public:
     ~aiContext();
     
     bool load(const char *path);
+    
+    const aiConfig& getConfig() const;
+    void setConfig(const aiConfig &config);
+
     aiObject* getTopObject();
+    void destroyObject(aiObject *obj);
+
     float getStartTime() const;
     float getEndTime() const;
 
-    void runTask(const std::function<void ()> &task);
+    void setTimeRangeToKeepSamples(float time, float range);
+    void updateSamples(float time, bool useThreads);
+    void updateSamplesBegin(float time);
+    void updateSamplesEnd();
+    void erasePastSamples(float time, float rangeKeep);
+
+    void enqueueTask(const task_t &task);
     void waitTasks();
 
     Abc::IArchive getArchive() const;
@@ -31,6 +45,7 @@ private:
     std::string normalizePath(const char *path) const;
     void reset();
     void gatherNodesRecursive(aiObject *n);
+    std::vector<aiObject*>::iterator destroyObject(aiObject *obj, std::vector<aiObject*>::iterator searchFrom);
 
 private:
     std::string m_path;
@@ -39,6 +54,8 @@ private:
     aiTaskGroup m_tasks;
     double m_timeRange[2];
     int m_uid;
+    aiConfig m_config;
+    std::tuple<float, float> m_timeRangeToKeepSamples; // start, range
 };
 
 

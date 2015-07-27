@@ -1,27 +1,34 @@
 #ifndef aiXForm_h
 #define aiXForm_h
 
-class aiXForm : public aiSchema
+class aiXFormSample : public aiSampleBase
 {
-typedef aiSchema super;
+typedef aiSampleBase super;
 public:
-    aiXForm();
-    aiXForm(aiObject *obj);
-    virtual ~aiXForm();
+    aiXFormSample(aiXForm *schema, float time);
 
-    void updateSample() override;
+    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
-    bool        getInherits() const;
-    abcV3       getPosition() const;
-    abcV3       getAxis() const;
-    float       getAngle() const;
-    abcV3       getScale() const;
-    abcM44      getMatrix() const;
+    void getData(aiXFormData &outData) const;
 
-private:
-    AbcGeom::IXformSchema m_schema;
+public:
     AbcGeom::XformSample m_sample;
-    bool m_inherits;
+};
+
+
+struct aiXFormTraits
+{
+    typedef aiXFormSample SampleT;
+    typedef AbcGeom::IXformSchema AbcSchemaT;
+};
+
+class aiXForm : public aiTSchema<aiXFormTraits>
+{
+typedef aiTSchema<aiXFormTraits> super;
+public:
+    aiXForm(aiObject *obj);
+
+    Sample* readSample(float time) override;
 };
 
 #endif

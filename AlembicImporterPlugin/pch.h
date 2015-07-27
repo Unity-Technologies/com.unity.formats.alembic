@@ -65,21 +65,39 @@ void aiDebugLogImpl(const char* fmt, ...);
 #include <d3d11.h>
 #endif // aiSupportD3D11
 
+#ifdef aiSupportD3D9
+#include <d3d9.h>
+#endif // aiSupportD3D9
+
 #endif // aiWindows
 
 using namespace Alembic;
 
-typedef Abc::V2f       abcV2;
-typedef Abc::V3f       abcV3;
+#define aiPI 3.14159265f
+
+typedef Imath::V2f     abcV2;
+typedef Imath::V3f     abcV3;
 typedef Imath::V4f     abcV4;
-typedef Abc::M44f      abcM44;
+typedef Imath::M44f    abcM44;
 typedef Abc::IObject   abcObject;
-struct  aiCameraParams;
-class   aiObject;
-class   aiXForm;
-class   aiPolyMesh;
-class   aiPoints;
-class   aiCurves;
-class   aiCamera;
-class   aiMaterial;
+
+struct  aiConfig;
+struct  aiCameraData;
+struct  aiXFormData;
+struct  aiMeshSummary;
+struct  aiMeshSampleSummary;
+struct  aiMeshSampleData;
+struct  aiSubmeshSummary;
+struct  aiSubmeshData;
+struct  aiFacesets;
+
 class   aiContext;
+class   aiObject;
+class   aiSchemaBase;
+class   aiSampleBase;
+class   aiXForm;
+class   aiXFormSample;
+class   aiPolyMesh;
+class   aiPolyMeshSample;
+class   aiCamera;
+class   aiCameraSample;
