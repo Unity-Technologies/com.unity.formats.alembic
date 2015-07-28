@@ -77,13 +77,13 @@ public class AbcAPI
 
     public struct aiConfig
     {
-        public bool swapHandedness;
-        public bool swapFaceWinding;
-        public aiNormalsMode normalsMode;
-        public aiTangentsMode tangentsMode;
-        public bool cacheTangentsSplits;
+        [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
+        [MarshalAs(UnmanagedType.U1)] public bool swapFaceWinding;
+        [MarshalAs(UnmanagedType.U4)] public aiNormalsMode normalsMode;
+        [MarshalAs(UnmanagedType.U4)] public aiTangentsMode tangentsMode;
+        [MarshalAs(UnmanagedType.U1)] public bool cacheTangentsSplits;
         public float aspectRatio;
-        public bool forceUpdate;
+        [MarshalAs(UnmanagedType.U1)] public bool forceUpdate;
 
         public void SetDefaults()
         {
@@ -99,7 +99,7 @@ public class AbcAPI
 
     public struct aiFacesets
     {
-        public int count;
+        [MarshalAs(UnmanagedType.U4)]public int count;
 
         public IntPtr faceCounts;
         public IntPtr faceIndices;
@@ -107,17 +107,17 @@ public class AbcAPI
 
     public struct aiMeshSummary
     {
-        public aiTopologyVariance topologyVariance;
-        public int peakIndexCount;
-        public int peakVertexCount;
+        [MarshalAs(UnmanagedType.U4)] public aiTopologyVariance topologyVariance;
+        [MarshalAs(UnmanagedType.U4)] public int peakIndexCount;
+        [MarshalAs(UnmanagedType.U4)] public int peakVertexCount;
     }
 
     public struct aiMeshSampleSummary
     {
-        public int splitCount;
-        public bool hasNormals;
-        public bool hasUVs;
-        public bool hasTangents;
+        [MarshalAs(UnmanagedType.U4)] public int splitCount;
+        [MarshalAs(UnmanagedType.U1)] public bool hasNormals;
+        [MarshalAs(UnmanagedType.U1)] public bool hasUVs;
+        [MarshalAs(UnmanagedType.U1)] public bool hasTangents;
     }
 
     public struct aiMeshSampleData
@@ -130,11 +130,11 @@ public class AbcAPI
 
     public struct aiSubmeshSummary
     {
-        public int index;
-        public int splitIndex;
-        public int splitSubmeshIndex;
-        public int facesetIndex;
-        public int triangleCount;
+        [MarshalAs(UnmanagedType.U4)] public int index;
+        [MarshalAs(UnmanagedType.U4)] public int splitIndex;
+        [MarshalAs(UnmanagedType.U4)] public int splitSubmeshIndex;
+        [MarshalAs(UnmanagedType.U4)] public int facesetIndex;
+        [MarshalAs(UnmanagedType.U4)] public int triangleCount;
     }
 
     public struct aiSubmeshData
@@ -147,7 +147,7 @@ public class AbcAPI
         public Vector3 translation;
         public Quaternion rotation;
         public Vector3 scale;
-        public bool inherits;
+        [MarshalAs(UnmanagedType.U1)] public bool inherits;
     }
 
     public struct aiCameraData
