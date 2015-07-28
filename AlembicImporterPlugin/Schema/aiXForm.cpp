@@ -22,18 +22,19 @@ void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool
 
 void aiXFormSample::getData(aiXFormData &outData) const
 {
+    abcV3 trans = m_sample.getTranslation();
     abcV3 axis = m_sample.getAxis();
     float angle = m_sample.getAngle() * (aiPI / 180.0f);
 
     if (m_config.swapHandedness)
     {
-        outData.translation.x *= -1.0f;
+        trans.x *= -1.0f;
         axis.x *= -1.0f;
         angle *= -1.0f;
     }
 
     outData.inherits = m_sample.getInheritsXforms();
-    outData.translation = m_sample.getTranslation();
+    outData.translation = trans;
     outData.scale = abcV3(m_sample.getScale());
     outData.rotation = abcV4(axis.x * std::sin(angle * 0.5f),
                              axis.y * std::sin(angle * 0.5f),
