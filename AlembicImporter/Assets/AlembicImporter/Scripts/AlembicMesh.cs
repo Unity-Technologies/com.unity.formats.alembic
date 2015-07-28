@@ -47,7 +47,6 @@ public class AlembicMesh : AlembicElement
     Transform m_trans;
     AbcAPI.aiMeshSummary m_summary;
     AbcAPI.aiMeshSampleSummary m_sampleSummary;
-    bool m_pendingUpdate;
 
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
@@ -61,7 +60,7 @@ public class AlembicMesh : AlembicElement
 
         Split split = null;
 
-        int maxNumSplits = AbcUtils.CeilDiv((int)m_summary.peakIndexCount, 65000);
+        int maxNumSplits = AbcUtils.CeilDiv(m_summary.peakIndexCount, 65000);
 
         if (m_splits.Count > maxNumSplits)
         {
@@ -122,8 +121,6 @@ public class AlembicMesh : AlembicElement
             split.mesh = mesh;
             split.host = trans.gameObject;
         }
-
-        m_pendingUpdate = false;
     }
 
     // in config is the one set by aiSetConfig()
@@ -160,17 +157,24 @@ public class AlembicMesh : AlembicElement
 
         if (abcMaterials != null)
         {
-            topologyChanged = topologyChanged || abcMaterials.HasFacesetsChanged();
+            if (abcMaterials.HasFacesetsChanged())
+            {
+                AbcVerboseLog("AlembicMesh.AbcSampleUpdated: Facesets updated, force topology update");
+                topologyChanged = true;
+            }
+
             hasFacesets = (abcMaterials.GetFacesetsCount() > 0);
         }
         else if (hasFacesets)
         {
+            AbcVerboseLog("AlembicMesh.AbcSampleUpdated: Facesets cleared, force topology update");
             topologyChanged = true;
             hasFacesets = false;
         }
 
         if (m_submeshes.Count == 0)
         {
+            AbcVerboseLog("AlembicMesh.AbcSampleUpdated: No submesh created yet, force topology update");
             topologyChanged = true;
         }
 
@@ -278,6 +282,8 @@ public class AlembicMesh : AlembicElement
                         index = -1,
                         update = true
                     };
+
+                    m_submeshes.Add(submesh);
                 }
 
                 submesh.facesetIndex = submeshSummary.facesetIndex;
@@ -305,12 +311,12 @@ public class AlembicMesh : AlembicElement
             }
         }
 
-        m_pendingUpdate = true;
+        AbcDirty();
     }
 
     public override void AbcUpdate()
     {
-        if (!m_pendingUpdate)
+        if (!AbcIsDirty())
         {
             return;
         }
@@ -365,8 +371,6 @@ public class AlembicMesh : AlembicElement
                 split.mesh.Clear();
                 split.host.SetActive(false);
             }
-
-            m_splits[s].host.SetActive(s < m_sampleSummary.splitCount);
         }
 
         for (int s=0; s<m_submeshes.Count; ++s)
@@ -387,7 +391,7 @@ public class AlembicMesh : AlembicElement
             }
         }
         
-        m_pendingUpdate = false;
+        AbcClean();
     }
 
     static Mesh AddMeshComponents(AbcAPI.aiObject abc, Transform trans)

@@ -92,7 +92,7 @@ public class AbcAPI
             normalsMode = aiNormalsMode.ComputeIfMissing;
             tangentsMode = aiTangentsMode.None;
             cacheTangentsSplits = true;
-            aspectRatio = 1.0f;
+            aspectRatio = -1.0f;
             forceUpdate = false;
         }
     }
@@ -237,6 +237,7 @@ public class AbcAPI
         public AlembicStream abcStream;
         public Transform parent;
         public float time;
+        public bool createMissingNodes;
     }
 
     public static float GetAspectRatio(aiAspectRatioMode mode)
@@ -306,17 +307,18 @@ public class AbcAPI
         abcStream.m_pathToAbc = path;
         abcStream.m_swapHandedness = p.swapHandedness;
         abcStream.m_swapFaceWinding = p.swapFaceWinding;
-        abcStream.AbcLoad();
+        abcStream.AbcLoad(true);
     }
 
 #endif
     
-    public static void UpdateAbcTree(aiContext ctx, Transform root, float time)
+    public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool createMissingNodes=false)
     {
         var ic = new ImportContext();
         ic.abcStream = root.GetComponent<AlembicStream>();
         ic.parent = root;
         ic.time = time;
+        ic.createMissingNodes = createMissingNodes;
 
         GCHandle hdl = GCHandle.Alloc(ic);
 
@@ -335,11 +337,14 @@ public class AbcAPI
 
         string childName = aiGetName(obj);
         var trans = parent.FindChild(childName);
-        bool created = false;
 
         if (trans == null)
         {
-            created = true;
+            if (!ic.createMissingNodes)
+            {
+                return;
+            }
+
             GameObject go = new GameObject();
             go.name = childName;
             trans = go.GetComponent<Transform>();
@@ -371,13 +376,10 @@ public class AbcAPI
         if (elem)
         {
             elem.AbcSetup(ic.abcStream, obj, schema);
-            aiSchemaUpdateSample(schema, 0.0f);
+            aiSchemaUpdateSample(schema, ic.time);
             elem.AbcUpdate();
             
-            if (created)
-            {
-                ic.abcStream.AbcAddElement(elem);
-            }
+            ic.abcStream.AbcAddElement(elem);
         }
 
         ic.parent = trans;

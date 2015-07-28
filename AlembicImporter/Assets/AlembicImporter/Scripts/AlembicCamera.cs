@@ -17,7 +17,6 @@ public class AlembicCamera : AlembicElement
     Transform m_trans;
     Camera m_camera;
     AbcAPI.aiCameraData m_abcData;
-    bool m_pendingUpdate;
 
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
@@ -27,8 +26,6 @@ public class AlembicCamera : AlembicElement
 
         m_trans = GetComponent<Transform>();
         m_camera = GetOrAddComponent<Camera>();
-
-        m_pendingUpdate = false;
     }
 
     public override void AbcGetConfig(ref AbcAPI.aiConfig config)
@@ -42,12 +39,13 @@ public class AlembicCamera : AlembicElement
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
         AbcAPI.aiCameraGetData(sample, ref m_abcData);
-        m_pendingUpdate = true;
+
+        AbcDirty();
     }
 
     public override void AbcUpdate()
     {
-        if (m_pendingUpdate)
+        if (AbcIsDirty())
         {
             m_trans.parent.forward = -m_trans.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
@@ -56,7 +54,7 @@ public class AlembicCamera : AlembicElement
             
             // no use for focusDistance and focalLength yet (could be usefull for DoF component)
             
-            m_pendingUpdate = false;
+            AbcClean();
         }
     }
 }

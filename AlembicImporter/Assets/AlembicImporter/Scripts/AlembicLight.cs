@@ -12,8 +12,6 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicLight : AlembicElement
 {
-    bool m_pendingUpdate;
-
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
                                   AbcAPI.aiSchema abcSchema)
@@ -24,8 +22,6 @@ public class AlembicLight : AlembicElement
 
         // Disable component for now
         light.enabled = false;
-
-        m_pendingUpdate = false;
     }
 
     // No config override
@@ -37,12 +33,11 @@ public class AlembicLight : AlembicElement
 
     public override void AbcUpdate()
     {
-        // ToDo
-        if (!m_pendingUpdate)
+        if (AbcIsDirty())
         {
-            return;
-        }
+            // ToDo
 
-        m_pendingUpdate = false;
+            AbcClean();
+        }
     }
 }
