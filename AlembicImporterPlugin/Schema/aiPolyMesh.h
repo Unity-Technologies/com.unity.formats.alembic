@@ -20,6 +20,9 @@ struct SubmeshKey
     {
     }
 
+    SubmeshKey(const SubmeshKey&) = default;
+    SubmeshKey& operator=(const SubmeshKey&) = default;
+
     inline bool operator<(const SubmeshKey &rhs) const
     {
         if (splitIndex < rhs.splitIndex) return true;
@@ -51,6 +54,9 @@ struct SplitInfo
         , submeshCount(0)
     {
     }
+
+    SplitInfo(const SplitInfo&) = default;
+    SplitInfo& operator=(const SplitInfo&) = default;
 };
 
 struct Submesh
@@ -69,6 +75,9 @@ struct Submesh
         , index(0)
     {
     }
+
+    Submesh(const Submesh&) = default;
+    Submesh& operator=(const Submesh&) = default;
 };
 
 typedef std::deque<Submesh> Submeshes;
@@ -90,21 +99,8 @@ struct TangentKey
     {
     }
     
-    inline TangentKey(const TangentKey &rhs)
-        : N(rhs.N)
-        , UV(rhs.UV)
-    {
-    }
-    
-    inline TangentKey& operator=(const TangentKey &rhs)
-    {
-        if (this != &rhs)
-        {
-            N = rhs.N;
-            UV = rhs.UV;
-        }
-        return *this;
-    }
+    TangentKey(const TangentKey&) = default;
+    TangentKey& operator=(const TangentKey&) = default;
     
     inline bool operator<(const TangentKey &rhs) const
     {

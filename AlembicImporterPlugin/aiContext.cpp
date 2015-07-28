@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "Schema/aiSchema.h"
 #include "Schema/aiXForm.h"
 #include "Schema/aiPolyMesh.h"
 #include "Schema/aiCamera.h"
-#include "aiLogger.h"
 #include <limits>
 
 class GlobalCache
@@ -30,7 +30,7 @@ public:
 
         if (it != ms_instance.m_contexts.end())
         {
-            aiLogger::Info("Using already created context for gameObject with ID %d\n", uid);
+            aiLogger::Info("Using already created context for gameObject with ID %d", uid);
 
             return it->second;
         }
@@ -50,7 +50,7 @@ public:
         }
         else
         {
-            aiLogger::Info("Register context for gameObject with ID %d\n", uid);
+            aiLogger::Info("Register context for gameObject with ID %d", uid);
 
             ms_instance.m_contexts[uid] = ctx;
 
@@ -71,7 +71,7 @@ public:
         {
             UnrefArchive(it->second->getPath());
 
-            aiLogger::Info("Unregister context for gameObject with ID %d\n", uid);
+            aiLogger::Info("Unregister context for gameObject with ID %d", uid);
 
             ms_instance.m_contexts.erase(it);
         }
@@ -92,7 +92,7 @@ public:
         }
         else
         {
-            aiLogger::Info("Add new alembic archive '%s'\n", path.c_str());
+            aiLogger::Info("Add new alembic archive '%s'", path.c_str());
                
             ArchiveItem &item = ms_instance.m_archives[path];
             
@@ -109,7 +109,7 @@ public:
         
         if (it != ms_instance.m_archives.end())
         {
-            aiLogger::Info("Reference alembic archive '%s'\n", path.c_str());
+            aiLogger::Info("Reference alembic archive '%s'", path.c_str());
 
             it->second.refcount += 1;
             return it->second.archive;
@@ -126,13 +126,13 @@ public:
         
         if (it != ms_instance.m_archives.end())
         {
-            aiLogger::Info("Unreference alembic archive '%s'\n", path.c_str());
+            aiLogger::Info("Unreference alembic archive '%s'", path.c_str());
 
             it->second.refcount -= 1;
 
             if (it->second.refcount <= 0)
             {
-                aiLogger::Info("Remove alembic archive '%s'\n", path.c_str());
+                aiLogger::Info("Remove alembic archive '%s'", path.c_str());
 
                 ms_instance.m_archives.erase(it);
             }
@@ -237,6 +237,7 @@ const aiConfig& aiContext::getConfig() const
 
 void aiContext::setConfig(const aiConfig &config)
 {
+    DebugLog("aiContext::setConfig: %s", config.toString().c_str());
     m_config = config;
 }
 
@@ -258,6 +259,8 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 
 void aiContext::destroyObject(aiObject *obj)
 {
+    DebugLog("aiObject::destroyObject()");
+    
     destroyObject(obj, m_nodes.begin());
 }
 
@@ -293,6 +296,8 @@ std::vector<aiObject*>::iterator aiContext::destroyObject(aiObject *obj, std::ve
 
 void aiContext::reset()
 {
+    DebugLog("aiObject::reset()");
+    
     waitTasks();
 
     for (auto n : m_nodes)
@@ -347,18 +352,22 @@ bool aiContext::load(const char *inPath)
 {
     std::string path = normalizePath(inPath);
 
+    DebugLog("aiContext::load: '%s'", path.c_str());
+
     if (path == m_path && m_archive)
     {
-        aiLogger::Info("Context already loaded for gameObject with id %d\n", m_uid);
+        aiLogger::Info("Context already loaded for gameObject with id %d", m_uid);
         return true;
     }
 
-    aiLogger::Info("Alembic file path changed from '%s' to '%s'. Reset context.\n", m_path.c_str(), path.c_str());
+    aiLogger::Info("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
+    aiLogger::Indent(1);
 
     reset();
 
     if (path.length() == 0)
     {
+        aiLogger::Unindent(1);
         return false;
     }
 
@@ -367,31 +376,31 @@ bool aiContext::load(const char *inPath)
     
     if (!m_archive.valid())
     {
-        aiLogger::Info("Archive '%s' not yet opened\n", inPath);
+        aiLogger::Info("Archive '%s' not yet opened", inPath);
 
         try
         {
-            aiDebugLog("trying to open AbcCoreOgawa::ReadArchive...\n");
+            DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
             m_archive = Abc::IArchive(AbcCoreOgawa::ReadArchive(), path);
         }
         catch (Alembic::Util::Exception e)
         {
-            aiDebugLog("exception: %s\n", e.what());
+            DebugLog("Failed (%s)", e.what());
 
             try
             {
-                aiDebugLog("trying to open AbcCoreHDF5::ReadArchive...\n");
+                DebugLog("Trying to open AbcCoreHDF5::ReadArchive...");
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
             }
             catch (Alembic::Util::Exception e)
             {
-                aiDebugLog("exception: %s\n", e.what());
+                DebugLog("Failed (%s)", e.what());
             }
         }
     }
     else
     {
-        aiLogger::Info("Archive '%s' already opened\n", inPath);
+        aiLogger::Info("Archive '%s' already opened", inPath);
     }
 
     if (m_archive.valid())
@@ -431,21 +440,26 @@ bool aiContext::load(const char *inPath)
             m_timeRange[1] = 0.0;
         }
 
-        aiDebugLog("succeeded\n");
+        DebugLog("Succeeded");
 
         GlobalCache::AddArchive(m_path, m_archive);
+
+        aiLogger::Unindent(1);
 
         return true;
     }
     else
     {
-        aiLogger::Info("Invalid archive '%s'\n", inPath);
+        aiLogger::Error("Invalid archive '%s'", inPath);
 
         m_path = "";
         m_archive.reset();
 
         m_timeRange[0] = 0.0;
         m_timeRange[1] = 0.0;
+        m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
+
+        aiLogger::Unindent(1);
 
         return false;
     }
@@ -475,6 +489,8 @@ void aiContext::updateSamples(float time, bool useThreads)
 {
     if (useThreads)
     {
+        DebugLog("aiContext::updateSamples() [threaded]");
+        
         // queue all updates in task pool...
         updateSamplesBegin(time);
         // ... and wait for completion
@@ -482,6 +498,8 @@ void aiContext::updateSamples(float time, bool useThreads)
     }
     else
     {
+        DebugLog("aiContext::updateSamples()");
+        
         float eraseStart = std::get<0>(m_timeRangeToKeepSamples);
         float eraseRange = std::get<1>(m_timeRangeToKeepSamples);
 
@@ -526,6 +544,8 @@ void aiContext::updateSamplesEnd()
 
 void aiContext::erasePastSamples(float time, float rangeKeep)
 {
+    DebugLog("aiContext::erasePastSamples()");
+    
     for (auto &e : m_nodes)
     {
         e->erasePastSamples(time, rangeKeep);

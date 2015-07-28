@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiCamera.h"
 #include "aiPolyMesh.h"
 #include "aiXForm.h"
-#include "aiLogger.h"
 
 // ---
 
@@ -68,6 +68,8 @@ int Topology::getSplitCount(bool forceRefresh)
 
 void Topology::updateSplits()
 {
+    DebugLog("Topology::updateSplits()");
+    
     int splitIndex = 0;
     size_t indexOffset = 0;
     size_t ncounts = counts->size();
@@ -104,7 +106,7 @@ void Topology::updateSplits()
 
 int Topology::getVertexBufferLength(int splitIndex) const
 {
-    if (splitIndex >= splits.size())
+    if (splitIndex < 0 || size_t(splitIndex) >= splits.size())
     {
         return 0;
     }
@@ -117,6 +119,8 @@ int Topology::getVertexBufferLength(int splitIndex) const
 int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
                                const aiFacesets &inFacesets)
 {
+    DebugLog("Topology::prepareSubmeshes()");
+    
     Facesets facesets;
     std::map<size_t, int> facesetIndices;
     
@@ -281,7 +285,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
 
 int Topology::getSplitSubmeshCount(int splitIndex) const
 {
-    if (splitIndex >= splits.size())
+    if (splitIndex < 0 || size_t(splitIndex) >= splits.size())
     {
         return 0;
     }
@@ -361,7 +365,7 @@ bool aiPolyMeshSample::tangentsRequired() const
 
 void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
 {
-    aiLogger::Info("%s: Compute smooth normals\n", getSchema()->getObject()->getFullName());
+    aiLogger::Info("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
 
     size_t smoothNormalsCount = m_positions->size();
 
@@ -437,7 +441,7 @@ void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
 
 void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const Abc::V3f *inN, bool indexedNormals)
 {
-    aiLogger::Info("%s: Compute tangent indices...\n", getSchema()->getObject()->getFullName());
+    aiLogger::Info("%s: Compute tangent indices...", getSchema()->getObject()->getFullName());
 
     const auto &counts = *(m_topology->counts);
     const auto &indices = *(m_topology->indices);
@@ -483,18 +487,10 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const Abc::
             {
                 TangentKey key(inN[Nidxs ? Nidxs[v] : indices[v]], uvVals[uvIdxs[v]]);
                 
-                #ifdef _DEBUG
-                aiLogger::Info("  Face-vertex %lu: Tangent Key => %s\n", v, key.toString().c_str());
-                #endif
-
                 it = uniqueIndices.find(key);
                 
                 if (it == uniqueIndices.end())
                 {
-                    #ifdef _DEBUG
-                    aiLogger::Info("    Not found: Add new unique tangent\n");
-                    #endif
-
                     int idx = (int) uniqueIndices.size();
                     
                     m_topology->tangentIndices[v] = idx;
@@ -502,10 +498,6 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const Abc::
                 }
                 else
                 {
-                    #ifdef _DEBUG
-                    aiLogger::Info("    Found: Use tangent %d\n", it->second);
-                    #endif
-
                     m_topology->tangentIndices[v] = it->second;
                 }
             }
@@ -514,12 +506,12 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const Abc::
         m_topology->tangentsCount = uniqueIndices.size(); 
     }
     
-    aiLogger::Info("  %lu unique tangent(s)\n", m_topology->tangentsCount);
+    aiLogger::Info("%lu unique tangent(s)", m_topology->tangentsCount);
 }
 
 void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *inN, bool indexedNormals)
 {
-    aiLogger::Info("%s: Compute %stangents\n", getSchema()->getObject()->getFullName(), (config.tangentsMode == TM_Smooth ? "smooth " : ""));
+    aiLogger::Info("%s: Compute %stangents", getSchema()->getObject()->getFullName(), (config.tangentsMode == TM_Smooth ? "smooth " : ""));
 
     const auto &counts = *(m_topology->counts);
     const auto &indices = *(m_topology->indices);
@@ -650,9 +642,9 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *i
 
 void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
 {
+    DebugLog("aiPolyMeshSample::updateConfig()");
+    
     topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding);
-    // If we support triangulate
-    // topoChanged = topoChanged || (config.triangulate != config.triangulate);
     dataChanged = (config.swapHandedness != m_config.swapHandedness);
 
     bool smoothNormalsRequired = (config.normalsMode == NM_AlwaysCompute ||
@@ -671,7 +663,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     {
         if (m_smoothNormals)
         {
-            aiLogger::Info("%s: Clear smooth normals\n", getSchema()->getObject()->getFullName());
+            aiLogger::Info("%s: Clear smooth normals", getSchema()->getObject()->getFullName());
             delete[] m_smoothNormals;
             m_smoothNormals = 0;
             m_smoothNormalsCount = 0;
@@ -725,7 +717,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     {
         if (m_tangents)
         {
-            aiLogger::Info("%s: Clear tangents\n", getSchema()->getObject()->getFullName());
+            aiLogger::Info("%s: Clear tangents", getSchema()->getObject()->getFullName());
             
             delete[] m_tangents;
             m_tangents = 0;
@@ -735,7 +727,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 
         if (m_topology->tangentIndices && (m_ownTopology || !config.cacheTangentsSplits))
         {
-            aiLogger::Info("%s: Clear tangent indices\n", getSchema()->getObject()->getFullName());
+            aiLogger::Info("%s: Clear tangent indices", getSchema()->getObject()->getFullName());
             
             delete[] m_topology->tangentIndices;
             m_topology->tangentIndices = 0;
@@ -754,6 +746,8 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 
 void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const
 {
+    DebugLog("aiPolyMeshSample::getSummary(forceRefresh=%s)", forceRefresh ? "true" : "false");
+    
     summary.splitCount = m_topology->getSplitCount(forceRefresh);
 
     summary.hasNormals = hasNormals();
@@ -765,54 +759,21 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
 
 int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
 {
+    DebugLog("aiPolyMeshSample::getVertexBufferLength(splitIndex=%d)", splitIndex);
+    
     return m_topology->getVertexBufferLength(splitIndex);
 }
 
 void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
 {
-    if (splitIndex >= m_topology->splits.size())
+    DebugLog("aiPolyMeshSample::fillVertexBuffer(splitIndex=%d)", splitIndex);
+    
+    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->splits.size())
     {
         return;
     }
 
-    aiLogger::Info("%s: Fill vertex buffer %u\n", getSchema()->getObject()->getFullName(), splitIndex);
-
-    if (smoothNormalsRequired())
-    {
-        if (!m_smoothNormals)
-        {
-            computeSmoothNormals(m_config);
-        }
-    }
-
-    if (tangentsRequired())
-    {
-        const Abc::V3f *normals = 0;
-        bool indexedNormals = false;
-        
-        if (smoothNormalsRequired())
-        {
-            normals = m_smoothNormals;
-        }
-        else if (m_normals.valid())
-        {
-            normals = m_normals.getVals()->get();
-            indexedNormals = (m_normals.getScope() == AbcGeom::kFacevaryingScope);
-        }
-
-        if (normals)
-        {
-            if (!m_topology->tangentIndices)
-            {
-                computeTangentIndices(m_config, normals, indexedNormals);
-            }
-
-            if (!m_tangents)
-            {
-                computeTangents(m_config, normals, indexedNormals);
-            }
-        }
-    }
+    aiLogger::Info("%s: Fill vertex buffer %u", getSchema()->getObject()->getFullName(), splitIndex);
 
     bool copyNormals = (hasNormals() && data.normals);
     bool copyUvs = (hasUVs() && data.uvs);
@@ -833,19 +794,19 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
     
     if (data.normals && !copyNormals)
     {
-        aiLogger::Info("Reset normals\n");
+        aiLogger::Info("Reset normals");
         memset(data.normals, 0, split.indicesCount * sizeof(Abc::V3f));
     }
     
     if (data.uvs && !copyUvs)
     {
-        aiLogger::Info("Reset UVs\n");
+        aiLogger::Info("Reset UVs (%s)");
         memset(data.uvs, 0, split.indicesCount * sizeof(Abc::V2f));
     }
     
     if (data.tangents && !copyTangents)
     {
-        aiLogger::Info("Reset tangents\n");
+        aiLogger::Info("Reset tangents");
         memset(data.tangents, 0, split.indicesCount * sizeof(Imath::V4f));
     }
     
@@ -1153,6 +1114,8 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
 
 int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
 {
+    DebugLog("aiPolyMeshSample::prepateSubmeshes()");
+    
     int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets);
 
     m_curSubmesh = m_topology->submeshBegin();
@@ -1162,11 +1125,15 @@ int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
 
 int aiPolyMeshSample::getSplitSubmeshCount(int splitIndex) const
 {
+    DebugLog("aiPolyMeshSample::getSplitSubmeshCount()");
+    
     return m_topology->getSplitSubmeshCount(splitIndex);
 }
 
 bool aiPolyMeshSample::getNextSubmesh(aiSubmeshSummary &summary)
 {
+    DebugLog("aiPolyMeshSample::getNextSubmesh()");
+    
     if (m_curSubmesh == m_topology->submeshEnd())
     {
         return false;
@@ -1189,6 +1156,8 @@ bool aiPolyMeshSample::getNextSubmesh(aiSubmeshSummary &summary)
 
 void aiPolyMeshSample::fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const
 {
+    DebugLog("aiPolyMeshSample::fillSubmeshIndices()");
+    
     Submeshes::const_iterator it = m_topology->submeshBegin() + summary.index;
     
     if (it != m_topology->submeshEnd())
@@ -1290,32 +1259,42 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     }
 
     m_varyingTopology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+    
+    DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
+             (m_constant ? "true" : "false"),
+             (m_varyingTopology ? "true" : "false"));
 }
 
 aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
 {
+    DebugLog("aiPolyMesh::readSample(t=%f)", time);
+    
     auto ss = MakeSampleSelector(time);
 
     Topology *topology = (m_varyingTopology ? new Topology() : &m_constantTopology);
     
     if (!topology->counts)
     {
+        DebugLog("  Read face counts");
         m_schema.getFaceCountsProperty().get(topology->counts, ss);
     }
 
     if (!topology->indices)
     {
+        DebugLog("  Read face indices");
         m_schema.getFaceIndicesProperty().get(topology->indices, ss);
     }
 
     Sample *ret = new Sample(this, time, topology, m_varyingTopology);
     
+    DebugLog("  Read positions");
     m_schema.getPositionsProperty().get(ret->m_positions, ss);
 
     ret->m_velocities.reset();
     auto velocitiesProp = m_schema.getVelocitiesProperty();
     if (velocitiesProp.valid())
     {
+        DebugLog("  Read velocities");
         velocitiesProp.get(ret->m_velocities, ss);
     }
 
@@ -1327,6 +1306,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
         {
             if (!m_constantNormals.valid())
             {
+                DebugLog("  Read normals (constant)");
                 normalsParam.getIndexed(m_constantNormals, ss);
             }
 
@@ -1334,6 +1314,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
         }
         else
         {
+            DebugLog("  Read normals");
             normalsParam.getIndexed(ret->m_normals, ss);
         }
     }
@@ -1346,6 +1327,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
         {
             if (!m_constantUVs.valid())
             {
+                DebugLog("  Read uvs (constant)");
                 uvsParam.getIndexed(m_constantUVs, ss);
             }
 
@@ -1353,7 +1335,42 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
         }
         else
         {
+            DebugLog("  Read uvs");
             uvsParam.getIndexed(ret->m_uvs, ss);
+        }
+    }
+
+    bool smoothNormalsRequired = ret->smoothNormalsRequired();
+
+    if (smoothNormalsRequired)
+    {
+        ret->computeSmoothNormals(m_config);
+    }
+
+    if (ret->tangentsRequired())
+    {
+        const Abc::V3f *normals = 0;
+        bool indexedNormals = false;
+        
+        if (smoothNormalsRequired)
+        {
+            normals = ret->m_smoothNormals;
+        }
+        else if (ret->m_normals.valid())
+        {
+            normals = ret->m_normals.getVals()->get();
+            indexedNormals = (ret->m_normals.getScope() == AbcGeom::kFacevaryingScope);
+        }
+
+        if (normals)
+        {
+            // topology may be shared, check tangent indices
+            if (!ret->m_topology->tangentIndices || !m_config.cacheTangentsSplits)
+            {
+                ret->computeTangentIndices(m_config, normals, indexedNormals);
+            }
+
+            ret->computeTangents(m_config, normals, indexedNormals);
         }
     }
 
@@ -1369,6 +1386,8 @@ int aiPolyMesh::getPeakIndexCount() const
 {
     if (m_peakIndexCount == 0)
     {
+        DebugLog("aiPolyMesh::getPeakIndexCount()");
+        
         Util::Dimensions dim;
         Abc::Int32ArraySamplePtr counts;
 
@@ -1416,6 +1435,8 @@ int aiPolyMesh::getPeakVertexCount() const
 {
     if (m_peakVertexCount == 0)
     {
+        DebugLog("aiPolyMesh::getPeakVertexCount()");
+        
         Util::Dimensions dim;
 
         auto positionsProp = m_schema.getPositionsProperty();
@@ -1442,9 +1463,9 @@ int aiPolyMesh::getPeakVertexCount() const
                 
                 size_t numVertices = dim.numPoints();
 
-                if (numVertices > m_peakVertexCount)
+                if (numVertices > size_t(m_peakVertexCount))
                 {
-                    m_peakVertexCount = numVertices;
+                    m_peakVertexCount = int(numVertices);
                 }
             }
         }
@@ -1455,6 +1476,8 @@ int aiPolyMesh::getPeakVertexCount() const
 
 void aiPolyMesh::getSummary(aiMeshSummary &summary) const
 {
+    DebugLog("aiPolyMesh::getSummary()");
+    
     summary.topologyVariance = getTopologyVariance();
     summary.peakIndexCount = getPeakIndexCount();
     summary.peakVertexCount = getPeakVertexCount();

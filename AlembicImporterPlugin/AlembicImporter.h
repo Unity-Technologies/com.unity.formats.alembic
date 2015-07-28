@@ -48,6 +48,34 @@ struct aiConfig
         , forceUpdate(false)
     {
     }
+
+    aiConfig(const aiConfig&) = default;
+    aiConfig& operator=(const aiConfig&) = default;
+
+    inline std::string toString() const
+    {
+        std::ostringstream oss;
+
+        oss << "{swapHandedness: " << (swapHandedness ? "true" : "false");
+        oss << ", swapFaceWinding: " << (swapFaceWinding ? "true" : "false");
+        oss << ", normalsMode: " << (normalsMode == NM_ReadFromFile
+                                     ? "read_from_file"
+                                     : (normalsMode == NM_ComputeIfMissing
+                                        ? "compute_if_missing"
+                                        : (normalsMode == NM_AlwaysCompute
+                                           ? "always_compute"
+                                           : "ignore")));
+        oss << ", tangentsMode: " << (tangentsMode == TM_None
+                                      ? "none"
+                                      : (tangentsMode == TM_Smooth
+                                         ? "smooth"
+                                         : "split"));
+        oss << ", cacheTangentsSplits: " << (cacheTangentsSplits ? "true" : "false");
+        oss << ", aspectRatio: " << aspectRatio;
+        oss << ", forceUpdate: " << (forceUpdate ? "true" : "false") << "}";
+        
+        return oss.str();
+    }
 };
 
 struct aiXFormData

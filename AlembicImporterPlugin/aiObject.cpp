@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "Schema/aiSchema.h"
@@ -51,6 +52,8 @@ void aiObject::addChild(aiObject *c)
 
 void aiObject::updateSample(float time)
 {
+    DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), time);
+    
     for (auto s : m_schemas)
     {
         s->updateSample(time);
@@ -59,6 +62,8 @@ void aiObject::updateSample(float time)
 
 void aiObject::erasePastSamples(float from, float range)
 {
+    DebugLog("aiObject::erasePastSamples(obj='%s', from=%f, range=%f)", getFullName(), from, range);
+    
     for (auto s : m_schemas)
     {
         s->erasePastSamples(from, range);

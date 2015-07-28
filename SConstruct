@@ -33,6 +33,9 @@ sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
 
+if excons.GetArgument("debug-log", 0, int) != 0:
+  defines.append("aiDebugLog")
+
 if excons.GetArgument("texture-mesh", 0, int) != 0:
   defines.append("aiSupportTextureMesh")
   sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])

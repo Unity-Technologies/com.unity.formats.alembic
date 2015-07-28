@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
@@ -15,13 +16,18 @@ aiCameraSample::aiCameraSample(aiCamera *schema, float time)
 
 void aiCameraSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
 {
+    DebugLog("aiCameraSample::updateConfig()");
+    
     topoChanged = false;
     dataChanged = (config.aspectRatio != m_config.aspectRatio);
-    m_config = config;   
+    
+    m_config = config;
 }
 
 void aiCameraSample::getData(aiCameraData &outData)
 {
+    DebugLog("aiCameraSample::getData()");
+    
     // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
     static float sRad2Deg = 180.0f / float(M_PI);
 
@@ -49,6 +55,8 @@ aiCamera::aiCamera(aiObject *obj)
 
 aiCamera::Sample* aiCamera::readSample(float time)
 {
+    DebugLog("aiCamera::readSample(t=%f)", time);
+    
     Sample *ret = new Sample(this, time);
     m_schema.get(ret->m_sample, MakeSampleSelector(time));
     return ret;

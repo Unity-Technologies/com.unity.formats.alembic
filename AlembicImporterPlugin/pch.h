@@ -8,6 +8,7 @@
 #include <mutex>
 #include <functional>
 #include <limits>
+#include <sstream>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
@@ -26,19 +27,11 @@
 #define aiExport __attribute__((visibility("default")))
 #endif
 
-#ifdef aiDebug
-void aiDebugLogImpl(const char* fmt, ...);
-#define aiDebugLog(...) aiDebugLogImpl(__VA_ARGS__)
-#ifdef aiVerboseDebug
-#define aiDebugLogVerbose(...) aiDebugLogImpl(__VA_ARGS__)
+#if defined(aiDebug) || defined(aiDebugLog)
+#define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
 #else
-#define aiDebugLogVerbose(...)
+#define DebugLog(...)
 #endif
-#else
-#define aiDebugLog(...)
-#define aiDebugLogVerbose(...)
-#endif
-
 
 #ifdef aiWindows
 #include <windows.h>
