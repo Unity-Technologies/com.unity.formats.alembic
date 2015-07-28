@@ -260,13 +260,30 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 void aiContext::destroyObject(aiObject *obj)
 {
     DebugLog("aiObject::destroyObject()");
+
+    if (!obj)
+    {
+        return;
+    }
+
+    aiObject *parent = obj->getParent();
     
-    destroyObject(obj, m_nodes.begin());
+    std::vector<aiObject*>::iterator it = m_nodes.end();
+
+    if (destroyObject(obj, m_nodes.begin(), it))
+    {
+        // note: at this point obj has already been destroyed
+        //       remove it from its parent children list
+        parent->removeChild(obj);
+    }
 }
 
-std::vector<aiObject*>::iterator aiContext::destroyObject(aiObject *obj, std::vector<aiObject*>::iterator searchFrom)
+bool aiContext::destroyObject(aiObject *obj,
+                              std::vector<aiObject*>::iterator searchFrom,
+                              std::vector<aiObject*>::iterator &next)
 {
     std::vector<aiObject*>::iterator it = std::find(searchFrom, m_nodes.end(), obj);
+    std::vector<aiObject*>::iterator nit;
     
     if (it != m_nodes.end())
     {
@@ -281,16 +298,22 @@ std::vector<aiObject*>::iterator aiContext::destroyObject(aiObject *obj, std::ve
         
         for (uint32_t c=0; c<numChildren; ++c)
         {
-            it = destroyObject(obj->getChild(c), it);
+            destroyObject(obj->getChild(c), it, nit);
+            // don't need to call removeChild on obj here as it is the be deleted
+            it = nit;
         }
+
+        // remove from parent nodes list
 
         delete obj;
 
-        return (m_nodes.begin() + fromIndex);
+        next = (m_nodes.begin() + fromIndex);
+        return true;
     }
     else
     {
-        return searchFrom;
+        next = searchFrom;
+        return false;
     }
 }
 

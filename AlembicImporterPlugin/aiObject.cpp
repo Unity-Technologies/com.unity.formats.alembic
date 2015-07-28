@@ -10,12 +10,14 @@
 
 aiObject::aiObject()
     : m_ctx(0)
+    , m_parent(0)
 {
 }
 
 aiObject::aiObject(aiContext *ctx, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
+    , m_parent(0)
 {
     if (m_abc.valid())
     {
@@ -47,7 +49,28 @@ aiObject::~aiObject()
 
 void aiObject::addChild(aiObject *c)
 {
+    if (!c)
+    {
+        return;
+    }
+
     m_children.push_back(c);
+    c->m_parent = this;
+}
+
+void aiObject::removeChild(aiObject *c)
+{
+    if (!c)
+    {
+        return;
+    }
+
+    std::vector<aiObject*>::iterator it = std::find(m_children.begin(), m_children.end(), c);
+    if (it != m_children.end())
+    {
+        c->m_parent = 0;
+        m_children.erase(it);
+    }
 }
 
 void aiObject::updateSample(float time)
@@ -76,7 +99,7 @@ const char* aiObject::getName() const        { return m_abc.getName().c_str(); }
 const char* aiObject::getFullName() const    { return m_abc.getFullName().c_str(); }
 uint32_t    aiObject::getNumChildren() const { return m_children.size(); }
 aiObject*   aiObject::getChild(int i)        { return m_children[i]; }
-
+aiObject*   aiObject::getParent()            { return m_parent; }
 
 bool aiObject::hasXForm() const    { return m_xform != nullptr; }
 bool aiObject::hasPolyMesh() const { return m_polymesh != nullptr; }

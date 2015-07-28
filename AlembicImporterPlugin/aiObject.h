@@ -18,6 +18,7 @@ public:
     const char* getFullName() const;
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
+    aiObject*   getParent();
 
     void        updateSample(float time);
     void        erasePastSamples(float from, float range);
@@ -35,10 +36,12 @@ public:
     aiContext*  getContext();
     abcObject&  getAbcObject();
     void        addChild(aiObject *c);
+    void        removeChild(aiObject *c);
 
 private:
     aiContext   *m_ctx;
     abcObject   m_abc;
+    aiObject    *m_parent;
     std::vector<aiObject*> m_children;
 
     std::vector<aiSchemaBase*>  m_schemas;
