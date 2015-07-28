@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
@@ -238,6 +239,7 @@ public class AbcAPI
         public Transform parent;
         public float time;
         public bool createMissingNodes;
+        public List<aiObject> objectsToDelete;
     }
 
     public static float GetAspectRatio(aiAspectRatioMode mode)
@@ -319,6 +321,7 @@ public class AbcAPI
         ic.parent = root;
         ic.time = time;
         ic.createMissingNodes = createMissingNodes;
+        ic.objectsToDelete = new List<aiObject>();
 
         GCHandle hdl = GCHandle.Alloc(ic);
 
@@ -327,6 +330,11 @@ public class AbcAPI
         if (top.ptr != (IntPtr)0)
         {
             aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(hdl));
+
+            foreach (aiObject obj in ic.objectsToDelete)
+            {
+                aiDestroyObject(ctx, obj);
+            }
         }
     }
 
@@ -342,6 +350,7 @@ public class AbcAPI
         {
             if (!ic.createMissingNodes)
             {
+                ic.objectsToDelete.Add(obj);
                 return;
             }
 

@@ -45,7 +45,9 @@ private:
     std::string normalizePath(const char *path) const;
     void reset();
     void gatherNodesRecursive(aiObject *n);
-    std::vector<aiObject*>::iterator destroyObject(aiObject *obj, std::vector<aiObject*>::iterator searchFrom);
+    bool destroyObject(aiObject *obj,
+                       std::vector<aiObject*>::iterator searchFrom,
+                       std::vector<aiObject*>::iterator &next);
 
 private:
     std::string m_path;
