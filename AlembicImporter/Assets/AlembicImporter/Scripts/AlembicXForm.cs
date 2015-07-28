@@ -14,7 +14,6 @@ public class AlembicXForm : AlembicElement
 {
     Transform m_trans;
     AbcAPI.aiXFormData m_abcData;
-    bool m_pendingUpdate;
 
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
@@ -23,8 +22,6 @@ public class AlembicXForm : AlembicElement
         base.AbcSetup(abcStream, abcObj, abcSchema);
 
         m_trans = GetComponent<Transform>();
-
-        m_pendingUpdate = false;
     }
 
     // No config overrides on AlembicXForm
@@ -33,12 +30,12 @@ public class AlembicXForm : AlembicElement
     {
         AbcAPI.aiXFormGetData(sample, ref m_abcData);
         
-        m_pendingUpdate = true;
+        AbcDirty();
     }
 
     public override void AbcUpdate()
     {
-        if (m_pendingUpdate)
+        if (AbcIsDirty())
         {
             if (m_abcData.inherits)
             {
@@ -53,7 +50,7 @@ public class AlembicXForm : AlembicElement
                 m_trans.localScale = m_abcData.scale;
             }
 
-            m_pendingUpdate = false;
+            AbcClean();
         }
     }
 }

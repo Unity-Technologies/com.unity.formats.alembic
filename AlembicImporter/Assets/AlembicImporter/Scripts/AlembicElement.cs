@@ -17,6 +17,9 @@ public abstract class AlembicElement : MonoBehaviour
     public AbcAPI.aiSchema m_abcSchema;
     public GCHandle m_thisHandle;
 
+    bool m_verbose;
+    bool m_pendingUpdate;
+
 
     static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
     {
@@ -50,10 +53,16 @@ public abstract class AlembicElement : MonoBehaviour
 #if UNITY_EDITOR
             if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                m_abcStream.AbcRemoveElement(this);
+                if (m_abcStream != null)
+                {
+                    m_abcStream.AbcRemoveElement(this);
+                }
             }
 #else
-            m_abcStream.AbcRemoveElement(this);
+            if (m_abcStream != null)
+            {
+                m_abcStream.AbcRemoveElement(this);
+            }
 #endif
         }
     }
@@ -71,11 +80,13 @@ public abstract class AlembicElement : MonoBehaviour
 
         AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
         AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
+
+        AbcDirty();
     }
 
     public AbcAPI.aiSample AbcGetSample()
     {
-        return AbcGetSample(m_abcStream.m_time);
+        return AbcGetSample((m_abcStream != null ? m_abcStream.m_time : 0.0f));
     }
 
     public AbcAPI.aiSample AbcGetSample(float time)
@@ -86,6 +97,7 @@ public abstract class AlembicElement : MonoBehaviour
     // Called by loading thread (not necessarily the main thread)
     public virtual void AbcGetConfig(ref AbcAPI.aiConfig config)
     {
+        // Overrides aiConfig options here if needed
     }
 
     // Called by loading thread (not necessarily the main thread)
@@ -93,4 +105,28 @@ public abstract class AlembicElement : MonoBehaviour
 
     // Called in main thread
     public abstract void AbcUpdate();
+
+
+    protected void AbcVerboseLog(string msg)
+    {
+        if (m_abcStream != null && m_abcStream.m_verbose)
+        {
+            Debug.Log(msg);
+        }
+    }
+
+    protected void AbcDirty()
+    {
+        m_pendingUpdate = true;
+    }
+
+    protected void AbcClean()
+    {
+        m_pendingUpdate = false;
+    }
+
+    protected bool AbcIsDirty()
+    {
+        return m_pendingUpdate;
+    }
 }

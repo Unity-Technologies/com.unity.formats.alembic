@@ -42,6 +42,8 @@ public class AlembicStream : MonoBehaviour
     AbcAPI.aiTangentsMode m_lastTangentsMode;
     bool m_lastIgnoreMissingNodes;
     float m_lastAspectRatio = -1.0f;
+    bool m_lastLogToFile = false;
+    string m_lastLogPath = "";
     float m_timeEps = 0.001f;
     AbcAPI.aiContext m_abc;
     Transform m_trans;
@@ -169,6 +171,11 @@ public class AlembicStream : MonoBehaviour
 
     void AbcUpdateElements()
     {
+        if (m_verbose)
+        {
+            Debug.Log("AlembicStream.AbcUpdateElement: " + m_elements.Count + " element(s).");
+        }
+
         foreach (AlembicElement e in m_elements)
         {
             if (e != null)
@@ -178,9 +185,32 @@ public class AlembicStream : MonoBehaviour
         }
     }
 
+    void AbcDetachElements()
+    {
+        if (m_verbose)
+        {
+            Debug.Log("AlembicStream.AbcDetachElement: " + m_elements.Count + " element(s).");
+        }
+
+        foreach (AlembicElement e in m_elements)
+        {
+            if (e != null)
+            {
+                e.m_abcStream = null;
+            }
+        }
+    }
+
     void AbcUpdate(float time)
     {
-        AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
+        if (m_lastLogToFile != m_logToFile ||
+            m_lastLogPath != m_logPath)
+        {
+            AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
+
+            m_lastLogToFile = m_logToFile;
+            m_lastLogPath = m_logPath;
+        }
         
         if (m_loaded)
         {
@@ -193,23 +223,20 @@ public class AlembicStream : MonoBehaviour
             {
                 if (m_verbose)
                 {
-                    Debug.Log("Update alembic at t=" + m_time + " (t'=" + abcTime + ")");
+                    Debug.Log("AlembicSctream.AbcUpdate: t=" + m_time + " (t'=" + abcTime + ")");
                 }
                 
                 AbcSyncConfig();
+
+                // This should ensure only keep one sample,
+                // unless you take 1,000,000 samples / sec (>30,000 samples per frame at 30 fps)
+                AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, m_time, 0.000001f);
 
                 AbcAPI.aiUpdateSamples(m_abc, m_time, false); // single threaded for first tests
 
                 AbcUpdateElements();
                 
                 AbcSetLastUpdateState(abcTime, aspectRatio);
-            }
-            else
-            {
-                if (m_verbose)
-                {
-                    Debug.Log("No need to update alembic at t=" + m_time + " (t'=" + abcTime + ")");
-                }
             }
         }
     }
@@ -220,6 +247,10 @@ public class AlembicStream : MonoBehaviour
     {
         if (e != null)
         {
+            if (m_verbose)
+            {
+                Debug.Log("AlembicStream.AbcAddElement: \"" + e.gameObject.name + "\"");
+            }
             m_elements.Add(e);
         }
     }
@@ -228,12 +259,16 @@ public class AlembicStream : MonoBehaviour
     {
         if (e != null)
         {
+            if (m_verbose)
+            {
+                Debug.Log("AlembicStream.AbcRemoveElement: \"" + e.gameObject.name + "\"");
+            }
             AbcAPI.aiDestroyObject(m_abc, e.m_abcObj);
             m_elements.Remove(e);
         }
     }
 
-    public void AbcLoad()
+    public void AbcLoad(bool createMissingNodes=false)
     {
         if (m_pathToAbc == null)
         {
@@ -254,7 +289,7 @@ public class AlembicStream : MonoBehaviour
 
             AbcSyncConfig();
 
-            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_time);
+            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_time, createMissingNodes);
         }
     }
 
@@ -284,10 +319,12 @@ public class AlembicStream : MonoBehaviour
 #if UNITY_EDITOR
             if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
+                AbcDetachElements();
                 AbcAPI.aiDestroyContext(m_abc);
                 m_abc = default(AbcAPI.aiContext);
             }
 #else
+            AbcDetachElements();
             AbcAPI.aiDestroyContext(m_abc);
             m_abc = default(AbcAPI.aiContext);
 #endif
