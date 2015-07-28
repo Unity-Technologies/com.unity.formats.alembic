@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
@@ -15,6 +16,8 @@ aiXFormSample::aiXFormSample(aiXForm *schema, float time)
 
 void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
 {
+    DebugLog("aiXFormSample::updateConfig()");
+    
     topoChanged = false;
     dataChanged = (config.swapHandedness != m_config.swapHandedness);
     m_config = config;
@@ -22,6 +25,8 @@ void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool
 
 void aiXFormSample::getData(aiXFormData &outData) const
 {
+    DebugLog("aiXFormSample::getData()");
+    
     abcV3 trans = m_sample.getTranslation();
     abcV3 axis = m_sample.getAxis();
     float angle = m_sample.getAngle() * (aiPI / 180.0f);
@@ -40,6 +45,7 @@ void aiXFormSample::getData(aiXFormData &outData) const
                              axis.y * std::sin(angle * 0.5f),
                              axis.z * std::sin(angle * 0.5f),
                              std::cos(angle * 0.5f) );
+
 }
 
 
@@ -51,6 +57,8 @@ aiXForm::aiXForm(aiObject *obj)
 
 aiXForm::Sample* aiXForm::readSample(float time)
 {
+    DebugLog("aiXForm::readSample(t=%f)", time);
+    
     Sample *ret = new Sample(this, time);
     m_schema.get(ret->m_sample, MakeSampleSelector(time));
     return ret;

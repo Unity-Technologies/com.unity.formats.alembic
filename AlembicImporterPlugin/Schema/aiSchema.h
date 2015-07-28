@@ -79,9 +79,16 @@ public:
 
     aiSampleBase* updateSample(float time) override
     {
+        DebugLog("aiTSchema::updateSample()");
+       
         m_config = m_obj->getContext()->getConfig();
+
+        DebugLog("  Original config: %s", m_config.toString().c_str());
+
         // get object config overrides (if any)
         invokeConfigCallback(&m_config);
+
+        DebugLog("  Override config: %s", m_config.toString().c_str());
 
         aiSampleBase *sample = 0;
         bool topologyChanged = false;
@@ -90,6 +97,7 @@ public:
         {
             if (m_samples.size() == 0)
             {
+                DebugLog("  Create sample for constant object");
                 // no need to pass config to readSample
                 // => aiSchemaBase::getConfig will return it
                 auto &sp = m_samples[time];
@@ -100,14 +108,18 @@ public:
             }
             else
             {
+                DebugLog("  Update constant object sample");
+
                 bool dataChanged = false;
 
                 sample = m_samples.begin()->second.get();
                 
-                sample->updateConfig(m_config, dataChanged, topologyChanged);
+                sample->updateConfig(m_config, topologyChanged, dataChanged);
                 
                 if (!m_config.forceUpdate && !dataChanged)
                 {
+                    DebugLog("  Data didn't change, nor update is forced");
+
                     sample = 0;
                 }
             }
@@ -118,6 +130,8 @@ public:
             
             if (!sp)
             {
+                DebugLog("  Create new time sample");
+
                 // sample was not cached
                 sp.reset(readSample(time));
 
@@ -126,14 +140,17 @@ public:
             }
             else
             {
+                DebugLog("  Update matching time sample");
+
                 bool dataChanged = false;
 
                 sample = sp.get();
                 
-                sample->updateConfig(m_config, dataChanged, topologyChanged);
+                sample->updateConfig(m_config, topologyChanged, dataChanged);
                 
                 if (!m_config.forceUpdate && !dataChanged)
                 {
+                    DebugLog("  Data didn't change, nor update is forced");
                     sample = 0;
                 }
             }
@@ -149,6 +166,8 @@ public:
 
     int erasePastSamples(float from, float range) override
     {
+        DebugLog("aiTSchema::erasePastSamples()");
+        
         if (m_constant)
         {
             return 0;
@@ -174,6 +193,8 @@ public:
 
     const Sample* findSample(float time) const override
     {
+        DebugLog("aiTSchema::findSample(t=%f)", time);
+        
         auto it = (m_constant ? m_samples.begin() : m_samples.find(time));
         return (it == m_samples.end() ? nullptr : it->second.get());
     }
@@ -187,20 +208,5 @@ protected:
     SampleCont m_samples;
 
 };
-
-/*
-class aiSchema
-{
-public:
-    aiSchema();
-    aiSchema(aiObject *obj);
-    virtual ~aiSchema();
-
-    virtual void updateSample() = 0;
-
-protected:
-    aiObject *m_obj;
-};
-*/
 
 #endif

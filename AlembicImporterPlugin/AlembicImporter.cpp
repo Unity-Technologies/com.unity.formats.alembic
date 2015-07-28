@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "Schema/aiSchema.h"
 #include "Schema/aiXForm.h"
 #include "Schema/aiPolyMesh.h"
 #include "Schema/aiCamera.h"
-#include "aiLogger.h"
 
 #ifdef aiWindows
     #include <windows.h>
@@ -15,25 +15,6 @@
 #else // aiWindows
 #   define aiBreak() __builtin_trap()
 #endif // aiWindows
-
-
-#ifdef aiDebug
-void aiDebugLogImpl(const char* fmt, ...)
-{
-    va_list vl;
-    va_start(vl, fmt);
-
-#ifdef aiWindows
-    char buf[2048];
-    vsprintf(buf, fmt, vl);
-    ::OutputDebugStringA(buf);
-#else // aiWindows
-    vprintf(fmt, vl);
-#endif // aiWindows
-
-    va_end(vl);
-}
-#endif // aiDebug
 
 
 aiCLinkage aiExport void aiEnableFileLog(bool on, const char *path)
@@ -130,7 +111,7 @@ aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, voi
         }
         catch (Alembic::Util::Exception e)
         {
-            aiDebugLog("exception: %s\n", e.what());
+            DebugLog("aiEnumerateChlid: %s", e.what());
         }
     }
 }
