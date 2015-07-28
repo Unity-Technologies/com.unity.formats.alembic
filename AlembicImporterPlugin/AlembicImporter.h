@@ -32,8 +32,8 @@ struct aiConfig
 {
     bool swapHandedness;
     bool swapFaceWinding;
-    aiNormalsMode normalsMode;
-    aiTangentsMode tangentsMode;
+    int32_t normalsMode;
+    int32_t tangentsMode;
     bool cacheTangentsSplits;
     float aspectRatio;
     bool forceUpdate;
@@ -58,12 +58,15 @@ struct aiXFormData
     bool inherits;
 
     inline aiXFormData()
-        : translation(0.0f)
-        , rotation(0.0f)
-        , scale(1.0f)
+        : translation(0.0f, 0.0f, 0.0f)
+        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
+        , scale(1.0f, 1.0f, 1.0f)
         , inherits(false)
     {
     }
+
+    aiXFormData(const aiXFormData&) = default;
+    aiXFormData& operator=(const aiXFormData&) = default;
 };
 
 struct aiCameraData
@@ -82,13 +85,16 @@ struct aiCameraData
         , focalLength(0.0f)
     {
     }
+
+    aiCameraData(const aiCameraData&) = default;
+    aiCameraData& operator=(const aiCameraData&) = default;
 };
 
 struct aiMeshSummary
 {
-    int topologyVariance;
-    int peakIndexCount;
-    int peakVertexCount;
+    int32_t topologyVariance;
+    int32_t peakIndexCount;
+    int32_t peakVertexCount;
 
     inline aiMeshSummary()
         : topologyVariance(0)
@@ -96,11 +102,14 @@ struct aiMeshSummary
         , peakVertexCount(0)
     {
     }
+
+    aiMeshSummary(const aiMeshSummary&) = default;
+    aiMeshSummary& operator=(const aiMeshSummary&) = default;
 };
 
 struct aiMeshSampleSummary
 {
-    int splitCount;
+    int32_t splitCount;
     bool hasNormals;
     bool hasUVs;
     bool hasTangents;
@@ -112,6 +121,9 @@ struct aiMeshSampleSummary
         , hasTangents(false)
     {
     }
+
+    aiMeshSampleSummary(const aiMeshSampleSummary&) = default;
+    aiMeshSampleSummary& operator=(const aiMeshSampleSummary&) = default;
 };
 
 struct aiMeshSampleData
@@ -128,15 +140,18 @@ struct aiMeshSampleData
         , tangents(0)
     {
     }
+
+    aiMeshSampleData(const aiMeshSampleData&) = default;
+    aiMeshSampleData& operator=(const aiMeshSampleData&) = default;
 };
 
 struct aiSubmeshSummary
 {
-    int index;
-    int splitIndex;
-    int splitSubmeshIndex;
-    int facesetIndex;
-    int triangleCount;
+    int32_t index;
+    int32_t splitIndex;
+    int32_t splitSubmeshIndex;
+    int32_t facesetIndex;
+    int32_t triangleCount;
 
     inline aiSubmeshSummary()
         : index(0)
@@ -146,23 +161,29 @@ struct aiSubmeshSummary
         , triangleCount(0)
     {
     }
+
+    aiSubmeshSummary(const aiSubmeshSummary&) = default;
+    aiSubmeshSummary& operator=(const aiSubmeshSummary&) = default;
 };
 
 struct aiSubmeshData
 {
-    int *indices;
+    int32_t *indices;
 
     inline aiSubmeshData()
         : indices(0)
     {
     }
+
+    aiSubmeshData(const aiSubmeshData&) = default;
+    aiSubmeshData& operator=(const aiSubmeshData&) = default;
 };
 
 struct aiFacesets
 {
-    int count;
-    int *faceCounts;
-    int *faceIndices;
+    int32_t count;
+    int32_t *faceCounts;
+    int32_t *faceIndices;
 
     inline aiFacesets()
         : count(0)
@@ -170,6 +191,9 @@ struct aiFacesets
         , faceIndices(0)
     {
     }
+
+    aiFacesets(const aiFacesets&) = default;
+    aiFacesets& operator=(const aiFacesets&) = default;
 };
 
 
