@@ -28,11 +28,7 @@ public:
     float getStartTime() const;
     float getEndTime() const;
 
-    void setTimeRangeToKeepSamples(float time, float range);
-    void updateSamples(float time, bool useThreads);
-    void updateSamplesBegin(float time);
-    void updateSamplesEnd();
-    void erasePastSamples(float time, float rangeKeep);
+    void updateSamples(float time);
 
     void enqueueTask(const task_t &task);
     void waitTasks();
@@ -57,7 +53,6 @@ private:
     double m_timeRange[2];
     int m_uid;
     aiConfig m_config;
-    std::tuple<float, float> m_timeRangeToKeepSamples; // start, range
 };
 
 

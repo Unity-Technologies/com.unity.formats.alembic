@@ -72,31 +72,10 @@ aiCLinkage aiExport void aiDestroyObject(aiContext* ctx, aiObject* obj)
     ctx->destroyObject(obj);
 }
 
-aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time, bool useThreads)
+aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time)
 {
-    ctx->updateSamples(time, useThreads);
+    ctx->updateSamples(time);
 }
-
-aiCLinkage aiExport void aiSetTimeRangeToKeepSamples(aiContext* ctx, float time, float range)
-{
-    ctx->setTimeRangeToKeepSamples(time, range);
-}
-
-aiCLinkage aiExport void aiErasePastSamples(aiContext* ctx, float time, float range)
-{
-    ctx->erasePastSamples(time, range);
-}
-
-aiCLinkage aiExport void aiUpdateSamplesBegin(aiContext* ctx, float time)
-{
-    ctx->updateSamplesBegin(time);
-}
-
-aiCLinkage aiExport void aiUpdateSamplesEnd(aiContext* ctx)
-{
-    ctx->updateSamplesEnd();
-}
-
 
 aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 {
@@ -145,11 +124,6 @@ aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schem
 aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, float time)
 {
     return schema->findSample(time);
-}
-
-aiCLinkage aiExport float aiSampleGetTime(aiSampleBase* sample)
-{
-    return sample->getTime();
 }
 
 

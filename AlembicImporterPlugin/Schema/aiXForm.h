@@ -5,7 +5,7 @@ class aiXFormSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiXFormSample(aiXForm *schema, float time);
+    aiXFormSample(aiXForm *schema);
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
@@ -28,6 +28,7 @@ typedef aiTSchema<aiXFormTraits> super;
 public:
     aiXForm(aiObject *obj);
 
+    Sample* newSample();
     Sample* readSample(float time, bool &topologyChanged) override;
 };
 

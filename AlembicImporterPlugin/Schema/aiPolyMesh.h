@@ -170,7 +170,7 @@ class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, float time, Topology *topo, bool ownTopo);
+    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo);
     virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
@@ -223,6 +223,7 @@ typedef aiTSchema<aiPolyMeshTraits> super;
 public:
     aiPolyMesh(aiObject *obj);
 
+    Sample* newSample();
     Sample* readSample(float time, bool &topologyChanged) override;
 
     int getTopologyVariance() const;
@@ -238,9 +239,9 @@ private:
     bool m_ignoreNormals;
     bool m_ignoreUVs;
 
-    Topology m_constantTopology;
-    AbcGeom::IN3fGeomParam::Sample m_constantNormals;
-    AbcGeom::IV2fGeomParam::Sample m_constantUVs;
+    Topology m_sharedTopology;
+    AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
+    AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
 };
 
 #endif

@@ -200,7 +200,6 @@ aiContext::aiContext(int uid)
 {
     m_timeRange[0] = 0;
     m_timeRange[1] = 0;
-    m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
 }
 
 aiContext::~aiContext()
@@ -337,7 +336,6 @@ void aiContext::reset()
 
     m_timeRange[0] = 0.0f;
     m_timeRange[1] = 0.0f;
-    m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
 }
 
 std::string aiContext::normalizePath(const char *inPath) const
@@ -480,7 +478,6 @@ bool aiContext::load(const char *inPath)
 
         m_timeRange[0] = 0.0;
         m_timeRange[1] = 0.0;
-        m_timeRangeToKeepSamples = std::make_tuple(0.0f, 0.0f);
 
         aiLogger::Unindent(1);
 
@@ -503,75 +500,29 @@ aiObject* aiContext::getTopObject()
     return m_nodes.empty() ? nullptr : m_nodes.front();
 }
 
-void aiContext::setTimeRangeToKeepSamples(float time, float range)
+void aiContext::updateSamples(float time)
 {
-    m_timeRangeToKeepSamples = std::make_tuple(time, range);
-}
-
-void aiContext::updateSamples(float time, bool useThreads)
-{
-    if (useThreads)
+    if (m_config.useThreads)
     {
         DebugLog("aiContext::updateSamples() [threaded]");
         
-        // queue all updates in task pool...
-        updateSamplesBegin(time);
-        // ... and wait for completion
-        updateSamplesEnd();
+        for (aiObject *obj : m_nodes)
+        {
+            enqueueTask([obj, time]() {
+                obj->updateSample(time);
+            });
+        }
+
+        waitTasks();
     }
     else
     {
         DebugLog("aiContext::updateSamples()");
         
-        float eraseStart = std::get<0>(m_timeRangeToKeepSamples);
-        float eraseRange = std::get<1>(m_timeRangeToKeepSamples);
-
         for (auto &e : m_nodes)
         {
             e->updateSample(time);
         }
-
-        if (eraseRange > 0.0f)
-        {
-            erasePastSamples(eraseStart, eraseRange);
-        }
-    }
-}
-
-void aiContext::updateSamplesBegin(float time)
-{
-    float eraseStart = std::get<0>(m_timeRangeToKeepSamples);
-    float eraseRange = std::get<1>(m_timeRangeToKeepSamples);
-
-    // enqueueTask([this, time](){ updateSamples(time); });
-    
-    for (aiObject *obj : m_nodes)
-    {
-        enqueueTask(
-            [obj, time, eraseStart, eraseRange]()
-            {
-                obj->updateSample(time);
-                if (eraseRange > 0.0f)
-                {
-                    obj->erasePastSamples(eraseStart, eraseRange);
-                }
-            }
-        );
-    }
-}
-
-void aiContext::updateSamplesEnd()
-{
-    waitTasks();
-}
-
-void aiContext::erasePastSamples(float time, float rangeKeep)
-{
-    DebugLog("aiContext::erasePastSamples()");
-    
-    for (auto &e : m_nodes)
-    {
-        e->erasePastSamples(time, rangeKeep);
     }
 }
 

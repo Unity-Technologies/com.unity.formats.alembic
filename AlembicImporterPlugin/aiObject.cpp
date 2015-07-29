@@ -83,16 +83,6 @@ void aiObject::updateSample(float time)
     }
 }
 
-void aiObject::erasePastSamples(float from, float range)
-{
-    DebugLog("aiObject::erasePastSamples(obj='%s', from=%f, range=%f)", getFullName(), from, range);
-    
-    for (auto s : m_schemas)
-    {
-        s->erasePastSamples(from, range);
-    }
-}
-
 aiContext*  aiObject::getContext()           { return m_ctx; }
 abcObject&  aiObject::getAbcObject()         { return m_abc; }
 const char* aiObject::getName() const        { return m_abc.getName().c_str(); }
