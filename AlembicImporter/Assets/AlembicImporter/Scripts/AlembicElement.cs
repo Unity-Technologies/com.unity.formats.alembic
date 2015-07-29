@@ -16,6 +16,8 @@ public abstract class AlembicElement : MonoBehaviour
     public AbcAPI.aiObject m_abcObj;
     public AbcAPI.aiSchema m_abcSchema;
     public GCHandle m_thisHandle;
+    
+    protected Transform m_trans;
 
     bool m_verbose;
     bool m_pendingUpdate;
@@ -75,6 +77,7 @@ public abstract class AlembicElement : MonoBehaviour
         m_abcObj = abcObj;
         m_abcSchema = abcSchema;
         m_thisHandle = GCHandle.Alloc(this);
+        m_trans = GetComponent<Transform>();
 
         IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
 

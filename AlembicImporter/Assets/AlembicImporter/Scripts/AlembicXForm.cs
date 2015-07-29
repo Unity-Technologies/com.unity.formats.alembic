@@ -12,17 +12,7 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicXForm : AlembicElement
 {
-    Transform m_trans;
     AbcAPI.aiXFormData m_abcData;
-
-    public override void AbcSetup(AlembicStream abcStream,
-                                  AbcAPI.aiObject abcObj,
-                                  AbcAPI.aiSchema abcSchema)
-    {
-        base.AbcSetup(abcStream, abcObj, abcSchema);
-
-        m_trans = GetComponent<Transform>();
-    }
 
     // No config overrides on AlembicXForm
 
