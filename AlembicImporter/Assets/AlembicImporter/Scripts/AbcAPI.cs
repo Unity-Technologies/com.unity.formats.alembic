@@ -385,8 +385,8 @@ public class AbcAPI
         if (elem)
         {
             elem.AbcSetup(ic.abcStream, obj, schema);
-            aiSchemaUpdateSample(schema, ic.time);
-            elem.AbcUpdate();
+            // aiSchemaUpdateSample(schema, ic.time);
+            // elem.AbcUpdate();
             
             ic.abcStream.AbcAddElement(elem);
         }
