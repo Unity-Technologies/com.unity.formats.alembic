@@ -44,7 +44,6 @@ public class AlembicMesh : AlembicElement
     [HideInInspector] public List<Submesh> m_submeshes = new List<Submesh>();
     [HideInInspector] public List<Split> m_splits = new List<Split>();
 
-    Transform m_trans;
     AbcAPI.aiMeshSummary m_summary;
     AbcAPI.aiMeshSampleSummary m_sampleSummary;
 
@@ -54,8 +53,6 @@ public class AlembicMesh : AlembicElement
     {
         base.AbcSetup(abcStream, abcObj, abcSchema);
 
-        m_trans = GetComponent<Transform>();
-        
         AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
 
         Split split = null;

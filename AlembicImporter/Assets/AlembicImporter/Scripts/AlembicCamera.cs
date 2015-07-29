@@ -14,7 +14,6 @@ public class AlembicCamera : AlembicElement
 {
     public AbcAPI.aiAspectRatioModeOverride m_aspectRatioMode = AbcAPI.aiAspectRatioModeOverride.InheritStreamSetting;
 
-    Transform m_trans;
     Camera m_camera;
     AbcAPI.aiCameraData m_abcData;
 
@@ -24,7 +23,6 @@ public class AlembicCamera : AlembicElement
     {
         base.AbcSetup(abcStream, abcObj, abcSchema);
 
-        m_trans = GetComponent<Transform>();
         m_camera = GetOrAddComponent<Camera>();
     }
 
