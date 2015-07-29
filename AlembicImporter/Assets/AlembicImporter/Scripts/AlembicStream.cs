@@ -230,9 +230,9 @@ public class AlembicStream : MonoBehaviour
 
                 // This should ensure only keep one sample,
                 // unless you take 1,000,000 samples / sec (>30,000 samples per frame at 30 fps)
-                AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, m_time, 0.000001f);
+                AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, abcTime, 0.000001f);
 
-                AbcAPI.aiUpdateSamples(m_abc, m_time, false); // single threaded for first tests
+                AbcAPI.aiUpdateSamples(m_abc, abcTime, false); // single threaded for first tests
 
                 AbcUpdateElements();
                 
@@ -286,10 +286,11 @@ public class AlembicStream : MonoBehaviour
             m_timeOffset = -m_startTime;
             m_timeScale = 1.0f;
             m_preserveStartTime = true;
+            m_forceRefresh = true;
 
             AbcSyncConfig();
 
-            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_time, createMissingNodes);
+            AbcAPI.UpdateAbcTree(m_abc, m_trans, AbcTime(m_time), createMissingNodes);
         }
     }
 
@@ -310,7 +311,6 @@ public class AlembicStream : MonoBehaviour
     {
         if (!AbcIsValid())
         {
-            Debug.Log("AlembicStream: Nothing to destroy");
             return;
         }
 
@@ -334,9 +334,9 @@ public class AlembicStream : MonoBehaviour
     void Start()
     {
         m_time = 0.0f;
+        m_forceRefresh = true;
 
         AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(m_aspectRatioMode));
-        m_forceRefresh = true;
     }
 
     void Update()
