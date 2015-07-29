@@ -55,12 +55,16 @@ aiXForm::aiXForm(aiObject *obj)
 {
 }
 
-aiXForm::Sample* aiXForm::readSample(float time)
+aiXForm::Sample* aiXForm::readSample(float time, bool &topologyChanged)
 {
     DebugLog("aiXForm::readSample(t=%f)", time);
     
     Sample *ret = new Sample(this, time);
+
     m_schema.get(ret->m_sample, MakeSampleSelector(time));
+
+    topologyChanged = false;
+
     return ret;
 }
 

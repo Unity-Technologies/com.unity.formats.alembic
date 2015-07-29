@@ -53,11 +53,15 @@ aiCamera::aiCamera(aiObject *obj)
 {
 }
 
-aiCamera::Sample* aiCamera::readSample(float time)
+aiCamera::Sample* aiCamera::readSample(float time, bool &topologyChanged)
 {
     DebugLog("aiCamera::readSample(t=%f)", time);
     
     Sample *ret = new Sample(this, time);
+    
     m_schema.get(ret->m_sample, MakeSampleSelector(time));
+
+    topologyChanged = false;
+
     return ret;
 }

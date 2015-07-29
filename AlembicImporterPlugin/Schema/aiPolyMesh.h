@@ -223,7 +223,7 @@ typedef aiTSchema<aiPolyMeshTraits> super;
 public:
     aiPolyMesh(aiObject *obj);
 
-    Sample* readSample(float time) override;
+    Sample* readSample(float time, bool &topologyChanged) override;
 
     int getTopologyVariance() const;
     int getPeakIndexCount() const;
