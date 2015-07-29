@@ -46,6 +46,7 @@ public class AlembicMesh : AlembicElement
 
     AbcAPI.aiMeshSummary m_summary;
     AbcAPI.aiMeshSampleSummary m_sampleSummary;
+    bool m_freshSetup = false;
 
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
@@ -69,8 +70,6 @@ public class AlembicMesh : AlembicElement
             m_splits.RemoveRange(maxNumSplits, m_splits.Count - maxNumSplits);
         }
 
-        // m_submeshes.Clear();
-
         for (int s=0; s<maxNumSplits; ++s)
         {
             Transform trans = (maxNumSplits > 1 ? null : m_trans);
@@ -85,6 +84,8 @@ public class AlembicMesh : AlembicElement
                     tangentCache = new Vector4[0],
                     mesh = null,
                     host = null,
+                    clear = true,
+                    submeshCount = 0,
                     active = true
                 };
 
@@ -118,8 +119,10 @@ public class AlembicMesh : AlembicElement
             split.mesh = mesh;
             split.host = trans.gameObject;
         }
-    }
 
+        m_freshSetup = true;
+    }
+    
     // in config is the one set by aiSetConfig()
     public override void AbcGetConfig(ref AbcAPI.aiConfig config)
     {
@@ -145,7 +148,7 @@ public class AlembicMesh : AlembicElement
 
         AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
 
-        config.forceUpdate = (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
+        config.forceUpdate = m_freshSetup || (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
     }
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
@@ -169,10 +172,11 @@ public class AlembicMesh : AlembicElement
             hasFacesets = false;
         }
 
-        if (m_submeshes.Count == 0)
+        if (m_freshSetup)
         {
-            AbcVerboseLog("AlembicMesh.AbcSampleUpdated: No submesh created yet, force topology update");
             topologyChanged = true;
+
+            m_freshSetup = false;
         }
 
         AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary, topologyChanged);

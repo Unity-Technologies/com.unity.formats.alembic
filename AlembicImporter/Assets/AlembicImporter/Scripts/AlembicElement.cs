@@ -83,8 +83,6 @@ public abstract class AlembicElement : MonoBehaviour
 
         AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
         AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
-
-        AbcDirty();
     }
 
     public AbcAPI.aiSample AbcGetSample()
