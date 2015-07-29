@@ -71,6 +71,7 @@ public:
 
     aiTSchema(aiObject *obj)
         : aiSchemaBase(obj)
+        , m_lastTime(0.0f)
     {
         AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
@@ -149,7 +150,11 @@ public:
                 if (!m_config.forceUpdate && !dataChanged)
                 {
                     DebugLog("  Data didn't change, nor update is forced");
-                    sample = 0;
+                    
+                    if (fabs(time - m_lastTime) <= 0.000001f)
+                    {
+                        sample = 0;
+                    }
                 }
             }
         }
@@ -158,6 +163,8 @@ public:
         {
             invokeSampleCallback(sample, topologyChanged);
         }
+
+        m_lastTime = time;
 
         return sample;
     }
@@ -204,6 +211,7 @@ protected:
 protected:
     AbcSchema m_schema;
     SampleCont m_samples;
+    float m_lastTime;
 
 };
 
