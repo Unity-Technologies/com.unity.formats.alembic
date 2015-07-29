@@ -9,9 +9,8 @@
 #include "aiXForm.h"
 
 
-aiSampleBase::aiSampleBase(aiSchemaBase *schema, float time)
+aiSampleBase::aiSampleBase(aiSchemaBase *schema)
     : m_schema(schema)
-    , m_time(time)
 {
 	m_config = schema->getConfig();
 }
@@ -45,7 +44,6 @@ aiObject* aiSchemaBase::getObject()
 
 const aiConfig& aiSchemaBase::getConfig() const
 {
-    //return m_obj->getContext()->getConfig();
     return m_config;
 }
 
@@ -79,10 +77,10 @@ void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChang
 
 Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(float time)
 {
-    return Abc::ISampleSelector(time, Abc::ISampleSelector::kFloorIndex);
+    return Abc::ISampleSelector(double(time), Abc::ISampleSelector::kFloorIndex);
 }
 
-Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(uint32_t index)
+Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(int64_t index)
 {
     return Abc::ISampleSelector(index, Abc::ISampleSelector::kFloorIndex);
 }

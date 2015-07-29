@@ -9,8 +9,8 @@
 #include "aiXForm.h"
 
 
-aiXFormSample::aiXFormSample(aiXForm *schema, float time)
-    : super(schema, time)
+aiXFormSample::aiXFormSample(aiXForm *schema)
+    : super(schema)
 {
 }
 
@@ -55,11 +55,23 @@ aiXForm::aiXForm(aiObject *obj)
 {
 }
 
+aiXForm::Sample* aiXForm::newSample()
+{
+    Sample *sample = getSample();
+    
+    if (!sample)
+    {
+        sample = new Sample(this);
+    }
+    
+    return sample;
+}
+
 aiXForm::Sample* aiXForm::readSample(float time, bool &topologyChanged)
 {
     DebugLog("aiXForm::readSample(t=%f)", time);
     
-    Sample *ret = new Sample(this, time);
+    Sample *ret = newSample();
 
     m_schema.get(ret->m_sample, MakeSampleSelector(time));
 

@@ -27,6 +27,8 @@ public class AlembicStream : MonoBehaviour
     public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
     public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
     public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
+    public bool m_useThreads = false;
+    public int m_sampleCacheSize = 0;
     public bool m_forceRefresh;
     public bool m_verbose = false;
     public bool m_logToFile = false;
@@ -65,6 +67,8 @@ public class AlembicStream : MonoBehaviour
         m_config.cacheTangentsSplits = true;
         m_config.aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
         m_config.forceUpdate = false; // m_forceRefresh; ?
+        m_config.useThreads = m_useThreads;
+        m_config.cacheSamples = m_sampleCacheSize;
 
         if (AbcIsValid())
         {
@@ -228,11 +232,7 @@ public class AlembicStream : MonoBehaviour
                 
                 AbcSyncConfig();
 
-                // This should ensure only keep one sample,
-                // unless you take 1,000,000 samples / sec (>30,000 samples per frame at 30 fps)
-                AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, abcTime, 0.000001f);
-
-                AbcAPI.aiUpdateSamples(m_abc, abcTime, false); // single threaded for first tests
+                AbcAPI.aiUpdateSamples(m_abc, abcTime);
 
                 AbcUpdateElements();
                 

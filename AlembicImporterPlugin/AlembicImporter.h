@@ -37,6 +37,8 @@ struct aiConfig
     bool cacheTangentsSplits;
     float aspectRatio;
     bool forceUpdate;
+    bool useThreads;
+    int32_t cacheSamples;
 
     inline aiConfig()
         : swapHandedness(true)
@@ -46,6 +48,9 @@ struct aiConfig
         , cacheTangentsSplits(true)
         , aspectRatio(-1.0f)
         , forceUpdate(false)
+        , useThreads(true)
+        , cacheSamples(0)
+
     {
     }
 
@@ -249,11 +254,7 @@ aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 aiCLinkage aiExport void            aiDestroyObject(aiContext* ctx, aiObject* obj);
 
-aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time, bool useThreads);
-aiCLinkage aiExport void            aiSetTimeRangeToKeepSamples(aiContext* ctx, float time, float range);
-aiCLinkage aiExport void            aiErasePastSamples(aiContext* ctx, float time, float range);
-aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);
-aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);
+aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
@@ -263,7 +264,6 @@ aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* sche
 aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
 aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time);
 aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, float time);
-aiCLinkage aiExport float           aiSampleGetTime(aiSampleBase* sample);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);

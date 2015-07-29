@@ -21,7 +21,6 @@ public:
     aiObject*   getParent();
 
     void        updateSample(float time);
-    void        erasePastSamples(float from, float range);
     
     bool        hasXForm() const;
     bool        hasPolyMesh() const;

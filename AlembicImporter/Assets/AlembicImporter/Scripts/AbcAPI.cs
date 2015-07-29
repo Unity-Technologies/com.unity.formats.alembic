@@ -85,6 +85,8 @@ public class AbcAPI
         [MarshalAs(UnmanagedType.U1)] public bool cacheTangentsSplits;
         public float aspectRatio;
         [MarshalAs(UnmanagedType.U1)] public bool forceUpdate;
+        [MarshalAs(UnmanagedType.U1)] public bool useThreads;
+        [MarshalAs(UnmanagedType.U4)] public int cacheSamples;
 
         public void SetDefaults()
         {
@@ -95,6 +97,8 @@ public class AbcAPI
             cacheTangentsSplits = true;
             aspectRatio = -1.0f;
             forceUpdate = false;
+            useThreads = true;
+            cacheSamples = 0;
         }
     }
 
@@ -195,12 +199,8 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
-    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time, bool useThreads);
-    [DllImport ("AlembicImporter")] public static extern void       aiSetTimeRangeToKeepSamples(aiContext ctx, float time, float keepRange);
-    [DllImport ("AlembicImporter")] public static extern void       aiErasePastSamples(aiContext ctx, float time, float keepRange);
-    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time, float keepRange);
-    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
-
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
+    
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
@@ -211,7 +211,6 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, float time);
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, float time);
-    [DllImport ("AlembicImporter")] public static extern float      aiSampleGetTime(aiSample sample);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);

@@ -5,7 +5,7 @@ class aiCameraSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiCameraSample(aiCamera *schema, float time);
+    aiCameraSample(aiCamera *schema);
     
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
@@ -29,6 +29,7 @@ typedef aiTSchema<aiCameraTraits> super;
 public:
     aiCamera(aiObject *obj);
 
+    Sample* newSample();
     Sample* readSample(float time, bool &topologyChanged) override;
 };
 

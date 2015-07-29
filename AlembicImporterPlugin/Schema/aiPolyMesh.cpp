@@ -297,8 +297,8 @@ int Topology::getSplitSubmeshCount(int splitIndex) const
 
 // ---
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, float time, Topology *topo, bool ownTopo)
-    : super(schema, time)
+aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo)
+    : super(schema)
     , m_topology(topo)
     , m_ownTopology(ownTopo)
     , m_smoothNormalsCount(0)
@@ -1265,32 +1265,49 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
              (m_varyingTopology ? "true" : "false"));
 }
 
+aiPolyMesh::Sample* aiPolyMesh::newSample()
+{
+    Sample *sample = getSample();
+    
+    if (!sample)
+    {
+        if (dontUseCache() || !m_varyingTopology)
+        {
+            sample = new Sample(this, &m_sharedTopology, false);
+        }
+        else
+        {
+            sample = new Sample(this, new Topology(), true);
+        }
+    }
+    
+    return sample;
+}
+
 aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
 {
     DebugLog("aiPolyMesh::readSample(t=%f)", time);
     
+    Sample *ret = newSample();
+
     auto ss = MakeSampleSelector(time);
 
     topologyChanged = m_varyingTopology;
 
-    Topology *topology = (m_varyingTopology ? new Topology() : &m_constantTopology);
-    
-    if (!topology->counts)
+    if (!ret->m_topology->counts || m_varyingTopology)
     {
         DebugLog("  Read face counts");
-        m_schema.getFaceCountsProperty().get(topology->counts, ss);
+        m_schema.getFaceCountsProperty().get(ret->m_topology->counts, ss);
         topologyChanged = true;
     }
 
-    if (!topology->indices)
+    if (!ret->m_topology->indices || m_varyingTopology)
     {
         DebugLog("  Read face indices");
-        m_schema.getFaceIndicesProperty().get(topology->indices, ss);
+        m_schema.getFaceIndicesProperty().get(ret->m_topology->indices, ss);
         topologyChanged = true;
     }
 
-    Sample *ret = new Sample(this, time, topology, m_varyingTopology);
-    
     DebugLog("  Read positions");
     m_schema.getPositionsProperty().get(ret->m_positions, ss);
 
@@ -1308,13 +1325,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
     {
         if (normalsParam.isConstant())
         {
-            if (!m_constantNormals.valid())
+            if (!m_sharedNormals.valid())
             {
                 DebugLog("  Read normals (constant)");
-                normalsParam.getIndexed(m_constantNormals, ss);
+                normalsParam.getIndexed(m_sharedNormals, ss);
             }
 
-            ret->m_normals = m_constantNormals;
+            ret->m_normals = m_sharedNormals;
         }
         else
         {
@@ -1329,13 +1346,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
     {
         if (uvsParam.isConstant())
         {
-            if (!m_constantUVs.valid())
+            if (!m_sharedUVs.valid())
             {
                 DebugLog("  Read uvs (constant)");
-                uvsParam.getIndexed(m_constantUVs, ss);
+                uvsParam.getIndexed(m_sharedUVs, ss);
             }
 
-            ret->m_uvs = m_constantUVs;
+            ret->m_uvs = m_sharedUVs;
         }
         else
         {
