@@ -69,7 +69,7 @@ public class AlembicMesh : AlembicElement
             m_splits.RemoveRange(maxNumSplits, m_splits.Count - maxNumSplits);
         }
 
-        m_submeshes.Clear();
+        // m_submeshes.Clear();
 
         for (int s=0; s<maxNumSplits; ++s)
         {
@@ -361,11 +361,12 @@ public class AlembicMesh : AlembicElement
                     }
                 }
 
+                split.clear = false;
+
                 split.host.SetActive(true);
             }
             else
             {
-                split.mesh.Clear();
                 split.host.SetActive(false);
             }
         }
@@ -377,6 +378,8 @@ public class AlembicMesh : AlembicElement
             if (submesh.update)
             {
                 m_splits[submesh.splitIndex].mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, submesh.index);
+
+                submesh.update = false;
             }
         }
 
