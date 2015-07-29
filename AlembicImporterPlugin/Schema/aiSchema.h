@@ -101,10 +101,9 @@ public:
                 // no need to pass config to readSample
                 // => aiSchemaBase::getConfig will return it
                 auto &sp = m_samples[time];
-                sp.reset(readSample(time));
+                sp.reset(readSample(time, topologyChanged));
                 
                 sample = sp.get();
-                topologyChanged = true; // first sample ever read, this has to be true
             }
             else
             {
@@ -133,10 +132,9 @@ public:
                 DebugLog("  Create new time sample");
 
                 // sample was not cached
-                sp.reset(readSample(time));
+                sp.reset(readSample(time, topologyChanged));
 
                 sample = sp.get();
-                topologyChanged = (m_samples.size() == 1 || m_varyingTopology);
             }
             else
             {
@@ -201,7 +199,7 @@ public:
 
 protected:
 
-    virtual Sample* readSample(float time) = 0;
+    virtual Sample* readSample(float time, bool &topologyChanged) = 0;
 
 protected:
     AbcSchema m_schema;

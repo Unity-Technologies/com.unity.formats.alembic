@@ -1265,11 +1265,13 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
              (m_varyingTopology ? "true" : "false"));
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
+aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
 {
     DebugLog("aiPolyMesh::readSample(t=%f)", time);
     
     auto ss = MakeSampleSelector(time);
+
+    topologyChanged = m_varyingTopology;
 
     Topology *topology = (m_varyingTopology ? new Topology() : &m_constantTopology);
     
@@ -1277,12 +1279,14 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
     {
         DebugLog("  Read face counts");
         m_schema.getFaceCountsProperty().get(topology->counts, ss);
+        topologyChanged = true;
     }
 
     if (!topology->indices)
     {
         DebugLog("  Read face indices");
         m_schema.getFaceIndicesProperty().get(topology->indices, ss);
+        topologyChanged = true;
     }
 
     Sample *ret = new Sample(this, time, topology, m_varyingTopology);

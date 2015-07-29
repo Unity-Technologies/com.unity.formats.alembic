@@ -28,7 +28,7 @@ typedef aiTSchema<aiXFormTraits> super;
 public:
     aiXForm(aiObject *obj);
 
-    Sample* readSample(float time) override;
+    Sample* readSample(float time, bool &topologyChanged) override;
 };
 
 #endif

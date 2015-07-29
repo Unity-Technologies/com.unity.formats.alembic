@@ -29,7 +29,7 @@ typedef aiTSchema<aiCameraTraits> super;
 public:
     aiCamera(aiObject *obj);
 
-    Sample* readSample(float time) override;
+    Sample* readSample(float time, bool &topologyChanged) override;
 };
 
 #endif
