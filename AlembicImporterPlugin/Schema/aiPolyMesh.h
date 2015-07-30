@@ -137,6 +137,8 @@ public:
 
     int getSplitCount() const;
     int getSplitCount(bool forceRefresh);
+
+    void clear();
     
     void updateSplits();
 

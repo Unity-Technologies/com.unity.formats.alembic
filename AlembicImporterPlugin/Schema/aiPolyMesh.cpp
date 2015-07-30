@@ -43,6 +43,25 @@ Topology::~Topology()
     }
 }
 
+void Topology::clear()
+{
+    aiLogger::Info("Topology::clear()");
+    indices.reset();
+    counts.reset();
+
+    if (tangentIndices)
+    {
+        delete[] tangentIndices;
+        tangentIndices = 0;
+    }
+    tangentIndicesCount = 0;
+    tangentsCount = 0;
+
+    submeshes.clear();
+    faceSplitIndices.clear();
+    splits.clear();
+}
+
 int Topology::getSplitCount() const
 {
     return (int) splits.size();
@@ -1278,6 +1297,13 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
         else
         {
             sample = new Sample(this, new Topology(), true);
+        }
+    }
+    else
+    {
+        if (m_varyingTopology)
+        {
+            sample->m_topology->clear();
         }
     }
     
