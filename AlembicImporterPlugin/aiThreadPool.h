@@ -45,18 +45,25 @@ public:
     ~aiTaskGroup();
     template<class F> void run(const F &f);
     void wait();
+    void taskDone();
 
 private:
-    std::atomic<int> m_active_tasks;
+    int m_active_tasks;
+    std::mutex m_task_mutex;
+    std::condition_variable m_condition;
 };
 
 template<class F>
 void aiTaskGroup::run(const F &f)
 {
-    ++m_active_tasks;
+    {
+        std::unique_lock<std::mutex> lock(m_task_mutex);
+        ++m_active_tasks;
+    }
+    
     aiThreadPool::getInstance().enqueue([this, f](){
         f();
-        --m_active_tasks;
+        this->taskDone();
     });
 }
 
