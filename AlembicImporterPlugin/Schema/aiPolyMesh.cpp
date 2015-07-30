@@ -440,7 +440,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
     }
 
     ret->m_normals.reset();
-    auto &normal_param = m_schema.getNormalsParam();
+    auto normal_param = m_schema.getNormalsParam();
     if (normal_param.valid()) {
         if (normal_param.isIndexed()) {
             normal_param.getIndexed(ret->m_normals, ss);
@@ -451,7 +451,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time)
     }
 
     ret->m_uvs.reset();
-    auto &uv_param = m_schema.getUVsParam();
+    auto uv_param = m_schema.getUVsParam();
     if (uv_param.valid()) {
         if (uv_param.isIndexed()) {
             uv_param.getIndexed(ret->m_uvs, ss);
@@ -512,8 +512,8 @@ uint32_t aiPolyMesh::getPeakIndexCount() const
     if (m_peak_index_count == 0) {
         Abc::Int32ArraySamplePtr counts;
         Abc::Int32ArraySamplePtr indices;
-        auto &index_prop = m_schema.getFaceIndicesProperty();
-        auto &count_prop = m_schema.getFaceCountsProperty();
+        auto index_prop = m_schema.getFaceIndicesProperty();
+        auto count_prop = m_schema.getFaceCountsProperty();
         int num_samples = index_prop.getNumSamples();
         if (num_samples == 0) { return 0; }
 
@@ -523,7 +523,7 @@ uint32_t aiPolyMesh::getPeakIndexCount() const
         }
         else {
             int i_max = 0;
-            int c_max = 0;
+            size_t c_max = 0;
             for (int i = 0; i < num_samples; ++i) {
                 index_prop.get(indices, Abc::ISampleSelector(int64_t(i)));
                 if (indices->size() > c_max) {
@@ -544,7 +544,7 @@ uint32_t aiPolyMesh::getPeakVertexCount() const
 {
     if (m_peak_vertex_count == 0) {
         Abc::P3fArraySamplePtr positions;
-        auto &positions_prop = m_schema.getPositionsProperty();
+        auto positions_prop = m_schema.getPositionsProperty();
         int num_samples = positions_prop.getNumSamples();
         if (num_samples == 0) { return 0; }
 
@@ -553,7 +553,7 @@ uint32_t aiPolyMesh::getPeakVertexCount() const
         }
         else {
             int i_max = 0;
-            int c_max = 0;
+            size_t c_max = 0;
             for (int i = 0; i < num_samples; ++i) {
                 positions_prop.get(positions, Abc::ISampleSelector(int64_t(i)));
                 if (positions->size() > c_max) {
