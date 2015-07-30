@@ -1451,6 +1451,8 @@ int aiPolyMesh::getPeakIndexCount() const
         }
         else
         {
+            aiLogger::Info("Checking %d sample(s)", numSamples);
+            
             int iMax = 0;
             size_t cMax = 0;
 

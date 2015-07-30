@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "aiLogger.h"
 #include "aiThreadPool.h"
 
 #ifndef aiWithTBB
