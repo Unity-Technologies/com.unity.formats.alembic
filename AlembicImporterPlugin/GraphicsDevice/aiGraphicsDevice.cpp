@@ -22,6 +22,7 @@ int aiGetPixelSize(aiETextureFormat format)
     case aiE_ARGBInt:   return 16;
     case aiE_RGInt:     return 8;
     case aiE_RInt:      return 4;
+    default: break;
     }
     return 0;
 }

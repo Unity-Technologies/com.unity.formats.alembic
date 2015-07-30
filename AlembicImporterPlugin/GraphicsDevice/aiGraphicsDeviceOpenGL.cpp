@@ -67,6 +67,8 @@ static void fcGetInternalFormatOpenGL(aiETextureFormat format, GLenum &o_fmt, GL
     case aiE_ARGBInt:   o_fmt = GL_RGBA_INTEGER; o_type = GL_INT; return;
     case aiE_RGInt:     o_fmt = GL_RG_INTEGER; o_type = GL_INT; return;
     case aiE_RInt:      o_fmt = GL_RED_INTEGER; o_type = GL_INT; return;
+    
+    default: break;
     }
 }
 
