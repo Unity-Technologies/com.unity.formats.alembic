@@ -73,6 +73,14 @@ void aiObject::removeChild(aiObject *c)
     }
 }
 
+void aiObject::readConfig()
+{
+    for (auto s : m_schemas)
+    {
+        s->readConfig();
+    }
+}
+
 void aiObject::updateSample(float time)
 {
     DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), time);
@@ -80,6 +88,14 @@ void aiObject::updateSample(float time)
     for (auto s : m_schemas)
     {
         s->updateSample(time);
+    }
+}
+
+void aiObject::notifyUpdate()
+{
+    for (auto s : m_schemas)
+    {
+        s->notifyUpdate();
     }
 }
 

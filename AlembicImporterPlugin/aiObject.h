@@ -20,7 +20,9 @@ public:
     aiObject*   getChild(int i);
     aiObject*   getParent();
 
+    void        readConfig();
     void        updateSample(float time);
+    void        notifyUpdate();
     
     bool        hasXForm() const;
     bool        hasPolyMesh() const;

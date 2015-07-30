@@ -39,7 +39,11 @@ public:
 
     virtual aiSampleBase* updateSample(float time) = 0;
     virtual const aiSampleBase* findSample(float time) const = 0;
-    
+
+    // for multithreaded updates, don't invoke C# callbacks from work threads
+    void readConfig();
+    void notifyUpdate();
+
     static Abc::ISampleSelector MakeSampleSelector(float time);
     static Abc::ISampleSelector MakeSampleSelector(int64_t index);
 
@@ -52,6 +56,8 @@ protected:
     aiConfig m_config;
     bool m_constant;
     bool m_varyingTopology;
+    aiSampleBase *m_pendingSample;
+    bool m_pendingTopologyChanged;
 };
 
 
@@ -96,15 +102,13 @@ public:
     aiSampleBase* updateSample(float time) override
     {
         DebugLog("aiTSchema::updateSample()");
-       
-        m_config = m_obj->getContext()->getConfig();
+        
+        bool useThreads = m_obj->getContext()->getConfig().useThreads;
 
-        DebugLog("  Original config: %s", m_config.toString().c_str());
-
-        // get object config overrides (if any)
-        invokeConfigCallback(&m_config);
-
-        DebugLog("  Override config: %s", m_config.toString().c_str());
+        if (!useThreads)
+        {
+            readConfig();
+        }
 
         Sample *sample = 0;
         bool topologyChanged = false;
@@ -188,9 +192,17 @@ public:
 
         m_lastSampleIndex = sampleIndex;
 
-        if (sample)
+        if (!useThreads)
         {
-            invokeSampleCallback(sample, topologyChanged);
+            if (sample)
+            {
+                invokeSampleCallback(sample, topologyChanged);
+            }
+        }
+        else
+        {
+            m_pendingSample = sample;
+            m_pendingTopologyChanged = topologyChanged;
         }
 
         if (useCache() && m_samples.size() > size_t(m_config.cacheSamples))
