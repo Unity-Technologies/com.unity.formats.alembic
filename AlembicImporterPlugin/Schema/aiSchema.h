@@ -70,7 +70,7 @@ public:
         : aiSchemaBase(obj)
         , m_theSample(0)
         , m_numSamples(0)
-        , m_lastSampleIndex(0)
+        , m_lastSampleIndex(-1)
     {
         AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
@@ -119,9 +119,10 @@ public:
                 m_samples.clear();
             }
             
-            if (m_theSample == 0)
+            // don't need to check m_constant here, sampleIndex wouldn't change
+            if (m_theSample == 0 || sampleIndex != m_lastSampleIndex)
             {
-                DebugLog("  Create sample for constant object");
+                DebugLog("  Read sample");
                 
                 sample = readSample(time, topologyChanged);
                 
@@ -129,27 +130,19 @@ public:
             }
             else
             {
-                if (!m_constant && sampleIndex != m_lastSampleIndex)
+                DebugLog("  Update sample");
+
+                bool dataChanged = false;
+
+                sample = m_theSample;
+                
+                sample->updateConfig(m_config, topologyChanged, dataChanged);
+                
+                if (!m_config.forceUpdate && !dataChanged)
                 {
-                    // note: readSmaple should use m_theSample internally
-                    sample = readSample(time, topologyChanged);
-                }
-                else
-                {
-                    DebugLog("  Update constant object sample");
+                    DebugLog("  Data didn't change, nor update is forced");
 
-                    bool dataChanged = false;
-
-                    sample = m_theSample;
-                    
-                    sample->updateConfig(m_config, topologyChanged, dataChanged);
-                    
-                    if (!m_config.forceUpdate && !dataChanged)
-                    {
-                        DebugLog("  Data didn't change, nor update is forced");
-
-                        sample = 0;
-                    }
+                    sample = 0;
                 }
             }
         }
@@ -159,24 +152,32 @@ public:
             
             if (!sp)
             {
-                DebugLog("  Create new time sample");
+                DebugLog("  Create new cache sample");
                 
-                // sample was not cached
                 sp.reset(readSample(time, topologyChanged));
 
                 sample = sp.get();
             }
             else
             {
-                DebugLog("  Update matching time sample");
+                DebugLog("  Update cached sample");
                 
                 bool dataChanged = false;
 
                 sample = sp.get();
                 
                 sample->updateConfig(m_config, topologyChanged, dataChanged);
-                
-                if (sampleIndex == m_lastSampleIndex && !m_config.forceUpdate && !dataChanged)
+
+                // force update if sample has changed from previously queried one
+                if (sampleIndex != m_lastSampleIndex)
+                {
+                    if (m_varyingTopology)
+                    {
+                        topologyChanged = true;
+                    }
+                    dataChanged = true;
+                }
+                else if (!dataChanged && !m_config.forceUpdate)
                 {
                     DebugLog("  Data didn't change, nor update is forced");
                     
@@ -185,12 +186,12 @@ public:
             }
         }
 
+        m_lastSampleIndex = sampleIndex;
+
         if (sample)
         {
             invokeSampleCallback(sample, topologyChanged);
         }
-
-        m_lastSampleIndex = sampleIndex;
 
         if (useCache() && m_samples.size() > size_t(m_config.cacheSamples))
         {
