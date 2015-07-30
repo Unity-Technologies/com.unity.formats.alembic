@@ -47,8 +47,6 @@ void aiWorkerThread::operator()()
         }
 
         task();
-
-        m_pool->m_taskCondition.notify_all();
     }
 }
 
@@ -122,23 +120,31 @@ aiTaskGroup::~aiTaskGroup()
 
 void aiTaskGroup::taskDone()
 {
-    --m_activeTasks;
+    {
+        std::unique_lock<std::mutex> lock(m_taskMutex);
+
+        --m_activeTasks;
+    }
+
+    m_taskCondition.notify_one();
 }
 
 void aiTaskGroup::wait()
 {
     aiThreadPool &pool = aiThreadPool::getInstance();
 
-    std::unique_lock<std::mutex> lock(pool.m_taskMutex);
-    
-    while (m_activeTasks > 0)
     {
-        if (pool.m_stop)
+        std::unique_lock<std::mutex> lock(m_taskMutex);
+        
+        while (m_activeTasks > 0)
         {
-            break;
-        }
+            if (pool.m_stop)
+            {
+                break;
+            }
 
-        pool.m_taskCondition.wait(lock);
+            m_taskCondition.wait(lock);
+        }
     }
 }
 
