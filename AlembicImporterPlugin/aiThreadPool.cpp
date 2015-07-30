@@ -23,14 +23,18 @@ void aiWorkerThread::operator()()
 {
     aiThreadPool &pool = *m_pool;
     std::function<void()> task;
-    while (true)
+    bool pool_stopped = false;
+    while (!pool_stopped)
     {
         {
             std::unique_lock<std::mutex> lock(pool.m_queue_mutex);
             while (!pool.m_stop && pool.m_tasks.empty()) {
                 pool.m_condition.wait(lock);
             }
-            if (pool.m_stop) { return; }
+            if (pool.m_stop) {
+                pool_stopped = true;
+                continue;
+            }
 
             task = pool.m_tasks.front();
             pool.m_tasks.pop_front();
@@ -61,8 +65,10 @@ static aiThreadPool *g_instance;
 
 void aiThreadPool::releaseInstance()
 {
-    delete g_instance;
-    g_instance = nullptr;
+    if (g_instance != nullptr) {
+        delete g_instance;
+        g_instance = nullptr;
+    }
 }
 
 aiThreadPool& aiThreadPool::getInstance()
@@ -93,20 +99,28 @@ aiTaskGroup::~aiTaskGroup()
 {
 }
 
+void aiTaskGroup::taskDone()
+{
+    {
+        std::unique_lock<std::mutex> lock(m_task_mutex);
+        --m_active_tasks;
+    }
+
+    m_condition.notify_one();
+}
+
 void aiTaskGroup::wait()
 {
     aiThreadPool &pool = aiThreadPool::getInstance();
-    while (m_active_tasks > 0)
+    
     {
-        std::function<void()> task;
-        {
-            std::unique_lock<std::mutex> lock(pool.m_queue_mutex);
-            if (!pool.m_tasks.empty()) {
-                task = pool.m_tasks.front();
-                pool.m_tasks.pop_front();
+        std::unique_lock<std::mutex> lock(m_task_mutex);
+        while (m_active_tasks > 0) {
+            if (pool.m_stop) {
+                break;
             }
+            m_condition.wait(lock);
         }
-        if (task) { task(); }
     }
 }
 
