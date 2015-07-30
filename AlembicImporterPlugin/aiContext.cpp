@@ -318,8 +318,9 @@ bool aiContext::destroyObject(aiObject *obj,
 
 void aiContext::reset()
 {
-    DebugLog("aiObject::reset()");
+    DebugLog("aiContext::reset()");
     
+    // just in case
     waitTasks();
 
     for (auto n : m_nodes)
@@ -508,12 +509,22 @@ void aiContext::updateSamples(float time)
         
         for (aiObject *obj : m_nodes)
         {
+            obj->readConfig();
+        }
+        
+        for (aiObject *obj : m_nodes)
+        {
             enqueueTask([obj, time]() {
                 obj->updateSample(time);
             });
         }
 
         waitTasks();
+
+        for (aiObject *obj : m_nodes)
+        {
+            obj->notifyUpdate();
+        }
     }
     else
     {

@@ -28,6 +28,8 @@ aiSchemaBase::aiSchemaBase(aiObject *obj)
     , m_sampleCbArg(nullptr)
     , m_constant(false)
     , m_varyingTopology(false)
+    , m_pendingSample(0)
+    , m_pendingTopologyChanged(false)
 {
 	// start with base config
 	m_config = obj->getContext()->getConfig();
@@ -73,6 +75,36 @@ void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChang
 	{
 		m_sampleCb(m_sampleCbArg, sample, topologyChanged);
 	}
+}
+
+void aiSchemaBase::readConfig()
+{
+    DebugLog("aiSchemaBase::readConfig");
+
+    m_config = m_obj->getContext()->getConfig();
+
+    bool useThreads = m_config.useThreads;
+
+    DebugLog("  Original config: %s", m_config.toString().c_str());
+
+    // get object config overrides (if any)
+    invokeConfigCallback(&m_config);
+
+    // don't allow override of useThreads option
+    m_config.useThreads = useThreads;
+
+    DebugLog("  Override config: %s", m_config.toString().c_str());
+}
+
+void aiSchemaBase::notifyUpdate()
+{
+    if (m_pendingSample)
+    {
+        invokeSampleCallback(m_pendingSample, m_pendingTopologyChanged);
+
+        m_pendingSample = 0;
+        m_pendingTopologyChanged = false;
+    }
 }
 
 Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(float time)

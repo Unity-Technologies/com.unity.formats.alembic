@@ -792,8 +792,6 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
         return;
     }
 
-    aiLogger::Info("%s: Fill vertex buffer %u", getSchema()->getObject()->getFullName(), splitIndex);
-
     bool copyNormals = (hasNormals() && data.normals);
     bool copyUvs = (hasUVs() && data.uvs);
     bool copyTangents = (hasTangents() && data.tangents);
@@ -813,19 +811,19 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
     
     if (data.normals && !copyNormals)
     {
-        aiLogger::Info("Reset normals");
+        aiLogger::Info("%s: Reset normals", getSchema()->getObject()->getFullName());
         memset(data.normals, 0, split.indicesCount * sizeof(Abc::V3f));
     }
     
     if (data.uvs && !copyUvs)
     {
-        aiLogger::Info("Reset UVs (%s)");
+        aiLogger::Info("%s: Reset UVs", getSchema()->getObject()->getFullName());
         memset(data.uvs, 0, split.indicesCount * sizeof(Abc::V2f));
     }
     
     if (data.tangents && !copyTangents)
     {
-        aiLogger::Info("Reset tangents");
+        aiLogger::Info("%s: Reset tangents", getSchema()->getObject()->getFullName());
         memset(data.tangents, 0, split.indicesCount * sizeof(Imath::V4f));
     }
     

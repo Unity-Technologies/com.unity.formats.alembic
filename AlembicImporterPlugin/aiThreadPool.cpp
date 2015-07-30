@@ -21,28 +21,47 @@ aiWorkerThread::aiWorkerThread(aiThreadPool *pool)
 
 void aiWorkerThread::operator()()
 {
-    aiThreadPool &pool = *m_pool;
     std::function<void()> task;
-    while (true)
+
+    bool poolStopped = false;
+
+    while (!poolStopped)
     {
         {
-            std::unique_lock<std::mutex> lock(pool.m_queueMutex);
-            while (!pool.m_stop && pool.m_tasks.empty()) {
-                pool.m_condition.wait(lock);
-            }
-            if (pool.m_stop) { return; }
+            std::unique_lock<std::mutex> lock(m_pool->m_queueMutex);
 
-            task = pool.m_tasks.front();
-            pool.m_tasks.pop_front();
+            while (!m_pool->m_stop && m_pool->m_tasks.empty())
+            {
+                m_pool->m_queueCondition.wait(lock);
+            }
+            
+            if (m_pool->m_stop)
+            {
+                poolStopped = true;
+                continue;
+            }
+
+            task = m_pool->m_tasks.front();
+            m_pool->m_tasks.pop_front();
         }
+
         task();
+
+        m_pool->m_taskCondition.notify_all();
     }
 }
+
+// ---
+
+static aiThreadPool *g_instance = nullptr;
 
 aiThreadPool::aiThreadPool(size_t threads)
     : m_stop(false)
 {
-    for (size_t i = 0; i < threads; ++i) {
+    DebugLog("aiThreadPool: Starting %lu thread(s)", threads);
+
+    for (size_t i = 0; i < threads; ++i)
+    {
         m_workers.push_back(std::thread(aiWorkerThread(this)));
     }
 }
@@ -50,26 +69,31 @@ aiThreadPool::aiThreadPool(size_t threads)
 aiThreadPool::~aiThreadPool()
 {
     m_stop = true;
-    m_condition.notify_all();
 
-    for (auto& worker : m_workers) {
+    m_queueCondition.notify_all();
+
+    for (auto& worker : m_workers)
+    {
         worker.join();
     }
 }
 
-static aiThreadPool *g_instance;
-
 void aiThreadPool::releaseInstance()
 {
-    delete g_instance;
-    g_instance = nullptr;
+    if (g_instance != nullptr)
+    {
+        delete g_instance;
+        g_instance = nullptr;
+    }
 }
 
 aiThreadPool& aiThreadPool::getInstance()
 {
-    if (g_instance == nullptr) {
+    if (g_instance == nullptr)
+    {
         g_instance = new aiThreadPool(std::thread::hardware_concurrency());
     }
+
     return *g_instance;
 }
 
@@ -77,12 +101,14 @@ void aiThreadPool::enqueue(const std::function<void()> &f)
 {
     {
         std::unique_lock<std::mutex> lock(m_queueMutex);
+        
         m_tasks.push_back(std::function<void()>(f));
     }
-    m_condition.notify_one();
+
+    m_queueCondition.notify_one();
 }
 
-
+// ---
 
 aiTaskGroup::aiTaskGroup()
     : m_activeTasks(0)
@@ -93,20 +119,25 @@ aiTaskGroup::~aiTaskGroup()
 {
 }
 
+void aiTaskGroup::taskDone()
+{
+    --m_activeTasks;
+}
+
 void aiTaskGroup::wait()
 {
     aiThreadPool &pool = aiThreadPool::getInstance();
+
+    std::unique_lock<std::mutex> lock(pool.m_taskMutex);
+    
     while (m_activeTasks > 0)
     {
-        std::function<void()> task;
+        if (pool.m_stop)
         {
-            std::unique_lock<std::mutex> lock(pool.m_queueMutex);
-            if (!pool.m_tasks.empty()) {
-                task = pool.m_tasks.front();
-                pool.m_tasks.pop_front();
-            }
+            break;
         }
-        if (task) { task(); }
+
+        pool.m_taskCondition.wait(lock);
     }
 }
 
