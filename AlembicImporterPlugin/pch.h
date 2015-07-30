@@ -62,6 +62,10 @@ void aiDebugLogImpl(const char* fmt, ...);
 #include <d3d11.h>
 #endif // aiSupportD3D11
 
+#ifdef aiSupportD3D9
+#include <d3d9.h>
+#endif // aiSupportD3D9
+
 #endif // aiWindows
 
 using namespace Alembic;
