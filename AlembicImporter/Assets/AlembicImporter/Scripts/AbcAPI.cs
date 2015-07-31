@@ -113,8 +113,6 @@ public class AbcAPI
     public struct aiMeshSummary
     {
         [MarshalAs(UnmanagedType.U4)] public aiTopologyVariance topologyVariance;
-        [MarshalAs(UnmanagedType.U4)] public int peakIndexCount;
-        [MarshalAs(UnmanagedType.U4)] public int peakVertexCount;
     }
 
     public struct aiMeshSampleSummary

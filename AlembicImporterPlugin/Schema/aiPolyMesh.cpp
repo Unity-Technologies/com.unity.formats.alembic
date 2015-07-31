@@ -1526,8 +1526,6 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
     DebugLog("aiPolyMesh::getSummary()");
     
     summary.topologyVariance = getTopologyVariance();
-    summary.peakIndexCount = getPeakIndexCount();
-    summary.peakVertexCount = getPeakVertexCount();
 }
 
 

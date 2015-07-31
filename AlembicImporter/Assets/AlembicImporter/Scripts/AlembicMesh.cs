@@ -48,33 +48,40 @@ public class AlembicMesh : AlembicElement
     AbcAPI.aiMeshSampleSummary m_sampleSummary;
     bool m_freshSetup = false;
 
-    public override void AbcSetup(AlembicStream abcStream,
-                                  AbcAPI.aiObject abcObj,
-                                  AbcAPI.aiSchema abcSchema)
+    void UpdateSplits(int numSplits)
     {
-        base.AbcSetup(abcStream, abcObj, abcSchema);
-
-        AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
-
         Split split = null;
 
-        int maxNumSplits = AbcUtils.CeilDiv(m_summary.peakIndexCount, 65000);
-
-        if (m_splits.Count > maxNumSplits)
+        if (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || numSplits > 1)
         {
-            for (int s=maxNumSplits; s<m_splits.Count; ++s)
+            for (int i=0; i<numSplits; ++i)
             {
-                GameObject.DestroyImmediate(m_splits[s].host);
+                if (i >= m_splits.Count)
+                {
+                    split = new Split
+                    {
+                        positionCache = new Vector3[0],
+                        normalCache = new Vector3[0],
+                        uvCache = new Vector2[0],
+                        tangentCache = new Vector4[0],
+                        mesh = null,
+                        host = null,
+                        clear = true,
+                        submeshCount = 0,
+                        active = true
+                    };
+
+                    m_splits.Add(split);
+                }
+                else
+                {
+                    m_splits[i].active = true;
+                }
             }
-
-            m_splits.RemoveRange(maxNumSplits, m_splits.Count - maxNumSplits);
         }
-
-        for (int s=0; s<maxNumSplits; ++s)
+        else
         {
-            Transform trans = (maxNumSplits > 1 ? null : m_trans);
-
-            if (s >= m_splits.Count)
+            if (m_splits.Count == 0)
             {
                 split = new Split
                 {
@@ -83,47 +90,37 @@ public class AlembicMesh : AlembicElement
                     uvCache = new Vector2[0],
                     tangentCache = new Vector4[0],
                     mesh = null,
-                    host = null,
+                    host = m_trans.gameObject,
                     clear = true,
                     submeshCount = 0,
                     active = true
                 };
 
-                if (trans == null)
-                {
-                    GameObject go = new GameObject();
-                    go.name = m_trans.gameObject.name + "_split_" + s;
-
-                    trans = go.GetComponent<Transform>();
-                    trans.parent = m_trans;
-                    trans.localPosition = Vector3.zero;
-                    trans.localEulerAngles = Vector3.zero;
-                    trans.localScale = Vector3.one;
-                }
-
                 m_splits.Add(split);
             }
             else
             {
-                if (trans == null)
-                {
-                    trans = m_trans.FindChild(m_trans.gameObject.name + "_split_" + s);
-                }
-
-                split = m_splits[s];
+                m_splits[0].active = true;
             }
-
-            Mesh mesh = AddMeshComponents(abcObj, trans);
-            mesh.name = trans.gameObject.name;
-
-            split.mesh = mesh;
-            split.host = trans.gameObject;
         }
+
+        for (int i=numSplits; i<m_splits.Count; ++i)
+        {
+            m_splits[i].active = false;
+        }
+    }
+
+    public override void AbcSetup(AlembicStream abcStream,
+                                  AbcAPI.aiObject abcObj,
+                                  AbcAPI.aiSchema abcSchema)
+    {
+        base.AbcSetup(abcStream, abcObj, abcSchema);
+
+        AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
 
         m_freshSetup = true;
     }
     
-    // in config is the one set by aiSetConfig()
     public override void AbcGetConfig(ref AbcAPI.aiConfig config)
     {
         if (m_normalsMode != AbcAPI.aiNormalsModeOverride.InheritStreamSetting)
@@ -183,6 +180,8 @@ public class AlembicMesh : AlembicElement
 
         AbcAPI.aiMeshSampleData vertexData = default(AbcAPI.aiMeshSampleData);
 
+        UpdateSplits(m_sampleSummary.splitCount);
+
         for (int s=0; s<m_sampleSummary.splitCount; ++s)
         {
             Split split = m_splits[s];
@@ -229,11 +228,6 @@ public class AlembicMesh : AlembicElement
             }
 
             AbcAPI.aiPolyMeshFillVertexBuffer(sample, s, ref vertexData);
-        }
-
-        for (int s=m_sampleSummary.splitCount; s<m_splits.Count; ++s)
-        {
-            m_splits[s].active = false;
         }
 
         if (topologyChanged)
@@ -322,12 +316,50 @@ public class AlembicMesh : AlembicElement
             return;
         }
 
+        bool useSubObjects = (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
+
         for (int s=0; s<m_splits.Count; ++s)
         {
             Split split = m_splits[s];
 
             if (split.active)
             {
+                // Feshly created splits may not have their host set yet
+                if (split.host == null)
+                {
+                    if (useSubObjects)
+                    {
+                        string name = m_trans.gameObject.name + "_split_" + s;
+
+                        Transform trans = m_trans.FindChild(name);
+
+                        if (trans == null)
+                        {
+                            GameObject go = new GameObject();
+                            go.name = name;
+
+                            trans = go.GetComponent<Transform>();
+                            trans.parent = m_trans;
+                            trans.localPosition = Vector3.zero;
+                            trans.localEulerAngles = Vector3.zero;
+                            trans.localScale = Vector3.one;
+                        }
+
+                        split.host = trans.gameObject;
+                    }
+                    else
+                    {
+                        split.host = m_trans.gameObject;
+                    }
+                }
+
+                // Feshly created splits may not have their mesh set yet
+                if (split.mesh == null)
+                {
+                    split.mesh = AddMeshComponents(m_abcObj, split.host);
+                    split.mesh.name = split.host.name;
+                }
+
                 if (split.clear)
                 {
                     split.mesh.Clear();
@@ -398,11 +430,11 @@ public class AlembicMesh : AlembicElement
         AbcClean();
     }
 
-    static Mesh AddMeshComponents(AbcAPI.aiObject abc, Transform trans)
+    static Mesh AddMeshComponents(AbcAPI.aiObject abc, GameObject gameObject)
     {
         Mesh mesh = null;
         
-        MeshFilter meshFilter = trans.gameObject.GetComponent<MeshFilter>();
+        MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
         
         if (meshFilter == null || meshFilter.sharedMesh == null)
         {
@@ -411,16 +443,16 @@ public class AlembicMesh : AlembicElement
 
             if (meshFilter == null)
             {
-                meshFilter = trans.gameObject.AddComponent<MeshFilter>();
+                meshFilter = gameObject.AddComponent<MeshFilter>();
             }
 
             meshFilter.sharedMesh = mesh;
 
-            MeshRenderer renderer = trans.gameObject.GetComponent<MeshRenderer>();
+            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
                 
             if (renderer == null)
             {
-                renderer = trans.gameObject.AddComponent<MeshRenderer>();
+                renderer = gameObject.AddComponent<MeshRenderer>();
             }
             
             renderer.sharedMaterial = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
