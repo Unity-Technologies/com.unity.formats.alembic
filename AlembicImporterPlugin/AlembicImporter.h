@@ -126,13 +126,9 @@ struct aiCameraData
 struct aiMeshSummary
 {
     int32_t topologyVariance;
-    int32_t peakIndexCount;
-    int32_t peakVertexCount;
 
     inline aiMeshSummary()
         : topologyVariance(0)
-        , peakIndexCount(0)
-        , peakVertexCount(0)
     {
     }
 
