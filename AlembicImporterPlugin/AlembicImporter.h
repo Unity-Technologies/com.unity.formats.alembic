@@ -39,6 +39,7 @@ struct aiConfig
     bool forceUpdate;
     bool useThreads;
     int32_t cacheSamples;
+    bool submeshPerUVTile;
 
     inline aiConfig()
         : swapHandedness(true)
@@ -50,7 +51,7 @@ struct aiConfig
         , forceUpdate(false)
         , useThreads(true)
         , cacheSamples(0)
-
+        , submeshPerUVTile(true)
     {
     }
 
@@ -63,6 +64,7 @@ struct aiConfig
 
         oss << "{swapHandedness: " << (swapHandedness ? "true" : "false");
         oss << ", swapFaceWinding: " << (swapFaceWinding ? "true" : "false");
+        oss << ", submeshPerUVTile: " << (submeshPerUVTile ? "true" : "false");
         oss << ", normalsMode: " << (normalsMode == NM_ReadFromFile
                                      ? "read_from_file"
                                      : (normalsMode == NM_ComputeIfMissing

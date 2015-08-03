@@ -29,6 +29,7 @@ public class AlembicStream : MonoBehaviour
     [Header("Data")]
     public bool m_swapHandedness;
     public bool m_swapFaceWinding;
+    public bool m_submeshPerUVTile = true;
     public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
     public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
     public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
@@ -50,6 +51,7 @@ public class AlembicStream : MonoBehaviour
     float m_lastAbcTime;
     bool m_lastSwapHandedness;
     bool m_lastSwapFaceWinding;
+    bool m_lastSubmeshPerUVTile; 
     AbcAPI.aiNormalsMode m_lastNormalsMode;
     AbcAPI.aiTangentsMode m_lastTangentsMode;
     bool m_lastIgnoreMissingNodes;
@@ -79,6 +81,7 @@ public class AlembicStream : MonoBehaviour
         m_config.forceUpdate = false; // m_forceRefresh; ?
         m_config.useThreads = m_useThreads;
         m_config.cacheSamples = m_sampleCacheSize;
+        m_config.submeshPerUVTile = m_submeshPerUVTile;
 
         if (AbcIsValid())
         {
@@ -159,6 +162,7 @@ public class AlembicStream : MonoBehaviour
         if (m_forceRefresh || 
             m_swapHandedness != m_lastSwapHandedness ||
             m_swapFaceWinding != m_lastSwapFaceWinding ||
+            m_submeshPerUVTile != m_lastSubmeshPerUVTile ||
             m_normalsMode != m_lastNormalsMode ||
             m_tangentsMode != m_lastTangentsMode ||
             Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
@@ -177,6 +181,7 @@ public class AlembicStream : MonoBehaviour
         m_lastAbcTime = abcTime;
         m_lastSwapHandedness = m_swapHandedness;
         m_lastSwapFaceWinding = m_swapFaceWinding;
+        m_lastSubmeshPerUVTile = m_submeshPerUVTile;
         m_lastNormalsMode = m_normalsMode;
         m_lastTangentsMode = m_tangentsMode;
         m_lastAspectRatio = aspectRatio;

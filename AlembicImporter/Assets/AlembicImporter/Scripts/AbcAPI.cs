@@ -87,6 +87,7 @@ public class AbcAPI
         [MarshalAs(UnmanagedType.U1)] public bool forceUpdate;
         [MarshalAs(UnmanagedType.U1)] public bool useThreads;
         [MarshalAs(UnmanagedType.U4)] public int cacheSamples;
+        [MarshalAs(UnmanagedType.U1)] public bool submeshPerUVTile;
 
         public void SetDefaults()
         {
@@ -99,6 +100,7 @@ public class AbcAPI
             forceUpdate = false;
             useThreads = true;
             cacheSamples = 0;
+            submeshPerUVTile = true;
         }
     }
 
