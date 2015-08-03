@@ -55,12 +55,16 @@ public abstract class AlembicElement : MonoBehaviour
 #if UNITY_EDITOR
             if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
+                AbcDestroy();
+
                 if (m_abcStream != null)
                 {
                     m_abcStream.AbcRemoveElement(this);
                 }
             }
 #else
+            AbcDestroy();
+            
             if (m_abcStream != null)
             {
                 m_abcStream.AbcRemoveElement(this);
@@ -83,6 +87,10 @@ public abstract class AlembicElement : MonoBehaviour
 
         AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
         AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
+    }
+
+    public virtual void AbcDestroy()
+    {
     }
 
     public AbcAPI.aiSample AbcGetSample()

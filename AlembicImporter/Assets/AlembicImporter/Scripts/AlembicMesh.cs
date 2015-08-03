@@ -121,6 +121,10 @@ public class AlembicMesh : AlembicElement
         m_freshSetup = true;
     }
     
+    public override void AbcDestroy()
+    {
+    }
+
     public override void AbcGetConfig(ref AbcAPI.aiConfig config)
     {
         if (m_normalsMode != AbcAPI.aiNormalsModeOverride.InheritStreamSetting)
@@ -376,21 +380,27 @@ public class AlembicMesh : AlembicElement
 
                     MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
                     
-                    int nmat = renderer.sharedMaterials.Length;
+                    Material[] currentMaterials = renderer.sharedMaterials;
+
+                    int nmat = currentMaterials.Length;
 
                     if (nmat != split.submeshCount)
                     {
                         Material[] materials = new Material[split.submeshCount];
                         
-                        for (int i=0; i<nmat; ++i)
+                        int copyTo = (nmat < split.submeshCount ? nmat : split.submeshCount);
+
+                        for (int i=0; i<copyTo; ++i)
                         {
-                            materials[i] = renderer.sharedMaterials[i];
+                            materials[i] = currentMaterials[i];
                         }
 
-                        for (int i=nmat; i<split.submeshCount; ++i)
+                        for (int i=copyTo; i<split.submeshCount; ++i)
                         {
-                            materials[i] = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-                            materials[i].name = "Material_" + Convert.ToString(i);
+                            Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+                            material.name = "Material_" + Convert.ToString(i);
+                            
+                            materials[i] = material;
                         }
 
                         renderer.sharedMaterials = materials;
@@ -430,7 +440,7 @@ public class AlembicMesh : AlembicElement
         AbcClean();
     }
 
-    static Mesh AddMeshComponents(AbcAPI.aiObject abc, GameObject gameObject)
+    Mesh AddMeshComponents(AbcAPI.aiObject abc, GameObject gameObject)
     {
         Mesh mesh = null;
         
@@ -455,8 +465,10 @@ public class AlembicMesh : AlembicElement
                 renderer = gameObject.AddComponent<MeshRenderer>();
             }
             
-            renderer.sharedMaterial = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-            renderer.sharedMaterial.name = "Material_0";
+            Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+            material.name = "Material_0";
+
+            renderer.sharedMaterial = material;
         }
         else
         {

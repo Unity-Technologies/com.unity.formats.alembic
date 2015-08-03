@@ -143,7 +143,7 @@ public:
     void updateSplits();
 
     int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets);
+    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile);
     int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return submeshes.begin(); }

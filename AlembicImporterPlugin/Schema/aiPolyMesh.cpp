@@ -136,7 +136,8 @@ int Topology::getVertexBufferLength(int splitIndex) const
 }
 
 int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
-                               const aiFacesets &inFacesets)
+                               const aiFacesets &inFacesets,
+                               bool submeshPerUVTile)
 {
     DebugLog("Topology::prepareSubmeshes()");
     
@@ -184,7 +185,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
     else
     {
         // don't even fill faceset if we have no UVs to tile split the mesh
-        if (uvs.valid())
+        if (uvs.valid() && submeshPerUVTile)
         {
             facesets.resize(1);
             
@@ -222,7 +223,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         const Util::uint32_t *uvIndices = 0;
         const Abc::V2f *uvValues = 0;
 
-        if (uvs.valid())
+        if (uvs.valid() && submeshPerUVTile)
         {
             uvValues = uvs.getVals()->get();
             uvIndices = uvs.getIndices()->get();
@@ -663,7 +664,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 {
     DebugLog("aiPolyMeshSample::updateConfig()");
     
-    topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding);
+    topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding || config.submeshPerUVTile != m_config.submeshPerUVTile);
     dataChanged = (config.swapHandedness != m_config.swapHandedness);
 
     bool smoothNormalsRequired = (config.normalsMode == NM_AlwaysCompute ||
@@ -1133,7 +1134,7 @@ int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
 {
     DebugLog("aiPolyMeshSample::prepateSubmeshes()");
     
-    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets);
+    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, m_config.submeshPerUVTile);
 
     m_curSubmesh = m_topology->submeshBegin();
 
