@@ -4,12 +4,12 @@
 #include "aiThreadPool.h"
 
 class aiObject;
-const int aiMagicCtx = 0x00585443; // "CTX"
-
 
 class aiContext
 {
 public:
+    typedef std::function<void ()> task_t;
+
     static aiContext* create(int uid);
     static void destroy(aiContext* ctx);
 
@@ -18,11 +18,19 @@ public:
     ~aiContext();
     
     bool load(const char *path);
+    
+    const aiConfig& getConfig() const;
+    void setConfig(const aiConfig &config);
+
     aiObject* getTopObject();
+    void destroyObject(aiObject *obj);
+
     float getStartTime() const;
     float getEndTime() const;
 
-    void runTask(const std::function<void ()> &task);
+    void updateSamples(float time);
+
+    void enqueueTask(const task_t &task);
     void waitTasks();
 
     Abc::IArchive getArchive() const;
@@ -33,17 +41,18 @@ private:
     std::string normalizePath(const char *path) const;
     void reset();
     void gatherNodesRecursive(aiObject *n);
+    bool destroyObject(aiObject *obj,
+                       std::vector<aiObject*>::iterator searchFrom,
+                       std::vector<aiObject*>::iterator &next);
 
 private:
-#ifdef aiDebug
-    int m_magic;
-#endif // aiDebug
     std::string m_path;
     Abc::IArchive m_archive;
     std::vector<aiObject*> m_nodes;
     aiTaskGroup m_tasks;
     double m_timeRange[2];
     int m_uid;
+    aiConfig m_config;
 };
 
 

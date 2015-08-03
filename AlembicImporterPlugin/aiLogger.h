@@ -21,6 +21,16 @@ public:
       }
    }
    
+   static inline void Indent(int level=1)
+   {
+      msInstance.indent(level);
+   }
+
+   static inline void Unindent(int level=1)
+   {
+      msInstance.unindent(level);
+   }
+
    static inline void Warning(const char *fmt, ...)
    {
       if (!msInstance.isOpened())
@@ -66,6 +76,21 @@ public:
       va_end(args);
    }
    
+   static inline void Debug(const char *fmt, ...)
+   {
+      if (!msInstance.isOpened())
+      {
+         return;
+      }
+      
+      va_list args;
+      va_start(args, fmt);
+      
+      msInstance.debug(fmt, args);
+      
+      va_end(args);
+   }
+   
 private:
    
    aiLogger();
@@ -76,14 +101,24 @@ private:
    
    bool isOpened() const;
    
+   void indent(int level);
+   void unindent(int level);
+
    void warning(const char *fmt, va_list args);
    void error(const char *fmt, va_list args);
    void info(const char *fmt, va_list args);
+   void debug(const char *fmt, va_list args);
 
 private:
    
+   void _openDebug();
+   void _close();
+   void _indent();
+   
    std::string mPath;
    FILE *mFile;
+   int mIndentLevel;
+   std::string mIndentString;
 
 private:
    
