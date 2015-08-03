@@ -45,7 +45,7 @@ public class AlembicCamera : AlembicElement
     {
         if (AbcIsDirty())
         {
-            m_trans.parent.forward = -m_trans.parent.forward;
+            m_trans.forward = -m_trans.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
             m_camera.nearClipPlane = m_abcData.nearClippingPlane;
             m_camera.farClipPlane = m_abcData.farClippingPlane;
