@@ -403,7 +403,7 @@ bool aiContext::load(const char *inPath)
         try
         {
             DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
-            m_archive = Abc::IArchive(AbcCoreOgawa::ReadArchive(), path);
+            m_archive = Abc::IArchive(AbcCoreOgawa::ReadArchive(std::thread::hardware_concurrency()), path);
         }
         catch (Alembic::Util::Exception e)
         {
