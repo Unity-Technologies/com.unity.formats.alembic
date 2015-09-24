@@ -17,6 +17,7 @@ public class AlembicMaterial : MonoBehaviour
         public List<int> faces;
     }
 
+    [Serializable]
     public class Facesets
     {
         public int[] faceCounts;
@@ -25,7 +26,8 @@ public class AlembicMaterial : MonoBehaviour
 
     bool dirty = false;
     List<Material> materials = new List<Material>();
-    Facesets facesetsCache = new Facesets { faceCounts = new int[0], faceIndices = new int[0] };
+    // Need to keep those around when scene is serialized
+    [HideInInspector] public Facesets facesetsCache = new Facesets { faceCounts = new int[0], faceIndices = new int[0] };
     
     void Start()
     {
