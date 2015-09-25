@@ -596,8 +596,8 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *i
                 dUV2 = UV2 - UV0;
 
                 float r = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
-                
-                if (r < -0.000001f || 0.000001f < r)
+
+                if (r != 0.0f)
                 {
                     r = 1.0f / r;
                     
@@ -644,12 +644,12 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *i
         const Abc::V3f &Nv = inN[tanNidxs[i]];
         Abc::V3f &Tv = tan1[i];
         Abc::V3f &Bv = tan2[i];
-        
+
         // Normalize Tv and Bv?
         
         T = Tv - Nv * Tv.dot(Nv);
         T.normalize();
-        
+
         m_tangents[i].x = T.x;
         m_tangents[i].y = T.y;
         m_tangents[i].z = T.z;
