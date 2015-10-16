@@ -24,9 +24,12 @@ lib_dirs = []
 libs = []
 embed_libs = []
 customs = []
-install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs"),
-                 "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs"),
-                 "unity/AlembicImporter/Shaders": ["AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader"]}
+install_files = {"unity/AlembicImporter": glob.glob("AlembicImporter/Assets/AlembicImporter/*.meta"),
+                 "unity/AlembicImporter/Plugins": glob.glob("AlembicImporter/Assets/AlembicImporter/Plugins/*.meta"),
+                 "unity/AlembicImporter/Plugins/x86_64": glob.glob("AlembicImporter/Assets/AlembicImporter/Plugins/x86_64/*.meta"),
+                 "unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs*"),
+                 "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs*"),
+                 "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader*")}
 sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
 sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
 
@@ -39,10 +42,10 @@ if excons.GetArgument("debug-log", 0, int) != 0:
 if excons.GetArgument("texture-mesh", 0, int) != 0:
   defines.append("aiSupportTextureMesh")
   sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
-  install_files["unity/AlembicImporter/Meshes"] = ["AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset"]
-  install_files["unity/AlembicImporter/Materials"] = ["AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat"]
-  install_files["unity/AlembicImporter/Shaders"].extend(["AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc",
-                                                         "AlembicImporter/Assets/AlembicImporter/Shaders/AIStandard.shader"])
+  install_files["unity/AlembicImporter/Meshes"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset*")
+  install_files["unity/AlembicImporter/Materials"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat*")
+  install_files["unity/AlembicImporter/Shaders"].extend(glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc*") +
+                                                        glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AIStandard.shader*"))
   
   if excons.GetArgument("opengl", 1, int) != 0:
     defines.extend(["aiSupportOpenGL", "aiDontForceStaticGLEW"])
