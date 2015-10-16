@@ -809,7 +809,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
     size_t o = split.indexOffset;
     
     // reset unused data arrays
-    
+
     if (data.normals && !copyNormals)
     {
         aiLogger::Info("%s: Reset normals", getSchema()->getObject()->getFullName());
@@ -827,6 +827,21 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
         aiLogger::Info("%s: Reset tangents", getSchema()->getObject()->getFullName());
         memset(data.tangents, 0, split.indicesCount * sizeof(Imath::V4f));
     }
+
+    abcV3 bbmin = positions[indices[o]];
+    abcV3 bbmax = bbmin;
+
+#define UPDATE_POSITIONS_AND_BOUNDS(srcIdx, dstIdx) \
+    abcV3 &cP = data.positions[dstIdx]; \
+    cP = positions[srcIdx]; \
+    cP.x *= xScale; \
+    if (cP.x < bbmin.x) bbmin.x = cP.x; \
+    else if (cP.x > bbmax.x) bbmax.x = cP.x; \
+    if (cP.y < bbmin.y) bbmin.y = cP.y; \
+    else if (cP.y > bbmax.y) bbmax.y = cP.y; \
+    if (cP.z < bbmin.z) bbmin.z = cP.z; \
+    else if (cP.z > bbmax.z) bbmax.z = cP.z
+
     
     // fill data arrays
 
@@ -852,9 +867,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                int v = indices[o];
-                                data.positions[k] = positions[v];
-                                data.positions[k].x *= xScale;
+                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                 data.normals[k] = normals[nIndices[o]];
                                 data.normals[k].x *= xScale;
                                 data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -870,8 +883,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                data.positions[k] = positions[indices[o]];
-                                data.positions[k].x *= xScale;
+                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                 data.normals[k] = normals[nIndices[o]];
                                 data.normals[k].x *= xScale;
                                 data.uvs[k] = uvs[uvIndices[o]];
@@ -886,9 +898,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            int v = indices[o];
-                            data.positions[k] = positions[v];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                             data.normals[k] = normals[nIndices[o]];
                             data.normals[k].x *= xScale;
                             data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -903,8 +913,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            data.positions[k] = positions[indices[o]];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                             data.normals[k] = normals[nIndices[o]];
                             data.normals[k].x *= xScale;
                         }
@@ -926,8 +935,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
                                 int v = indices[o];
-                                data.positions[k] = positions[v];
-                                data.positions[k].x *= xScale;
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                 data.normals[k] = normals[v];
                                 data.normals[k].x *= xScale;
                                 data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -944,8 +952,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
                                 int v = indices[o];
-                                data.positions[k] = positions[v];
-                                data.positions[k].x *= xScale;
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                 data.normals[k] = normals[v];
                                 data.normals[k].x *= xScale;
                                 data.uvs[k] = uvs[uvIndices[o]];
@@ -961,8 +968,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
                             int v = indices[o];
-                            data.positions[k] = positions[v];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
                             data.normals[k] = normals[v];
                             data.normals[k].x *= xScale;
                             data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -978,8 +984,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
                             int v = indices[o];
-                            data.positions[k] = positions[v];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
                             data.normals[k] = normals[v];
                             data.normals[k].x *= xScale;
                         }
@@ -1002,8 +1007,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
                             int v = indices[o];
-                            data.positions[k] = positions[v];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
                             data.normals[k] = m_smoothNormals[v];
                             data.normals[k].x *= xScale;
                             data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -1020,8 +1024,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
                             int v = indices[o];
-                            data.positions[k] = positions[v];
-                            data.positions[k].x *= xScale;
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
                             data.normals[k] = m_smoothNormals[v];
                             data.normals[k].x *= xScale;
                             data.uvs[k] = uvs[uvIndices[o]];
@@ -1037,8 +1040,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
                         int v = indices[o];
-                        data.positions[k] = positions[v];
-                        data.positions[k].x *= xScale;
+                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
                         data.normals[k] = m_smoothNormals[v];
                         data.normals[k].x *= xScale;
                         data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
@@ -1054,8 +1056,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
                         int v = indices[o];
-                        data.positions[k] = positions[v];
-                        data.positions[k].x *= xScale;
+                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
                         data.normals[k] = m_smoothNormals[v];
                         data.normals[k].x *= xScale;
                     }
@@ -1077,9 +1078,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        int v = indices[o];
-                        data.positions[k] = positions[v];
-                        data.positions[k].x *= xScale;
+                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                         data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
                         data.tangents[k].x *= xScale;
                         data.uvs[k] = uvs[uvIndices[o]];
@@ -1093,8 +1092,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        data.positions[k] = positions[indices[o]];
-                        data.positions[k].x *= xScale;
+                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                         data.uvs[k] = uvs[uvIndices[o]];
                     }
                 }
@@ -1107,9 +1105,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
-                    int v = indices[o];
-                    data.positions[k] = positions[v];
-                    data.positions[k].x *= xScale;
+                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                     data.tangents[k] = m_tangents[m_topology->tangentIndices[o]];
                     data.tangents[k].x *= xScale;
                 }
@@ -1122,12 +1118,16 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
-                    data.positions[k] = positions[indices[o]];
-                    data.positions[k].x *= xScale;
+                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                 }
             }
         }
     }
+
+#undef UPDATE_POSITIONS_AND_BOUNDS
+
+    data.center = 0.5f * (bbmin + bbmax);
+    data.size = bbmax - bbmin;
 }
 
 int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)

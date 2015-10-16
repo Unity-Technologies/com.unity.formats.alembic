@@ -131,6 +131,8 @@ public class AbcAPI
         public IntPtr normals;
         public IntPtr uvs;
         public IntPtr tangents;
+        public Vector3 center;
+        public Vector3 size;
     }
 
     public struct aiSubmeshSummary

@@ -163,12 +163,16 @@ struct aiMeshSampleData
     abcV3 *normals;
     abcV2 *uvs;
     abcV4 *tangents;
+    abcV3 center;
+    abcV3 size;
 
     inline aiMeshSampleData()
         : positions(0)
         , normals(0)
         , uvs(0)
         , tangents(0)
+        , center(0.0f, 0.0f, 0.0f)
+        , size(0.0f, 0.0f, 0.0f)
     {
     }
 

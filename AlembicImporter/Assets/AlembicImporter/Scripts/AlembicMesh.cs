@@ -22,6 +22,9 @@ public class AlembicMesh : AlembicElement
         public bool clear;
         public int submeshCount;
         public bool active;
+
+        public Vector3 center;
+        public Vector3 size;
     }
 
     [Serializable]
@@ -68,7 +71,9 @@ public class AlembicMesh : AlembicElement
                         host = null,
                         clear = true,
                         submeshCount = 0,
-                        active = true
+                        active = true,
+                        center = Vector3.zero,
+                        size = Vector3.zero
                     };
 
                     m_splits.Add(split);
@@ -93,7 +98,9 @@ public class AlembicMesh : AlembicElement
                     host = m_trans.gameObject,
                     clear = true,
                     submeshCount = 0,
-                    active = true
+                    active = true,
+                    center = Vector3.zero,
+                    size = Vector3.zero
                 };
 
                 m_splits.Add(split);
@@ -232,6 +239,9 @@ public class AlembicMesh : AlembicElement
             }
 
             AbcAPI.aiPolyMeshFillVertexBuffer(sample, s, ref vertexData);
+
+            split.center = vertexData.center;
+            split.size = vertexData.size;
         }
 
         if (topologyChanged)
@@ -373,6 +383,8 @@ public class AlembicMesh : AlembicElement
                 split.mesh.normals = split.normalCache;
                 split.mesh.tangents = split.tangentCache;
                 split.mesh.uv = split.uvCache;
+                // update the bounds
+                split.mesh.bounds = new Bounds(split.center, split.size);
 
                 if (split.clear)
                 {
