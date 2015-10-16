@@ -13,9 +13,11 @@ using UnityEditor;
 public class AlembicCamera : AlembicElement
 {
     public AbcAPI.aiAspectRatioModeOverride m_aspectRatioMode = AbcAPI.aiAspectRatioModeOverride.InheritStreamSetting;
+    public bool m_ignoreClippingPlanes = false;
 
     Camera m_camera;
     AbcAPI.aiCameraData m_abcData;
+    bool m_lastIgnoreClippingPlanes = false;
 
     public override void AbcSetup(AlembicStream abcStream,
                                   AbcAPI.aiObject abcObj,
@@ -43,16 +45,22 @@ public class AlembicCamera : AlembicElement
 
     public override void AbcUpdate()
     {
-        if (AbcIsDirty())
+        if (AbcIsDirty() || m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
         {
             m_trans.forward = -m_trans.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
-            m_camera.nearClipPlane = m_abcData.nearClippingPlane;
-            m_camera.farClipPlane = m_abcData.farClippingPlane;
+
+            if (!m_ignoreClippingPlanes)
+            {
+                m_camera.nearClipPlane = m_abcData.nearClippingPlane;
+                m_camera.farClipPlane = m_abcData.farClippingPlane;
+            }
             
             // no use for focusDistance and focalLength yet (could be usefull for DoF component)
             
             AbcClean();
+
+            m_lastIgnoreClippingPlanes = m_ignoreClippingPlanes;
         }
     }
 }
