@@ -24,10 +24,7 @@ lib_dirs = []
 libs = []
 embed_libs = []
 customs = []
-install_files = {"unity/AlembicImporter": glob.glob("AlembicImporter/Assets/AlembicImporter/*.meta"),
-                 "unity/AlembicImporter/Plugins": glob.glob("AlembicImporter/Assets/AlembicImporter/Plugins/*.meta"),
-                 "unity/AlembicImporter/Plugins/x86_64": glob.glob("AlembicImporter/Assets/AlembicImporter/Plugins/x86_64/*.meta"),
-                 "unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs*"),
+install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs*"),
                  "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs*"),
                  "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader*")}
 sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
