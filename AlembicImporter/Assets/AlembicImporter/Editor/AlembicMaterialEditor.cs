@@ -65,7 +65,7 @@ class AlembicMaterialEditor : EditorWindow
             string startFolder = (xmlPath.Length > 0 ? Path.GetDirectoryName(xmlPath) : Application.dataPath);
             xmlPath = MakeDataRelativePath(EditorUtility.OpenFilePanel("Select Material Assignment File", startFolder, "xml"));
 
-            if (xmlPath.Length > 0 && materialFolder.Length == 0)
+            if (xmlPath.Length > 0)
             {
                 materialFolder = Path.GetDirectoryName(xmlPath);
             }
