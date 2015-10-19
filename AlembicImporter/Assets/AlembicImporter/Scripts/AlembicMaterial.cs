@@ -350,7 +350,7 @@ public class AlembicMaterial : MonoBehaviour
                 
                 if (target == null)
                 {
-                    Debug.LogWarning("Could not find node: " + path);
+                    Debug.Log("Could not find node: " + path);
                     continue;
                 }
 
