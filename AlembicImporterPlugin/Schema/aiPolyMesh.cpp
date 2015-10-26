@@ -653,7 +653,9 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *i
         m_tangents[i].x = T.x;
         m_tangents[i].y = T.y;
         m_tangents[i].z = T.z;
-        m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f ? -1.0f : 1.0f);
+        m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f
+                            ? (m_config.swapHandedness ?  1.0 : -1.0)
+                            : (m_config.swapHandedness ? -1.0 :  1.0));
     }
 
     delete[] tanNidxs;
