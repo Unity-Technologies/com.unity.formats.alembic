@@ -286,18 +286,18 @@ public class AbcAPI
         ImportImpl(path, p);
     }
 
-    static GameObject ImportAbc(string path)
+    public static GameObject ImportAbc(string path)
     {
         var relPath = MakeRelativePath(path);
         ImportParams p = new ImportParams();
-        return ImportImpl(path, p);
+        return ImportImpl(relPath, p);
     }
 
     static GameObject ImportImpl(string path, ImportParams p)
     {
         if (path == null || path == "")
         {
-            return;
+            return null;
         }
 
         string baseName = System.IO.Path.GetFileNameWithoutExtension(path);
