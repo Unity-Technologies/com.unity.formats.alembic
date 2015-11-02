@@ -286,7 +286,14 @@ public class AbcAPI
         ImportImpl(path, p);
     }
 
-    static void ImportImpl(string path, ImportParams p)
+    static GameObject ImportAbc(string path)
+    {
+        var relPath = MakeRelativePath(path);
+        ImportParams p = new ImportParams();
+        return ImportImpl(path, p);
+    }
+
+    static GameObject ImportImpl(string path, ImportParams p)
     {
         if (path == null || path == "")
         {
@@ -311,6 +318,8 @@ public class AbcAPI
         abcStream.m_swapHandedness = p.swapHandedness;
         abcStream.m_swapFaceWinding = p.swapFaceWinding;
         abcStream.AbcLoad(true);
+
+        return root;
     }
 
 #endif
