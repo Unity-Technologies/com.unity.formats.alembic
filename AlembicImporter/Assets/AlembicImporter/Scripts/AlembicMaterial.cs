@@ -47,7 +47,7 @@ public class AlembicMaterial : MonoBehaviour
                 if (abcmesh.m_submeshes.Count < materials.Count)
                 {
                     // should have at least materials.Count submeshes
-                    Debug.Log("Not enough submeshes for all assigned materials.");
+                    Debug.Log("\"" + abcmesh.name + "\": Not enough submeshes for all assigned materials. (" + materials.Count + " material(s) for " + abcmesh.m_submeshes.Count + " submesh(es))");
                     return;
                 }
 
@@ -350,7 +350,7 @@ public class AlembicMaterial : MonoBehaviour
                 
                 if (target == null)
                 {
-                    Debug.Log("Could not find node: " + path);
+                    // Debug.Log("Could not find node: " + path);
                     continue;
                 }
 
@@ -453,6 +453,7 @@ public class AlembicMaterial : MonoBehaviour
         if (abcstream != null)
         {
             abcstream.m_forceRefresh = true;
+            abcstream.SendMessage("AbcUpdate", abcstream.m_time, SendMessageOptions.DontRequireReceiver);
         }
     }
 
