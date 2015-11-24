@@ -790,7 +790,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
 {
     DebugLog("aiPolyMeshSample::fillVertexBuffer(splitIndex=%d)", splitIndex);
     
-    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->splits.size())
+    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->splits.size() || m_topology->splits[splitIndex].indicesCount == 0)
     {
         return;
     }
