@@ -305,16 +305,22 @@ public class AlembicMaterial : MonoBehaviour
   
     static Material GetMaterial(string name, string matfolder)
     {
+        // FindAssets will return all shaders that contains name in a case insensitive way
         string[] guids = AssetDatabase.FindAssets(name + " t:material", new string[1] { matfolder });
 
-        if (guids.Length == 1)
+        foreach (string guid in guids)
         {
-            return AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(Material)) as Material;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            
+            Material mat = AssetDatabase.LoadAssetAtPath(path, typeof(Material)) as Material;
+            
+            if (mat.name == name)
+            {
+                return mat;
+            }
         }
-        else
-        {
-            return null;
-        }
+        
+        return null;
     }
 
     public static void Import(string xmlPath, GameObject root, string materialFolder)
