@@ -1,29 +1,19 @@
-﻿#ifndef aiCamera_h
+#ifndef aiCamera_h
 #define aiCamera_h
-
-
-struct aiCameraData
-{
-    float near_clipping_plane;
-    float far_clipping_plane;
-    float field_of_view;
-    float focus_distance;
-    float focal_length;
-};
-
-
 
 class aiCameraSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiCameraSample(aiCamera *schema, float time);
-    void getParams(aiCameraData &o_params);
+    aiCameraSample(aiCamera *schema);
+    
+    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
+    void getData(aiCameraData &outData);
+    
 public:
     AbcGeom::CameraSample m_sample;
 };
-
 
 
 struct aiCameraTraits
@@ -32,16 +22,15 @@ struct aiCameraTraits
     typedef AbcGeom::ICameraSchema AbcSchemaT;
 };
 
+
 class aiCamera : public aiTSchema<aiCameraTraits>
 {
 typedef aiTSchema<aiCameraTraits> super;
 public:
     aiCamera(aiObject *obj);
-    Sample* readSample(float time) override;
-    void debugDump() const override;
 
-private:
-    AbcGeom::ICameraSchema m_schema;
+    Sample* newSample();
+    Sample* readSample(float time, bool &topologyChanged) override;
 };
 
-#endif // aiCamera_h
+#endif

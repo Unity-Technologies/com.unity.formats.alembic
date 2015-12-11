@@ -3,62 +3,56 @@
 
 #include "aiThreadPool.h"
 
-typedef std::shared_ptr<Abc::IArchive> abcArchivePtr;
-
 class aiObject;
-
-
-struct aiImportConfig
-{
-    uint8_t triangulate;
-    uint8_t revert_x;
-    uint8_t revert_face;
-
-    aiImportConfig() : triangulate(true), revert_x(true), revert_face(false) {}
-};
-
 
 class aiContext
 {
 public:
-    typedef std::function<void()> task_t;
+    typedef std::function<void ()> task_t;
 
-    static aiContext* create();
+    static aiContext* create(int uid);
     static void destroy(aiContext* ctx);
 
 public:
-    aiContext();
+    aiContext(int uid=-1);
     ~aiContext();
+    
     bool load(const char *path);
+    
+    const aiConfig& getConfig() const;
+    void setConfig(const aiConfig &config);
+
     aiObject* getTopObject();
-    const aiImportConfig& getImportConfig() const;
-    void setImportConfig(const aiImportConfig &conf);
-    void setTimeRangeToKeepSamples(float time, float range);
+    void destroyObject(aiObject *obj);
 
     float getStartTime() const;
     float getEndTime() const;
 
     void updateSamples(float time);
-    void updateSamplesBegin(float time);
-    void updateSamplesEnd();
-    void erasePastSamples(float time, float range_keep);
 
     void enqueueTask(const task_t &task);
     void waitTasks();
 
-    void debugDump() const;
+    Abc::IArchive getArchive() const;
+    const std::string& getPath() const;
+    int getUid() const;
 
 private:
+    std::string normalizePath(const char *path) const;
+    void reset();
     void gatherNodesRecursive(aiObject *n);
+    bool destroyObject(aiObject *obj,
+                       std::vector<aiObject*>::iterator searchFrom,
+                       std::vector<aiObject*>::iterator &next);
 
 private:
-    abcArchivePtr m_archive;
+    std::string m_path;
+    Abc::IArchive m_archive;
     std::vector<aiObject*> m_nodes;
-    std::tuple<float, float> m_time_range_to_keep_samples;
-
-    aiImportConfig m_iconfig;
     aiTaskGroup m_tasks;
-    double m_time_range[2];
+    double m_timeRange[2];
+    int m_uid;
+    aiConfig m_config;
 };
 
 

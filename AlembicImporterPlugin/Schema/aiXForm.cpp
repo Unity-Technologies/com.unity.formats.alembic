@@ -1,38 +1,51 @@
 #include "pch.h"
 #include "AlembicImporter.h"
-#include "aiSchema.h"
-#include "aiObject.h"
+#include "aiLogger.h"
 #include "aiContext.h"
+#include "aiObject.h"
+#include "aiSchema.h"
+#include "aiCamera.h"
+#include "aiPolyMesh.h"
 #include "aiXForm.h"
 
-#define aiPI 3.14159265f
 
-
-aiXFormSample::aiXFormSample(aiXForm *xf, float time)
-    : super(xf, time)
+aiXFormSample::aiXFormSample(aiXForm *schema)
+    : super(schema)
 {
 }
 
-void aiXFormSample::getData(aiXFormData &o_data) const
+void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
 {
-    o_data.inherits = m_sample.getInheritsXforms();
-    o_data.translation = m_sample.getTranslation();
-    o_data.scale = abcV3(m_sample.getScale());
+    DebugLog("aiXFormSample::updateConfig()");
+    
+    topoChanged = false;
+    dataChanged = (config.swapHandedness != m_config.swapHandedness);
+    m_config = config;
+}
 
+void aiXFormSample::getData(aiXFormData &outData) const
+{
+    DebugLog("aiXFormSample::getData()");
+    
+    abcV3 trans = m_sample.getTranslation();
     abcV3 axis = m_sample.getAxis();
     float angle = m_sample.getAngle() * (aiPI / 180.0f);
 
-    if (m_schema->getImportConfig().revert_x) {
-        o_data.translation.x *= -1.0f;
+    if (m_config.swapHandedness)
+    {
+        trans.x *= -1.0f;
         axis.x *= -1.0f;
         angle *= -1.0f;
     }
 
-    o_data.rotation = abcV4(
-        axis.x * std::sin(angle * 0.5f),
-        axis.y * std::sin(angle * 0.5f),
-        axis.z * std::sin(angle * 0.5f),
-        std::cos(angle * 0.5f) );
+    outData.inherits = m_sample.getInheritsXforms();
+    outData.translation = trans;
+    outData.scale = abcV3(m_sample.getScale());
+    outData.rotation = abcV4(axis.x * std::sin(angle * 0.5f),
+                             axis.y * std::sin(angle * 0.5f),
+                             axis.z * std::sin(angle * 0.5f),
+                             std::cos(angle * 0.5f) );
+
 }
 
 
@@ -40,16 +53,30 @@ void aiXFormSample::getData(aiXFormData &o_data) const
 aiXForm::aiXForm(aiObject *obj)
     : super(obj)
 {
-    AbcGeom::IXform xf(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = xf.getSchema();
 }
 
-aiXForm::Sample* aiXForm::readSample(float time)
+aiXForm::Sample* aiXForm::newSample()
 {
-    Sample *ret = new Sample(this, time);
-    m_schema.get(ret->m_sample, makeSampleSelector(time));
+    Sample *sample = getSample();
+    
+    if (!sample)
+    {
+        sample = new Sample(this);
+    }
+    
+    return sample;
+}
+
+aiXForm::Sample* aiXForm::readSample(float time, bool &topologyChanged)
+{
+    DebugLog("aiXForm::readSample(t=%f)", time);
+    
+    Sample *ret = newSample();
+
+    m_schema.get(ret->m_sample, MakeSampleSelector(time));
+
+    topologyChanged = false;
+
     return ret;
 }
-
-
 

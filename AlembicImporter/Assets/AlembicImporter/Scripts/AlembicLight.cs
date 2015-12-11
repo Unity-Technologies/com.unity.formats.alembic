@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -12,20 +12,32 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicLight : AlembicElement
 {
-    public override void AbcSetup(
-        AlembicStream abcstream,
-        AbcAPI.aiObject abcobj,
-        AbcAPI.aiSchema abcschema)
+    public override void AbcSetup(AlembicStream abcStream,
+                                  AbcAPI.aiObject abcObj,
+                                  AbcAPI.aiSchema abcSchema)
     {
-        base.AbcSetup(abcstream, abcobj, abcschema);
+        base.AbcSetup(abcStream, abcObj, abcSchema);
+
+        Light light = GetOrAddComponent<Light>();
+
+        // Disable component for now
+        light.enabled = false;
     }
 
+    // No config override
 
-    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
+        // ToDo
     }
 
     public override void AbcUpdate()
     {
+        if (AbcIsDirty())
+        {
+            // ToDo
+
+            AbcClean();
+        }
     }
 }

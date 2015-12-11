@@ -1,0 +1,6 @@
+[submodule "excons"]
+	path = excons
+	url = git://github.com/gatgui/excons.git
+[submodule "alembic"]
+	path = alembic
+	url = git://github.com/gatgui/alembic.git

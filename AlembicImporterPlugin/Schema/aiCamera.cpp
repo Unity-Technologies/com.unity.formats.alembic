@@ -1,41 +1,79 @@
 #include "pch.h"
 #include "AlembicImporter.h"
-#include "aiSchema.h"
-#include "aiObject.h"
+#include "aiLogger.h"
 #include "aiContext.h"
+#include "aiObject.h"
+#include "aiSchema.h"
 #include "aiCamera.h"
+#include "aiPolyMesh.h"
+#include "aiXForm.h"
 
 
-
-aiCameraSample::aiCameraSample(aiCamera *schema, float time)
-    : super(schema, time)
+aiCameraSample::aiCameraSample(aiCamera *schema)
+    : super(schema)
 {
 }
 
-void aiCameraSample::getParams(aiCameraData &o_params)
+void aiCameraSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
 {
-    o_params.near_clipping_plane = m_sample.getNearClippingPlane();
-    o_params.far_clipping_plane = m_sample.getFarClippingPlane();
-    o_params.field_of_view = m_sample.getFieldOfView();
-    o_params.focus_distance = m_sample.getFocusDistance() * 0.1f; // centimeter to meter
-    o_params.focal_length = m_sample.getFocalLength() * 0.01f; // milimeter to meter
+    DebugLog("aiCameraSample::updateConfig()");
+    
+    topoChanged = false;
+    dataChanged = (config.aspectRatio != m_config.aspectRatio);
+    
+    m_config = config;
+}
+
+void aiCameraSample::getData(aiCameraData &outData)
+{
+    DebugLog("aiCameraSample::getData()");
+    
+    // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
+    static float sRad2Deg = 180.0f / float(M_PI);
+
+    float verticalAperture = (float) m_sample.getVerticalAperture();
+    float focalLength = (float) m_sample.getFocalLength();
+
+    if (m_config.aspectRatio > 0.0f)
+    {
+        verticalAperture = (float) m_sample.getHorizontalAperture() / m_config.aspectRatio;
+    }
+
+    outData.nearClippingPlane = (float) m_sample.getNearClippingPlane();
+    outData.farClippingPlane = (float) m_sample.getFarClippingPlane();
+    // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
+    outData.fieldOfView = 2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
+    outData.focusDistance = (float) m_sample.getFocusDistance() * 0.1f; // centimeter to meter
+    outData.focalLength = focalLength * 0.01f; // milimeter to meter
 }
 
 
 aiCamera::aiCamera(aiObject *obj)
     : super(obj)
 {
-    AbcGeom::ICamera cam(obj->getAbcObject(), Abc::kWrapExisting);
-    m_schema = cam.getSchema();
 }
 
-aiCamera::Sample* aiCamera::readSample(float time)
+aiCamera::Sample* aiCamera::newSample()
 {
-    Sample *ret = new Sample(this, time);
-    m_schema.get(ret->m_sample, makeSampleSelector(time));
+    Sample *sample = getSample();
+    
+    if (!sample)
+    {
+        sample = new Sample(this);
+    }
+    
+    return sample;
+}
+
+aiCamera::Sample* aiCamera::readSample(float time, bool &topologyChanged)
+{
+    DebugLog("aiCamera::readSample(t=%f)", time);
+    
+    Sample *ret = newSample();
+    
+    m_schema.get(ret->m_sample, MakeSampleSelector(time));
+
+    topologyChanged = false;
+
     return ret;
-}
-
-void aiCamera::debugDump() const
-{
 }

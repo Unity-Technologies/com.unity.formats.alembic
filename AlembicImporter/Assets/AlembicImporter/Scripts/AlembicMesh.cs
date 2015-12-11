@@ -1,373 +1,492 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 [ExecuteInEditMode]
 public class AlembicMesh : AlembicElement
 {
     [Serializable]
-    public class Entry
+    public class Split
     {
-        public int[] buf_indices;
-        public Vector3[] buf_vertices;
-        public Vector3[] buf_normals;
-        public Vector2[] buf_uvs;
-        public Vector3[] buf_velocities;
+        public Vector3[] positionCache;
+        public Vector3[] normalCache;
+        public Vector2[] uvCache;
+        public Vector4[] tangentCache;
         public Mesh mesh;
-        public MeshRenderer renderer;
-        public MaterialPropertyBlock mpb;
         public GameObject host;
-        public bool update_index;
+
+        public bool clear;
+        public int submeshCount;
         public bool active;
+
+        public Vector3 center;
+        public Vector3 size;
     }
 
-    public class TextureMeshData
+    [Serializable]
+    public class Submesh
     {
-        public RenderTexture indices;
-        public RenderTexture vertices;
-        public RenderTexture normals;
-        public RenderTexture uvs;
-        public RenderTexture velocities;
+        public int[] indexCache;
+        public int facesetIndex;
+        public int splitIndex;
+        public int index;
+
+        public bool update;
     }
 
-    const int MeshTextureWidth = 1024;
+    public AbcAPI.aiFaceWindingOverride m_faceWinding = AbcAPI.aiFaceWindingOverride.InheritStreamSetting;
+    public AbcAPI.aiNormalsModeOverride m_normalsMode = AbcAPI.aiNormalsModeOverride.InheritStreamSetting;
+    public AbcAPI.aiTangentsModeOverride m_tangentsMode = AbcAPI.aiTangentsModeOverride.InheritStreamSetting;
+    public bool m_cacheTangentsSplits = true;
+    
+    [HideInInspector] public bool hasFacesets = false;
+    [HideInInspector] public List<Submesh> m_submeshes = new List<Submesh>();
+    [HideInInspector] public List<Split> m_splits = new List<Split>();
 
-    Transform m_trans;
-    public List<Entry> m_meshes = new List<Entry>();
-    TextureMeshData m_mtex;
-    AbcAPI.aiTextureMeshData m_abc_mtex = default(AbcAPI.aiTextureMeshData);
-    AbcAPI.aiPolyMeshSchemaSummary m_schema_summary;
-    AbcAPI.aiPolyMeshSampleSummary m_mesh_summary;
+    AbcAPI.aiMeshSummary m_summary;
+    AbcAPI.aiMeshSampleSummary m_sampleSummary;
+    bool m_freshSetup = false;
 
-    const int max_indices = 64998;
-    const int max_vertices = 65000;
-
-
-    public static RenderTexture CreateDataTexture(int num_data, int num_elements, RenderTextureFormat format)
+    void UpdateSplits(int numSplits)
     {
-        if (num_data == 0) { return null; }
-        int width = MeshTextureWidth * num_elements;
-        int height = AlembicUtils.ceildiv(num_data, MeshTextureWidth);
-        //Debug.Log("CreateDataTexture(): " + width + " x " + height + " " + format);
-        var r = new RenderTexture(width, height, 0, format);
-        r.filterMode = FilterMode.Point;
-        r.wrapMode = TextureWrapMode.Repeat;
-        r.enableRandomWrite = true;
-        r.Create();
-        return r;
-    }
+        Split split = null;
 
-    public override void AbcSetup(
-        AlembicStream abcstream,
-        AbcAPI.aiObject abcobj,
-        AbcAPI.aiSchema abcschema)
-    {
-        base.AbcSetup(abcstream, abcobj, abcschema);
-        m_trans = GetComponent<Transform>();
-
-        AbcAPI.aiPolyMeshGetSchemaSummary(abcschema, ref m_schema_summary);
-        int peak_index_count = (int)m_schema_summary.peak_index_count;
-        int peak_vertex_count = (int)m_schema_summary.peak_vertex_count;
-
-        if(GetComponent<MeshRenderer>()==null)
+        if (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || numSplits > 1)
         {
-            int num_mesh_objects = AlembicUtils.ceildiv(peak_index_count, max_indices);
-
-            AddMeshComponents(abcobj, m_trans, abcstream.m_data_type);
-            var entry = new AlembicMesh.Entry
+            for (int i=0; i<numSplits; ++i)
             {
-                host = m_trans.gameObject,
-                mesh = GetComponent<MeshFilter>().sharedMesh,
-                renderer = GetComponent<MeshRenderer>(),
-            };
-            m_meshes.Add(entry);
-#if UNITY_EDITOR
-            if (abcstream.m_data_type == AlembicStream.MeshDataType.Mesh)
-            {
-                GetComponent<MeshRenderer>().sharedMaterial = GetDefaultMaterial();
-            }
-            else if(abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
-            {
-                GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicStandard.mat");
-            }
-#endif
-
-            for (int i = 1; i < num_mesh_objects; ++i)
-            {
-                string name = "Submesh_" + i;
-
-                GameObject go = new GameObject();
-                Transform child = go.GetComponent<Transform>();
-                go.name = name;
-                child.parent = m_trans;
-                child.localPosition = Vector3.zero;
-                child.localEulerAngles = Vector3.zero;
-                child.localScale = Vector3.one;
-                Mesh mesh = AddMeshComponents(abcobj, child, m_abcstream.m_data_type);
-                mesh.name = name;
-                child.GetComponent<MeshRenderer>().sharedMaterial = GetComponent<MeshRenderer>().sharedMaterial;
-
-                entry = new Entry
+                if (i >= m_splits.Count)
                 {
-                    host = go,
-                    mesh = mesh,
-                    renderer = child.GetComponent<MeshRenderer>(),
-                };
-                m_meshes.Add(entry);
-            }
-        }
+                    split = new Split
+                    {
+                        positionCache = new Vector3[0],
+                        normalCache = new Vector3[0],
+                        uvCache = new Vector2[0],
+                        tangentCache = new Vector4[0],
+                        mesh = null,
+                        host = null,
+                        clear = true,
+                        submeshCount = 0,
+                        active = true,
+                        center = Vector3.zero,
+                        size = Vector3.zero
+                    };
 
-        if (abcstream.m_data_type == AlembicStream.MeshDataType.Mesh)
-        {
-            for (int i = 0; i < m_meshes.Count; ++i)
-            {
-                m_meshes[i].buf_indices = new int[0];
-                m_meshes[i].buf_vertices = new Vector3[0];
-                m_meshes[i].buf_normals = new Vector3[0];
-                m_meshes[i].buf_uvs = new Vector2[0];
-            }
-        }
-        else if (abcstream.m_data_type == AlembicStream.MeshDataType.Texture)
-        {
-            m_mtex = new TextureMeshData();
-            m_abc_mtex = new AbcAPI.aiTextureMeshData();
-            m_abc_mtex.tex_width = MeshTextureWidth;
-
-            m_mtex.indices = CreateDataTexture(peak_index_count, 1, RenderTextureFormat.RInt);
-            m_abc_mtex.tex_indices = m_mtex.indices.GetNativeTexturePtr();
-
-            m_mtex.vertices = CreateDataTexture(peak_vertex_count, 3, RenderTextureFormat.RFloat);
-            m_abc_mtex.tex_vertices = m_mtex.vertices.GetNativeTexturePtr();
-
-            if (m_schema_summary.has_normals != 0)
-            {
-                int normal_count = m_schema_summary.is_normals_indexed != 0 ? peak_vertex_count : peak_index_count;
-                m_mtex.normals = CreateDataTexture(normal_count, 3, RenderTextureFormat.RFloat);
-                m_abc_mtex.tex_normals = m_mtex.normals.GetNativeTexturePtr();
-            }
-            if (m_schema_summary.has_uvs != 0)
-            {
-                int uv_count = m_schema_summary.is_uvs_indexed != 0 ? peak_vertex_count : peak_index_count;
-                m_mtex.uvs = CreateDataTexture(uv_count, 2, RenderTextureFormat.RFloat);
-                m_abc_mtex.tex_uvs = m_mtex.uvs.GetNativeTexturePtr();
-            }
-            if (m_schema_summary.has_velocities != 0)
-            {
-                m_mtex.velocities = CreateDataTexture(peak_vertex_count, 3, RenderTextureFormat.RFloat);
-                m_abc_mtex.tex_velocities = m_mtex.velocities.GetNativeTexturePtr();
-            }
-
-            for (int i = 0; i < m_meshes.Count; ++i)
-            {
-                m_meshes[i].mpb = new MaterialPropertyBlock();
-                m_meshes[i].mpb.SetVector("_DrawData", Vector4.zero);
-
-                m_meshes[i].mpb.SetTexture("_Indices", m_mtex.indices);
-                m_meshes[i].mpb.SetTexture("_Vertices", m_mtex.vertices);
-                if (m_mtex.normals != null) { m_meshes[i].mpb.SetTexture("_Normals", m_mtex.normals); }
-                if (m_mtex.uvs != null) { m_meshes[i].mpb.SetTexture("_UVs", m_mtex.uvs); }
-                if (m_mtex.velocities != null) { m_meshes[i].mpb.SetTexture("_Velocities", m_mtex.velocities); }
-
-                m_meshes[i].renderer.SetPropertyBlock(m_meshes[i].mpb);
-            }
-        }
-    }
-
-
-    // called by loading thread
-    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
-    {
-        switch (m_abcstream.m_data_type)
-        {
-            case AlembicStream.MeshDataType.Texture:
-                AbcOnUpdateSample_Texture(sample);
-                break;
-            case AlembicStream.MeshDataType.Mesh:
-                AbcOnUpdateSample_Mesh(sample);
-                break;
-        }
-    }
-
-    // called by loading thread
-    void AbcOnUpdateSample_Texture(AbcAPI.aiSample sample)
-    {
-    }
-
-    // called by loading thread
-    void AbcOnUpdateSample_Mesh(AbcAPI.aiSample sample)
-    {
-        var schema = m_abcschema;
-        var smi_prev = default(AbcAPI.aiSplitedMeshInfo);
-        var smi = default(AbcAPI.aiSplitedMeshInfo);
-        AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_mesh_summary);
-
-        int nth_submesh = 0;
-        for (; ; )
-        {
-            smi_prev = smi;
-            smi = default(AbcAPI.aiSplitedMeshInfo);
-            bool is_end = AbcAPI.aiPolyMeshGetSplitedMeshInfo(sample, ref smi, ref smi_prev, max_vertices);
-
-            AlembicMesh.Entry entry;
-            if (nth_submesh < m_meshes.Count)
-            {
-                entry = m_meshes[nth_submesh];
-                entry.active = true;
-            }
-            else
-            {
-                Debug.Log("AlembicMesh: not enough submeshes!");
-                break;
-            }
-
-            entry.update_index = entry.buf_indices.Length == 0 ||
-                m_schema_summary.topology_variance == AbcAPI.aiTopologyVariance.Heterogeneous;
-
-            Array.Resize(ref entry.buf_vertices, (int)smi.vertex_count);
-            smi.dst_vertices = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_vertices, 0);
-
-            if (m_mesh_summary.has_normals != 0)
-            {
-                Array.Resize(ref entry.buf_normals, (int)smi.vertex_count);
-                smi.dst_normals = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_normals, 0);
-            }
-
-            if (entry.update_index)
-            {
-                if (m_mesh_summary.has_uvs != 0)
-                {
-                    Array.Resize(ref entry.buf_uvs, (int)smi.vertex_count);
-                    smi.dst_uvs = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_uvs, 0);
+                    m_splits.Add(split);
                 }
-
-                Array.Resize(ref entry.buf_indices, (int)smi.triangulated_index_count);
-                smi.dst_indices = Marshal.UnsafeAddrOfPinnedArrayElement(entry.buf_indices, 0);
-            }
-
-            AbcAPI.aiPolyMeshCopySplitedMesh(sample, ref smi);
-
-            ++nth_submesh;
-            if (is_end) { break; }
-        }
-
-        for (int i = nth_submesh + 1; i < m_meshes.Count; ++i)
-        {
-            m_meshes[i].active = false;
-        }
-    }
-
-
-
-    public override void AbcUpdate()
-    {
-        switch (m_abcstream.m_data_type)
-        {
-            case AlembicStream.MeshDataType.Texture:
-                AbcUpdate_Texture();
-                break;
-            case AlembicStream.MeshDataType.Mesh:
-                AbcUpdate_Mesh();
-                break;
-        }
-    }
-
-    void AbcUpdate_Texture()
-    {
-        AbcAPI.aiPolyMeshCopyToTexture(AbcAPI.aiSchemaGetSample(m_abcschema, m_abcstream.time_prev), ref m_abc_mtex);
-        for (int i = 0; i < m_meshes.Count; ++i)
-        {
-            //[0]: begin_index, [1]: index_count, [2]: vertex_count
-            var drawdata = new Vector4(max_indices * i, m_abc_mtex.index_count, m_abc_mtex.vertex_count, 0.0f);
-            m_meshes[i].mpb.SetVector("_DrawData", drawdata);
-            m_meshes[i].renderer.SetPropertyBlock(m_meshes[i].mpb);
-        }
-    }
-
-    void AbcUpdate_Mesh()
-    {
-        for (int i = 0; i < m_meshes.Count; ++i)
-        {
-            AlembicMesh.Entry entry = m_meshes[i];
-            entry.host.SetActive(entry.active);
-
-            if (entry.update_index)
-            {
-                entry.mesh.Clear();
-            }
-
-            entry.mesh.vertices = entry.buf_vertices;
-            if (m_mesh_summary.has_normals != 0) {
-                entry.mesh.normals = entry.buf_normals;
-            }
-            if (entry.update_index)
-            {
-                if (m_mesh_summary.has_uvs != 0)
+                else
                 {
-                    entry.mesh.uv = entry.buf_uvs;
+                    m_splits[i].active = true;
                 }
-                entry.mesh.SetIndices(entry.buf_indices, MeshTopology.Triangles, 0);
-                entry.update_index = false;
             }
-
-            // recalculate normals if needed
-            if (m_mesh_summary.has_normals == 0)
-            {
-                entry.mesh.RecalculateNormals();
-            }
-        }
-    }
-
-
-    static Mesh AddMeshComponents(AbcAPI.aiObject abc, Transform trans, AlembicStream.MeshDataType mdt)
-    {
-        Mesh mesh = null;
-
-        var mesh_filter = trans.GetComponent<MeshFilter>();
-        var mesh_renderer = trans.GetComponent<MeshRenderer>();
-        if (mesh_filter == null)
-        {
-            mesh_filter = trans.gameObject.AddComponent<MeshFilter>();
-        }
-        if (mesh_renderer == null)
-        {
-            trans.gameObject.AddComponent<MeshRenderer>();
-        }
-
-        if (mdt == AlembicStream.MeshDataType.Texture)
-        {
-#if UNITY_EDITOR
-            mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset");
-#endif
         }
         else
         {
-            mesh = new Mesh();
-            mesh.name = AbcAPI.aiGetName(abc);
-            mesh.MarkDynamic();
+            if (m_splits.Count == 0)
+            {
+                split = new Split
+                {
+                    positionCache = new Vector3[0],
+                    normalCache = new Vector3[0],
+                    uvCache = new Vector2[0],
+                    tangentCache = new Vector4[0],
+                    mesh = null,
+                    host = m_trans.gameObject,
+                    clear = true,
+                    submeshCount = 0,
+                    active = true,
+                    center = Vector3.zero,
+                    size = Vector3.zero
+                };
+
+                m_splits.Add(split);
+            }
+            else
+            {
+                m_splits[0].active = true;
+            }
         }
-        mesh_filter.sharedMesh = mesh;
+
+        for (int i=numSplits; i<m_splits.Count; ++i)
+        {
+            m_splits[i].active = false;
+        }
+    }
+
+    public override void AbcSetup(AlembicStream abcStream,
+                                  AbcAPI.aiObject abcObj,
+                                  AbcAPI.aiSchema abcSchema)
+    {
+        base.AbcSetup(abcStream, abcObj, abcSchema);
+
+        AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
+
+        m_freshSetup = true;
+    }
+    
+    public override void AbcDestroy()
+    {
+    }
+
+    public override void AbcGetConfig(ref AbcAPI.aiConfig config)
+    {
+        if (m_normalsMode != AbcAPI.aiNormalsModeOverride.InheritStreamSetting)
+        {
+            config.normalsMode = (AbcAPI.aiNormalsMode) m_normalsMode;
+        }
+
+        if (m_tangentsMode != AbcAPI.aiTangentsModeOverride.InheritStreamSetting)
+        {
+            config.tangentsMode = (AbcAPI.aiTangentsMode) m_tangentsMode;
+        }
+
+        if (m_faceWinding != AbcAPI.aiFaceWindingOverride.InheritStreamSetting)
+        {
+            config.swapFaceWinding = (m_faceWinding == AbcAPI.aiFaceWindingOverride.Swap);
+        }
+
+        config.cacheTangentsSplits = m_cacheTangentsSplits;
+
+        // if 'forceUpdate' is set true, even if alembic sample data do not change at all
+        // AbcSampleUpdated will still be called (topologyChanged will be false)
+
+        AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
+
+        config.forceUpdate = m_freshSetup || (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
+    }
+
+    public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+    {
+        AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
+
+        if (abcMaterials != null)
+        {
+            if (abcMaterials.HasFacesetsChanged())
+            {
+                AbcVerboseLog("AlembicMesh.AbcSampleUpdated: Facesets updated, force topology update");
+                topologyChanged = true;
+            }
+
+            hasFacesets = (abcMaterials.GetFacesetsCount() > 0);
+        }
+        else if (hasFacesets)
+        {
+            AbcVerboseLog("AlembicMesh.AbcSampleUpdated: Facesets cleared, force topology update");
+            topologyChanged = true;
+            hasFacesets = false;
+        }
+
+        if (m_freshSetup)
+        {
+            topologyChanged = true;
+
+            m_freshSetup = false;
+        }
+
+        AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary, topologyChanged);
+
+        AbcAPI.aiMeshSampleData vertexData = default(AbcAPI.aiMeshSampleData);
+
+        UpdateSplits(m_sampleSummary.splitCount);
+
+        for (int s=0; s<m_sampleSummary.splitCount; ++s)
+        {
+            Split split = m_splits[s];
+
+            split.clear = topologyChanged;
+            split.active = true;
+
+            int vertexCount = AbcAPI.aiPolyMeshGetVertexBufferLength(sample, s);
+
+            Array.Resize(ref split.positionCache, vertexCount);
+            vertexData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(split.positionCache, 0);
+
+            if (m_sampleSummary.hasNormals)
+            {
+                Array.Resize(ref split.normalCache, vertexCount);
+                vertexData.normals = Marshal.UnsafeAddrOfPinnedArrayElement(split.normalCache, 0);
+            }
+            else
+            {
+                Array.Resize(ref split.normalCache, 0);
+                vertexData.normals = (IntPtr)0;
+            }
+
+            if (m_sampleSummary.hasUVs)
+            {
+                Array.Resize(ref split.uvCache, vertexCount);
+                vertexData.uvs = Marshal.UnsafeAddrOfPinnedArrayElement(split.uvCache, 0);
+            }
+            else
+            {
+                Array.Resize(ref split.uvCache, 0);
+                vertexData.uvs = (IntPtr)0;
+            }
+
+            if (m_sampleSummary.hasTangents)
+            {
+                Array.Resize(ref split.tangentCache, vertexCount);
+                vertexData.tangents = Marshal.UnsafeAddrOfPinnedArrayElement(split.tangentCache, 0);
+            }
+            else
+            {
+                Array.Resize(ref split.tangentCache, 0);
+                vertexData.tangents = (IntPtr)0;
+            }
+
+            AbcAPI.aiPolyMeshFillVertexBuffer(sample, s, ref vertexData);
+
+            split.center = vertexData.center;
+            split.size = vertexData.size;
+        }
+
+        if (topologyChanged)
+        {
+            AbcAPI.aiFacesets facesets = default(AbcAPI.aiFacesets);
+            AbcAPI.aiSubmeshSummary submeshSummary = default(AbcAPI.aiSubmeshSummary);
+            AbcAPI.aiSubmeshData submeshData = default(AbcAPI.aiSubmeshData);
+
+            if (abcMaterials != null)
+            {
+                abcMaterials.GetFacesets(ref facesets);
+            }
+            
+            int numSubmeshes = AbcAPI.aiPolyMeshPrepareSubmeshes(sample, ref facesets);
+
+            if (m_submeshes.Count > numSubmeshes)
+            {
+                m_submeshes.RemoveRange(numSubmeshes, m_submeshes.Count - numSubmeshes);
+            }
+            
+            for (int s=0; s<m_sampleSummary.splitCount; ++s)
+            {
+                m_splits[s].submeshCount = AbcAPI.aiPolyMeshGetSplitSubmeshCount(sample, s);
+            }
+
+            while (AbcAPI.aiPolyMeshGetNextSubmesh(sample, ref submeshSummary))
+            {
+                if (submeshSummary.splitIndex >= m_splits.Count)
+                {
+                    Debug.Log("Invalid split index");
+                    continue;
+                }
+
+                Submesh submesh = null;
+
+                if (submeshSummary.index < m_submeshes.Count)
+                {
+                    submesh = m_submeshes[submeshSummary.index];
+                }
+                else
+                {
+                    submesh = new Submesh
+                    {
+                        indexCache = new int[0],
+                        facesetIndex = -1,
+                        splitIndex = -1,
+                        index = -1,
+                        update = true
+                    };
+
+                    m_submeshes.Add(submesh);
+                }
+
+                submesh.facesetIndex = submeshSummary.facesetIndex;
+                submesh.splitIndex = submeshSummary.splitIndex;
+                submesh.index = submeshSummary.splitSubmeshIndex;
+                submesh.update = true;
+
+                Array.Resize(ref submesh.indexCache, 3 * submeshSummary.triangleCount);
+
+                submeshData.indices = Marshal.UnsafeAddrOfPinnedArrayElement(submesh.indexCache, 0);
+
+                AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
+            }
+            
+            if (abcMaterials != null)
+            {
+                abcMaterials.AknowledgeFacesetsChanges();
+            }
+        }
+        else
+        {
+            for (int i=0; i<m_submeshes.Count; ++i)
+            {
+                m_submeshes[i].update = false;
+            }
+        }
+
+        AbcDirty();
+    }
+
+    public override void AbcUpdate()
+    {
+        if (!AbcIsDirty())
+        {
+            return;
+        }
+
+        bool useSubObjects = (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
+
+        for (int s=0; s<m_splits.Count; ++s)
+        {
+            Split split = m_splits[s];
+
+            if (split.active)
+            {
+                // Feshly created splits may not have their host set yet
+                if (split.host == null)
+                {
+                    if (useSubObjects)
+                    {
+                        string name = m_trans.gameObject.name + "_split_" + s;
+
+                        Transform trans = m_trans.FindChild(name);
+
+                        if (trans == null)
+                        {
+                            GameObject go = new GameObject();
+                            go.name = name;
+
+                            trans = go.GetComponent<Transform>();
+                            trans.parent = m_trans;
+                            trans.localPosition = Vector3.zero;
+                            trans.localEulerAngles = Vector3.zero;
+                            trans.localScale = Vector3.one;
+                        }
+
+                        split.host = trans.gameObject;
+                    }
+                    else
+                    {
+                        split.host = m_trans.gameObject;
+                    }
+                }
+
+                // Feshly created splits may not have their mesh set yet
+                if (split.mesh == null)
+                {
+                    split.mesh = AddMeshComponents(m_abcObj, split.host);
+                    split.mesh.name = split.host.name;
+                }
+
+                if (split.clear)
+                {
+                    split.mesh.Clear();
+                }
+
+                split.mesh.vertices = split.positionCache;
+                split.mesh.normals = split.normalCache;
+                split.mesh.tangents = split.tangentCache;
+                split.mesh.uv = split.uvCache;
+                // update the bounds
+                split.mesh.bounds = new Bounds(split.center, split.size);
+
+                if (split.clear)
+                {
+                    split.mesh.subMeshCount = split.submeshCount;
+
+                    MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
+                    
+                    Material[] currentMaterials = renderer.sharedMaterials;
+
+                    int nmat = currentMaterials.Length;
+
+                    if (nmat != split.submeshCount)
+                    {
+                        Material[] materials = new Material[split.submeshCount];
+                        
+                        int copyTo = (nmat < split.submeshCount ? nmat : split.submeshCount);
+
+                        for (int i=0; i<copyTo; ++i)
+                        {
+                            materials[i] = currentMaterials[i];
+                        }
+
+                        for (int i=copyTo; i<split.submeshCount; ++i)
+                        {
+                            Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+                            material.name = "Material_" + Convert.ToString(i);
+                            
+                            materials[i] = material;
+                        }
+
+                        renderer.sharedMaterials = materials;
+                    }
+                }
+
+                split.clear = false;
+
+                split.host.SetActive(true);
+            }
+            else
+            {
+                split.host.SetActive(false);
+            }
+        }
+
+        for (int s=0; s<m_submeshes.Count; ++s)
+        {
+            Submesh submesh = m_submeshes[s];
+
+            if (submesh.update)
+            {
+                m_splits[submesh.splitIndex].mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, submesh.index);
+
+                submesh.update = false;
+            }
+        }
+
+        if (!m_sampleSummary.hasNormals && !m_sampleSummary.hasTangents)
+        {
+            for (int s=0; s<m_sampleSummary.splitCount; ++s)
+            {
+                m_splits[s].mesh.RecalculateNormals();
+            }
+        }
+        
+        AbcClean();
+    }
+
+    Mesh AddMeshComponents(AbcAPI.aiObject abc, GameObject gameObject)
+    {
+        Mesh mesh = null;
+        
+        MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
+        
+        if (meshFilter == null || meshFilter.sharedMesh == null)
+        {
+            mesh = new Mesh();
+            mesh.MarkDynamic();
+
+            if (meshFilter == null)
+            {
+                meshFilter = gameObject.AddComponent<MeshFilter>();
+            }
+
+            meshFilter.sharedMesh = mesh;
+
+            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+                
+            if (renderer == null)
+            {
+                renderer = gameObject.AddComponent<MeshRenderer>();
+            }
+            
+            Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+            material.name = "Material_0";
+
+            renderer.sharedMaterial = material;
+        }
+        else
+        {
+            mesh = meshFilter.sharedMesh;
+        }
 
         return mesh;
     }
-
-#if UNITY_EDITOR
-    static MethodInfo s_GetBuiltinExtraResourcesMethod;
-
-    static Material GetDefaultMaterial()
-    {
-        if (s_GetBuiltinExtraResourcesMethod == null)
-        {
-            BindingFlags bfs = BindingFlags.NonPublic | BindingFlags.Static;
-            s_GetBuiltinExtraResourcesMethod = typeof(EditorGUIUtility).GetMethod("GetBuiltinExtraResource", bfs);
-        }
-        return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
-    }
-#endif
 }

@@ -3,7 +3,7 @@
 #if defined(aiSupportTextureMesh) && defined(aiSupportD3D11)
 #include "aiGraphicsDevice.h"
 #include <d3d11.h>
-const int fcD3D11MaxStagingTextures = 32;
+const int aiD3D11MaxStagingTextures = 32;
 
 
 class aiGraphicsDeviceD3D11 : public aiIGraphicsDevice
@@ -13,8 +13,8 @@ public:
     ~aiGraphicsDeviceD3D11();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
-    bool writeTexture(void *o_tex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void clearStagingTextures();
@@ -23,8 +23,8 @@ private:
 private:
     ID3D11Device *m_device;
     ID3D11DeviceContext *m_context;
-    ID3D11Query *m_query_event;
-    std::map<uint64_t, ID3D11Texture2D*> m_staging_textures;
+    ID3D11Query *m_queryEvent;
+    std::map<uint64_t, ID3D11Texture2D*> m_stagingTextures;
 };
 
 
@@ -36,7 +36,7 @@ aiIGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device)
 aiGraphicsDeviceD3D11::aiGraphicsDeviceD3D11(void *device)
     : m_device((ID3D11Device*)device)
     , m_context(nullptr)
-    , m_query_event(nullptr)
+    , m_queryEvent(nullptr)
 {
     clearStagingTextures();
     if (m_device != nullptr)
@@ -44,7 +44,7 @@ aiGraphicsDeviceD3D11::aiGraphicsDeviceD3D11(void *device)
         m_device->GetImmediateContext(&m_context);
 
         D3D11_QUERY_DESC qdesc = {D3D11_QUERY_EVENT , 0};
-        m_device->CreateQuery(&qdesc, &m_query_event);
+        m_device->CreateQuery(&qdesc, &m_queryEvent);
     }
 }
 
@@ -55,8 +55,8 @@ aiGraphicsDeviceD3D11::~aiGraphicsDeviceD3D11()
         m_context->Release();
         m_context = nullptr;
 
-        m_query_event->Release();
-        m_query_event = nullptr;
+        m_queryEvent->Release();
+        m_queryEvent = nullptr;
     }
 }
 
@@ -64,7 +64,7 @@ void* aiGraphicsDeviceD3D11::getDevicePtr() { return m_device; }
 int aiGraphicsDeviceD3D11::getDeviceType() { return kGfxRendererD3D11; }
 
 
-static DXGI_FORMAT fcGetInternalFormatD3D11(aiETextureFormat fmt)
+static DXGI_FORMAT aiGetInternalFormatD3D11(aiETextureFormat fmt)
 {
     switch (fmt)
     {
@@ -88,43 +88,43 @@ static DXGI_FORMAT fcGetInternalFormatD3D11(aiETextureFormat fmt)
 
 ID3D11Texture2D* aiGraphicsDeviceD3D11::findOrCreateStagingTexture(int width, int height, aiETextureFormat format)
 {
-    if (m_staging_textures.size() >= fcD3D11MaxStagingTextures) {
+    if (m_stagingTextures.size() >= aiD3D11MaxStagingTextures) {
         clearStagingTextures();
     }
 
-    DXGI_FORMAT internal_format = fcGetInternalFormatD3D11(format);
-    uint64_t hash = width + (height << 16) + ((uint64_t)internal_format << 32);
+    DXGI_FORMAT internalFormat = aiGetInternalFormatD3D11(format);
+    uint64_t hash = width + (height << 16) + ((uint64_t)internalFormat << 32);
     {
-        auto it = m_staging_textures.find(hash);
-        if (it != m_staging_textures.end())
+        auto it = m_stagingTextures.find(hash);
+        if (it != m_stagingTextures.end())
         {
             return it->second;
         }
     }
 
     D3D11_TEXTURE2D_DESC desc = {
-        width, height, 1, 1, internal_format, { 1, 0 },
+        width, height, 1, 1, internalFormat, { 1, 0 },
         D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0
     };
     ID3D11Texture2D *ret = nullptr;
     HRESULT hr = m_device->CreateTexture2D(&desc, nullptr, &ret);
     if (SUCCEEDED(hr))
     {
-        m_staging_textures.insert(std::make_pair(hash, ret));
+        m_stagingTextures.insert(std::make_pair(hash, ret));
     }
     return ret;
 }
 
 void aiGraphicsDeviceD3D11::clearStagingTextures()
 {
-    for (auto& pair : m_staging_textures)
+    for (auto& pair : m_stagingTextures)
     {
         pair.second->Release();
     }
-    m_staging_textures.clear();
+    m_stagingTextures.clear();
 }
 
-bool aiGraphicsDeviceD3D11::readTexture(void *o_buf, size_t bufsize, void *tex_, int width, int height, aiETextureFormat format)
+bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiETextureFormat format)
 {
     if (m_context == nullptr || tex_ == nullptr) { return false; }
     int psize = aiGetPixelSize(format);
@@ -137,8 +137,8 @@ bool aiGraphicsDeviceD3D11::readTexture(void *o_buf, size_t bufsize, void *tex_,
 
     // ID3D11DeviceContext::Map() はその時点までのコマンドの終了を待ってくれないっぽくて、
     // ↑の CopyResource() が終わるのを手動で待たないといけない。
-    m_context->End(m_query_event);
-    while (m_context->GetData(m_query_event, nullptr, 0, 0) == S_FALSE) {
+    m_context->End(m_queryEvent);
+    while (m_context->GetData(m_queryEvent, nullptr, 0, 0) == S_FALSE) {
         std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
 
@@ -146,7 +146,7 @@ bool aiGraphicsDeviceD3D11::readTexture(void *o_buf, size_t bufsize, void *tex_,
     HRESULT hr = m_context->Map(tmp, 0, D3D11_MAP_READ, 0, &mapped);
     if (SUCCEEDED(hr))
     {
-        char *wpixels = (char*)o_buf;
+        char *wpixels = (char*)outBuf;
         int wpitch = width * aiGetPixelSize(format);
         const char *rpixels = (const char*)mapped.pData;
         int rpitch = mapped.RowPitch;
@@ -173,20 +173,20 @@ bool aiGraphicsDeviceD3D11::readTexture(void *o_buf, size_t bufsize, void *tex_,
     return false;
 }
 
-bool aiGraphicsDeviceD3D11::writeTexture(void *o_tex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceD3D11::writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
 {
     int psize = aiGetPixelSize(format);
     int pitch = psize * width;
-    const size_t num_pixels = bufsize / psize;
+    const size_t numPixels = bufsize / psize;
 
     D3D11_BOX box;
     box.left = 0;
     box.right = width;
     box.top = 0;
-    box.bottom = ceildiv((UINT)num_pixels, (UINT)width);
+    box.bottom = ceildiv((UINT)numPixels, (UINT)width);
     box.front = 0;
     box.back = 1;
-    ID3D11Texture2D *tex = (ID3D11Texture2D*)o_tex;
+    ID3D11Texture2D *tex = (ID3D11Texture2D*)outTex;
     m_context->UpdateSubresource(tex, 0, &box, buf, pitch, 0);
     return true;
 }

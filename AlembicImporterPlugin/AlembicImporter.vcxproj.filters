@@ -27,6 +27,7 @@
     <ClCompile Include="Schema\aiSchema.cpp">
       <Filter>Schema</Filter>
     </ClCompile>
+    <ClCompile Include="aiLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

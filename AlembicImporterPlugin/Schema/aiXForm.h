@@ -1,25 +1,18 @@
-﻿#ifndef aiXForm_h
+#ifndef aiXForm_h
 #define aiXForm_h
-
-
-struct aiXFormData
-{
-    abcV3 translation;
-    abcV4 rotation;
-    abcV3 scale;
-    uint8_t inherits;
-};
 
 class aiXFormSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiXFormSample(aiXForm *xf, float time);
-    void getData(aiXFormData &o_data) const;
+    aiXFormSample(aiXForm *schema);
+
+    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
+
+    void getData(aiXFormData &outData) const;
 
 public:
     AbcGeom::XformSample m_sample;
-    bool m_inherits;
 };
 
 
@@ -34,9 +27,9 @@ class aiXForm : public aiTSchema<aiXFormTraits>
 typedef aiTSchema<aiXFormTraits> super;
 public:
     aiXForm(aiObject *obj);
-    Sample* readSample(float time) override;
 
-private:
+    Sample* newSample();
+    Sample* readSample(float time, bool &topologyChanged) override;
 };
 
-#endif // aiXForm_h
+#endif
