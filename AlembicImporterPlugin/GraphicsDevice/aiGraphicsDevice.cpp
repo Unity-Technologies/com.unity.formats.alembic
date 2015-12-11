@@ -32,8 +32,8 @@ aiIGraphicsDevice* aiCreateGraphicsDeviceD3D9(void *device);
 aiIGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
 
 
-aiIGraphicsDevice *g_the_graphics_device;
-aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice() { return g_the_graphics_device; }
+aiIGraphicsDevice *g_theGraphicsDevice;
+aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice() { return g_theGraphicsDevice; }
 typedef aiIGraphicsDevice* (*aiGetGraphicsDeviceT)();
 
 
@@ -43,26 +43,26 @@ aiCLinkage aiExport void UnitySetGraphicsDevice(void* device, int deviceType, in
 #ifdef aiSupportD3D9
         if (deviceType == kGfxRendererD3D9)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceD3D9(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceD3D9(device);
         }
 #endif // aiSupportD3D9
 #ifdef aiSupportD3D11
         if (deviceType == kGfxRendererD3D11)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceD3D11(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceD3D11(device);
         }
 #endif // aiSupportD3D11
 #ifdef aiSupportOpenGL
         if (deviceType == kGfxRendererOpenGL)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceOpenGL(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceOpenGL(device);
         }
 #endif // aiSupportOpenGL
     }
 
     if (eventType == kGfxDeviceEventShutdown) {
-        delete g_the_graphics_device;
-        g_the_graphics_device = nullptr;
+        delete g_theGraphicsDevice;
+        g_theGraphicsDevice = nullptr;
     }
 }
 
@@ -103,22 +103,22 @@ aiCLinkage aiExport void aiFinalizeGraphicsDevice()
 
 // PatchLibrary で突っ込まれたモジュールは UnitySetGraphicsDevice() が呼ばれないので、
 // DLL_PROCESS_ATTACH のタイミングで先にロードされているモジュールからデバイスをもらって同等の処理を行う。
-BOOL WINAPI DllMain(HINSTANCE module_handle, DWORD reason_for_call, LPVOID reserved)
+BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
 {
-    if (reason_for_call == DLL_PROCESS_ATTACH)
+    if (reasonForCall == DLL_PROCESS_ATTACH)
     {
         HMODULE m = ::GetModuleHandleA("AlembicImporter.dll");
         if (m) {
             auto proc = (aiGetGraphicsDeviceT)::GetProcAddress(m, "aiGetGraphicsDevice");
             if (proc) {
-                aiIGraphicsDevice *dev = proc();
+                aiGraphicsDevice *dev = proc();
                 if (dev) {
                     UnitySetGraphicsDevice(dev->getDevicePtr(), dev->getDeviceType(), kGfxDeviceEventInitialize);
                 }
             }
         }
     }
-    else if (reason_for_call == DLL_PROCESS_DETACH)
+    else if (reasonForCall == DLL_PROCESS_DETACH)
     {
     }
     return TRUE;

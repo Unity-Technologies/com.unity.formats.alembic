@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -12,38 +12,35 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicXForm : AlembicElement
 {
-    Transform m_trans;
-    AbcAPI.aiXFormData m_abcdata;
+    AbcAPI.aiXFormData m_abcData;
 
-    public override void AbcSetup(
-        AlembicStream abcstream,
-        AbcAPI.aiObject abcobj,
-        AbcAPI.aiSchema abcschema)
-    {
-        base.AbcSetup(abcstream, abcobj, abcschema);
-        m_trans = GetComponent<Transform>();
-    }
+    // No config overrides on AlembicXForm
 
-    public override void AbcOnUpdateSample(AbcAPI.aiSample sample)
+    public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
-        AbcAPI.aiXFormGetData(sample, ref m_abcdata);
+        AbcAPI.aiXFormGetData(sample, ref m_abcData);
+        
+        AbcDirty();
     }
 
     public override void AbcUpdate()
     {
-        var trans = m_trans;
+        if (AbcIsDirty())
+        {
+            if (m_abcData.inherits)
+            {
+                m_trans.localPosition = m_abcData.translation;
+                m_trans.localRotation = m_abcData.rotation;
+                m_trans.localScale = m_abcData.scale;
+            }
+            else
+            {
+                m_trans.position = m_abcData.translation;
+                m_trans.rotation = m_abcData.rotation;
+                m_trans.localScale = m_abcData.scale;
+            }
 
-        if (m_abcdata.inherits != 0)
-        {
-            trans.localPosition = m_abcdata.translation;
-            trans.localRotation = m_abcdata.rotation;
-            trans.localScale = m_abcdata.scale;
-        }
-        else
-        {
-            trans.position = m_abcdata.translation;
-            trans.rotation = m_abcdata.rotation;
-            trans.localScale = m_abcdata.scale;
+            AbcClean();
         }
     }
 }

@@ -3,10 +3,16 @@
 #if defined(aiSupportTextureMesh) && defined(aiSupportOpenGL)
 #include "aiGraphicsDevice.h"
 
+#ifndef aiDontForceStaticGLEW
 #define GLEW_STATIC
+#endif
+
 #include <GL/glew.h>
+
+#if defined(aiWindows) && !defined(aiNoAutoLink)
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glew32s.lib")
+#endif
 
 
 class aiGraphicsDeviceOpenGL : public aiIGraphicsDevice
@@ -16,8 +22,8 @@ public:
     ~aiGraphicsDeviceOpenGL();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
-    bool writeTexture(void *o_tex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void *m_device;
@@ -44,53 +50,53 @@ aiGraphicsDeviceOpenGL::~aiGraphicsDeviceOpenGL()
 }
 
 
-static void fcGetInternalFormatOpenGL(aiETextureFormat format, GLenum &o_fmt, GLenum &o_type)
+static void fcGetInternalFormatOpenGL(aiETextureFormat format, GLenum &outFmt, GLenum &outType)
 {
     switch (format)
     {
-    case aiE_ARGB32:    o_fmt = GL_RGBA; o_type = GL_UNSIGNED_BYTE; return;
+    case aiE_ARGB32:    outFmt = GL_RGBA; outType = GL_UNSIGNED_BYTE; return;
 
-    case aiE_ARGBHalf:  o_fmt = GL_RGBA; o_type = GL_HALF_FLOAT; return;
-    case aiE_RGHalf:    o_fmt = GL_RG; o_type = GL_HALF_FLOAT; return;
-    case aiE_RHalf:     o_fmt = GL_RED; o_type = GL_HALF_FLOAT; return;
+    case aiE_ARGBHalf:  outFmt = GL_RGBA; outType = GL_HALF_FLOAT; return;
+    case aiE_RGHalf:    outFmt = GL_RG; outType = GL_HALF_FLOAT; return;
+    case aiE_RHalf:     outFmt = GL_RED; outType = GL_HALF_FLOAT; return;
 
-    case aiE_ARGBFloat: o_fmt = GL_RGBA; o_type = GL_FLOAT; return;
-    case aiE_RGFloat:   o_fmt = GL_RG; o_type = GL_FLOAT; return;
-    case aiE_RFloat:    o_fmt = GL_RED; o_type = GL_FLOAT; return;
+    case aiE_ARGBFloat: outFmt = GL_RGBA; outType = GL_FLOAT; return;
+    case aiE_RGFloat:   outFmt = GL_RG; outType = GL_FLOAT; return;
+    case aiE_RFloat:    outFmt = GL_RED; outType = GL_FLOAT; return;
 
-    case aiE_ARGBInt:   o_fmt = GL_RGBA_INTEGER; o_type = GL_INT; return;
-    case aiE_RGInt:     o_fmt = GL_RG_INTEGER; o_type = GL_INT; return;
-    case aiE_RInt:      o_fmt = GL_RED_INTEGER; o_type = GL_INT; return;
+    case aiE_ARGBInt:   outFmt = GL_RGBA_INTEGER; outType = GL_INT; return;
+    case aiE_RGInt:     outFmt = GL_RG_INTEGER; outType = GL_INT; return;
+    case aiE_RInt:      outFmt = GL_RED_INTEGER; outType = GL_INT; return;
     }
 }
 
-bool aiGraphicsDeviceOpenGL::readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format)
+bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format)
 {
-    GLenum internal_format = 0;
-    GLenum internal_type = 0;
-    fcGetInternalFormatOpenGL(format, internal_format, internal_type);
+    GLenum internalFormat = 0;
+    GLenum internalType = 0;
+    fcGetInternalFormatOpenGL(format, internalFormat, internalType);
 
     //// glGetTextureImage() is available only OpenGL 4.5 or later...
-    // glGetTextureImage((GLuint)(size_t)tex, 0, internal_format, internal_type, bufsize, o_buf);
+    // glGetTextureImage((GLuint)(size_t)tex, 0, internalFormat, internalType, bufsize, outBuf);
 
     glFinish();
     glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)tex);
-    glGetTexImage(GL_TEXTURE_2D, 0, internal_format, internal_type, o_buf);
+    glGetTexImage(GL_TEXTURE_2D, 0, internalFormat, internalType, outBuf);
     glBindTexture(GL_TEXTURE_2D, 0);
     return true;
 }
 
-bool aiGraphicsDeviceOpenGL::writeTexture(void *o_tex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceOpenGL::writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
 {
-    GLenum internal_format = 0;
-    GLenum internal_type = 0;
-    fcGetInternalFormatOpenGL(format, internal_format, internal_type);
+    GLenum internalFormat = 0;
+    GLenum internalType = 0;
+    fcGetInternalFormatOpenGL(format, internalFormat, internalType);
 
     //// glTextureSubImage2D() is available only OpenGL 4.5 or later...
-    // glTextureSubImage2D((GLuint)(size_t)o_tex, 0, 0, 0, width, height, internal_format, internal_type, buf);
+    // glTextureSubImage2D((GLuint)(size_t)outTex, 0, 0, 0, width, height, internalFormat, internalType, buf);
 
-    glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)o_tex);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, internal_format, internal_type, buf);
+    glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)outTex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, internalFormat, internalType, buf);
     glBindTexture(GL_TEXTURE_2D, 0);
     return true;
 }

@@ -1,11 +1,12 @@
 ﻿#include "pch.h"
 #include "AlembicImporter.h"
+#include "aiLogger.h"
+#include "aiContext.h"
+#include "aiObject.h"
 #include "Schema/aiSchema.h"
 #include "Schema/aiXForm.h"
 #include "Schema/aiPolyMesh.h"
 #include "Schema/aiCamera.h"
-#include "aiObject.h"
-#include "aiContext.h"
 
 #ifdef aiWindows
     #include <windows.h>
@@ -16,24 +17,10 @@
 #endif // aiWindows
 
 
-#ifdef aiDebug
-void aiDebugLogImpl(const char* fmt, ...)
+aiCLinkage aiExport void aiEnableFileLog(bool on, const char *path)
 {
-    va_list vl;
-    va_start(vl, fmt);
-
-#ifdef aiWindows
-    char buf[2048];
-    vsprintf(buf, fmt, vl);
-    ::OutputDebugStringA(buf);
-#else // aiWindows
-    vprintf(fmt, vl);
-#endif // aiWindows
-
-    va_end(vl);
+    aiLogger::Enable(on, path);
 }
-#endif // aiDebug
-
 
 aiCLinkage aiExport void aiCleanup()
 {
@@ -43,46 +30,35 @@ aiCLinkage aiExport void aiCleanup()
 #endif
 }
 
-aiCLinkage aiExport aiContext* aiCreateContext()
+aiCLinkage aiExport aiContext* aiCreateContext(int uid)
 {
-    auto ctx = aiContext::create();
-    aiDebugLog("aiCreateContext(): %p\n", ctx);
+    auto ctx = aiContext::create(uid);
     return ctx;
 }
 
 aiCLinkage aiExport void aiDestroyContext(aiContext* ctx)
 {
-    aiDebugLog("aiDestroyContext(): %p\n", ctx);
     aiContext::destroy(ctx);
 }
 
 
 aiCLinkage aiExport bool aiLoad(aiContext* ctx, const char *path)
 {
-    aiDebugLog("aiLoad(): %p %s\n", ctx, path);
     return ctx->load(path);
 }
 
-aiCLinkage aiExport void aiSetImportConfig(aiContext* ctx, const aiImportConfig *conf)
+aiCLinkage aiExport void aiSetConfig(aiContext* ctx, const aiConfig* conf)
 {
-    ctx->setImportConfig(*conf);
-}
-
-aiCLinkage aiExport void aiDebugDump(aiContext* ctx)
-{
-    aiDebugLog("aiDebugDump(): %p\n", ctx);
-    ctx->debugDump();
+    ctx->setConfig(*conf);
 }
 
 aiCLinkage aiExport float aiGetStartTime(aiContext* ctx)
 {
-    aiDebugLog("aiGetStartTime(): %p\n", ctx);
     return ctx->getStartTime();
 }
 
 aiCLinkage aiExport float aiGetEndTime(aiContext* ctx)
 {
-    aiDebugLog("aiGetEndTime(): %p\n", ctx);
     return ctx->getEndTime();
 }
 
@@ -91,44 +67,33 @@ aiCLinkage aiExport aiObject* aiGetTopObject(aiContext* ctx)
     return ctx->getTopObject();
 }
 
+aiCLinkage aiExport void aiDestroyObject(aiContext* ctx, aiObject* obj)
+{
+    ctx->destroyObject(obj);
+}
+
 aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time)
 {
     ctx->updateSamples(time);
 }
-aiCLinkage aiExport void aiUpdateSamplesBegin(aiContext* ctx, float time)
-{
-    ctx->updateSamplesBegin(time);
-}
-aiCLinkage aiExport void aiUpdateSamplesEnd(aiContext* ctx)
-{
-    ctx->updateSamplesEnd();
-}
-aiCLinkage aiExport void aiSetTimeRangeToKeepSamples(aiContext *ctx, float time, float range)
-{
-    ctx->setTimeRangeToKeepSamples(time, range);
-}
-aiCLinkage aiExport void aiErasePastSamples(aiContext* ctx, float time, float range)
-{
-    ctx->erasePastSamples(time, range);
-}
 
-aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userdata)
+aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 {
-    //aiDebugLogVerbose("aiEnumerateChild(): %s (%d children)\n", obj->getName(), obj->getNumChildren());
     size_t n = obj->getNumChildren();
-    for (size_t i = 0; i < n; ++i) {
-        try {
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        try
+        {
             aiObject *child = obj->getChild(i);
-            e(child, userdata);
+            e(child, userData);
         }
         catch (Alembic::Util::Exception e)
         {
-            aiDebugLog("exception: %s\n", e.what());
+            DebugLog("aiEnumerateChlid: %s", e.what());
         }
     }
 }
-
-
 
 aiCLinkage aiExport const char* aiGetNameS(aiObject* obj)
 {
@@ -141,10 +106,14 @@ aiCLinkage aiExport const char* aiGetFullNameS(aiObject* obj)
 }
 
 
-
-aiCLinkage aiExport void aiSchemaSetCallback(aiSchemaBase* schema, aiSampleCallback cb, void *arg)
+aiCLinkage aiExport void aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg)
 {
-    schema->setCallback(cb, arg);
+    schema->setSampleCallback(cb, arg);
+}
+
+aiCLinkage aiExport void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg)
+{
+    schema->setConfigCallback(cb, arg);
 }
 
 aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time)
@@ -157,12 +126,6 @@ aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, 
     return schema->findSample(time);
 }
 
-aiCLinkage aiExport uint32_t aiSampleGetTime(aiSampleBase* sample)
-{
-    return sample->getTime();
-}
-
-
 
 aiCLinkage aiExport bool aiHasXForm(aiObject* obj)
 {
@@ -171,13 +134,12 @@ aiCLinkage aiExport bool aiHasXForm(aiObject* obj)
 
 aiCLinkage aiExport aiXForm* aiGetXForm(aiObject* obj)
 {
-    return &obj->getXForm();
+    return &(obj->getXForm());
 }
 
-aiCLinkage aiExport void aiXFormGetData(aiXFormSample* sample, aiXFormData *o_data)
+aiCLinkage aiExport void aiXFormGetData(aiXFormSample* sample, aiXFormData *outData)
 {
-    if (!sample) { return; }
-    sample->getData(*o_data);
+    sample->getData(*outData);
 }
 
 
@@ -188,55 +150,48 @@ aiCLinkage aiExport bool aiHasPolyMesh(aiObject* obj)
 
 aiCLinkage aiExport aiPolyMesh* aiGetPolyMesh(aiObject* obj)
 {
-    return &obj->getPolyMesh();
+    return &(obj->getPolyMesh());
 }
 
-aiCLinkage aiExport int aiPolyMeshGetTopologyVariance(aiPolyMesh* schema)
+aiCLinkage aiExport void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
 {
-    return schema->getTopologyVariance();
+    schema->getSummary(*summary);
 }
 
-aiCLinkage aiExport uint32_t aiPolyMeshGetPeakIndexCount(aiPolyMesh* schema)
+aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh)
 {
-    return schema->getPeakIndexCount();
+    sample->getSummary(forceRefresh, *summary);
 }
 
-aiCLinkage aiExport uint32_t aiPolyMeshGetPeakVertexCount(aiPolyMesh* schema)
+aiCLinkage aiExport int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
-    return schema->getPeakVertexCount();
+    return sample->getVertexBufferLength(splitIndex);
 }
 
-aiCLinkage aiExport void aiPolyMeshGetSchemaSummary(aiPolyMesh* schema, aiPolyMeshSchemaSummary *o_summary)
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data)
 {
-    schema->getSummary(*o_summary);
+    sample->fillVertexBuffer(splitIndex, *data);
 }
 
-aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiPolyMeshSampleSummary *o_summary)
+aiCLinkage aiExport int aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets)
 {
-    if (!sample) { return; }
-    sample->getSummary(*o_summary);
+    return sample->prepareSubmeshes(*facesets);
 }
 
-aiCLinkage aiExport bool aiPolyMeshGetSplitedMeshInfo(aiPolyMeshSample* sample, aiSplitedMeshData *o_smi, const aiSplitedMeshData *prev, int max_vertices)
+aiCLinkage aiExport int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex)
 {
-    if (!sample) { return true; }
-    return sample->getSplitedMeshInfo(*o_smi, *prev, max_vertices);
+    return sample->getSplitSubmeshCount(splitIndex);
 }
 
-aiCLinkage aiExport void aiPolyMeshCopySplitedMesh(aiPolyMeshSample* sample, aiSplitedMeshData *o_smi)
+aiCLinkage aiExport bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
 {
-    if (!sample) { return; }
-    return sample->copySplitedMesh(*o_smi);
+    return sample->getNextSubmesh(*summary);
 }
 
-aiCLinkage aiExport void aiPolyMeshCopyToTexture(aiPolyMeshSample* sample, aiTextureMeshData *dst)
+aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data)
 {
-#ifdef aiSupportTextureMesh
-    if (!sample) { return; }
-    sample->copyMeshToTexture(*dst);
-#endif // aiSupportTextureMesh
+    sample->fillSubmeshIndices(*summary, *data);
 }
-
 
 
 aiCLinkage aiExport bool aiHasCamera(aiObject* obj)
@@ -246,11 +201,10 @@ aiCLinkage aiExport bool aiHasCamera(aiObject* obj)
 
 aiCLinkage aiExport aiCamera* aiGetCamera(aiObject* obj)
 {
-    return &obj->getCamera();
+    return &(obj->getCamera());
 }
 
-aiCLinkage aiExport void aiCameraGetData(aiCameraSample* sample, aiCameraData *o_params)
+aiCLinkage aiExport void aiCameraGetData(aiCameraSample* sample, aiCameraData *outData)
 {
-    if (!sample) { return; }
-    sample->getParams(*o_params);
+    sample->getData(*outData);
 }

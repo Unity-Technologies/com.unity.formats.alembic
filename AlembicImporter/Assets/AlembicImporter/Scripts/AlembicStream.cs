@@ -12,76 +12,304 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicStream : MonoBehaviour
 {
-    public enum MeshDataType { Mesh, Texture }
-    public enum CycleType { Hold, Loop, Reverse, Bounce }
+    public enum CycleType { Hold, Loop, Reverse, Bounce };
 
-    public MeshDataType m_data_type;
-    public string m_path_to_abc;
+    [Header("Abc")]
+    public string m_pathToAbc;
     public float m_time;
-    public float m_time_offset;
-    public float m_time_scale = 1.0f;
-    public bool m_preserve_start_time = true;
+
+    [Header("Playback")]
+    public float m_startTime = 0.0f;
+    public float m_endTime = 0.0f;
+    public float m_timeOffset = 0.0f;
+    public float m_timeScale = 1.0f;
+    public bool m_preserveStartTime = true;
     public CycleType m_cycle = CycleType.Hold;
-    public bool m_revert_x = true;
-    public bool m_revert_faces = false;
-    bool m_load_succeeded;
-    public float m_start_time;
-    public float m_end_time;
-    public float m_time_prev;
-    public float m_time_next;
-    public float m_time_eps = 0.001f;
 
-    public List<AlembicElement> m_elements = new List<AlembicElement>();
+    [Header("Data")]
+    public bool m_swapHandedness;
+    public bool m_swapFaceWinding;
+    public bool m_submeshPerUVTile = true;
+    public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
+    public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
+    public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
 
+    [Header("Diagnostic")]
+    public bool m_verbose = false;
+    public bool m_logToFile = false;
+    public string m_logPath = "";
+    
+    [Header("Advanced")]
+    public bool m_useThreads = false;
+    public int m_sampleCacheSize = 0;
+    public bool m_forceRefresh;
+
+    [HideInInspector] public HashSet<AlembicElement> m_elements = new HashSet<AlembicElement>();
+    [HideInInspector] public AbcAPI.aiConfig m_config;
+
+    bool m_loaded;
+    float m_lastAbcTime;
+    bool m_lastSwapHandedness;
+    bool m_lastSwapFaceWinding;
+    bool m_lastSubmeshPerUVTile; 
+    AbcAPI.aiNormalsMode m_lastNormalsMode;
+    AbcAPI.aiTangentsMode m_lastTangentsMode;
+    bool m_lastIgnoreMissingNodes;
+    float m_lastAspectRatio = -1.0f;
+    bool m_lastLogToFile = false;
+    string m_lastLogPath = "";
+    float m_timeEps = 0.001f;
     AbcAPI.aiContext m_abc;
     Transform m_trans;
+    // keep a list of aiObjects to update?
 
+    // --- For internal use ---
 
-    public float time { get { return m_time; } }
-    public float time_prev { get { return m_time_prev; } }
-    public float time_next { get { return m_time_next; } }
-
-    public void AddElement(AlembicElement e) { m_elements.Add(e); }
-
-    public void DebugDump() { AbcAPI.aiDebugDump(m_abc); }
-
-
-
-    public void AbcLoad()
+    bool AbcIsValid()
     {
-        if (m_path_to_abc == null) { return; }
-        Debug.Log(m_path_to_abc);
+        return (m_abc.ptr != (IntPtr)0);
+    }
 
-        m_trans = GetComponent<Transform>();
-        m_abc = AbcAPI.aiCreateContext();
-        m_load_succeeded = AbcAPI.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_path_to_abc);
+    void AbcSyncConfig()
+    {
+        m_config.swapHandedness = m_swapHandedness;
+        m_config.swapFaceWinding = m_swapFaceWinding;
+        m_config.normalsMode = m_normalsMode;
+        m_config.tangentsMode = m_tangentsMode;
+        m_config.cacheTangentsSplits = true;
+        m_config.aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
+        m_config.forceUpdate = false; // m_forceRefresh; ?
+        m_config.useThreads = m_useThreads;
+        m_config.cacheSamples = m_sampleCacheSize;
+        m_config.submeshPerUVTile = m_submeshPerUVTile;
 
-        if (m_load_succeeded)
+        if (AbcIsValid())
         {
-            m_start_time = AbcAPI.aiGetStartTime(m_abc);
-            m_end_time = AbcAPI.aiGetEndTime(m_abc);
-            m_time_offset = -m_start_time;
-            m_time_scale = 1.0f;
-            m_preserve_start_time = true;
-
-            AbcAPI.aiImportConfig ic;
-            ic.triangulate = 1;
-            ic.revert_x = (byte)(m_revert_x ? 1 : 0);
-            ic.revert_faces = (byte)(m_revert_faces ? 1 : 0);
-            AbcAPI.aiSetImportConfig(m_abc, ref ic);
-            AbcAPI.UpdateAbcTree(m_abc, m_trans, m_revert_x, m_revert_faces, m_time);
+            AbcAPI.aiSetConfig(m_abc, ref m_config);
         }
+    }
+
+    float AbcTime(float inTime)
+    {
+        float extraOffset = 0.0f;
+
+        // compute extra time offset to counter-balance effect of m_timeScale on m_startTime
+        if (m_preserveStartTime)
+        {
+            extraOffset = m_startTime * (m_timeScale - 1.0f);
+        }
+
+        float playTime = m_endTime - m_startTime;
+
+        // apply speed and offset
+        float outTime = m_timeScale * (inTime - m_timeOffset) - extraOffset;
+
+        if (m_cycle == CycleType.Hold)
+        {
+            if (outTime < (m_startTime - m_timeEps))
+            {
+                outTime = m_startTime;
+            }
+            else if (outTime > (m_endTime + m_timeEps))
+            {
+                outTime = m_endTime;
+            }
+        }
+        else
+        {
+            float normalizedTime = (outTime - m_startTime) / playTime;
+            float playRepeat = (float)Math.Floor(normalizedTime);
+            float fraction = Math.Abs(normalizedTime - playRepeat);
+            
+            if (m_cycle == CycleType.Reverse)
+            {
+                if (outTime > (m_startTime + m_timeEps) && outTime < (m_endTime - m_timeEps))
+                {
+                    // inside alembic sample range
+                    outTime = m_endTime - fraction * playTime;
+                }
+                else if (outTime < (m_startTime + m_timeEps))
+                {
+                    outTime = m_endTime;
+                }
+                else
+                {
+                    outTime = m_startTime;
+                }
+            }
+            else
+            {
+                if (outTime < (m_startTime - m_timeEps) || outTime > (m_endTime + m_timeEps))
+                {
+                    // outside alembic sample range
+                    if (m_cycle == CycleType.Loop || ((int)playRepeat % 2) == 0)
+                    {
+                        outTime = m_startTime + fraction * playTime;
+                    }
+                    else
+                    {
+                        outTime = m_endTime - fraction * playTime;
+                    }
+                }
+            }
+        }
+
+        return outTime;
+    }
+
+    bool AbcUpdateRequired(float abcTime, float aspectRatio)
+    {
+        if (m_forceRefresh || 
+            m_swapHandedness != m_lastSwapHandedness ||
+            m_swapFaceWinding != m_lastSwapFaceWinding ||
+            m_submeshPerUVTile != m_lastSubmeshPerUVTile ||
+            m_normalsMode != m_lastNormalsMode ||
+            m_tangentsMode != m_lastTangentsMode ||
+            Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
+            aspectRatio != m_lastAspectRatio)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    void AbcSetLastUpdateState(float abcTime, float aspectRatio)
+    {
+        m_lastAbcTime = abcTime;
+        m_lastSwapHandedness = m_swapHandedness;
+        m_lastSwapFaceWinding = m_swapFaceWinding;
+        m_lastSubmeshPerUVTile = m_submeshPerUVTile;
+        m_lastNormalsMode = m_normalsMode;
+        m_lastTangentsMode = m_tangentsMode;
+        m_lastAspectRatio = aspectRatio;
+        m_forceRefresh = false;
     }
 
     void AbcUpdateElements()
     {
-        int len = m_elements.Count;
-        for (int i = 0; i < len; ++i)
+        if (m_verbose)
         {
-            m_elements[i].AbcUpdate();
+            Debug.Log("AlembicStream.AbcUpdateElement: " + m_elements.Count + " element(s).");
+        }
+
+        foreach (AlembicElement e in m_elements)
+        {
+            if (e != null)
+            {
+                e.AbcUpdate();
+            }
         }
     }
 
+    void AbcDetachElements()
+    {
+        if (m_verbose)
+        {
+            Debug.Log("AlembicStream.AbcDetachElement: " + m_elements.Count + " element(s).");
+        }
+
+        foreach (AlembicElement e in m_elements)
+        {
+            if (e != null)
+            {
+                e.m_abcStream = null;
+            }
+        }
+    }
+
+    void AbcUpdate(float time)
+    {
+        if (m_lastLogToFile != m_logToFile ||
+            m_lastLogPath != m_logPath)
+        {
+            AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
+
+            m_lastLogToFile = m_logToFile;
+            m_lastLogPath = m_logPath;
+        }
+        
+        if (m_loaded)
+        {
+            m_time = time;
+
+            float abcTime = AbcTime(m_time);
+            float aspectRatio = AbcAPI.GetAspectRatio(m_aspectRatioMode);
+
+            if (AbcUpdateRequired(abcTime, aspectRatio))
+            {
+                if (m_verbose)
+                {
+                    Debug.Log("AlembicSctream.AbcUpdate: t=" + m_time + " (t'=" + abcTime + ")");
+                }
+                
+                AbcSyncConfig();
+
+                AbcAPI.aiUpdateSamples(m_abc, abcTime);
+
+                AbcUpdateElements();
+                
+                AbcSetLastUpdateState(abcTime, aspectRatio);
+            }
+        }
+    }
+
+    // --- public api ---
+    
+    public void AbcAddElement(AlembicElement e)
+    {
+        if (e != null)
+        {
+            if (m_verbose)
+            {
+                Debug.Log("AlembicStream.AbcAddElement: \"" + e.gameObject.name + "\"");
+            }
+            m_elements.Add(e);
+        }
+    }
+
+    public void AbcRemoveElement(AlembicElement e)
+    {
+        if (e != null)
+        {
+            if (m_verbose)
+            {
+                Debug.Log("AlembicStream.AbcRemoveElement: \"" + e.gameObject.name + "\"");
+            }
+            AbcAPI.aiDestroyObject(m_abc, e.m_abcObj);
+            m_elements.Remove(e);
+        }
+    }
+
+    public void AbcLoad(bool createMissingNodes=false)
+    {
+        if (m_pathToAbc == null)
+        {
+            return;
+        }
+
+        m_trans = GetComponent<Transform>();
+        m_abc = AbcAPI.aiCreateContext(gameObject.GetInstanceID());
+        m_loaded = AbcAPI.aiLoad(m_abc, Application.streamingAssetsPath + "/" + m_pathToAbc);
+
+        if (m_loaded)
+        {
+            m_startTime = AbcAPI.aiGetStartTime(m_abc);
+            m_endTime = AbcAPI.aiGetEndTime(m_abc);
+            m_timeOffset = -m_startTime;
+            m_timeScale = 1.0f;
+            m_preserveStartTime = true;
+            m_forceRefresh = true;
+
+            AbcSyncConfig();
+
+            AbcAPI.UpdateAbcTree(m_abc, m_trans, AbcTime(m_time), createMissingNodes);
+        }
+    }
+
+    // --- method overrides ---
 
     void OnApplicationQuit()
     {
@@ -91,115 +319,50 @@ public class AlembicStream : MonoBehaviour
     public void Awake()
     {
         AbcLoad();
+        AbcAPI.aiEnableFileLog(m_logToFile, m_logPath);
     }
 
     void OnDestroy()
     {
-        AbcAPI.aiDestroyContext(m_abc);
-        m_abc = default(AbcAPI.aiContext);
-    }
-
-    float AdjustTime(float in_time)
-    {
-        float extra_offset = 0.0f;
-
-        // compute extra time offset to counter-balance effect of m_time_scale on m_start_time
-        if (m_preserve_start_time)
+        if (!AbcIsValid())
         {
-            extra_offset = m_start_time * (m_time_scale - 1.0f);
+            return;
         }
 
-        float play_time = m_end_time - m_start_time;
-
-        // apply speed and offset
-        float out_time = m_time_scale * (in_time - m_time_offset) - extra_offset;
-
-        if (m_cycle == CycleType.Hold)
+        if (!Application.isPlaying)
         {
-            if (out_time < (m_start_time - m_time_eps))
+#if UNITY_EDITOR
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                out_time = m_start_time;
+                AbcDetachElements();
+                AbcAPI.aiDestroyContext(m_abc);
+                m_abc = default(AbcAPI.aiContext);
             }
-            else if (out_time > (m_end_time + m_time_eps))
-            {
-                out_time = m_end_time;
-            }
+#else
+            AbcDetachElements();
+            AbcAPI.aiDestroyContext(m_abc);
+            m_abc = default(AbcAPI.aiContext);
+#endif
         }
-        else
-        {
-            float normalized_time = (out_time - m_start_time) / play_time;
-            float play_repeat = (float)Math.Floor(normalized_time);
-            float fraction = Math.Abs(normalized_time - play_repeat);
-            
-            if (m_cycle == CycleType.Reverse)
-            {
-                if (out_time > (m_start_time + m_time_eps) && out_time < (m_end_time - m_time_eps))
-                {
-                    // inside alembic sample range
-                    out_time = m_end_time - fraction * play_time;
-                }
-                else if (out_time < (m_start_time + m_time_eps))
-                {
-                    out_time = m_end_time;
-                }
-                else
-                {
-                    out_time = m_start_time;
-                }
-            }
-            else
-            {
-                if (out_time < (m_start_time - m_time_eps) || out_time > (m_end_time + m_time_eps))
-                {
-                    // outside alembic sample range
-                    if (m_cycle == CycleType.Loop || ((int)play_repeat % 2) == 0)
-                    {
-                        out_time = m_start_time + fraction * play_time;
-                    }
-                    else
-                    {
-                        out_time = m_end_time - fraction * play_time;
-                    }
-                }
-            }
-        }
-
-        return out_time;
     }
 
     void Start()
     {
-        m_time_prev = m_time_next = m_time;
-    }
+        m_time = 0.0f;
+        m_forceRefresh = true;
 
-#if UNITY_EDITOR
-    void OnValidate()
-    {
-        m_time_next = m_time;
+        AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(m_aspectRatioMode));
     }
-#endif
 
     void Update()
     {
-        if (!m_load_succeeded) { return; }
-
-        float at1 = AdjustTime(m_time);
-        m_time += Time.deltaTime;
-        float at2 = AdjustTime(m_time);
-        if (at1 != at2)
+        if (Application.isPlaying)
         {
-            m_time_prev = m_time;
-            m_time_next = AdjustTime(m_time + m_time_eps);
-
-            // end preload
-            AbcAPI.aiUpdateSamplesEnd(m_abc);
-
-            AbcUpdateElements();
-
-            AbcAPI.aiSetTimeRangeToKeepSamples(m_abc, at2, 0.1f);
-
-            // begin preload
-            AbcAPI.aiUpdateSamplesBegin(m_abc, m_time_next);
+            AbcUpdate(Time.time);
+        }
+        else
+        {
+            AbcUpdate(m_time);
         }
     }
 }
