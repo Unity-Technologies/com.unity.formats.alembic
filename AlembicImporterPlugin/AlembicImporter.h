@@ -167,10 +167,10 @@ struct aiMeshSampleData
     abcV3 size;
 
     inline aiMeshSampleData()
-        : positions(0)
-        , normals(0)
-        , uvs(0)
-        , tangents(0)
+        : positions(nullptr)
+        , normals(nullptr)
+        , uvs(nullptr)
+        , tangents(nullptr)
         , center(0.0f, 0.0f, 0.0f)
         , size(0.0f, 0.0f, 0.0f)
     {
@@ -232,6 +232,26 @@ struct aiFacesets
 };
 
 
+struct aiPointsSampleData
+{
+    abcV3 *positions;
+    abcV3 *velocities;
+    uint64_t *ids;
+    int32_t count;
+
+    inline aiPointsSampleData()
+        : positions(nullptr)
+        , velocities(nullptr)
+        , ids(nullptr)
+        , count(0)
+    {
+    }
+
+    aiPointsSampleData(const aiPointsSampleData&) = default;
+    aiPointsSampleData& operator=(const aiPointsSampleData&) = default;
+};
+
+
 #ifdef _WIN32
 typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userData);
 typedef void (__stdcall *aiConfigCallback)(void *csObj, aiConfig *config);
@@ -285,5 +305,9 @@ aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSampl
 aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
 aiCLinkage aiExport aiCamera*       aiGetCamera(aiObject* obj);
 aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
+
+aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
+aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
+aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
 
 #endif // AlembicImporter_h

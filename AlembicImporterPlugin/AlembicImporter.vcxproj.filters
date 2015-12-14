@@ -28,6 +28,9 @@
       <Filter>Schema</Filter>
     </ClCompile>
     <ClCompile Include="aiLogger.cpp" />
+    <ClCompile Include="Schema\aiPoints.cpp">
+      <Filter>Schema</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -48,6 +51,9 @@
       <Filter>Schema</Filter>
     </ClInclude>
     <ClInclude Include="Schema\aiSchema.h">
+      <Filter>Schema</Filter>
+    </ClInclude>
+    <ClInclude Include="Schema\aiPoints.h">
       <Filter>Schema</Filter>
     </ClInclude>
   </ItemGroup>
