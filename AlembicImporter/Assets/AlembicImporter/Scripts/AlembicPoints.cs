@@ -12,24 +12,43 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class AlembicPoints : AlembicElement
 {
+    // members
     AbcAPI.aiPointsSampleData m_abcData;
+    Vector3[] m_abcPositions;
+    Int64[] m_abcIDs;
+    int m_abcPeakVertexCount;
+
+    // properties
+    public AbcAPI.aiPointsSampleData abcData { get { return m_abcData; } }
+    public Vector3[] abcPositions { get { return m_abcPositions; } }
+    public Int64[] abcIDs { get { return m_abcIDs; } }
+    public int abcPeakVertexCount { get { return m_abcPeakVertexCount; } }
+
 
     // No config overrides on AlembicPoints
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
+        if(m_abcPeakVertexCount == 0)
+        {
+            m_abcPeakVertexCount = AbcAPI.aiPointsGetPeakVertexCount(m_abcSchema);
+            m_abcPositions = new Vector3[m_abcPeakVertexCount];
+            m_abcIDs = new Int64[m_abcPeakVertexCount];
+
+            m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
+            m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
+        }
+
         AbcAPI.aiPointsGetData(sample, ref m_abcData);
         AbcDirty();
     }
 
     public override void AbcUpdate()
     {
-        // implement this in subclass
-
-        //if (AbcIsDirty())
-        //{
-        //    // do something
-        //    AbcClean();
-        //}
+        if (AbcIsDirty())
+        {
+            // nothing to do in this component.
+            AbcClean();
+        }
     }
 }
