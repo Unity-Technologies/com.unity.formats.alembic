@@ -221,6 +221,11 @@ aiCLinkage aiExport aiPoints* aiGetPoints(aiObject* obj)
     return &(obj->getPoints());
 }
 
+aiCLinkage aiExport int aiPointsGetPeakVertexCount(aiPoints *schema)
+{
+    return schema->getPeakVertexCount();
+}
+
 aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData)
 {
     sample->fillData(*outData);

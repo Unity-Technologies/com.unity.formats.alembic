@@ -244,11 +244,12 @@ public class AbcAPI
 
     [DllImport("AlembicImporter")] public static extern bool        aiHasPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
+    [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern void        aiPointsGetData(aiSample sample, ref aiPointsSampleData data);
     // currently tex must be ARGBFloat RenderTexture
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, TextureFormat fmt);
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, RenderTextureFormat fmt);
     // currently tex must be RInt RenderTexture
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, TextureFormat fmt);
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, RenderTextureFormat fmt);
 
 
     class ImportContext

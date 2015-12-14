@@ -4,3 +4,14 @@ dependencies/
 .build/
 *.dblite
 excons.cache
+
+AlembicImporter/*.csproj
+AlembicImporter/*.sln
+*.sdf
+*.opendb
+.vs/
+Library/
+Temp/
+_tmp/
+_out/
+ipch/

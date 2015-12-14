@@ -310,6 +310,7 @@ aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCa
 
 aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
+aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
 aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
 #ifdef aiSupportTexture
 aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt);
