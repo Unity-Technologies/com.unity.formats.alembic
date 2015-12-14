@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTextureMesh) && defined(aiSupportOpenGL)
+#if defined(aiSupportTexture) && defined(aiSupportOpenGL)
 #include "aiGraphicsDevice.h"
 
 #ifndef aiDontForceStaticGLEW

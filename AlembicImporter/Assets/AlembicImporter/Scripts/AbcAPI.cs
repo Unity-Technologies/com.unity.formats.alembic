@@ -186,6 +186,15 @@ public class AbcAPI
         public System.IntPtr ptr;
     }
 
+    public struct aiPointsSampleData
+    {
+        public IntPtr positions;
+        public IntPtr velocities;
+        public IntPtr ids;
+        public int count;
+    }
+
+
 
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
@@ -228,11 +237,19 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
-    
+
     [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
-    
+
+    [DllImport("AlembicImporter")] public static extern bool        aiHasPoints(aiObject obj);
+    [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
+    [DllImport("AlembicImporter")] public static extern void        aiPointsGetData(aiSample sample, ref aiPointsSampleData data);
+    // currently tex must be ARGBFloat RenderTexture
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, TextureFormat fmt);
+    // currently tex must be RInt RenderTexture
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, TextureFormat fmt);
+
 
     class ImportContext
     {
@@ -390,6 +407,11 @@ public class AbcAPI
         {
             elem = GetOrAddComponent<AlembicCamera>(trans.gameObject);
             schema = aiGetCamera(obj);
+        }
+        else if (aiHasPoints(obj))
+        {
+            elem = GetOrAddComponent<AlembicPoints>(trans.gameObject);
+            schema = aiGetPoints(obj);
         }
 
         if (elem)

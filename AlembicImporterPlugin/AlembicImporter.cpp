@@ -225,3 +225,65 @@ aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleD
 {
     sample->fillData(*outData);
 }
+
+
+
+#ifdef aiSupportTexture
+
+std::vector<char> g_texture_buffer;
+
+// thread 'unsafe'
+aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt)
+{
+    if (fmt != aiE_ARGBFloat)
+    {
+        DebugLog("aiPointsCopyPositionsToTexture():  format must be ARGBFloat");
+        return false;
+    }
+    DebugLog("aiPointsCopyPositionsToTexture():  width %d height %d format %d", width, height, fmt);
+
+    int bufsize = width * height * 16; // 16: size of ARGBFloat
+    g_texture_buffer.resize(bufsize);
+
+    // convert position data to float4 (x,y,z,pad ...)
+    abcV3 *src = data->positions;
+    abcV4 *buf = reinterpret_cast<abcV4*>(&g_texture_buffer[0]);
+    int count = data->count;
+    for (int i = 0; i < count; ++i) {
+        buf[i].x = src[i].x;
+        buf[i].y = src[i].y;
+        buf[i].z = src[i].z;
+    }
+
+    // copy to texture
+    aiGetGraphicsDevice()->writeTexture(tex, width, height, fmt, buf, bufsize);
+    return true;
+}
+
+// thread 'unsafe'
+aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt)
+{
+    if (fmt != aiE_RInt)
+    {
+        DebugLog("aiPointsCopyIDsToTexture():  format must be RInt");
+        return false;
+    }
+    DebugLog("aiPointsCopyIDsToTexture():  width %d height %d format %d", width, height, fmt);
+
+    int bufsize = width * height * 4; // 4: size of RInt
+    g_texture_buffer.resize(bufsize);
+
+    // convert ID data to int32
+    uint64_t *src = data->ids;
+    int32_t *buf = reinterpret_cast<int32_t*>(&g_texture_buffer[0]);
+    int count = data->count;
+    for (int i = 0; i < count; ++i) {
+        buf[i] = static_cast<int32_t>(src[i]);
+    }
+
+    // copy to texture
+    aiGetGraphicsDevice()->writeTexture(tex, width, height, fmt, buf, bufsize);
+
+    return true;
+}
+#endif // aiSupportTexture

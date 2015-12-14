@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTextureMesh) && defined(aiSupportD3D11)
+#if defined(aiSupportTexture) && defined(aiSupportD3D11)
 #include "aiGraphicsDevice.h"
 #include <d3d11.h>
 const int aiD3D11MaxStagingTextures = 32;
@@ -103,7 +103,7 @@ ID3D11Texture2D* aiGraphicsDeviceD3D11::findOrCreateStagingTexture(int width, in
     }
 
     D3D11_TEXTURE2D_DESC desc = {
-        width, height, 1, 1, internalFormat, { 1, 0 },
+        (UINT)width, (UINT)height, 1, 1, internalFormat, { 1, 0 },
         D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE, 0
     };
     ID3D11Texture2D *ret = nullptr;

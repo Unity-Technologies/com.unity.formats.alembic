@@ -2,16 +2,18 @@
 #define AlembicImporter_h
 
 // options:
-// graphics device options are relevant only if aiSupportTextureMesh is defined
+// graphics device options are relevant only if aiSupportTexture is defined
 // 
-// #define aiSupportTextureMesh
+// #define aiSupportTexture
 //  #define aiSupportD3D11
-//  #define aiSupportD3D9
 //  #define aiSupportOpenGL
 // 
 // #define aiWithTBB
 
 #include "pch.h"
+#ifdef aiSupportTexture
+    #include "GraphicsDevice/aiGraphicsDevice.h"
+#endif // aiSupportTexture
 
 enum aiNormalsMode
 {
@@ -309,5 +311,9 @@ aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCa
 aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
+#ifdef aiSupportTexture
+aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt);
+#endif // aiSupportTexture
 
 #endif // AlembicImporter_h
