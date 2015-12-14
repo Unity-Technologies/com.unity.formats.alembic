@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTextureMesh)
+#if defined(aiSupportTexture)
 
 #include "aiGraphicsDevice.h"
 

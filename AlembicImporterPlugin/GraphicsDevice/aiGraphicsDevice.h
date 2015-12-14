@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTextureMesh)
+#if defined(aiSupportTexture)
 
 // Graphics device identifiers in Unity
 enum GfxDeviceRenderer
