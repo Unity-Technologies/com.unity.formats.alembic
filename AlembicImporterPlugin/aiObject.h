@@ -27,10 +27,12 @@ public:
     bool        hasXForm() const;
     bool        hasPolyMesh() const;
     bool        hasCamera() const;
+    bool        hasPoints() const;
 
     aiXForm&    getXForm();
     aiPolyMesh& getPolyMesh();
     aiCamera&   getCamera();
+    aiPoints&   getPoints();
 
 public:
 
@@ -49,6 +51,7 @@ private:
     std::unique_ptr<aiXForm>    m_xform;
     std::unique_ptr<aiPolyMesh> m_polymesh;
     std::unique_ptr<aiCamera>   m_camera;
+    std::unique_ptr<aiPoints>   m_points;
 };
 
 

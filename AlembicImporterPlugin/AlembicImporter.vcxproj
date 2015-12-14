@@ -29,6 +29,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Schema\aiCamera.cpp" />
+    <ClCompile Include="Schema\aiPoints.cpp" />
     <ClCompile Include="Schema\aiPolyMesh.cpp" />
     <ClCompile Include="Schema\aiSchema.cpp" />
     <ClCompile Include="Schema\aiXForm.cpp" />
@@ -41,6 +42,7 @@
     <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Schema\aiCamera.h" />
+    <ClInclude Include="Schema\aiPoints.h" />
     <ClInclude Include="Schema\aiPolyMesh.h" />
     <ClInclude Include="Schema\aiSchema.h" />
     <ClInclude Include="Schema\aiXForm.h" />
