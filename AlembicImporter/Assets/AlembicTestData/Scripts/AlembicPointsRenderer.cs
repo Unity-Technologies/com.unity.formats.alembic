@@ -15,8 +15,19 @@ using UnityEditor;
 public class AlembicPointsRenderer : MonoBehaviour
 {
     const int TextureWidth = 2048;
-    RenderTexture m_texPositions;
-    RenderTexture m_texIDs;
+    public RenderTexture m_texPositions;
+    public RenderTexture m_texIDs;
+
+
+    public static RenderTexture CreateDataTexture(int w, int h, RenderTextureFormat f)
+    {
+        RenderTexture r = new RenderTexture(w, h, 0, f);
+        r.filterMode = FilterMode.Point;
+        r.useMipMap = false;
+        r.generateMips = false;
+        r.Create();
+        return r;
+    }
 
     public void Update()
     {
@@ -27,8 +38,8 @@ public class AlembicPointsRenderer : MonoBehaviour
         if(m_texPositions == null)
         {
             int height = points.abcPeakVertexCount / TextureWidth + 1;
-            m_texPositions = new RenderTexture(TextureWidth, height, 0, RenderTextureFormat.ARGBFloat);
-            m_texIDs = new RenderTexture(TextureWidth, height, 0, RenderTextureFormat.RInt);
+            m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
+            m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
         }
 
         AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, m_texPositions.format);
