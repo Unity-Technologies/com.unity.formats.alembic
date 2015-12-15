@@ -2,6 +2,7 @@
 
 #if defined(aiSupportTexture) && defined(aiSupportD3D11)
 #include "aiGraphicsDevice.h"
+#include "aiLogger.h"
 #include <d3d11.h>
 const int aiD3D11MaxStagingTextures = 32;
 
@@ -126,6 +127,11 @@ void aiGraphicsDeviceD3D11::clearStagingTextures()
 
 bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiRenderTextureFormat format)
 {
+    if (tex_ == nullptr) {
+        DebugLog("aiGraphicsDeviceD3D11::readTexture(): texture is null");
+        return false;
+    }
+
     if (m_context == nullptr || tex_ == nullptr) { return false; }
     int psize = aiGetPixelSize(format);
 
@@ -175,6 +181,11 @@ bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_
 
 bool aiGraphicsDeviceD3D11::writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize)
 {
+    if (outTex == nullptr) {
+        DebugLog("aiGraphicsDeviceD3D11::writeTexture(): texture is null");
+        return false;
+    }
+
     int psize = aiGetPixelSize(format);
     int pitch = psize * width;
     const size_t numPixels = bufsize / psize;
