@@ -9,6 +9,7 @@ AlembicImporter/*.csproj
 AlembicImporter/*.sln
 *.sdf
 *.opendb
+*.vcxproj.user
 .vs/
 Library/
 Temp/

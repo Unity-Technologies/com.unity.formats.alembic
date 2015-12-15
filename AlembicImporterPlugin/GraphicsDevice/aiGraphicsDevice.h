@@ -27,7 +27,8 @@ enum GfxDeviceEventType {
     kGfxDeviceEventAfterReset,
 };
 
-enum aiETextureFormat
+
+enum aiRenderTextureFormat
 {
     aiE_ARGB32 = 0,
     aiE_Depth = 1,
@@ -56,12 +57,33 @@ public:
     virtual ~aiIGraphicsDevice() {}
     virtual void* getDevicePtr() = 0;
     virtual int getDeviceType() = 0;
-    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) = 0;
-    virtual bool writeTexture(void *o_tex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) = 0;
+    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format) = 0;
+    virtual bool writeTexture(void *o_tex, int width, int height, aiRenderTextureFormat format, const void *data, size_t datasize) = 0;
 };
 aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice();
-int aiGetPixelSize(aiETextureFormat format);
+int aiGetPixelSize(aiRenderTextureFormat format);
+void* aiGetConversionBuffer(size_t size); // return thread-local buffer
 
+// T: input data type
+// F: convert function
+//   [](void *dst, const T *src, int nth_element)
+//   example: float3 to float4
+//     [](void *dst, const abcV3 *src, int i) {
+//         ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
+//     }
+template<class T, class F>
+inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiRenderTextureFormat format, const T *data, size_t num_elements, const F& converter)
+{
+    auto dev = aiGetGraphicsDevice();
+    if (dev == nullptr) { return false; }
+
+    size_t bufsize = width * height * aiGetPixelSize(format);
+    void *buf = aiGetConversionBuffer(bufsize);
+    for (size_t i = 0; i < num_elements; ++i) {
+        converter(buf, data, i);
+    }
+    return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
+}
 
 template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a%b == 0 ? 0 : 1); }
 template<class IntType> inline IntType ceilup(IntType a, IntType b) { return ceildiv(a, b) * b; }

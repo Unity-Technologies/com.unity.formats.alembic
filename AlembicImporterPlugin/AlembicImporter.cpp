@@ -235,10 +235,9 @@ aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleD
 
 #ifdef aiSupportTexture
 
-std::vector<char> g_texture_buffer;
+#include "GraphicsDevice/aiGraphicsDevice.h"
 
-// thread 'unsafe'
-aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt)
 {
     if (fmt != aiE_ARGBFloat)
     {
@@ -247,26 +246,13 @@ aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data
     }
     DebugLog("aiPointsCopyPositionsToTexture():  width %d height %d format %d", width, height, fmt);
 
-    int bufsize = width * height * 16; // 16: size of ARGBFloat
-    g_texture_buffer.resize(bufsize);
-
-    // convert position data to float4 (x,y,z,pad ...)
-    abcV3 *src = data->positions;
-    abcV4 *buf = reinterpret_cast<abcV4*>(&g_texture_buffer[0]);
-    int count = data->count;
-    for (int i = 0; i < count; ++i) {
-        buf[i].x = src[i].x;
-        buf[i].y = src[i].y;
-        buf[i].z = src[i].z;
-    }
-
-    // copy to texture
-    aiGetGraphicsDevice()->writeTexture(tex, width, height, fmt, buf, bufsize);
-    return true;
+    return aiWriteTextureWithConversion(tex, width, height, fmt, data->positions, data->count,
+        [](void *dst, const abcV3 *src, int i) {
+            ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
+        });
 }
 
-// thread 'unsafe'
-aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt)
 {
     if (fmt != aiE_RInt)
     {
@@ -275,20 +261,9 @@ aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void
     }
     DebugLog("aiPointsCopyIDsToTexture():  width %d height %d format %d", width, height, fmt);
 
-    int bufsize = width * height * 4; // 4: size of RInt
-    g_texture_buffer.resize(bufsize);
-
-    // convert ID data to int32
-    uint64_t *src = data->ids;
-    int32_t *buf = reinterpret_cast<int32_t*>(&g_texture_buffer[0]);
-    int count = data->count;
-    for (int i = 0; i < count; ++i) {
-        buf[i] = static_cast<int32_t>(src[i]);
-    }
-
-    // copy to texture
-    aiGetGraphicsDevice()->writeTexture(tex, width, height, fmt, buf, bufsize);
-
-    return true;
+    return aiWriteTextureWithConversion(tex, width, height, fmt, data->ids, data->count,
+        [](void *dst, const uint64_t *src, int i) {
+            ((int32_t*)dst)[i] = (int32_t)(src[i]);
+        });
 }
 #endif // aiSupportTexture

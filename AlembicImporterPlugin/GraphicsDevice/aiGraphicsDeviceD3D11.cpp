@@ -13,12 +13,12 @@ public:
     ~aiGraphicsDeviceD3D11();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
-    bool writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void clearStagingTextures();
-    ID3D11Texture2D* findOrCreateStagingTexture(int width, int height, aiETextureFormat format);
+    ID3D11Texture2D* findOrCreateStagingTexture(int width, int height, aiRenderTextureFormat format);
 
 private:
     ID3D11Device *m_device;
@@ -64,7 +64,7 @@ void* aiGraphicsDeviceD3D11::getDevicePtr() { return m_device; }
 int aiGraphicsDeviceD3D11::getDeviceType() { return kGfxRendererD3D11; }
 
 
-static DXGI_FORMAT aiGetInternalFormatD3D11(aiETextureFormat fmt)
+static DXGI_FORMAT aiGetInternalFormatD3D11(aiRenderTextureFormat fmt)
 {
     switch (fmt)
     {
@@ -86,7 +86,7 @@ static DXGI_FORMAT aiGetInternalFormatD3D11(aiETextureFormat fmt)
 }
 
 
-ID3D11Texture2D* aiGraphicsDeviceD3D11::findOrCreateStagingTexture(int width, int height, aiETextureFormat format)
+ID3D11Texture2D* aiGraphicsDeviceD3D11::findOrCreateStagingTexture(int width, int height, aiRenderTextureFormat format)
 {
     if (m_stagingTextures.size() >= aiD3D11MaxStagingTextures) {
         clearStagingTextures();
@@ -124,7 +124,7 @@ void aiGraphicsDeviceD3D11::clearStagingTextures()
     m_stagingTextures.clear();
 }
 
-bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiETextureFormat format)
+bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiRenderTextureFormat format)
 {
     if (m_context == nullptr || tex_ == nullptr) { return false; }
     int psize = aiGetPixelSize(format);
@@ -173,7 +173,7 @@ bool aiGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_
     return false;
 }
 
-bool aiGraphicsDeviceD3D11::writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceD3D11::writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize)
 {
     int psize = aiGetPixelSize(format);
     int pitch = psize * width;

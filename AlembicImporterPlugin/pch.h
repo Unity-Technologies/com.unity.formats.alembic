@@ -74,6 +74,8 @@ typedef Imath::V4f     abcV4;
 typedef Imath::M44f    abcM44;
 typedef Abc::IObject   abcObject;
 
+enum aiRenderTextureFormat;
+
 struct  aiConfig;
 struct  aiCameraData;
 struct  aiXFormData;
@@ -94,7 +96,12 @@ class   aiPolyMesh;
 class   aiPolyMeshSample;
 class   aiPoints;
 class   aiPointsSample;
+struct  aiPointsSampleData;
 class   aiCurves;
 class   aiCurvesSample;
+struct  aiCurvesSampleData;
+class   aiSubD;
+class   aiSubDSample;
+struct  aiSubDSampleData;
 class   aiCamera;
 class   aiCameraSample;

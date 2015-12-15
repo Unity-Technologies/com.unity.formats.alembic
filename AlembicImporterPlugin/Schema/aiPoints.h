@@ -18,6 +18,25 @@ public:
     Abc::UInt64ArraySamplePtr m_ids;
 };
 
+struct aiPointsSampleData
+{
+    abcV3 *positions;
+    abcV3 *velocities;
+    uint64_t *ids;
+    int32_t count;
+
+    inline aiPointsSampleData()
+        : positions(nullptr)
+        , velocities(nullptr)
+        , ids(nullptr)
+        , count(0)
+    {
+    }
+
+    aiPointsSampleData(const aiPointsSampleData&) = default;
+    aiPointsSampleData& operator=(const aiPointsSampleData&) = default;
+};
+
 
 struct aiPointsTraits
 {
