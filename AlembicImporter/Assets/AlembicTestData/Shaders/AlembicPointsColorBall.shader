@@ -1,4 +1,4 @@
-Shader "Alembic/AlembicPointsColorBall" {
+Shader "Alembic/PointsColorBall" {
 Properties {
     _RMin("ColorRange R min", Range(0,1)) = 0.0
     _GMin("ColorRange G min", Range(0,1)) = 0.0
@@ -17,8 +17,7 @@ CGPROGRAM
 #pragma target 3.0
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 
-#include "UnityCG.cginc"
-#include "PseudoInstancing.cginc"
+#include "Assets/AlembicImporter/Shaders/PseudoInstancing.cginc"
 
 float _RMin;
 float _GMin;
