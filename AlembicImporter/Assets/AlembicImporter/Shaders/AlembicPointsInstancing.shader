@@ -1,4 +1,4 @@
-Shader "Alembic/AlembicPointsInstancing" {
+Shader "Alembic/PointsInstancing" {
 Properties {
     _Color ("Color", Color) = (1,1,1,1)
     _MainTex ("Albedo (RGB)", 2D) = "white" {}
@@ -30,8 +30,6 @@ struct Input {
     float2 uv_MainTex;
 };
 
-sampler2D g_instance_texture_id;
-
 
 void ApplyInstanceTransform(int instance_id, inout float4 vertex)
 {
@@ -40,7 +38,7 @@ void ApplyInstanceTransform(int instance_id, inout float4 vertex)
         return;
     }
     vertex.xyz *= GetModelScale();
-    vertex.xyz += GetInstanceTranslation(instance_id);
+    vertex.xyz += GetInstanceTranslation(instance_id) * GetTransScale();
 }
 
 void vert(inout appdata_full I, out Input O)

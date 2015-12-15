@@ -18,7 +18,6 @@ public class AlembicPointsRenderer : MonoBehaviour
 
     public Mesh m_mesh;
     public Material[] m_materials;
-    public LayerMask m_layer_selector = 1;
     public bool m_cast_shadow = false;
     public bool m_receive_shadow = false;
     public Vector3 m_model_scale = Vector3.one;
@@ -210,18 +209,6 @@ public class AlembicPointsRenderer : MonoBehaviour
             }
         }
 
-        int layer_mask = m_layer_selector.value;
-        for (int i = 0; i < 32; ++i)
-        {
-            if ((layer_mask & (1 << i)) != 0)
-            {
-                m_layer = i;
-                m_layer_selector.value = 1 << i;
-                break;
-            }
-        }
-
-
         var trans = GetComponent<Transform>();
         Vector3 scale = trans.localScale;
         m_expanded_mesh.bounds = new Bounds(trans.position,
@@ -249,12 +236,13 @@ public class AlembicPointsRenderer : MonoBehaviour
         });
 
         // issue draw calls
+        int layer = gameObject.layer;
         Matrix4x4 matrix = Matrix4x4.identity;
         m_actual_materials.ForEach(a =>
         {
             for (int i = 0; i < batch_count; ++i)
             {
-                Graphics.DrawMesh(m_expanded_mesh, matrix, a[i], m_layer, null, 0, null, m_cast_shadow, m_receive_shadow);
+                Graphics.DrawMesh(m_expanded_mesh, matrix, a[i], layer, null, 0, null, m_cast_shadow, m_receive_shadow);
             }
         });
     }
@@ -263,8 +251,8 @@ public class AlembicPointsRenderer : MonoBehaviour
 #if UNITY_EDITOR
     void Reset()
     {
-        //m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Ist/Foundation/Meshes/Cube.asset");
-        //m_material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Ist/MassParticle/CPUParticle/Materials/MPStandard.mat");
+        m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IcoSphere.asset");
+        m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicPointsDefault.mat") };
         m_bounds_size = Vector3.one * 2.0f;
     }
 #endif
