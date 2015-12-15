@@ -38,7 +38,7 @@ void* aiGetConversionBuffer(size_t size)
         g_conversion_buffer = new std::vector<char>();
     }
     g_conversion_buffer->resize(size);
-    return &g_conversion_buffer[0];
+    return &(*g_conversion_buffer)[0];
 }
 
 

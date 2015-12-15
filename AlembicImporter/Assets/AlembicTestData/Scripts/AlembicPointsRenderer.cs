@@ -10,6 +10,7 @@ using UnityEditor;
 #endif
 
 [ExecuteInEditMode]
+[AddComponentMenu("Alembic/PointsRenderer")]
 [RequireComponent(typeof(AlembicPoints))]
 public class AlembicPointsRenderer : MonoBehaviour
 {
