@@ -41,7 +41,7 @@ void ApplyInstanceTransform(int instance_id, inout float4 vertex)
         vertex.xyz *= 0.0;
         return;
     }
-    vertex.xyz *= GetBaseScale();
+    vertex.xyz *= GetModelScale();
     vertex.xyz += GetInstanceTranslation(instance_id);
 }
 

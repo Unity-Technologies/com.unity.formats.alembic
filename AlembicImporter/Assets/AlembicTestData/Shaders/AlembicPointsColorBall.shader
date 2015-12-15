@@ -4,8 +4,8 @@ Properties {
     _RMax("ColorRange R max", Range(0,1)) = 1.0
     _GMin("ColorRange G min", Range(0,1)) = 0.0
     _GMax("ColorRange G max", Range(0,1)) = 1.0
-    _BMin("ColorRange G min", Range(0,1)) = 0.0
-    _BMax("ColorRange G max", Range(0,1)) = 1.0
+    _BMin("ColorRange B min", Range(0,1)) = 0.0
+    _BMax("ColorRange B max", Range(0,1)) = 1.0
     _Emission("Emission", Range(0,1)) = 0.0
     _Glossiness ("Smoothness", Range(0,1)) = 0.5
     _Metallic("Metallic", Range(0,1)) = 0.0
@@ -46,8 +46,8 @@ void ApplyInstanceTransform(int instance_id, inout float4 vertex)
         vertex.xyz *= 0.0;
         return;
     }
-    vertex.xyz *= GetBaseScale();
-    vertex.xyz += GetInstanceTranslation(instance_id);
+    vertex.xyz *= GetModelScale();
+    vertex.xyz += GetInstanceTranslation(instance_id) * GetTransScale();
 }
 
 float3 iq_rand(float3 p)

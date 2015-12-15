@@ -22,14 +22,23 @@ public class AlembicPoints : AlembicElement
     public AbcAPI.aiPointsSampleData abcData { get { return m_abcData; } }
     public Vector3[] abcPositions { get { return m_abcPositions; } }
     public Int64[] abcIDs { get { return m_abcIDs; } }
-    public int abcPeakVertexCount { get { return m_abcPeakVertexCount; } }
+    public int abcPeakVertexCount
+    {
+        get {
+            if (m_abcPeakVertexCount == 0)
+            {
+                m_abcPeakVertexCount = AbcAPI.aiPointsGetPeakVertexCount(m_abcSchema);
+            }
+            return m_abcPeakVertexCount;
+        }
+    }
 
 
     // No config overrides on AlembicPoints
 
     public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
     {
-        if(m_abcPeakVertexCount == 0)
+        if(m_abcPositions == null)
         {
             m_abcPeakVertexCount = AbcAPI.aiPointsGetPeakVertexCount(m_abcSchema);
             m_abcPositions = new Vector3[m_abcPeakVertexCount];
