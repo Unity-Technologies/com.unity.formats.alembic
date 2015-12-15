@@ -1,10 +1,10 @@
 Shader "Alembic/AlembicPointsColorBall" {
 Properties {
     _RMin("ColorRange R min", Range(0,1)) = 0.0
-    _RMax("ColorRange R max", Range(0,1)) = 1.0
     _GMin("ColorRange G min", Range(0,1)) = 0.0
-    _GMax("ColorRange G max", Range(0,1)) = 1.0
     _BMin("ColorRange B min", Range(0,1)) = 0.0
+    _RMax("ColorRange R max", Range(0,1)) = 1.0
+    _GMax("ColorRange G max", Range(0,1)) = 1.0
     _BMax("ColorRange B max", Range(0,1)) = 1.0
     _Emission("Emission", Range(0,1)) = 0.0
     _Glossiness ("Smoothness", Range(0,1)) = 0.5
@@ -18,15 +18,13 @@ CGPROGRAM
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 
 #include "UnityCG.cginc"
-#include "Assets/Ist/Foundation/Shaders/Math.cginc"
-#include "Assets/Ist/Foundation/Shaders/Geometry.cginc"
-#include "Assets/Ist/BatchRenderer/Shaders/BatchRenderer.cginc"
+#include "PseudoInstancing.cginc"
 
 float _RMin;
-float _RMax;
 float _GMin;
-float _GMax;
 float _BMin;
+float _RMax;
+float _GMax;
 float _BMax;
 float _Emission;
 float _Glossiness;
@@ -37,8 +35,12 @@ struct Input {
     float4 color;
 };
 
-sampler2D g_instance_texture_id;
 
+float3 iq_rand(float3 p)
+{
+    p = float3(dot(p, float3(127.1, 311.7, 311.7)), dot(p, float3(269.5, 183.3, 183.3)), dot(p, float3(269.5, 183.3, 183.3)));
+    return frac(sin(p)*43758.5453);
+}
 
 void ApplyInstanceTransform(int instance_id, inout float4 vertex)
 {
@@ -50,24 +52,18 @@ void ApplyInstanceTransform(int instance_id, inout float4 vertex)
     vertex.xyz += GetInstanceTranslation(instance_id) * GetTransScale();
 }
 
-float3 iq_rand(float3 p)
-{
-    p = float3(dot(p, float3(127.1, 311.7, 311.7)), dot(p, float3(269.5, 183.3, 183.3)), dot(p, float3(269.5, 183.3, 183.3)));
-    return frac(sin(p)*43758.5453);
-}
-
 
 void vert(inout appdata_full I, out Input O)
 {
     UNITY_INITIALIZE_OUTPUT(Input, O);
 
-    int iid = GetBatchBegin() + I.texcoord1.x;
+    int iid = GetInstanceID(I.texcoord1.x);
     ApplyInstanceTransform(iid, I.vertex);
-    float abcid = tex2Dlod(g_instance_texture_id, InstanceTexcoord(iid)).xyz;
+    float objid = GetObjectID(iid);
 
     float3 cmin = float3(_RMin, _GMin, _BMin);
     float3 cmax = float3(_RMax, _GMax, _BMax);
-    float3 w = iq_rand(float3(abcid * 0.1328, abcid * 0.7532, abcid * 0.6753));
+    float3 w = iq_rand(float3(objid * 0.1328, objid * 0.7532, objid * 0.6753));
     O.color = float4(lerp(cmin, cmax, w), 0.0);
 }
 
