@@ -67,7 +67,7 @@ void vert(inout appdata_full I, out Input O)
 
     float3 cmin = float3(_RMin, _GMin, _BMin);
     float3 cmax = float3(_RMax, _GMax, _BMax);
-    float3 w = iq_rand(abcid * 0.1328, abcid * 0.7532, abcid * 0.6753);
+    float3 w = iq_rand(float3(abcid * 0.1328, abcid * 0.7532, abcid * 0.6753));
     O.color = float4(lerp(cmin, cmax, w), 0.0);
 }
 
