@@ -9,17 +9,39 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-//[ExecuteInEditMode]
+[ExecuteInEditMode]
 [AddComponentMenu("Alembic/PointsRenderer")]
 [RequireComponent(typeof(AlembicPoints))]
-public class AlembicPointsRenderer : Ist.BatchRendererBase
+public class AlembicPointsRenderer : MonoBehaviour
 {
     const int TextureWidth = 2048;
+
+    public Mesh m_mesh;
+    public Material[] m_materials;
+    public LayerMask m_layer_selector = 1;
+    public bool m_cast_shadow = false;
+    public bool m_receive_shadow = false;
+    public Vector3 m_model_scale = Vector3.one;
+    public Vector3 m_trans_scale = Vector3.one;
+    public Vector3 m_bounds_size = Vector3.one;
+
+    int m_instances_par_batch;
+    int m_layer;
+    Mesh m_expanded_mesh;
+    List<List<Material>> m_actual_materials;
+
     RenderTexture m_texPositions;
     RenderTexture m_texIDs;
 
 
-    public static RenderTexture CreateDataTexture(int w, int h, RenderTextureFormat f)
+    #region static
+
+    public static int ceildiv(int v, int d)
+    {
+        return v / d + (v % d == 0 ? 0 : 1);
+    }
+
+    static RenderTexture CreateDataTexture(int w, int h, RenderTextureFormat f)
     {
         RenderTexture r = new RenderTexture(w, h, 0, f);
         r.filterMode = FilterMode.Point;
@@ -29,20 +51,108 @@ public class AlembicPointsRenderer : Ist.BatchRendererBase
         return r;
     }
 
+    public const int MaxVertices = 65000; // Mesh's limitation
 
-    public override Material CloneMaterial(Material src, int nth)
+    public static Mesh CreateExpandedMesh(Mesh mesh, int required_instances, out int instances_par_batch)
+    {
+        Vector3[] vertices_base = mesh.vertices;
+        Vector3[] normals_base = (mesh.normals == null || mesh.normals.Length == 0) ? null : mesh.normals;
+        Vector4[] tangents_base = (mesh.tangents == null || mesh.tangents.Length == 0) ? null : mesh.tangents;
+        Vector2[] uv_base = (mesh.uv == null || mesh.uv.Length == 0) ? null : mesh.uv;
+        Color[] colors_base = (mesh.colors == null || mesh.colors.Length == 0) ? null : mesh.colors;
+        int[] indices_base = (mesh.triangles == null || mesh.triangles.Length == 0) ? null : mesh.triangles;
+        instances_par_batch = Mathf.Min(MaxVertices / mesh.vertexCount, required_instances);
+
+        Vector3[] vertices = new Vector3[vertices_base.Length * instances_par_batch];
+        Vector2[] idata = new Vector2[vertices_base.Length * instances_par_batch];
+        Vector3[] normals = normals_base == null ? null : new Vector3[normals_base.Length * instances_par_batch];
+        Vector4[] tangents = tangents_base == null ? null : new Vector4[tangents_base.Length * instances_par_batch];
+        Vector2[] uv = uv_base == null ? null : new Vector2[uv_base.Length * instances_par_batch];
+        Color[] colors = colors_base == null ? null : new Color[colors_base.Length * instances_par_batch];
+        int[] indices = indices_base == null ? null : new int[indices_base.Length * instances_par_batch];
+
+        for (int ii = 0; ii < instances_par_batch; ++ii)
+        {
+            for (int vi = 0; vi < vertices_base.Length; ++vi)
+            {
+                int i = ii * vertices_base.Length + vi;
+                vertices[i] = vertices_base[vi];
+                idata[i] = new Vector2((float)ii, (float)vi);
+            }
+            if (normals != null)
+            {
+                for (int vi = 0; vi < normals_base.Length; ++vi)
+                {
+                    int i = ii * normals_base.Length + vi;
+                    normals[i] = normals_base[vi];
+                }
+            }
+            if (tangents != null)
+            {
+                for (int vi = 0; vi < tangents_base.Length; ++vi)
+                {
+                    int i = ii * tangents_base.Length + vi;
+                    tangents[i] = tangents_base[vi];
+                }
+            }
+            if (uv != null)
+            {
+                for (int vi = 0; vi < uv_base.Length; ++vi)
+                {
+                    int i = ii * uv_base.Length + vi;
+                    uv[i] = uv_base[vi];
+                }
+            }
+            if (colors != null)
+            {
+                for (int vi = 0; vi < colors_base.Length; ++vi)
+                {
+                    int i = ii * colors_base.Length + vi;
+                    colors[i] = colors_base[vi];
+                }
+            }
+            if (indices != null)
+            {
+                for (int vi = 0; vi < indices_base.Length; ++vi)
+                {
+                    int i = ii * indices_base.Length + vi;
+                    indices[i] = ii * vertices_base.Length + indices_base[vi];
+                }
+            }
+
+        }
+        Mesh ret = new Mesh();
+        ret.vertices = vertices;
+        ret.normals = normals;
+        ret.tangents = tangents;
+        ret.uv = uv;
+        ret.colors = colors;
+        ret.uv2 = idata;
+        ret.triangles = indices;
+        return ret;
+    }
+
+    #endregion
+
+
+    void ForEachEveryMaterials(System.Action<Material> a)
+    {
+        m_actual_materials.ForEach((ma) => { ma.ForEach(v => { a(v); }); });
+    }
+
+    Material CloneMaterial(Material src, int nth)
     {
         Material m = new Material(src);
-        m.SetInt("g_batch_begin", nth * m_instances_par_batch);
-        m.SetTexture("g_instance_texture_t", m_texPositions);
-        m.SetTexture("g_instance_texture_id", m_texIDs);
+        m.SetInt("_BatchBegin", nth * m_instances_par_batch);
 
         Vector4 ts = new Vector4(
             1.0f / m_texPositions.width,
             1.0f / m_texPositions.height,
             m_texPositions.width,
             m_texPositions.height);
-        m.SetVector("g_texel_size", ts);
+        m.SetVector("_TexelSize", ts);
+        m.SetTexture("_PositionBuffer", m_texPositions);
+        m.SetTexture("_IDBuffer", m_texIDs);
 
         // fix rendering order for transparent objects
         if (m.renderQueue >= 3000)
@@ -52,26 +162,100 @@ public class AlembicPointsRenderer : Ist.BatchRendererBase
         return m;
     }
 
-
-    public virtual void ReleaseGPUResources()
+    public void Flush()
     {
-        ClearMaterials();
-    }
-
-    public virtual void ResetGPUResoures()
-    {
-        ReleaseGPUResources();
-        UpdateGPUResources();
-    }
-
-    public override void UpdateGPUResources()
-    {
-        ForEachEveryMaterials((v) =>
+        if(m_mesh == null)
         {
-            v.SetInt("g_num_max_instances", m_max_instances);
-            v.SetInt("g_num_instances", m_instance_count);
-            v.SetVector("g_model_scale", m_model_scale);
-            v.SetVector("g_trans_scale", m_trans_scale);
+            Debug.LogWarning("AlembicPointsRenderer: mesh is not assigned");
+            return;
+        }
+        if (m_materials == null || m_materials.Length==0 || (m_materials.Length==1 && m_materials[0]==null))
+        {
+            Debug.LogWarning("AlembicPointsRenderer: material is not assigned");
+            return;
+        }
+
+
+        var points = GetComponent<AlembicPoints>();
+        var abcData = points.abcData;
+        int max_instances = points.abcPeakVertexCount;
+        int instance_count = abcData.count;
+
+        if (instance_count == 0) { return; } // nothing to draw
+
+        // update data texture
+        if (m_texPositions == null)
+        {
+            int height = ceildiv(max_instances, TextureWidth);
+            m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
+            m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
+        }
+        AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, m_texPositions.format);
+        AbcAPI.aiPointsCopyIDsToTexture(ref abcData, m_texIDs.GetNativeTexturePtr(), m_texIDs.width, m_texIDs.height, m_texIDs.format);
+
+
+        if (m_expanded_mesh == null)
+        {
+            m_expanded_mesh = CreateExpandedMesh(m_mesh, max_instances, out m_instances_par_batch);
+            m_expanded_mesh.UploadMeshData(true);
+            return;
+        }
+
+        if (m_actual_materials == null)
+        {
+            m_actual_materials = new List<List<Material>>();
+            while (m_actual_materials.Count < m_materials.Length)
+            {
+                m_actual_materials.Add(new List<Material>());
+            }
+        }
+
+        int layer_mask = m_layer_selector.value;
+        for (int i = 0; i < 32; ++i)
+        {
+            if ((layer_mask & (1 << i)) != 0)
+            {
+                m_layer = i;
+                m_layer_selector.value = 1 << i;
+                break;
+            }
+        }
+
+
+        var trans = GetComponent<Transform>();
+        Vector3 scale = trans.localScale;
+        m_expanded_mesh.bounds = new Bounds(trans.position,
+            new Vector3(m_bounds_size.x * scale.x, m_bounds_size.y * scale.y, m_bounds_size.y * scale.y));
+        instance_count = Mathf.Min(instance_count, max_instances);
+        int batch_count = ceildiv(instance_count, m_instances_par_batch);
+
+        // clone materials if needed
+        for (int i = 0; i < m_actual_materials.Count; ++i)
+        {
+            var a = m_actual_materials[i];
+            while (a.Count < batch_count)
+            {
+                Material m = CloneMaterial(m_materials[i], a.Count);
+                a.Add(m);
+            }
+        }
+
+        // update materials
+        ForEachEveryMaterials((m) =>
+        {
+            m.SetInt("_NumInstances", instance_count);
+            m.SetVector("_ModelScale", m_model_scale);
+            m.SetVector("_TransScale", m_trans_scale);
+        });
+
+        // issue draw calls
+        Matrix4x4 matrix = Matrix4x4.identity;
+        m_actual_materials.ForEach(a =>
+        {
+            for (int i = 0; i < batch_count; ++i)
+            {
+                Graphics.DrawMesh(m_expanded_mesh, matrix, a[i], m_layer, null, 0, null, m_cast_shadow, m_receive_shadow);
+            }
         });
     }
 
@@ -79,51 +263,41 @@ public class AlembicPointsRenderer : Ist.BatchRendererBase
 #if UNITY_EDITOR
     void Reset()
     {
-        m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Ist/Foundation/Meshes/Cube.asset");
-        m_material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Ist/MassParticle/CPUParticle/Materials/MPStandard.mat");
+        //m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Ist/Foundation/Meshes/Cube.asset");
+        //m_material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Ist/MassParticle/CPUParticle/Materials/MPStandard.mat");
         m_bounds_size = Vector3.one * 2.0f;
     }
 #endif
 
-    public override void OnEnable()
+    void OnDisable()
     {
-        var points = GetComponent<AlembicPoints>();
-        int abcPeakVertexCount = points.abcPeakVertexCount;
-
-        if (m_texPositions == null)
+        if(m_actual_materials != null)
         {
-            int height = abcPeakVertexCount / TextureWidth + 1;
-            m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
-            m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
+            m_actual_materials.ForEach(a => { a.Clear(); });
         }
-
-        m_max_instances = abcPeakVertexCount;
-
-        base.OnEnable();
-        ResetGPUResoures();
-    }
-
-    public override void OnDisable()
-    {
-        base.OnDisable();
-        ReleaseGPUResources();
-    }
-
-    public override void LateUpdate()
-    {
-        m_bounds_size = Vector3.one * 2.0f;
-        var points = GetComponent<AlembicPoints>();
-        var abcData = points.abcData;
-        if (abcData.count > 0) {
-            AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, m_texPositions.format);
-            AbcAPI.aiPointsCopyIDsToTexture(ref abcData, m_texIDs.GetNativeTexturePtr(), m_texIDs.width, m_texIDs.height, m_texIDs.format);
-
-            m_instance_count = points.abcPeakVertexCount;
-            base.LateUpdate();
+        if (m_texPositions != null)
+        {
+            m_texPositions.Release();
+            m_texPositions = null;
+        }
+        if (m_texIDs != null)
+        {
+            m_texIDs.Release();
+            m_texIDs = null;
         }
     }
 
-    public override void OnDrawGizmos()
+    void LateUpdate()
     {
+        Flush();
+    }
+
+    void OnDrawGizmos()
+    {
+        Transform t = GetComponent<Transform>();
+        Vector3 s = t.localScale;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(t.position, new Vector3(m_bounds_size.x * s.x, m_bounds_size.y * s.y, m_bounds_size.z * s.z));
     }
 }

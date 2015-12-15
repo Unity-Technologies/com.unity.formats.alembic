@@ -14,9 +14,7 @@ CGPROGRAM
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 
 #include "UnityCG.cginc"
-#include "Assets/Ist/Foundation/Shaders/Math.cginc"
-#include "Assets/Ist/Foundation/Shaders/Geometry.cginc"
-#include "Assets/Ist/BatchRenderer/Shaders/BatchRenderer.cginc"
+#include "PseudoInstancing.cginc"
 
 sampler2D _MainTex;
 sampler2D _NormalMap;
@@ -25,8 +23,8 @@ sampler2D _SpecularMap;
 sampler2D _GrossMap;
 half _Glossiness;
 half _Metallic;
-fixed4 _Color;
-fixed4 _Emission;
+half4 _Color;
+half4 _Emission;
 
 struct Input {
     float2 uv_MainTex;
@@ -49,7 +47,7 @@ void vert(inout appdata_full I, out Input O)
 {
     UNITY_INITIALIZE_OUTPUT(Input, O);
 
-    int iid = GetBatchBegin() + I.texcoord1.x;
+    int iid = GetInstanceID(I.texcoord1.x);
     ApplyInstanceTransform(iid, I.vertex);
 
     O.uv_MainTex = float4(I.texcoord.xy, 0.0, 0.0);
