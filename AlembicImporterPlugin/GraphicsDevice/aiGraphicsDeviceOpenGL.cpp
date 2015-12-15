@@ -22,8 +22,8 @@ public:
     ~aiGraphicsDeviceOpenGL();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
-    bool writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void *m_device;
@@ -50,7 +50,7 @@ aiGraphicsDeviceOpenGL::~aiGraphicsDeviceOpenGL()
 }
 
 
-static void fcGetInternalFormatOpenGL(aiETextureFormat format, GLenum &outFmt, GLenum &outType)
+static void fcGetInternalFormatOpenGL(aiRenderTextureFormat format, GLenum &outFmt, GLenum &outType)
 {
     switch (format)
     {
@@ -70,7 +70,7 @@ static void fcGetInternalFormatOpenGL(aiETextureFormat format, GLenum &outFmt, G
     }
 }
 
-bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format)
+bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format)
 {
     GLenum internalFormat = 0;
     GLenum internalType = 0;
@@ -86,7 +86,7 @@ bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex
     return true;
 }
 
-bool aiGraphicsDeviceOpenGL::writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceOpenGL::writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize)
 {
     GLenum internalFormat = 0;
     GLenum internalType = 0;

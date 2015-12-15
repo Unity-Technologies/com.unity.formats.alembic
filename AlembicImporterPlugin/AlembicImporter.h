@@ -11,9 +11,6 @@
 // #define aiWithTBB
 
 #include "pch.h"
-#ifdef aiSupportTexture
-    #include "GraphicsDevice/aiGraphicsDevice.h"
-#endif // aiSupportTexture
 
 enum aiNormalsMode
 {
@@ -234,26 +231,6 @@ struct aiFacesets
 };
 
 
-struct aiPointsSampleData
-{
-    abcV3 *positions;
-    abcV3 *velocities;
-    uint64_t *ids;
-    int32_t count;
-
-    inline aiPointsSampleData()
-        : positions(nullptr)
-        , velocities(nullptr)
-        , ids(nullptr)
-        , count(0)
-    {
-    }
-
-    aiPointsSampleData(const aiPointsSampleData&) = default;
-    aiPointsSampleData& operator=(const aiPointsSampleData&) = default;
-};
-
-
 #ifdef _WIN32
 typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userData);
 typedef void (__stdcall *aiConfigCallback)(void *csObj, aiConfig *config);
@@ -313,8 +290,8 @@ aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
 aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
 #ifdef aiSupportTexture
-aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt);
-aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiETextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt);
 #endif // aiSupportTexture
 
 #endif // AlembicImporter_h

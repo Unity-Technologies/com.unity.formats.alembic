@@ -5,7 +5,7 @@
 #include "aiGraphicsDevice.h"
 
 
-int aiGetPixelSize(aiETextureFormat format)
+int aiGetPixelSize(aiRenderTextureFormat format)
 {
     switch (format)
     {
@@ -25,6 +25,22 @@ int aiGetPixelSize(aiETextureFormat format)
     }
     return 0;
 }
+
+
+namespace {
+    thread_local std::vector<char> *g_conversion_buffer;
+}
+
+void* aiGetConversionBuffer(size_t size)
+{
+    if (g_conversion_buffer == nullptr)
+    {
+        g_conversion_buffer = new std::vector<char>();
+    }
+    g_conversion_buffer->resize(size);
+    return &g_conversion_buffer[0];
+}
+
 
 
 aiIGraphicsDevice* aiCreateGraphicsDeviceOpenGL(void *device);
@@ -111,7 +127,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
         if (m) {
             auto proc = (aiGetGraphicsDeviceT)::GetProcAddress(m, "aiGetGraphicsDevice");
             if (proc) {
-                aiGraphicsDevice *dev = proc();
+                aiIGraphicsDevice *dev = proc();
                 if (dev) {
                     UnitySetGraphicsDevice(dev->getDevicePtr(), dev->getDeviceType(), kGfxDeviceEventInitialize);
                 }

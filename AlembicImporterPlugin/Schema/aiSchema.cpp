@@ -4,9 +4,6 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
-#include "aiCamera.h"
-#include "aiPolyMesh.h"
-#include "aiXForm.h"
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
