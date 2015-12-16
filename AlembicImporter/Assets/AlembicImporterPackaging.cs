@@ -15,8 +15,7 @@ public class AlembicImporterPackaging
     {
         string[] files = new string[]
         {
-"Assets/AlembicImporter/Scripts",
-"Assets/Plugins",
+"Assets/AlembicImporter",
         };
         AssetDatabase.ExportPackage(files, "AlembicImporter.unitypackage", ExportPackageOptions.Recurse);
     }
