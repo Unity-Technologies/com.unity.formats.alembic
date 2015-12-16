@@ -60,4 +60,15 @@ public class AlembicPoints : AlembicElement
             AbcClean();
         }
     }
+
+
+    void Reset()
+    {
+        // add renderer
+        var c = gameObject.GetComponent<AlembicPointsRenderer>();
+        if (c == null)
+        {
+            c = gameObject.AddComponent<AlembicPointsRenderer>();
+        }
+    }
 }
