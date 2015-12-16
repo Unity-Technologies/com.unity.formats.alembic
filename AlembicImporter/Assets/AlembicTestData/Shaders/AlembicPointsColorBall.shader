@@ -1,17 +1,15 @@
 Shader "Alembic/PointsColorBall" {
 Properties {
-    _RMin("ColorRange R min", Range(0,1)) = 0.0
-    _GMin("ColorRange G min", Range(0,1)) = 0.0
-    _BMin("ColorRange B min", Range(0,1)) = 0.0
-    _RMax("ColorRange R max", Range(0,1)) = 1.0
-    _GMax("ColorRange G max", Range(0,1)) = 1.0
-    _BMax("ColorRange B max", Range(0,1)) = 1.0
+    _ColorBuffer("Color", 2D) = "white" {}
+    _RandomBuffer("Random", 2D) = "white" {}
+    _RandomDiffuse("Random Diffuse", Float) = 0.0
+
     _Emission("Emission", Range(0,1)) = 0.0
     _Glossiness ("Smoothness", Range(0,1)) = 0.5
     _Metallic("Metallic", Range(0,1)) = 0.0
 }
-SubShader {
-    Tags { "RenderType"="Opaque" "Queue"="Geometry+1" }
+SubShader{
+    Tags { "RenderType" = "Opaque" "Queue" = "Geometry+1" }
 
 CGPROGRAM
 #pragma target 3.0
@@ -19,26 +17,30 @@ CGPROGRAM
 
 #include "Assets/AlembicImporter/Shaders/PseudoInstancing.cginc"
 
-float _RMin;
-float _GMin;
-float _BMin;
-float _RMax;
-float _GMax;
-float _BMax;
+sampler2D _RandomBuffer;
+sampler2D _ColorBuffer;
+float4 _RandomBuffer_TexelSize;
+float4 _ColorBuffer_TexelSize;
+
 float _Emission;
 float _Glossiness;
 float _Metallic;
-
+float _RandomDiffuse;
 
 struct Input {
     float4 color;
 };
 
 
-float3 iq_rand(float3 p)
+float4 Random(float iid)
 {
-    p = float3(dot(p, float3(127.1, 311.7, 311.7)), dot(p, float3(269.5, 183.3, 183.3)), dot(p, float3(269.5, 183.3, 183.3)));
-    return frac(sin(p)*43758.5453);
+    float4 coord = float4(_RandomBuffer_TexelSize.xy * float2(iid, iid * _RandomBuffer_TexelSize.x), 0.0, 0.0);
+    return tex2Dlod(_RandomBuffer, coord) * 2.0 - 1.0;
+}
+
+float4 GetColor(float random)
+{
+    return tex2Dlod(_ColorBuffer, float4(random, 0.0, 0.0, 0.0));
 }
 
 void ApplyInstanceTransform(int instance_id, inout float4 vertex)
@@ -57,13 +59,13 @@ void vert(inout appdata_full I, out Input O)
     UNITY_INITIALIZE_OUTPUT(Input, O);
 
     int iid = GetInstanceID(I.texcoord1.x);
-    ApplyInstanceTransform(iid, I.vertex);
     float objid = GetObjectID(iid);
+    float4 rand = Random(iid);
 
-    float3 cmin = float3(_RMin, _GMin, _BMin);
-    float3 cmax = float3(_RMax, _GMax, _BMax);
-    float3 w = iq_rand(float3(objid * 0.1328, objid * 0.7532, objid * 0.6753));
-    O.color = float4(lerp(cmin, cmax, w), 0.0);
+    ApplyInstanceTransform(iid, I.vertex);
+    I.vertex.xyz += rand.xyz * _RandomDiffuse;
+
+    O.color = GetColor(rand.x);
 }
 
 void surf(Input I, inout SurfaceOutputStandard O)
