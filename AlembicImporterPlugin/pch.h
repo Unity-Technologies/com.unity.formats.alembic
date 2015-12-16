@@ -74,7 +74,7 @@ typedef Imath::V4f     abcV4;
 typedef Imath::M44f    abcM44;
 typedef Abc::IObject   abcObject;
 
-enum aiRenderTextureFormat;
+enum aiTextureFormat;
 
 struct  aiConfig;
 struct  aiCameraData;

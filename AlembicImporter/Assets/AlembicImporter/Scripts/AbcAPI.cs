@@ -72,6 +72,22 @@ public class AbcAPI
         Heterogeneous
     }
 
+    public enum aiTextureFormat
+    {
+        Unknown,
+        ARGB32,
+        ARGB2101010,
+        RHalf,
+        RGHalf,
+        ARGBHalf,
+        RFloat,
+        RGFloat,
+        ARGBFloat,
+        RInt,
+        RGInt,
+        ARGBInt,
+    }
+
     public delegate void aiNodeEnumerator(aiObject obj, IntPtr userData);
     public delegate void aiConfigCallback(IntPtr _this, ref aiConfig config);
     public delegate void aiSampleCallback(IntPtr _this, aiSample sample, bool topologyChanged);
@@ -246,10 +262,10 @@ public class AbcAPI
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern void        aiPointsGetData(aiSample sample, ref aiPointsSampleData data);
-    // currently tex must be ARGBFloat RenderTexture
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, RenderTextureFormat fmt);
-    // currently tex must be RInt RenderTexture
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, RenderTextureFormat fmt);
+    // currently tex must be ARGBFloat
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
+    // currently tex must be RInt
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
 
 
     class ImportContext
@@ -437,6 +453,40 @@ public class AbcAPI
             c = go.AddComponent<T>();
         }
         return c;
+    }
+
+
+    public static aiTextureFormat GetTextureFormat(RenderTexture v)
+    {
+        switch (v.format)
+        {
+            case RenderTextureFormat.ARGB32:    return aiTextureFormat.ARGB32;
+            case RenderTextureFormat.RHalf:     return aiTextureFormat.RHalf;
+            case RenderTextureFormat.RGHalf:    return aiTextureFormat.RGHalf;
+            case RenderTextureFormat.ARGBHalf:  return aiTextureFormat.ARGBHalf;
+            case RenderTextureFormat.RFloat:    return aiTextureFormat.RFloat;
+            case RenderTextureFormat.RGFloat:   return aiTextureFormat.RGFloat;
+            case RenderTextureFormat.ARGBFloat: return aiTextureFormat.ARGBFloat;
+            case RenderTextureFormat.RInt:      return aiTextureFormat.RInt;
+            case RenderTextureFormat.RGInt:     return aiTextureFormat.RGInt;
+            case RenderTextureFormat.ARGBInt:   return aiTextureFormat.ARGBInt;
+        }
+        return aiTextureFormat.Unknown;
+    }
+
+    public static aiTextureFormat GetTextureFormat(Texture2D v)
+    {
+        switch (v.format)
+        {
+            case TextureFormat.ARGB32:      return aiTextureFormat.ARGB32;
+            case TextureFormat.RHalf:       return aiTextureFormat.RHalf;
+            case TextureFormat.RGHalf:      return aiTextureFormat.RGHalf;
+            case TextureFormat.RGBAHalf:    return aiTextureFormat.ARGBHalf;
+            case TextureFormat.RFloat:      return aiTextureFormat.RFloat;
+            case TextureFormat.RGFloat:     return aiTextureFormat.RGFloat;
+            case TextureFormat.RGBAFloat:   return aiTextureFormat.ARGBFloat;
+        }
+        return aiTextureFormat.Unknown;
     }
 }
 

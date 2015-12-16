@@ -189,8 +189,8 @@ public class AlembicPointsRenderer : MonoBehaviour
             m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
             m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
         }
-        AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, m_texPositions.format);
-        AbcAPI.aiPointsCopyIDsToTexture(ref abcData, m_texIDs.GetNativeTexturePtr(), m_texIDs.width, m_texIDs.height, m_texIDs.format);
+        AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, AbcAPI.GetTextureFormat(m_texPositions));
+        AbcAPI.aiPointsCopyIDsToTexture(ref abcData, m_texIDs.GetNativeTexturePtr(), m_texIDs.width, m_texIDs.height, AbcAPI.GetTextureFormat(m_texIDs));
 
 
         if (m_expanded_mesh == null)
