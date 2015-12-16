@@ -8,7 +8,7 @@ aePolyMesh::aePolyMesh(aeObject *obj)
 
 }
 
-void aePolyMesh::writeSample(aePolyMeshSampleData &data)
+void aePolyMesh::writeSample(const aePolyMeshSampleData &data)
 {
 
 }

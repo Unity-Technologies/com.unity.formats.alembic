@@ -9,7 +9,7 @@ class aeCamera : public aeSchemaBase
 {
 public:
     aeCamera(aeObject *obj);
-    void writeSample(aeCameraSampleData &data);
+    void writeSample(const aeCameraSampleData &data);
 
 private:
     AbcGeom::OCamera m_abcobj;

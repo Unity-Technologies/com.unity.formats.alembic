@@ -18,7 +18,7 @@ class aePoints : public aeSchemaBase
 {
 public:
     aePoints(aeObject *obj);
-    void writeSample(aePointsSampleData &data);
+    void writeSample(const aePointsSampleData &data);
 
 private:
     AbcGeom::OPoints m_abcobj;

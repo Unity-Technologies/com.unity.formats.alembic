@@ -20,18 +20,28 @@ struct aeConfig
 class aeContext
 {
 public:
-    aeContext(aeConfig &conf);
+    typedef std::vector<aeObject*> NodeCont;
+    typedef NodeCont::iterator NodeIter;
+
+    aeContext(const aeConfig &conf);
     ~aeContext();
     void reset();
     bool openArchive(const char *path);
 
     aeObject* getTopObject();
+    aeObject* createObject(aeObject *parent, const char *name);
+    void destroyObject(aeObject *obj);
+
+    void setTime(float time);
 
 private:
-    std::string m_path;
+    bool destroyObject(aeObject *obj, NodeIter searchFrom, NodeIter &next);
+
+private:
+    aeConfig m_config;
     Abc::OArchive m_archive;
     std::vector<aeObject*> m_nodes;
-    aeConfig m_config;
+    std::vector<abcChrono> m_times;
 };
 
 #endif // aeContext_h

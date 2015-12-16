@@ -7,7 +7,7 @@ aeCamera::aeCamera(aeObject *obj)
 {
 }
 
-void aeCamera::writeSample(aeCameraSampleData &data)
+void aeCamera::writeSample(const aeCameraSampleData &data)
 {
 
 }
