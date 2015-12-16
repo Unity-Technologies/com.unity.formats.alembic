@@ -247,19 +247,9 @@ public class AlembicPointsRenderer : MonoBehaviour
         });
     }
 
-
-#if UNITY_EDITOR
-    void Reset()
+    void ReleaseGPUResoureces()
     {
-        m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IcoSphere.asset");
-        m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicPointsDefault.mat") };
-        m_bounds_size = Vector3.one * 2.0f;
-    }
-#endif
-
-    void OnDisable()
-    {
-        if(m_actual_materials != null)
+        if (m_actual_materials != null)
         {
             m_actual_materials.ForEach(a => { a.Clear(); });
         }
@@ -273,6 +263,27 @@ public class AlembicPointsRenderer : MonoBehaviour
             m_texIDs.Release();
             m_texIDs = null;
         }
+    }
+
+
+#if UNITY_EDITOR
+    void Reset()
+    {
+        m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IcoSphere.asset");
+        m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicPointsDefault.mat") };
+        m_bounds_size = Vector3.one * 2.0f;
+        ReleaseGPUResoureces();
+    }
+
+    void OnValidate()
+    {
+        ReleaseGPUResoureces();
+    }
+#endif
+
+    void OnDisable()
+    {
+        ReleaseGPUResoureces();
     }
 
     void LateUpdate()
