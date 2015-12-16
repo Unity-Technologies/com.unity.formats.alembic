@@ -207,6 +207,8 @@ public class AbcAPI
         public IntPtr positions;
         public IntPtr velocities;
         public IntPtr ids;
+        public Vector3 boundsCenter;
+        public Vector3 boundsExtents;
         public int count;
     }
 
