@@ -151,13 +151,6 @@ public class AlembicPointsRenderer : MonoBehaviour
     {
         Material m = new Material(src);
         m.SetInt("_BatchBegin", nth * m_instances_par_batch);
-
-        Vector4 ts = new Vector4(
-            1.0f / m_texPositions.width,
-            1.0f / m_texPositions.height,
-            m_texPositions.width,
-            m_texPositions.height);
-        m.SetVector("_TexelSize", ts);
         m.SetTexture("_PositionBuffer", m_texPositions);
         m.SetTexture("_IDBuffer", m_texIDs);
 
