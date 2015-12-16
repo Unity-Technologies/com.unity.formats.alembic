@@ -9,7 +9,7 @@ class aePolyMesh : public aeSchemaBase
 {
 public:
     aePolyMesh(aeObject *obj);
-    void writeSample(aePolyMeshSampleData &data);
+    void writeSample(const aePolyMeshSampleData &data);
 
 private:
     AbcGeom::OPolyMesh m_abcobj;

@@ -25,7 +25,7 @@ class aeXForm : public aeSchemaBase
 {
 public:
     aeXForm(aeObject *obj);
-    void writeSample(aeXFormSampleData &data);
+    void writeSample(const aeXFormSampleData &data);
 
 private:
     AbcGeom::OXform m_abcobj;

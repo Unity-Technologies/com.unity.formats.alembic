@@ -10,7 +10,7 @@ aeXForm::aeXForm(aeObject *obj)
 
 }
 
-void aeXForm::writeSample(aeXFormSampleData &data)
+void aeXForm::writeSample(const aeXFormSampleData &data)
 {
 
 }

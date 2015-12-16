@@ -6,6 +6,7 @@
 
 #define aeCLinkage  aiCLinkage
 #define aeExport    aiExport
+#define aeDebugLog(...) 
 
 struct aeConfig;
 
@@ -22,11 +23,11 @@ struct aePolyMeshSampleData;
 struct aeCameraSampleData;
 
 aeCLinkage aeExport void            aeCleanup();
-aeCLinkage aeExport aeContext*      aeCreateContext(int uid);
+aeCLinkage aeExport aeContext*      aeCreateContext(const aeConfig *conf);
 aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 
-aeCLinkage aeExport aeObject*       aeCreateTopObject(aeContext* ctx);
+aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
 aeCLinkage aeExport aeObject*       aeCreateObject(aeObject *parent, const char *name);
 aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time);
 

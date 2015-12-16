@@ -5,6 +5,7 @@ class aeObject
 {
 public:
     aeObject(aeContext *ctx, AbcGeom::OObject &abc, const char *name);
+    aeObject(aeObject *parent, const char *name);
     ~aeObject();
 
     const char* getName() const;

@@ -8,26 +8,25 @@
 
 aeObject::aeObject(aeContext *ctx, AbcGeom::OObject &abc, const char *name)
     : m_ctx(ctx)
+    , m_parent(nullptr)
     , m_abc(abc)
 {
 
 }
 
+aeObject::aeObject(aeObject *parent, const char *name)
+    : m_ctx(parent->m_ctx)
+    , m_parent(parent)
+    , m_abc(parent->m_abc, name)
+{
+}
+
 aeObject::~aeObject()
 {
-
 }
 
-const char* aeObject::getName() const
-{
-
-}
-
-const char* aeObject::getFullName() const
-{
-
-}
-
+const char* aeObject::getName() const           { return m_abc.getName().c_str(); }
+const char* aeObject::getFullName() const       { return m_abc.getFullName().c_str(); }
 uint32_t    aeObject::getNumChildren() const    { return m_children.size(); }
 aeObject*   aeObject::getChild(int i)           { return m_children[i]; }
 aeObject*   aeObject::getParent()               { return m_parent; }
@@ -56,13 +55,28 @@ aeXForm& aeObject::addXForm()
 
 aePolyMesh& aeObject::addPolyMesh()
 {
+    if (m_polymesh != nullptr) { return *m_polymesh; }
+
+    m_polymesh.reset(new aePolyMesh(this));
+    m_schemas.push_back(m_polymesh.get());
+    return *m_polymesh;
 }
 
 aeCamera& aeObject::addCamera()
 {
+    if (m_camera != nullptr) { return *m_camera; }
+
+    m_camera.reset(new aeCamera(this));
+    m_schemas.push_back(m_camera.get());
+    return *m_camera;
 }
 
 aePoints& aeObject::addPoints()
 {
+    if (m_xform != nullptr) { return *m_points; }
+
+    m_points.reset(new aePoints(this));
+    m_schemas.push_back(m_points.get());
+    return *m_points;
 }
 
