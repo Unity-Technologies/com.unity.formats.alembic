@@ -74,20 +74,28 @@ public class AlembicStreamSync : MonoBehaviour
       m_lastTime = 0.0f;
    }
 
+   // Added so that AlembicStreamSync can be used recursively
+   void AbcUpdate(float time)
+   {
+      m_time = time;
+      
+      if (Math.Abs(time - m_lastTime) > m_timeEps)
+      {
+         foreach (SyncItem item in m_streams)
+         {
+            item.Sync(time);
+         }
+         
+         m_lastTime = time;
+      }
+   }
+
    void Update()
    {
       // Do not trigger stream update if we're in play mode
       if (!Application.isPlaying)
       {
-         if (Math.Abs(m_time - m_lastTime) > m_timeEps)
-         {
-            foreach (SyncItem item in m_streams)
-            {
-               item.Sync(m_time);
-            }
-            
-            m_lastTime = m_time;
-         }
+         AbcUpdate(m_time);
       }
    }
 }
