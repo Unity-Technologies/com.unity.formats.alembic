@@ -237,9 +237,9 @@ aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleD
 
 #include "GraphicsDevice/aiGraphicsDevice.h"
 
-aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt)
 {
-    if (fmt == aiE_ARGBFloat)
+    if (fmt == aiTextureFormat_ARGBFloat)
     {
         return aiWriteTextureWithConversion(tex, width, height, fmt, data->positions, data->count,
             [](void *dst, const abcV3 *src, int i) {
@@ -252,16 +252,16 @@ aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data
     }
 }
 
-aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt)
 {
-    if (fmt == aiE_RInt)
+    if (fmt == aiTextureFormat_RInt)
     {
         return aiWriteTextureWithConversion(tex, width, height, fmt, data->ids, data->count,
             [](void *dst, const uint64_t *src, int i) {
                 ((int32_t*)dst)[i] = (int32_t)(src[i]);
             });
     }
-    else if (fmt == aiE_RFloat)
+    else if (fmt == aiTextureFormat_RFloat)
     {
         return aiWriteTextureWithConversion(tex, width, height, fmt, data->ids, data->count,
             [](void *dst, const uint64_t *src, int i) {

@@ -22,8 +22,8 @@ public:
     ~aiGraphicsDeviceOpenGL();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format) override;
-    bool writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiTextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiTextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void *m_device;
@@ -50,27 +50,27 @@ aiGraphicsDeviceOpenGL::~aiGraphicsDeviceOpenGL()
 }
 
 
-static void fcGetInternalFormatOpenGL(aiRenderTextureFormat format, GLenum &outFmt, GLenum &outType)
+static void fcGetInternalFormatOpenGL(aiTextureFormat format, GLenum &outFmt, GLenum &outType)
 {
     switch (format)
     {
-    case aiE_ARGB32:    outFmt = GL_RGBA; outType = GL_UNSIGNED_BYTE; return;
+    case aiTextureFormat_ARGB32:    outFmt = GL_RGBA; outType = GL_UNSIGNED_BYTE; return;
 
-    case aiE_ARGBHalf:  outFmt = GL_RGBA; outType = GL_HALF_FLOAT; return;
-    case aiE_RGHalf:    outFmt = GL_RG; outType = GL_HALF_FLOAT; return;
-    case aiE_RHalf:     outFmt = GL_RED; outType = GL_HALF_FLOAT; return;
+    case aiTextureFormat_ARGBHalf:  outFmt = GL_RGBA; outType = GL_HALF_FLOAT; return;
+    case aiTextureFormat_RGHalf:    outFmt = GL_RG; outType = GL_HALF_FLOAT; return;
+    case aiTextureFormat_RHalf:     outFmt = GL_RED; outType = GL_HALF_FLOAT; return;
 
-    case aiE_ARGBFloat: outFmt = GL_RGBA; outType = GL_FLOAT; return;
-    case aiE_RGFloat:   outFmt = GL_RG; outType = GL_FLOAT; return;
-    case aiE_RFloat:    outFmt = GL_RED; outType = GL_FLOAT; return;
+    case aiTextureFormat_ARGBFloat: outFmt = GL_RGBA; outType = GL_FLOAT; return;
+    case aiTextureFormat_RGFloat:   outFmt = GL_RG; outType = GL_FLOAT; return;
+    case aiTextureFormat_RFloat:    outFmt = GL_RED; outType = GL_FLOAT; return;
 
-    case aiE_ARGBInt:   outFmt = GL_RGBA_INTEGER; outType = GL_INT; return;
-    case aiE_RGInt:     outFmt = GL_RG_INTEGER; outType = GL_INT; return;
-    case aiE_RInt:      outFmt = GL_RED_INTEGER; outType = GL_INT; return;
+    case aiTextureFormat_ARGBInt:   outFmt = GL_RGBA_INTEGER; outType = GL_INT; return;
+    case aiTextureFormat_RGInt:     outFmt = GL_RG_INTEGER; outType = GL_INT; return;
+    case aiTextureFormat_RInt:      outFmt = GL_RED_INTEGER; outType = GL_INT; return;
     }
 }
 
-bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format)
+bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiTextureFormat format)
 {
     GLenum internalFormat = 0;
     GLenum internalType = 0;
@@ -86,7 +86,7 @@ bool aiGraphicsDeviceOpenGL::readTexture(void *outBuf, size_t bufsize, void *tex
     return true;
 }
 
-bool aiGraphicsDeviceOpenGL::writeTexture(void *outTex, int width, int height, aiRenderTextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceOpenGL::writeTexture(void *outTex, int width, int height, aiTextureFormat format, const void *buf, size_t bufsize)
 {
     GLenum internalFormat = 0;
     GLenum internalType = 0;

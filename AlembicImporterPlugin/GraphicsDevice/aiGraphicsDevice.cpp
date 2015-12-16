@@ -5,23 +5,23 @@
 #include "aiGraphicsDevice.h"
 
 
-int aiGetPixelSize(aiRenderTextureFormat format)
+int aiGetPixelSize(aiTextureFormat format)
 {
     switch (format)
     {
-    case aiE_ARGB32:    return 4;
+    case aiTextureFormat_ARGB32:    return 4;
 
-    case aiE_ARGBHalf:  return 8;
-    case aiE_RGHalf:    return 4;
-    case aiE_RHalf:     return 2;
+    case aiTextureFormat_ARGBHalf:  return 8;
+    case aiTextureFormat_RGHalf:    return 4;
+    case aiTextureFormat_RHalf:     return 2;
 
-    case aiE_ARGBFloat: return 16;
-    case aiE_RGFloat:   return 8;
-    case aiE_RFloat:    return 4;
+    case aiTextureFormat_ARGBFloat: return 16;
+    case aiTextureFormat_RGFloat:   return 8;
+    case aiTextureFormat_RFloat:    return 4;
 
-    case aiE_ARGBInt:   return 16;
-    case aiE_RGInt:     return 8;
-    case aiE_RInt:      return 4;
+    case aiTextureFormat_ARGBInt:   return 16;
+    case aiTextureFormat_RGInt:     return 8;
+    case aiTextureFormat_RInt:      return 4;
     }
     return 0;
 }

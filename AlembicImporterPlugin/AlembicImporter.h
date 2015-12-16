@@ -290,8 +290,8 @@ aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
 aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
 #ifdef aiSupportTexture
-aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt);
-aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiRenderTextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);
 #endif // aiSupportTexture
 
 #endif // AlembicImporter_h

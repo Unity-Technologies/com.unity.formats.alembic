@@ -28,27 +28,20 @@ enum GfxDeviceEventType {
 };
 
 
-enum aiRenderTextureFormat
+enum aiTextureFormat
 {
-    aiE_ARGB32 = 0,
-    aiE_Depth = 1,
-    aiE_ARGBHalf = 2,
-    aiE_Shadowmap = 3,
-    aiE_RGB565 = 4,
-    aiE_ARGB4444 = 5,
-    aiE_ARGB1555 = 6,
-    aiE_Default = 7,
-    aiE_ARGB2101010 = 8,
-    aiE_DefaultHDR = 9,
-    aiE_ARGBFloat = 11,
-    aiE_RGFloat = 12,
-    aiE_RGHalf = 13,
-    aiE_RFloat = 14,
-    aiE_RHalf = 15,
-    aiE_R8 = 16,
-    aiE_ARGBInt = 17,
-    aiE_RGInt = 18,
-    aiE_RInt = 19,
+    aiTextureFormat_Unknown,
+    aiTextureFormat_ARGB32,
+    aiTextureFormat_ARGB2101010,
+    aiTextureFormat_RHalf,
+    aiTextureFormat_RGHalf,
+    aiTextureFormat_ARGBHalf,
+    aiTextureFormat_RFloat,
+    aiTextureFormat_RGFloat,
+    aiTextureFormat_ARGBFloat,
+    aiTextureFormat_RInt,
+    aiTextureFormat_RGInt,
+    aiTextureFormat_ARGBInt,
 };
 
 class aiIGraphicsDevice
@@ -57,11 +50,11 @@ public:
     virtual ~aiIGraphicsDevice() {}
     virtual void* getDevicePtr() = 0;
     virtual int getDeviceType() = 0;
-    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiRenderTextureFormat format) = 0;
-    virtual bool writeTexture(void *o_tex, int width, int height, aiRenderTextureFormat format, const void *data, size_t datasize) = 0;
+    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiTextureFormat format) = 0;
+    virtual bool writeTexture(void *o_tex, int width, int height, aiTextureFormat format, const void *data, size_t datasize) = 0;
 };
 aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice();
-int aiGetPixelSize(aiRenderTextureFormat format);
+int aiGetPixelSize(aiTextureFormat format);
 void* aiGetConversionBuffer(size_t size); // return thread-local buffer
 
 // T: input data type
@@ -72,7 +65,7 @@ void* aiGetConversionBuffer(size_t size); // return thread-local buffer
 //         ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
 //     }
 template<class T, class F>
-inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiRenderTextureFormat format, const T *data, size_t num_elements, const F& converter)
+inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiTextureFormat format, const T *data, size_t num_elements, const F& converter)
 {
     auto dev = aiGetGraphicsDevice();
     if (dev == nullptr) { return false; }
