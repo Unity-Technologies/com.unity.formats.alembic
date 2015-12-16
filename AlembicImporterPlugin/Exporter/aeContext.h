@@ -1,18 +1,31 @@
 #ifndef aeContext_h
 #define aeContext_h
 
+enum aeArchiveType
+{
+    aeArchiveType_HDF5,
+    aeArchiveType_Ogawa,
+};
+
 struct aeConfig
 {
+    aeArchiveType archive_type;
 
+    aeConfig()
+        : archive_type(aeArchiveType_Ogawa)
+    {
+    }
 };
 
 class aeContext
 {
 public:
-    aeContext();
+    aeContext(aeConfig &conf);
+    ~aeContext();
+    void reset();
     bool openArchive(const char *path);
 
-    aeObject* getOrCreateTopObject();
+    aeObject* getTopObject();
 
 private:
     std::string m_path;

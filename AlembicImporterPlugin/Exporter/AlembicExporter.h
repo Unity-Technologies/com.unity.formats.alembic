@@ -27,7 +27,7 @@ aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 
 aeCLinkage aeExport aeObject*       aeCreateTopObject(aeContext* ctx);
-aeCLinkage aeExport aeObject*       aeCreateObject(aeContext* ctx, aeObject *parent, const char *name);
+aeCLinkage aeExport aeObject*       aeCreateObject(aeObject *parent, const char *name);
 aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time);
 
 aeCLinkage aeExport aeXForm*        aeAddXForm(aeObject *obj);

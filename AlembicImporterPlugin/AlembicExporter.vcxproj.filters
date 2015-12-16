@@ -8,6 +8,21 @@
     <ClCompile Include="Exporter\aeContext.cpp">
       <Filter>Exporter</Filter>
     </ClCompile>
+    <ClCompile Include="Exporter\aePoints.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aePolyMesh.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aeXForm.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aeCamera.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\AlembicExporter.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -15,6 +30,21 @@
       <Filter>Exporter</Filter>
     </ClInclude>
     <ClInclude Include="Exporter\aeContext.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aeCamera.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aePoints.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aePolyMesh.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aeXForm.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\AlembicExporter.h">
       <Filter>Exporter</Filter>
     </ClInclude>
   </ItemGroup>

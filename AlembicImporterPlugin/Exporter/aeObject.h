@@ -4,8 +4,7 @@
 class aeObject
 {
 public:
-    aeObject();
-    aeObject(aiContext *ctx, abcObject &abc, const char *name);
+    aeObject(aeContext *ctx, AbcGeom::OObject &abc, const char *name);
     ~aeObject();
 
     const char* getName() const;
@@ -48,56 +47,5 @@ private:
 };
 
 
-
-struct aeXFormSampleData
-{
-    abcV3 translation;
-    abcV4 rotation;
-    abcV3 scale;
-    bool inherits;
-
-    inline aeXFormSampleData()
-        : translation(0.0f, 0.0f, 0.0f)
-        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
-        , scale(1.0f, 1.0f, 1.0f)
-        , inherits(false)
-    {
-    }
-
-    aeXFormSampleData(const aeXFormSampleData&) = default;
-    aeXFormSampleData& operator=(const aeXFormSampleData&) = default;
-};
-
-class aeXForm : public aeSchemaBase
-{
-public:
-    void writeSample(aeXFormSampleData &data);
-
-private:
-    AbcGeom::OXformSchema m_schema;
-};
-
-
-
-struct aePointsSample
-{
-    abcV3 *positions;
-    int count;
-
-    inline aePointsSample()
-        : positions(nullptr)
-        , count(0)
-    {
-    }
-};
-
-class aePoints : public aeSchemaBase
-{
-public:
-
-private:
-    AbcGeom::OPoints m_abcobj;
-    AbcGeom::OPointsSchema m_schema;
-};
 
 #endif // aeObject_h
