@@ -16,6 +16,7 @@ public:
     Abc::P3fArraySamplePtr m_positions;
     Abc::V3fArraySamplePtr m_velocities;
     Abc::UInt64ArraySamplePtr m_ids;
+    Abc::Box3d m_bounds;
 };
 
 struct aiPointsSampleData
@@ -23,6 +24,8 @@ struct aiPointsSampleData
     abcV3 *positions;
     abcV3 *velocities;
     uint64_t *ids;
+    abcV3 boundsCenter;
+    abcV3 boundsExtents;
     int32_t count;
 
     inline aiPointsSampleData()

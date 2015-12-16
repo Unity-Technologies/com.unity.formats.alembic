@@ -51,6 +51,9 @@ void aiPointsSample::fillData(aiPointsSampleData &data)
             data.ids[i] = (*m_ids)[i];
         }
     }
+
+    data.boundsCenter = m_bounds.center();
+    data.boundsExtents = m_bounds.size();
 }
 
 // ---
@@ -100,6 +103,13 @@ aiPoints::Sample* aiPoints::readSample(float time, bool &topologyChanged)
     {
         DebugLog("  Read IDs");
         idProp.get(ret->m_ids, ss);
+    }
+
+    auto boundsProp = m_schema.getSelfBoundsProperty();
+    if (boundsProp.valid())
+    {
+        DebugLog("  Read bounds");
+        boundsProp.get(ret->m_bounds, ss);
     }
 
     return ret;

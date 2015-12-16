@@ -72,6 +72,8 @@ typedef Imath::V2f     abcV2;
 typedef Imath::V3f     abcV3;
 typedef Imath::V4f     abcV4;
 typedef Imath::M44f    abcM44;
+typedef Imath::Box3f   abcBox;
+typedef Imath::Box3d   abcBoxd;
 typedef Abc::IObject   abcObject;
 
 enum aiTextureFormat;

@@ -22,11 +22,14 @@ public class AlembicPointsRenderer : MonoBehaviour
     public bool m_receive_shadow = false;
     public Vector3 m_model_scale = Vector3.one;
     public Vector3 m_trans_scale = Vector3.one;
-    public Vector3 m_bounds_size = Vector3.one;
+#if UNITY_EDITOR
+    public bool m_show_bounds = true;
+#endif
 
     int m_instances_par_batch;
     int m_layer;
     Mesh m_expanded_mesh;
+    Bounds m_bounds;
     List<List<Material>> m_actual_materials;
 
     RenderTexture m_texPositions;
@@ -38,6 +41,11 @@ public class AlembicPointsRenderer : MonoBehaviour
     public static int ceildiv(int v, int d)
     {
         return v / d + (v % d == 0 ? 0 : 1);
+    }
+
+    public static Vector3 mul(Vector3 a, Vector3 b)
+    {
+        return new Vector3(a.x*b.x, a.y*b.y, a.z*b.z);
     }
 
     static RenderTexture CreateDataTexture(int w, int h, RenderTextureFormat f)
@@ -179,6 +187,8 @@ public class AlembicPointsRenderer : MonoBehaviour
         var abcData = points.abcData;
         int max_instances = points.abcPeakVertexCount;
         int instance_count = abcData.count;
+        m_bounds.center = mul(abcData.boundsCenter, m_trans_scale);
+        m_bounds.extents = mul(abcData.boundsExtents, m_trans_scale);
 
         if (instance_count == 0) { return; } // nothing to draw
 
@@ -211,8 +221,7 @@ public class AlembicPointsRenderer : MonoBehaviour
 
         var trans = GetComponent<Transform>();
         Vector3 scale = trans.localScale;
-        m_expanded_mesh.bounds = new Bounds(trans.position,
-            new Vector3(m_bounds_size.x * scale.x, m_bounds_size.y * scale.y, m_bounds_size.y * scale.y));
+        m_expanded_mesh.bounds = m_bounds;
         instance_count = Mathf.Min(instance_count, max_instances);
         int batch_count = ceildiv(instance_count, m_instances_par_batch);
 
@@ -263,6 +272,7 @@ public class AlembicPointsRenderer : MonoBehaviour
             m_texIDs.Release();
             m_texIDs = null;
         }
+        m_bounds = new Bounds();
     }
 
 
@@ -271,7 +281,6 @@ public class AlembicPointsRenderer : MonoBehaviour
     {
         m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IcoSphere.asset");
         m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicPointsDefault.mat") };
-        m_bounds_size = Vector3.one * 2.0f;
         ReleaseGPUResoureces();
     }
 
@@ -291,12 +300,17 @@ public class AlembicPointsRenderer : MonoBehaviour
         Flush();
     }
 
+#if UNITY_EDITOR
     void OnDrawGizmos()
     {
-        Transform t = GetComponent<Transform>();
-        Vector3 s = t.localScale;
+        if(m_show_bounds)
+        {
+            Transform t = GetComponent<Transform>();
+            Vector3 s = t.localScale;
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(t.position, new Vector3(m_bounds_size.x * s.x, m_bounds_size.y * s.y, m_bounds_size.z * s.z));
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(m_bounds.center, m_bounds.extents);
+        }
     }
+#endif
 }
