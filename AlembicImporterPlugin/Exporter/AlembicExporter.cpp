@@ -1,0 +1,7 @@
+#include "pch.h"
+#include "AlembicExporter.h"
+#include "aeObject.h"
+#include "aeXForm.h"
+#include "aePoints.h"
+#include "aePolyMesh.h"
+#include "aeCamera.h"

@@ -15,8 +15,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Exporter\aeCamera.cpp" />
     <ClCompile Include="Exporter\aeContext.cpp" />
     <ClCompile Include="Exporter\aeObject.cpp" />
+    <ClCompile Include="Exporter\aePoints.cpp" />
+    <ClCompile Include="Exporter\aePolyMesh.cpp" />
+    <ClCompile Include="Exporter\aeXForm.cpp" />
+    <ClCompile Include="Exporter\AlembicExporter.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -24,9 +29,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AlembicExporter.h" />
+    <ClInclude Include="Exporter\aeCamera.h" />
     <ClInclude Include="Exporter\aeContext.h" />
     <ClInclude Include="Exporter\aeObject.h" />
+    <ClInclude Include="Exporter\aePoints.h" />
+    <ClInclude Include="Exporter\aePolyMesh.h" />
+    <ClInclude Include="Exporter\aeXForm.h" />
+    <ClInclude Include="Exporter\AlembicExporter.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
