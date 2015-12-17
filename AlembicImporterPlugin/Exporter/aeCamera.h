@@ -30,7 +30,6 @@ public:
 
 private:
     AbcGeom::OCameraSchema m_schema;
-    AbcGeom::CameraSample m_sample;
 };
 
 #endif // aeCamera_h

@@ -41,10 +41,20 @@ public class AlembicRecorder : MonoBehaviour
     public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
     {
         aeAPI.aePolyMeshSampleData data = new aeAPI.aePolyMeshSampleData();
-        var vertices = mesh.vertices;
         var indices = mesh.GetIndices(0); // todo: record all submeshes
-        data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0);
+        var vertices = mesh.vertices;
+        var normals = mesh.normals;
+        var uvs = mesh.uv;
         data.indices = Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0);
+        data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0);
+        if(normals != null)
+        {
+            data.normals = Marshal.UnsafeAddrOfPinnedArrayElement(normals, 0);
+        }
+        if(uvs != null)
+        {
+            data.uvs = Marshal.UnsafeAddrOfPinnedArrayElement(uvs, 0);
+        }
         data.vertex_count = vertices.Length;
         data.index_count = indices.Length;
 
