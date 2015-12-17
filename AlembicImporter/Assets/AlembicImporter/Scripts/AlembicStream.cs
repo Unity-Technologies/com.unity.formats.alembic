@@ -62,6 +62,7 @@ public class AlembicStream : MonoBehaviour
     AbcAPI.aiContext m_abc;
     Transform m_trans;
     // keep a list of aiObjects to update?
+    string m_lastPathToAbc;
 
     // --- For internal use ---
 
@@ -166,7 +167,8 @@ public class AlembicStream : MonoBehaviour
             m_normalsMode != m_lastNormalsMode ||
             m_tangentsMode != m_lastTangentsMode ||
             Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
-            aspectRatio != m_lastAspectRatio)
+            aspectRatio != m_lastAspectRatio ||
+            m_pathToAbc != m_lastPathToAbc)
         {
             return true;
         }
@@ -186,6 +188,7 @@ public class AlembicStream : MonoBehaviour
         m_lastTangentsMode = m_tangentsMode;
         m_lastAspectRatio = aspectRatio;
         m_forceRefresh = false;
+        m_lastPathToAbc = m_pathToAbc;
     }
 
     void AbcUpdateElements()
@@ -220,6 +223,100 @@ public class AlembicStream : MonoBehaviour
         }
     }
 
+    void AbcCleanupSubTree(Transform tr, ref List<GameObject> objsToDelete)
+    {
+        AlembicElement elem = tr.gameObject.GetComponent<AlembicMesh>() as AlembicElement;
+        if (elem == null)
+        {
+            elem = tr.gameObject.GetComponent<AlembicXForm>() as AlembicElement;
+            if (elem == null)
+            {
+                elem = tr.gameObject.GetComponent<AlembicCamera>() as AlembicElement;
+                if (elem == null)
+                {
+                    elem = tr.gameObject.GetComponent<AlembicLight>() as AlembicElement;
+                }
+            }
+        }
+
+        if (elem != null && !m_elements.Contains(elem))
+        {
+            if (m_verbose)
+            {
+                Debug.Log("Alembic.AbcCleanupSubTree: Node \"" + tr.gameObject.name + "\" no longer in alembic tree");
+            }
+            objsToDelete.Add(tr.gameObject);
+        }
+        else
+        {
+            foreach (Transform childTr in tr)
+            {
+                AbcCleanupSubTree(childTr, ref objsToDelete);
+            }
+        }
+    }
+
+    void AbcCleanupTree()
+    {
+        List<GameObject> objsToDelete = new List<GameObject>();
+
+        foreach (Transform tr in gameObject.transform)
+        {
+            AbcCleanupSubTree(tr, ref objsToDelete);
+        }
+
+        foreach (GameObject obj in objsToDelete)
+        {
+            // will this also destroy children?
+            // should I call obj.Destroy() instead
+            GameObject.DestroyImmediate(obj);
+        }
+    }
+
+    bool AbcRecoverContext()
+    {
+        if (!AbcIsValid())
+        {
+            if (m_verbose)
+            {
+                Debug.Log("AlembicStream.AbcRecoverContext: Try to recover alembic context");
+            }
+
+            m_abc = AbcAPI.aiCreateContext(gameObject.GetInstanceID());
+
+            if (AbcIsValid())
+            {
+                m_startTime = AbcAPI.aiGetStartTime(m_abc);
+                m_endTime = AbcAPI.aiGetEndTime(m_abc);
+                m_timeOffset = -m_startTime;
+                m_timeScale = 1.0f;
+                m_preserveStartTime = true;
+                m_forceRefresh = true;
+                m_trans = GetComponent<Transform>();
+                m_elements.Clear();
+
+                AbcSyncConfig();
+
+                AbcAPI.UpdateAbcTree(m_abc, m_trans, AbcTime(m_time), false);
+
+                if (m_verbose)
+                {
+                    Debug.Log("AlembicStream.AbcRecoverContext: Succeeded (" + m_elements.Count + " element(s))");
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     void AbcUpdate(float time)
     {
         if (m_lastLogToFile != m_logToFile ||
@@ -231,8 +328,26 @@ public class AlembicStream : MonoBehaviour
             m_lastLogPath = m_logPath;
         }
         
+        if (!m_loaded && m_pathToAbc != null)
+        {
+            // We have lost the alembic context, try to recover it
+            m_loaded = AbcRecoverContext();
+        }
+
         if (m_loaded)
         {
+            if (!AbcIsValid())
+            {
+                // We have lost the alembic context, try to recover
+                m_loaded = AbcRecoverContext();
+                if (!m_loaded)
+                {
+                    Debug.LogWarning("AlembicStream.AbcUpdate: Lost alembic context");
+                    
+                    return;
+                }
+            }
+
             m_time = time;
 
             float abcTime = AbcTime(m_time);
@@ -242,14 +357,34 @@ public class AlembicStream : MonoBehaviour
             {
                 if (m_verbose)
                 {
-                    Debug.Log("AlembicSctream.AbcUpdate: t=" + m_time + " (t'=" + abcTime + ")");
+                    Debug.Log("AlembicStream.AbcUpdate: t=" + m_time + " (t'=" + abcTime + ")");
                 }
                 
-                AbcSyncConfig();
+                if (m_pathToAbc != m_lastPathToAbc)
+                {
+                    if (m_verbose)
+                    {
+                        Debug.Log("AlembicStream.AbcUpdate: Path to alembic file changed");
+                    }
 
-                AbcAPI.aiUpdateSamples(m_abc, abcTime);
+                    AbcDetachElements();
 
-                AbcUpdateElements();
+                    AbcAPI.aiDestroyContext(m_abc);
+
+                    m_elements.Clear();
+
+                    AbcLoad(true);
+
+                    AbcCleanupTree();
+                }
+                else
+                {
+                    AbcSyncConfig();
+
+                    AbcAPI.aiUpdateSamples(m_abc, abcTime);
+
+                    AbcUpdateElements();
+                }   
                 
                 AbcSetLastUpdateState(abcTime, aspectRatio);
             }
