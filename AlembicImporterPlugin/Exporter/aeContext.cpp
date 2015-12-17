@@ -18,11 +18,17 @@ aeContext::~aeContext()
 void aeContext::reset()
 {
     if (m_archive != nullptr) {
-        // set time sampling and flush
-        Abc::TimeSampling ts = Abc::TimeSampling(
-            Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_times);
-        m_archive.addTimeSampling(ts);
-        m_archive.reset();
+        try {
+            // set time sampling and flush
+            Abc::TimeSampling ts = Abc::TimeSampling(
+                Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_times);
+            m_archive.addTimeSampling(ts);
+            m_archive.reset();
+        }
+        catch (Alembic::Util::Exception e)
+        {
+            aeDebugLog("Failed (%s)", e.what());
+        }
     }
 
     for (auto n : m_nodes) { delete n; }
@@ -48,7 +54,7 @@ bool aeContext::openArchive(const char *path)
         }
     }
     catch (Alembic::Util::Exception e) {
-        DebugLog("Failed (%s)", e.what());
+        aeDebugLog("Failed (%s)", e.what());
         return false;
     }
 
