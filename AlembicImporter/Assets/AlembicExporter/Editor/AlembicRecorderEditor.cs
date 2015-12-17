@@ -23,6 +23,11 @@ public class AlembicRecorderEditor : Editor
             {
                 t.BeginRecording();
             }
+
+            if (GUILayout.Button("One Shot"))
+            {
+                t.OneShot();
+            }
         }
     }
 }
