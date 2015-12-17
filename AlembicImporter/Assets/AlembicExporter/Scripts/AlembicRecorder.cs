@@ -178,7 +178,10 @@ public class AlembicRecorder : MonoBehaviour
 
     public bool BeginRecording()
     {
-        if(m_recording) { return true; }
+        if(m_recording) {
+            Debug.Log("already recording");
+            return false;
+        }
 
         m_ctx = aeAPI.aeCreateContext(ref m_conf);
         if(m_ctx.ptr == IntPtr.Zero) {
@@ -269,6 +272,18 @@ public class AlembicRecorder : MonoBehaviour
         m_recording = false;
     }
 
+    public void OneShot()
+    {
+        if(BeginRecording())
+        {
+            aeAPI.aeSetTime(m_ctx, 0.0f);
+            foreach (var recorder in m_recorders)
+            {
+                recorder.Capture();
+            }
+            EndRecording();
+        }
+    }
 
     IEnumerator ProcessRecording()
     {
