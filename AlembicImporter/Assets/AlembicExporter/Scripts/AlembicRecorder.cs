@@ -19,7 +19,7 @@ public abstract class AlembicCustomRecorder : MonoBehaviour
 
 
 [ExecuteInEditMode]
-class AlembicRecorder : MonoBehaviour
+public class AlembicRecorder : MonoBehaviour
 {
     #region impl
 
@@ -174,6 +174,8 @@ class AlembicRecorder : MonoBehaviour
     float m_time;
 
 
+    public bool isRecording { get { return m_recording; } }
+
     public bool BeginRecording()
     {
         if(m_recording) { return true; }
@@ -260,14 +262,18 @@ class AlembicRecorder : MonoBehaviour
     public void EndRecording()
     {
         if (!m_recording) { return; }
+
+        m_recorders.Clear();
         aeAPI.aeDestroyContext(m_ctx);
         m_ctx = new aeAPI.aeContext();
+        m_recording = false;
     }
 
 
     IEnumerator ProcessRecording()
     {
         yield return new WaitForEndOfFrame();
+        if(!m_recording) { yield break; }
 
         aeAPI.aeSetTime(m_ctx, m_time);
         foreach(var recorder in m_recorders) {
@@ -283,5 +289,10 @@ class AlembicRecorder : MonoBehaviour
             m_time += Time.deltaTime;
             StartCoroutine(ProcessRecording());
         }
+    }
+
+    void OnDisable()
+    {
+        EndRecording();
     }
 }
