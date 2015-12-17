@@ -7,6 +7,7 @@ struct aeCameraSampleData
 
 class aeCamera : public aeSchemaBase
 {
+typedef aeSchemaBase super;
 public:
     aeCamera(aeObject *obj);
     void writeSample(const aeCameraSampleData &data);

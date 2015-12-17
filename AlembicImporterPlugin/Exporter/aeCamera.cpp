@@ -4,6 +4,9 @@
 #include "aeCamera.h"
 
 aeCamera::aeCamera(aeObject *obj)
+    : super(obj)
+    , m_abcobj(obj->getAbcObject(), "Camera")
+    , m_schema(m_abcobj.getSchema())
 {
 }
 

@@ -7,6 +7,7 @@ struct aePolyMeshSampleData
 
 class aePolyMesh : public aeSchemaBase
 {
+typedef aeSchemaBase super;
 public:
     aePolyMesh(aeObject *obj);
     void writeSample(const aePolyMeshSampleData &data);

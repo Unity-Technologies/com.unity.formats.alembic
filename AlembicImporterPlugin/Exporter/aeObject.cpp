@@ -80,3 +80,13 @@ aePoints& aeObject::addPoints()
     return *m_points;
 }
 
+
+
+aeSchemaBase::aeSchemaBase(aeObject *obj)
+    : m_obj(obj)
+{
+}
+
+aeSchemaBase::~aeSchemaBase()
+{
+}
