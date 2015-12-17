@@ -3,6 +3,20 @@
 
 struct aeCameraSampleData
 {
+    float nearClippingPlane;
+    float farClippingPlane;
+    float fieldOfView;
+    float focusDistance;
+    float focalLength;
+
+    inline aeCameraSampleData()
+        : nearClippingPlane(0.0f)
+        , farClippingPlane(0.0f)
+        , fieldOfView(0.0f)
+        , focusDistance(0.0f)
+        , focalLength(0.0f)
+    {
+    }
 };
 
 class aeCamera : public aeSchemaBase
@@ -15,6 +29,7 @@ public:
 private:
     AbcGeom::OCamera m_abcobj;
     AbcGeom::OCameraSchema m_schema;
+    AbcGeom::CameraSample m_sample;
 };
 
 #endif // aeCamera_h
