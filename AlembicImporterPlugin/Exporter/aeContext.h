@@ -1,24 +1,6 @@
 #ifndef aeContext_h
 #define aeContext_h
 
-enum aeArchiveType
-{
-    aeArchiveType_HDF5,
-    aeArchiveType_Ogawa,
-};
-
-struct aeConfig
-{
-    aeArchiveType archive_type;
-    bool swapHandedness;
-
-    aeConfig()
-        : archive_type(aeArchiveType_Ogawa)
-        , swapHandedness(true)
-    {
-    }
-};
-
 class aeContext
 {
 public:

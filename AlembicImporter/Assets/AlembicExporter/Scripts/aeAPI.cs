@@ -24,6 +24,7 @@ public class aeAPI
     public struct aeConfig
     {
         [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
+        [MarshalAs(UnmanagedType.U1)] public bool preserveTreeStructure;
         [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
 
 
@@ -34,6 +35,7 @@ public class aeAPI
                 return new aeConfig
                 {
                     archiveType = aeArchiveType.Ogawa,
+                    preserveTreeStructure = false,
                     swapHandedness = true,
                 };
             }
@@ -62,6 +64,7 @@ public class aeAPI
         public IntPtr uvs; // Vector2*. can be null
         public IntPtr indices; // int*
         public IntPtr faces; // int*. can be null. assume all faces are triangles if null
+
         public int vertex_count;
         public int index_count;
         public int face_count;

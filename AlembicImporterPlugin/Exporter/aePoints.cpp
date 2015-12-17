@@ -17,8 +17,8 @@ AbcGeom::OPoints& aePoints::getAbcObject()
 
 void aePoints::writeSample(const aePointsSampleData &data)
 {
-    m_sample.setPositions(Abc::P3fArraySample(data.positions, data.count));
+    AbcGeom::OPointsSchema::Sample sample;
+    sample.setPositions(Abc::P3fArraySample(data.positions, data.count));
 
-    m_schema.set(m_sample);
-    m_sample.reset();
+    m_schema.set(sample);
 }

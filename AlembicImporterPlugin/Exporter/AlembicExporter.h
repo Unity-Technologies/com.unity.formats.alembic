@@ -22,6 +22,28 @@ struct aePointsSampleData;
 struct aePolyMeshSampleData;
 struct aeCameraSampleData;
 
+
+enum aeArchiveType
+{
+    aeArchiveType_HDF5,
+    aeArchiveType_Ogawa,
+};
+
+struct aeConfig
+{
+    aeArchiveType archive_type;
+    bool preserveTreeStructure;
+    bool swapHandedness;
+
+    aeConfig()
+        : archive_type(aeArchiveType_Ogawa)
+        , preserveTreeStructure(false)
+        , swapHandedness(true)
+    {
+    }
+};
+
+
 aeCLinkage aeExport void            aeCleanup();
 aeCLinkage aeExport aeContext*      aeCreateContext(const aeConfig *conf);
 aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);

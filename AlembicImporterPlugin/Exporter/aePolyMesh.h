@@ -37,11 +37,10 @@ public:
 
 private:
     AbcGeom::OPolyMeshSchema m_schema;
-    AbcGeom::OPolyMeshSchema::Sample m_sample;
 
-    AbcGeom::ON3fGeomParam::Sample m_sample_normals;
-    AbcGeom::OV2fGeomParam::Sample m_sample_uvs;
-    std::vector<int> m_face_count_buf;
+    std::vector<abcV3>  m_buf_positions;
+    std::vector<abcV3>  m_buf_normals;
+    std::vector<int>    m_buf_faces;
 };
 
 

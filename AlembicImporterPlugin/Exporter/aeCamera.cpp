@@ -23,9 +23,9 @@ void aeCamera::writeSample(const aeCameraSampleData &data)
     //2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
     //1.0f / tan(data.fieldOfView * 0.5f * sDeg2Rad);
 
-    m_sample.setNearClippingPlane(data.nearClippingPlane);
-    m_sample.setFarClippingPlane(data.farClippingPlane);
+    AbcGeom::CameraSample sample;
+    sample.setNearClippingPlane(data.nearClippingPlane);
+    sample.setFarClippingPlane(data.farClippingPlane);
 
-    m_schema.set(m_sample);
-    m_sample.reset();
+    m_schema.set(sample);
 }
