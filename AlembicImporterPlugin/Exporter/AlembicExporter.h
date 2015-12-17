@@ -32,12 +32,10 @@ enum aeArchiveType
 struct aeConfig
 {
     aeArchiveType archive_type;
-    bool preserveTreeStructure;
     bool swapHandedness;
 
     aeConfig()
         : archive_type(aeArchiveType_Ogawa)
-        , preserveTreeStructure(false)
         , swapHandedness(true)
     {
     }

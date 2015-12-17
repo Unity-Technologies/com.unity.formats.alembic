@@ -19,6 +19,7 @@ public abstract class AlembicCustomRecorder : MonoBehaviour
 
 
 [ExecuteInEditMode]
+[AddComponentMenu("Alembic/Recorder")]
 public class AlembicRecorder : MonoBehaviour
 {
     #region impl
@@ -168,15 +169,22 @@ public class AlembicRecorder : MonoBehaviour
     #endregion
 
 
+    public enum Scope
+    {
+        EntireScene,
+        CurrentBranch,
+    }
 
     public string m_path;
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
-    public bool m_showHud;
+
+    public Scope m_scope = Scope.EntireScene;
+    public bool m_preserveTreeStructure = false;
 
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
     public bool m_captureCamera = true;
-    public bool m_customRecorder = true;
+    public bool m_captureCustomRecorder = true;
 
     aeAPI.aeContext m_ctx;
     List<Recorder> m_recorders = new List<Recorder>();
@@ -185,6 +193,20 @@ public class AlembicRecorder : MonoBehaviour
 
 
     public bool isRecording { get { return m_recording; } }
+    public float time { get { return m_time; } }
+
+
+    T[] GetTargets<T>() where T : Component
+    {
+        if(m_scope == Scope.CurrentBranch)
+        {
+            return GetComponentsInChildren<T>();
+        }
+        else
+        {
+            return FindObjectsOfType<T>();
+        }
+    }
 
     public bool BeginRecording()
     {
@@ -211,7 +233,7 @@ public class AlembicRecorder : MonoBehaviour
 
         if (m_captureCamera)
         {
-            foreach(var target in FindObjectsOfType<Camera>())
+            foreach(var target in GetTargets<Camera>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
                 var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
@@ -225,7 +247,7 @@ public class AlembicRecorder : MonoBehaviour
 
         if (m_captureMeshRenderer)
         {
-            foreach (var target in FindObjectsOfType<MeshRenderer>())
+            foreach (var target in GetTargets<MeshRenderer>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
                 var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
@@ -239,7 +261,7 @@ public class AlembicRecorder : MonoBehaviour
 
         if (m_captureSkinnedMeshRenderer)
         {
-            foreach (var target in FindObjectsOfType<SkinnedMeshRenderer>())
+            foreach (var target in GetTargets<SkinnedMeshRenderer>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
                 var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
@@ -251,9 +273,9 @@ public class AlembicRecorder : MonoBehaviour
             }
         }
 
-        if (m_customRecorder)
+        if (m_captureCustomRecorder)
         {
-            foreach (var target in FindObjectsOfType<AlembicCustomRecorder>())
+            foreach (var target in GetTargets<AlembicCustomRecorder>())
             {
                 target.SetParent(top);
                 var mesh_rec = new CustomRecorderHandler(target);
@@ -263,6 +285,8 @@ public class AlembicRecorder : MonoBehaviour
 
         m_recording = true;
         m_time = 0.0f;
+
+        Debug.Log("AlembicRecorder: start " + m_path);
         return true;
     }
 
@@ -274,6 +298,8 @@ public class AlembicRecorder : MonoBehaviour
         aeAPI.aeDestroyContext(m_ctx);
         m_ctx = new aeAPI.aeContext();
         m_recording = false;
+
+        Debug.Log("AlembicRecorder: end: " + m_path);
     }
 
     public void OneShot()
@@ -300,6 +326,14 @@ public class AlembicRecorder : MonoBehaviour
         }
     }
 
+
+    void Reset()
+    {
+        if(m_path == null || m_path == "")
+        {
+            m_path = gameObject.name + ".abc";
+        }
+    }
 
     void Update()
     {

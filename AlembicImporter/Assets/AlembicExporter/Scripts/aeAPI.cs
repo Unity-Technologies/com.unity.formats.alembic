@@ -24,7 +24,6 @@ public class aeAPI
     public struct aeConfig
     {
         [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
-        [MarshalAs(UnmanagedType.U1)] public bool preserveTreeStructure;
         [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
 
 
@@ -35,7 +34,6 @@ public class aeAPI
                 return new aeConfig
                 {
                     archiveType = aeArchiveType.Ogawa,
-                    preserveTreeStructure = false,
                     swapHandedness = true,
                 };
             }
