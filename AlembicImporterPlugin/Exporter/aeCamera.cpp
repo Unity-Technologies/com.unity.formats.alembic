@@ -3,11 +3,16 @@
 #include "aeObject.h"
 #include "aeCamera.h"
 
-aeCamera::aeCamera(aeObject *obj)
-    : super(obj)
-    , m_abcobj(obj->getAbcObject(), "Camera")
-    , m_schema(m_abcobj.getSchema())
+
+aeCamera::aeCamera(aeObject *parent, const char *name)
+    : super(parent->getContext(), parent, new AbcGeom::OCamera(parent->getAbcObject(), name))
+    , m_schema(getAbcObject().getSchema())
 {
+}
+
+AbcGeom::OCamera& aeCamera::getAbcObject()
+{
+    return dynamic_cast<AbcGeom::OCamera&>(*m_abc);
 }
 
 void aeCamera::writeSample(const aeCameraSampleData &data)

@@ -19,15 +19,12 @@ public class aeAPI
 
     public struct aeContext { public IntPtr ptr; }
     public struct aeObject  { public IntPtr ptr; }
-    public struct aeXForm   { public IntPtr ptr; }
-    public struct aePoints  { public IntPtr ptr; }
-    public struct aePolyMesh{ public IntPtr ptr; }
-    public struct aeCamera  { public IntPtr ptr; }
 
     [Serializable]
     public struct aeConfig
     {
         [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
+        [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
 
 
         public static aeConfig default_value
@@ -36,7 +33,8 @@ public class aeAPI
             {
                 return new aeConfig
                 {
-                    archiveType = aeArchiveType.Ogawa
+                    archiveType = aeArchiveType.Ogawa,
+                    swapHandedness = true,
                 };
             }
         }
@@ -86,14 +84,13 @@ public class aeAPI
 
     [DllImport ("AlembicExporter")] public static extern void       aeSetTime(aeContext ctx, float time);
     [DllImport ("AlembicExporter")] public static extern aeObject   aeGetTopObject(aeContext ctx);
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeCreateObject(aeObject parent, string name);
 
-    [DllImport ("AlembicExporter")] public static extern aeXForm    aeAddXForm(aeObject obj);
-    [DllImport ("AlembicExporter")] public static extern aePoints   aeAddPoints(aeObject obj);
-    [DllImport ("AlembicExporter")] public static extern aePolyMesh aeAddPolyMesh(aeObject obj);
-    [DllImport ("AlembicExporter")] public static extern aeCamera   aeAddCamera(aeObject obj);
-    [DllImport ("AlembicExporter")] public static extern void       aeXFormWriteSample(aeXForm obj, ref aeXFormSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aePointsWriteSample(aePoints obj, ref aePointsSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aePolyMeshWriteSample(aePolyMesh obj, ref aePolyMeshSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aeCameraWriteSample(aeCamera obj, ref aeCameraSampleData data);
+    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewXForm(aeObject parent, string name);
+    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewCamera(aeObject parent, string name);
+    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewPoints(aeObject parent, string name);
+    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewPolyMesh(aeObject parent, string name);
+    [DllImport ("AlembicExporter")] public static extern void       aeXFormWriteSample(aeObject obj, ref aeXFormSampleData data);
+    [DllImport ("AlembicExporter")] public static extern void       aePointsWriteSample(aeObject obj, ref aePointsSampleData data);
+    [DllImport ("AlembicExporter")] public static extern void       aePolyMeshWriteSample(aeObject obj, ref aePolyMeshSampleData data);
+    [DllImport ("AlembicExporter")] public static extern void       aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
 }

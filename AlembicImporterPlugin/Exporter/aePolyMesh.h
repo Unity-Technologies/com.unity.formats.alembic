@@ -26,15 +26,16 @@ struct aePolyMeshSampleData
     }
 };
 
-class aePolyMesh : public aeSchemaBase
+class aePolyMesh : public aeObject
 {
-typedef aeSchemaBase super;
+typedef aeObject super;
 public:
-    aePolyMesh(aeObject *obj);
+    aePolyMesh(aeObject *parent, const char *name);
+    AbcGeom::OPolyMesh& getAbcObject() override;
+
     void writeSample(const aePolyMeshSampleData &data);
 
 private:
-    AbcGeom::OPolyMesh m_abcobj;
     AbcGeom::OPolyMeshSchema m_schema;
     AbcGeom::OPolyMeshSchema::Sample m_sample;
 

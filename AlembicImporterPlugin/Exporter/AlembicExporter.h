@@ -28,13 +28,12 @@ aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
-aeCLinkage aeExport aeObject*       aeCreateObject(aeObject *parent, const char *name);
 aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time);
 
-aeCLinkage aeExport aeXForm*        aeAddXForm(aeObject *obj);
-aeCLinkage aeExport aePoints*       aeAddPoints(aeObject *obj);
-aeCLinkage aeExport aePolyMesh*     aeAddPolyMesh(aeObject *obj);
-aeCLinkage aeExport aeCamera*       aeAddCamera(aeObject *obj);
+aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name);
+aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);
+aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name);
+aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *name);
 aeCLinkage aeExport void            aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data);
 aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aePointsSampleData *data);
 aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data);

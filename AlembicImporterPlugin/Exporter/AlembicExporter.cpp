@@ -33,52 +33,41 @@ aeCLinkage aeExport aeObject* aeGetTopObject(aeContext* ctx)
     return ctx->getTopObject();
 }
 
-aeCLinkage aeExport aeObject* aeCreateObject(aeObject *parent, const char *name)
-{
-    return parent->getContext()->createObject(parent, name);
-}
-
 aeCLinkage aeExport void aeSetTime(aeContext* ctx, float time)
 {
     ctx->setTime(time);
 }
 
 
-aeCLinkage aeExport aeXForm* aeAddXForm(aeObject *obj)
+aeCLinkage aeExport aeXForm* aeNewXForm(aeObject *parent, const char *name)
 {
-    return &obj->addXForm();
+    return parent->newChild<aeXForm>(name);
 }
-
-aeCLinkage aeExport aePoints* aeAddPoints(aeObject *obj)
+aeCLinkage aeExport aePoints* aeNewPoints(aeObject *parent, const char *name)
 {
-    return &obj->addPoints();
+    return parent->newChild<aePoints>(name);
 }
-
-aeCLinkage aeExport aePolyMesh* aeAddPolyMesh(aeObject *obj)
+aeCLinkage aeExport aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name)
 {
-    return &obj->addPolyMesh();
+    return parent->newChild<aePolyMesh>(name);
 }
-
-aeCLinkage aeExport aeCamera* aeAddCamera(aeObject *obj)
+aeCLinkage aeExport aeCamera* aeNewCamera(aeObject *parent, const char *name)
 {
-    return &obj->addCamera();
+    return parent->newChild<aeCamera>(name);
 }
 
 aeCLinkage aeExport void aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data)
 {
     obj->writeSample(*data);
 }
-
 aeCLinkage aeExport void aePointsWriteSample(aePoints *obj, const aePointsSampleData *data)
 {
     obj->writeSample(*data);
 }
-
 aeCLinkage aeExport void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data)
 {
     obj->writeSample(*data);
 }
-
 aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraSampleData *data)
 {
     obj->writeSample(*data);
