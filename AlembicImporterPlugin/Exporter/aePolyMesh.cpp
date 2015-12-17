@@ -3,12 +3,15 @@
 #include "aeObject.h"
 #include "aePolyMesh.h"
 
-aePolyMesh::aePolyMesh(aeObject *obj)
-    : super(obj)
-    , m_abcobj(obj->getAbcObject(), "PolyMesh")
-    , m_schema(m_abcobj.getSchema())
+aePolyMesh::aePolyMesh(aeObject *parent, const char *name)
+    : super(parent->getContext(), parent, new AbcGeom::OPolyMesh(parent->getAbcObject(), name))
+    , m_schema(getAbcObject().getSchema())
 {
+}
 
+AbcGeom::OPolyMesh& aePolyMesh::getAbcObject()
+{
+    return dynamic_cast<AbcGeom::OPolyMesh&>(*m_abc);
 }
 
 void aePolyMesh::writeSample(const aePolyMeshSampleData &data)

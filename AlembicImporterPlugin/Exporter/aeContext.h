@@ -10,9 +10,11 @@ enum aeArchiveType
 struct aeConfig
 {
     aeArchiveType archive_type;
+    bool swapHandedness;
 
     aeConfig()
         : archive_type(aeArchiveType_Ogawa)
+        , swapHandedness(true)
     {
     }
 };
@@ -28,19 +30,15 @@ public:
     void reset();
     bool openArchive(const char *path);
 
+    const aeConfig& getConfig() const;
     aeObject* getTopObject();
-    aeObject* createObject(aeObject *parent, const char *name);
-    void destroyObject(aeObject *obj);
 
     void setTime(float time);
 
 private:
-    bool destroyObject(aeObject *obj, NodeIter searchFrom, NodeIter &next);
-
-private:
     aeConfig m_config;
     Abc::OArchive m_archive;
-    std::vector<aeObject*> m_nodes;
+    std::unique_ptr<aeObject> m_node_top;
     std::vector<abcChrono> m_times;
 };
 

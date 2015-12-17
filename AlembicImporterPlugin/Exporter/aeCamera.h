@@ -19,15 +19,16 @@ struct aeCameraSampleData
     }
 };
 
-class aeCamera : public aeSchemaBase
+class aeCamera : public aeObject
 {
-typedef aeSchemaBase super;
+typedef aeObject super;
 public:
-    aeCamera(aeObject *obj);
+    aeCamera(aeObject *parent, const char *name);
+    AbcGeom::OCamera& getAbcObject() override;
+
     void writeSample(const aeCameraSampleData &data);
 
 private:
-    AbcGeom::OCamera m_abcobj;
     AbcGeom::OCameraSchema m_schema;
     AbcGeom::CameraSample m_sample;
 };

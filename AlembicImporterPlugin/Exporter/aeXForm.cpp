@@ -4,13 +4,15 @@
 #include "aeXForm.h"
 
 
-
-aeXForm::aeXForm(aeObject *obj)
-    : super(obj)
-    , m_abcobj(obj->getAbcObject(), "XForm")
-    , m_schema(m_abcobj.getSchema())
+aeXForm::aeXForm(aeObject *parent, const char *name)
+    : super(parent->getContext(), parent, new AbcGeom::OXform(parent->getAbcObject(), name))
+    , m_schema(getAbcObject().getSchema())
 {
+}
 
+AbcGeom::OXform& aeXForm::getAbcObject()
+{
+    return dynamic_cast<AbcGeom::OXform&>(*m_abc);
 }
 
 void aeXForm::writeSample(const aeXFormSampleData &data)

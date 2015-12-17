@@ -23,7 +23,7 @@ public class AlembicRecorder : MonoBehaviour
 {
     #region impl
 
-    public static void CaptureTransform(aeAPI.aeXForm abc, Transform trans)
+    public static void CaptureTransform(aeAPI.aeObject abc, Transform trans)
     {
         aeAPI.aeXFormSampleData data;
         data.inherits = false;
@@ -33,12 +33,12 @@ public class AlembicRecorder : MonoBehaviour
         aeAPI.aeXFormWriteSample(abc, ref data);
     }
 
-    public static void CaptureCamera(aeAPI.aeCamera abc, Camera cam)
+    public static void CaptureCamera(aeAPI.aeObject abc, Camera cam)
     {
         // todo
     }
 
-    public static void CaptureMesh(aeAPI.aePolyMesh abc, Mesh mesh)
+    public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
     {
         aeAPI.aePolyMeshSampleData data = new aeAPI.aePolyMeshSampleData();
         var vertices = mesh.vertices;
@@ -60,9 +60,9 @@ public class AlembicRecorder : MonoBehaviour
     public class TransformRecorder : Recorder
     {
         Transform m_target;
-        aeAPI.aeXForm m_abc;
+        aeAPI.aeObject m_abc;
 
-        public TransformRecorder(Transform target, aeAPI.aeXForm abc)
+        public TransformRecorder(Transform target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -80,9 +80,9 @@ public class AlembicRecorder : MonoBehaviour
     public class CameraRecorder : Recorder
     {
         Camera m_target;
-        aeAPI.aeCamera m_abc;
+        aeAPI.aeObject m_abc;
 
-        public CameraRecorder(Camera target, aeAPI.aeCamera abc)
+        public CameraRecorder(Camera target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -100,9 +100,9 @@ public class AlembicRecorder : MonoBehaviour
     public class MeshRecorder : Recorder
     {
         MeshRenderer m_target;
-        aeAPI.aePolyMesh m_abc;
+        aeAPI.aeObject m_abc;
 
-        public MeshRecorder(MeshRenderer target, aeAPI.aePolyMesh abc)
+        public MeshRecorder(MeshRenderer target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -120,9 +120,9 @@ public class AlembicRecorder : MonoBehaviour
     public class SkinnedMeshRecorder : Recorder
     {
         SkinnedMeshRenderer m_target;
-        aeAPI.aePolyMesh m_abc;
+        aeAPI.aeObject m_abc;
 
-        public SkinnedMeshRecorder(SkinnedMeshRenderer target, aeAPI.aePolyMesh abc)
+        public SkinnedMeshRecorder(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -203,14 +203,12 @@ public class AlembicRecorder : MonoBehaviour
         {
             foreach(var target in FindObjectsOfType<Camera>())
             {
-                var trans_obj = aeAPI.aeCreateObject(top, target.name + "_trans");
-                var trans_abc = aeAPI.aeAddXForm(trans_obj);
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_abc);
+                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
+                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
                 m_recorders.Add(trans_rec);
 
-                var cam_obj = aeAPI.aeCreateObject(trans_obj, target.name);
-                var cam_abc = aeAPI.aeAddCamera(cam_obj);
-                var cam_rec = new CameraRecorder(target, cam_abc);
+                var cam_obj = aeAPI.aeNewCamera(trans_obj, target.name);
+                var cam_rec = new CameraRecorder(target, cam_obj);
                 m_recorders.Add(cam_rec);
             }
         }
@@ -219,14 +217,12 @@ public class AlembicRecorder : MonoBehaviour
         {
             foreach (var target in FindObjectsOfType<MeshRenderer>())
             {
-                var trans_obj = aeAPI.aeCreateObject(top, target.name + "_trans");
-                var trans_abc = aeAPI.aeAddXForm(trans_obj);
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_abc);
+                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
+                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
                 m_recorders.Add(trans_rec);
 
-                var mesh_obj = aeAPI.aeCreateObject(trans_obj, target.name);
-                var mesh_abc = aeAPI.aeAddPolyMesh(mesh_obj);
-                var mesh_rec = new MeshRecorder(target, mesh_abc);
+                var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
+                var mesh_rec = new MeshRecorder(target, mesh_obj);
                 m_recorders.Add(mesh_rec);
             }
         }
@@ -235,14 +231,12 @@ public class AlembicRecorder : MonoBehaviour
         {
             foreach (var target in FindObjectsOfType<SkinnedMeshRenderer>())
             {
-                var trans_obj = aeAPI.aeCreateObject(top, target.name + "_trans");
-                var trans_abc = aeAPI.aeAddXForm(trans_obj);
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_abc);
+                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
+                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
                 m_recorders.Add(trans_rec);
 
-                var mesh_obj = aeAPI.aeCreateObject(trans_obj, target.name);
-                var mesh_abc = aeAPI.aeAddPolyMesh(mesh_obj);
-                var mesh_rec = new SkinnedMeshRecorder(target, mesh_abc);
+                var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
+                var mesh_rec = new SkinnedMeshRecorder(target, mesh_obj);
                 m_recorders.Add(mesh_rec);
             }
         }

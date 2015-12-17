@@ -14,15 +14,16 @@ struct aePointsSampleData
     }
 };
 
-class aePoints : public aeSchemaBase
+class aePoints : public aeObject
 {
-typedef aeSchemaBase super;
+typedef aeObject super;
 public:
-    aePoints(aeObject *obj);
+    aePoints(aeObject *parent, const char *name);
+    AbcGeom::OPoints& getAbcObject() override;
+
     void writeSample(const aePointsSampleData &data);
 
 private:
-    AbcGeom::OPoints m_abcobj;
     AbcGeom::OPointsSchema m_schema;
     AbcGeom::OPointsSchema::Sample m_sample;
 };

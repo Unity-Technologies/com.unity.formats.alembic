@@ -23,15 +23,16 @@ struct aeXFormSampleData
     aeXFormSampleData& operator=(const aeXFormSampleData&) = default;
 };
 
-class aeXForm : public aeSchemaBase
+class aeXForm : public aeObject
 {
-typedef aeSchemaBase super;
+typedef aeObject super;
 public:
-    aeXForm(aeObject *obj);
+    aeXForm(aeObject *parent, const char *name);
+    AbcGeom::OXform& getAbcObject() override;
+
     void writeSample(const aeXFormSampleData &data);
 
 private:
-    AbcGeom::OXform m_abcobj;
     AbcGeom::OXformSchema m_schema;
     AbcGeom::XformSample m_sample;
 };

@@ -4,9 +4,8 @@
 class aeObject
 {
 public:
-    aeObject(aeContext *ctx, AbcGeom::OObject &abc, const char *name);
-    aeObject(aeObject *parent, const char *name);
-    ~aeObject();
+    aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc);
+    virtual ~aeObject();
 
     const char* getName() const;
     const char* getFullName() const;
@@ -14,30 +13,20 @@ public:
     aeObject*   getChild(int i);
     aeObject*   getParent();
 
-    aeXForm&    addXForm();
-    aePolyMesh& addPolyMesh();
-    aeCamera&   addCamera();
-    aePoints&   addPoints();
-
-public:
     aeContext*          getContext();
-    AbcGeom::OObject&   getAbcObject();
-    void                addChild(aeObject *c);
+    const aeConfig&     getConfig() const;
+    virtual AbcGeom::OObject&   getAbcObject();
+
+    /// T: aeCamera, aeXForm, aePoint, aePolyMesh
+    template<class T> T* newChild(const char *name);
     void                removeChild(aeObject *c);
 
-private:
-    aeContext                   *m_ctx;
-    aeObject                    *m_parent;
-    AbcGeom::OObject            m_abc;
-    std::vector<aeObject*>      m_children;
-
-    std::vector<aeSchemaBase*>  m_schemas;
-    std::unique_ptr<aeXForm>    m_xform;
-    std::unique_ptr<aePolyMesh> m_polymesh;
-    std::unique_ptr<aeCamera>   m_camera;
-    std::unique_ptr<aePoints>   m_points;
+protected:
+    aeContext               *m_ctx;
+    aeObject                *m_parent;
+    std::vector<aeObject*>  m_children;
+    std::unique_ptr<AbcGeom::OObject> m_abc;
 };
-
 
 
 class aeSchemaBase
@@ -45,6 +34,8 @@ class aeSchemaBase
 public:
     aeSchemaBase(aeObject *obj);
     virtual ~aeSchemaBase();
+
+    const aeConfig& getConfig() const;
 
 protected:
     aeObject *m_obj;
