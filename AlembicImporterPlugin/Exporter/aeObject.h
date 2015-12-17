@@ -43,8 +43,11 @@ private:
 class aeSchemaBase
 {
 public:
-    virtual ~aeSchemaBase() {}
-private:
+    aeSchemaBase(aeObject *obj);
+    virtual ~aeSchemaBase();
+
+protected:
+    aeObject *m_obj;
 };
 
 

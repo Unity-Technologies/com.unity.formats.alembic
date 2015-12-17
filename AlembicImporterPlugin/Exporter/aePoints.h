@@ -16,6 +16,7 @@ struct aePointsSampleData
 
 class aePoints : public aeSchemaBase
 {
+typedef aeSchemaBase super;
 public:
     aePoints(aeObject *obj);
     void writeSample(const aePointsSampleData &data);

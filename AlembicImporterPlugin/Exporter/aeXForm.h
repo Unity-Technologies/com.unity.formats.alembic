@@ -5,15 +5,17 @@
 struct aeXFormSampleData
 {
     abcV3 translation;
-    abcV4 rotation;
+    abcV3 rotation_axis;
+    float rotation_angle;
     abcV3 scale;
     bool inherits;
 
     inline aeXFormSampleData()
         : translation(0.0f, 0.0f, 0.0f)
-        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
+        , rotation_axis(0.0f, 0.0f, 0.0f)
+        , rotation_angle(0.0f)
         , scale(1.0f, 1.0f, 1.0f)
-        , inherits(false)
+        , inherits(true)
     {
     }
 
@@ -23,6 +25,7 @@ struct aeXFormSampleData
 
 class aeXForm : public aeSchemaBase
 {
+typedef aeSchemaBase super;
 public:
     aeXForm(aeObject *obj);
     void writeSample(const aeXFormSampleData &data);
@@ -30,6 +33,7 @@ public:
 private:
     AbcGeom::OXform m_abcobj;
     AbcGeom::OXformSchema m_schema;
+    AbcGeom::XformSample m_sample;
 };
 
 #endif // aeXForm_h
