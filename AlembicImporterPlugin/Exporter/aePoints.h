@@ -24,6 +24,7 @@ public:
 private:
     AbcGeom::OPoints m_abcobj;
     AbcGeom::OPointsSchema m_schema;
+    AbcGeom::OPointsSchema::Sample m_sample;
 };
 
 #endif // aePoints_h

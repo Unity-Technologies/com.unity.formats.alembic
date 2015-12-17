@@ -15,8 +15,6 @@ aeXForm::aeXForm(aeObject *obj)
 
 void aeXForm::writeSample(const aeXFormSampleData &data)
 {
-    m_sample.reset();
-
     AbcGeom::XformOp transop(AbcGeom::kTranslateOperation, AbcGeom::kTranslateHint);
     AbcGeom::XformOp scaleop(AbcGeom::kScaleOperation, AbcGeom::kScaleHint);
     AbcGeom::XformOp rotop(AbcGeom::kRotateOperation, AbcGeom::kRotateHint);
@@ -26,4 +24,5 @@ void aeXForm::writeSample(const aeXFormSampleData &data)
     m_sample.addOp(scaleop, data.scale);
 
     m_schema.set(m_sample);
+    m_sample.reset();
 }
