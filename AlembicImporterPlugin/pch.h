@@ -16,21 +16,26 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
+#define aiImpl
+#define aeImpl
+#define aeDebugLog(...) 
+
+
 #ifdef _WIN32
-#define aiWindows
+    #define aiWindows
 #endif // _WIN32
 
 #define aiCLinkage extern "C"
 #ifdef _MSC_VER
-#define aiExport __declspec(dllexport)
+    #define aiExport __declspec(dllexport)
 #else
-#define aiExport __attribute__((visibility("default")))
+    #define aiExport __attribute__((visibility("default")))
 #endif
 
 #if defined(aiDebug) || defined(aiDebugLog)
-#define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
+    #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
 #else
-#define DebugLog(...)
+    #define DebugLog(...)
 #endif
 
 #ifdef aiWindows

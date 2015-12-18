@@ -22,8 +22,8 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
     if (getConfig().swapHandedness)
     {
         data.translation.x *= -1.0f;
-        data.rotation_axis.x *= -1.0f;
-        data.rotation_angle *= -1.0f;
+        data.rotationAxis.x *= -1.0f;
+        data.rotationAngle *= -1.0f;
     }
 
     AbcGeom::XformOp transop(AbcGeom::kTranslateOperation, AbcGeom::kTranslateHint);
@@ -32,7 +32,7 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
     AbcGeom::XformSample sample;
     sample.setInheritsXforms(data.inherits);
     sample.addOp(transop, data.translation);
-    sample.addOp(rotop, data.rotation_axis, data.rotation_angle);
+    sample.addOp(rotop, data.rotationAxis, data.rotationAngle);
     sample.addOp(scaleop, data.scale);
 
     m_schema.set(sample);

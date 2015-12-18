@@ -1,18 +1,42 @@
 #ifndef AlembicExporter_h
 #define AlembicExporter_h
 
+#define aeCLinkage extern "C"
 
-#include "pch.h"
+#ifdef aeImpl
+    #ifdef _MSC_VER
+        #define aeExport __declspec(dllexport)
+    #else
+        #define aeExport __attribute__((visibility("default")))
+    #endif
+#else
+    #ifdef _MSC_VER
+        #define aeExport __declspec(dllimport)
+        #pragma commnet(lib, "AlembicExporter.lib")
+    #else
+    #endif
 
-#define aeCLinkage  aiCLinkage
-#define aeExport    aiExport
-#define aeDebugLog(...) 
+    struct abcV2
+    {
+        float x, y;
+
+        abcV2() {}
+        abcV2(float _x, float _y) : x(_x), y(_y) {}
+    };
+
+    struct abcV3
+    {
+        float x, y, x;
+
+        abcV2() {}
+        abcV2(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+     };
+#endif
 
 struct aeConfig;
 
 class aeContext;
 class aeObject;
-class aeSchemaBase;
 class aeXForm;
 class aePoints;
 class aePolyMesh;
@@ -29,23 +53,23 @@ enum aeArchiveType
     aeArchiveType_Ogawa,
 };
 
-enum aeTypeSamplingType
+enum aeTimeSamplingType
 {
-    aeTypeSamplingType_Uniform,
-    aeTypeSamplingType_Acyclic,
+    aeTimeSamplingType_Uniform,
+    aeTimeSamplingType_Acyclic,
 };
 
 struct aeConfig
 {
     aeArchiveType archiveType;
-    aeTypeSamplingType timeSamplingType;
-    float startTime;
-    float timePerSample; // relevant only when timeSamplingType==aeTypeSamplingType_Uniform
-    bool swapHandedness; // rhs <-> lhs
+    aeTimeSamplingType timeSamplingType;
+    float startTime;     // relevant only if timeSamplingType is uniform
+    float timePerSample; // relevant only if timeSamplingType is uniform
+    bool swapHandedness; // swap rhs <-> lhs
 
     aeConfig()
         : archiveType(aeArchiveType_Ogawa)
-        , timeSamplingType(aeTypeSamplingType_Uniform)
+        , timeSamplingType(aeTimeSamplingType_Uniform)
         , startTime(0.0f)
         , timePerSample(1.0f / 30.0f)
         , swapHandedness(true)
@@ -54,12 +78,87 @@ struct aeConfig
 };
 
 
+struct aeXFormSampleData
+{
+    abcV3 translation;
+    abcV3 rotationAxis;
+    float rotationAngle;
+    abcV3 scale;
+    bool inherits;
+
+    inline aeXFormSampleData()
+        : translation(0.0f, 0.0f, 0.0f)
+        , rotationAxis(0.0f, 1.0f, 0.0f)
+        , rotationAngle(0.0f)
+        , scale(1.0f, 1.0f, 1.0f)
+        , inherits(false)
+    {
+    }
+};
+
+struct aePolyMeshSampleData
+{
+    abcV3 *positions;
+    abcV3 *normals; // can be null
+    abcV2 *uvs; // can be null
+    int *indices;
+    int *faces; // can be null. assume all faces are triangles if null
+
+    int vertexCount;
+    int indexCount;
+    int faceCount;
+
+    aePolyMeshSampleData()
+        : positions(nullptr)
+        , normals(nullptr)
+        , uvs(nullptr)
+        , indices(nullptr)
+        , faces(nullptr)
+        , vertexCount(0)
+        , indexCount(0)
+        , faceCount(0)
+    {
+    }
+};
+
+struct aePointsSampleData
+{
+    abcV3 *positions;
+    int count;
+
+    inline aePointsSampleData()
+        : positions(nullptr)
+        , count(0)
+    {
+    }
+};
+
+struct aeCameraSampleData
+{
+    float nearClippingPlane;
+    float farClippingPlane;
+    float fieldOfView;
+    float focusDistance;
+    float focalLength;
+
+    inline aeCameraSampleData()
+        : nearClippingPlane(0.0f)
+        , farClippingPlane(0.0f)
+        , fieldOfView(0.0f)
+        , focusDistance(0.0f)
+        , focalLength(0.0f)
+    {
+    }
+};
+
+
+
 aeCLinkage aeExport aeContext*      aeCreateContext(const aeConfig *conf);
 aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
-aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 
+aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
-aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time); // relevant only when timeSamplingType==aeTypeSamplingType_Acyclic
+aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time); // relevant only if timeSamplingType is acyclic
 
 aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name);
 aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);

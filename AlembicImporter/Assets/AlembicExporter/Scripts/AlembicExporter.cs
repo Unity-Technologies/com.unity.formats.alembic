@@ -60,8 +60,8 @@ public class AlembicExporter : MonoBehaviour
         {
             data.uvs = Marshal.UnsafeAddrOfPinnedArrayElement(uvs, 0);
         }
-        data.vertex_count = vertices.Length;
-        data.index_count = indices.Length;
+        data.vertexCount = vertices.Length;
+        data.indexCount = indices.Length;
 
         aeAPI.aePolyMeshWriteSample(abc, ref data);
     }
@@ -320,7 +320,7 @@ public class AlembicExporter : MonoBehaviour
     {
         if (BeginRecording())
         {
-            aeAPI.aeSetTime(m_ctx, 0.0f);
+            aeAPI.aeAddTime(m_ctx, 0.0f);
             foreach (var recorder in m_components)
             {
                 recorder.Capture();
@@ -334,7 +334,7 @@ public class AlembicExporter : MonoBehaviour
         yield return new WaitForEndOfFrame();
         if(!m_recording) { yield break; }
 
-        aeAPI.aeSetTime(m_ctx, m_time);
+        aeAPI.aeAddTime(m_ctx, m_time);
         foreach(var recorder in m_components) {
             recorder.Capture();
         }
