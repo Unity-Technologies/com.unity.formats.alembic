@@ -29,26 +29,37 @@ enum aeArchiveType
     aeArchiveType_Ogawa,
 };
 
+enum aeTypeSamplingType
+{
+    aeTypeSamplingType_Uniform,
+    aeTypeSamplingType_Acyclic,
+};
+
 struct aeConfig
 {
-    aeArchiveType archive_type;
-    bool swapHandedness;
+    aeArchiveType archiveType;
+    aeTypeSamplingType timeSamplingType;
+    float startTime;
+    float timePerSample; // relevant only when timeSamplingType==aeTypeSamplingType_Uniform
+    bool swapHandedness; // rhs <-> lhs
 
     aeConfig()
-        : archive_type(aeArchiveType_Ogawa)
+        : archiveType(aeArchiveType_Ogawa)
+        , timeSamplingType(aeTypeSamplingType_Uniform)
+        , startTime(0.0f)
+        , timePerSample(1.0f / 30.0f)
         , swapHandedness(true)
     {
     }
 };
 
 
-aeCLinkage aeExport void            aeCleanup();
 aeCLinkage aeExport aeContext*      aeCreateContext(const aeConfig *conf);
 aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
-aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time);
+aeCLinkage aeExport void            aeSetTime(aeContext* ctx, float time); // relevant only when timeSamplingType==aeTypeSamplingType_Acyclic
 
 aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name);
 aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);

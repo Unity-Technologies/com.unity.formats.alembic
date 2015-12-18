@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "AlembicExporter.h"
+#include "aeContext.h"
 #include "aeObject.h"
 #include "aeCamera.h"
 
 
 aeCamera::aeCamera(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OCamera(parent->getAbcObject(), name))
+    : super(parent->getContext(), parent, new AbcGeom::OCamera(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }

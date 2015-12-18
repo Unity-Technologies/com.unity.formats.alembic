@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "AlembicExporter.h"
+#include "aeContext.h"
 #include "aeObject.h"
 #include "aePoints.h"
 
 
 aePoints::aePoints(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OPoints(parent->getAbcObject(), name))
+    : super(parent->getContext(), parent, new AbcGeom::OPoints(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
