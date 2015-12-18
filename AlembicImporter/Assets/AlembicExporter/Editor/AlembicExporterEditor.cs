@@ -2,14 +2,14 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AlembicRecorder))]
-public class AlembicRecorderEditor : Editor
+[CustomEditor(typeof(AlembicExporter))]
+public class AlembicExporterEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        var t = target as AlembicRecorder;
+        var t = target as AlembicExporter;
 
         if (t.isRecording)
         {
