@@ -16,21 +16,26 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
+#define aiImpl
+#define aeImpl
+#define aeDebugLog(...) 
+
+
 #ifdef _WIN32
-#define aiWindows
+    #define aiWindows
 #endif // _WIN32
 
 #define aiCLinkage extern "C"
 #ifdef _MSC_VER
-#define aiExport __declspec(dllexport)
+    #define aiExport __declspec(dllexport)
 #else
-#define aiExport __attribute__((visibility("default")))
+    #define aiExport __attribute__((visibility("default")))
 #endif
 
 #if defined(aiDebug) || defined(aiDebugLog)
-#define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
+    #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
 #else
-#define DebugLog(...)
+    #define DebugLog(...)
 #endif
 
 #ifdef aiWindows
@@ -68,13 +73,15 @@ using namespace Alembic;
 
 #define aiPI 3.14159265f
 
-typedef Imath::V2f     abcV2;
-typedef Imath::V3f     abcV3;
-typedef Imath::V4f     abcV4;
-typedef Imath::M44f    abcM44;
-typedef Imath::Box3f   abcBox;
-typedef Imath::Box3d   abcBoxd;
-typedef Abc::IObject   abcObject;
+typedef Imath::V2f      abcV2;
+typedef Imath::V3f      abcV3;
+typedef Imath::V4f      abcV4;
+typedef Imath::M44f     abcM44;
+typedef Imath::M44d     abcM44d;
+typedef Imath::Box3f    abcBox;
+typedef Imath::Box3d    abcBoxd;
+typedef Abc::chrono_t   abcChrono;
+typedef Abc::IObject    abcObject;
 
 enum aiTextureFormat;
 
