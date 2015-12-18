@@ -280,7 +280,7 @@ public class AlembicExporter : MonoBehaviour
 
 
 
-    public bool BeginRecording()
+    public bool BeginCapture()
     {
         if(m_recording) {
             Debug.Log("already recording");
@@ -390,7 +390,7 @@ public class AlembicExporter : MonoBehaviour
         return true;
     }
 
-    public void EndRecording()
+    public void EndCapture()
     {
         if (!m_recording) { return; }
 
@@ -405,14 +405,14 @@ public class AlembicExporter : MonoBehaviour
 
     public void OneShot()
     {
-        if (BeginRecording())
+        if (BeginCapture())
         {
             aeAPI.aeAddTime(m_ctx, 0.0f);
             foreach (var recorder in m_capturers)
             {
                 recorder.Capture();
             }
-            EndRecording();
+            EndCapture();
         }
     }
 
@@ -456,6 +456,6 @@ public class AlembicExporter : MonoBehaviour
 
     void OnDisable()
     {
-        EndRecording();
+        EndCapture();
     }
 }

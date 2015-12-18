@@ -13,16 +13,16 @@ public class AlembicExporterEditor : Editor
 
         if (t.isRecording)
         {
-            if (GUILayout.Button("End Recording"))
+            if (GUILayout.Button("End Capture"))
             {
-                t.EndRecording();
+                t.EndCapture();
             }
         }
         else
         {
-            if (GUILayout.Button("Begin Recording"))
+            if (GUILayout.Button("Begin Capture"))
             {
-                t.BeginRecording();
+                t.BeginCapture();
             }
 
             if (GUILayout.Button("One Shot"))

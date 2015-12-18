@@ -1,18 +1,60 @@
+1. [Alembic?](#alembic?)
+2. [AlembicImporter](#alembicimporter)
+3. [AlembicExporter](#alembicexporter)
+
+# Alembic?
+Alembic は主に映画業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  スキニングやダイナミクスなどのシミュレーション結果を必要な全フレームベイクして頂点キャッシュに変換し、それを alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
+このため、Alembic のインポートやエクスポートができれば、Unity を映像制作用のレンダラやコンポジットとして使ったり、Unity で各種シミュレーションを行ってそれを他の DCC ツールに渡したりといったことができるようになります。  
+(Alembic 本家: http://www.alembic.io/ )  
+
 # AlembicImporter
-
 ![example](Screenshots/alembic_example.gif)  
-Alembic ファイルのジオメトリを Unity 上で再生するプラグインです。  
-Alembic は主に映画業界で使われているデータフォーマットで、フレーム毎に bake された巨大な頂点群を格納するのに用いられます。(詳しくは: http://www.alembic.io/ )  
+パッケージ: [AlembicImporter.unitypackage](Packages/AlembicImporter.unitypackage?raw=true)
 
+Alembic ファイルのジオメトリを Unity 上で再生するプラグインです。現在 Camera、PolyMesh、Points の再生に対応しています。  
+Alembic ファイルに含まれるノード群を Unity 側で GameObject として再構築、PolyMesh を含むノードは MeshFilter や MeshRenderer も生成し、データをファイルからストリーミングして再生します。  
+注意すべき点として、**Alembic ファイルは Assets/StreamingAssets 以下に置く必要があります**。これはストリーミングでデータ読み込む都合上、ビルド後も .abc ファイルがそのまま残っている必要があるためです。
+
+上記パッケージをプロジェクトにインポート後、下記スクリーンショットのメニューより Alembic のインポートを行うことができます。  
 ![example](Screenshots/menu.png)  
-[このパッケージ](Packages/AlembicImporter.unitypackage?raw=true)をインポートし、上記スクリーンショットのメニューから .abc ファイルを選択して読み込みます。  
-読み込むとその .abc ファイルに含まれるノード群に対応する GameObject が生成され、ポリゴンメッシュを含むノードは MeshFilter や MeshRenderer も生成されます。(subdiv や NURBS は未対応で、無視されます)
 
-Alembic ファイルから直接ストリーミングでデータを読み込み、Mesh オブジェクトの頂点とインデックスを毎フレーム更新することで再生しています。このため、**Alembic ファイルは Assets/StreamingAssets 以下に格納されている必要があります**。  
-また、ストリーミングはファイルごとに並列に行われます。なので、適度にファイルを分けたほうが再生は高速になります。
 
-現状まだまだ開発中ですが、とりあえず遅いながらもジオメトリの再生ができるようになっています。  
-ちなみ冒頭の gif アニメのデータは TestData/Bifrost_milk.7z に含まれています。(そのままだと github で扱えるファイルサイズの上限 100MB を超えるため、Assets/StreamingAssets には置いていません)  
+# AlembicExporter
+パッケージ: [AlembicExporter.unitypackage](Packages/AlembicExporter.unitypackage?raw=true)
+
+Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
+MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力), Camera の書き出しに対応しており、カスタムハンドラを書けば独自のデータも出力できるようになっています。
+
+エクスポートを行うには、上記パッケージをインポート後、AlembicExporter コンポーネントを追加します。  
+![example](Screenshots/AlembicExporter.png)  
+Path: 出力パスを指定します。  
+Archive Type: Alembic のフォーマットの指定で、通常 Ogawa のままで問題ないでしょう。  
+
+Time Sampling Type:  
+注意が必要な項目です。
+これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) とみなします。これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
+Time Sampling Type を Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間にインターバルになります。この場合当然間隔はばらばらになってしまうため、映像制作には通常 Uniform を選ぶことになるでしょう。  
+Start Time と Time Per Sample は、前述の通り Time Sampling Type が Uniform の場合に使われる数値です。
+
+Awap Handedness:
+有効にすると 右手座標系 / 左手座標系 を入れ変える処理を挟みます。
+DCC ツールの多くは Unity とは逆の座標系なので、大抵は有効にしておいたほうがいいでしょう。  
+
+Scope: Entire Scene の場合文字通りシーン内のキャプチャ可能な全オブジェクトをキャプチャします。
+Current Branch の場合その Alembic Exporter コンポーネントがついている GameObject 以下のツリーのみをキャプチャします。
+
+Preserve Tree Structure: 有効にした場合、キャプチャ対象の親オブジェクト群の Transform も Alembic ファイルに含めます。無効の場合キャプチャ対象のみ Alembic に含めます。
+
+Capture *** の項目は対象コンポーネントのキャプチャの有効/無効を指定します。
+Ignore Disabled が有効な場合、disabled されたオブジェクトはキャプチャ対象コンポーネントであっても除外されます。
+
+Begin Capture / End Capture, One Shot:
+ キャプチャを開始 / 停止します。OneShot は現在の 1 フレームだけキャプチャします。
+これらはスクリプトから BeginCapture() / EndCapture() / OneShot() を呼ぶことで同機能にアクセスでるため、独自 UI を作る場合容易に組み込めるはずです。
+
+キャプチャの途中でオブジェクトの enabled / disabled が変わってもキャプチャは継続される点にやや注意が必要です。
+また、キャプチャの途中で対象オブジェクトが削除された場合、そのオブジェクトのキャプチャは中断されますが、このようなサンプル数が不均一な Alembic ファイルは対応していないソフトウェアもあるかもしれず、避けたほうがいいシチュエーションです。
+
 
 
 ## 謝辞
