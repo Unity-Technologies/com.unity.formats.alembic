@@ -19,7 +19,7 @@ public abstract class AlembicCustomComponentCapturer : MonoBehaviour
 
 
 [ExecuteInEditMode]
-[AddComponentMenu("Alembic/Recorder")]
+[AddComponentMenu("Alembic/Exporter")]
 public class AlembicExporter : MonoBehaviour
 {
     #region impl
@@ -46,7 +46,7 @@ public class AlembicExporter : MonoBehaviour
     public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
     {
         var data = new aeAPI.aePolyMeshSampleData();
-        var indices = mesh.GetIndices(0); // todo: record all submeshes
+        var indices = mesh.triangles; // todo: record all submeshes
         var vertices = mesh.vertices;
         var normals = mesh.normals;
         var uvs = mesh.uv;
@@ -168,6 +168,7 @@ public class AlembicExporter : MonoBehaviour
     public class SkinnedMeshCapturer : ComponentCapturer
     {
         SkinnedMeshRenderer m_target;
+        Mesh m_mesh;
 
         public SkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
@@ -179,7 +180,9 @@ public class AlembicExporter : MonoBehaviour
         {
             if (m_target != null)
             {
-                CaptureMesh(m_abc, m_target.sharedMesh);
+                if(m_mesh == null) { m_mesh = new Mesh(); }
+                m_target.BakeMesh(m_mesh);
+                CaptureMesh(m_abc, m_mesh);
             }
         }
     }
@@ -272,7 +275,7 @@ public class AlembicExporter : MonoBehaviour
 
     public TransformCapturer CreateTransformCapturer(GameObject target, aeAPI.aeObject parent)
     {
-        var abc = aeAPI.aeNewXForm(parent, target.name + "_Transform");
+        var abc = aeAPI.aeNewXForm(parent, target.name + " (" + target.GetHashCode().ToString("X8") + ")");
         var cap = new TransformCapturer(target.GetComponent<Transform>(), abc);
         m_capturers.Add(cap);
         return cap;
