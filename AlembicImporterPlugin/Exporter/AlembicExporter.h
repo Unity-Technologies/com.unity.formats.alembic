@@ -43,6 +43,7 @@ class aeXForm;    // : aeObject
 class aePoints;   // : aeObject
 class aePolyMesh; // : aeObject
 class aeCamera;   // : aeObject
+class aeProperty;
 struct aeXFormSampleData;
 struct aePointsSampleData;
 struct aePolyMeshSampleData;
@@ -59,6 +60,17 @@ enum aeTimeSamplingType
 {
     aeTimeSamplingType_Uniform,
     aeTimeSamplingType_Acyclic,
+};
+
+enum aePropertyType
+{
+    aePropertyType_Float,
+    aePropertyType_Int,
+    aePropertyType_Bool,
+    aePropertyType_V2,
+    aePropertyType_V3,
+    aePropertyType_V4,
+    aePropertyType_M44,
 };
 
 struct aeConfig
@@ -100,11 +112,11 @@ struct aeXFormSampleData
 
 struct aePolyMeshSampleData
 {
-    abcV3 *positions;
-    abcV3 *normals; // can be null
-    abcV2 *uvs; // can be null
-    int *indices;
-    int *faces; // can be null. assume all faces are triangles if null
+    const abcV3 *positions;
+    const abcV3 *normals; // can be null
+    const abcV2 *uvs; // can be null
+    const int *indices;
+    const int *faces; // can be null. assume all faces are triangles if null
 
     int vertexCount;
     int indexCount;
@@ -125,8 +137,8 @@ struct aePolyMeshSampleData
 
 struct aePointsSampleData
 {
-    abcV3 *positions;
-    uint64_t *ids; // can be null
+    const abcV3 *positions;
+    const uint64_t *ids; // can be null
     int count;
 
     inline aePointsSampleData()
@@ -173,5 +185,7 @@ aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aeP
 aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data);
 aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeCameraSampleData *data);
 
+aeCLinkage aeExport aeProperty*     aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
+aeCLinkage aeExport void            aeWriteProperty(aeProperty *prop, const void *data, int num_data);
 
 #endif // AlembicExporter_h

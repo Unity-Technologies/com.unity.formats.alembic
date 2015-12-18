@@ -3,6 +3,7 @@
 
 #include "aiThreadPool.h"
 
+typedef Abc::IObject    abcObject;
 class aiObject;
 
 class aiContext

@@ -6,14 +6,19 @@
 
 
 aeCamera::aeCamera(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OCamera(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+    : super(parent->getContext(), parent, new abcCamera(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
 
-AbcGeom::OCamera& aeCamera::getAbcObject()
+abcCamera& aeCamera::getAbcObject()
 {
-    return dynamic_cast<AbcGeom::OCamera&>(*m_abc);
+    return dynamic_cast<abcCamera&>(*m_abc);
+}
+
+abcProperties* aeCamera::getAbcProperties()
+{
+    return &m_schema;
 }
 
 void aeCamera::writeSample(const aeCameraSampleData &data)

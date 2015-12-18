@@ -6,7 +6,8 @@ class aePoints : public aeObject
 typedef aeObject super;
 public:
     aePoints(aeObject *parent, const char *name);
-    AbcGeom::OPoints& getAbcObject() override;
+    abcPoints& getAbcObject() override;
+    abcProperties* getAbcProperties() override;
 
     void writeSample(const aePointsSampleData &data);
 
