@@ -6,14 +6,19 @@
 
 
 aePoints::aePoints(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OPoints(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+    : super(parent->getContext(), parent, new abcPoints(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
 
-AbcGeom::OPoints& aePoints::getAbcObject()
+abcPoints& aePoints::getAbcObject()
 {
-    return dynamic_cast<AbcGeom::OPoints&>(*m_abc);
+    return dynamic_cast<abcPoints&>(*m_abc);
+}
+
+abcProperties* aePoints::getAbcProperties()
+{
+    return &m_schema;
 }
 
 void aePoints::writeSample(const aePointsSampleData &data_)

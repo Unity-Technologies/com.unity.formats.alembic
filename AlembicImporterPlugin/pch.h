@@ -81,7 +81,6 @@ typedef Imath::M44d     abcM44d;
 typedef Imath::Box3f    abcBox;
 typedef Imath::Box3d    abcBoxd;
 typedef Abc::chrono_t   abcChrono;
-typedef Abc::IObject    abcObject;
 
 enum aiTextureFormat;
 

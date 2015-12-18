@@ -5,14 +5,19 @@
 #include "aePolyMesh.h"
 
 aePolyMesh::aePolyMesh(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OPolyMesh(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+    : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
 
-AbcGeom::OPolyMesh& aePolyMesh::getAbcObject()
+abcPolyMesh& aePolyMesh::getAbcObject()
 {
-    return dynamic_cast<AbcGeom::OPolyMesh&>(*m_abc);
+    return dynamic_cast<abcPolyMesh&>(*m_abc);
+}
+
+abcProperties* aePolyMesh::getAbcProperties()
+{
+    return &m_schema;
 }
 
 void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)

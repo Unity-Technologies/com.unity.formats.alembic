@@ -68,3 +68,23 @@ aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraSample
 {
     obj->writeSample(*data);
 }
+
+aeCLinkage aeExport aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
+{
+    switch (type) {
+    case aePropertyType_Float:  return parent->newProperty<Abc::OFloatArrayProperty>(name); break;
+    case aePropertyType_Int:    return parent->newProperty<Abc::OInt32ArrayProperty>(name); break;
+    case aePropertyType_Bool:   return parent->newProperty<Abc::OBoolArrayProperty>(name); break;
+    case aePropertyType_V2:     return parent->newProperty<Abc::OV2fArrayProperty>(name); break;
+    case aePropertyType_V3:     return parent->newProperty<Abc::OV3fArrayProperty>(name); break;
+    case aePropertyType_V4:     return parent->newProperty<Abc::OQuatfArrayProperty>(name); break;
+    case aePropertyType_M44:    return parent->newProperty<Abc::OM44fArrayProperty>(name); break;
+    }
+    aeDebugLog("aeNewProperty(): unknown type");
+    return nullptr;
+}
+
+aeCLinkage aeExport void aeWriteProperty(aeProperty *prop, const void *data, int num_data)
+{
+    prop->writeSample(data, num_data);
+}

@@ -7,18 +7,65 @@
 #include "aePolyMesh.h"
 #include "aeCamera.h"
 
+
+aeProperty::aeProperty()
+{
+}
+
+aeProperty::~aeProperty()
+{
+}
+
+
+template<class T>
+class aeTProprty : public aeProperty
+{
+typedef aeProperty super;
+public:
+    typedef T property_type;
+    typedef typename T::value_type value_type;
+    typedef typename T::sample_type sample_type;
+
+    aeTProprty(aeObject *parent, const char *name)
+        : m_abcprop(new property_type(*parent->getAbcProperties(), name, parent->getContext()->getTimeSaplingIndex()))
+    {
+        aeDebugLog("aeTProprty::aeTProprty() %s", m_abcprop->getName().c_str());
+    }
+
+    void writeSample(const void *data, int data_num) override
+    {
+        m_abcprop->set(sample_type((const value_type*)data, data_num));
+    }
+
+private:
+    std::unique_ptr<property_type> m_abcprop;
+};
+template class aeTProprty<Abc::OFloatArrayProperty>;
+template class aeTProprty<Abc::OInt32ArrayProperty>;
+template class aeTProprty<Abc::OBoolArrayProperty>;
+template class aeTProprty<Abc::OV2fArrayProperty>;
+template class aeTProprty<Abc::OV3fArrayProperty>;
+template class aeTProprty<Abc::OQuatfArrayProperty>;
+template class aeTProprty<Abc::OM44fArrayProperty>;
+
+
 aeObject::aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc)
     : m_ctx(ctx)
     , m_parent(parent)
     , m_abc(abc)
 {
+    aeDebugLog("aeObject::aeObject() %s", getName());
 }
 
 aeObject::~aeObject()
 {
+    aeDebugLog("aeObject::~aeObject() %s", getName());
+
     while (!m_children.empty()) {
         delete m_children.back();
     }
+    m_properties.clear();
+
     if (m_parent != nullptr) {
         m_parent->removeChild(this);
     }
@@ -55,3 +102,31 @@ void aeObject::removeChild(aeObject *c)
         m_children.erase(it);
     }
 }
+
+
+abcProperties* aeObject::getAbcProperties()
+{
+    return nullptr;
+}
+
+template<class T>
+aeProperty* aeObject::newProperty(const char *name)
+{
+    auto *cprop = getAbcProperties();
+    if (cprop == nullptr) {
+        aeDebugLog("aeObject::newProperty() %s failed!", name);
+        return nullptr;
+    }
+
+    auto *ret = new aeTProprty<T>(this, name);
+    m_properties.emplace_back(aePropertyPtr(ret));
+    return ret;
+}
+template aeProperty*    aeObject::newProperty<Abc::OFloatArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OInt32ArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OBoolArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OV2fArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OV3fArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OQuatfArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<Abc::OM44fArrayProperty>(const char *name);
+

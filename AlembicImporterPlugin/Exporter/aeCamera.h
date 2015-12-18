@@ -6,7 +6,8 @@ class aeCamera : public aeObject
 typedef aeObject super;
 public:
     aeCamera(aeObject *parent, const char *name);
-    AbcGeom::OCamera& getAbcObject() override;
+    abcCamera& getAbcObject() override;
+    abcProperties* getAbcProperties() override;
 
     void writeSample(const aeCameraSampleData &data);
 

@@ -7,7 +7,8 @@ class aeXForm : public aeObject
 typedef aeObject super;
 public:
     aeXForm(aeObject *parent, const char *name);
-    AbcGeom::OXform& getAbcObject() override;
+    abcXForm& getAbcObject() override;
+    abcProperties* getAbcProperties() override;
 
     void writeSample(const aeXFormSampleData &data);
 

@@ -6,14 +6,19 @@
 
 
 aeXForm::aeXForm(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OXform(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+    : super(parent->getContext(), parent, new abcXForm(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
 
-AbcGeom::OXform& aeXForm::getAbcObject()
+abcXForm& aeXForm::getAbcObject()
 {
-    return dynamic_cast<AbcGeom::OXform&>(*m_abc);
+    return dynamic_cast<abcXForm&>(*m_abc);
+}
+
+abcProperties* aeXForm::getAbcProperties()
+{
+    return &m_schema;
 }
 
 void aeXForm::writeSample(const aeXFormSampleData &data_)
