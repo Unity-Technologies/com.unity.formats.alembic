@@ -230,11 +230,13 @@ public class AlembicPointsRenderer : MonoBehaviour
         }
 
         // update materials
+        var worldToLocalMatrix = trans.localToWorldMatrix;
         ForEachEveryMaterials((m) =>
         {
             m.SetInt("_NumInstances", instance_count);
             m.SetVector("_ModelScale", m_model_scale);
             m.SetVector("_TransScale", m_trans_scale);
+            m.SetMatrix("_Transform", worldToLocalMatrix);
         });
 
         // issue draw calls
