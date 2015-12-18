@@ -10,8 +10,6 @@
 // 
 // #define aiWithTBB
 
-#include "pch.h"
-
 enum aiNormalsMode
 {
     NM_ReadFromFile = 0,

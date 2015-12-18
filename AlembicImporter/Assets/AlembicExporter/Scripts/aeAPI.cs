@@ -31,9 +31,9 @@ public class aeAPI
     {
         [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
         [MarshalAs(UnmanagedType.U4)] public aeTypeSamplingType timeSamplingType;
-        public float startTime;
-        public float timePerSample;
-        [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
+        public float startTime;     // relevant only if timeSamplingType is uniform
+        public float timePerSample; // relevant only if timeSamplingType is uniform
+        [MarshalAs(UnmanagedType.U1)] public bool swapHandedness; // swap rhs <-> lhs
 
 
         public static aeConfig default_value
@@ -75,9 +75,9 @@ public class aeAPI
         public IntPtr indices; // int*
         public IntPtr faces; // int*. can be null. assume all faces are triangles if null
 
-        public int vertex_count;
-        public int index_count;
-        public int face_count;
+        public int vertexCount;
+        public int indexCount;
+        public int faceCount;
     }
 
     public struct aeCameraSampleData
@@ -95,7 +95,7 @@ public class aeAPI
 
     [DllImport ("AlembicExporter")] public static extern bool       aeOpenArchive(aeContext ctx, string path);
     [DllImport ("AlembicExporter")] public static extern aeObject   aeGetTopObject(aeContext ctx);
-    [DllImport ("AlembicExporter")] public static extern void       aeSetTime(aeContext ctx, float time); // relevant only when timeSamplingType==Acyclic
+    [DllImport ("AlembicExporter")] public static extern void       aeAddTime(aeContext ctx, float time); // relevant only if timeSamplingType is acyclic
 
     [DllImport ("AlembicExporter")] public static extern aeObject   aeNewXForm(aeObject parent, string name);
     [DllImport ("AlembicExporter")] public static extern aeObject   aeNewCamera(aeObject parent, string name);

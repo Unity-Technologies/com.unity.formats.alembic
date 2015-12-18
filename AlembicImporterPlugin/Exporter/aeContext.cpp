@@ -19,7 +19,7 @@ aeContext::~aeContext()
 void aeContext::reset()
 {
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTypeSamplingType_Acyclic) {
+        if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
             Abc::TimeSampling ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_times);
             *m_archive.getTimeSampling(m_time_sampling_index) = ts;
         }

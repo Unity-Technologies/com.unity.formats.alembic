@@ -55,19 +55,3 @@ void aeObject::removeChild(aeObject *c)
         m_children.erase(it);
     }
 }
-
-
-
-aeSchemaBase::aeSchemaBase(aeObject *obj)
-    : m_obj(obj)
-{
-}
-
-aeSchemaBase::~aeSchemaBase()
-{
-}
-
-const aeConfig& aeSchemaBase::getConfig() const
-{
-    return m_obj->getConfig();
-}

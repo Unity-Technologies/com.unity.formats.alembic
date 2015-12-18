@@ -28,19 +28,4 @@ protected:
     std::unique_ptr<AbcGeom::OObject> m_abc;
 };
 
-
-class aeSchemaBase
-{
-public:
-    aeSchemaBase(aeObject *obj);
-    virtual ~aeSchemaBase();
-
-    const aeConfig& getConfig() const;
-
-protected:
-    aeObject *m_obj;
-};
-
-
-
 #endif // aeObject_h

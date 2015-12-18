@@ -29,7 +29,7 @@ aeCLinkage aeExport aeObject* aeGetTopObject(aeContext* ctx)
     return ctx->getTopObject();
 }
 
-aeCLinkage aeExport void aeSetTime(aeContext* ctx, float time)
+aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time)
 {
     ctx->setTime(time);
 }
