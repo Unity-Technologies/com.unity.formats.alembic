@@ -66,16 +66,51 @@ public class AlembicExporter : MonoBehaviour
         aeAPI.aePolyMeshWriteSample(abc, ref data);
     }
 
+    public static void CaptureParticle(
+        aeAPI.aeObject abc,
+        ParticleSystem ps,
+        ref ParticleSystem.Particle[] buf_particles,
+        ref Vector3[] buf_positions)
+    {
+        // create buffer
+        int count_max = ps.maxParticles;
+        if (buf_particles == null )
+        {
+            buf_particles = new ParticleSystem.Particle[count_max];
+            buf_positions = new Vector3[count_max];
+        }
+        else if(buf_particles.Length != count_max)
+        {
+            Array.Resize(ref buf_particles, count_max);
+            Array.Resize(ref buf_positions, count_max);
+        }
+
+        // copy particle positions to buffer
+        int count = ps.GetParticles(buf_particles);
+        for (int i=0; i < count; ++i)
+        {
+            buf_positions[i] = buf_particles[i].position;
+        }
+
+        // write!
+        var data = new aeAPI.aePointsSampleData();
+        data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(buf_positions, 0);
+        data.count = count;
+        aeAPI.aePointsWriteSample(abc, ref data);
+    }
+
 
     public abstract class ComponentCapturer
     {
+        protected aeAPI.aeObject m_abc;
         public abstract void Capture();
+
+        public aeAPI.aeObject abc { get { return m_abc; } }
     }
 
     public class TransformCapturer : ComponentCapturer
     {
         Transform m_target;
-        aeAPI.aeObject m_abc;
 
         public TransformCapturer(Transform target, aeAPI.aeObject abc)
         {
@@ -95,7 +130,6 @@ public class AlembicExporter : MonoBehaviour
     public class CameraCapturer : ComponentCapturer
     {
         Camera m_target;
-        aeAPI.aeObject m_abc;
 
         public CameraCapturer(Camera target, aeAPI.aeObject abc)
         {
@@ -115,7 +149,6 @@ public class AlembicExporter : MonoBehaviour
     public class MeshCapturer : ComponentCapturer
     {
         MeshRenderer m_target;
-        aeAPI.aeObject m_abc;
 
         public MeshCapturer(MeshRenderer target, aeAPI.aeObject abc)
         {
@@ -135,7 +168,6 @@ public class AlembicExporter : MonoBehaviour
     public class SkinnedMeshCapturer : ComponentCapturer
     {
         SkinnedMeshRenderer m_target;
-        aeAPI.aeObject m_abc;
 
         public SkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
@@ -148,6 +180,27 @@ public class AlembicExporter : MonoBehaviour
             if (m_target != null)
             {
                 CaptureMesh(m_abc, m_target.sharedMesh);
+            }
+        }
+    }
+
+    public class ParticleCapturer : ComponentCapturer
+    {
+        ParticleSystem m_target;
+        ParticleSystem.Particle[] m_buf_particles;
+        Vector3[] m_buf_positions;
+
+        public ParticleCapturer(ParticleSystem target, aeAPI.aeObject abc)
+        {
+            m_target = target;
+            m_abc = abc;
+        }
+
+        public override void Capture()
+        {
+            if (m_target != null)
+            {
+                CaptureParticle(m_abc, m_target, ref m_buf_particles, ref m_buf_positions);
             }
         }
     }
@@ -187,12 +240,13 @@ public class AlembicExporter : MonoBehaviour
 
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
-    public bool m_captureParticleRenderer = true;
+    public bool m_captureParticleSystem = true;
     public bool m_captureCamera = true;
-    public bool m_captureCustomRecorder = true;
+    public bool m_enableCustomCapturer = true;
+    public bool m_ignoreDisabled = true;
 
     aeAPI.aeContext m_ctx;
-    List<ComponentCapturer> m_components = new List<ComponentCapturer>();
+    List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
     bool m_recording;
     float m_time;
     int m_frameCount;
@@ -214,6 +268,17 @@ public class AlembicExporter : MonoBehaviour
             return FindObjectsOfType<T>();
         }
     }
+
+
+    public TransformCapturer CreateTransformCapturer(GameObject target, aeAPI.aeObject parent)
+    {
+        var abc = aeAPI.aeNewXForm(parent, target.name + "_Transform");
+        var cap = new TransformCapturer(target.GetComponent<Transform>(), abc);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+
 
     public bool BeginRecording()
     {
@@ -244,57 +309,79 @@ public class AlembicExporter : MonoBehaviour
             m_preserveTreeStructure = false;
         }
 
+
+        // create component captures
+
+        // Camera
         if (m_captureCamera)
         {
             foreach(var target in GetTargets<Camera>())
             {
-                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
-                m_components.Add(trans_rec);
+                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
+                var trans = CreateTransformCapturer(target.gameObject, top);
 
-                var cam_obj = aeAPI.aeNewCamera(trans_obj, target.name);
-                var cam_rec = new CameraCapturer(target, cam_obj);
-                m_components.Add(cam_rec);
+                var cam_abc = aeAPI.aeNewCamera(trans.abc, target.name);
+                var cam_cap = new CameraCapturer(target, cam_abc);
+                m_capturers.Add(cam_cap);
             }
         }
 
+        // MeshRenderer
         if (m_captureMeshRenderer)
         {
             foreach (var target in GetTargets<MeshRenderer>())
             {
-                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
-                m_components.Add(trans_rec);
+                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
+                var trans = CreateTransformCapturer(target.gameObject, top);
 
-                var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
-                var mesh_rec = new MeshCapturer(target, mesh_obj);
-                m_components.Add(mesh_rec);
+                var mesh_abc = aeAPI.aeNewPolyMesh(trans.abc, target.name);
+                var mesh_cap = new MeshCapturer(target, mesh_abc);
+                m_capturers.Add(mesh_cap);
             }
         }
 
+        // SkinnedMeshRenderer
         if (m_captureSkinnedMeshRenderer)
         {
             foreach (var target in GetTargets<SkinnedMeshRenderer>())
             {
-                var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
-                m_components.Add(trans_rec);
+                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
+                var trans = CreateTransformCapturer(target.gameObject, top);
 
-                var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
-                var mesh_rec = new SkinnedMeshCapturer(target, mesh_obj);
-                m_components.Add(mesh_rec);
+                var mesh_abc = aeAPI.aeNewPolyMesh(trans.abc, target.name);
+                var mesh_cap = new SkinnedMeshCapturer(target, mesh_abc);
+                m_capturers.Add(mesh_cap);
             }
         }
 
-        if (m_captureCustomRecorder)
+        // ParticleSystem
+        if (m_captureParticleSystem)
+        {
+            foreach (var target in GetTargets<ParticleSystem>())
+            {
+                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy)) { continue; }
+                var trans = CreateTransformCapturer(target.gameObject, top);
+
+                var particle_abc = aeAPI.aeNewPoints(trans.abc, target.name);
+                var particle_cap = new ParticleCapturer(target, particle_abc);
+                m_capturers.Add(particle_cap);
+            }
+        }
+
+        // handle custom capturers (AlembicCustomComponentCapturer)
+        if (m_enableCustomCapturer)
         {
             foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
             {
-                target.SetParent(top);
-                var mesh_rec = new CustomCapturerHandler(target);
-                m_components.Add(mesh_rec);
+                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
+                var trans = CreateTransformCapturer(target.gameObject, top);
+
+                target.SetParent(trans.abc);
+                var capturer = new CustomCapturerHandler(target);
+                m_capturers.Add(capturer);
             }
         }
+
 
         m_recording = true;
         m_time = 0.0f;
@@ -307,7 +394,7 @@ public class AlembicExporter : MonoBehaviour
     {
         if (!m_recording) { return; }
 
-        m_components.Clear();
+        m_capturers.Clear();
         aeAPI.aeDestroyContext(m_ctx);
         m_ctx = new aeAPI.aeContext();
         m_recording = false;
@@ -321,7 +408,7 @@ public class AlembicExporter : MonoBehaviour
         if (BeginRecording())
         {
             aeAPI.aeAddTime(m_ctx, 0.0f);
-            foreach (var recorder in m_components)
+            foreach (var recorder in m_capturers)
             {
                 recorder.Capture();
             }
@@ -335,7 +422,7 @@ public class AlembicExporter : MonoBehaviour
         if(!m_recording) { yield break; }
 
         aeAPI.aeAddTime(m_ctx, m_time);
-        foreach(var recorder in m_components) {
+        foreach(var recorder in m_capturers) {
             recorder.Capture();
         }
         ++m_frameCount;
