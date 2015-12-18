@@ -1,4 +1,4 @@
-1. [Alembic?](#alembic?)
+1. [Alembic?](#alembic)
 2. [AlembicImporter](#alembicimporter)
 3. [AlembicExporter](#alembicexporter)
 
@@ -31,12 +31,12 @@ Path: 出力パスを指定します。
 Archive Type: Alembic のフォーマットの指定で、通常 Ogawa のままで問題ないでしょう。  
 
 Time Sampling Type:  
-注意が必要な項目です。
-これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) とみなします。これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
-Time Sampling Type を Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間にインターバルになります。この場合当然間隔はばらばらになってしまうため、映像制作には通常 Uniform を選ぶことになるでしょう。  
-Start Time と Time Per Sample は、前述の通り Time Sampling Type が Uniform の場合に使われる数値です。
+キャプチャの間隔の指定です。
+これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。そして、これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
+Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。この場合当然間隔はばらばらになってしまうため、映像制作には通常 Uniform を選ぶことになるでしょう。  
+Start Time と Time Per Sample は、Time Sampling Type が Uniform の場合に使われる数値です。
 
-Awap Handedness:
+Swap Handedness:
 有効にすると 右手座標系 / 左手座標系 を入れ変える処理を挟みます。
 DCC ツールの多くは Unity とは逆の座標系なので、大抵は有効にしておいたほうがいいでしょう。  
 
