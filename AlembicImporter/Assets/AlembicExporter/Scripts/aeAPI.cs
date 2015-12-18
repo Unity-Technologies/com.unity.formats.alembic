@@ -23,8 +23,20 @@ public class aeAPI
         Acyclic,
     };
 
+    public enum aePropertyType
+    {
+        FloatArray,
+        IntArray,
+        BoolArray,
+        Vec2Array,
+        Vec3Array,
+        Vec4Array,
+        Mat44Array,
+    };
+
     public struct aeContext { public IntPtr ptr; }
-    public struct aeObject  { public IntPtr ptr; }
+    public struct aeObject { public IntPtr ptr; }
+    public struct aeProperty { public IntPtr ptr; }
 
     [Serializable]
     public struct aeConfig
@@ -90,23 +102,25 @@ public class aeAPI
         public float focalLength;
     }
 
+    
+    [DllImport("AlembicExporter")] public static extern aeContext   aeCreateContext(ref aeConfig conf);
+    [DllImport("AlembicExporter")] public static extern void        aeDestroyContext(aeContext ctx);
 
-    [DllImport ("AlembicExporter")] public static extern aeContext  aeCreateContext(ref aeConfig conf);
-    [DllImport ("AlembicExporter")] public static extern void       aeDestroyContext(aeContext ctx);
+    [DllImport("AlembicExporter")] public static extern bool        aeOpenArchive(aeContext ctx, string path);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeGetTopObject(aeContext ctx);
+    [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time); // relevant only if timeSamplingType is acyclic
 
-    [DllImport ("AlembicExporter")] public static extern bool       aeOpenArchive(aeContext ctx, string path);
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeGetTopObject(aeContext ctx);
-    [DllImport ("AlembicExporter")] public static extern void       aeAddTime(aeContext ctx, float time); // relevant only if timeSamplingType is acyclic
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewXForm(aeObject parent, string name);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPoints(aeObject parent, string name);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name);
+    [DllImport("AlembicExporter")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormSampleData data);
+    [DllImport("AlembicExporter")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsSampleData data);
+    [DllImport("AlembicExporter")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshSampleData data);
+    [DllImport("AlembicExporter")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
 
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewXForm(aeObject parent, string name);
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewCamera(aeObject parent, string name);
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewPoints(aeObject parent, string name);
-    [DllImport ("AlembicExporter")] public static extern aeObject   aeNewPolyMesh(aeObject parent, string name);
-    [DllImport ("AlembicExporter")] public static extern void       aeXFormWriteSample(aeObject obj, ref aeXFormSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aePointsWriteSample(aeObject obj, ref aePointsSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aePolyMeshWriteSample(aeObject obj, ref aePolyMeshSampleData data);
-    [DllImport ("AlembicExporter")] public static extern void       aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
-
+    [DllImport("AlembicExporter")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteSample(aeProperty prop, IntPtr data, int num_data);
 
 
     public static void aeWait(float wt)

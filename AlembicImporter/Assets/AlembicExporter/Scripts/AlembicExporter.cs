@@ -10,19 +10,17 @@ using UnityEditor;
 #endif
 
 
-public abstract class AlembicCustomComponentCapturer : MonoBehaviour
-{
-    public abstract void SetParent(aeAPI.aeObject parent);
-    public abstract void Capture();
-}
-
-
 
 [ExecuteInEditMode]
 [AddComponentMenu("Alembic/Exporter")]
 public class AlembicExporter : MonoBehaviour
 {
     #region impl
+
+    public static IntPtr GetArrayPtr(Array v)
+    {
+        return Marshal.UnsafeAddrOfPinnedArrayElement(v, 0);
+    }
 
     public static void CaptureTransform(aeAPI.aeObject abc, Transform trans)
     {
@@ -46,58 +44,21 @@ public class AlembicExporter : MonoBehaviour
     public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
     {
         var data = new aeAPI.aePolyMeshSampleData();
-        var indices = mesh.triangles; // todo: record all submeshes
+        var indices = mesh.triangles;
         var vertices = mesh.vertices;
         var normals = mesh.normals;
         var uvs = mesh.uv;
-        data.indices = Marshal.UnsafeAddrOfPinnedArrayElement(indices, 0);
-        data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(vertices, 0);
-        if(normals != null)
-        {
-            data.normals = Marshal.UnsafeAddrOfPinnedArrayElement(normals, 0);
-        }
-        if(uvs != null)
-        {
-            data.uvs = Marshal.UnsafeAddrOfPinnedArrayElement(uvs, 0);
-        }
+
+        data.indices = GetArrayPtr(indices);
+        data.positions = GetArrayPtr(vertices);
+        if(normals != null) { data.normals = GetArrayPtr(normals); }
+        if(uvs != null)     { data.uvs = GetArrayPtr(uvs); }
         data.vertexCount = vertices.Length;
         data.indexCount = indices.Length;
 
         aeAPI.aePolyMeshWriteSample(abc, ref data);
     }
 
-    public static void CaptureParticle(
-        aeAPI.aeObject abc,
-        ParticleSystem ps,
-        ref ParticleSystem.Particle[] buf_particles,
-        ref Vector3[] buf_positions)
-    {
-        // create buffer
-        int count_max = ps.maxParticles;
-        if (buf_particles == null )
-        {
-            buf_particles = new ParticleSystem.Particle[count_max];
-            buf_positions = new Vector3[count_max];
-        }
-        else if(buf_particles.Length != count_max)
-        {
-            Array.Resize(ref buf_particles, count_max);
-            Array.Resize(ref buf_positions, count_max);
-        }
-
-        // copy particle positions to buffer
-        int count = ps.GetParticles(buf_particles);
-        for (int i=0; i < count; ++i)
-        {
-            buf_positions[i] = buf_particles[i].position;
-        }
-
-        // write!
-        var data = new aeAPI.aePointsSampleData();
-        data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(buf_positions, 0);
-        data.count = count;
-        aeAPI.aePointsWriteSample(abc, ref data);
-    }
 
 
     public abstract class ComponentCapturer
@@ -120,10 +81,9 @@ public class AlembicExporter : MonoBehaviour
 
         public override void Capture()
         {
-            if (m_target != null)
-            {
-                CaptureTransform(m_abc, m_target);
-            }
+            if (m_target == null) { return; }
+
+            CaptureTransform(m_abc, m_target);
         }
     }
 
@@ -139,10 +99,9 @@ public class AlembicExporter : MonoBehaviour
 
         public override void Capture()
         {
-            if (m_target != null)
-            {
-                CaptureCamera(m_abc, m_target);
-            }
+            if (m_target == null) { return; }
+
+            CaptureCamera(m_abc, m_target);
         }
     }
 
@@ -158,10 +117,9 @@ public class AlembicExporter : MonoBehaviour
 
         public override void Capture()
         {
-            if(m_target != null)
-            {
-                CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh);
-            }
+            if (m_target == null) { return; }
+
+            CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh);
         }
     }
 
@@ -178,33 +136,65 @@ public class AlembicExporter : MonoBehaviour
 
         public override void Capture()
         {
-            if (m_target != null)
-            {
-                if(m_mesh == null) { m_mesh = new Mesh(); }
-                m_target.BakeMesh(m_mesh);
-                CaptureMesh(m_abc, m_mesh);
-            }
+            if (m_target == null) { return; }
+
+            if (m_mesh == null) { m_mesh = new Mesh(); }
+            m_target.BakeMesh(m_mesh);
+            CaptureMesh(m_abc, m_mesh);
         }
     }
 
     public class ParticleCapturer : ComponentCapturer
     {
+        aeAPI.aeProperty m_prop_rotatrions;
         ParticleSystem m_target;
         ParticleSystem.Particle[] m_buf_particles;
         Vector3[] m_buf_positions;
+        Vector3[] m_buf_rotations;
 
         public ParticleCapturer(ParticleSystem target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
+            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec3Array);
         }
 
         public override void Capture()
         {
-            if (m_target != null)
+            if (m_target == null) { return; }
+
+            // create buffer
+            int count_max = m_target.maxParticles;
+            if (m_buf_particles == null)
             {
-                CaptureParticle(m_abc, m_target, ref m_buf_particles, ref m_buf_positions);
+                m_buf_particles = new ParticleSystem.Particle[count_max];
+                m_buf_positions = new Vector3[count_max];
+                m_buf_rotations = new Vector3[count_max];
             }
+            else if (m_buf_particles.Length != count_max)
+            {
+                Array.Resize(ref m_buf_particles, count_max);
+                Array.Resize(ref m_buf_positions, count_max);
+                Array.Resize(ref m_buf_rotations, count_max);
+            }
+
+            // copy particle positions & rotations to buffer
+            int count = m_target.GetParticles(m_buf_particles);
+            for (int i = 0; i < count; ++i)
+            {
+                m_buf_positions[i] = m_buf_particles[i].position;
+            }
+            for (int i = 0; i < count; ++i)
+            {
+                m_buf_rotations[i] = m_buf_particles[i].rotation3D;
+            }
+
+            // write!
+            var data = new aeAPI.aePointsSampleData();
+            data.positions = GetArrayPtr(m_buf_positions);
+            data.count = count;
+            aeAPI.aePointsWriteSample(m_abc, ref data);
+            aeAPI.aePropertyWriteSample(m_prop_rotatrions, GetArrayPtr(m_buf_rotations), count);
         }
     }
 
@@ -219,10 +209,9 @@ public class AlembicExporter : MonoBehaviour
 
         public override void Capture()
         {
-            if (m_target != null)
-            {
-                m_target.Capture();
-            }
+            if (m_target == null) { return; }
+
+            m_target.Capture();
         }
     }
 
