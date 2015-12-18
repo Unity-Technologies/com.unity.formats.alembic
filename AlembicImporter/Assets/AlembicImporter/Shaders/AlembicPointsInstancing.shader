@@ -1,17 +1,19 @@
 Shader "Alembic/PointsInstancing" {
 Properties {
+    [Toggle(APPLY_TRANSFORM)] _ApplyTransform("Apply Transform", Int) = 1
     _Color ("Color", Color) = (1,1,1,1)
     _MainTex ("Albedo (RGB)", 2D) = "white" {}
-    _Glossiness ("Smoothness", Range(0,1)) = 0.5
+    _Glossiness("Smoothness", Range(0,1)) = 0.5
     _Metallic("Metallic", Range(0,1)) = 0.0
     _Emission("Emission", Color) = (0,0,0,0)
 }
-SubShader {
-    Tags { "RenderType"="Opaque" "Queue"="Geometry+1" }
+SubShader{
+    Tags { "RenderType" = "Opaque" "Queue" = "Geometry+1" }
 
 CGPROGRAM
 #pragma target 3.0
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
+#pragma multi_compile ___ APPLY_TRANSFORM
 
 #include "UnityCG.cginc"
 #include "PseudoInstancing.cginc"
@@ -25,6 +27,7 @@ half _Glossiness;
 half _Metallic;
 half4 _Color;
 half4 _Emission;
+float4x4 _Transform;
 
 struct Input {
     float2 uv_MainTex;
@@ -47,6 +50,9 @@ void vert(inout appdata_full I, out Input O)
 
     int iid = GetInstanceID(I.texcoord1.x);
     ApplyInstanceTransform(iid, I.vertex);
+#if APPLY_TRANSFORM
+    I.vertex = mul(_Transform, I.vertex);
+#endif
 
     O.uv_MainTex = float4(I.texcoord.xy, 0.0, 0.0);
 }
