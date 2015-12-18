@@ -30,18 +30,22 @@ public class AlembicRecorder : MonoBehaviour
         data.inherits = false;
         data.translation = trans.position;
         data.scale = trans.lossyScale;
-        trans.rotation.ToAngleAxis(out data.rotation_angle, out data.rotation_axis);
+        trans.rotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
         aeAPI.aeXFormWriteSample(abc, ref data);
     }
 
     public static void CaptureCamera(aeAPI.aeObject abc, Camera cam)
     {
-        // todo
+        var data = new aeAPI.aeCameraSampleData();
+        data.nearClippingPlane = cam.nearClipPlane;
+        data.farClippingPlane = cam.farClipPlane;
+        data.fieldOfView = cam.fieldOfView;
+        aeAPI.aeCameraWriteSample(abc, ref data);
     }
 
     public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
     {
-        aeAPI.aePolyMeshSampleData data = new aeAPI.aePolyMeshSampleData();
+        var data = new aeAPI.aePolyMeshSampleData();
         var indices = mesh.GetIndices(0); // todo: record all submeshes
         var vertices = mesh.vertices;
         var normals = mesh.normals;
@@ -304,7 +308,7 @@ public class AlembicRecorder : MonoBehaviour
 
     public void OneShot()
     {
-        if(BeginRecording())
+        if (BeginRecording())
         {
             aeAPI.aeSetTime(m_ctx, 0.0f);
             foreach (var recorder in m_recorders)
@@ -323,6 +327,13 @@ public class AlembicRecorder : MonoBehaviour
         aeAPI.aeSetTime(m_ctx, m_time);
         foreach(var recorder in m_recorders) {
             recorder.Capture();
+        }
+
+
+        if (m_conf.timeSamplingType == aeAPI.aeTypeSamplingType.Uniform)
+        {
+            Time.maximumDeltaTime = m_conf.timePerSample;
+            aeAPI.aeWaitMaxDeltaTime();
         }
     }
 

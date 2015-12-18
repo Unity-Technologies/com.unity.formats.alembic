@@ -10,7 +10,8 @@ public class AlembicRecorderEditor : Editor
         DrawDefaultInspector();
 
         var t = target as AlembicRecorder;
-        if(t.isRecording)
+
+        if (t.isRecording)
         {
             if (GUILayout.Button("End Recording"))
             {

@@ -17,6 +17,12 @@ public class aeAPI
         Ogawa,
     };
 
+    public enum aeTypeSamplingType
+    {
+        Uniform,
+        Acyclic,
+    };
+
     public struct aeContext { public IntPtr ptr; }
     public struct aeObject  { public IntPtr ptr; }
 
@@ -24,6 +30,9 @@ public class aeAPI
     public struct aeConfig
     {
         [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
+        [MarshalAs(UnmanagedType.U4)] public aeTypeSamplingType timeSamplingType;
+        public float startTime;
+        public float timePerSample;
         [MarshalAs(UnmanagedType.U1)] public bool swapHandedness;
 
 
@@ -34,6 +43,9 @@ public class aeAPI
                 return new aeConfig
                 {
                     archiveType = aeArchiveType.Ogawa,
+                    timeSamplingType = aeTypeSamplingType.Uniform,
+                    startTime = 0.0f,
+                    timePerSample = 1.0f / 30.0f,
                     swapHandedness = true,
                 };
             }
@@ -43,8 +55,8 @@ public class aeAPI
     public struct aeXFormSampleData
     {
         public Vector3 translation;
-        public Vector3 rotation_axis;
-        public float rotation_angle;
+        public Vector3 rotationAxis;
+        public float rotationAngle;
         public Vector3 scale;
         [MarshalAs(UnmanagedType.U1)] public bool inherits;
     }
@@ -77,14 +89,13 @@ public class aeAPI
         public float focalLength;
     }
 
-    [DllImport ("AlembicExporter")] public static extern void       aeCleanup();
 
     [DllImport ("AlembicExporter")] public static extern aeContext  aeCreateContext(ref aeConfig conf);
     [DllImport ("AlembicExporter")] public static extern void       aeDestroyContext(aeContext ctx);
-    [DllImport ("AlembicExporter")] public static extern bool       aeOpenArchive(aeContext ctx, string path);
 
-    [DllImport ("AlembicExporter")] public static extern void       aeSetTime(aeContext ctx, float time);
+    [DllImport ("AlembicExporter")] public static extern bool       aeOpenArchive(aeContext ctx, string path);
     [DllImport ("AlembicExporter")] public static extern aeObject   aeGetTopObject(aeContext ctx);
+    [DllImport ("AlembicExporter")] public static extern void       aeSetTime(aeContext ctx, float time); // relevant only when timeSamplingType==Acyclic
 
     [DllImport ("AlembicExporter")] public static extern aeObject   aeNewXForm(aeObject parent, string name);
     [DllImport ("AlembicExporter")] public static extern aeObject   aeNewCamera(aeObject parent, string name);
@@ -94,4 +105,18 @@ public class aeAPI
     [DllImport ("AlembicExporter")] public static extern void       aePointsWriteSample(aeObject obj, ref aePointsSampleData data);
     [DllImport ("AlembicExporter")] public static extern void       aePolyMeshWriteSample(aeObject obj, ref aePolyMeshSampleData data);
     [DllImport ("AlembicExporter")] public static extern void       aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
+
+
+
+    public static void aeWait(float wt)
+    {
+        while (Time.realtimeSinceStartup - Time.unscaledTime < wt) {
+            System.Threading.Thread.Sleep(1);
+        }
+    }
+
+    public static void aeWaitMaxDeltaTime()
+    {
+        aeWait(Time.maximumDeltaTime);
+    }
 }

@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "AlembicExporter.h"
+#include "aeContext.h"
 #include "aeObject.h"
 #include "aeXForm.h"
 
 
 aeXForm::aeXForm(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OXform(parent->getAbcObject(), name))
+    : super(parent->getContext(), parent, new AbcGeom::OXform(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }

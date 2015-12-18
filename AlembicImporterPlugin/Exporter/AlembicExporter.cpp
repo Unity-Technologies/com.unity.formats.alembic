@@ -7,10 +7,6 @@
 #include "aePolyMesh.h"
 #include "aeCamera.h"
 
-aeCLinkage aeExport void aeCleanup()
-{
-
-}
 
 aeCLinkage aeExport aeContext* aeCreateContext(const aeConfig *conf)
 {

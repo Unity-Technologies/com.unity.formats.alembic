@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "AlembicExporter.h"
+#include "aeContext.h"
 #include "aeObject.h"
 #include "aePolyMesh.h"
 
 aePolyMesh::aePolyMesh(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new AbcGeom::OPolyMesh(parent->getAbcObject(), name))
+    : super(parent->getContext(), parent, new AbcGeom::OPolyMesh(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
     , m_schema(getAbcObject().getSchema())
 {
 }
