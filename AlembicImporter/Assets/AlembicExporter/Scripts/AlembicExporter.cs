@@ -10,7 +10,7 @@ using UnityEditor;
 #endif
 
 
-public abstract class AlembicCustomRecorder : MonoBehaviour
+public abstract class AlembicCustomComponentCapturer : MonoBehaviour
 {
     public abstract void SetParent(aeAPI.aeObject parent);
     public abstract void Capture();
@@ -20,7 +20,7 @@ public abstract class AlembicCustomRecorder : MonoBehaviour
 
 [ExecuteInEditMode]
 [AddComponentMenu("Alembic/Recorder")]
-public class AlembicRecorder : MonoBehaviour
+public class AlembicExporter : MonoBehaviour
 {
     #region impl
 
@@ -67,17 +67,17 @@ public class AlembicRecorder : MonoBehaviour
     }
 
 
-    public abstract class Recorder
+    public abstract class ComponentCapturer
     {
         public abstract void Capture();
     }
 
-    public class TransformRecorder : Recorder
+    public class TransformCapturer : ComponentCapturer
     {
         Transform m_target;
         aeAPI.aeObject m_abc;
 
-        public TransformRecorder(Transform target, aeAPI.aeObject abc)
+        public TransformCapturer(Transform target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -92,12 +92,12 @@ public class AlembicRecorder : MonoBehaviour
         }
     }
 
-    public class CameraRecorder : Recorder
+    public class CameraCapturer : ComponentCapturer
     {
         Camera m_target;
         aeAPI.aeObject m_abc;
 
-        public CameraRecorder(Camera target, aeAPI.aeObject abc)
+        public CameraCapturer(Camera target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -112,12 +112,12 @@ public class AlembicRecorder : MonoBehaviour
         }
     }
 
-    public class MeshRecorder : Recorder
+    public class MeshCapturer : ComponentCapturer
     {
         MeshRenderer m_target;
         aeAPI.aeObject m_abc;
 
-        public MeshRecorder(MeshRenderer target, aeAPI.aeObject abc)
+        public MeshCapturer(MeshRenderer target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -132,12 +132,12 @@ public class AlembicRecorder : MonoBehaviour
         }
     }
 
-    public class SkinnedMeshRecorder : Recorder
+    public class SkinnedMeshCapturer : ComponentCapturer
     {
         SkinnedMeshRenderer m_target;
         aeAPI.aeObject m_abc;
 
-        public SkinnedMeshRecorder(SkinnedMeshRenderer target, aeAPI.aeObject abc)
+        public SkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
             m_target = target;
             m_abc = abc;
@@ -152,11 +152,11 @@ public class AlembicRecorder : MonoBehaviour
         }
     }
 
-    public class CustomRecorderHandler : Recorder
+    public class CustomCapturerHandler : ComponentCapturer
     {
-        AlembicCustomRecorder m_target;
+        AlembicCustomComponentCapturer m_target;
 
-        public CustomRecorderHandler(AlembicCustomRecorder target)
+        public CustomCapturerHandler(AlembicCustomComponentCapturer target)
         {
             m_target = target;
         }
@@ -187,17 +187,20 @@ public class AlembicRecorder : MonoBehaviour
 
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
+    public bool m_captureParticleRenderer = true;
     public bool m_captureCamera = true;
     public bool m_captureCustomRecorder = true;
 
     aeAPI.aeContext m_ctx;
-    List<Recorder> m_recorders = new List<Recorder>();
+    List<ComponentCapturer> m_components = new List<ComponentCapturer>();
     bool m_recording;
     float m_time;
+    int m_frameCount;
 
 
     public bool isRecording { get { return m_recording; } }
-    public float time { get { return m_time; } }
+    public float time { get { return m_time; } set { m_time = value; } }
+    public float frameCount { get { return m_frameCount; } }
 
 
     T[] GetTargets<T>() where T : Component
@@ -235,17 +238,23 @@ public class AlembicRecorder : MonoBehaviour
 
         var top = aeAPI.aeGetTopObject(m_ctx);
 
+        if(m_preserveTreeStructure)
+        {
+            Debug.LogWarning("AlembicExporter: preserveTreeStructure is not implemented yet...");
+            m_preserveTreeStructure = false;
+        }
+
         if (m_captureCamera)
         {
             foreach(var target in GetTargets<Camera>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
-                m_recorders.Add(trans_rec);
+                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
+                m_components.Add(trans_rec);
 
                 var cam_obj = aeAPI.aeNewCamera(trans_obj, target.name);
-                var cam_rec = new CameraRecorder(target, cam_obj);
-                m_recorders.Add(cam_rec);
+                var cam_rec = new CameraCapturer(target, cam_obj);
+                m_components.Add(cam_rec);
             }
         }
 
@@ -254,12 +263,12 @@ public class AlembicRecorder : MonoBehaviour
             foreach (var target in GetTargets<MeshRenderer>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
-                m_recorders.Add(trans_rec);
+                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
+                m_components.Add(trans_rec);
 
                 var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
-                var mesh_rec = new MeshRecorder(target, mesh_obj);
-                m_recorders.Add(mesh_rec);
+                var mesh_rec = new MeshCapturer(target, mesh_obj);
+                m_components.Add(mesh_rec);
             }
         }
 
@@ -268,29 +277,29 @@ public class AlembicRecorder : MonoBehaviour
             foreach (var target in GetTargets<SkinnedMeshRenderer>())
             {
                 var trans_obj = aeAPI.aeNewXForm(top, target.name + "_trans");
-                var trans_rec = new TransformRecorder(target.GetComponent<Transform>(), trans_obj);
-                m_recorders.Add(trans_rec);
+                var trans_rec = new TransformCapturer(target.GetComponent<Transform>(), trans_obj);
+                m_components.Add(trans_rec);
 
                 var mesh_obj = aeAPI.aeNewPolyMesh(trans_obj, target.name);
-                var mesh_rec = new SkinnedMeshRecorder(target, mesh_obj);
-                m_recorders.Add(mesh_rec);
+                var mesh_rec = new SkinnedMeshCapturer(target, mesh_obj);
+                m_components.Add(mesh_rec);
             }
         }
 
         if (m_captureCustomRecorder)
         {
-            foreach (var target in GetTargets<AlembicCustomRecorder>())
+            foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
             {
                 target.SetParent(top);
-                var mesh_rec = new CustomRecorderHandler(target);
-                m_recorders.Add(mesh_rec);
+                var mesh_rec = new CustomCapturerHandler(target);
+                m_components.Add(mesh_rec);
             }
         }
 
         m_recording = true;
         m_time = 0.0f;
 
-        Debug.Log("AlembicRecorder: start " + m_path);
+        Debug.Log("AlembicExporter: start " + m_path);
         return true;
     }
 
@@ -298,12 +307,13 @@ public class AlembicRecorder : MonoBehaviour
     {
         if (!m_recording) { return; }
 
-        m_recorders.Clear();
+        m_components.Clear();
         aeAPI.aeDestroyContext(m_ctx);
         m_ctx = new aeAPI.aeContext();
         m_recording = false;
+        m_frameCount = 0;
 
-        Debug.Log("AlembicRecorder: end: " + m_path);
+        Debug.Log("AlembicExporter: end: " + m_path);
     }
 
     public void OneShot()
@@ -311,7 +321,7 @@ public class AlembicRecorder : MonoBehaviour
         if (BeginRecording())
         {
             aeAPI.aeSetTime(m_ctx, 0.0f);
-            foreach (var recorder in m_recorders)
+            foreach (var recorder in m_components)
             {
                 recorder.Capture();
             }
@@ -325,11 +335,13 @@ public class AlembicRecorder : MonoBehaviour
         if(!m_recording) { yield break; }
 
         aeAPI.aeSetTime(m_ctx, m_time);
-        foreach(var recorder in m_recorders) {
+        foreach(var recorder in m_components) {
             recorder.Capture();
         }
+        ++m_frameCount;
 
 
+        // wait maximumDeltaTime if timeSamplingType is uniform
         if (m_conf.timeSamplingType == aeAPI.aeTypeSamplingType.Uniform)
         {
             Time.maximumDeltaTime = m_conf.timePerSample;
