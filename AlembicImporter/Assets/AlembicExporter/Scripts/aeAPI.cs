@@ -63,8 +63,9 @@ public class aeAPI
 
     public struct aePointsSampleData
     {
-        IntPtr positions; // Vector3*
-        int count;
+        public IntPtr positions; // Vector3*
+        public IntPtr ids; // ulong*. can be null
+        public int count;
     }
 
     public struct aePolyMeshSampleData

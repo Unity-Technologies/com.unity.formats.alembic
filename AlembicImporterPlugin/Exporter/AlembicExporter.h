@@ -33,14 +33,16 @@
      };
 #endif
 
-struct aeConfig;
-
 class aeContext;
-class aeObject;
-class aeXForm;
-class aePoints;
-class aePolyMesh;
-class aeCamera;
+#ifdef aeImpl
+    class aeObject;
+#else
+    typedef void aeObject; // force make upper-castable
+#endif
+class aeXForm;    // : aeObject
+class aePoints;   // : aeObject
+class aePolyMesh; // : aeObject
+class aeCamera;   // : aeObject
 struct aeXFormSampleData;
 struct aePointsSampleData;
 struct aePolyMeshSampleData;
@@ -124,10 +126,12 @@ struct aePolyMeshSampleData
 struct aePointsSampleData
 {
     abcV3 *positions;
+    uint64_t *ids; // can be null
     int count;
 
     inline aePointsSampleData()
         : positions(nullptr)
+        , ids(nullptr)
         , count(0)
     {
     }
