@@ -52,6 +52,7 @@ void vert(inout appdata_full I, out Input O)
     ApplyInstanceTransform(iid, I.vertex);
 #if APPLY_TRANSFORM
     I.vertex = mul(_Transform, I.vertex);
+    I.normal = normalize(mul(_Transform, float4(I.normal, 0.0)).xyz);
 #endif
 
     O.uv_MainTex = float4(I.texcoord.xy, 0.0, 0.0);

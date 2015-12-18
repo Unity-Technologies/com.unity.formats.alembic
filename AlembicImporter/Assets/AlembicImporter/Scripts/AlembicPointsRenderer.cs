@@ -176,6 +176,7 @@ public class AlembicPointsRenderer : MonoBehaviour
         }
 
 
+
         var points = GetComponent<AlembicPoints>();
         var abcData = points.abcData;
         int max_instances = points.abcPeakVertexCount;
@@ -213,7 +214,6 @@ public class AlembicPointsRenderer : MonoBehaviour
         }
 
         var trans = GetComponent<Transform>();
-        Vector3 scale = trans.localScale;
         m_expanded_mesh.bounds = m_bounds;
         instance_count = Mathf.Min(instance_count, max_instances);
         int batch_count = ceildiv(instance_count, m_instances_par_batch);
@@ -300,9 +300,6 @@ public class AlembicPointsRenderer : MonoBehaviour
     {
         if(m_show_bounds)
         {
-            Transform t = GetComponent<Transform>();
-            Vector3 s = t.localScale;
-
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(m_bounds.center, m_bounds.extents);
         }
