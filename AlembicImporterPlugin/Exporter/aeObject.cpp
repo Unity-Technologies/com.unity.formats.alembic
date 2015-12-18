@@ -40,13 +40,13 @@ public:
 private:
     std::unique_ptr<property_type> m_abcprop;
 };
-template class aeTProprty<Abc::OFloatArrayProperty>;
-template class aeTProprty<Abc::OInt32ArrayProperty>;
-template class aeTProprty<Abc::OBoolArrayProperty>;
-template class aeTProprty<Abc::OV2fArrayProperty>;
-template class aeTProprty<Abc::OV3fArrayProperty>;
-template class aeTProprty<Abc::OQuatfArrayProperty>;
-template class aeTProprty<Abc::OM44fArrayProperty>;
+template class aeTProprty<abcFloatArrayProperty>;
+template class aeTProprty<abcInt32ArrayProperty>;
+template class aeTProprty<abcBoolArrayProperty >;
+template class aeTProprty<abcVec2ArrayProperty >;
+template class aeTProprty<abcVec3ArrayProperty >;
+template class aeTProprty<abcVec4ArrayProperty >;
+template class aeTProprty<abcMat44ArrayProperty>;
 
 
 aeObject::aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc)
@@ -122,11 +122,11 @@ aeProperty* aeObject::newProperty(const char *name)
     m_properties.emplace_back(aePropertyPtr(ret));
     return ret;
 }
-template aeProperty*    aeObject::newProperty<Abc::OFloatArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OInt32ArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OBoolArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OV2fArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OV3fArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OQuatfArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<Abc::OM44fArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloatArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcInt32ArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcBoolArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcVec2ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcVec3ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcVec4ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcMat44ArrayProperty>(const char *name);
 

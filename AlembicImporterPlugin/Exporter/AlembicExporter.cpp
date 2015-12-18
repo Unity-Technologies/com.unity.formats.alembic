@@ -72,19 +72,19 @@ aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraSample
 aeCLinkage aeExport aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
 {
     switch (type) {
-    case aePropertyType_Float:  return parent->newProperty<Abc::OFloatArrayProperty>(name); break;
-    case aePropertyType_Int:    return parent->newProperty<Abc::OInt32ArrayProperty>(name); break;
-    case aePropertyType_Bool:   return parent->newProperty<Abc::OBoolArrayProperty>(name); break;
-    case aePropertyType_V2:     return parent->newProperty<Abc::OV2fArrayProperty>(name); break;
-    case aePropertyType_V3:     return parent->newProperty<Abc::OV3fArrayProperty>(name); break;
-    case aePropertyType_V4:     return parent->newProperty<Abc::OQuatfArrayProperty>(name); break;
-    case aePropertyType_M44:    return parent->newProperty<Abc::OM44fArrayProperty>(name); break;
+    case aePropertyType_FloatArray:  return parent->newProperty<abcFloatArrayProperty>(name); break;
+    case aePropertyType_IntArray:    return parent->newProperty<abcInt32ArrayProperty>(name); break;
+    case aePropertyType_BoolArray:   return parent->newProperty<abcBoolArrayProperty >(name); break;
+    case aePropertyType_Vec2Array:     return parent->newProperty<abcVec2ArrayProperty >(name); break;
+    case aePropertyType_Vec3Array:     return parent->newProperty<abcVec3ArrayProperty >(name); break;
+    case aePropertyType_Vec4Array:     return parent->newProperty<abcVec4ArrayProperty >(name); break;
+    case aePropertyType_Mat44Array:    return parent->newProperty<abcMat44ArrayProperty>(name); break;
     }
     aeDebugLog("aeNewProperty(): unknown type");
     return nullptr;
 }
 
-aeCLinkage aeExport void aeWriteProperty(aeProperty *prop, const void *data, int num_data)
+aeCLinkage aeExport void aePropertyWriteSample(aeProperty *prop, const void *data, int num_data)
 {
     prop->writeSample(data, num_data);
 }
