@@ -1,13 +1,13 @@
-1. [Alembic?](#alembic)
-2. [AlembicImporter](#alembicimporter)
-3. [AlembicExporter](#alembicexporter)
+- [Alembic?](#alembic)
+- [Alembic Importer](#alembic-importer)
+- [Alembic Exporter](#alembic-exporter)
 
 # Alembic?
-Alembic は主に映画業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  スキニングやダイナミクスなどのシミュレーション結果を必要な全フレームベイクして頂点キャッシュに変換し、それを alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
-このため、Alembic のインポートやエクスポートができれば、Unity を映像制作用のレンダラやコンポジットとして使ったり、Unity で各種シミュレーションを行ってそれを他の DCC ツールに渡したりといったことができるようになります。  
+Alembic は主に映画業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
+近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。  
 (Alembic 本家: http://www.alembic.io/ )  
 
-# AlembicImporter
+# Alembic Importer
 ![example](Screenshots/alembic_example.gif)  
 パッケージ: [AlembicImporter.unitypackage](Packages/AlembicImporter.unitypackage?raw=true)
 
@@ -19,38 +19,48 @@ Alembic ファイルに含まれるノード群を Unity 側で GameObject と�
 ![example](Screenshots/menu.png)  
 
 
-# AlembicExporter
+# Alembic Exporter
 パッケージ: [AlembicExporter.unitypackage](Packages/AlembicExporter.unitypackage?raw=true)
 
 Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
 MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力), Camera の書き出しに対応しており、カスタムハンドラを書けば独自のデータも出力できるようになっています。
 
-エクスポートを行うには、上記パッケージをインポート後、AlembicExporter コンポーネントを追加します。  
+エクスポートを行うには、上記パッケージをインポート後、AlembicExporter コンポーネントを適当なオブジェクトに追加します。   
 ![example](Screenshots/AlembicExporter.png)  
-Path: 出力パスを指定します。  
-Archive Type: Alembic のフォーマットの指定で、通常 Ogawa のままで問題ないでしょう。  
+以下は各項目の説明です。
 
-Time Sampling Type:  
-キャプチャの間隔の指定です。
-これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。そして、これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
-Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。この場合当然間隔はばらばらになってしまうため、映像制作には通常 Uniform を選ぶことになるでしょう。  
-Start Time と Time Per Sample は、Time Sampling Type が Uniform の場合に使われる数値です。
+- Path  
+  出力パスを指定します。  
 
-Swap Handedness:
-有効にすると 右手座標系 / 左手座標系 を入れ変える処理を挟みます。
-DCC ツールの多くは Unity とは逆の座標系なので、大抵は有効にしておいたほうがいいでしょう。  
+- Archive Type  
+  Alembic のフォーマットの指定で、大抵は Ogawa のままで問題ないと思われます。  
 
-Scope: Entire Scene の場合文字通りシーン内のキャプチャ可能な全オブジェクトをキャプチャします。
-Current Branch の場合その Alembic Exporter コンポーネントがついている GameObject 以下のツリーのみをキャプチャします。
+- Time Sampling Type  
+  キャプチャの間隔の指定です。
+  これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。そして、これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
+  Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。この場合当然間隔は一定ではなくなるため、映像制作には通常 Uniform を選ぶことになるでしょう。  
+  Start Time と Time Per Sample は、Time Sampling Type が Uniform の場合に使われる数値です。
 
-Preserve Tree Structure: 有効にした場合、キャプチャ対象の親オブジェクト群の Transform も Alembic ファイルに含めます。無効の場合キャプチャ対象のみ Alembic に含めます。
+- Swap Handedness  
+  有効にすると 右手座標系 / 左手座標系 を入れ変える処理を挟みます。
+  DCC ツールの多くは Unity とは逆の座標系なので、大抵は有効にしておいたほうがいいでしょう。  
 
-Capture *** の項目は対象コンポーネントのキャプチャの有効/無効を指定します。
-Ignore Disabled が有効な場合、disabled されたオブジェクトはキャプチャ対象コンポーネントであっても除外されます。
+- Scope  
+  Entire Scene の場合文字通りシーン内のキャプチャ可能な全オブジェクトをキャプチャします。
+  Current Branch の場合その Alembic Exporter コンポーネントがついている GameObject 以下のツリーのみをキャプチャします。
 
-Begin Capture / End Capture, One Shot:
- キャプチャを開始 / 停止します。OneShot は現在の 1 フレームだけキャプチャします。
-これらはスクリプトから BeginCapture() / EndCapture() / OneShot() を呼ぶことで同機能にアクセスでるため、独自 UI を作る場合容易に組み込めるはずです。
+- Preserve Tree Structure  
+  有効にした場合、キャプチャ対象の親オブジェクト群の Transform も Alembic ファイルに含めます。無効の場合キャプチャ対象のみ Alembic に含めます。
+
+- Capture (コンポーネント名)  
+  各コンポーネントのキャプチャの有効/無効を指定します。
+
+- Ignore Disabled  
+  これが有効な場合、disabled されたオブジェクトはキャプチャ対象コンポーネントであっても除外されます。
+
+- Begin / End Capture, One Shot  
+  キャプチャを開始 / 停止します。OneShot は現在の 1 フレームだけをキャプチャします。  
+  これらはスクリプトから BeginCapture() / EndCapture() / OneShot() を呼ぶことで同機能にアクセスでるため、独自 UI を作る場合容易に組み込めるはずです。
 
 キャプチャの途中でオブジェクトの enabled / disabled が変わってもキャプチャは継続される点にやや注意が必要です。
 また、キャプチャの途中で対象オブジェクトが削除された場合、そのオブジェクトのキャプチャは中断されますが、このようなサンプル数が不均一な Alembic ファイルは対応していないソフトウェアもあるかもしれず、避けたほうがいいシチュエーションです。
