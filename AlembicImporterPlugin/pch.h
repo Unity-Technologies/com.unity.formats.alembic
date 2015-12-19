@@ -9,6 +9,7 @@
 #include <functional>
 #include <limits>
 #include <sstream>
+#include <type_traits>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>

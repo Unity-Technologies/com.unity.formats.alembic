@@ -194,7 +194,7 @@ public class AlembicExporter : MonoBehaviour
             data.positions = GetArrayPtr(m_buf_positions);
             data.count = count;
             aeAPI.aePointsWriteSample(m_abc, ref data);
-            aeAPI.aePropertyWriteSample(m_prop_rotatrions, GetArrayPtr(m_buf_rotations), count);
+            aeAPI.aePropertyWriteArraySample(m_prop_rotatrions, GetArrayPtr(m_buf_rotations), count);
         }
     }
 
@@ -224,7 +224,7 @@ public class AlembicExporter : MonoBehaviour
         CurrentBranch,
     }
 
-    public string m_path;
+    public string m_output_path;
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
 
     public Scope m_scope = Scope.EntireScene;
@@ -281,12 +281,12 @@ public class AlembicExporter : MonoBehaviour
 
         m_ctx = aeAPI.aeCreateContext(ref m_conf);
         if(m_ctx.ptr == IntPtr.Zero) {
-            Debug.Log("aeCreateContext() failed");
+            Debug.LogWarning("aeCreateContext() failed");
             return false;
         }
-        if(!aeAPI.aeOpenArchive(m_ctx, m_path))
+        if(!aeAPI.aeOpenArchive(m_ctx, m_output_path))
         {
-            Debug.Log("aeOpenArchive() failed");
+            Debug.LogWarning("aeOpenArchive() failed");
             aeAPI.aeDestroyContext(m_ctx);
             m_ctx = new aeAPI.aeContext();
             return false;
@@ -378,7 +378,7 @@ public class AlembicExporter : MonoBehaviour
         m_recording = true;
         m_time = 0.0f;
 
-        Debug.Log("AlembicExporter: start " + m_path);
+        Debug.Log("AlembicExporter: start " + m_output_path);
         return true;
     }
 
@@ -392,7 +392,7 @@ public class AlembicExporter : MonoBehaviour
         m_recording = false;
         m_frameCount = 0;
 
-        Debug.Log("AlembicExporter: end: " + m_path);
+        Debug.Log("AlembicExporter: end: " + m_output_path);
     }
 
     public void OneShot()
@@ -431,9 +431,9 @@ public class AlembicExporter : MonoBehaviour
 
     void Reset()
     {
-        if(m_path == null || m_path == "")
+        if(m_output_path == null || m_output_path == "")
         {
-            m_path = gameObject.name + ".abc";
+            m_output_path = gameObject.name + ".abc";
         }
     }
 

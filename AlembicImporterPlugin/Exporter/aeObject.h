@@ -6,7 +6,9 @@ class aeProperty
 public:
     aeProperty();
     virtual ~aeProperty();
-    virtual void writeSample(const void *data, int data_num) = 0;
+    virtual const char* getName() const = 0;
+    virtual bool isArray() const = 0; // true if property is array (abcFloatArrayProperty etc.)
+    virtual void writeSample(const void *data, int data_num) = 0; // data_num is ignored on scalar property
 };
 
 
@@ -31,7 +33,7 @@ public:
     template<class T> T*    newChild(const char *name);
     void                    removeChild(aeObject *c);
 
-    /// T: Abc::OFloatArrayProperty, Abc::OV2fArrayProperty, etc
+    /// T: abcFloatArrayProperty, abcFloatProperty, etc
     template<class T>
     aeProperty*             newProperty(const char *name);
 
