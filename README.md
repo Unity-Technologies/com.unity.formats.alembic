@@ -1,11 +1,14 @@
+[English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
 - [Alembic?](#alembic)
 - [Alembic Importer](#alembic-importer)
 - [Alembic Exporter](#alembic-exporter)
 
 # Alembic?
-Alembic は主に映画業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
-近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。  
-(Alembic 本家: http://www.alembic.io/ )  
+Alembic は主に映像業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  映像業界では、スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを Alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
+
+近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。ゲームの 3D 録画には何か新たな可能性もあるかもしれません。  
+
+Alembic 本家: http://www.alembic.io/
 
 # Alembic Importer
 ![example](Screenshots/alembic_example.gif)  
@@ -37,8 +40,8 @@ MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力),
 
 - Time Sampling Type  
   キャプチャの間隔の指定です。
-  これを Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。そして、これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。  
-  Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。この場合当然間隔は一定ではなくなるため、映像制作には通常 Uniform を選ぶことになるでしょう。  
+  Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。映像制作の場合こちらにすべきでしょう。これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。このため、キャプチャ開始後挙動が変わったように見えることもあるかもしれません。  
+  Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。 当然間隔は一定ではなくなりますが、ゲーム進行への影響は最小限になります。主にゲームの 3D 録画を想定したモードです。  
   Start Time と Time Per Sample は、Time Sampling Type が Uniform の場合に使われる数値です。
 
 - Swap Handedness  
@@ -50,8 +53,8 @@ MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力),
   Current Branch の場合その Alembic Exporter コンポーネントがついている GameObject 以下のツリーのみをキャプチャします。
 
 - Preserve Tree Structure  
-  有効にした場合、キャプチャ対象の親オブジェクト群の Transform も Alembic 側に含めます。無効の場合キャプチャ対象のみ含めます。
-  無効の方が情報量は少なく、見た目は変わらないはずなのですが、現在無効だと回転がおかしくなるケースがあるようで、有効にしておいたほうが無難です。
+  有効にした場合、Unity 側のツリー構造をそのまま Alembic 側でも保ちます (=キャプチャ対象の親オブジェクト群の Transform も Alembic に含めます)。無効の場合、Alembic 側は全要素が Top ノード直下にぶら下がったフラットな構造になります。  
+  どちらでも見た目は変わらず、無効の方が情報量は少なくなります。  
 
 - Capture (コンポーネント名)  
   各コンポーネントのキャプチャの有効/無効を指定します。
@@ -63,13 +66,15 @@ MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力),
   キャプチャを開始 / 停止します。OneShot は現在の 1 フレームだけをキャプチャします。  
   これらはスクリプトから BeginCapture() / EndCapture() / OneShot() を呼ぶことで同機能にアクセスできます。UI を独自作る場合でも組み込みは容易でしょう。
 
-キャプチャ対象オブジェクトはキャプチャ開始時に決定され、途中で変わることはありません。なので、オブジェクトの enabled / disabled はキャプチャの途中で変わってもキャプチャには影響しません。  
-キャプチャの途中で対象オブジェクトが削除された場合はそのオブジェクトのキャプチャは中断されてしまいますが、その結果できたサンプル数が不均一な Alembic ファイルはややイレギュラーな状態であり、正しく処理できないソフトウェアもあると予想されます。避けたほうがいいシチュエーションです。  
-Export 結果の各ノードは名前に "(FFFE9E18)" のようなハッシュ値が付与されます。これは名前の衝突を避けるための処置です。(Alembic は同じ階層に名前が同じノードがあってはいけないルールになっています)
+現状キャプチャ対象オブジェクトはキャプチャ開始時に決定され、途中で増減はしません。なので、オブジェクトの enabled / disabled はキャプチャの途中で変わっても影響しませんし、キャプチャ開始後に新規に生成されたオブジェクトはキャプチャされません。  
+キャプチャ途中の対象オブジェクトの削除には注意が必要です。この場合、そのオブジェクトのキャプチャは中断されますが、その結果できたサンプル数が不均一な Alembic ファイルはややイレギュラーな状態であり、正しく処理できないソフトウェアもあると予想されます。避けたほうがいいシチュエーションでしょう。  
+
+Export 結果の各ノードは名前に "(FFFE9E18)" のようなハッシュ値が付与されます。これは名前の衝突を避けるための処置です。(Alembic は一つの階層に名前が同じノードが複数あってはいけないルールになっています)  
+また、マテリアルは現在全くの未サポートです。
 
 
 
-## 謝辞
+## Thanks
 - Alembic およびそれに付随するライブラリ群 (HDF5, ILMBase) を使用しています。  
   http://www.alembic.io/
 

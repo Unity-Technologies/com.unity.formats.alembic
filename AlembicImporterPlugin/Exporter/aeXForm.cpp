@@ -31,14 +31,17 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
         data.rotationAngle *= -1.0f;
     }
 
-    AbcGeom::XformOp transop(AbcGeom::kTranslateOperation, AbcGeom::kTranslateHint);
-    AbcGeom::XformOp scaleop(AbcGeom::kScaleOperation, AbcGeom::kScaleHint);
-    AbcGeom::XformOp rotop(AbcGeom::kRotateOperation, AbcGeom::kRotateHint);
+    // single kMatrixOperation is best for compatibility
+
+    const float Deg2Rad = M_PI / 180.0f;
+    abcM44 trans;
+    trans *= abcM44().setScale(data.scale);
+    trans *= abcM44().setAxisAngle(data.rotationAxis, data.rotationAngle*Deg2Rad);
+    trans *= abcM44().setTranslation(data.translation);
+
+    AbcGeom::XformOp matop(AbcGeom::kMatrixOperation, AbcGeom::kMatrixHint);
     AbcGeom::XformSample sample;
     sample.setInheritsXforms(data.inherits);
-    sample.addOp(transop, data.translation);
-    sample.addOp(rotop, data.rotationAxis, data.rotationAngle);
-    sample.addOp(scaleop, data.scale);
-
+    sample.addOp(matop, abcM44d(trans));
     m_schema.set(sample);
 }
