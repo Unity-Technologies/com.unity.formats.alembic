@@ -9,6 +9,8 @@ public class AlembicExporterEditor : Editor
     {
         DrawDefaultInspector();
 
+        GUILayout.Space(10);
+
         var t = target as AlembicExporter;
 
         if (t.isRecording)
