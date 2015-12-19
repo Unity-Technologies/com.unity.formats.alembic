@@ -64,6 +64,7 @@ enum aeTimeSamplingType
 
 enum aePropertyType
 {
+    // array types
     aePropertyType_FloatArray,
     aePropertyType_IntArray,
     aePropertyType_BoolArray,
@@ -71,6 +72,15 @@ enum aePropertyType
     aePropertyType_Vec3Array,
     aePropertyType_Vec4Array,
     aePropertyType_Mat44Array,
+
+    // scalar types
+    aePropertyType_Float,
+    aePropertyType_Int,
+    aePropertyType_Bool,
+    aePropertyType_Vec2,
+    aePropertyType_Vec3,
+    aePropertyType_Vec4,
+    aePropertyType_Mat44,
 };
 
 struct aeConfig
@@ -186,6 +196,7 @@ aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const
 aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeCameraSampleData *data);
 
 aeCLinkage aeExport aeProperty*     aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
-aeCLinkage aeExport void            aePropertyWriteSample(aeProperty *prop, const void *data, int num_data);
+aeCLinkage aeExport void            aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
+aeCLinkage aeExport void            aePropertyWriteScalarSample(aeProperty *prop, const void *data);
 
 #endif // AlembicExporter_h

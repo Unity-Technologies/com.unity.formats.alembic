@@ -25,6 +25,7 @@ public class aeAPI
 
     public enum aePropertyType
     {
+        // array types
         FloatArray,
         IntArray,
         BoolArray,
@@ -32,6 +33,15 @@ public class aeAPI
         Vec3Array,
         Vec4Array,
         Mat44Array,
+
+        // scalar types
+        Float,
+        Int,
+        Bool,
+        Vec2,
+        Vec3,
+        Vec4,
+        Mat44,
     };
 
     public struct aeContext { public IntPtr ptr; }
@@ -120,8 +130,17 @@ public class aeAPI
     [DllImport("AlembicExporter")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
 
     [DllImport("AlembicExporter")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
-    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteSample(aeProperty prop, IntPtr data, int num_data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteArraySample(aeProperty prop, IntPtr data, int num_data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, IntPtr data);
 
+    // all of these are same as IntPtr version. just for convenience.
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref float data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref int data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref bool data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector2 data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector3 data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector4 data);
+    [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Matrix4x4 data);
 
     public static void aeWait(float wt)
     {

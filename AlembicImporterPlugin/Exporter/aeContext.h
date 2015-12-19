@@ -15,6 +15,13 @@ typedef Abc::OV2fArrayProperty      abcVec2ArrayProperty;
 typedef Abc::OV3fArrayProperty      abcVec3ArrayProperty;
 typedef Abc::OC4fArrayProperty      abcVec4ArrayProperty;
 typedef Abc::OM44fArrayProperty     abcMat44ArrayProperty;
+typedef Abc::OFloatProperty         abcFloatProperty;
+typedef Abc::OInt32Property         abcInt32Property;
+typedef Abc::OBoolProperty          abcBoolProperty;
+typedef Abc::OV2fProperty           abcVec2Property;
+typedef Abc::OV3fProperty           abcVec3Property;
+typedef Abc::OC4fProperty           abcVec4Property;
+typedef Abc::OM44fProperty          abcMat44Property;
 
 
 class aeContext
