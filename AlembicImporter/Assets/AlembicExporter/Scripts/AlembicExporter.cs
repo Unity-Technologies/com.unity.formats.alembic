@@ -22,13 +22,22 @@ public class AlembicExporter : MonoBehaviour
         return Marshal.UnsafeAddrOfPinnedArrayElement(v, 0);
     }
 
-    public static void CaptureTransform(aeAPI.aeObject abc, Transform trans)
+    public static void CaptureTransform(aeAPI.aeObject abc, Transform trans, bool inherits)
     {
         aeAPI.aeXFormSampleData data;
-        data.inherits = false;
-        data.translation = trans.position;
-        data.scale = trans.lossyScale;
-        trans.rotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
+        data.inherits = inherits;
+        if(inherits)
+        {
+            data.translation = trans.localPosition;
+            data.scale = trans.localScale;
+            trans.localRotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
+        }
+        else
+        {
+            data.translation = trans.position;
+            data.scale = trans.lossyScale;
+            trans.rotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
+        }
         aeAPI.aeXFormWriteSample(abc, ref data);
     }
 
@@ -63,27 +72,32 @@ public class AlembicExporter : MonoBehaviour
 
     public abstract class ComponentCapturer
     {
+        protected GameObject m_obj;
         protected aeAPI.aeObject m_abc;
-        public abstract void Capture();
 
+        public GameObject obj { get { return m_obj; } }
         public aeAPI.aeObject abc { get { return m_abc; } }
+        public abstract void Capture();
     }
 
     public class TransformCapturer : ComponentCapturer
     {
         Transform m_target;
+        bool m_inherits;
 
-        public TransformCapturer(Transform target, aeAPI.aeObject abc)
+        public TransformCapturer(Transform target, aeAPI.aeObject abc, bool inherits)
         {
-            m_target = target;
+            m_obj = target.gameObject;
             m_abc = abc;
+            m_target = target;
+            m_inherits = inherits;
         }
 
         public override void Capture()
         {
             if (m_target == null) { return; }
 
-            CaptureTransform(m_abc, m_target);
+            CaptureTransform(m_abc, m_target, m_inherits);
         }
     }
 
@@ -93,8 +107,9 @@ public class AlembicExporter : MonoBehaviour
 
         public CameraCapturer(Camera target, aeAPI.aeObject abc)
         {
-            m_target = target;
+            m_obj = target.gameObject;
             m_abc = abc;
+            m_target = target;
         }
 
         public override void Capture()
@@ -111,8 +126,9 @@ public class AlembicExporter : MonoBehaviour
 
         public MeshCapturer(MeshRenderer target, aeAPI.aeObject abc)
         {
-            m_target = target;
+            m_obj = target.gameObject;
             m_abc = abc;
+            m_target = target;
         }
 
         public override void Capture()
@@ -130,8 +146,9 @@ public class AlembicExporter : MonoBehaviour
 
         public SkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
-            m_target = target;
+            m_obj = target.gameObject;
             m_abc = abc;
+            m_target = target;
         }
 
         public override void Capture()
@@ -146,16 +163,19 @@ public class AlembicExporter : MonoBehaviour
 
     public class ParticleCapturer : ComponentCapturer
     {
-        aeAPI.aeProperty m_prop_rotatrions;
         ParticleSystem m_target;
+        aeAPI.aeProperty m_prop_rotatrions;
+
         ParticleSystem.Particle[] m_buf_particles;
         Vector3[] m_buf_positions;
         Vector3[] m_buf_rotations;
 
         public ParticleCapturer(ParticleSystem target, aeAPI.aeObject abc)
         {
-            m_target = target;
+            m_obj = target.gameObject;
             m_abc = abc;
+            m_target = target;
+
             m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec3Array);
         }
 
@@ -204,6 +224,7 @@ public class AlembicExporter : MonoBehaviour
 
         public CustomCapturerHandler(AlembicCustomComponentCapturer target)
         {
+            m_obj = target.gameObject;
             m_target = target;
         }
 
@@ -228,7 +249,7 @@ public class AlembicExporter : MonoBehaviour
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
 
     public Scope m_scope = Scope.EntireScene;
-    public bool m_preserveTreeStructure = false;
+    public bool m_preserveTreeStructure = true;
 
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
@@ -262,14 +283,298 @@ public class AlembicExporter : MonoBehaviour
     }
 
 
-    public TransformCapturer CreateTransformCapturer(GameObject target, aeAPI.aeObject parent)
+    public TransformCapturer CreateTransformCapturer(GameObject target, aeAPI.aeObject parent, bool inherits)
     {
         var abc = aeAPI.aeNewXForm(parent, target.name + " (" + target.GetHashCode().ToString("X8") + ")");
-        var cap = new TransformCapturer(target.GetComponent<Transform>(), abc);
+        var cap = new TransformCapturer(target.GetComponent<Transform>(), abc, inherits);
         m_capturers.Add(cap);
         return cap;
     }
 
+    public CameraCapturer CreateCameraCapturer(Camera target, aeAPI.aeObject parent)
+    {
+        var abc = aeAPI.aeNewCamera(parent, target.name);
+        var cap = new CameraCapturer(target, abc);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+    public MeshCapturer CreateMeshCapturer(MeshRenderer target, aeAPI.aeObject parent)
+    {
+        var abc = aeAPI.aeNewPolyMesh(parent, target.name);
+        var cap = new MeshCapturer(target, abc);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+    public SkinnedMeshCapturer CreateSkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject parent)
+    {
+        var abc = aeAPI.aeNewPolyMesh(parent, target.name);
+        var cap = new SkinnedMeshCapturer(target, abc);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+    public ParticleCapturer CreateParticleCapturer(ParticleSystem target, aeAPI.aeObject parent)
+    {
+        var abc = aeAPI.aeNewPoints(parent, target.name);
+        var cap = new ParticleCapturer(target, abc);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+    public CustomCapturerHandler CreateCustomCapturerHandler(AlembicCustomComponentCapturer target, aeAPI.aeObject parent)
+    {
+        target.SetParent(parent);
+        var cap = new CustomCapturerHandler(target);
+        m_capturers.Add(cap);
+        return cap;
+    }
+
+    bool ShouldBeIgnored(Behaviour target)
+    {
+        return m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
+    }
+    bool ShouldBeIgnored(Renderer target)
+    {
+        return m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
+    }
+    bool ShouldBeIgnored(ParticleSystem target)
+    {
+        return m_ignoreDisabled && (!target.gameObject.activeInHierarchy);
+    }
+
+
+    #region impl_capture_tree
+
+    // capture node tree for "Preserve Tree Structure" option.
+    public class CaptureNode
+    {
+        public List<CaptureNode> children = new List<CaptureNode>();
+
+        public Transform obj;
+        public TransformCapturer transform;
+        public ComponentCapturer component;
+    }
+
+    Dictionary<Transform, CaptureNode> m_capture_node;
+    List<CaptureNode> m_top_nodes;
+
+    CaptureNode ConstructTree(Transform node)
+    {
+        if(node == null) { return null; }
+
+        CaptureNode cn;
+        if (m_capture_node.TryGetValue(node, out cn)) { return cn; }
+
+        cn = new CaptureNode();
+        cn.obj = node;
+        m_capture_node.Add(node, cn);
+
+        var parent = ConstructTree(node.parent);
+        if (parent != null)
+        {
+            parent.children.Add(cn);
+        }
+        else
+        {
+            m_top_nodes.Add(cn);
+        }
+
+        return cn;
+    }
+
+    void ConstructTree_TransformCapturer()
+    {
+        var abctop = aeAPI.aeGetTopObject(m_ctx);
+        foreach (var c in m_top_nodes)
+        {
+            ConstructTree_TransformCapturer(c, abctop);
+        }
+    }
+
+    void ConstructTree_TransformCapturer(CaptureNode node, aeAPI.aeObject parent)
+    {
+        node.transform = CreateTransformCapturer(node.obj.gameObject, parent, true);
+        foreach (var c in node.children)
+        {
+            ConstructTree_TransformCapturer(c, node.transform.abc);
+        }
+    }
+    #endregion
+
+    void CreateCapturers_Tree()
+    {
+        m_capture_node = new Dictionary<Transform, CaptureNode>();
+        m_top_nodes = new List<CaptureNode>();
+
+        Camera[]                cameras         = m_captureCamera ? GetTargets<Camera>() : null;
+        MeshRenderer[]          meshes          = m_captureMeshRenderer ? GetTargets<MeshRenderer>() : null;
+        SkinnedMeshRenderer[]   skinned_meshes  = m_captureSkinnedMeshRenderer ? GetTargets<SkinnedMeshRenderer>() : null;
+        ParticleSystem[]        particles       = m_captureParticleSystem ? GetTargets<ParticleSystem>() : null;
+        AlembicCustomComponentCapturer[] custum_capturers = m_enableCustomCapturer ? GetTargets<AlembicCustomComponentCapturer>() : null;
+
+        // construct tree
+        // (bottom-up)
+        if (cameras != null)
+        {
+            foreach (var t in cameras)
+            {
+                if (ShouldBeIgnored(t)) { return; }
+                ConstructTree(t.GetComponent<Transform>());
+            }
+        }
+        if (meshes != null)
+        {
+            foreach (var t in meshes)
+            {
+                if (ShouldBeIgnored(t)) { return; }
+                ConstructTree(t.GetComponent<Transform>());
+            }
+        }
+        if (skinned_meshes != null)
+        {
+            foreach (var t in skinned_meshes)
+            {
+                if (ShouldBeIgnored(t)) { return; }
+                ConstructTree(t.GetComponent<Transform>());
+            }
+        }
+        if (particles != null)
+        {
+            foreach (var t in particles)
+            {
+                if (ShouldBeIgnored(t)) { return; }
+                ConstructTree(t.GetComponent<Transform>());
+            }
+        }
+        if (custum_capturers != null)
+        {
+            foreach (var t in custum_capturers)
+            {
+                if (ShouldBeIgnored(t)) { return; }
+                ConstructTree(t.GetComponent<Transform>());
+            }
+        }
+
+        // make transform capturers (top-down)
+        ConstructTree_TransformCapturer();
+
+        // make component capturers
+        if (cameras != null)
+        {
+            foreach (var t in cameras)
+            {
+                CaptureNode cn;
+                if (m_capture_node.TryGetValue(t.GetComponent<Transform>(), out cn))
+                {
+                    cn.component = CreateCameraCapturer(t, cn.transform.abc);
+                }
+            }
+        }
+        if (meshes != null)
+        {
+            foreach (var t in meshes)
+            {
+                CaptureNode cn;
+                if (m_capture_node.TryGetValue(t.GetComponent<Transform>(), out cn))
+                {
+                    cn.component = CreateMeshCapturer(t, cn.transform.abc);
+                }
+            }
+        }
+        if (skinned_meshes != null)
+        {
+            foreach (var t in skinned_meshes)
+            {
+                CaptureNode cn;
+                if (m_capture_node.TryGetValue(t.GetComponent<Transform>(), out cn))
+                {
+                    cn.component = CreateSkinnedMeshCapturer(t, cn.transform.abc);
+                }
+            }
+        }
+        if (particles != null)
+        {
+            foreach (var t in particles)
+            {
+                CaptureNode cn;
+                if (m_capture_node.TryGetValue(t.GetComponent<Transform>(), out cn))
+                {
+                    cn.component = CreateParticleCapturer(t, cn.transform.abc);
+                }
+            }
+        }
+        if (custum_capturers != null)
+        {
+            foreach (var t in custum_capturers)
+            {
+                CaptureNode cn;
+                if (m_capture_node.TryGetValue(t.GetComponent<Transform>(), out cn))
+                {
+                    cn.component = CreateCustomCapturerHandler(t, cn.transform.abc);
+                }
+            }
+        }
+
+        m_top_nodes = null;
+        m_capture_node = null;
+    }
+
+    void CreateCapturers_Flat()
+    {
+        var top = aeAPI.aeGetTopObject(m_ctx);
+
+        // Camera
+        if (m_captureCamera)
+        {
+            foreach (var target in GetTargets<Camera>())
+            {
+                if (ShouldBeIgnored(target)) { continue; }
+                CreateCameraCapturer(target, CreateTransformCapturer(target.gameObject, top, false).abc);
+            }
+        }
+
+        // MeshRenderer
+        if (m_captureMeshRenderer)
+        {
+            foreach (var target in GetTargets<MeshRenderer>())
+            {
+                if (ShouldBeIgnored(target)) { continue; }
+                CreateMeshCapturer(target, CreateTransformCapturer(target.gameObject, top, false).abc);
+            }
+        }
+
+        // SkinnedMeshRenderer
+        if (m_captureSkinnedMeshRenderer)
+        {
+            foreach (var target in GetTargets<SkinnedMeshRenderer>())
+            {
+                if (ShouldBeIgnored(target)) { continue; }
+                CreateSkinnedMeshCapturer(target, CreateTransformCapturer(target.gameObject, top, false).abc);
+            }
+        }
+
+        // ParticleSystem
+        if (m_captureParticleSystem)
+        {
+            foreach (var target in GetTargets<ParticleSystem>())
+            {
+                if (ShouldBeIgnored(target)) { continue; }
+                CreateParticleCapturer(target, CreateTransformCapturer(target.gameObject, top, false).abc);
+            }
+        }
+
+        // handle custom capturers (AlembicCustomComponentCapturer)
+        if (m_enableCustomCapturer)
+        {
+            foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
+            {
+                if (ShouldBeIgnored(target)) { continue; }
+                CreateCustomCapturerHandler(target, CreateTransformCapturer(target.gameObject, top, false).abc);
+            }
+        }
+    }
 
 
     public bool BeginCapture()
@@ -279,101 +584,26 @@ public class AlembicExporter : MonoBehaviour
             return false;
         }
 
+        // create context and open archive
         m_ctx = aeAPI.aeCreateContext(ref m_conf);
         if(m_ctx.ptr == IntPtr.Zero) {
             Debug.LogWarning("aeCreateContext() failed");
             return false;
         }
-        if(!aeAPI.aeOpenArchive(m_ctx, m_output_path))
-        {
+        if(!aeAPI.aeOpenArchive(m_ctx, m_output_path)) {
             Debug.LogWarning("aeOpenArchive() failed");
             aeAPI.aeDestroyContext(m_ctx);
             m_ctx = new aeAPI.aeContext();
             return false;
         }
 
-
-        var top = aeAPI.aeGetTopObject(m_ctx);
-
-        if(m_preserveTreeStructure)
-        {
-            Debug.LogWarning("AlembicExporter: preserveTreeStructure is not implemented yet...");
-            m_preserveTreeStructure = false;
+        // create capturers
+        if(m_preserveTreeStructure) {
+            CreateCapturers_Tree();
         }
-
-
-        // create component captures
-
-        // Camera
-        if (m_captureCamera)
-        {
-            foreach(var target in GetTargets<Camera>())
-            {
-                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
-                var trans = CreateTransformCapturer(target.gameObject, top);
-
-                var cam_abc = aeAPI.aeNewCamera(trans.abc, target.name);
-                var cam_cap = new CameraCapturer(target, cam_abc);
-                m_capturers.Add(cam_cap);
-            }
+        else {
+            CreateCapturers_Flat();
         }
-
-        // MeshRenderer
-        if (m_captureMeshRenderer)
-        {
-            foreach (var target in GetTargets<MeshRenderer>())
-            {
-                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
-                var trans = CreateTransformCapturer(target.gameObject, top);
-
-                var mesh_abc = aeAPI.aeNewPolyMesh(trans.abc, target.name);
-                var mesh_cap = new MeshCapturer(target, mesh_abc);
-                m_capturers.Add(mesh_cap);
-            }
-        }
-
-        // SkinnedMeshRenderer
-        if (m_captureSkinnedMeshRenderer)
-        {
-            foreach (var target in GetTargets<SkinnedMeshRenderer>())
-            {
-                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
-                var trans = CreateTransformCapturer(target.gameObject, top);
-
-                var mesh_abc = aeAPI.aeNewPolyMesh(trans.abc, target.name);
-                var mesh_cap = new SkinnedMeshCapturer(target, mesh_abc);
-                m_capturers.Add(mesh_cap);
-            }
-        }
-
-        // ParticleSystem
-        if (m_captureParticleSystem)
-        {
-            foreach (var target in GetTargets<ParticleSystem>())
-            {
-                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy)) { continue; }
-                var trans = CreateTransformCapturer(target.gameObject, top);
-
-                var particle_abc = aeAPI.aeNewPoints(trans.abc, target.name);
-                var particle_cap = new ParticleCapturer(target, particle_abc);
-                m_capturers.Add(particle_cap);
-            }
-        }
-
-        // handle custom capturers (AlembicCustomComponentCapturer)
-        if (m_enableCustomCapturer)
-        {
-            foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
-            {
-                if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { continue; }
-                var trans = CreateTransformCapturer(target.gameObject, top);
-
-                target.SetParent(trans.abc);
-                var capturer = new CustomCapturerHandler(target);
-                m_capturers.Add(capturer);
-            }
-        }
-
 
         m_recording = true;
         m_time = 0.0f;
@@ -387,7 +617,7 @@ public class AlembicExporter : MonoBehaviour
         if (!m_recording) { return; }
 
         m_capturers.Clear();
-        aeAPI.aeDestroyContext(m_ctx);
+        aeAPI.aeDestroyContext(m_ctx); // flush archive
         m_ctx = new aeAPI.aeContext();
         m_recording = false;
         m_frameCount = 0;
