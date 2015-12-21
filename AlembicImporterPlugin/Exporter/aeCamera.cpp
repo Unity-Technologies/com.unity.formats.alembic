@@ -21,17 +21,32 @@ abcProperties* aeCamera::getAbcProperties()
     return &m_schema;
 }
 
-void aeCamera::writeSample(const aeCameraSampleData &data)
+void aeCamera::writeSample(const aeCameraSampleData &data_)
 {
-    // todo: compute aperture & focal length
-    //static const float sRad2Deg = 180.0f / float(M_PI);
-    //static const float sDeg2Rad = float(M_PI) / 180.0f;
-    //2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
-    //1.0f / tan(data.fieldOfView * 0.5f * sDeg2Rad);
+    auto data = data_;
+
+    const float Rad2Deg = 180.0f / float(M_PI);
+    const float Deg2Rad = float(M_PI) / 180;
+
+    if (data.focalLength == 0.0f) {
+        // compute focalLength by fieldOfView and aperture
+        // deformation:
+        //  fieldOfView = atan((aperture * 10.0f) / (2.0f * focalLength)) * Rad2Deg * 2.0f;
+        //  fieldOfView * Deg2Rad / 2.0f = atan((aperture * 10.0f) / (2.0f * focalLength));
+        //  tan(fieldOfView * Deg2Rad / 2.0f) = (aperture * 10.0f) / (2.0f * focalLength);
+        //  tan(fieldOfView * Deg2Rad / 2.0f) * (2.0f * focalLength) = (aperture * 10.0f);
+        //  (2.0f * focalLength) = (aperture * 10.0f) / tan(fieldOfView * Deg2Rad / 2.0f);
+        //  focalLength = (aperture * 10.0f) / tan(fieldOfView * Deg2Rad / 2.0f) / 2.0f;
+
+        data.focalLength = (data.aperture * 10.0f) / std::tan(data.fieldOfView * Deg2Rad / 2.0f) / 2.0f;
+    }
 
     AbcGeom::CameraSample sample;
     sample.setNearClippingPlane(data.nearClippingPlane);
     sample.setFarClippingPlane(data.farClippingPlane);
-
+    sample.setFocalLength(data.focalLength);
+    sample.setFocusDistance(data.focusDistance);
+    sample.setVerticalAperture(data.aperture);
+    sample.setHorizontalAperture(data.aperture * data.aspectRatio);
     m_schema.set(sample);
 }

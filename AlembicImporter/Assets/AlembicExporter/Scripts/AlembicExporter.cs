@@ -46,12 +46,13 @@ public class AlembicExporter : MonoBehaviour
         aeAPI.aeXFormWriteSample(abc, ref data);
     }
 
-    public static void CaptureCamera(aeAPI.aeObject abc, Camera cam)
+    public static void CaptureCamera(aeAPI.aeObject abc, Camera cam, float aspectRatio)
     {
-        var data = new aeAPI.aeCameraSampleData();
+        var data = aeAPI.aeCameraSampleData.default_value;
         data.nearClippingPlane = cam.nearClipPlane;
         data.farClippingPlane = cam.farClipPlane;
         data.fieldOfView = cam.fieldOfView;
+        data.aspectRatio = aspectRatio;
         aeAPI.aeCameraWriteSample(abc, ref data);
     }
 
@@ -120,6 +121,13 @@ public class AlembicExporter : MonoBehaviour
     public class CameraCapturer : ComponentCapturer
     {
         Camera m_target;
+        AspectRatioMode m_aspectRatioMode;
+
+        public AspectRatioMode aspectRatioMode
+        {
+            get { return m_aspectRatioMode; }
+            set { m_aspectRatioMode = value; }
+        }
 
         public CameraCapturer(Camera target, aeAPI.aeObject abc)
         {
@@ -132,7 +140,15 @@ public class AlembicExporter : MonoBehaviour
         {
             if (m_target == null) { return; }
 
-            CaptureCamera(m_abc, m_target);
+            float aspect = 0.0f;
+            switch (m_aspectRatioMode)
+            {
+                case AspectRatioMode.Ratio_16_10: aspect = 16.0f / 10.0f; break;
+                case AspectRatioMode.Ratio_16_9: aspect = 16.0f / 9.0f; break;
+                case AspectRatioMode.Ratio_4_3: aspect = 4.0f / 3.0f; break;
+                case AspectRatioMode.WidthPerHeight: aspect = (float)m_target.pixelWidth / (float)m_target.pixelHeight; break;
+            }
+            CaptureCamera(m_abc, m_target, aspect);
         }
     }
 
@@ -261,7 +277,19 @@ public class AlembicExporter : MonoBehaviour
         CurrentBranch,
     }
 
+
+    public enum AspectRatioMode
+    {
+        Ratio_16_9,
+        Ratio_16_10,
+        Ratio_4_3,
+        WidthPerHeight,
+    };
+
+
     public string m_output_path;
+    public bool m_captureOnStart = false;
+    public int m_maxCaptureFrame = 0; // 0: infinite
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
 
     public Scope m_scope = Scope.EntireScene;
@@ -273,6 +301,8 @@ public class AlembicExporter : MonoBehaviour
     public bool m_captureCamera = true;
     public bool m_enableCustomCapturer = true;
     public bool m_ignoreDisabled = true;
+
+    public AspectRatioMode m_cameraAspectRatio = AspectRatioMode.Ratio_16_10;
 
     public bool m_diagnostics;
 
@@ -519,7 +549,8 @@ public class AlembicExporter : MonoBehaviour
                 var trans = CreateComponentCapturer(target.GetComponent<Transform>(), top);
                 trans.inherits = false;
                 trans.invertForward = true;
-                CreateComponentCapturer(target, trans.abc);
+                var cam = CreateComponentCapturer(target, trans.abc);
+                cam.aspectRatioMode = m_cameraAspectRatio;
             }
         }
 
@@ -648,6 +679,11 @@ public class AlembicExporter : MonoBehaviour
         {
             Debug.Log("AlembicExporter.ProcessCapture(): " + (elapsed * 1000.0f) + "ms");
         }
+
+        if(m_frameCount >= m_maxCaptureFrame)
+        {
+            EndCapture();
+        }
     }
 
     IEnumerator ProcessRecording()
@@ -671,6 +707,14 @@ public class AlembicExporter : MonoBehaviour
         if(m_output_path == null || m_output_path == "")
         {
             m_output_path = gameObject.name + ".abc";
+        }
+    }
+
+    void Start()
+    {
+        if(m_captureOnStart)
+        {
+            BeginCapture();
         }
     }
 
