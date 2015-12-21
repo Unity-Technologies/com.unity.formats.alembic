@@ -62,6 +62,12 @@ enum aeTimeSamplingType
     aeTimeSamplingType_Acyclic,
 };
 
+enum aeXFromType
+{
+    aeXFromType_Matrix,
+    aeXFromType_TRS,
+};
+
 enum aePropertyType
 {
     // array types
@@ -89,6 +95,7 @@ struct aeConfig
     aeTimeSamplingType timeSamplingType;
     float startTime;     // relevant only if timeSamplingType is uniform
     float timePerSample; // relevant only if timeSamplingType is uniform
+    aeXFromType xformType;
     bool swapHandedness; // swap rhs <-> lhs
 
     aeConfig()
@@ -96,6 +103,7 @@ struct aeConfig
         , timeSamplingType(aeTimeSamplingType_Uniform)
         , startTime(0.0f)
         , timePerSample(1.0f / 30.0f)
+        , xformType(aeXFromType_TRS)
         , swapHandedness(true)
     {
     }

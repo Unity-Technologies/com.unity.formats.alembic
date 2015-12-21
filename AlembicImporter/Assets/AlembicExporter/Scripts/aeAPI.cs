@@ -23,6 +23,12 @@ public class aeAPI
         Acyclic,
     };
 
+    public enum aeXFormType
+    {
+        Matrix,
+        TRS,
+    };
+
     public enum aePropertyType
     {
         // array types
@@ -55,6 +61,7 @@ public class aeAPI
         [MarshalAs(UnmanagedType.U4)] public aeTypeSamplingType timeSamplingType;
         public float startTime;     // relevant only if timeSamplingType is uniform
         public float timePerSample; // relevant only if timeSamplingType is uniform
+        [MarshalAs(UnmanagedType.U4)] public aeXFormType xformType;
         [MarshalAs(UnmanagedType.U1)] public bool swapHandedness; // swap rhs <-> lhs
 
 
@@ -68,6 +75,7 @@ public class aeAPI
                     timeSamplingType = aeTypeSamplingType.Uniform,
                     startTime = 0.0f,
                     timePerSample = 1.0f / 30.0f,
+                    xformType = aeXFormType.Matrix,
                     swapHandedness = true,
                 };
             }
