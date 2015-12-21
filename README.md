@@ -1,16 +1,17 @@
+# Alembic Importer / Exporter
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
 - [Alembic?](#alembic)
 - [Alembic Importer](#alembic-importer)
 - [Alembic Exporter](#alembic-exporter)
 
-# Alembic?
+## Alembic?
 Alembic は主に映像業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  映像業界では、スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを Alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
 
 近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。ゲームの 3D 録画のような新たな使い方も考えられます。  
 
 Alembic 本家: http://www.alembic.io/
 
-# Alembic Importer
+## Alembic Importer
 ![example](Screenshots/alembic_example.gif)  
 パッケージ: [AlembicImporter.unitypackage](Packages/AlembicImporter.unitypackage?raw=true)
 
@@ -22,7 +23,7 @@ Alembic ファイルに含まれるノード群を Unity 側で GameObject と�
 ![example](Screenshots/menu.png)  
 
 
-# Alembic Exporter
+## Alembic Exporter
 パッケージ: [AlembicExporter.unitypackage](Packages/AlembicExporter.unitypackage?raw=true)
 
 Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
@@ -43,6 +44,10 @@ MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力),
   Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。映像制作の場合こちらにすべきでしょう。これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime が TimePerSample に固定された上、毎フレームこの間隔を待つようになります**。このため、キャプチャ開始後挙動が変わったように見えることもあるかもしれません。  
   Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。 当然間隔は一定ではなくなりますが、ゲーム進行への影響は最小限になります。主にゲームの 3D 録画を想定したモードです。  
   Start Time は Alembic 側の開始時間です。Time Per Sample は前述の通り、Time Sampling Type が Uniform の場合の Alembic 側のフレーム間インターバルになります。  
+
+- Xform Type  
+  特に問題がなければ TRS のままにしておいてください。  
+  Xform とは Alembic における Unity の Transform 相当品です。Matrix で保存するとわずかながら再生速度が速くなりますが、ソフトウェアによっては回転とスケールが同時にかかった時結果が元と変わってしまう可能性があります。  
 
 - Swap Handedness  
   有効にすると 右手座標系 / 左手座標系 を入れ変える処理を挟みます。

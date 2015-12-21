@@ -75,7 +75,7 @@ public class aeAPI
                     timeSamplingType = aeTypeSamplingType.Uniform,
                     startTime = 0.0f,
                     timePerSample = 1.0f / 30.0f,
-                    xformType = aeXFormType.Matrix,
+                    xformType = aeXFormType.TRS,
                     swapHandedness = true,
                 };
             }
@@ -115,12 +115,33 @@ public class aeAPI
     {
         public float nearClippingPlane;
         public float farClippingPlane;
-        public float fieldOfView;
-        public float focusDistance;
+        public float fieldOfView; // degree. relevant only if focusDistance==0.0 (default)
+        public float aspectRatio;
+
+        // if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.05f.
         public float focalLength;
+        public float focusDistance;
+        public float aperture;
+
+        public static aeCameraSampleData default_value
+        {
+            get
+            {
+                return new aeCameraSampleData
+                {
+                    nearClippingPlane = 0.3f,
+                    farClippingPlane = 1000.0f,
+                    fieldOfView = 60.0f,
+                    aspectRatio = 16.0f / 9.0f,
+                    focalLength = 0.0f,
+                    focusDistance = 5.0f,
+                    aperture = 2.4f,
+                };
+            }
+        }
     }
 
-    
+
     [DllImport("AlembicExporter")] public static extern aeContext   aeCreateContext(ref aeConfig conf);
     [DllImport("AlembicExporter")] public static extern void        aeDestroyContext(aeContext ctx);
 

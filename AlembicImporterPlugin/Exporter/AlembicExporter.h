@@ -171,16 +171,21 @@ struct aeCameraSampleData
 {
     float nearClippingPlane;
     float farClippingPlane;
-    float fieldOfView;
+    float fieldOfView; // degree. relevant only if focusDistance==0.0
+    float aspectRatio;
+
+    float focalLength; // if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
     float focusDistance;
-    float focalLength;
+    float aperture;
 
     inline aeCameraSampleData()
-        : nearClippingPlane(0.0f)
-        , farClippingPlane(0.0f)
-        , fieldOfView(0.0f)
-        , focusDistance(0.0f)
+        : nearClippingPlane(0.3f)
+        , farClippingPlane(1000.0f)
+        , fieldOfView(60.0f)
+        , aspectRatio(16.0f / 9.0f)
         , focalLength(0.0f)
+        , focusDistance(5.0f)
+        , aperture(2.4)
     {
     }
 };
