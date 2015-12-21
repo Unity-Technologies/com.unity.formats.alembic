@@ -14,6 +14,7 @@ public:
 
 private:
     AbcGeom::OXformSchema m_schema;
+    AbcGeom::XformSample m_sample;
 };
 
 #endif // aeXForm_h

@@ -31,17 +31,23 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
         data.rotationAngle *= -1.0f;
     }
 
-    // single kMatrixOperation is best for compatibility
+    m_sample.setInheritsXforms(data.inherits);
+    if (getConfig().xformType == aeXFromType_Matrix)
+    {
+        const float Deg2Rad = M_PI / 180.0f;
+        abcM44 trans;
+        trans *= abcM44().setScale(data.scale);
+        trans *= abcM44().setAxisAngle(data.rotationAxis, data.rotationAngle*Deg2Rad);
+        trans *= abcM44().setTranslation(data.translation);
+        m_sample.setMatrix(abcM44d(trans));
+    }
+    else if (getConfig().xformType == aeXFromType_TRS)
+    {
+        m_sample.setTranslation(data.translation);
+        m_sample.setRotation(data.rotationAxis, data.rotationAngle);
+        m_sample.setScale(data.scale);
+    }
 
-    const float Deg2Rad = M_PI / 180.0f;
-    abcM44 trans;
-    trans *= abcM44().setScale(data.scale);
-    trans *= abcM44().setAxisAngle(data.rotationAxis, data.rotationAngle*Deg2Rad);
-    trans *= abcM44().setTranslation(data.translation);
-
-    AbcGeom::XformOp matop(AbcGeom::kMatrixOperation, AbcGeom::kMatrixHint);
-    AbcGeom::XformSample sample;
-    sample.setInheritsXforms(data.inherits);
-    sample.addOp(matop, abcM44d(trans));
-    m_schema.set(sample);
+    m_schema.set(m_sample);
+    m_sample.reset();
 }
