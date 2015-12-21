@@ -91,6 +91,7 @@ if use_externals:
     os.remove(dll)
 
 else:
+  excons.SetArgument("c++1", 1)
   SConscript("alembic/SConstruct")
   
   Import("RequireAlembic")

@@ -691,7 +691,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
         }
     }
 
-    bool tangentsRequired = (config.tangentsMode != TM_None);
+    bool tangentsRequired = (m_uvs.valid() && config.tangentsMode != TM_None);
 
     if (tangentsRequired)
     {
@@ -1408,7 +1408,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
             indexedNormals = (ret->m_normals.getScope() == AbcGeom::kFacevaryingScope);
         }
 
-        if (normals)
+        if (normals && ret->m_uvs.valid())
         {
             // topology may be shared, check tangent indices
             if (!ret->m_topology->tangentIndices || !m_config.cacheTangentsSplits)
