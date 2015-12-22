@@ -300,6 +300,7 @@ public class AlembicPointsRenderer : MonoBehaviour
     {
         if(m_show_bounds)
         {
+            Gizmos.matrix = GetComponent<Transform>().localToWorldMatrix;
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(m_bounds.center, m_bounds.extents);
         }
