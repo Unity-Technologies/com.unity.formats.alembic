@@ -297,7 +297,7 @@ public class AlembicExporter : MonoBehaviour
 
     [Header("Misc")]
 
-    public bool m_diagnostics;
+    public bool m_detailLog;
 
     aeAPI.aeContext m_ctx;
     List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
@@ -366,7 +366,7 @@ public class AlembicExporter : MonoBehaviour
 
     public CustomCapturerHandler CreateComponentCapturer(AlembicCustomComponentCapturer target, aeAPI.aeObject parent)
     {
-        target.SetParent(parent);
+        target.CreateAbcObject(parent);
         var cap = new CustomCapturerHandler(target);
         m_capturers.Add(cap);
         return cap;
@@ -513,7 +513,7 @@ public class AlembicExporter : MonoBehaviour
             {
                 if (ShouldBeIgnored(t)) { return; }
                 var node = ConstructTree(t.GetComponent<Transform>());
-                node.componentType = t.GetType();
+                node.componentType = typeof(AlembicCustomComponentCapturer);
             }
         }
 
@@ -670,7 +670,7 @@ public class AlembicExporter : MonoBehaviour
         ++m_frameCount;
 
         float elapsed = Time.realtimeSinceStartup - begin_time;
-        if (m_diagnostics)
+        if (m_detailLog)
         {
             Debug.Log("AlembicExporter.ProcessCapture(): " + (elapsed * 1000.0f) + "ms");
         }
