@@ -45,6 +45,20 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         }
     }
 
+    if (data.faces == nullptr) {
+        // assume all faces are triangles
+
+        int vertices_per_primitive = 3;
+        int num_primitives = data.indexCount / vertices_per_primitive;
+        m_buf_faces.resize(num_primitives);
+        std::fill(m_buf_faces.begin(), m_buf_faces.end(), vertices_per_primitive);
+        data.faces = &m_buf_faces[0];
+        data.faceCount = m_buf_faces.size();
+    }
+
+    sample.setPositions(Abc::P3fArraySample(data.positions, data.vertexCount));
+    sample.setFaceIndices(Abc::Int32ArraySample(data.indices, data.indexCount));
+    sample.setFaceCounts(Abc::Int32ArraySample(data.faces, data.faceCount));
     if (data.normals != nullptr) {
         sample_normals.setIndices(Abc::UInt32ArraySample((uint32_t*)data.indices, data.indexCount));
         sample_normals.setVals(Abc::V3fArraySample(data.normals, data.vertexCount));
@@ -55,19 +69,5 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         sample_uvs.setVals(Abc::V2fArraySample(data.uvs, data.vertexCount));
         sample.setUVs(sample_uvs);
     }
-
-    sample.setPositions(Abc::P3fArraySample(data.positions, data.vertexCount));
-    sample.setFaceIndices(Abc::Int32ArraySample(data.indices, data.indexCount));
-    if (data.faces != nullptr) {
-        sample.setFaceCounts(Abc::Int32ArraySample(data.faces, data.faceCount));
-    }
-    else {
-        // assume all faces are triangle
-        int num_faces = data.indexCount / 3;
-        m_buf_faces.resize(num_faces);
-        std::fill(m_buf_faces.begin(), m_buf_faces.end(), 3);
-        sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces));
-    }
-
     m_schema.set(sample);
 }
