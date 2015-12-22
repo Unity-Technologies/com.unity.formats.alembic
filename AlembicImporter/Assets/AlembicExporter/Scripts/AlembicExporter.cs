@@ -193,7 +193,7 @@ public class AlembicExporter : MonoBehaviour
 
         ParticleSystem.Particle[] m_buf_particles;
         Vector3[] m_buf_positions;
-        Vector3[] m_buf_rotations;
+        Vector4[] m_buf_rotations;
 
         public ParticleCapturer(ParticleSystem target, aeAPI.aeObject abc)
         {
@@ -201,7 +201,7 @@ public class AlembicExporter : MonoBehaviour
             m_abc = abc;
             m_target = target;
 
-            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec3Array);
+            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec4Array);
         }
 
         public override void Capture()
@@ -214,7 +214,7 @@ public class AlembicExporter : MonoBehaviour
             {
                 m_buf_particles = new ParticleSystem.Particle[count_max];
                 m_buf_positions = new Vector3[count_max];
-                m_buf_rotations = new Vector3[count_max];
+                m_buf_rotations = new Vector4[count_max];
             }
             else if (m_buf_particles.Length != count_max)
             {
@@ -231,7 +231,8 @@ public class AlembicExporter : MonoBehaviour
             }
             for (int i = 0; i < count; ++i)
             {
-                m_buf_rotations[i] = m_buf_particles[i].rotation3D;
+                m_buf_rotations[i] = m_buf_particles[i].axisOfRotation;
+                m_buf_rotations[i].w = m_buf_particles[i].rotation;
             }
 
             // write!
