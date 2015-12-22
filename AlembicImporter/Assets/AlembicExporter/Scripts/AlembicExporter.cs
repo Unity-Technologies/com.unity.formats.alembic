@@ -271,21 +271,31 @@ public class AlembicExporter : MonoBehaviour
         CurrentBranch,
     }
 
+    [Header("Abc")]
 
     public string m_output_path;
-    public bool m_captureOnStart = false;
-    public int m_maxCaptureFrame = 0; // 0: infinite
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
+
+    [Header("Capture Setting")]
+
+    public bool m_captureOnStart = false;
+    [Tooltip("0=infinite")]
+    public int m_maxCaptureFrame = 0;
+
+    [Header("Capture Components")]
 
     public Scope m_scope = Scope.EntireScene;
     public bool m_preserveTreeStructure = true;
-
+    [Space(8)]
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
     public bool m_captureParticleSystem = true;
     public bool m_captureCamera = true;
-    public bool m_enableCustomCapturer = true;
+    public bool m_customCapturer = true;
+    [Space(8)]
     public bool m_ignoreDisabled = true;
+
+    [Header("Misc")]
 
     public bool m_diagnostics;
 
@@ -497,7 +507,7 @@ public class AlembicExporter : MonoBehaviour
                 node.componentType = t.GetType();
             }
         }
-        if (m_enableCustomCapturer)
+        if (m_customCapturer)
         {
             foreach (var t in GetTargets<AlembicCustomComponentCapturer>())
             {
@@ -573,7 +583,7 @@ public class AlembicExporter : MonoBehaviour
         }
 
         // handle custom capturers (AlembicCustomComponentCapturer)
-        if (m_enableCustomCapturer)
+        if (m_customCapturer)
         {
             foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
             {

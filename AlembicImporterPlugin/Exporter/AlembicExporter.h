@@ -199,6 +199,7 @@ aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *pa
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
 aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time); // relevant only if timeSamplingType is acyclic
 
+aeCLinkage aeExport void            aeDeleteObject(aeObject *obj);
 aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name);
 aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);
 aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name);

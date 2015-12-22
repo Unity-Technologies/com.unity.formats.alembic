@@ -35,6 +35,10 @@ aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time)
 }
 
 
+aeCLinkage aeExport void aeDeleteObject(aeObject *obj)
+{
+    delete obj;
+}
 aeCLinkage aeExport aeXForm* aeNewXForm(aeObject *parent, const char *name)
 {
     return parent->newChild<aeXForm>(name);
