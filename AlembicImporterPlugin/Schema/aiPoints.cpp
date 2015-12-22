@@ -38,6 +38,11 @@ void aiPointsSample::fillData(aiPointsSampleData &data)
         for (int i = 0; i < count; ++i) {
             data.positions[i] = (*m_positions)[i];
         }
+        if (m_config.swapHandedness) {
+            for (int i = 0; i < count; ++i) {
+                data.positions[i].x *= -1.0f;
+            }
+        }
     }
 
     if (m_velocities && data.velocities) {
