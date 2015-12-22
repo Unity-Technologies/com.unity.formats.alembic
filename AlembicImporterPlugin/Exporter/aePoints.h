@@ -15,6 +15,7 @@ private:
     AbcGeom::OPointsSchema m_schema;
 
     std::vector<uint64_t> m_buf_ids;
+    std::vector<abcV3> m_buf_positions;
 };
 
 #endif // aePoints_h

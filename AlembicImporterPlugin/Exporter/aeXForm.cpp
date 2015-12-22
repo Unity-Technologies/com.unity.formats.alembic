@@ -30,6 +30,7 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
         data.rotationAxis.x *= -1.0f;
         data.rotationAngle *= -1.0f;
     }
+    data.translation *= getConfig().scale;
 
     m_sample.setInheritsXforms(data.inherits);
     if (getConfig().xformType == aeXFromType_Matrix)

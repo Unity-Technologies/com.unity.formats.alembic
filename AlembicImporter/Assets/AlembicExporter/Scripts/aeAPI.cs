@@ -57,12 +57,26 @@ public class aeAPI
     [Serializable]
     public struct aeConfig
     {
-        [MarshalAs(UnmanagedType.U4)] public aeArchiveType archiveType;
-        [MarshalAs(UnmanagedType.U4)] public aeTypeSamplingType timeSamplingType;
-        public float startTime;     // relevant only if timeSamplingType is uniform
-        public float timePerSample; // relevant only if timeSamplingType is uniform
-        [MarshalAs(UnmanagedType.U4)] public aeXFormType xformType;
-        [MarshalAs(UnmanagedType.U1)] public bool swapHandedness; // swap rhs <-> lhs
+        [MarshalAs(UnmanagedType.U4)]
+        public aeArchiveType archiveType;
+
+        [MarshalAs(UnmanagedType.U4)]
+        public aeTypeSamplingType timeSamplingType;
+
+        [Tooltip("start time on Alembic.")]
+        public float startTime;
+
+        [Tooltip("delta time on Alembic. relevant only if timeSamplingType is Uniform")]
+        public float timePerSample;
+
+        [MarshalAs(UnmanagedType.U4)]
+        public aeXFormType xformType;
+
+        [MarshalAs(UnmanagedType.U1)]
+        public bool swapHandedness; // swap rhs <-> lhs
+
+        [Tooltip("global scale. for unit conversion.")]
+        public float scale;
 
 
         public static aeConfig default_value
@@ -77,6 +91,7 @@ public class aeAPI
                     timePerSample = 1.0f / 30.0f,
                     xformType = aeXFormType.TRS,
                     swapHandedness = true,
+                    scale = 1.0f,
                 };
             }
         }

@@ -97,6 +97,7 @@ struct aeConfig
     float timePerSample; // relevant only if timeSamplingType is uniform
     aeXFromType xformType;
     bool swapHandedness; // swap rhs <-> lhs
+    float scale;
 
     aeConfig()
         : archiveType(aeArchiveType_Ogawa)
@@ -105,6 +106,7 @@ struct aeConfig
         , timePerSample(1.0f / 30.0f)
         , xformType(aeXFromType_TRS)
         , swapHandedness(true)
+        , scale(1.0f)
     {
     }
 };

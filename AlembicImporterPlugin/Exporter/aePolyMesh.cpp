@@ -27,20 +27,28 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
     AbcGeom::OV2fGeomParam::Sample sample_uvs;
 
     aePolyMeshSampleData data = data_;
-    if (getConfig().swapHandedness) {
-        // convert vertex
-        {
-            m_buf_positions.resize(data.vertexCount);
-            memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3)*data.vertexCount);
-            for (abcV3 &v : m_buf_positions) { v.x *= -1.0f; }
-            data.positions = &m_buf_positions[0];
-        }
+    const auto &conf = getConfig();
 
-        // convert normal
+    // if swapHandedness or scaling is required, copy positions to temporary buffer and convert
+    if (conf.swapHandedness || conf.scale != 1.0f) {
+        m_buf_positions.resize(data.vertexCount);
+        memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3)*data.vertexCount);
+        if (conf.swapHandedness) {
+            for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+        }
+        if (conf.scale != 1.0f) {
+            float scale = conf.scale;
+            for (auto &v : m_buf_positions) { v *= scale; }
+        }
+        data.positions = &m_buf_positions[0];
+    }
+
+    // if swapHandedness is required, copy normals to temporary buffer and invert normal.x 
+    if (conf.swapHandedness) {
         if (data.normals != nullptr) {
             m_buf_normals.resize(data.vertexCount);
             memcpy(&m_buf_normals[0], data.normals, sizeof(abcV3)*data.vertexCount);
-            for (abcV3 &v : m_buf_normals) { v.x *= -1.0f; }
+            for (auto &v : m_buf_normals) { v.x *= -1.0f; }
             data.normals = &m_buf_normals[0];
         }
     }
