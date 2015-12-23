@@ -273,14 +273,8 @@ public class AlembicExporter : MonoBehaviour
 
     [Header("Abc")]
 
-    public string m_output_path;
+    public string m_outputPath;
     public aeAPI.aeConfig m_conf = aeAPI.aeConfig.default_value;
-
-    [Header("Capture Setting")]
-
-    public bool m_captureOnStart = false;
-    [Tooltip("Automatically end capture when reached Max Capture Frame. 0: Infinite")]
-    public int m_maxCaptureFrame = 0;
 
     [Header("Capture Components")]
 
@@ -293,6 +287,13 @@ public class AlembicExporter : MonoBehaviour
     public bool m_captureParticleSystem = true;
     public bool m_captureCamera = true;
     public bool m_customCapturer = true;
+
+    [Header("Capture Setting")]
+
+    [Tooltip("Start capture on start.")]
+    public bool m_captureOnStart = false;
+    [Tooltip("Automatically end capture when reached Max Capture Frame. 0=Infinite")]
+    public int m_maxCaptureFrame = 0;
 
     [Header("Misc")]
 
@@ -598,7 +599,7 @@ public class AlembicExporter : MonoBehaviour
     public bool BeginCapture()
     {
         if(m_recording) {
-            Debug.Log("already recording");
+            Debug.Log("AlembicExporter: already started");
             return false;
         }
 
@@ -608,7 +609,7 @@ public class AlembicExporter : MonoBehaviour
             Debug.LogWarning("aeCreateContext() failed");
             return false;
         }
-        if(!aeAPI.aeOpenArchive(m_ctx, m_output_path)) {
+        if(!aeAPI.aeOpenArchive(m_ctx, m_outputPath)) {
             Debug.LogWarning("aeOpenArchive() failed");
             aeAPI.aeDestroyContext(m_ctx);
             m_ctx = new aeAPI.aeContext();
@@ -632,7 +633,7 @@ public class AlembicExporter : MonoBehaviour
             Time.maximumDeltaTime = (1.0f / m_conf.frameRate);
         }
 
-        Debug.Log("AlembicExporter: start " + m_output_path);
+        Debug.Log("AlembicExporter: start " + m_outputPath);
         return true;
     }
 
@@ -647,7 +648,7 @@ public class AlembicExporter : MonoBehaviour
         m_time = 0.0f;
         m_frameCount = 0;
 
-        Debug.Log("AlembicExporter: end: " + m_output_path);
+        Debug.Log("AlembicExporter: end: " + m_outputPath);
     }
 
     public void OneShot()
@@ -702,9 +703,9 @@ public class AlembicExporter : MonoBehaviour
 
     void Reset()
     {
-        if(m_output_path == null || m_output_path == "")
+        if(m_outputPath == null || m_outputPath == "")
         {
-            m_output_path = gameObject.name + ".abc";
+            m_outputPath = gameObject.name + ".abc";
         }
     }
 

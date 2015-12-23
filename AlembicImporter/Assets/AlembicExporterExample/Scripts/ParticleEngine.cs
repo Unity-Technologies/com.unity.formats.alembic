@@ -8,7 +8,7 @@ using UnityEditor;
 #endif
 
 
-namespace AlembicExporterTest
+namespace AlembicExporterExample
 {
 
     public class ParticleEngine : MonoBehaviour

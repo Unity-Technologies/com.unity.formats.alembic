@@ -26,6 +26,7 @@ public class AlembicImporterPackaging
         string[] files = new string[]
         {
 "Assets/AlembicExporter",
+"Assets/AlembicExporterExample",
         };
         AssetDatabase.ExportPackage(files, "AlembicExporter.unitypackage", ExportPackageOptions.Recurse);
     }
