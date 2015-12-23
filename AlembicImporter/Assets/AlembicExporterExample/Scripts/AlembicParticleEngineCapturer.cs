@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace AlembicExporterTest
+namespace AlembicExporterExample
 {
 
     [RequireComponent(typeof(ParticleEngine))]
