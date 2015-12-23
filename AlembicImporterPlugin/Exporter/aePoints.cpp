@@ -27,7 +27,7 @@ void aePoints::writeSample(const aePointsSampleData &data_)
 
     const auto &conf = getConfig();
 
-    // handling swapHandedness and scaling for positions, velocities
+    // handle swapHandedness and scaling for positions, velocities
     if (conf.swapHandedness || conf.scale != 1.0f) {
         float scale = conf.scale;
         {

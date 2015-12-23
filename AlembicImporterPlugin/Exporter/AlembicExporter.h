@@ -97,6 +97,7 @@ struct aeConfig
     float frameRate;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
     aeXFromType xformType;
     bool swapHandedness; // swap rhs <-> lhs
+    bool swapFaces; // swap triangle indices
     float scale;
 
     aeConfig()
@@ -106,6 +107,7 @@ struct aeConfig
         , frameRate(30.0f)
         , xformType(aeXFromType_TRS)
         , swapHandedness(true)
+        , swapFaces(false)
         , scale(1.0f)
     {
     }

@@ -72,8 +72,13 @@ public class aeAPI
         [MarshalAs(UnmanagedType.U4)]
         public aeXFormType xformType;
 
+        [Tooltip("Swap right-hand space and left-hand space")]
         [MarshalAs(UnmanagedType.U1)]
-        public bool swapHandedness; // swap rhs <-> lhs
+        public bool swapHandedness;
+
+        [Tooltip("Swap triangle indices")]
+        [MarshalAs(UnmanagedType.U1)]
+        public bool swapFaces;
 
         [Tooltip("Global scale for unit conversion.")]
         public float scale;
@@ -91,6 +96,7 @@ public class aeAPI
                     frameRate = 30.0f,
                     xformType = aeXFormType.TRS,
                     swapHandedness = true,
+                    swapFaces = false,
                     scale = 1.0f,
                 };
             }

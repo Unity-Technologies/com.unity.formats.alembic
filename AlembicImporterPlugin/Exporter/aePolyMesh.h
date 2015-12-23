@@ -17,6 +17,7 @@ private:
     std::vector<abcV3>  m_buf_positions;
     std::vector<abcV3>  m_buf_velocities;
     std::vector<abcV3>  m_buf_normals;
+    std::vector<int>    m_buf_indices;
     std::vector<int>    m_buf_faces;
 };
 

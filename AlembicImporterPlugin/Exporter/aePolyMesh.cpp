@@ -25,7 +25,7 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
     aePolyMeshSampleData data = data_;
     const auto &conf = getConfig();
 
-    // handling swapHandedness and scaling for positions, velocities
+    // handle swapHandedness and scaling for positions, velocities
     if (conf.swapHandedness || conf.scale != 1.0f) {
         float scale = conf.scale;
         {
@@ -53,7 +53,7 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         }
     }
 
-    // handling swapHandedness for normals
+    // handle swapHandedness for normals
     if (conf.swapHandedness) {
         if (data.normals != nullptr) {
             m_buf_normals.resize(data.vertexCount);
@@ -61,6 +61,17 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
             for (auto &v : m_buf_normals) { v.x *= -1.0f; }
             data.normals = &m_buf_normals[0];
         }
+    }
+
+    // handle swapFace option
+    if (conf.swapFaces) {
+        m_buf_indices.resize(data.indexCount);
+        for (int i = 0; i < m_buf_indices.size(); i += 3) {
+            m_buf_indices[i + 0] = data.indices[i + 0];
+            m_buf_indices[i + 1] = data.indices[i + 2];
+            m_buf_indices[i + 2] = data.indices[i + 1];
+        }
+        data.indices = &m_buf_indices[0];
     }
 
     if (data.faces == nullptr) {
