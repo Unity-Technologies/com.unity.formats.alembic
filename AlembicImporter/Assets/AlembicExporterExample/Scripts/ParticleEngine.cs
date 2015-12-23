@@ -59,10 +59,12 @@ namespace AlembicExporterExample
         CSParams[] m_csparams;
         Vector3[] m_buf_positions;
         Vector3[] m_buf_velocities;
+        float m_elapsed;
 
 
         public Vector3[] positionBuffer { get { return m_buf_positions; } }
         public Vector3[] velocityBuffer { get { return m_buf_velocities; } }
+        public float elapsed { get { return m_elapsed; } }
 
 
 
@@ -111,6 +113,8 @@ namespace AlembicExporterExample
                 return;
             }
 
+            float begin_time = Time.realtimeSinceStartup;
+
             m_csparams[0].particle_count = m_particle_count;
             m_csparams[0].particle_size = m_particle_size;
             m_csparams[0].rcp_particle_size2 = 1.0f / (m_particle_size * 2.0f);
@@ -130,6 +134,9 @@ namespace AlembicExporterExample
 
             m_cb_positions.GetData(m_buf_positions);
             m_cb_velocities.GetData(m_buf_velocities);
+
+            m_elapsed = Time.realtimeSinceStartup - begin_time;
+            Debug.Log("ParticleEngine.UpdateSimulation(): " + (m_elapsed * 1000.0f) + "ms");
         }
 
 

@@ -11,7 +11,7 @@ namespace AlembicExporterExample
 {
 
     [RequireComponent(typeof(ParticleEngine))]
-    public class AlembicParticleEngineCapturer : AlembicCustomComponentCapturer
+    public class ParticleEngineCapturer : AlembicCustomComponentCapturer
     {
         public bool m_captureVelocities = true;
         aeAPI.aeObject m_abc;

@@ -34,7 +34,7 @@ void UpdateVelocity(uint3 dtid : SV_DispatchThreadID)
 
     float particle_size2 = g_params[0].particle_size * 2.0f;
 
-    // パーティクル同士の押し返し
+    // particle-particle collision
     float3 pos = g_particles[tid].position.xyz;
     float3 accel = { 0.0f, 0.0f, 0.0f };
     for (int j = 0; j < g_params[0].particle_count; ++j) {
@@ -46,7 +46,7 @@ void UpdateVelocity(uint3 dtid : SV_DispatchThreadID)
         accel = accel + a * (dist > 0.0, 1.0);
     }
 
-    // 床との衝突
+    // particle-floor collision
     const float3 floor_normal = { 0.0f, 1.0f, 0.0f };
     const float floor_distance = -g_params[0].particle_size;
     {
@@ -54,7 +54,7 @@ void UpdateVelocity(uint3 dtid : SV_DispatchThreadID)
         accel += floor_normal * (-min(0.0f, d) * g_params[0].wall_stiffness);
     }
 
-    // 重力加速
+    // apply graviy
     const float3 gravity_direction = { 0.0f, -1.0f, 0.0f };
     const float gravity_strength = 5.0f;
     accel += gravity_direction * gravity_strength;
