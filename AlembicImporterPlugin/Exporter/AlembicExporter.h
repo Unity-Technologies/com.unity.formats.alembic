@@ -93,8 +93,8 @@ struct aeConfig
 {
     aeArchiveType archiveType;
     aeTimeSamplingType timeSamplingType;
-    float startTime;     // relevant only if timeSamplingType is uniform
-    float timePerSample; // relevant only if timeSamplingType is uniform
+    float startTime;    // start time on Alembic.
+    float frameRate;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
     aeXFromType xformType;
     bool swapHandedness; // swap rhs <-> lhs
     float scale;
@@ -103,7 +103,7 @@ struct aeConfig
         : archiveType(aeArchiveType_Ogawa)
         , timeSamplingType(aeTimeSamplingType_Uniform)
         , startTime(0.0f)
-        , timePerSample(1.0f / 30.0f)
+        , frameRate(30.0f)
         , xformType(aeXFromType_TRS)
         , swapHandedness(true)
         , scale(1.0f)
@@ -133,6 +133,7 @@ struct aeXFormSampleData
 struct aePolyMeshSampleData
 {
     const abcV3 *positions;
+    const abcV3 *velocities; // can be null
     const abcV3 *normals; // can be null
     const abcV2 *uvs; // can be null
     const int *indices;
@@ -144,6 +145,7 @@ struct aePolyMeshSampleData
 
     aePolyMeshSampleData()
         : positions(nullptr)
+        , velocities(nullptr)
         , normals(nullptr)
         , uvs(nullptr)
         , indices(nullptr)
@@ -158,11 +160,13 @@ struct aePolyMeshSampleData
 struct aePointsSampleData
 {
     const abcV3 *positions;
+    const abcV3 *velocities; // can be null
     const uint64_t *ids; // can be null
     int count;
 
     inline aePointsSampleData()
         : positions(nullptr)
+        , velocities(nullptr)
         , ids(nullptr)
         , count(0)
     {
