@@ -279,21 +279,20 @@ public class AlembicExporter : MonoBehaviour
     [Header("Capture Setting")]
 
     public bool m_captureOnStart = false;
-    [Tooltip("0=infinite")]
+    [Tooltip("Automatically end capture when reached Max Capture Frame. 0: Infinite")]
     public int m_maxCaptureFrame = 0;
 
     [Header("Capture Components")]
 
     public Scope m_scope = Scope.EntireScene;
     public bool m_preserveTreeStructure = true;
+    public bool m_ignoreDisabled = true;
     [Space(8)]
     public bool m_captureMeshRenderer = true;
     public bool m_captureSkinnedMeshRenderer = true;
     public bool m_captureParticleSystem = true;
     public bool m_captureCamera = true;
     public bool m_customCapturer = true;
-    [Space(8)]
-    public bool m_ignoreDisabled = true;
 
     [Header("Misc")]
 
@@ -628,6 +627,11 @@ public class AlembicExporter : MonoBehaviour
         m_time = m_conf.startTime;
         m_frameCount = 0;
 
+        if (m_conf.timeSamplingType == aeAPI.aeTypeSamplingType.Uniform)
+        {
+            Time.maximumDeltaTime = (1.0f / m_conf.frameRate);
+        }
+
         Debug.Log("AlembicExporter: start " + m_output_path);
         return true;
     }
@@ -691,7 +695,6 @@ public class AlembicExporter : MonoBehaviour
         // wait maximumDeltaTime if timeSamplingType is uniform
         if (m_conf.timeSamplingType == aeAPI.aeTypeSamplingType.Uniform)
         {
-            Time.maximumDeltaTime = m_conf.timePerSample;
             aeAPI.aeWaitMaxDeltaTime();
         }
     }

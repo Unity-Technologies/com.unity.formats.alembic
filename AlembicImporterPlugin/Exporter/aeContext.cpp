@@ -52,7 +52,7 @@ bool aeContext::openArchive(const char *path)
         return false;
     }
 
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(m_config.timePerSample), abcChrono(m_config.startTime));
+    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(m_config.startTime));
     m_time_sampling_index = m_archive.addTimeSampling(ts);
 
     m_node_top.reset(new aeObject(this, nullptr, new AbcGeom::OObject(m_archive, AbcGeom::kTop, getTimeSaplingIndex())));

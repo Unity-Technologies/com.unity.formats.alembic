@@ -16,6 +16,7 @@ private:
 
     std::vector<uint64_t> m_buf_ids;
     std::vector<abcV3> m_buf_positions;
+    std::vector<abcV3> m_buf_velocities;
 };
 
 #endif // aePoints_h

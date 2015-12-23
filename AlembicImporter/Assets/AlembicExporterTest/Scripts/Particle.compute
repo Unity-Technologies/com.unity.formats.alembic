@@ -24,6 +24,7 @@ struct Particle
 StructuredBuffer<Params>        g_params;
 RWStructuredBuffer<Particle>    g_particles;
 RWStructuredBuffer<float3>      g_positions;
+RWStructuredBuffer<float3>      g_velocities;
 
 
 [numthreads(KernelBlockSize,1,1)]
@@ -73,4 +74,5 @@ void UpdatePosition(uint3 dtid : SV_DispatchThreadID)
 
     g_particles[tid].position.xyz = pos;
     g_positions[tid] = pos;
+    g_velocities[tid] = vel;
 }

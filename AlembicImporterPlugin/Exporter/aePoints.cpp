@@ -27,20 +27,35 @@ void aePoints::writeSample(const aePointsSampleData &data_)
 
     const auto &conf = getConfig();
 
-    // if swapHandedness or scaling is required, copy positions to temporary buffer and convert
+    // handling swapHandedness and scaling for positions, velocities
     if (conf.swapHandedness || conf.scale != 1.0f) {
-        m_buf_positions.resize(data.count);
-        memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3) * data.count);
-        if (conf.swapHandedness) {
-            for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+        float scale = conf.scale;
+        {
+            m_buf_positions.resize(data.count);
+            memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3) * data.count);
+            if (conf.swapHandedness) {
+                for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+            }
+            if (scale != 1.0f) {
+                for (auto &v : m_buf_positions) { v *= scale; }
+            }
+            data.positions = &m_buf_positions[0];
         }
-        if (conf.scale != 1.0f) {
-            const float scale = conf.scale;
-            for (auto &v : m_buf_positions) { v *= scale; }
+
+        if (data.velocities != nullptr) {
+            m_buf_velocities.resize(data.count);
+            memcpy(&m_buf_velocities[0], data.velocities, sizeof(abcV3) * data.count);
+            if (conf.swapHandedness) {
+                for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
+            }
+            if (scale != 1.0f) {
+                for (auto &v : m_buf_velocities) { v *= scale; }
+            }
+            data.velocities = &m_buf_velocities[0];
         }
-        data.positions = &m_buf_positions[0];
     }
 
+    // update id buffer if needed
     if (data.ids == nullptr) {
         int bufsize = m_buf_ids.size();
         if (data.count > bufsize) {
@@ -52,9 +67,13 @@ void aePoints::writeSample(const aePointsSampleData &data_)
         data.ids = &m_buf_ids[0];
     }
 
+    // write!
     AbcGeom::OPointsSchema::Sample sample;
     sample.setPositions(Abc::P3fArraySample(data.positions, data.count));
     sample.setIds(Abc::UInt64ArraySample(data.ids, data.count));
+    if (data.velocities != nullptr) {
+        sample.setVelocities(Abc::V3fArraySample(data.velocities, data.count));
+    }
 
     m_schema.set(sample);
 }

@@ -55,14 +55,14 @@ namespace AlembicExporterTest
         ComputeBuffer m_cb_params;
         ComputeBuffer m_cb_particles;
         ComputeBuffer m_cb_positions;
+        ComputeBuffer m_cb_velocities;
         CSParams[] m_csparams;
         Vector3[] m_buf_positions;
+        Vector3[] m_buf_velocities;
 
 
-        public Vector3[] GetPositionBuffer()
-        {
-            return m_buf_positions;
-        }
+        public Vector3[] positionBuffer { get { return m_buf_positions; } }
+        public Vector3[] velocityBuffer { get { return m_buf_velocities; } }
 
 
 
@@ -73,14 +73,10 @@ namespace AlembicExporterTest
                 m_cb_params = new ComputeBuffer(1, CSParams.size);
                 m_cb_particles = new ComputeBuffer(m_particle_count, peParticle.size);
                 m_cb_positions = new ComputeBuffer(m_particle_count, 12);
+                m_cb_velocities = new ComputeBuffer(m_particle_count, 12);
                 m_buf_positions = new Vector3[m_particle_count];
+                m_buf_velocities = new Vector3[m_particle_count];
                 m_csparams = new CSParams[1];
-                for (int i = 0; i < 2; ++i)
-                {
-                    m_cs_particle_core.SetBuffer(i, "g_params", m_cb_params);
-                    m_cs_particle_core.SetBuffer(i, "g_particles", m_cb_particles);
-                    m_cs_particle_core.SetBuffer(i, "g_positions", m_cb_positions);
-                }
             }
             {
                 UnityEngine.Random.seed = 0;
@@ -103,6 +99,7 @@ namespace AlembicExporterTest
                 m_cb_params.Release(); m_cb_params = null;
                 m_cb_particles.Release(); m_cb_particles = null;
                 m_cb_positions.Release(); m_cb_positions = null;
+                m_cb_velocities.Release(); m_cb_velocities = null;
             }
         }
 
@@ -121,17 +118,18 @@ namespace AlembicExporterTest
             m_csparams[0].wall_stiffness = m_wall_stiffness;
             m_csparams[0].timestep = dt;
             m_cb_params.SetData(m_csparams);
+
             for (int i = 0; i < 2; ++i)
             {
                 m_cs_particle_core.SetBuffer(i, "g_params", m_cb_params);
                 m_cs_particle_core.SetBuffer(i, "g_particles", m_cb_particles);
                 m_cs_particle_core.SetBuffer(i, "g_positions", m_cb_positions);
+                m_cs_particle_core.SetBuffer(i, "g_velocities", m_cb_velocities);
+                m_cs_particle_core.Dispatch(i, m_particle_count / KernelBlockSize, 1, 1);
             }
 
-            m_cs_particle_core.Dispatch(0, m_particle_count / KernelBlockSize, 1, 1);
-            m_cs_particle_core.Dispatch(1, m_particle_count / KernelBlockSize, 1, 1);
-
             m_cb_positions.GetData(m_buf_positions);
+            m_cb_velocities.GetData(m_buf_velocities);
         }
 
 

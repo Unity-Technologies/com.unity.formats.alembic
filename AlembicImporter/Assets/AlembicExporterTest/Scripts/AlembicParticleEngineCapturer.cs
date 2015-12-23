@@ -13,6 +13,7 @@ namespace AlembicExporterTest
     [RequireComponent(typeof(ParticleEngine))]
     public class AlembicParticleEngineCapturer : AlembicCustomComponentCapturer
     {
+        public bool m_captureVelocities = true;
         aeAPI.aeObject m_abc;
 
         public override void CreateAbcObject(aeAPI.aeObject parent)
@@ -23,12 +24,20 @@ namespace AlembicExporterTest
         public override void Capture()
         {
             var target = GetComponent<ParticleEngine>();
-            var positions = target.GetPositionBuffer();
-            if(positions == null) { return; }
+            var positions = target.positionBuffer;
+            if (positions == null) { return; }
 
             var data = new aeAPI.aePointsSampleData();
-            data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             data.count = positions.Length;
+            data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
+            if(m_captureVelocities)
+            {
+                var velocities = target.velocityBuffer;
+                if (velocities != null)
+                {
+                    data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
+                }
+            }
             aeAPI.aePointsWriteSample(m_abc, ref data);
         }
 

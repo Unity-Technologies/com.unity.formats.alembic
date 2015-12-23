@@ -22,28 +22,38 @@ abcProperties* aePolyMesh::getAbcProperties()
 
 void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
 {
-    AbcGeom::OPolyMeshSchema::Sample sample;
-    AbcGeom::ON3fGeomParam::Sample sample_normals;
-    AbcGeom::OV2fGeomParam::Sample sample_uvs;
-
     aePolyMeshSampleData data = data_;
     const auto &conf = getConfig();
 
-    // if swapHandedness or scaling is required, copy positions to temporary buffer and convert
+    // handling swapHandedness and scaling for positions, velocities
     if (conf.swapHandedness || conf.scale != 1.0f) {
-        m_buf_positions.resize(data.vertexCount);
-        memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3)*data.vertexCount);
-        if (conf.swapHandedness) {
-            for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+        float scale = conf.scale;
+        {
+            m_buf_positions.resize(data.vertexCount);
+            memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3) * data.vertexCount);
+            if (conf.swapHandedness) {
+                for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+            }
+            if (scale != 1.0f) {
+                for (auto &v : m_buf_positions) { v *= scale; }
+            }
+            data.positions = &m_buf_positions[0];
         }
-        if (conf.scale != 1.0f) {
-            float scale = conf.scale;
-            for (auto &v : m_buf_positions) { v *= scale; }
+
+        if (data.velocities != nullptr) {
+            m_buf_velocities.resize(data.vertexCount);
+            memcpy(&m_buf_velocities[0], data.velocities, sizeof(abcV3) * data.vertexCount);
+            if (conf.swapHandedness) {
+                for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
+            }
+            if (scale != 1.0f) {
+                for (auto &v : m_buf_velocities) { v *= scale; }
+            }
+            data.velocities = &m_buf_velocities[0];
         }
-        data.positions = &m_buf_positions[0];
     }
 
-    // if swapHandedness is required, copy normals to temporary buffer and invert normal.x 
+    // handling swapHandedness for normals
     if (conf.swapHandedness) {
         if (data.normals != nullptr) {
             m_buf_normals.resize(data.vertexCount);
@@ -55,18 +65,24 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
 
     if (data.faces == nullptr) {
         // assume all faces are triangles
-
         int vertices_per_primitive = 3;
         int num_primitives = data.indexCount / vertices_per_primitive;
         m_buf_faces.resize(num_primitives);
-        std::fill(m_buf_faces.begin(), m_buf_faces.end(), vertices_per_primitive);
+        for (auto &v : m_buf_faces) { v = vertices_per_primitive; }
         data.faces = &m_buf_faces[0];
         data.faceCount = m_buf_faces.size();
     }
 
+    // write!
+    AbcGeom::OPolyMeshSchema::Sample sample;
+    AbcGeom::ON3fGeomParam::Sample sample_normals;
+    AbcGeom::OV2fGeomParam::Sample sample_uvs;
     sample.setPositions(Abc::P3fArraySample(data.positions, data.vertexCount));
     sample.setFaceIndices(Abc::Int32ArraySample(data.indices, data.indexCount));
     sample.setFaceCounts(Abc::Int32ArraySample(data.faces, data.faceCount));
+    if (data.velocities != nullptr) {
+        sample.setVelocities(Abc::V3fArraySample(data.velocities, data.vertexCount));
+    }
     if (data.normals != nullptr) {
         sample_normals.setIndices(Abc::UInt32ArraySample((uint32_t*)data.indices, data.indexCount));
         sample_normals.setVals(Abc::V3fArraySample(data.normals, data.vertexCount));

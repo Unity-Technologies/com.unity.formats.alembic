@@ -10,6 +10,7 @@ public class AlembicExporterEditor : Editor
         DrawDefaultInspector();
 
         GUILayout.Space(10);
+        EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
 
         var t = target as AlembicExporter;
 

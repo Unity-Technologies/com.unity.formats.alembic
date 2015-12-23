@@ -63,11 +63,11 @@ public class aeAPI
         [MarshalAs(UnmanagedType.U4)]
         public aeTypeSamplingType timeSamplingType;
 
-        [Tooltip("start time on Alembic.")]
+        [Tooltip("Start time on Alembic.")]
         public float startTime;
 
-        [Tooltip("delta time on Alembic. relevant only if timeSamplingType is Uniform")]
-        public float timePerSample;
+        [Tooltip("Frame rate on Alembic. Relevant only if timeSamplingType is Uniform")]
+        public float frameRate;
 
         [MarshalAs(UnmanagedType.U4)]
         public aeXFormType xformType;
@@ -75,7 +75,7 @@ public class aeAPI
         [MarshalAs(UnmanagedType.U1)]
         public bool swapHandedness; // swap rhs <-> lhs
 
-        [Tooltip("global scale. for unit conversion.")]
+        [Tooltip("Global scale for unit conversion.")]
         public float scale;
 
 
@@ -88,7 +88,7 @@ public class aeAPI
                     archiveType = aeArchiveType.Ogawa,
                     timeSamplingType = aeTypeSamplingType.Uniform,
                     startTime = 0.0f,
-                    timePerSample = 1.0f / 30.0f,
+                    frameRate = 30.0f,
                     xformType = aeXFormType.TRS,
                     swapHandedness = true,
                     scale = 1.0f,
@@ -109,6 +109,7 @@ public class aeAPI
     public struct aePointsSampleData
     {
         public IntPtr positions; // Vector3*
+        public IntPtr velocities; // Vector3*. can be null
         public IntPtr ids; // ulong*. can be null
         public int count;
     }
@@ -117,6 +118,7 @@ public class aeAPI
     {
         public IntPtr positions; // Vector3*
         public IntPtr normals; // Vector3*. can be null
+        public IntPtr velocities; // Vector3*. can be null
         public IntPtr uvs; // Vector2*. can be null
         public IntPtr indices; // int*
         public IntPtr faces; // int*. can be null. assume all faces are triangles if null
