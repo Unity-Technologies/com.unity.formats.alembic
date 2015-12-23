@@ -297,7 +297,7 @@ public class AlembicExporter : MonoBehaviour
 
     [Header("Misc")]
 
-    public bool m_detailLog;
+    public bool m_detailedLog;
 
     aeAPI.aeContext m_ctx;
     List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
@@ -326,6 +326,8 @@ public class AlembicExporter : MonoBehaviour
 
     public TransformCapturer CreateComponentCapturer(Transform target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new TransformCapturer(\"" + target.name + "\""); }
+
         var abc = aeAPI.aeNewXForm(parent, target.name + " (" + target.GetInstanceID().ToString("X8") + ")");
         var cap = new TransformCapturer(target, abc);
         m_capturers.Add(cap);
@@ -334,6 +336,8 @@ public class AlembicExporter : MonoBehaviour
 
     public CameraCapturer CreateComponentCapturer(Camera target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new CameraCapturer(\"" + target.name + "\""); }
+
         var abc = aeAPI.aeNewCamera(parent, target.name);
         var cap = new CameraCapturer(target, abc);
         m_capturers.Add(cap);
@@ -342,6 +346,8 @@ public class AlembicExporter : MonoBehaviour
 
     public MeshCapturer CreateComponentCapturer(MeshRenderer target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new MeshCapturer(\"" + target.name + "\""); }
+
         var abc = aeAPI.aeNewPolyMesh(parent, target.name);
         var cap = new MeshCapturer(target, abc);
         m_capturers.Add(cap);
@@ -350,6 +356,8 @@ public class AlembicExporter : MonoBehaviour
 
     public SkinnedMeshCapturer CreateComponentCapturer(SkinnedMeshRenderer target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new SkinnedMeshCapturer(\"" + target.name + "\""); }
+
         var abc = aeAPI.aeNewPolyMesh(parent, target.name);
         var cap = new SkinnedMeshCapturer(target, abc);
         m_capturers.Add(cap);
@@ -358,6 +366,8 @@ public class AlembicExporter : MonoBehaviour
 
     public ParticleCapturer CreateComponentCapturer(ParticleSystem target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new ParticleCapturer(\"" + target.name + "\""); }
+
         var abc = aeAPI.aeNewPoints(parent, target.name);
         var cap = new ParticleCapturer(target, abc);
         m_capturers.Add(cap);
@@ -366,6 +376,8 @@ public class AlembicExporter : MonoBehaviour
 
     public CustomCapturerHandler CreateComponentCapturer(AlembicCustomComponentCapturer target, aeAPI.aeObject parent)
     {
+        if (m_detailedLog) { Debug.Log("AlembicExporter: new CustomCapturerHandler(\"" + target.name + "\""); }
+
         target.CreateAbcObject(parent);
         var cap = new CustomCapturerHandler(target);
         m_capturers.Add(cap);
@@ -376,13 +388,23 @@ public class AlembicExporter : MonoBehaviour
     {
         return m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
     }
-    bool ShouldBeIgnored(Renderer target)
-    {
-        return m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
-    }
     bool ShouldBeIgnored(ParticleSystem target)
     {
         return m_ignoreDisabled && (!target.gameObject.activeInHierarchy);
+    }
+    bool ShouldBeIgnored(MeshRenderer target)
+    {
+        if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
+        var mesh = target.GetComponent<MeshFilter>().sharedMesh;
+        if (mesh == null) { return true; }
+        return false;
+    }
+    bool ShouldBeIgnored(SkinnedMeshRenderer target)
+    {
+        if (m_ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
+        var mesh = target.sharedMesh;
+        if (mesh == null) { return true; }
+        return false;
     }
 
 
@@ -475,7 +497,7 @@ public class AlembicExporter : MonoBehaviour
         {
             foreach (var t in GetTargets<Camera>())
             {
-                if (ShouldBeIgnored(t)) { return; }
+                if (ShouldBeIgnored(t)) { continue; }
                 var node = ConstructTree(t.GetComponent<Transform>());
                 node.componentType = t.GetType();
             }
@@ -484,7 +506,7 @@ public class AlembicExporter : MonoBehaviour
         {
             foreach (var t in GetTargets<MeshRenderer>())
             {
-                if (ShouldBeIgnored(t)) { return; }
+                if (ShouldBeIgnored(t)) { continue; }
                 var node = ConstructTree(t.GetComponent<Transform>());
                 node.componentType = t.GetType();
             }
@@ -493,7 +515,7 @@ public class AlembicExporter : MonoBehaviour
         {
             foreach (var t in GetTargets<SkinnedMeshRenderer>())
             {
-                if (ShouldBeIgnored(t)) { return; }
+                if (ShouldBeIgnored(t)) { continue; }
                 var node = ConstructTree(t.GetComponent<Transform>());
                 node.componentType = t.GetType();
             }
@@ -502,7 +524,7 @@ public class AlembicExporter : MonoBehaviour
         {
             foreach (var t in GetTargets<ParticleSystem>())
             {
-                if (ShouldBeIgnored(t)) { return; }
+                if (ShouldBeIgnored(t)) { continue; }
                 var node = ConstructTree(t.GetComponent<Transform>());
                 node.componentType = t.GetType();
             }
@@ -511,7 +533,7 @@ public class AlembicExporter : MonoBehaviour
         {
             foreach (var t in GetTargets<AlembicCustomComponentCapturer>())
             {
-                if (ShouldBeIgnored(t)) { return; }
+                if (ShouldBeIgnored(t)) { continue; }
                 var node = ConstructTree(t.GetComponent<Transform>());
                 node.componentType = typeof(AlembicCustomComponentCapturer);
             }
@@ -675,7 +697,7 @@ public class AlembicExporter : MonoBehaviour
         ++m_frameCount;
 
         float elapsed = Time.realtimeSinceStartup - begin_time;
-        if (m_detailLog)
+        if (m_detailedLog)
         {
             Debug.Log("AlembicExporter.ProcessCapture(): " + (elapsed * 1000.0f) + "ms");
         }

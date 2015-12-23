@@ -10,7 +10,7 @@ using UnityEditor;
 namespace AlembicExporterExample
 {
     [ExecuteInEditMode]
-    public class AlembicExporterHUD : MonoBehaviour
+    public class AlembicExporterGUI : MonoBehaviour
     {
         public Image m_background;
         public Color m_color_default;
