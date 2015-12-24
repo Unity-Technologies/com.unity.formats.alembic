@@ -32,9 +32,10 @@ MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力),
 <img align="right" src="Screenshots/Batching.png">
 現状 64 bit Windows 専用で、Unity 5.2 以降で動作を確認済みです。  
 **下準備として、Static Batching、Dynamic Batching を無効化しておく必要があります**。これを怠ると Batching された後の Mesh 群が書き出されてしまい、データが無駄に増える上に結果も変わってしまいます。  
-Batching の設定は Edit -> Project Settings -> Player の Rendering 項目の中にあります。
+Batching の設定は Edit -> Project Settings -> Player の Rendering 項目の中にあります。  
 
-  
+---  
+
 エクスポートを行うには、上記パッケージをインポート後、AlembicExporter コンポーネントを適当なオブジェクトに追加します。   
 <img align="right" src="Screenshots/AlembicExporter.png">
 以下は各項目の説明です。
@@ -49,7 +50,7 @@ Batching の設定は Edit -> Project Settings -> Player の Rendering 項目の
   キャプチャの間隔の指定です。
   Uniform にした場合、Alembic 側のフレーム間のインターバルは常に一定 (Time Per Sample 秒) になります。映像制作の場合こちらにすべきでしょう。これを選んでキャプチャを開始した場合した場合、**Time.maxDeltaTime を書き換えてフレームレートを固定します**。Time.maxDeltaTime を独自に管理している場合注意が必要です。  
   Acyclic にした場合、Unity 側のデルタタイムがそのまま Alembic 側のフレーム間のインターバルになります。 当然間隔は一定ではなくなりますが、ゲーム進行への影響は最小限になります。主にゲームの 3D 録画を想定したモードです。  
-  Start Time は Alembic 側の開始時間です。Time Per Sample は前述の通り、Time Sampling Type が Uniform の場合の Alembic 側のフレーム間インターバルになります。  
+  Start Time は Alembic 側の開始時間です。Frame Rate は Time Sampling Type が Uniform の場合の Alembic 側のフレーム間インターバルになります。  
 
 - Xform Type  
   特に問題がなければ TRS のままにしておいてください。  
