@@ -62,20 +62,28 @@ public class AlembicExporter : MonoBehaviour
         aeAPI.aeCameraWriteSample(abc, ref data);
     }
 
-    public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh)
+    public class MeshBuffer
     {
-        var data = new aeAPI.aePolyMeshSampleData();
-        var indices = mesh.triangles;
-        var vertices = mesh.vertices;
-        var normals = mesh.normals;
-        var uvs = mesh.uv;
+        public int[] indices;
+        public Vector3[] vertices;
+        public Vector3[] normals;
+        public Vector2[] uvs;
+    }
 
-        data.indices = GetArrayPtr(indices);
-        data.positions = GetArrayPtr(vertices);
-        if(normals != null) { data.normals = GetArrayPtr(normals); }
-        if(uvs != null)     { data.uvs = GetArrayPtr(uvs); }
-        data.vertexCount = vertices.Length;
-        data.indexCount = indices.Length;
+    public static void CaptureMesh(aeAPI.aeObject abc, Mesh mesh, MeshBuffer buf)
+    {
+        buf.indices = mesh.triangles;
+        buf.vertices = mesh.vertices;
+        buf.normals = mesh.normals;
+        buf.uvs = mesh.uv;
+
+        var data = new aeAPI.aePolyMeshSampleData();
+        data.indices = GetArrayPtr(buf.indices);
+        data.positions = GetArrayPtr(buf.vertices);
+        if(buf.normals != null) { data.normals = GetArrayPtr(buf.normals); }
+        if(buf.uvs != null)     { data.uvs = GetArrayPtr(buf.uvs); }
+        data.vertexCount = buf.vertices.Length;
+        data.indexCount = buf.indices.Length;
 
         aeAPI.aePolyMeshWriteSample(abc, ref data);
     }
@@ -148,19 +156,21 @@ public class AlembicExporter : MonoBehaviour
     public class MeshCapturer : ComponentCapturer
     {
         MeshRenderer m_target;
+        MeshBuffer m_mesh_buffer;
 
         public MeshCapturer(MeshRenderer target, aeAPI.aeObject abc)
         {
             m_obj = target.gameObject;
             m_abc = abc;
             m_target = target;
+            m_mesh_buffer = new MeshBuffer();
         }
 
         public override void Capture()
         {
             if (m_target == null) { return; }
 
-            CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh);
+            CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh, m_mesh_buffer);
         }
     }
 
@@ -168,12 +178,14 @@ public class AlembicExporter : MonoBehaviour
     {
         SkinnedMeshRenderer m_target;
         Mesh m_mesh;
+        MeshBuffer m_mesh_buffer;
 
         public SkinnedMeshCapturer(SkinnedMeshRenderer target, aeAPI.aeObject abc)
         {
             m_obj = target.gameObject;
             m_abc = abc;
             m_target = target;
+            m_mesh_buffer = new MeshBuffer();
         }
 
         public override void Capture()
@@ -182,7 +194,7 @@ public class AlembicExporter : MonoBehaviour
 
             if (m_mesh == null) { m_mesh = new Mesh(); }
             m_target.BakeMesh(m_mesh);
-            CaptureMesh(m_abc, m_mesh);
+            CaptureMesh(m_abc, m_mesh, m_mesh_buffer);
         }
     }
 
@@ -303,11 +315,13 @@ public class AlembicExporter : MonoBehaviour
     List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
     bool m_recording;
     float m_time;
+    float m_elapsed;
     int m_frameCount;
 
 
     public bool isRecording { get { return m_recording; } }
-    public float time { get { return m_time; } set { m_time = value; } }
+    public float time { get { return m_time; } }
+    public float elapsed { get { return m_elapsed; } }
     public float frameCount { get { return m_frameCount; } }
 
 
@@ -696,10 +710,10 @@ public class AlembicExporter : MonoBehaviour
         m_time += Time.deltaTime;
         ++m_frameCount;
 
-        float elapsed = Time.realtimeSinceStartup - begin_time;
+        m_elapsed = Time.realtimeSinceStartup - begin_time;
         if (m_detailedLog)
         {
-            Debug.Log("AlembicExporter.ProcessCapture(): " + (elapsed * 1000.0f) + "ms");
+            Debug.Log("AlembicExporter.ProcessCapture(): " + (m_elapsed * 1000.0f) + "ms");
         }
 
         if(m_maxCaptureFrame > 0 && m_frameCount >= m_maxCaptureFrame)
@@ -722,13 +736,23 @@ public class AlembicExporter : MonoBehaviour
         }
     }
 
-
-    void Reset()
+    void UpdateOutputPath()
     {
-        if(m_outputPath == null || m_outputPath == "")
+        if (m_outputPath == null || m_outputPath == "")
         {
             m_outputPath = gameObject.name + ".abc";
         }
+    }
+
+
+    void Reset()
+    {
+        UpdateOutputPath();
+    }
+
+    void OnEnable()
+    {
+        UpdateOutputPath();
     }
 
     void Start()
