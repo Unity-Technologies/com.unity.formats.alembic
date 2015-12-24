@@ -57,7 +57,6 @@ namespace AlembicExporterExample
             m_background.color = m_color_capturering;
             m_button_one_shot.gameObject.SetActive(false);
             m_button_toggle_capture.GetComponentInChildren<Text>().text = "End Capture";
-            m_input_fps.readOnly = true;
         }
 
         public void EndCapture()
@@ -73,7 +72,6 @@ namespace AlembicExporterExample
             m_background.color = m_color_default;
             m_button_one_shot.gameObject.SetActive(true);
             m_button_toggle_capture.GetComponentInChildren<Text>().text = "Begin Capture";
-            m_input_fps.readOnly = false;
         }
 
         public void OneShot()
