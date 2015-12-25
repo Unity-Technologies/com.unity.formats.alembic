@@ -24,22 +24,22 @@ Alembic ファイルに含まれるノード群を Unity 側で GameObject と�
 
 
 ## Alembic Exporter
+![example](Screenshots/AlembicExporter.gif)  
 パッケージ: [AlembicExporter.unitypackage](Packages/AlembicExporter.unitypackage?raw=true)
 
 Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
 MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力), Camera の書き出しに対応しており、カスタムハンドラを書けば独自のデータも出力できるようになっています。  
 
 <img align="right" src="Screenshots/Batching.png">
-現状 64 bit Windows 専用で、Unity 5.2 以降で動作を確認済みです。  
-**下準備として、Static Batching、Dynamic Batching を無効化しておく必要があります**。これを怠ると Batching された後の Mesh 群が書き出されてしまい、データが無駄に増える上に結果も変わってしまいます。  
+現状 64 bit Windows 専用で、Unity 5.2 以降で動作を確認済みです。(ソースレベルでは Mac, Linux でもコンパイルできて動くはずですが、未確認です)  
+下準備として、**Static Batching、Dynamic Batching を無効化しておく必要があります**。これを怠ると Batching された後の Mesh 群が書き出されてしまい、場合によってはデータが数倍に膨れ上がる上に結果も変わってしまいます。  
 Batching の設定は Edit -> Project Settings -> Player の Rendering 項目の中にあります。  
 
 ---  
 
-エクスポートを行うには、上記パッケージをインポート後、AlembicExporter コンポーネントを適当なオブジェクトに追加します。   
-<img align="right" src="Screenshots/AlembicExporter.png">
+エクスポートを行うには、上記パッケージをインポート後、AlembicExporter  コンポーネントを適当なオブジェクトに追加します。
 以下は各項目の説明です。
-
+<img align="right" src="Screenshots/AlembicExporter.png">
 - Output Path  
   出力パスを指定します。  
 
