@@ -1,78 +1,51 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.4)
 PROJECT(AlembicPlugins)
 
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-OPTION (WITH_GRAPHICS_DEVICE "With Graphics Devices (Required by write-data-to-texture feature)" ON)
+OPTION (USE_GRAPHICS_DEVICE "Use Graphics Devices (Required by write-data-to-texture feature)" ON)
+OPTION (USE_EXTERNALS "Use Externals (Add externals/alembic etc to include & library path)" ON)
 
 IF(MSVC)
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MT")
 ENDIF()
 
-INCLUDE_DIRECTORIES (
+SET( INCLUDES
     .
     Foundation
-    external/glew-1.13.0/include
-    external/alembic-1_05_08/lib
-    external/ilmbase-2.2.0/Imath
-    external/ilmbase-2.2.0/IlmThread
-    external/ilmbase-2.2.0/IexMath
-    external/ilmbase-2.2.0/Iex
-    external/ilmbase-2.2.0/Half
-    external/ilmbase-2.2.0/config
-    external/hdf5-1.8.14/hl/src
-    external/hdf5-1.8.14/src
-    external/hdf5-1.8.14
 )
+IF(USE_EXTERNALS)
+    SET (INCLUDES
+        ${INCLUDES}
+        external/glew-1.13.0/include
+        external/alembic-1_05_08/lib
+        external/ilmbase-2.2.0/Imath
+        external/ilmbase-2.2.0/IlmThread
+        external/ilmbase-2.2.0/IexMath
+        external/ilmbase-2.2.0/Iex
+        external/ilmbase-2.2.0/Half
+        external/ilmbase-2.2.0/config
+        external/hdf5-1.8.14/hl/src
+        external/hdf5-1.8.14/src
+        external/hdf5-1.8.14
+    )
+ENDIF()
+INCLUDE_DIRECTORIES(${INCLUDES})
 
-LINK_DIRECTORIES (
-    ${CMAKE_SOURCE_DIR}/external/libs/x86_64
-)
+IF(USE_EXTERNALS)
+    LINK_DIRECTORIES (
+        ${CMAKE_SOURCE_DIR}/external/libs/x86_64
+    )
+ENDIF()
 
+FILE(GLOB EXPORTER_CXX_FILES Exporter/*.cpp)
+FILE(GLOB EXPORTER_H_FILES Exporter/*.h)
 
-SET( EXPORTER_CXX_FILES
-    pch.cpp
-    Exporter/aeCamera.cpp
-    Exporter/aeContext.cpp
-    Exporter/aeObject.cpp
-    Exporter/aePoints.cpp
-    Exporter/aePolyMesh.cpp
-    Exporter/aeXForm.cpp
-    Exporter/AlembicExporter.cpp
-)
-SET( EXPORTER_H_FILES
-    pch.h
-    Exporter/aeCamera.h
-    Exporter/aeContext.h
-    Exporter/aeObject.h
-    Exporter/aePoints.h
-    Exporter/aePolyMesh.h
-    Exporter/aeXForm.h
-    Exporter/AlembicExporter.h
-)
+FILE(GLOB IMPORTER_CXX_FILES Importer/*.cpp)
+FILE(GLOB IMPORTER_H_FILES Importer/*.h)
 
-SET( IMPORTER_CXX_FILES
-    pch.cpp
-    Importer/aiCamera.cpp
-    Importer/aiContext.cpp
-    Importer/aiObject.cpp
-    Importer/aiPoints.cpp
-    Importer/aiPolyMesh.cpp
-    Importer/aiSchema.cpp
-    Importer/aiXForm.cpp
-    Importer/AlembicImporter.cpp
-)
-SET( IMPORTER_H_FILES
-    pch.h
-    Importer/aiCamera.h
-    Importer/aiContext.h
-    Importer/aiObject.h
-    Importer/aiPoints.h
-    Importer/aiPolyMesh.h
-    Importer/aiSchema.h
-    Importer/aiXForm.h
-    Importer/AlembicImporter.h
-)
+FILE(GLOB FOUNDATION_CXX_FILES Foundation/*.cpp)
+FILE(GLOB FOUNDATION_H_FILES Foundation/*.h)
 
 SET( GRAPHICS_CXX_FILES
     GraphicsDevice/aiGraphicsDevice.cpp
@@ -88,26 +61,19 @@ IF(WIN32)
     )
 ENDIF()
 
-SET( FOUNDATION_CXX_FILES
-  Foundation/aiLogger.cpp
-  Foundation/aiThreadPool.cpp
-)
-SET( FOUNDATION_H_FILES
-  Foundation/aiLogger.h
-  Foundation/aiThreadPool.h
-)
-
 
 SET( EXPORTER_SOURCE_FILES
+    pch.cpp pch.h
     ${EXPORTER_CXX_FILES} ${EXPORTER_H_FILES}
 )
 ADD_LIBRARY( AlembicExporter ${EXPORTER_SOURCE_FILES} )
 
 SET( IMPORTER_SOURCE_FILES
+    pch.cpp pch.h
     ${IMPORTER_CXX_FILES} ${IMPORTER_H_FILES}
     ${FOUNDATION_CXX_FILES} ${FOUNDATION_H_FILES}
 )
-IF(WITH_GRAPHICS_DEVICE)
+IF(USE_GRAPHICS_DEVICE)
     SET( IMPORTER_SOURCE_FILES
         ${IMPORTER_SOURCE_FILES}
         ${GRAPHICS_CXX_FILES} ${GRAPHICS_H_FILES}
