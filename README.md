@@ -3,6 +3,7 @@
 - [Alembic?](#alembic)
 - [Alembic Importer](#alembic-importer)
 - [Alembic Exporter](#alembic-exporter)
+- [History](#history)
 
 ## Alembic?
 Alembic は主に映像業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  映像業界では、スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを Alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
@@ -90,12 +91,22 @@ Alembic 側のノードには名前に "(0000283C)" のような ID が付与さ
 また、マテリアルは現在全くの未サポートです。
 
 
+## History
+- 2015/12/28
+  - [Importer/Exporter] VisualStudio ランタイムへの依存を除去
+- 2015/12/25
+  - Alembic Exporter 公開
+- 2015/06/30
+  - Alembic Importer 公開
 
+    
 ## Thanks
 - Alembic およびそれに付随するライブラリ群 (HDF5, ILMBase) を使用しています。  
   http://www.alembic.io/
 
 ## License
+MIT-License:
+
 Copyright (C) 2015 Unity Technologies Japan, G.K.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
