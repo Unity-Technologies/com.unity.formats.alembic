@@ -3,10 +3,10 @@
 #include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include "Schema/aiSchema.h"
-#include "Schema/aiXForm.h"
-#include "Schema/aiPolyMesh.h"
-#include "Schema/aiCamera.h"
+#include "aiSchema.h"
+#include "aiXForm.h"
+#include "aiPolyMesh.h"
+#include "aiCamera.h"
 #include <limits>
 
 class GlobalCache

@@ -112,7 +112,7 @@ aeObject::~aeObject()
 
 const char* aeObject::getName() const           { return m_abc->getName().c_str(); }
 const char* aeObject::getFullName() const       { return m_abc->getFullName().c_str(); }
-uint32_t    aeObject::getNumChildren() const    { return m_children.size(); }
+uint32_t    aeObject::getNumChildren() const    { return (uint32_t)m_children.size(); }
 aeObject*   aeObject::getChild(int i)           { return m_children[i]; }
 aeObject*   aeObject::getParent()               { return m_parent; }
 

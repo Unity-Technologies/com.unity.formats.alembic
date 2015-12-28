@@ -193,7 +193,7 @@ struct aeCameraSampleData
         , aspectRatio(16.0f / 9.0f)
         , focalLength(0.0f)
         , focusDistance(5.0f)
-        , aperture(2.4)
+        , aperture(2.4f)
     {
     }
 };

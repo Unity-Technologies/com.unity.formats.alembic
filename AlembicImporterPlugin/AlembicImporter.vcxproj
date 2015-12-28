@@ -15,37 +15,38 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="aiContext.cpp" />
-    <ClCompile Include="aiLogger.cpp" />
-    <ClCompile Include="aiObject.cpp" />
-    <ClCompile Include="aiThreadPool.cpp" />
-    <ClCompile Include="AlembicImporter.cpp" />
+    <ClCompile Include="Foundation\aiLogger.cpp" />
+    <ClCompile Include="Foundation\aiThreadPool.cpp" />
     <ClCompile Include="GraphicsDevice\aiGraphicsDevice.cpp" />
     <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D11.cpp" />
     <ClCompile Include="GraphicsDevice\aiGraphicsDeviceOpenGL.cpp" />
+    <ClCompile Include="Importer\aiCamera.cpp" />
+    <ClCompile Include="Importer\aiContext.cpp" />
+    <ClCompile Include="Importer\aiObject.cpp" />
+    <ClCompile Include="Importer\aiPoints.cpp" />
+    <ClCompile Include="Importer\aiPolyMesh.cpp" />
+    <ClCompile Include="Importer\aiSchema.cpp" />
+    <ClCompile Include="Importer\aiXForm.cpp" />
+    <ClCompile Include="Importer\AlembicImporter.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Schema\aiCamera.cpp" />
-    <ClCompile Include="Schema\aiPoints.cpp" />
-    <ClCompile Include="Schema\aiPolyMesh.cpp" />
-    <ClCompile Include="Schema\aiSchema.cpp" />
-    <ClCompile Include="Schema\aiXForm.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aiContext.h" />
-    <ClInclude Include="aiObject.h" />
-    <ClInclude Include="aiThreadPool.h" />
-    <ClInclude Include="AlembicImporter.h" />
+    <ClInclude Include="Foundation\aiLogger.h" />
+    <ClInclude Include="Foundation\aiThreadPool.h" />
     <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h" />
+    <ClInclude Include="Importer\aiCamera.h" />
+    <ClInclude Include="Importer\aiContext.h" />
+    <ClInclude Include="Importer\aiObject.h" />
+    <ClInclude Include="Importer\aiPoints.h" />
+    <ClInclude Include="Importer\aiPolyMesh.h" />
+    <ClInclude Include="Importer\aiSchema.h" />
+    <ClInclude Include="Importer\aiXForm.h" />
+    <ClInclude Include="Importer\AlembicImporter.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Schema\aiCamera.h" />
-    <ClInclude Include="Schema\aiPoints.h" />
-    <ClInclude Include="Schema\aiPolyMesh.h" />
-    <ClInclude Include="Schema\aiSchema.h" />
-    <ClInclude Include="Schema\aiXForm.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>
@@ -70,19 +71,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);Foundation;external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
     <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);Foundation;external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
     <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
-    <IncludePath>$(ProjectDir);external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);Foundation;external;external\glew-1.13.0\include;external\alembic-1_05_08\lib;external\ilmbase-2.2.0\Imath;external\ilmbase-2.2.0\IlmThread;external\ilmbase-2.2.0\IexMath;external\ilmbase-2.2.0\Iex;external\ilmbase-2.2.0\Half;external\ilmbase-2.2.0\config;external\hdf5-1.8.14\hl\src;external\hdf5-1.8.14\src;external\hdf5-1.8.14;$(IncludePath)</IncludePath>
     <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
@@ -116,6 +117,7 @@ $(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /p
       <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>aiSupportTexture;aiSupportOpenGL;aiSupportD3D11;aiDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

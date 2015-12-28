@@ -3,11 +3,11 @@
 #include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include "Schema/aiSchema.h"
-#include "Schema/aiXForm.h"
-#include "Schema/aiPolyMesh.h"
-#include "Schema/aiCamera.h"
-#include "Schema/aiPoints.h"
+#include "aiSchema.h"
+#include "aiXForm.h"
+#include "aiPolyMesh.h"
+#include "aiCamera.h"
+#include "aiPoints.h"
 
 #ifdef aiWindows
     #include <windows.h>
@@ -103,7 +103,7 @@ aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, voi
     {
         try
         {
-            aiObject *child = obj->getChild(i);
+            aiObject *child = obj->getChild((int)i);
             e(child, userData);
         }
         catch (Alembic::Util::Exception e)

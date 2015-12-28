@@ -2,10 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="AlembicImporter.cpp" />
-    <ClCompile Include="aiContext.cpp" />
-    <ClCompile Include="aiObject.cpp" />
-    <ClCompile Include="aiThreadPool.cpp" />
     <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D11.cpp">
       <Filter>GraphicsDevice</Filter>
     </ClCompile>
@@ -15,54 +11,82 @@
     <ClCompile Include="GraphicsDevice\aiGraphicsDevice.cpp">
       <Filter>GraphicsDevice</Filter>
     </ClCompile>
-    <ClCompile Include="Schema\aiXForm.cpp">
-      <Filter>Schema</Filter>
+    <ClCompile Include="Foundation\aiLogger.cpp">
+      <Filter>Foundation</Filter>
     </ClCompile>
-    <ClCompile Include="Schema\aiCamera.cpp">
-      <Filter>Schema</Filter>
+    <ClCompile Include="Foundation\aiThreadPool.cpp">
+      <Filter>Foundation</Filter>
     </ClCompile>
-    <ClCompile Include="Schema\aiPolyMesh.cpp">
-      <Filter>Schema</Filter>
+    <ClCompile Include="Importer\aiPolyMesh.cpp">
+      <Filter>Importer</Filter>
     </ClCompile>
-    <ClCompile Include="Schema\aiSchema.cpp">
-      <Filter>Schema</Filter>
+    <ClCompile Include="Importer\aiSchema.cpp">
+      <Filter>Importer</Filter>
     </ClCompile>
-    <ClCompile Include="aiLogger.cpp" />
-    <ClCompile Include="Schema\aiPoints.cpp">
-      <Filter>Schema</Filter>
+    <ClCompile Include="Importer\aiXForm.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer\AlembicImporter.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer\aiCamera.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer\aiContext.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer\aiObject.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="Importer\aiPoints.cpp">
+      <Filter>Importer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="AlembicImporter.h" />
-    <ClInclude Include="aiContext.h" />
-    <ClInclude Include="aiObject.h" />
-    <ClInclude Include="aiThreadPool.h" />
     <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h">
       <Filter>GraphicsDevice</Filter>
     </ClInclude>
-    <ClInclude Include="Schema\aiXForm.h">
-      <Filter>Schema</Filter>
+    <ClInclude Include="Foundation\aiThreadPool.h">
+      <Filter>Foundation</Filter>
     </ClInclude>
-    <ClInclude Include="Schema\aiCamera.h">
-      <Filter>Schema</Filter>
+    <ClInclude Include="Foundation\aiLogger.h">
+      <Filter>Foundation</Filter>
     </ClInclude>
-    <ClInclude Include="Schema\aiPolyMesh.h">
-      <Filter>Schema</Filter>
+    <ClInclude Include="Importer\aiPolyMesh.h">
+      <Filter>Importer</Filter>
     </ClInclude>
-    <ClInclude Include="Schema\aiSchema.h">
-      <Filter>Schema</Filter>
+    <ClInclude Include="Importer\aiSchema.h">
+      <Filter>Importer</Filter>
     </ClInclude>
-    <ClInclude Include="Schema\aiPoints.h">
-      <Filter>Schema</Filter>
+    <ClInclude Include="Importer\aiXForm.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\AlembicImporter.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\aiCamera.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\aiContext.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\aiObject.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\aiPoints.h">
+      <Filter>Importer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GraphicsDevice">
       <UniqueIdentifier>{a0e5e438-2063-4574-b032-d8b71c7d8d73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Schema">
-      <UniqueIdentifier>{919b6ca2-710c-4894-80de-d94f28f3c0ef}</UniqueIdentifier>
+    <Filter Include="Importer">
+      <UniqueIdentifier>{c94f82d9-acb1-49f5-85b5-aed90514a514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{4845b8b3-6627-4eb1-a91d-c170ecd9afaf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

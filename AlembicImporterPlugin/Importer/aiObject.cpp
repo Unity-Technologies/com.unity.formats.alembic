@@ -3,11 +3,11 @@
 #include "aiLogger.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include "Schema/aiSchema.h"
-#include "Schema/aiXForm.h"
-#include "Schema/aiPolyMesh.h"
-#include "Schema/aiCamera.h"
-#include "Schema/aiPoints.h"
+#include "aiSchema.h"
+#include "aiXForm.h"
+#include "aiPolyMesh.h"
+#include "aiCamera.h"
+#include "aiPoints.h"
 
 aiObject::aiObject()
     : m_ctx(0)
@@ -110,7 +110,7 @@ aiContext*  aiObject::getContext()           { return m_ctx; }
 abcObject&  aiObject::getAbcObject()         { return m_abc; }
 const char* aiObject::getName() const        { return m_abc.getName().c_str(); }
 const char* aiObject::getFullName() const    { return m_abc.getFullName().c_str(); }
-uint32_t    aiObject::getNumChildren() const { return m_children.size(); }
+uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(); }
 aiObject*   aiObject::getChild(int i)        { return m_children[i]; }
 aiObject*   aiObject::getParent()            { return m_parent; }
 

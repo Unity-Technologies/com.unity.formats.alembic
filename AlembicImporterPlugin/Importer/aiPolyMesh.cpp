@@ -288,7 +288,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
 
             for (int j=0; j<nv; ++j, ++vertexIndex)
             {
-                curMesh->vertexIndices.push_back(vertexIndex - split.indexOffset);
+                curMesh->vertexIndices.push_back(vertexIndex - int(split.indexOffset));
             }
         }
 
@@ -652,8 +652,8 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const Abc::V3f *i
         m_tangents[i].y = T.y;
         m_tangents[i].z = T.z;
         m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f
-                            ? (m_config.swapHandedness ?  1.0 : -1.0)
-                            : (m_config.swapHandedness ? -1.0 :  1.0));
+                            ? (m_config.swapHandedness ?  1.0f : -1.0f)
+                            : (m_config.swapHandedness ? -1.0f :  1.0f));
     }
 
     delete[] tanNidxs;
@@ -1440,7 +1440,7 @@ int aiPolyMesh::getPeakIndexCount() const
         auto indicesProp = m_schema.getFaceIndicesProperty();
         auto countsProp = m_schema.getFaceCountsProperty();
         
-        int numSamples = indicesProp.getNumSamples();
+        int numSamples = (int)indicesProp.getNumSamples();
 
         if (numSamples == 0)
         {
@@ -1489,7 +1489,7 @@ int aiPolyMesh::getPeakVertexCount() const
 
         auto positionsProp = m_schema.getPositionsProperty();
 
-        int numSamples = positionsProp.getNumSamples();
+        int numSamples = (int)positionsProp.getNumSamples();
 
         if (numSamples == 0)
         {
@@ -1499,7 +1499,7 @@ int aiPolyMesh::getPeakVertexCount() const
         {
             positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(0)));
             
-            m_peakVertexCount = dim.numPoints();
+            m_peakVertexCount = (int)dim.numPoints();
         }
         else
         {

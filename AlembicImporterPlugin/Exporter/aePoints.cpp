@@ -57,7 +57,7 @@ void aePoints::writeSample(const aePointsSampleData &data_)
 
     // update id buffer if needed
     if (data.ids == nullptr) {
-        int bufsize = m_buf_ids.size();
+        int bufsize = (int)m_buf_ids.size();
         if (data.count > bufsize) {
             m_buf_ids.resize(data.count);
             for (int i = bufsize; i < data.count; ++i) {
