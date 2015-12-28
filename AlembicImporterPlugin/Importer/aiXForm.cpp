@@ -68,8 +68,8 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
         const auto &op = sample.getOp(i);
         if (op.getType() == AbcGeom::kRotateOperation) {
             if (++n_rot_op == 1) {
-                const auto& ax = op.getAxis();
-                ret = abcV4(ax.x, ax.y, ax.z, op.getAngle() * Deg2Rad);
+                abcV3 ax = op.getAxis();
+                ret = abcV4(ax.x, ax.y, ax.z, (float)op.getAngle() * Deg2Rad);
             }
         }
         else if (op.getType() == AbcGeom::kMatrixOperation) {
@@ -78,8 +78,8 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
     }
 
     if (n_rot_op != 1) {
-        const auto& ax = sample.getAxis();
-        ret = abcV4(ax.x, ax.y, ax.z, sample.getAngle() * Deg2Rad);
+        abcV3 ax = sample.getAxis();
+        ret = abcV4(ax.x, ax.y, ax.z, (float)sample.getAngle() * Deg2Rad);
     }
 
     if (swapHandedness)

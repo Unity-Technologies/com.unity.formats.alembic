@@ -81,7 +81,7 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         m_buf_faces.resize(num_primitives);
         for (auto &v : m_buf_faces) { v = vertices_per_primitive; }
         data.faces = &m_buf_faces[0];
-        data.faceCount = m_buf_faces.size();
+        data.faceCount = (int)m_buf_faces.size();
     }
 
     // write!

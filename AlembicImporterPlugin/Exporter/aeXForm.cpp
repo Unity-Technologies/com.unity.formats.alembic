@@ -35,7 +35,7 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
     m_sample.setInheritsXforms(data.inherits);
     if (getConfig().xformType == aeXFromType_Matrix)
     {
-        const float Deg2Rad = M_PI / 180.0f;
+        const float Deg2Rad = float(M_PI) / 180.0f;
         abcM44 trans;
         trans *= abcM44().setScale(data.scale);
         trans *= abcM44().setAxisAngle(data.rotationAxis, data.rotationAngle*Deg2Rad);

@@ -31,7 +31,7 @@ void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
 
 void aiPointsSample::fillData(aiPointsSampleData &data)
 {
-    int count = m_positions->size();
+    int count = (int)m_positions->size();
     data.count = count;
 
     if (m_positions && data.positions) {
@@ -130,7 +130,7 @@ int aiPoints::getPeakVertexCount() const
 
         auto positionsProp = m_schema.getPositionsProperty();
 
-        int numSamples = positionsProp.getNumSamples();
+        int numSamples = (int)positionsProp.getNumSamples();
 
         if (numSamples == 0)
         {
@@ -140,7 +140,7 @@ int aiPoints::getPeakVertexCount() const
         {
             positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(0)));
 
-            m_peakVertexCount = dim.numPoints();
+            m_peakVertexCount = (int)dim.numPoints();
         }
         else
         {
