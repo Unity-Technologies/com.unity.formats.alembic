@@ -16,9 +16,9 @@ abcCamera& aeCamera::getAbcObject()
     return dynamic_cast<abcCamera&>(*m_abc);
 }
 
-abcProperties* aeCamera::getAbcProperties()
+abcProperties aeCamera::getAbcProperties()
 {
-    return &m_schema;
+    return m_schema.getUserProperties();
 }
 
 void aeCamera::writeSample(const aeCameraSampleData &data_)

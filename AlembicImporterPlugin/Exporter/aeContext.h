@@ -8,20 +8,23 @@ typedef AbcGeom::OPolyMesh          abcPolyMesh;
 typedef AbcGeom::OPoints            abcPoints;
 typedef AbcGeom::OCompoundProperty  abcProperties;
 
-typedef Abc::OFloatArrayProperty    abcFloatArrayProperty;
-typedef Abc::OInt32ArrayProperty    abcInt32ArrayProperty;
-typedef Abc::OBoolArrayProperty     abcBoolArrayProperty;
-typedef Abc::OV2fArrayProperty      abcVec2ArrayProperty;
-typedef Abc::OV3fArrayProperty      abcVec3ArrayProperty;
-typedef Abc::OC4fArrayProperty      abcVec4ArrayProperty;
-typedef Abc::OM44fArrayProperty     abcMat44ArrayProperty;
-typedef Abc::OFloatProperty         abcFloatProperty;
-typedef Abc::OInt32Property         abcInt32Property;
 typedef Abc::OBoolProperty          abcBoolProperty;
-typedef Abc::OV2fProperty           abcVec2Property;
-typedef Abc::OV3fProperty           abcVec3Property;
-typedef Abc::OC4fProperty           abcVec4Property;
-typedef Abc::OM44fProperty          abcMat44Property;
+typedef Abc::OInt32Property         abcIntProperty;
+typedef Abc::OUInt32Property        abcUIntProperty;
+typedef Abc::OFloatProperty         abcFloatProperty;
+typedef Abc::OV2fProperty           abcFloat2Property;
+typedef Abc::OV3fProperty           abcFloat3Property;
+typedef Abc::OC4fProperty           abcFloat4Property;
+typedef Abc::OM44fProperty          abcFloat4x4Property;
+
+typedef Abc::OBoolArrayProperty     abcBoolArrayProperty;
+typedef Abc::OInt32ArrayProperty    abcIntArrayProperty;
+typedef Abc::OUInt32ArrayProperty   abcUIntArrayProperty;
+typedef Abc::OFloatArrayProperty    abcFloatArrayProperty;
+typedef Abc::OV2fArrayProperty      abcFloat2ArrayProperty;
+typedef Abc::OV3fArrayProperty      abcFloat3ArrayProperty;
+typedef Abc::OC4fArrayProperty      abcFloat4ArrayProperty;
+typedef Abc::OM44fArrayProperty     abcFloat4x4ArrayProperty;
 
 
 class aeContext

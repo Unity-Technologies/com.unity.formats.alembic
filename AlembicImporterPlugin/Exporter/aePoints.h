@@ -7,7 +7,7 @@ typedef aeObject super;
 public:
     aePoints(aeObject *parent, const char *name);
     abcPoints& getAbcObject() override;
-    abcProperties* getAbcProperties() override;
+    abcProperties getAbcProperties() override;
 
     void writeSample(const aePointsSampleData &data);
 

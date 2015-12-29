@@ -25,6 +25,7 @@
     <ClCompile Include="Importer\aiObject.cpp" />
     <ClCompile Include="Importer\aiPoints.cpp" />
     <ClCompile Include="Importer\aiPolyMesh.cpp" />
+    <ClCompile Include="Importer\aiProperty.cpp" />
     <ClCompile Include="Importer\aiSchema.cpp" />
     <ClCompile Include="Importer\aiXForm.cpp" />
     <ClCompile Include="Importer\AlembicImporter.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="Importer\aiObject.h" />
     <ClInclude Include="Importer\aiPoints.h" />
     <ClInclude Include="Importer\aiPolyMesh.h" />
+    <ClInclude Include="Importer\aiProperty.h" />
     <ClInclude Include="Importer\aiSchema.h" />
     <ClInclude Include="Importer\aiXForm.h" />
     <ClInclude Include="Importer\AlembicImporter.h" />

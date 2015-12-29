@@ -213,7 +213,7 @@ public class AlembicExporter : MonoBehaviour
             m_abc = abc;
             m_target = target;
 
-            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec4Array);
+            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Float4Array);
         }
 
         public override void Capture()

@@ -82,35 +82,3 @@ typedef Imath::M44d     abcM44d;
 typedef Imath::Box3f    abcBox;
 typedef Imath::Box3d    abcBoxd;
 typedef Abc::chrono_t   abcChrono;
-
-enum aiTextureFormat;
-
-struct  aiConfig;
-struct  aiCameraData;
-struct  aiXFormData;
-struct  aiMeshSummary;
-struct  aiMeshSampleSummary;
-struct  aiMeshSampleData;
-struct  aiSubmeshSummary;
-struct  aiSubmeshData;
-struct  aiFacesets;
-
-class   aiContext;
-class   aiObject;
-class   aiSchemaBase;
-class   aiSampleBase;
-class   aiXForm;
-class   aiXFormSample;
-class   aiPolyMesh;
-class   aiPolyMeshSample;
-class   aiPoints;
-class   aiPointsSample;
-struct  aiPointsSampleData;
-class   aiCurves;
-class   aiCurvesSample;
-struct  aiCurvesSampleData;
-class   aiSubD;
-class   aiSubDSample;
-struct  aiSubDSampleData;
-class   aiCamera;
-class   aiCameraSample;

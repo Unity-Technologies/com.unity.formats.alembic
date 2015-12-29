@@ -10,6 +10,40 @@
 // 
 // #define aiWithTBB
 
+
+enum aiTextureFormat;
+
+struct  aiConfig;
+struct  aiCameraData;
+struct  aiXFormData;
+struct  aiMeshSummary;
+struct  aiMeshSampleSummary;
+struct  aiMeshSampleData;
+struct  aiSubmeshSummary;
+struct  aiSubmeshData;
+struct  aiFacesets;
+
+class   aiContext;
+class   aiObject;
+class   aiSchemaBase;
+class   aiSampleBase;
+class   aiXForm;
+class   aiXFormSample;
+class   aiPolyMesh;
+class   aiPolyMeshSample;
+class   aiPoints;
+class   aiPointsSample;
+struct  aiPointsSampleData;
+class   aiCurves;
+class   aiCurvesSample;
+struct  aiCurvesSampleData;
+class   aiSubD;
+class   aiSubDSample;
+struct  aiSubDSampleData;
+class   aiCamera;
+class   aiCameraSample;
+class   aiProperty;
+
 enum aiNormalsMode
 {
     NM_ReadFromFile = 0,
@@ -23,6 +57,37 @@ enum aiTangentsMode
     TM_None = 0,
     TM_Smooth,
     TM_Split
+};
+
+enum aiPropertyType
+{
+    aiPropertyType_Unknown,
+
+    // scalar types
+    aiPropertyType_Bool,
+    aiPropertyType_Int,
+    aiPropertyType_UInt,
+    aiPropertyType_Float,
+    aiPropertyType_Float2,
+    aiPropertyType_Float3,
+    aiPropertyType_Float4,
+    aiPropertyType_Float4x4,
+
+    // array types
+    aiPropertyType_BoolArray,
+    aiPropertyType_IntArray,
+    aiPropertyType_UIntArray,
+    aiPropertyType_FloatArray,
+    aiPropertyType_Float2Array,
+    aiPropertyType_Float3Array,
+    aiPropertyType_Float4Array,
+    aiPropertyType_Float4x4Array,
+
+    aiPropertyType_ScalarTypeBegin  = aiPropertyType_Bool,
+    aiPropertyType_ScalarTypeEnd    = aiPropertyType_Float4x4,
+
+    aiPropertyType_ArrayTypeBegin   = aiPropertyType_BoolArray,
+    aiPropertyType_ArrayTypeEnd     = aiPropertyType_Float4x4Array,
 };
 
 struct aiConfig
@@ -228,6 +293,16 @@ struct aiFacesets
     aiFacesets& operator=(const aiFacesets&) = default;
 };
 
+struct aiPropertyData
+{
+    const void *data;
+    int size;
+    aiPropertyType type;
+
+    aiPropertyData() : data(nullptr), size(0), type(aiPropertyType_Unknown) {}
+    aiPropertyData(aiPropertyType t, const void *d, int s) : data(d), size(s), type(t) {}
+};
+
 
 #ifdef _WIN32
 typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userData);
@@ -287,6 +362,14 @@ aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
 aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
+
+aiCLinkage aiExport int             aiSchemaGetNumProperties(aiSchemaBase* schema);
+aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
+aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
+aiCLinkage aiExport const char*     aiPropertyGetNameS(aiProperty* prop);
+aiCLinkage aiExport aiPropertyType  aiPropertyGetType(aiProperty* prop);
+aiCLinkage aiExport void            aiPropertyGetData(aiProperty* prop, aiPropertyData *o_data);
+
 #ifdef aiSupportTexture
 aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);
 aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);

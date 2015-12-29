@@ -41,6 +41,11 @@ public:
     void        addChild(aiObject *c);
     void        removeChild(aiObject *c);
 
+    template<class F>
+    void eachChildren(const F &f) { for (auto *c : m_children) { f(*c); } }
+    template<class F>
+    void eachChildren(const F &f) const { for (const auto *c : m_children) { f(*c); } }
+
 private:
     aiContext   *m_ctx;
     abcObject   m_abc;

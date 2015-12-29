@@ -4,6 +4,7 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
+#include "aiProperty.h"
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
@@ -34,6 +35,8 @@ aiSchemaBase::aiSchemaBase(aiObject *obj)
 
 aiSchemaBase::~aiSchemaBase()
 {
+    for (auto &i : m_properties) { delete i; }
+    m_properties.clear();
 }
 
 aiObject* aiSchemaBase::getObject()
@@ -112,4 +115,44 @@ Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(float time)
 Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(int64_t index)
 {
     return Abc::ISampleSelector(index, Abc::ISampleSelector::kFloorIndex);
+}
+
+
+int aiSchemaBase::getNumProperties() const
+{
+    return (int)m_properties.size();
+}
+
+aiProperty* aiSchemaBase::getPropertyByIndex(int i)
+{
+    auto r = m_properties[i];
+    if (r != nullptr) { r->setActive(true); }
+    return r;
+}
+
+aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
+{
+    auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
+        [](aiProperty *a, const std::string& name) { return a->getName() < name; });
+    if (i != m_properties.end()) {
+        (*i)->setActive(true);
+        return *i;
+    }
+    return nullptr;
+}
+
+void aiSchemaBase::setupProperties()
+{
+    auto cpro = getAbcProperties();
+    if (!cpro.valid()) { return; }
+    size_t n = cpro.getNumProperties();
+    for (size_t i = 0; i < n; ++i) {
+        auto header = cpro.getPropertyHeader(i);
+        auto *prop = aiMakeProperty(cpro, header);
+        if (prop != nullptr) {
+            m_properties.push_back(prop);
+        }
+    }
+    std::sort(m_properties.begin(), m_properties.end(),
+        [](aiProperty *a, aiProperty *b) { return a->getName() < b->getName(); });
 }

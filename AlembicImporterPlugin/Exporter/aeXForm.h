@@ -8,7 +8,7 @@ typedef aeObject super;
 public:
     aeXForm(aeObject *parent, const char *name);
     abcXForm& getAbcObject() override;
-    abcProperties* getAbcProperties() override;
+    abcProperties getAbcProperties() override;
 
     void writeSample(const aeXFormSampleData &data);
 

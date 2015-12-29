@@ -7,7 +7,7 @@ typedef aeObject super;
 public:
     aePolyMesh(aeObject *parent, const char *name);
     abcPolyMesh& getAbcObject() override;
-    abcProperties* getAbcProperties() override;
+    abcProperties getAbcProperties() override;
 
     void writeSample(const aePolyMeshSampleData &data);
 

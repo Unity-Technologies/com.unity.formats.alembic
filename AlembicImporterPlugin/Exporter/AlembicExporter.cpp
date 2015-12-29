@@ -76,20 +76,25 @@ aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraSample
 aeCLinkage aeExport aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
 {
     switch (type) {
-    case aePropertyType_FloatArray: return parent->newProperty<abcFloatArrayProperty>(name); break;
-    case aePropertyType_IntArray:   return parent->newProperty<abcInt32ArrayProperty>(name); break;
-    case aePropertyType_BoolArray:  return parent->newProperty<abcBoolArrayProperty >(name); break;
-    case aePropertyType_Vec2Array:  return parent->newProperty<abcVec2ArrayProperty >(name); break;
-    case aePropertyType_Vec3Array:  return parent->newProperty<abcVec3ArrayProperty >(name); break;
-    case aePropertyType_Vec4Array:  return parent->newProperty<abcVec4ArrayProperty >(name); break;
-    case aePropertyType_Mat44Array: return parent->newProperty<abcMat44ArrayProperty>(name); break;
-    case aePropertyType_Float:  return parent->newProperty<abcFloatProperty>(name); break;
-    case aePropertyType_Int:    return parent->newProperty<abcInt32Property>(name); break;
-    case aePropertyType_Bool:   return parent->newProperty<abcBoolProperty >(name); break;
-    case aePropertyType_Vec2:   return parent->newProperty<abcVec2Property >(name); break;
-    case aePropertyType_Vec3:   return parent->newProperty<abcVec3Property >(name); break;
-    case aePropertyType_Vec4:   return parent->newProperty<abcVec4Property >(name); break;
-    case aePropertyType_Mat44:  return parent->newProperty<abcMat44Property>(name); break;
+        // scalar properties
+    case aePropertyType_Bool:           return parent->newProperty<abcBoolProperty>(name); break;
+    case aePropertyType_Int:            return parent->newProperty<abcIntProperty>(name); break;
+    case aePropertyType_UInt:           return parent->newProperty<abcUIntProperty>(name); break;
+    case aePropertyType_Float:          return parent->newProperty<abcFloatProperty>(name); break;
+    case aePropertyType_Float2:         return parent->newProperty<abcFloat2Property>(name); break;
+    case aePropertyType_Float3:         return parent->newProperty<abcFloat3Property>(name); break;
+    case aePropertyType_Float4:         return parent->newProperty<abcFloat4Property>(name); break;
+    case aePropertyType_Float4x4:       return parent->newProperty<abcFloat4x4Property>(name); break;
+
+        // array properties
+    case aePropertyType_BoolArray:      return parent->newProperty<abcBoolArrayProperty >(name); break;
+    case aePropertyType_IntArray:       return parent->newProperty<abcIntArrayProperty>(name); break;
+    case aePropertyType_UIntArray:      return parent->newProperty<abcUIntArrayProperty>(name); break;
+    case aePropertyType_FloatArray:     return parent->newProperty<abcFloatArrayProperty>(name); break;
+    case aePropertyType_Float2Array:    return parent->newProperty<abcFloat2ArrayProperty>(name); break;
+    case aePropertyType_Float3Array:    return parent->newProperty<abcFloat3ArrayProperty>(name); break;
+    case aePropertyType_Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
+    case aePropertyType_Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
     aeDebugLog("aeNewProperty(): unknown type");
     return nullptr;

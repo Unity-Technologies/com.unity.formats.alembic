@@ -16,9 +16,9 @@ abcPoints& aePoints::getAbcObject()
     return dynamic_cast<abcPoints&>(*m_abc);
 }
 
-abcProperties* aePoints::getAbcProperties()
+abcProperties aePoints::getAbcProperties()
 {
-    return &m_schema;
+    return m_schema.getUserProperties();
 }
 
 void aePoints::writeSample(const aePointsSampleData &data_)

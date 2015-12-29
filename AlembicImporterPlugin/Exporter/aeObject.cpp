@@ -29,7 +29,7 @@ public:
     typedef typename T::sample_type sample_type;
 
     aeTArrayProprty(aeObject *parent, const char *name)
-        : m_abcprop(new property_type(*parent->getAbcProperties(), name, parent->getContext()->getTimeSaplingIndex()))
+        : m_abcprop(new property_type(parent->getAbcProperties(), name, parent->getContext()->getTimeSaplingIndex()))
     {
         aeDebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
     }
@@ -44,13 +44,14 @@ public:
 private:
     std::unique_ptr<property_type> m_abcprop;
 };
+template class aeTArrayProprty<abcBoolArrayProperty>;
+template class aeTArrayProprty<abcIntArrayProperty>;
+template class aeTArrayProprty<abcUIntArrayProperty>;
 template class aeTArrayProprty<abcFloatArrayProperty>;
-template class aeTArrayProprty<abcInt32ArrayProperty>;
-template class aeTArrayProprty<abcBoolArrayProperty >;
-template class aeTArrayProprty<abcVec2ArrayProperty >;
-template class aeTArrayProprty<abcVec3ArrayProperty >;
-template class aeTArrayProprty<abcVec4ArrayProperty >;
-template class aeTArrayProprty<abcMat44ArrayProperty>;
+template class aeTArrayProprty<abcFloat2ArrayProperty>;
+template class aeTArrayProprty<abcFloat3ArrayProperty>;
+template class aeTArrayProprty<abcFloat4ArrayProperty>;
+template class aeTArrayProprty<abcFloat4x4ArrayProperty>;
 
 
 // scalar property
@@ -64,7 +65,7 @@ public:
     typedef typename T::value_type value_type;
 
     aeTScalarProprty(aeObject *parent, const char *name)
-        : m_abcprop(new property_type(*parent->getAbcProperties(), name, parent->getContext()->getTimeSaplingIndex()))
+        : m_abcprop(new property_type(parent->getAbcProperties(), name, parent->getContext()->getTimeSaplingIndex()))
     {
         aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
@@ -79,13 +80,14 @@ public:
 private:
     std::unique_ptr<property_type> m_abcprop;
 };
-template class aeTScalarProprty<abcFloatProperty>;
-template class aeTScalarProprty<abcInt32Property>;
 template class aeTScalarProprty<abcBoolProperty >;
-template class aeTScalarProprty<abcVec2Property >;
-template class aeTScalarProprty<abcVec3Property >;
-template class aeTScalarProprty<abcVec4Property >;
-template class aeTScalarProprty<abcMat44Property>;
+template class aeTScalarProprty<abcIntProperty>;
+template class aeTScalarProprty<abcUIntProperty>;
+template class aeTScalarProprty<abcFloatProperty>;
+template class aeTScalarProprty<abcFloat2Property >;
+template class aeTScalarProprty<abcFloat3Property >;
+template class aeTScalarProprty<abcFloat4Property >;
+template class aeTScalarProprty<abcFloat4x4Property>;
 
 
 aeObject::aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc)
@@ -143,9 +145,9 @@ void aeObject::removeChild(aeObject *c)
 }
 
 
-abcProperties* aeObject::getAbcProperties()
+abcProperties aeObject::getAbcProperties()
 {
-    return nullptr;
+    return abcProperties();
 }
 
 
@@ -153,22 +155,21 @@ template<class T, bool is_array=std::is_base_of<Abc::OArrayProperty, T>::value>
 struct aeMakeProperty;
 
 template<class T>
+struct aeMakeProperty<T, false>
+{
+    static aeProperty* make(aeObject *parent, const char *name) { return new aeTScalarProprty<T>(parent, name); }
+};
+template<class T>
 struct aeMakeProperty<T, true>
 {
     static aeProperty* make(aeObject *parent, const char *name) { return new aeTArrayProprty<T>(parent, name); }
 };
 
 template<class T>
-struct aeMakeProperty<T, false>
-{
-    static aeProperty* make(aeObject *parent, const char *name) { return new aeTScalarProprty<T>(parent, name); }
-};
-
-template<class T>
 aeProperty* aeObject::newProperty(const char *name)
 {
-    auto *cprop = getAbcProperties();
-    if (cprop == nullptr) {
+    auto cprop = getAbcProperties();
+    if (!cprop.valid()) {
         aeDebugLog("aeObject::newProperty() %s failed!", name);
         return nullptr;
     }
@@ -177,17 +178,21 @@ aeProperty* aeObject::newProperty(const char *name)
     m_properties.emplace_back(aePropertyPtr(ret));
     return ret;
 }
-template aeProperty*    aeObject::newProperty<abcFloatArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<abcInt32ArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<abcBoolArrayProperty >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec2ArrayProperty >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec3ArrayProperty >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec4ArrayProperty >(const char *name);
-template aeProperty*    aeObject::newProperty<abcMat44ArrayProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<abcFloatProperty>(const char *name);
-template aeProperty*    aeObject::newProperty<abcInt32Property>(const char *name);
+
 template aeProperty*    aeObject::newProperty<abcBoolProperty >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec2Property >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec3Property >(const char *name);
-template aeProperty*    aeObject::newProperty<abcVec4Property >(const char *name);
-template aeProperty*    aeObject::newProperty<abcMat44Property>(const char *name);
+template aeProperty*    aeObject::newProperty<abcIntProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcUIntProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloatProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat2Property >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat3Property >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat4Property >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat4x4Property>(const char *name);
+
+template aeProperty*    aeObject::newProperty<abcBoolArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcIntArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcUIntArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloatArrayProperty>(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat2ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat3ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat4ArrayProperty >(const char *name);
+template aeProperty*    aeObject::newProperty<abcFloat4x4ArrayProperty>(const char *name);

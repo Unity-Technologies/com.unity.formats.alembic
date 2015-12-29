@@ -70,23 +70,33 @@ enum aeXFromType
 
 enum aePropertyType
 {
-    // array types
-    aePropertyType_FloatArray,
-    aePropertyType_IntArray,
-    aePropertyType_BoolArray,
-    aePropertyType_Vec2Array,
-    aePropertyType_Vec3Array,
-    aePropertyType_Vec4Array,
-    aePropertyType_Mat44Array,
+    aePropertyType_Unknown,
 
     // scalar types
-    aePropertyType_Float,
-    aePropertyType_Int,
     aePropertyType_Bool,
-    aePropertyType_Vec2,
-    aePropertyType_Vec3,
-    aePropertyType_Vec4,
-    aePropertyType_Mat44,
+    aePropertyType_Int,
+    aePropertyType_UInt,
+    aePropertyType_Float,
+    aePropertyType_Float2,
+    aePropertyType_Float3,
+    aePropertyType_Float4,
+    aePropertyType_Float4x4,
+
+    // array types
+    aePropertyType_BoolArray,
+    aePropertyType_IntArray,
+    aePropertyType_UIntArray,
+    aePropertyType_FloatArray,
+    aePropertyType_Float2Array,
+    aePropertyType_Float3Array,
+    aePropertyType_Float4Array,
+    aePropertyType_Float4x4Array,
+
+    aePropertyType_ScalarTypeBegin = aePropertyType_Bool,
+    aePropertyType_ScalarTypeEnd = aePropertyType_Float4x4,
+
+    aePropertyType_ArrayTypeBegin = aePropertyType_BoolArray,
+    aePropertyType_ArrayTypeEnd = aePropertyType_Float4x4Array,
 };
 
 struct aeConfig
