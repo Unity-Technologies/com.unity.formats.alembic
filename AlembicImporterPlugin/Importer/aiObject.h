@@ -11,7 +11,7 @@ class aiObject
 {
 public:
     aiObject();
-    aiObject(aiContext *ctx, abcObject &abc);
+    aiObject(aiContext *ctx, aiObject *parent, abcObject &abc);
     ~aiObject();
 
     const char* getName() const;
@@ -34,17 +34,27 @@ public:
     aiCamera&   getCamera();
     aiPoints&   getPoints();
 
-public:
+    template<class F>
+    void eachChildren(const F &f)
+    {
+        for (auto *c : m_children) { f(c); }
+    }
 
+    template<class F>
+    void eachChildrenRecursive(const F &f)
+    {
+        for (auto *c : m_children) {
+            f(c);
+            c->eachChildrenRecursive(f);
+        }
+    }
+
+public:
+    // for internal use
     aiContext*  getContext();
     abcObject&  getAbcObject();
-    void        addChild(aiObject *c);
+    aiObject*   newChild(abcObject &abc);
     void        removeChild(aiObject *c);
-
-    template<class F>
-    void eachChildren(const F &f) { for (auto *c : m_children) { f(*c); } }
-    template<class F>
-    void eachChildren(const F &f) const { for (const auto *c : m_children) { f(*c); } }
 
 private:
     aiContext   *m_ctx;

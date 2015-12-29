@@ -90,7 +90,7 @@ template class aeTScalarProprty<abcFloat4Property >;
 template class aeTScalarProprty<abcFloat4x4Property>;
 
 
-aeObject::aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc)
+aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc)
     : m_ctx(ctx)
     , m_parent(parent)
     , m_abc(abc)
@@ -136,6 +136,8 @@ template aePoints*      aeObject::newChild<aePoints>(const char *name);
 
 void aeObject::removeChild(aeObject *c)
 {
+    if (c == nullptr) { return; }
+
     auto it = std::find(m_children.begin(), m_children.end(), c);
     if (it != m_children.end())
     {

@@ -205,13 +205,8 @@ aiContext::aiContext(int uid)
 aiContext::~aiContext()
 {
     waitTasks();
-        
-    for (auto n : m_nodes)
-    {
-        delete n;
-    }
-
-    m_nodes.clear();
+    m_top_node.reset();
+    m_archive.reset();
 }
 
 Abc::IArchive aiContext::getArchive() const
@@ -242,77 +237,13 @@ void aiContext::setConfig(const aiConfig &config)
 
 void aiContext::gatherNodesRecursive(aiObject *n)
 {
-    m_nodes.push_back(n);
-
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
     
     for (size_t i = 0; i < numChildren; ++i)
     {
-        abcObject abcChild = abc.getChild(i);
-        aiObject *child = new aiObject(this, abcChild);
-        n->addChild(child);
+        aiObject *child = n->newChild(abc.getChild(i));
         gatherNodesRecursive(child);
-    }
-}
-
-void aiContext::destroyObject(aiObject *obj)
-{
-    DebugLog("aiObject::destroyObject()");
-
-    if (!obj)
-    {
-        return;
-    }
-
-    aiObject *parent = obj->getParent();
-    
-    std::vector<aiObject*>::iterator it = m_nodes.end();
-
-    if (destroyObject(obj, m_nodes.begin(), it))
-    {
-        // note: at this point obj has already been destroyed
-        //       remove it from its parent children list
-        parent->removeChild(obj);
-    }
-}
-
-bool aiContext::destroyObject(aiObject *obj,
-                              std::vector<aiObject*>::iterator searchFrom,
-                              std::vector<aiObject*>::iterator &next)
-{
-    std::vector<aiObject*>::iterator it = std::find(searchFrom, m_nodes.end(), obj);
-    std::vector<aiObject*>::iterator nit;
-    
-    if (it != m_nodes.end())
-    {
-        size_t fromIndex = searchFrom - m_nodes.begin();
-
-        // it now points to next element after found object
-        // (its first child or next sibling if it hasn't got any child)
-        it = m_nodes.erase(it);
-
-        // also destroy all the childrens
-        uint32_t numChildren = obj->getNumChildren();
-        
-        for (uint32_t c=0; c<numChildren; ++c)
-        {
-            destroyObject(obj->getChild(c), it, nit);
-            // don't need to call removeChild on obj here as it is the be deleted
-            it = nit;
-        }
-
-        // remove from parent nodes list
-
-        delete obj;
-
-        next = (m_nodes.begin() + fromIndex);
-        return true;
-    }
-    else
-    {
-        next = searchFrom;
-        return false;
     }
 }
 
@@ -323,12 +254,7 @@ void aiContext::reset()
     // just in case
     waitTasks();
 
-    for (auto n : m_nodes)
-    {
-        delete n;
-    }
-
-    m_nodes.clear();
+    m_top_node.reset();
 
     GlobalCache::UnrefArchive(m_path);
     
@@ -428,8 +354,8 @@ bool aiContext::load(const char *inPath)
     if (m_archive.valid())
     {
         abcObject abcTop = m_archive.getTop();
-        aiObject *top = new aiObject(this, abcTop);
-        gatherNodesRecursive(top);
+        m_top_node.reset(new aiObject(this, nullptr, abcTop));
+        gatherNodesRecursive(m_top_node.get());
 
         m_timeRange[0] = std::numeric_limits<double>::max();
         m_timeRange[1] = -std::numeric_limits<double>::max();
@@ -498,7 +424,18 @@ float aiContext::getEndTime() const
 
 aiObject* aiContext::getTopObject()
 {
-    return m_nodes.empty() ? nullptr : m_nodes.front();
+    return m_top_node.get();
+}
+
+
+void aiContext::destroyObject(aiObject *obj)
+{
+    if (obj == getTopObject()) {
+        m_top_node.reset();
+    }
+    else {
+        delete obj;
+    }
 }
 
 void aiContext::updateSamples(float time)
@@ -507,34 +444,45 @@ void aiContext::updateSamples(float time)
     {
         DebugLog("aiContext::updateSamples() [threaded]");
         
-        for (aiObject *obj : m_nodes)
-        {
-            obj->readConfig();
-        }
-        
-        for (aiObject *obj : m_nodes)
-        {
-            enqueueTask([obj, time]() {
-                obj->updateSample(time);
+        eachNodes([](aiObject *o) {
+            o->readConfig();
+        });
+        eachNodes([this, time](aiObject *o) {
+            enqueueTask([o, time]() {
+                o->updateSample(time);
             });
-        }
-
+        });
         waitTasks();
-
-        for (aiObject *obj : m_nodes)
-        {
-            obj->notifyUpdate();
-        }
+        eachNodes([](aiObject *o) {
+            o->notifyUpdate();
+        });
     }
     else
     {
         DebugLog("aiContext::updateSamples()");
         
-        for (auto &e : m_nodes)
-        {
-            e->updateSample(time);
-        }
+        eachNodes([time](aiObject *o) {
+            o->updateSample(time);
+        });
     }
+}
+void aiContext::updateSamplesBegin(float time)
+{
+    eachNodes([](aiObject *o) {
+        o->readConfig();
+    });
+    enqueueTask([this, time](){
+        eachNodes([time](aiObject *o) {
+            o->updateSample(time);
+        });
+    });
+}
+void aiContext::updateSamplesEnd()
+{
+    waitTasks();
+    eachNodes([](aiObject *o) {
+        o->notifyUpdate();
+    });
 }
 
 void aiContext::enqueueTask(const std::function<void()> &task)

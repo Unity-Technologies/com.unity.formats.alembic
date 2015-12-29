@@ -55,6 +55,8 @@ public:
     float getEndTime() const;
 
     void updateSamples(float time);
+    void updateSamplesBegin(float time);
+    void updateSamplesEnd();
 
     void enqueueTask(const task_t &task);
     void waitTasks();
@@ -63,18 +65,21 @@ public:
     const std::string& getPath() const;
     int getUid() const;
 
+    template<class F>
+    void eachNodes(const F &f)
+    {
+        m_top_node->eachChildrenRecursive(f);
+    }
+
 private:
     std::string normalizePath(const char *path) const;
     void reset();
     void gatherNodesRecursive(aiObject *n);
-    bool destroyObject(aiObject *obj,
-                       std::vector<aiObject*>::iterator searchFrom,
-                       std::vector<aiObject*>::iterator &next);
 
 private:
     std::string m_path;
     Abc::IArchive m_archive;
-    std::vector<aiObject*> m_nodes;
+    std::unique_ptr<aiObject> m_top_node;
     aiTaskGroup m_tasks;
     double m_timeRange[2];
     int m_uid;

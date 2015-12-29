@@ -90,27 +90,32 @@ aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time)
         ctx->updateSamples(time);
     }
 }
+aiCLinkage aiExport void aiUpdateSamplesBegin(aiContext* ctx, float time)
+{
+    if (ctx)
+    {
+        ctx->updateSamplesBegin(time);
+    }
+}
+aiCLinkage aiExport void aiUpdateSamplesEnd(aiContext* ctx)
+{
+    if (ctx)
+    {
+        ctx->updateSamplesEnd();
+    }
+}
 
 aiCLinkage aiExport void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 {
-    if (!obj)
-    {
-        return;
-    }
-    
-    size_t n = obj->getNumChildren();
+    if (obj == nullptr) { return; }
 
-    for (size_t i = 0; i < n; ++i)
+    try
     {
-        try
-        {
-            aiObject *child = obj->getChild((int)i);
-            e(child, userData);
-        }
-        catch (Alembic::Util::Exception e)
-        {
-            DebugLog("aiEnumerateChlid: %s", e.what());
-        }
+        obj->eachChildren([&](aiObject *child) { e(child, userData); });
+    }
+    catch (Alembic::Util::Exception e)
+    {
+        DebugLog("aiEnumerateChlid: %s", e.what());
     }
 }
 
