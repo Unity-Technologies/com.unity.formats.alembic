@@ -10,15 +10,15 @@
 #include "aiPoints.h"
 
 aiObject::aiObject()
-    : m_ctx(0)
-    , m_parent(0)
+    : m_ctx(nullptr)
+    , m_parent(nullptr)
 {
 }
 
-aiObject::aiObject(aiContext *ctx, abcObject &abc)
+aiObject::aiObject(aiContext *ctx, aiObject *parent, abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
-    , m_parent(0)
+    , m_parent(parent)
 {
     if (m_abc.valid())
     {
@@ -52,27 +52,26 @@ aiObject::aiObject(aiContext *ctx, abcObject &abc)
 
 aiObject::~aiObject()
 {
+    while (!m_children.empty()) {
+        delete m_children.back();
+    }
+    if (m_parent != nullptr) {
+        m_parent->removeChild(this);
+    }
 }
 
-void aiObject::addChild(aiObject *c)
+aiObject* aiObject::newChild(abcObject &abc)
 {
-    if (!c)
-    {
-        return;
-    }
-
-    m_children.push_back(c);
-    c->m_parent = this;
+    auto *child = new aiObject(getContext(), this, abc);
+    m_children.push_back(child);
+    return child;
 }
 
 void aiObject::removeChild(aiObject *c)
 {
-    if (!c)
-    {
-        return;
-    }
+    if (c == nullptr) { return; }
 
-    std::vector<aiObject*>::iterator it = std::find(m_children.begin(), m_children.end(), c);
+    auto it = std::find(m_children.begin(), m_children.end(), c);
     if (it != m_children.end())
     {
         c->m_parent = 0;

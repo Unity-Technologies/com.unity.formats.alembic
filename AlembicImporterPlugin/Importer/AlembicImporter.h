@@ -329,6 +329,8 @@ aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 aiCLinkage aiExport void            aiDestroyObject(aiContext* ctx, aiObject* obj);
 
 aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
+aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);
+aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);

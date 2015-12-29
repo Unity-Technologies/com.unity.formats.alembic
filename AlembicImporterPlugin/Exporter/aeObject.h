@@ -15,7 +15,7 @@ public:
 class aeObject
 {
 public:
-    aeObject(aeContext *ctx, aeObject *parent, AbcGeom::OObject *abc);
+    aeObject(aeContext *ctx, aeObject *parent, abcObject *abc);
     virtual ~aeObject();
 
     const char* getName() const;
