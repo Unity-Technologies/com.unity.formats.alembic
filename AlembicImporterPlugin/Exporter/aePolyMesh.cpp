@@ -15,9 +15,9 @@ abcPolyMesh& aePolyMesh::getAbcObject()
     return dynamic_cast<abcPolyMesh&>(*m_abc);
 }
 
-abcProperties* aePolyMesh::getAbcProperties()
+abcProperties aePolyMesh::getAbcProperties()
 {
-    return &m_schema;
+    return m_schema.getUserProperties();
 }
 
 void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)

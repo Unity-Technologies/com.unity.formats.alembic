@@ -41,6 +41,9 @@
     <ClCompile Include="Importer\aiPoints.cpp">
       <Filter>Importer</Filter>
     </ClCompile>
+    <ClCompile Include="Importer\aiProperty.cpp">
+      <Filter>Importer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -75,6 +78,9 @@
       <Filter>Importer</Filter>
     </ClInclude>
     <ClInclude Include="Importer\aiPoints.h">
+      <Filter>Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="Importer\aiProperty.h">
       <Filter>Importer</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,7 +3,32 @@
 
 #include "aiThreadPool.h"
 
-typedef Abc::IObject    abcObject;
+typedef AbcGeom::IObject            abcObject;
+typedef AbcGeom::IXform             abcXForm;
+typedef AbcGeom::ICamera            abcCamera;
+typedef AbcGeom::IPolyMesh          abcPolyMesh;
+typedef AbcGeom::IPoints            abcPoints;
+typedef AbcGeom::ICompoundProperty  abcProperties;
+
+typedef Abc::IBoolProperty          abcBoolProperty;
+typedef Abc::IInt32Property         abcIntProperty;
+typedef Abc::IUInt32Property        abcUIntProperty;
+typedef Abc::IFloatProperty         abcFloatProperty;
+typedef Abc::IV2fProperty           abcFloat2Property;
+typedef Abc::IV3fProperty           abcFloat3Property;
+typedef Abc::IC4fProperty           abcFloat4Property;
+typedef Abc::IM44fProperty          abcFloat4x4Property;
+
+typedef Abc::IBoolArrayProperty     abcBoolArrayProperty;
+typedef Abc::IInt32ArrayProperty    abcIntArrayProperty;
+typedef Abc::IUInt32ArrayProperty   abcUIntArrayProperty;
+typedef Abc::IFloatArrayProperty    abcFloatArrayProperty;
+typedef Abc::IV2fArrayProperty      abcFloat2ArrayProperty;
+typedef Abc::IV3fArrayProperty      abcFloat3ArrayProperty;
+typedef Abc::IC4fArrayProperty      abcFloat4ArrayProperty;
+typedef Abc::IM44fArrayProperty     abcFloat4x4ArrayProperty;
+
+
 class aiObject;
 
 class aiContext

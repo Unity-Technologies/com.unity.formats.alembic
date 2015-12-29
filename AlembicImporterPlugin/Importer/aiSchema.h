@@ -47,6 +47,14 @@ public:
     static Abc::ISampleSelector MakeSampleSelector(float time);
     static Abc::ISampleSelector MakeSampleSelector(int64_t index);
 
+    int getNumProperties() const;
+    aiProperty* getPropertyByIndex(int i);
+    aiProperty* getPropertyByName(const std::string& name);
+
+protected:
+    virtual AbcGeom::ICompoundProperty getAbcProperties() = 0;
+    void setupProperties();
+
 protected:
     aiObject *m_obj;
     aiConfigCallback m_configCb;
@@ -58,6 +66,7 @@ protected:
     bool m_varyingTopology;
     aiSampleBase *m_pendingSample;
     bool m_pendingTopologyChanged;
+    std::vector<aiProperty*> m_properties;
 };
 
 
@@ -83,6 +92,7 @@ public:
         m_constant = m_schema.isConstant();
         m_timeSampling = m_schema.getTimeSampling();
         m_numSamples = (int64_t) m_schema.getNumSamples();
+        setupProperties();
     }
 
     virtual ~aiTSchema()
@@ -289,6 +299,12 @@ protected:
                 break;
             }
         }
+    }
+
+protected:
+    AbcGeom::ICompoundProperty getAbcProperties() override
+    {
+        return m_schema.getUserProperties();
     }
 
 protected:

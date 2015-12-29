@@ -27,7 +27,7 @@ public:
     aeContext*          getContext();
     const aeConfig&     getConfig() const;
     virtual abcObject&  getAbcObject();
-    virtual abcProperties* getAbcProperties();
+    virtual abcProperties getAbcProperties();
 
     /// T: aeCamera, aeXForm, aePoint, aePolyMesh
     template<class T> T*    newChild(const char *name);

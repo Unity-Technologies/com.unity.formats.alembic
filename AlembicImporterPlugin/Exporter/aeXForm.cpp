@@ -16,9 +16,9 @@ abcXForm& aeXForm::getAbcObject()
     return dynamic_cast<abcXForm&>(*m_abc);
 }
 
-abcProperties* aeXForm::getAbcProperties()
+abcProperties aeXForm::getAbcProperties()
 {
-    return &m_schema;
+    return m_schema.getUserProperties();
 }
 
 void aeXForm::writeSample(const aeXFormSampleData &data_)

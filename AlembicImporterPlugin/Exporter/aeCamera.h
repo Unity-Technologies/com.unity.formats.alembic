@@ -7,7 +7,7 @@ typedef aeObject super;
 public:
     aeCamera(aeObject *parent, const char *name);
     abcCamera& getAbcObject() override;
-    abcProperties* getAbcProperties() override;
+    abcProperties getAbcProperties() override;
 
     void writeSample(const aeCameraSampleData &data);
 

@@ -8,6 +8,7 @@
 #include "aiPolyMesh.h"
 #include "aiCamera.h"
 #include "aiPoints.h"
+#include "aiProperty.h"
 
 #ifdef aiWindows
     #include <windows.h>
@@ -275,6 +276,36 @@ aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleD
     sample->fillData(*outData);
 }
 
+
+aiCLinkage aiExport int aiSchemaGetNumProperties(aiSchemaBase* schema)
+{
+    return schema->getNumProperties();
+}
+
+aiCLinkage aiExport aiProperty* aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i)
+{
+    return schema->getPropertyByIndex(i);
+}
+
+aiCLinkage aiExport aiProperty* aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name)
+{
+    return schema->getPropertyByName(name);
+}
+
+aiCLinkage aiExport aiPropertyType aiPropertyGetType(aiProperty* prop)
+{
+    return prop->getPropertyType();
+}
+
+aiCLinkage aiExport const char* aiPropertyGetNameS(aiProperty* prop)
+{
+    return prop->getName().c_str();
+}
+
+aiCLinkage aiExport void aiPropertyGetData(aiProperty* prop, aiPropertyData *o_data)
+{
+    *o_data = prop->getData();
+}
 
 
 #ifdef aiSupportTexture
