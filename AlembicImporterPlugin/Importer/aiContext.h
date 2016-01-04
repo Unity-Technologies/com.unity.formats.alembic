@@ -2,6 +2,7 @@
 #define aiContext_h
 
 #include "aiThreadPool.h"
+#include "aiMisc.h"
 
 typedef AbcGeom::IObject            abcObject;
 typedef AbcGeom::IXform             abcXForm;

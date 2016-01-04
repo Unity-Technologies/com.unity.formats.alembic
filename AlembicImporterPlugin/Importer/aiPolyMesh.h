@@ -43,14 +43,14 @@ struct SplitInfo
     size_t firstFace;
     size_t lastFace;
     size_t indexOffset;
-    size_t indicesCount;
+    size_t vertexCount;
     size_t submeshCount;
 
     inline SplitInfo(size_t ff=0, size_t io=0)
         : firstFace(ff)
         , lastFace(ff)
         , indexOffset(io)
-        , indicesCount(0)
+        , vertexCount(0)
         , submeshCount(0)
     {
     }
@@ -205,7 +205,7 @@ public:
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::V3fArraySamplePtr m_velocities;
     size_t m_smoothNormalsCount;
-    abcV3 *m_smoothNormals;    
+    abcV3 *m_smoothNormals; 
     size_t m_tangentsCount;
     abcV4 *m_tangents;
 

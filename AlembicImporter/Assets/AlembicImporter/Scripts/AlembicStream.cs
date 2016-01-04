@@ -63,6 +63,7 @@ public class AlembicStream : MonoBehaviour
     Transform m_trans;
     // keep a list of aiObjects to update?
     string m_lastPathToAbc;
+    bool m_updateBegan = false;
 
     // --- For internal use ---
 
@@ -317,7 +318,7 @@ public class AlembicStream : MonoBehaviour
         }
     }
 
-    void AbcUpdate(float time)
+    void AbcUpdateBegin(float time)
     {
         if (m_lastLogToFile != m_logToFile ||
             m_lastLogPath != m_logPath)
@@ -381,18 +382,32 @@ public class AlembicStream : MonoBehaviour
                 {
                     AbcSyncConfig();
 
-                    AbcAPI.aiUpdateSamples(m_abc, abcTime);
-
-                    AbcUpdateElements();
-                }   
+                    if(m_useThreads) {
+                        AbcAPI.aiUpdateSamplesBegin(m_abc, abcTime);
+                        m_updateBegan = true;
+                    }
+                    else {
+                        AbcAPI.aiUpdateSamples(m_abc, abcTime);
+                        AbcUpdateElements();
+                    }
+                }
                 
                 AbcSetLastUpdateState(abcTime, aspectRatio);
             }
         }
     }
 
+    void AbcUpdateEnd()
+    {
+        if(m_updateBegan)
+        {
+            AbcAPI.aiUpdateSamplesEnd(m_abc);
+            AbcUpdateElements();
+        }
+    }
+
     // --- public api ---
-    
+
     public void AbcAddElement(AlembicElement e)
     {
         if (e != null)
@@ -493,11 +508,16 @@ public class AlembicStream : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            AbcUpdate(Time.time);
+            AbcUpdateBegin(Time.time);
         }
         else
         {
-            AbcUpdate(m_time);
+            AbcUpdateBegin(m_time);
         }
+    }
+
+    void LateUpdate()
+    {
+        AbcUpdateEnd();
     }
 }

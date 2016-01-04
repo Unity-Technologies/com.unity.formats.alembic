@@ -78,7 +78,4 @@ inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiT
     return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
 }
 
-template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a%b == 0 ? 0 : 1); }
-template<class IntType> inline IntType ceilup(IntType a, IntType b) { return ceildiv(a, b) * b; }
-
 #endif
