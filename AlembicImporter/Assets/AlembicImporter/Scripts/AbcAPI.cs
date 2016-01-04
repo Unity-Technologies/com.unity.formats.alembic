@@ -163,6 +163,9 @@ public class AbcAPI
     public struct aiMeshSummary
     {
         [MarshalAs(UnmanagedType.U4)] public aiTopologyVariance topologyVariance;
+        public int peakVertexCount;
+        public int peakIndexCount;
+        public int peakSubmeshCount;
     }
 
     public struct aiMeshSampleSummary
@@ -272,7 +275,9 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-    
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
+
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);

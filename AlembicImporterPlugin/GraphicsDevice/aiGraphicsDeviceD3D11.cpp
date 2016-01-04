@@ -3,6 +3,7 @@
 #if defined(aiSupportTexture) && defined(aiSupportD3D11)
 #include "aiGraphicsDevice.h"
 #include "aiLogger.h"
+#include "aiMisc.h"
 #include <d3d11.h>
 const int aiD3D11MaxStagingTextures = 32;
 

@@ -103,7 +103,7 @@ void Topology::updateSplits()
     {
         size_t nv = (size_t) counts->get()[i];
 
-        if (curSplit->indicesCount + nv > 65000)
+        if (curSplit->vertexCount + nv > 65000)
         {
             splits.push_back(SplitInfo(i, indexOffset));
             
@@ -115,7 +115,7 @@ void Topology::updateSplits()
         faceSplitIndices[i] = splitIndex;
 
         curSplit->lastFace = i;
-        curSplit->indicesCount += nv;
+        curSplit->vertexCount += nv;
 
         indexOffset += nv;
     }
@@ -129,7 +129,7 @@ int Topology::getVertexBufferLength(int splitIndex) const
     }
     else
     {
-        return (int) splits[splitIndex].indicesCount;
+        return (int) splits[splitIndex].vertexCount;
     }
 }
 
@@ -788,7 +788,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
 {
     DebugLog("aiPolyMeshSample::fillVertexBuffer(splitIndex=%d)", splitIndex);
     
-    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->splits.size() || m_topology->splits[splitIndex].indicesCount == 0)
+    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->splits.size() || m_topology->splits[splitIndex].vertexCount == 0)
     {
         return;
     }
@@ -813,19 +813,19 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
     if (data.normals && !copyNormals)
     {
         aiLogger::Info("%s: Reset normals", getSchema()->getObject()->getFullName());
-        memset(data.normals, 0, split.indicesCount * sizeof(Abc::V3f));
+        memset(data.normals, 0, split.vertexCount * sizeof(abcV3));
     }
     
     if (data.uvs && !copyUvs)
     {
         aiLogger::Info("%s: Reset UVs", getSchema()->getObject()->getFullName());
-        memset(data.uvs, 0, split.indicesCount * sizeof(Abc::V2f));
+        memset(data.uvs, 0, split.vertexCount * sizeof(abcV2));
     }
     
     if (data.tangents && !copyTangents)
     {
         aiLogger::Info("%s: Reset tangents", getSchema()->getObject()->getFullName());
-        memset(data.tangents, 0, split.indicesCount * sizeof(Imath::V4f));
+        memset(data.tangents, 0, split.vertexCount * sizeof(abcV4));
     }
 
     abcV3 bbmin = positions[indices[o]];
@@ -1527,6 +1527,9 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
     DebugLog("aiPolyMesh::getSummary()");
     
     summary.topologyVariance = getTopologyVariance();
+    summary.peakVertexCount = getPeakVertexCount();
+    summary.peakIndexCount = getPeakIndexCount();
+    summary.peakSubmeshCount = ceildiv(summary.peakIndexCount, 64998);
 }
 
 

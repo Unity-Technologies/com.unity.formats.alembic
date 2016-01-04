@@ -83,6 +83,9 @@
     <ClInclude Include="Importer\aiProperty.h">
       <Filter>Importer</Filter>
     </ClInclude>
+    <ClInclude Include="Foundation\aiMisc.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GraphicsDevice">
