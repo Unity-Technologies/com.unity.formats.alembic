@@ -1,7 +1,9 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTextureMesh) && defined(aiSupportD3D9)
+#if defined(aiSupportTexture) && defined(aiSupportD3D9)
 #include "aiGraphicsDevice.h"
+#include "aiLogger.h"
+#include "aiMisc.h"
 #include <d3d9.h>
 const int aiD3D9MaxStagingTextures = 32;
 
@@ -12,12 +14,12 @@ public:
     ~aiGraphicsDeviceD3D9();
     void* getDevicePtr() override;
     int getDeviceType() override;
-    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiETextureFormat format) override;
-    bool writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize) override;
+    bool readTexture(void *outBuf, size_t bufsize, void *tex, int width, int height, aiTextureFormat format) override;
+    bool writeTexture(void *outTex, int width, int height, aiTextureFormat format, const void *buf, size_t bufsize) override;
 
 private:
     void clearStagingTextures();
-    IDirect3DSurface9* findOrCreateStagingTexture(int width, int height, aiETextureFormat format);
+    IDirect3DSurface9* findOrCreateStagingTexture(int width, int height, aiTextureFormat format);
 
 private:
     IDirect3DDevice9 *m_device;
@@ -56,24 +58,24 @@ void aiGraphicsDeviceD3D9::clearStagingTextures()
 
 
 
-static D3DFORMAT aiGetInternalFormatD3D9(aiETextureFormat fmt)
+static D3DFORMAT aiGetInternalFormatD3D9(aiTextureFormat fmt)
 {
     switch (fmt)
     {
-    case aiE_ARGB32:    return D3DFMT_A8R8G8B8;
+    case aiTextureFormat_ARGB32:    return D3DFMT_A8R8G8B8;
 
-    case aiE_ARGBHalf:  return D3DFMT_A16B16G16R16F;
-    case aiE_RGHalf:    return D3DFMT_G16R16F;
-    case aiE_RHalf:     return D3DFMT_R16F;
+    case aiTextureFormat_ARGBHalf:  return D3DFMT_A16B16G16R16F;
+    case aiTextureFormat_RGHalf:    return D3DFMT_G16R16F;
+    case aiTextureFormat_RHalf:     return D3DFMT_R16F;
 
-    case aiE_ARGBFloat: return D3DFMT_A32B32G32R32F;
-    case aiE_RGFloat:   return D3DFMT_G32R32F;
-    case aiE_RFloat:    return D3DFMT_R32F;
+    case aiTextureFormat_ARGBFloat: return D3DFMT_A32B32G32R32F;
+    case aiTextureFormat_RGFloat:   return D3DFMT_G32R32F;
+    case aiTextureFormat_RFloat:    return D3DFMT_R32F;
     }
     return D3DFMT_UNKNOWN;
 }
 
-IDirect3DSurface9* aiGraphicsDeviceD3D9::findOrCreateStagingTexture(int width, int height, aiETextureFormat format)
+IDirect3DSurface9* aiGraphicsDeviceD3D9::findOrCreateStagingTexture(int width, int height, aiTextureFormat format)
 {
     if (m_stagingTextures.size() >= aiD3D9MaxStagingTextures) {
         clearStagingTextures();
@@ -101,34 +103,7 @@ IDirect3DSurface9* aiGraphicsDeviceD3D9::findOrCreateStagingTexture(int width, i
 }
 
 
-template<class T>
-struct RGBA
-{
-    T r,g,b,a;
-};
-
-template<class T>
-inline void BGRA_RGBA_conversion(RGBA<T> *data, int numPixels)
-{
-    for (int i = 0; i < numPixels; ++i) {
-        std::swap(data[i].r, data[i].b);
-    }
-}
-
-template<class T>
-inline void copy_with_BGRA_RGBA_conversion(RGBA<T> *dst, const RGBA<T> *src, int numPixels)
-{
-    for (int i = 0; i < numPixels; ++i) {
-        RGBA<T>       &d = dst[i];
-        const RGBA<T> &s = src[i];
-        d.r = s.b;
-        d.g = s.g;
-        d.b = s.r;
-        d.a = s.a;
-    }
-}
-
-bool aiGraphicsDeviceD3D9::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiETextureFormat format)
+bool aiGraphicsDeviceD3D9::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, aiTextureFormat format)
 {
     HRESULT hr;
     IDirect3DTexture9 *tex = (IDirect3DTexture9*)tex_;
@@ -173,8 +148,8 @@ bool aiGraphicsDeviceD3D9::readTexture(void *outBuf, size_t bufsize, void *tex_,
             surfDst->UnlockRect();
 
             // D3D9 の ARGB32 のピクセルの並びは BGRA になっているので並べ替える
-            if (format == aiE_ARGB32) {
-                BGRA_RGBA_conversion((RGBA<uint8_t>*)outBuf, bufsize / 4);
+            if (format == aiTextureFormat_ARGB32) {
+                BGRA2RGBA((RGBA<uint8_t>*)outBuf, bufsize / 4);
             }
             ret = true;
         }
@@ -184,7 +159,7 @@ bool aiGraphicsDeviceD3D9::readTexture(void *outBuf, size_t bufsize, void *tex_,
     return ret;
 }
 
-bool aiGraphicsDeviceD3D9::writeTexture(void *outTex, int width, int height, aiETextureFormat format, const void *buf, size_t bufsize)
+bool aiGraphicsDeviceD3D9::writeTexture(void *outTex, int width, int height, aiTextureFormat format, const void *buf, size_t bufsize)
 {
     int psize = aiGetPixelSize(format);
     int pitch = psize * width;
@@ -212,8 +187,8 @@ bool aiGraphicsDeviceD3D9::writeTexture(void *outTex, int width, int height, aiE
         int wpitch = locked.Pitch;
 
         // こちらも ARGB32 の場合 BGRA に並べ替える必要がある
-        if (format == aiE_ARGB32) {
-            copy_with_BGRA_RGBA_conversion((RGBA<uint8_t>*)wpixels, (RGBA<uint8_t>*)rpixels, bufsize / 4);
+        if (format == aiTextureFormat_ARGB32) {
+            CopyWithBGRA2RGBA((RGBA<uint8_t>*)wpixels, (RGBA<uint8_t>*)rpixels, bufsize / 4);
         }
         else {
             memcpy(wpixels, rpixels, bufsize);
