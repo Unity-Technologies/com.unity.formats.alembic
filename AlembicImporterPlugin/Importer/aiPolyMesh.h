@@ -1,8 +1,7 @@
 #ifndef aiPolyMesh_h
 #define aiPolyMesh_h
 
-typedef std::set<size_t> Faceset;
-
+typedef std::vector<size_t> Faceset;
 typedef std::vector<Faceset> Facesets;
 
 struct SubmeshKey
@@ -146,24 +145,24 @@ public:
     int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile);
     int getSplitSubmeshCount(int splitIndex) const;
 
-    inline Submeshes::iterator submeshBegin() { return submeshes.begin(); }
-    inline Submeshes::iterator submeshEnd() { return submeshes.end(); }
+    inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
+    inline Submeshes::iterator submeshEnd() { return m_submeshes.end(); }
 
-    inline Submeshes::const_iterator submeshBegin() const { return submeshes.begin(); }
-    inline Submeshes::const_iterator submeshEnd() const { return submeshes.end(); }
+    inline Submeshes::const_iterator submeshBegin() const { return m_submeshes.begin(); }
+    inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
 public:
-    Abc::Int32ArraySamplePtr indices;
-    Abc::Int32ArraySamplePtr counts;
+    Abc::Int32ArraySamplePtr m_indices;
+    Abc::Int32ArraySamplePtr m_counts;
 
-    Submeshes submeshes;
+    Submeshes m_submeshes;
 
-    std::vector<int> faceSplitIndices;
-    std::vector<SplitInfo> splits;
+    std::vector<int> m_faceSplitIndices;
+    std::vector<SplitInfo> m_splits;
 
-    size_t tangentIndicesCount;
-    int *tangentIndices;
-    size_t tangentsCount;
+    size_t m_tangentIndicesCount;
+    int *m_tangentIndices;
+    size_t m_tangentsCount;
 };
 
 // ---
