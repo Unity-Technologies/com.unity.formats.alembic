@@ -2,6 +2,8 @@
 
 #if defined(aiSupportTexture) && defined(aiSupportOpenGL)
 #include "aiGraphicsDevice.h"
+#include "aiLogger.h"
+#include "aiMisc.h"
 
 #ifndef aiDontForceStaticGLEW
 #define GLEW_STATIC

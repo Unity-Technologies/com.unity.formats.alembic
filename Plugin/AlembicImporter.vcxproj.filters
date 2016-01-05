@@ -44,6 +44,9 @@
     <ClCompile Include="Importer\aiProperty.cpp">
       <Filter>Importer</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D9.cpp">
+      <Filter>GraphicsDevice</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
