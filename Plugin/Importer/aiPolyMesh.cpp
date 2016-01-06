@@ -140,12 +140,29 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
     DebugLog("Topology::prepareSubmeshes()");
     
     Facesets facesets;
-    std::map<size_t, int> facesetIndices;
-    
+    std::vector<int> facesetIndices; // index -> face table
+
+
     m_submeshes.clear();
 
     if (inFacesets.count > 0)
     {
+        int index_count = 0;
+        int max_index = 0;
+        {
+            int n = inFacesets.count;
+            for (int i = 0; i < n; ++i)
+            {
+                int ngon = inFacesets.faceCounts[i];
+                for (int j = 0; j < ngon; ++j)
+                {
+                    max_index = std::max<int>(max_index, inFacesets.faceIndices[index_count++]);
+                }
+            }
+        }
+        facesetIndices.resize(max_index, -1);
+
+
         size_t index = 0;
         int defaultFacesetIndex = -1;
 
@@ -172,11 +189,12 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
             }
         }
 
-        for (size_t i=0; i<m_counts->size(); ++i)
-        {
-            if (facesetIndices.find(i) == facesetIndices.end())
+        if (defaultFacesetIndex != -1) {
+            for (size_t i=0; i<m_counts->size(); ++i)
             {
-                facesetIndices[i] = defaultFacesetIndex;
+                if (facesetIndices[i] == -1) {
+                    facesetIndices[i] = defaultFacesetIndex;
+                }
             }
         }
     }
@@ -186,14 +204,13 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         if (uvs.valid() && submeshPerUVTile)
         {
             facesets.resize(1);
-            
+            facesetIndices.resize(m_counts->size(), -1);
+
             Faceset &faceset = facesets[0];
-            
+
             for (size_t i=0; i<m_counts->size(); ++i)
             {
                 faceset.push_back(i);
-
-                facesetIndices[i] = -1;
             }
         }
     }
