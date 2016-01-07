@@ -190,6 +190,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         }
 
         if (defaultFacesetIndex != -1) {
+            facesetIndices.resize(m_counts->size(), -1);
             for (size_t i=0; i<m_counts->size(); ++i)
             {
                 if (facesetIndices[i] == -1) {
