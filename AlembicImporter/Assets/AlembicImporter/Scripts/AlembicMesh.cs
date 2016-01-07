@@ -413,6 +413,7 @@ public class AlembicMesh : AlembicElement
                             materials[i] = currentMaterials[i];
                         }
 
+#if UNITY_EDITOR
                         for (int i=copyTo; i<split.submeshCount; ++i)
                         {
                             Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
@@ -420,6 +421,7 @@ public class AlembicMesh : AlembicElement
                             
                             materials[i] = material;
                         }
+#endif
 
                         renderer.sharedMaterials = materials;
                     }
@@ -477,16 +479,17 @@ public class AlembicMesh : AlembicElement
             meshFilter.sharedMesh = mesh;
 
             MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-                
+
             if (renderer == null)
             {
                 renderer = gameObject.AddComponent<MeshRenderer>();
             }
-            
+
+#if UNITY_EDITOR
             Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
             material.name = "Material_0";
-
             renderer.sharedMaterial = material;
+#endif
         }
         else
         {
