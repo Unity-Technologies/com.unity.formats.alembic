@@ -1,31 +1,46 @@
-﻿#include "pch.h"
+#include "pch.h"
 
-#if defined(aiSupportTextureMesh)
+#if defined(aiSupportTexture)
 
 #include "aiGraphicsDevice.h"
 
 
-int aiGetPixelSize(aiETextureFormat format)
+int aiGetPixelSize(aiTextureFormat format)
 {
     switch (format)
     {
-    case aiE_ARGB32:    return 4;
+    case aiTextureFormat_ARGB32:    return 4;
 
-    case aiE_ARGBHalf:  return 8;
-    case aiE_RGHalf:    return 4;
-    case aiE_RHalf:     return 2;
+    case aiTextureFormat_ARGBHalf:  return 8;
+    case aiTextureFormat_RGHalf:    return 4;
+    case aiTextureFormat_RHalf:     return 2;
 
-    case aiE_ARGBFloat: return 16;
-    case aiE_RGFloat:   return 8;
-    case aiE_RFloat:    return 4;
+    case aiTextureFormat_ARGBFloat: return 16;
+    case aiTextureFormat_RGFloat:   return 8;
+    case aiTextureFormat_RFloat:    return 4;
 
-    case aiE_ARGBInt:   return 16;
-    case aiE_RGInt:     return 8;
-    case aiE_RInt:      return 4;
-    default: break;
+    case aiTextureFormat_ARGBInt:   return 16;
+    case aiTextureFormat_RGInt:     return 8;
+    case aiTextureFormat_RInt:      return 4;
     }
     return 0;
 }
+
+
+namespace {
+    thread_local std::vector<char> *g_conversion_buffer;
+}
+
+void* aiGetConversionBuffer(size_t size)
+{
+    if (g_conversion_buffer == nullptr)
+    {
+        g_conversion_buffer = new std::vector<char>();
+    }
+    g_conversion_buffer->resize(size);
+    return &(*g_conversion_buffer)[0];
+}
+
 
 
 aiIGraphicsDevice* aiCreateGraphicsDeviceOpenGL(void *device);
@@ -33,8 +48,8 @@ aiIGraphicsDevice* aiCreateGraphicsDeviceD3D9(void *device);
 aiIGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
 
 
-aiIGraphicsDevice *g_the_graphics_device;
-aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice() { return g_the_graphics_device; }
+aiIGraphicsDevice *g_theGraphicsDevice;
+aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice() { return g_theGraphicsDevice; }
 typedef aiIGraphicsDevice* (*aiGetGraphicsDeviceT)();
 
 
@@ -44,26 +59,26 @@ aiCLinkage aiExport void UnitySetGraphicsDevice(void* device, int deviceType, in
 #ifdef aiSupportD3D9
         if (deviceType == kGfxRendererD3D9)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceD3D9(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceD3D9(device);
         }
 #endif // aiSupportD3D9
 #ifdef aiSupportD3D11
         if (deviceType == kGfxRendererD3D11)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceD3D11(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceD3D11(device);
         }
 #endif // aiSupportD3D11
 #ifdef aiSupportOpenGL
         if (deviceType == kGfxRendererOpenGL)
         {
-            g_the_graphics_device = aiCreateGraphicsDeviceOpenGL(device);
+            g_theGraphicsDevice = aiCreateGraphicsDeviceOpenGL(device);
         }
 #endif // aiSupportOpenGL
     }
 
     if (eventType == kGfxDeviceEventShutdown) {
-        delete g_the_graphics_device;
-        g_the_graphics_device = nullptr;
+        delete g_theGraphicsDevice;
+        g_theGraphicsDevice = nullptr;
     }
 }
 
@@ -104,9 +119,9 @@ aiCLinkage aiExport void aiFinalizeGraphicsDevice()
 
 // PatchLibrary で突っ込まれたモジュールは UnitySetGraphicsDevice() が呼ばれないので、
 // DLL_PROCESS_ATTACH のタイミングで先にロードされているモジュールからデバイスをもらって同等の処理を行う。
-BOOL WINAPI DllMain(HINSTANCE module_handle, DWORD reason_for_call, LPVOID reserved)
+BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
 {
-    if (reason_for_call == DLL_PROCESS_ATTACH)
+    if (reasonForCall == DLL_PROCESS_ATTACH)
     {
         HMODULE m = ::GetModuleHandleA("AlembicImporter.dll");
         if (m) {
@@ -119,7 +134,7 @@ BOOL WINAPI DllMain(HINSTANCE module_handle, DWORD reason_for_call, LPVOID reser
             }
         }
     }
-    else if (reason_for_call == DLL_PROCESS_DETACH)
+    else if (reasonForCall == DLL_PROCESS_DETACH)
     {
     }
     return TRUE;

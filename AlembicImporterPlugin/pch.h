@@ -1,10 +1,15 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <map>
+#include <set>
+#include <vector>
+#include <deque>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <functional>
-#include <atomic>
+#include <limits>
+#include <sstream>
+#include <type_traits>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
@@ -12,30 +17,27 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
+#define aiImpl
+#define aeImpl
+#define aeDebugLog(...) 
+
+
 #ifdef _WIN32
-#define aiWindows
+    #define aiWindows
 #endif // _WIN32
 
 #define aiCLinkage extern "C"
 #ifdef _MSC_VER
-#define aiExport __declspec(dllexport)
+    #define aiExport __declspec(dllexport)
 #else
-#define aiExport __attribute__((visibility("default")))
+    #define aiExport __attribute__((visibility("default")))
 #endif
 
-#ifdef aiDebug
-void aiDebugLogImpl(const char* fmt, ...);
-#define aiDebugLog(...) aiDebugLogImpl(__VA_ARGS__)
-#ifdef aiVerboseDebug
-#define aiDebugLogVerbose(...) aiDebugLogImpl(__VA_ARGS__)
+#if defined(aiDebug) || defined(aiDebugLog)
+    #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
 #else
-#define aiDebugLogVerbose(...)
+    #define DebugLog(...)
 #endif
-#else
-#define aiDebugLog(...)
-#define aiDebugLogVerbose(...)
-#endif
-
 
 #ifdef aiWindows
 #include <windows.h>
@@ -70,19 +72,28 @@ void aiDebugLogImpl(const char* fmt, ...);
 
 using namespace Alembic;
 
+#define aiPI 3.14159265f
+
 typedef Imath::V2f      abcV2;
 typedef Imath::V3f      abcV3;
 typedef Imath::V4f      abcV4;
 typedef Imath::M44f     abcM44;
-typedef Abc::IObject    abcObject;
+typedef Imath::M44d     abcM44d;
+typedef Imath::Box3f    abcBox;
+typedef Imath::Box3d    abcBoxd;
+typedef Abc::chrono_t   abcChrono;
 
-struct  aiImportConfig;
+enum aiTextureFormat;
+
+struct  aiConfig;
 struct  aiCameraData;
 struct  aiXFormData;
-struct  aiPolyMeshSchemaSummary;
-struct  aiPolyMeshSampleSummary;
-struct  aiSplitedMeshData;
-struct  aiTextureMeshData;
+struct  aiMeshSummary;
+struct  aiMeshSampleSummary;
+struct  aiMeshSampleData;
+struct  aiSubmeshSummary;
+struct  aiSubmeshData;
+struct  aiFacesets;
 
 class   aiContext;
 class   aiObject;
@@ -94,11 +105,12 @@ class   aiPolyMesh;
 class   aiPolyMeshSample;
 class   aiPoints;
 class   aiPointsSample;
+struct  aiPointsSampleData;
 class   aiCurves;
 class   aiCurvesSample;
+struct  aiCurvesSampleData;
+class   aiSubD;
+class   aiSubDSample;
+struct  aiSubDSampleData;
 class   aiCamera;
 class   aiCameraSample;
-class   aiLight;
-class   aiLightSample;
-class   aiMaterial;
-class   aiMaterialSample;

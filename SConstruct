@@ -6,7 +6,6 @@ import excons
 from excons.tools import unity
 from excons.tools import tbb
 from excons.tools import dl
-from excons.tools import gl
 from excons.tools import glew
 
 use_externals = (sys.platform == "win32" and excons.Build64() and excons.GetArgument("use-externals", 1, int) != 0)
@@ -25,25 +24,30 @@ lib_dirs = []
 libs = []
 embed_libs = []
 customs = []
-install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs")}
-sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp", "AddLibraryPath.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
+install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs*"),
+                 "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs*"),
+                 "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader*")}
+sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
 sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
 
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
 
-if excons.GetArgument("texture-mesh", 1, int) != 0:
+if excons.GetArgument("debug-log", 0, int) != 0:
+  defines.append("aiDebugLog")
+
+if excons.GetArgument("texture-mesh", 0, int) != 0:
   defines.append("aiSupportTextureMesh")
   sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
-  install_files["unity/AlembicImporter/Meshes"] = ["AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset"]
-  install_files["unity/AlembicImporter/Materials"] = ["AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat"]
-  install_files["unity/AlembicImporter/Shaders"] = ["AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc",
-                                                    "AlembicImporter/Assets/AlembicImporter/Shaders/AIStandard.shader"]
+  install_files["unity/AlembicImporter/Meshes"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset*")
+  install_files["unity/AlembicImporter/Materials"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat*")
+  install_files["unity/AlembicImporter/Shaders"].extend(glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc*") +
+                                                        glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AIStandard.shader*"))
   
   if excons.GetArgument("opengl", 1, int) != 0:
     defines.extend(["aiSupportOpenGL", "aiDontForceStaticGLEW"])
     sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceOpenGL.cpp")
-    customs.extend([glew.Require, gl.Require])
+    customs.append(glew.Require)
 
   if sys.platform == "win32":
     if excons.GetArgument("d3d9", 1, int) != 0:
@@ -81,12 +85,13 @@ if use_externals:
     shutil.rmtree(lib_dir)
 
   dll_pattern = os.path.join(excons.OutputBaseDirectory(), "unity", "AlembicImporter", "Plugins", "x86_64", "*.dll")
-  keep_names = ["AlembicImporter", "AddLibraryPath"]
+  keep_names = ["AlembicImporter"]
   dlls_to_remove = filter(lambda x: os.path.splitext(os.path.basename(x))[0] not in keep_names, glob.glob(dll_pattern))
   for dll in dlls_to_remove:
     os.remove(dll)
 
 else:
+  excons.SetArgument("c++1", 1)
   SConscript("alembic/SConstruct")
   
   Import("RequireAlembic")
@@ -124,23 +129,7 @@ tester = {"name": "tester",
           "custom": [dl.Require],
           "srcs": ["TestData/tester.cpp"]}
 
-if sys.platform == "win32":
-  # This also looks like a ugly hack that may no be necessary if unity provided
-  # us with some per project directory where we can drop dependencies in...
-  path_hack = {"name": "AddLibraryPath",
-               "type": "dynamicmodule",
-               "custom": [dl.Require],
-               "srcs": ["AlembicImporterPlugin/AddLibraryPath.cpp"]}
-
-  unity.Plugin(path_hack, package="AlembicImporter")
-
-  # Add 'AddLibraryPath' as a dependency for 'AlembicImporter'
-  importer["deps"] = ["AddLibraryPath"]
-
-  targets = [path_hack, importer, tester]
-
-else:
-  targets = [importer, tester]
+targets = [importer, tester]
 
 excons.DeclareTargets(env, targets)
 

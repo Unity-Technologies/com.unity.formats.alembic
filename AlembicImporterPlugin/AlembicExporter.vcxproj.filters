@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Exporter\aeObject.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aeContext.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aePoints.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aePolyMesh.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aeXForm.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\aeCamera.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter\AlembicExporter.cpp">
+      <Filter>Exporter</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Exporter\aeObject.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aeContext.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aeCamera.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aePoints.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aePolyMesh.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\aeXForm.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter\AlembicExporter.h">
+      <Filter>Exporter</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Exporter">
+      <UniqueIdentifier>{714bf871-4c1d-47ae-8d74-1967d46b6932}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
