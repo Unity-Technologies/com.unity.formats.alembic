@@ -31,23 +31,33 @@ public class aeAPI
 
     public enum aePropertyType
     {
-        // array types
-        FloatArray,
-        IntArray,
-        BoolArray,
-        Vec2Array,
-        Vec3Array,
-        Vec4Array,
-        Mat44Array,
+        Unknown,
 
         // scalar types
-        Float,
-        Int,
         Bool,
-        Vec2,
-        Vec3,
-        Vec4,
-        Mat44,
+        Int,
+        UInt,
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Float4x4,
+
+        // array types
+        BoolArray,
+        IntArray,
+        UIntArray,
+        FloatArray,
+        Float2Array,
+        Float3Array,
+        Float4Array,
+        Float4x4Array,
+
+        ScalarTypeBegin = Bool,
+        ScalarTypeEnd = Float4x4,
+
+        ArrayTypeBegin = BoolArray,
+        ArrayTypeEnd = Float4x4Array,
     };
 
     public struct aeContext { public IntPtr ptr; }

@@ -72,6 +72,38 @@ public class AbcAPI
         Heterogeneous
     }
 
+    public enum aiPropertyType
+    {
+        Unknown,
+
+        // scalar types
+        Bool,
+        Int,
+        UInt,
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Float4x4,
+
+        // array types
+        BoolArray,
+        IntArray,
+        UIntArray,
+        FloatArray,
+        Float2Array,
+        Float3Array,
+        Float4Array,
+        Float4x4Array,
+
+        ScalarTypeBegin = Bool,
+        ScalarTypeEnd = Float4x4,
+
+        ArrayTypeBegin = BoolArray,
+        ArrayTypeEnd = Float4x4Array,
+    };
+
+
     public enum aiTextureFormat
     {
         Unknown,
@@ -131,6 +163,9 @@ public class AbcAPI
     public struct aiMeshSummary
     {
         [MarshalAs(UnmanagedType.U4)] public aiTopologyVariance topologyVariance;
+        public int peakVertexCount;
+        public int peakIndexCount;
+        public int peakSubmeshCount;
     }
 
     public struct aiMeshSampleSummary
@@ -197,6 +232,11 @@ public class AbcAPI
         public System.IntPtr ptr;
     }
 
+    public struct aiProperty
+    {
+        public System.IntPtr ptr;
+    }
+
     public struct aiSample
     {
         public System.IntPtr ptr;
@@ -212,6 +252,12 @@ public class AbcAPI
         public int count;
     }
 
+    public struct aiPropertyData
+    {
+        public IntPtr data;
+        public int size;
+        aiPropertyType type;
+    }
 
 
 
@@ -229,7 +275,9 @@ public class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
     [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-    
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
+    [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
+
     [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
     [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
@@ -264,6 +312,15 @@ public class AbcAPI
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern void        aiPointsGetData(aiSample sample, ref aiPointsSampleData data);
+
+    [DllImport("AlembicImporter")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
+    [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
+    [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByName(aiSchema schema, string name);
+    [DllImport("AlembicImporter")] public static extern IntPtr          aiPropertyGetNameS(aiProperty prop);
+    [DllImport("AlembicImporter")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
+    [DllImport("AlembicImporter")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData o_data);
+
+
     // currently tex must be ARGBFloat
     [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
     // currently tex must be RInt

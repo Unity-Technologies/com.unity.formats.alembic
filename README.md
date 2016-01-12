@@ -7,10 +7,12 @@
 
 ## Alembic?
 Alembic は主に映像業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  映像業界では、スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを Alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
+Alembic 本家: http://www.alembic.io/
 
 近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。ゲームの 3D 録画のような新たな使い方も考えられます。  
 
-Alembic 本家: http://www.alembic.io/
+本プラグインは Unity で Alembic のインポートとエクスポートを実現します。
+現状 Windows 専用で、Unity 5.2 以降で動作を確認済みです。(ソースレベルでは Mac, Linux などでもコンパイルできて動くはずですが、未確認です)  
 
 ## Alembic Importer
 ![example](Screenshots/alembic_example.gif)  
@@ -31,15 +33,12 @@ Alembic ファイルに含まれるノード群を Unity 側で GameObject と�
 Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
 MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力), Camera の書き出しに対応しており、カスタムハンドラを書けば独自のデータも出力できるようになっています。  
 
-<img align="right" src="Screenshots/Batching.png">
-現状 64 bit Windows 専用で、Unity 5.2 以降で動作を確認済みです。(ソースレベルでは Mac, Linux でもコンパイルできて動くはずですが、未確認です)  
-下準備として、**Static Batching、Dynamic Batching を無効化しておく必要があります**。これを怠ると Batching された後の Mesh 群が書き出されてしまい、場合によってはデータが数倍に膨れ上がる上に結果も変わってしまいます。  
-Batching の設定は Edit -> Project Settings -> Player の Rendering 項目の中にあります。  
-
----  
 
 エクスポートを行うには、上記パッケージをインポート後、AlembicExporter  コンポーネントを適当なオブジェクトに追加します。
-以下は各項目の説明です。
+注意すべき点として、**AlembicExporter コンポーネントは追加時に自動的に Batching を無効化します。** 有効なままだと Batching された後の Mesh 群が書き出されてしまい、場合によってはデータが数倍に膨れ上がる上に結果も変わってしまうためです。  
+Batching の設定を変えたい場合、設定項目は Edit -> Project Settings -> Player の Rendering 項目の中にあります。  
+
+以下は AlembicExporter の各項目の説明です。
 <img align="right" src="Screenshots/AlembicExporter.png">
 - Output Path  
   出力パスを指定します。  
@@ -92,6 +91,8 @@ Alembic 側のノードには名前に "(0000283C)" のような ID が付与さ
 
 
 ## History
+- 2016/01/07
+  - [Importer/Exporter] x86 版プラグインを追加
 - 2015/12/28
   - [Importer/Exporter] VisualStudio ランタイムへの依存を除去
 - 2015/12/25
@@ -99,7 +100,7 @@ Alembic 側のノードには名前に "(0000283C)" のような ID が付与さ
 - 2015/06/30
   - Alembic Importer 公開
 
-    
+
 ## Thanks
 - Alembic およびそれに付随するライブラリ群 (HDF5, ILMBase) を使用しています。  
   http://www.alembic.io/

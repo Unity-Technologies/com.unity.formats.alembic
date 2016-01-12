@@ -1,5 +1,7 @@
 Shader "Alembic/PointsColorBall" {
 Properties {
+    [Toggle(APPLY_TRANSFORM)] _ApplyTransform("Apply Transform", Int) = 1
+    [Toggle(APPLY_SMOOTHING)] _ApplySmoothing("Apply Smoothing", Int) = 1
     _ColorBuffer("Color", 2D) = "white" {}
     _RandomBuffer("Random", 2D) = "white" {}
     _RandomDiffuse("Random Diffuse", Float) = 0.0
@@ -12,8 +14,10 @@ SubShader{
     Tags { "RenderType" = "Opaque" "Queue" = "Geometry+1" }
 
 CGPROGRAM
-#pragma target 3.0
+#pragma target 5.0
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
+#pragma multi_compile ___ APPLY_TRANSFORM
+#pragma multi_compile ___ APPLY_SMOOTHING
 
 #include "Assets/AlembicImporter/Shaders/PseudoInstancing.cginc"
 
@@ -26,11 +30,30 @@ float _Emission;
 float _Glossiness;
 float _Metallic;
 float _RandomDiffuse;
+float4x4 _Transform;
 
 struct Input {
     float4 color;
+#if APPLY_SMOOTHING
+    float4 world_pos;
+    float4 sphere;
+#endif // APPLY_SMOOTHING
 };
 
+float3 IntersectionRayPlane(float3 ray_pos, float3 ray_dir, float4 plane)
+{
+    float t = (-dot(ray_pos, plane.xyz) - plane.w) / dot(plane.xyz, ray_dir);
+    return ray_pos + ray_dir * t;
+}
+
+float3 IntersectionEyeViewPlane(float3 world_pos, float3 plane_pos)
+{
+    float3 camera_dir = normalize(_WorldSpaceCameraPos.xyz - plane_pos);
+    float4 plane = float4(camera_dir, dot(plane_pos, -camera_dir));
+    float3 ray_pos = _WorldSpaceCameraPos.xyz;
+    float3 ray_dir = normalize(world_pos - _WorldSpaceCameraPos.xyz);
+    return IntersectionRayPlane(ray_pos, ray_dir, plane);
+}
 
 float4 Random(float iid)
 {
@@ -63,13 +86,34 @@ void vert(inout appdata_full I, out Input O)
     float4 rand = Random(iid);
 
     ApplyInstanceTransform(iid, I.vertex);
+#if APPLY_TRANSFORM
+    I.vertex = mul(_Transform, I.vertex);
+    I.normal = normalize(mul(_Transform, float4(I.normal, 0.0)).xyz);
+#endif
     I.vertex.xyz += rand.xyz * _RandomDiffuse;
 
     O.color = GetColor(rand.x);
+#if APPLY_SMOOTHING
+    O.world_pos = I.vertex;
+    float3 sphere_pos = GetInstanceTranslation(iid) + (rand.xyz * _RandomDiffuse);
+#if APPLY_TRANSFORM
+    sphere_pos += float3(_Transform[0].w, _Transform[1].w, _Transform[2].w);
+#endif
+    float sphere_radius = GetModelScale().x * 0.5 * 0.9;
+    O.sphere = float4(sphere_pos, sphere_radius);
+#endif // APPLY_SMOOTHING
 }
 
 void surf(Input I, inout SurfaceOutputStandard O)
 {
+#if APPLY_SMOOTHING
+    float3 proj_pos = IntersectionEyeViewPlane(I.world_pos.xyz, I.sphere.xyz);
+    float proj_dist = length(proj_pos - I.sphere.xyz);
+    if (proj_dist > I.sphere.w) {
+        discard;
+    }
+#endif // APPLY_SMOOTHING
+
     float4 c = I.color;
     O.Albedo = c.rgb;
     O.Metallic = _Metallic;
