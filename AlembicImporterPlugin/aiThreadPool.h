@@ -1,4 +1,4 @@
-﻿#ifndef aiThreadPool_h
+#ifndef aiThreadPool_h
 #define aiThreadPool_h
 
 #ifndef aiWithTBB
@@ -31,8 +31,8 @@ private:
 private:
     std::vector< std::thread > m_workers;
     std::deque< std::function<void()> > m_tasks;
-    std::mutex m_queue_mutex;
-    std::condition_variable m_condition;
+    std::mutex m_queueMutex;
+    std::condition_variable m_queueCondition;
     bool m_stop;
 };
 
@@ -43,25 +43,29 @@ class aiTaskGroup
 public:
     aiTaskGroup();
     ~aiTaskGroup();
+
     template<class F> void run(const F &f);
     void wait();
     void taskDone();
 
+    void taskDone();
+
 private:
-    int m_active_tasks;
-    std::mutex m_task_mutex;
-    std::condition_variable m_condition;
+    int m_activeTasks;
+    std::mutex m_taskMutex;
+    std::condition_variable m_taskCondition;
 };
 
 template<class F>
 void aiTaskGroup::run(const F &f)
 {
     {
-        std::unique_lock<std::mutex> lock(m_task_mutex);
-        ++m_active_tasks;
+        std::unique_lock<std::mutex> lock(m_taskMutex);
+
+        ++m_activeTasks;
     }
     
-    aiThreadPool::getInstance().enqueue([this, f](){
+    aiThreadPool::getInstance().enqueue([this, f]() {
         f();
         this->taskDone();
     });
