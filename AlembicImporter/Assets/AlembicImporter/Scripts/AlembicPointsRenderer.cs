@@ -20,6 +20,7 @@ public class AlembicPointsRenderer : MonoBehaviour
     public Material[] m_materials;
     public bool m_cast_shadow = false;
     public bool m_receive_shadow = false;
+    public float m_count_rate = 1.0f;
     public Vector3 m_model_scale = Vector3.one;
     public Vector3 m_trans_scale = Vector3.one;
 #if UNITY_EDITOR
@@ -215,7 +216,8 @@ public class AlembicPointsRenderer : MonoBehaviour
 
         var trans = GetComponent<Transform>();
         m_expanded_mesh.bounds = m_bounds;
-        instance_count = Mathf.Min(instance_count, max_instances);
+        m_count_rate = Mathf.Max(m_count_rate, 0.0f);
+        instance_count = Mathf.Min((int)(instance_count * m_count_rate), (int)(max_instances * m_count_rate));
         int batch_count = ceildiv(instance_count, m_instances_par_batch);
 
         // clone materials if needed
@@ -234,6 +236,7 @@ public class AlembicPointsRenderer : MonoBehaviour
         ForEachEveryMaterials((m) =>
         {
             m.SetInt("_NumInstances", instance_count);
+            m.SetVector("_CountRate", new Vector4(m_count_rate, 1.0f / m_count_rate, 0.0f, 0.0f));
             m.SetVector("_ModelScale", m_model_scale);
             m.SetVector("_TransScale", m_trans_scale);
             m.SetMatrix("_Transform", worldToLocalMatrix);

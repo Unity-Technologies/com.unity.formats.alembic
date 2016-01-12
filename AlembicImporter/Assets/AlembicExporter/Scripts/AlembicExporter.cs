@@ -213,7 +213,7 @@ public class AlembicExporter : MonoBehaviour
             m_abc = abc;
             m_target = target;
 
-            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Vec4Array);
+            m_prop_rotatrions = aeAPI.aeNewProperty(m_abc, "rotation", aeAPI.aePropertyType.Float4Array);
         }
 
         public override void Capture()
@@ -273,6 +273,16 @@ public class AlembicExporter : MonoBehaviour
             m_target.Capture();
         }
     }
+
+
+#if UNITY_EDITOR
+    void ForceDisableBatching()
+    {
+        var method = typeof(UnityEditor.PlayerSettings).GetMethod("SetBatchingForPlatform", BindingFlags.NonPublic | BindingFlags.Static);
+        method.Invoke(null, new object[] { BuildTarget.StandaloneWindows, 0, 0 });
+        method.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, 0, 0 });
+    }
+#endif
 
     #endregion
 
@@ -745,10 +755,14 @@ public class AlembicExporter : MonoBehaviour
     }
 
 
+
+#if UNITY_EDITOR
     void Reset()
     {
+        ForceDisableBatching();
         UpdateOutputPath();
     }
+#endif
 
     void OnEnable()
     {

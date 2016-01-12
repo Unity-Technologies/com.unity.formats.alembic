@@ -16,3 +16,6 @@ Temp/
 _tmp/
 _out/
 ipch/
+
+*.abc
+*.abc.meta
