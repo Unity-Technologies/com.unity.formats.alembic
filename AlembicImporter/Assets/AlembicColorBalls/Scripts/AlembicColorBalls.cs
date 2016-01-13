@@ -10,10 +10,10 @@ using UnityEditor;
 #endif
 
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(AlembicPointsRenderer))]
 public class AlembicColorBalls : MonoBehaviour
 {
-    public Material m_material;
     public Color[] m_colors = new Color[] { Color.red, Color.green, Color.blue };
     Texture2D m_color_texture;
 
