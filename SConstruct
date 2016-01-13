@@ -19,16 +19,21 @@ env = excons.MakeBaseEnv()
 # I don't know whst this whole PatchLibrary is. Looks like a hack that we don't
 # really need. Let's disable it for now by defining aiMaster
 defines = ["aiMaster"]
-inc_dirs = ["AlembicImporterPlugin"]
+inc_dirs = ["Plugin/Foundation", "Plugin/Importer"]
 lib_dirs = []
 libs = []
 embed_libs = []
 customs = []
 install_files = {"unity/AlembicImporter/Scripts": glob.glob("AlembicImporter/Assets/AlembicImporter/Scripts/*.cs*"),
                  "unity/AlembicImporter/Editor": glob.glob("AlembicImporter/Assets/AlembicImporter/Editor/*.cs*"),
-                 "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader*")}
-sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("AlembicImporterPlugin/*.cpp"))
-sources.extend(glob.glob("AlembicImporterPlugin/Schema/*.cpp"))
+                 "unity/AlembicImporter/Materials": glob.glob("AlembicImporter/Assets/AlembicImporter/Materials/AlembicPoints*"),
+                 "unity/AlembicImporter/Meshes": glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/Quad*") +
+                                                 glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/Cube*") +
+                                                 glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/IcoSphere*"),
+                 "unity/AlembicImporter/Shaders": glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/DataViz.shader*") +
+                                                  glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AlembicPoints*.shader*")}
+sources = filter(lambda x: os.path.basename(x) not in ["pch.cpp"], glob.glob("Plugin/Importer/*.cpp"))
+sources.extend(glob.glob("Plugin/Foundation/*.cpp"))
 
 if excons.GetArgument("debug", 0, int) != 0:
   defines.append("aiDebug")
@@ -38,7 +43,7 @@ if excons.GetArgument("debug-log", 0, int) != 0:
 
 if excons.GetArgument("texture-mesh", 0, int) != 0:
   defines.append("aiSupportTextureMesh")
-  sources.extend(["AlembicImporterPlugin/GraphicsDevice/aiGraphicsDevice.cpp"])
+  sources.extend(["Plugin/GraphicsDevice/aiGraphicsDevice.cpp"])
   install_files["unity/AlembicImporter/Meshes"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Meshes/IndexOnlyMesh.asset*")
   install_files["unity/AlembicImporter/Materials"] = glob.glob("AlembicImporter/Assets/AlembicImporter/Materials/AlembicStandard.mat*")
   install_files["unity/AlembicImporter/Shaders"].extend(glob.glob("AlembicImporter/Assets/AlembicImporter/Shaders/AICommon.cginc*") +
@@ -46,34 +51,27 @@ if excons.GetArgument("texture-mesh", 0, int) != 0:
   
   if excons.GetArgument("opengl", 1, int) != 0:
     defines.extend(["aiSupportOpenGL", "aiDontForceStaticGLEW"])
-    sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceOpenGL.cpp")
+    sources.append("Plugin/GraphicsDevice/aiGraphicsDeviceOpenGL.cpp")
     customs.append(glew.Require)
 
   if sys.platform == "win32":
     if excons.GetArgument("d3d9", 1, int) != 0:
       defines.append("aiSupportD3D9")
-      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D9.cpp")
+      sources.append("Plugin/GraphicsDevice/aiGraphicsDeviceD3D9.cpp")
 
     if excons.GetArgument("d3d11", 1, int) != 0:
       defines.append("aiSupportD3D11")
-      sources.append("AlembicImporterPlugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
+      sources.append("Plugin/GraphicsDevice/aiGraphicsDeviceD3D11.cpp")
 
 if use_externals:
   # we're on windows if we fall here
   
-  inc_dirs.extend(["AlembicImporterPlugin/external/ilmbase-2.2.0/Half",
-                   "AlembicImporterPlugin/external/ilmbase-2.2.0/Iex",
-                   "AlembicImporterPlugin/external/ilmbase-2.2.0/IexMath",
-                   "AlembicImporterPlugin/external/ilmbase-2.2.0/Imath",
-                   "AlembicImporterPlugin/external/ilmbase-2.2.0/IlmThread",
-                   "AlembicImporterPlugin/external/ilmbase-2.2.0/config",
-                   "AlembicImporterPlugin/external/hdf5-1.8.14/hl/src",
-                   "AlembicImporterPlugin/external/hdf5-1.8.14/src",
-                   "AlembicImporterPlugin/external/hdf5-1.8.14",
-                   "AlembicImporterPlugin/external/alembic-1_05_08/lib",
-                   "AlembicImporterPlugin/external/glew-1.12.0/include"])
+  inc_dirs.extend(["Plugin/external/ilmbase/include",
+                   "Plugin/external/HDF5/include",
+                   "Plugin/external/alembic/include",
+                   "Plugin/external/glew/include"])
   
-  lib_dirs.append("AlembicImporterPlugin/external/libs/x86_64")
+  lib_dirs.append("Plugin/external/libs/x86_64")
   
   # Cleanup build using custom alembic
   inc_dir = os.path.join(excons.OutputBaseDirectory(), "include")

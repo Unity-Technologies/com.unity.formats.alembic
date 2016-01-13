@@ -1549,4 +1549,3 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
     summary.peakSubmeshCount = ceildiv(summary.peakIndexCount, 64998);
 }
 
-
