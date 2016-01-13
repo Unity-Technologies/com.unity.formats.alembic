@@ -83,7 +83,7 @@ void vert(inout appdata_full I, out Input O)
 
     int iid = GetInstanceID(I.texcoord1.x);
     float objid = GetObjectID(iid);
-    float4 rand = Random(iid);
+    float4 rand = Random(objid);
 
     ApplyInstanceTransform(iid, I.vertex);
 #if APPLY_TRANSFORM
