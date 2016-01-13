@@ -8,8 +8,8 @@ int         _BatchBegin;
 
 sampler2D   _PositionBuffer;
 sampler2D   _IDBuffer;
-float4 _PositionBuffer_TexelSize;
-float4 _CountRate; // x: count rate, y: 1.0 / count rate
+float4      _PositionBuffer_TexelSize;
+float4      _CountRate; // x: count rate, y: 1.0 / count rate
 
 
 int     GetNumInstances()       { return _NumInstances; }

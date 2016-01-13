@@ -2,6 +2,7 @@ Shader "Alembic/PointsColorBall" {
 Properties {
     [Toggle(APPLY_TRANSFORM)] _ApplyTransform("Apply Transform", Int) = 1
     [Toggle(APPLY_SMOOTHING)] _ApplySmoothing("Apply Smoothing", Int) = 1
+    [Toggle(APPLY_POINT_ID)]  _ApplyPointID("Apply Point ID", Int) = 1
     _ColorBuffer("Color", 2D) = "white" {}
     _RandomBuffer("Random", 2D) = "white" {}
     _RandomDiffuse("Random Diffuse", Vector) = (0.0, 0.0, 0.0)
@@ -18,6 +19,7 @@ CGPROGRAM
 #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 #pragma multi_compile ___ APPLY_TRANSFORM
 #pragma multi_compile ___ APPLY_SMOOTHING
+#pragma multi_compile ___ APPLY_POINT_ID
 
 #include "Assets/AlembicImporter/Shaders/PseudoInstancing.cginc"
 
@@ -26,11 +28,11 @@ sampler2D _ColorBuffer;
 float4 _RandomBuffer_TexelSize;
 float4 _ColorBuffer_TexelSize;
 
-float _Emission;
-float _Glossiness;
-float _Metallic;
-float3 _RandomDiffuse;
-float4x4 _Transform;
+float       _Emission;
+float       _Glossiness;
+float       _Metallic;
+float3      _RandomDiffuse;
+float4x4    _Transform;
 
 struct Input {
     float4 color;
@@ -82,8 +84,12 @@ void vert(inout appdata_full I, out Input O)
     UNITY_INITIALIZE_OUTPUT(Input, O);
 
     int iid = GetInstanceID(I.texcoord1.x);
+#if APPLY_POINT_ID
     float objid = GetObjectID(iid);
     float4 rand = Random(objid);
+#else
+    float4 rand = Random(iid);
+#endif
 
     ApplyInstanceTransform(iid, I.vertex);
 #if APPLY_TRANSFORM
