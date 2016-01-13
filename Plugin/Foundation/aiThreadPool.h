@@ -48,8 +48,6 @@ public:
     void wait();
     void taskDone();
 
-    void taskDone();
-
 private:
     int m_activeTasks;
     std::mutex m_taskMutex;
