@@ -4,7 +4,7 @@ Properties {
     [Toggle(APPLY_SMOOTHING)] _ApplySmoothing("Apply Smoothing", Int) = 1
     _ColorBuffer("Color", 2D) = "white" {}
     _RandomBuffer("Random", 2D) = "white" {}
-    _RandomDiffuse("Random Diffuse", Float) = 0.0
+    _RandomDiffuse("Random Diffuse", Vector) = (0.0, 0.0, 0.0)
 
     _Emission("Emission", Range(0,1)) = 0.0
     _Glossiness ("Smoothness", Range(0,1)) = 0.5
@@ -29,7 +29,7 @@ float4 _ColorBuffer_TexelSize;
 float _Emission;
 float _Glossiness;
 float _Metallic;
-float _RandomDiffuse;
+float3 _RandomDiffuse;
 float4x4 _Transform;
 
 struct Input {
