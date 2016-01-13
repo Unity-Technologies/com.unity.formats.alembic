@@ -163,6 +163,12 @@ public class AlembicPointsRenderer : MonoBehaviour
         return m;
     }
 
+    public void RefleshMaterials()
+    {
+        m_actual_materials = null;
+        Flush();
+    }
+
     public void Flush()
     {
         if(m_mesh == null)
