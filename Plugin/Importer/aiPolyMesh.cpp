@@ -336,10 +336,6 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownT
     : super(schema)
     , m_topology(topo)
     , m_ownTopology(ownTopo)
-    , m_smoothNormalsCount(0)
-    , m_smoothNormals(0)
-    , m_tangentsCount(0)
-    , m_tangents(0)
 {
 }
 
@@ -348,16 +344,6 @@ aiPolyMeshSample::~aiPolyMeshSample()
     if (m_topology && m_ownTopology)
     {
         delete m_topology;
-    }
-
-    if (m_smoothNormals)
-    {
-        delete[] m_smoothNormals;
-    }
-
-    if (m_tangents)
-    {
-        delete[] m_tangents;
     }
 }
 
@@ -372,7 +358,7 @@ bool aiPolyMeshSample::hasNormals() const
         return false;
         break;
     default:
-        return (m_normals.valid() || m_smoothNormals);
+        return (m_normals.valid() || !m_smoothNormals.empty());
     }
 }
 
@@ -383,7 +369,7 @@ bool aiPolyMeshSample::hasUVs() const
 
 bool aiPolyMeshSample::hasTangents() const
 {
-    return (m_config.tangentsMode != TM_None && hasUVs() && m_tangents && m_topology->m_tangentIndices);
+    return (m_config.tangentsMode != TM_None && hasUVs() && !m_tangents.empty() && m_topology->m_tangentIndices);
 }
 
 bool aiPolyMeshSample::smoothNormalsRequired() const
@@ -403,21 +389,9 @@ void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
     aiLogger::Info("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
 
     size_t smoothNormalsCount = m_positions->size();
+    m_smoothNormals.resize(smoothNormalsCount);
+    std::fill(m_smoothNormals.begin(), m_smoothNormals.end(), abcV3());
 
-    if (!m_smoothNormals)
-    {
-        m_smoothNormals = new Abc::V3f[smoothNormalsCount];
-    }
-    else if (m_smoothNormalsCount != smoothNormalsCount)
-    {
-        delete[] m_smoothNormals;
-        m_smoothNormals = new Abc::V3f[smoothNormalsCount];
-    }
-    
-    // always reset as V3f default constructor doesn't initialize its members
-    memset(m_smoothNormals, 0, smoothNormalsCount * sizeof(Abc::V3f));
-
-    m_smoothNormalsCount = smoothNormalsCount;
 
     const auto &counts = *(m_topology->m_counts);
     const auto &indices = *(m_topology->m_indices);
@@ -468,10 +442,7 @@ void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
     }
 
     // Normalize normal vectors
-    for (size_t i=0; i<m_smoothNormalsCount; ++i)
-    {
-        m_smoothNormals[i].normalize();
-    }
+    for (abcV3& v : m_smoothNormals) { v.normalize(); }
 }
 
 void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3 *inN, bool indexedNormals)
@@ -559,28 +530,19 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN,
     size_t off = 0;
     bool ccw = config.swapFaceWinding;
     int ti1 = (ccw ? 2 : 1);
-    int ti2 = (ccw ? 1 : 2);    
+    int ti2 = (ccw ? 1 : 2);
+
     size_t tangentsCount = m_topology->m_tangentsCount;
+    m_tangents.resize(tangentsCount);
+    std::fill(m_tangents.begin(), m_tangents.end(), abcV4());
 
-    if (!m_tangents)
-    {
-        m_tangents = new Imath::V4f[tangentsCount];
-    }
-    else if (m_tangentsCount != tangentsCount)
-    {
-        delete[] m_tangents;
-        m_tangents = new Imath::V4f[tangentsCount];       
-    }
 
-    m_tangentsCount = tangentsCount;
 
     abcV3 *tan1 = new Abc::V3f[2 * tangentsCount];
     abcV3 *tan2 = tan1 + tangentsCount;
     int *tanNidxs = new int[tangentsCount];
     abcV3 T, B, dP1, dP2, tmp;
     abcV2 dUV1, dUV2;
-
-    memset(tan1, 0, 2 * tangentsCount * sizeof(Abc::V3f));
 
     for (size_t f=0; f<nf; ++f)
     {
@@ -690,7 +652,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     
     if (smoothNormalsRequired)
     {
-        if (!m_smoothNormals || topoChanged)
+        if (m_smoothNormals.empty() || topoChanged)
         {
             computeSmoothNormals(config);
             dataChanged = true;
@@ -698,12 +660,10 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     }
     else
     {
-        if (m_smoothNormals)
+        if (!m_smoothNormals.empty())
         {
             aiLogger::Info("%s: Clear smooth normals", getSchema()->getObject()->getFullName());
-            delete[] m_smoothNormals;
-            m_smoothNormals = 0;
-            m_smoothNormalsCount = 0;
+            m_smoothNormals.clear();
             dataChanged = true;
         }
     }
@@ -719,7 +679,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 
         if (smoothNormalsRequired)
         {
-            N = m_smoothNormals;
+            N = &m_smoothNormals[0];
         }
         else if (m_normals.valid())
         {
@@ -736,7 +696,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
             {
                 computeTangentIndices(config, N, Nindexed);
             }
-            if (!m_tangents || 
+            if (m_tangents.empty() || 
                 tangentsModeChanged ||
                 topoChanged)
             {
@@ -752,13 +712,11 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     
     if (!tangentsRequired)
     {
-        if (m_tangents)
+        if (!m_tangents.empty())
         {
             aiLogger::Info("%s: Clear tangents", getSchema()->getObject()->getFullName());
             
-            delete[] m_tangents;
-            m_tangents = 0;
-            m_tangentsCount = 0;
+            m_tangents.clear();
             dataChanged = true;
         }
 
@@ -1536,7 +1494,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
         
         if (smoothNormalsRequired)
         {
-            normals = ret->m_smoothNormals;
+            normals = &ret->m_smoothNormals[0];
         }
         else if (ret->m_normals.valid())
         {
