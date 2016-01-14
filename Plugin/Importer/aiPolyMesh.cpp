@@ -794,6 +794,12 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
     summary.hasTangents = hasTangents();
 }
 
+
+void aiPolyMeshSample::getData(aiMeshSampleData &data)
+{
+    // todo
+}
+
 int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
 {
     DebugLog("aiPolyMeshSample::getVertexBufferLength(splitIndex=%d)", splitIndex);

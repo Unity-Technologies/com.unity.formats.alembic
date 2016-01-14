@@ -22,16 +22,6 @@
 #define aeDebugLog(...) 
 
 
-#ifdef _WIN32
-    #define aiWindows
-#endif // _WIN32
-
-#define aiCLinkage extern "C"
-#ifdef _MSC_VER
-    #define aiExport __declspec(dllexport)
-#else
-    #define aiExport __attribute__((visibility("default")))
-#endif
 
 #if defined(aiDebug) || defined(aiDebugLog)
     #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
@@ -39,7 +29,7 @@
     #define DebugLog(...)
 #endif
 
-#ifdef aiWindows
+#ifdef _WIN32
 #include <windows.h>
 
 #ifndef aiNoAutoLink
@@ -68,7 +58,7 @@
 #include <d3d9.h>
 #endif // aiSupportD3D9
 
-#endif // aiWindows
+#endif // _WIN32
 
 using namespace Alembic;
 

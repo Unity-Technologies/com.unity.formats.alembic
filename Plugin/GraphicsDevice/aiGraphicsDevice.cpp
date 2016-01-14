@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #if defined(aiSupportTexture)
-
+#include "AlembicImporter.h"
 #include "aiGraphicsDevice.h"
 
 

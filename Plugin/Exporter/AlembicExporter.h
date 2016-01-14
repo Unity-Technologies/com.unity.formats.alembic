@@ -1,6 +1,8 @@
 #ifndef AlembicExporter_h
 #define AlembicExporter_h
 
+#include <cstdint>
+
 #define aeCLinkage extern "C"
 
 #ifdef aeImpl
@@ -12,10 +14,11 @@
 #else
     #ifdef _MSC_VER
         #define aeExport __declspec(dllimport)
-        #pragma commnet(lib, "AlembicExporter.lib")
+        #pragma comment(lib, "AlembicExporter.lib")
     #else
     #endif
 
+#ifndef AlembicImporter_h
     struct abcV2
     {
         float x, y;
@@ -26,12 +29,21 @@
 
     struct abcV3
     {
-        float x, y, x;
+        float x, y, z;
 
-        abcV2() {}
-        abcV2(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-     };
-#endif
+        abcV3() {}
+        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+    };
+
+    struct abcV4
+    {
+        float x, y, z, w;
+
+        abcV4() {}
+        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
+    };
+#endif // AlembicImporter_h
+#endif // aeImpl
 
 class aeContext;
 #ifdef aeImpl

@@ -10,6 +10,59 @@
 // 
 // #define aiWithTBB
 
+#include <cstdint>
+
+#ifdef _WIN32
+    #define aiWindows
+#endif // _WIN32
+
+#ifdef _MSC_VER
+    #define aiSTDCall __stdcall
+#else // _MSC_VER
+    #define aiSTDCall __attribute__((stdcall))
+#endif // _MSC_VER
+
+#define aiCLinkage extern "C"
+
+#ifdef aiImpl
+    #ifdef _MSC_VER
+        #define aiExport __declspec(dllexport)
+    #else
+        #define aiExport __attribute__((visibility("default")))
+    #endif
+#else
+    #ifdef _MSC_VER
+        #define aiExport __declspec(dllimport)
+        #pragma comment(lib, "AlembicImporter.lib")
+    #else
+    #endif
+
+#ifndef AlembicExporter_h
+    struct abcV2
+    {
+        float x, y;
+
+        abcV2() {}
+        abcV2(float _x, float _y) : x(_x), y(_y) {}
+    };
+
+    struct abcV3
+    {
+        float x, y, z;
+
+        abcV3() {}
+        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+    };
+
+    struct abcV4
+    {
+        float x, y, z, w;
+
+        abcV4() {}
+        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
+    };
+#endif // AlembicExporter_h
+#endif // aiImpl
 
 enum aiTextureFormat;
 
@@ -310,15 +363,9 @@ struct aiPropertyData
 };
 
 
-#ifdef _WIN32
-typedef void (__stdcall *aiNodeEnumerator)(aiObject *node, void *userData);
-typedef void (__stdcall *aiConfigCallback)(void *csObj, aiConfig *config);
-typedef void (__stdcall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
-#else
-typedef void (*aiNodeEnumerator)(aiObject *node, void *userData);
-typedef void (*aiConfigCallback)(void *csObj, aiConfig *config);
-typedef void (*aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
-#endif
+typedef void (aiSTDCall *aiNodeEnumerator)(aiObject *node, void *userData);
+typedef void (aiSTDCall *aiConfigCallback)(void *csObj, aiConfig *config);
+typedef void (aiSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
 
 
 aiCLinkage aiExport void            aiEnableFileLog(bool on, const char *path);
@@ -355,6 +402,9 @@ aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh);
+// direct copy (no splitting)
+aiCLinkage aiExport void            aiPolyMeshGetData(aiPolyMeshSample* sample, aiMeshSampleData* data);
+// copy with splitting
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);
 aiCLinkage aiExport int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
