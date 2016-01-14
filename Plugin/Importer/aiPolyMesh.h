@@ -183,6 +183,7 @@ public:
     bool tangentsRequired() const;
 
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
+    void getData(aiMeshSampleData &data);
 
     void computeTangentIndices(const aiConfig &config, const Abc::V3f *N, bool Nindexed);
     void computeTangents(const aiConfig &config, const Abc::V3f *N, bool Nindexed);

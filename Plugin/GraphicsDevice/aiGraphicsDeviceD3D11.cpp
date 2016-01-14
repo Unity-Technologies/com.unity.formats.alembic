@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #if defined(aiSupportTexture) && defined(aiSupportD3D11)
+#include "AlembicImporter.h"
 #include "aiGraphicsDevice.h"
 #include "aiLogger.h"
 #include "aiMisc.h"

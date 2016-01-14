@@ -202,6 +202,14 @@ aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, ai
     }
 }
 
+aiCLinkage aiExport void aiPolyMeshGetData(aiPolyMeshSample* sample, aiMeshSampleData* data)
+{
+    if (sample)
+    {
+        sample->getData(*data);
+    }
+}
+
 aiCLinkage aiExport int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
     return (sample ? sample->getVertexBufferLength(splitIndex) : 0);

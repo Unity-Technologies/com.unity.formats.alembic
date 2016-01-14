@@ -7,6 +7,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AlembicImporter", "AlembicI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AlembicExporter", "AlembicExporter.vcxproj", "{35E1C482-1AEE-4AAE-BBE9-0309CB84F321}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AAFAB54A-D125-4047-AC51-0B688A56BD96}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PointsRandomizer", "Tools\PointsRandomizer.vcxproj", "{AD022B67-4DBD-463E-A165-AEAE482AC97D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshTriangulator", "Tools\MeshTriangulator.vcxproj", "{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -41,8 +47,36 @@ Global
 		{35E1C482-1AEE-4AAE-BBE9-0309CB84F321}.Release|Win32.Build.0 = Release|Win32
 		{35E1C482-1AEE-4AAE-BBE9-0309CB84F321}.Release|x64.ActiveCfg = Release|x64
 		{35E1C482-1AEE-4AAE-BBE9-0309CB84F321}.Release|x64.Build.0 = Release|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Debug|Win32.Build.0 = Debug|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Debug|x64.ActiveCfg = Debug|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Debug|x64.Build.0 = Debug|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Master|Win32.ActiveCfg = Master|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Master|Win32.Build.0 = Master|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Master|x64.ActiveCfg = Master|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Master|x64.Build.0 = Master|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Release|Win32.ActiveCfg = Release|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Release|Win32.Build.0 = Release|Win32
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Release|x64.ActiveCfg = Release|x64
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D}.Release|x64.Build.0 = Release|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Debug|Win32.Build.0 = Debug|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Debug|x64.ActiveCfg = Debug|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Debug|x64.Build.0 = Debug|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Master|Win32.ActiveCfg = Master|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Master|Win32.Build.0 = Master|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Master|x64.ActiveCfg = Master|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Master|x64.Build.0 = Master|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Release|Win32.ActiveCfg = Release|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Release|Win32.Build.0 = Release|Win32
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Release|x64.ActiveCfg = Release|x64
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AD022B67-4DBD-463E-A165-AEAE482AC97D} = {AAFAB54A-D125-4047-AC51-0B688A56BD96}
+		{A1B2ECAC-2BC0-4B24-A231-EFD8D226DC08} = {AAFAB54A-D125-4047-AC51-0B688A56BD96}
 	EndGlobalSection
 EndGlobal
