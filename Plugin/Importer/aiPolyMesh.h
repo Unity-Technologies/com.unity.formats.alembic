@@ -208,10 +208,8 @@ public:
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::Box3d m_bounds;
 
-    size_t m_smoothNormalsCount;
-    abcV3 *m_smoothNormals; 
-    size_t m_tangentsCount;
-    abcV4 *m_tangents;
+    std::vector<abcV3> m_smoothNormals;
+    std::vector<abcV4> m_tangents;
 
     Submeshes::iterator m_curSubmesh;
 };
