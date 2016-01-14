@@ -147,8 +147,8 @@ struct aiConfig
 {
     bool swapHandedness;
     bool swapFaceWinding;
-    int32_t normalsMode;
-    int32_t tangentsMode;
+    aiNormalsMode normalsMode;
+    aiTangentsMode tangentsMode;
     bool cacheTangentsSplits;
     float aspectRatio;
     bool forceUpdate;

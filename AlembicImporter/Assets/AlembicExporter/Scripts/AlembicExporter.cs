@@ -82,7 +82,7 @@ public class AlembicExporter : MonoBehaviour
         data.positions = GetArrayPtr(buf.vertices);
         if(buf.normals != null) { data.normals = GetArrayPtr(buf.normals); }
         if(buf.uvs != null)     { data.uvs = GetArrayPtr(buf.uvs); }
-        data.vertexCount = buf.vertices.Length;
+        data.positionCount = buf.vertices.Length;
         data.indexCount = buf.indices.Length;
 
         aeAPI.aePolyMeshWriteSample(abc, ref data);
