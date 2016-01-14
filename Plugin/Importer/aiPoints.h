@@ -10,7 +10,8 @@ public:
     virtual ~aiPointsSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
-    void fillData(aiPointsSampleData &data);
+    void getDataPointer(aiPointsSampleData &data);
+    void copyData(aiPointsSampleData &data);
 
 public:
     Abc::P3fArraySamplePtr m_positions;

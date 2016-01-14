@@ -178,10 +178,27 @@ public class AbcAPI
 
     public struct aiMeshSampleData
     {
+        // indices and their counts are available only when get by aiPolyMeshGetData()
         public IntPtr positions;
+        public IntPtr velocities;
         public IntPtr normals;
         public IntPtr uvs;
         public IntPtr tangents;
+
+        public IntPtr indices;
+        public IntPtr normalIndices;
+        public IntPtr uvIndices;
+        public IntPtr faces;
+
+        public int positionCount;
+        public int normalCount;
+        public int uvCount;
+
+        public int indexCount;
+        public int normalIndexCount;
+        public int uvIndexCount;
+        public int faceCount;
+
         public Vector3 center;
         public Vector3 size;
     }
@@ -311,7 +328,7 @@ public class AbcAPI
     [DllImport("AlembicImporter")] public static extern bool        aiHasPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
-    [DllImport("AlembicImporter")] public static extern void        aiPointsGetData(aiSample sample, ref aiPointsSampleData data);
+    [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsSampleData data);
 
     [DllImport("AlembicImporter")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);

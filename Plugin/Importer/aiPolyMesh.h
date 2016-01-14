@@ -183,10 +183,11 @@ public:
     bool tangentsRequired() const;
 
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
-    void getData(aiMeshSampleData &data);
+    void getDataPointer(aiMeshSampleData &data);
+    void copyData(aiMeshSampleData &data);
 
-    void computeTangentIndices(const aiConfig &config, const Abc::V3f *N, bool Nindexed);
-    void computeTangents(const aiConfig &config, const Abc::V3f *N, bool Nindexed);
+    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
+    void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeSmoothNormals(const aiConfig &config);
 
     int getVertexBufferLength(int splitIndex) const;
@@ -200,10 +201,13 @@ public:
 public:
     Topology *m_topology;
     bool m_ownTopology;
+
     Abc::P3fArraySamplePtr m_positions;
+    Abc::V3fArraySamplePtr m_velocities;
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
-    Abc::V3fArraySamplePtr m_velocities;
+    Abc::Box3d m_bounds;
+
     size_t m_smoothNormalsCount;
     abcV3 *m_smoothNormals; 
     size_t m_tangentsCount;
