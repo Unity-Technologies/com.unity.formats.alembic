@@ -132,15 +132,25 @@ public class aeAPI
 
     public struct aePolyMeshSampleData
     {
-        public IntPtr positions; // Vector3*
-        public IntPtr normals; // Vector3*. can be null
-        public IntPtr velocities; // Vector3*. can be null
-        public IntPtr uvs; // Vector2*. can be null
-        public IntPtr indices; // int*
-        public IntPtr faces; // int*. can be null. assume all faces are triangles if null
+        public IntPtr positions;        // Vector3*
+        public IntPtr velocities;       // Vector3*. can be null
+        public IntPtr normals;          // Vector3*. can be null
+        public IntPtr uvs;              // Vector2*. can be null
 
-        public int vertexCount;
+        public IntPtr indices;          // int*. 
+        public IntPtr normalIndices;    // int*. if null, assume same as indices
+        public IntPtr uvIndices;        // int*. if null, assume same as indices
+
+        public IntPtr faces;            // int*. if null, assume all faces are triangles
+
+        public int positionCount;       
+        public int normalCount;         // if 0, assume same as positionCount
+        public int uvCount;             // if 0, assume same as positionCount
+
         public int indexCount;
+        public int normalIndexCount;    // if 0, assume same as indexCount
+        public int uvIndexCount;        // if 0, assume same as indexCount
+
         public int faceCount;
     }
 

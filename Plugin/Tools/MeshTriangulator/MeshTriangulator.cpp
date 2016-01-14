@@ -6,6 +6,7 @@ struct MeshTriangulatorConfig
 {
     bool    triangulate;
     bool    expand_indices;
+    bool    split;
     bool    swap_handedness;
     bool    swap_face_winding;
     abcV3   scale;
@@ -13,6 +14,7 @@ struct MeshTriangulatorConfig
     MeshTriangulatorConfig()
         : triangulate(true)
         , expand_indices(true)
+        , split(false)
         , swap_handedness(false)
         , swap_face_winding(false)
         , scale(1.0f, 1.0f, 1.0f)

@@ -157,15 +157,25 @@ struct aeXFormSampleData
 struct aePolyMeshSampleData
 {
     const abcV3 *positions;
-    const abcV3 *velocities; // can be null
-    const abcV3 *normals; // can be null
-    const abcV2 *uvs; // can be null
-    const int *indices;
-    const int *faces; // can be null. assume all faces are triangles if null
+    const abcV3 *velocities;    // can be null
+    const abcV3 *normals;       // can be null
+    const abcV2 *uvs;           // can be null
 
-    int vertexCount;
+    const int *indices;
+    const int *normalIndices;   // if null, assume same as indices
+    const int *uvIndices;       // if null, assume same as indices
+
+    const int *faces;           // if null, assume all faces are triangles
+
+    int positionCount;
+    int normalCount;            // if 0, assume same as positionCount
+    int uvCount;                // if 0, assume same as positionCount
+
     int indexCount;
-    int faceCount;
+    int normalIndexCount;       // if 0, assume same as indexCount
+    int uvIndexCount;           // if 0, assume same as indexCount
+
+    int faceCount;              // only relevant if faces!=nullptr
 
     aePolyMeshSampleData()
         : positions(nullptr)
@@ -173,9 +183,15 @@ struct aePolyMeshSampleData
         , normals(nullptr)
         , uvs(nullptr)
         , indices(nullptr)
+        , normalIndices(nullptr)
+        , uvIndices(nullptr)
         , faces(nullptr)
-        , vertexCount(0)
+        , positionCount(0)
+        , normalCount(0)
+        , uvCount(0)
         , indexCount(0)
+        , normalIndexCount(0)
+        , uvIndexCount(0)
         , faceCount(0)
     {
     }
