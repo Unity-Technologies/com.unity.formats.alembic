@@ -202,13 +202,22 @@ aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, ai
     }
 }
 
-aiCLinkage aiExport void aiPolyMeshGetData(aiPolyMeshSample* sample, aiMeshSampleData* data)
+aiCLinkage aiExport void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data)
 {
     if (sample)
     {
-        sample->getData(*data);
+        sample->getDataPointer(*data);
     }
 }
+
+aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data)
+{
+    if (sample)
+    {
+        sample->copyData(*data);
+    }
+}
+
 
 aiCLinkage aiExport int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
@@ -283,10 +292,16 @@ aiCLinkage aiExport int aiPointsGetPeakVertexCount(aiPoints *schema)
     return schema->getPeakVertexCount();
 }
 
-aiCLinkage aiExport void aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData)
+aiCLinkage aiExport void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsSampleData *outData)
 {
     if (sample == nullptr) { return; }
-    sample->fillData(*outData);
+    sample->getDataPointer(*outData);
+}
+
+aiCLinkage aiExport void aiPointsCopyData(aiPointsSample* sample, aiPointsSampleData *outData)
+{
+    if (sample == nullptr) { return; }
+    sample->copyData(*outData);
 }
 
 

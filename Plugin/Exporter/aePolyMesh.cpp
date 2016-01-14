@@ -76,7 +76,7 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
 
     // handle swapFace option
     if (conf.swapFaces) {
-        auto swap_routine = [&](const int *src, std::vector<int>& dst) {
+        auto swap_routine = [&](std::vector<int>& dst, const int *src) {
             int i = 0;
             for (int fi = 0; fi < data.faceCount; ++fi) {
                 int ngon = data.faces[i];
@@ -90,17 +90,17 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
 
         {
             m_buf_indices.resize(data.indexCount);
-            swap_routine(data.indices, m_buf_indices);
+            swap_routine(m_buf_indices, data.indices);
             data.indices = &m_buf_indices[0];
         }
         if (data.normalIndices && data.normalIndexCount) {
             m_buf_normal_indices.resize(data.normalIndexCount);
-            swap_routine(data.normalIndices, m_buf_normal_indices);
+            swap_routine(m_buf_normal_indices, data.normalIndices);
             data.normalIndices = &m_buf_normal_indices[0];
         }
         if (data.uvIndices && data.uvIndexCount) {
             m_buf_uv_indices.resize(data.uvIndexCount);
-            swap_routine(data.uvIndices, m_buf_uv_indices);
+            swap_routine(m_buf_uv_indices, data.uvIndices);
             data.uvIndices = &m_buf_uv_indices[0];
         }
     }

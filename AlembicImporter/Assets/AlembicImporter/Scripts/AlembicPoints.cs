@@ -48,7 +48,7 @@ public class AlembicPoints : AlembicElement
             m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
         }
 
-        AbcAPI.aiPointsGetData(sample, ref m_abcData);
+        AbcAPI.aiPointsCopyData(sample, ref m_abcData);
         AbcDirty();
     }
 

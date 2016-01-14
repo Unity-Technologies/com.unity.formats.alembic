@@ -29,7 +29,26 @@ void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
 }
 
 
-void aiPointsSample::fillData(aiPointsSampleData &data)
+void aiPointsSample::getDataPointer(aiPointsSampleData &data)
+{
+    if (m_positions) {
+        data.count = m_positions->size();
+        data.positions = (abcV3*)m_positions->get();
+    }
+
+    if (m_velocities) {
+        data.velocities = (abcV3*)m_velocities->get();
+    }
+
+    if (m_ids) {
+        data.ids = (uint64_t*)m_ids->get();
+    }
+
+    data.boundsCenter = m_bounds.center();
+    data.boundsExtents = m_bounds.size();
+}
+
+void aiPointsSample::copyData(aiPointsSampleData &data)
 {
     int count = (int)m_positions->size();
     data.count = count;

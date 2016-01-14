@@ -280,20 +280,37 @@ struct aiMeshSampleSummary
 
 struct aiMeshSampleData
 {
+    // indices and their counts are available only when get by aiPolyMeshGetData()
+
     abcV3 *positions;
+    abcV3 *velocities;
     abcV3 *normals;
     abcV2 *uvs;
     abcV4 *tangents;
+
+    int *indices;
+    int *normalIndices;
+    int *uvIndices;
+    int *faces;
+
+    int positionCount;
+    int normalCount;
+    int uvCount;
+
+    int indexCount;
+    int normalIndexCount;
+    int uvIndexCount;
+    int faceCount;
+
     abcV3 center;
     abcV3 size;
 
     inline aiMeshSampleData()
-        : positions(nullptr)
-        , normals(nullptr)
-        , uvs(nullptr)
-        , tangents(nullptr)
-        , center(0.0f, 0.0f, 0.0f)
-        , size(0.0f, 0.0f, 0.0f)
+        : positions(nullptr), velocities(nullptr), normals(nullptr), uvs(nullptr), tangents(nullptr)
+        , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
+        , positionCount(0), normalCount(0), uvCount(0)
+        , indexCount(0), normalIndexCount(0), uvIndexCount(0), faceCount(0)
+        , center(0.0f, 0.0f, 0.0f) , size(0.0f, 0.0f, 0.0f)
     {
     }
 
@@ -402,9 +419,11 @@ aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh);
-// direct copy (no splitting)
-aiCLinkage aiExport void            aiPolyMeshGetData(aiPolyMeshSample* sample, aiMeshSampleData* data);
-// copy with splitting
+// return pointers to actual data. no conversions (swap handedness etc.) are applied.
+aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data);
+// copy mesh data without splitting or triangulating. swap handedness and/or faces are applied.
+aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data);
+// all these below are splitting
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);
 aiCLinkage aiExport int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
@@ -419,7 +438,8 @@ aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCa
 aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
-aiCLinkage aiExport void            aiPointsGetData(aiPointsSample* sample, aiPointsSampleData *outData);
+aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsSampleData *outData);
+aiCLinkage aiExport void            aiPointsCopyData(aiPointsSample* sample, aiPointsSampleData *outData);
 
 aiCLinkage aiExport int             aiSchemaGetNumProperties(aiSchemaBase* schema);
 aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);

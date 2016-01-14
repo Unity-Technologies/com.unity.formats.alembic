@@ -141,8 +141,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicImporter\Plugins\x86_64\
-$(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicImporter\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -158,8 +157,7 @@ $(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /p
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicImporter\Plugins\x86_64\
-$(SolutionDir)external\PatchLibrary\PatchLibraryProxy64.exe /target:Unity.exe /patch:$(TargetPath)</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicImporter\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
