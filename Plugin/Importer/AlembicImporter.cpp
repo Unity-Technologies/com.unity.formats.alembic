@@ -218,7 +218,7 @@ aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSamp
     }
 }
 
-aiCLinkage aiExport void aiPolyMeshGetTriangurated(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices)
+aiCLinkage aiExport void aiPolyMeshCopyDataWithTriangulation(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices)
 {
     if (sample)
     {

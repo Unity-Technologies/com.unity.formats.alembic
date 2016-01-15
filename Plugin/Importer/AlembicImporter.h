@@ -245,12 +245,14 @@ struct aiMeshSummary
     int32_t topologyVariance;
     int32_t peakVertexCount;
     int32_t peakIndexCount;
+    int32_t peakTriangulatedIndexCount;
     int32_t peakSubmeshCount;
 
     inline aiMeshSummary()
         : topologyVariance(0)
         , peakVertexCount(0)
         , peakIndexCount(0)
+        , peakTriangulatedIndexCount(0)
         , peakSubmeshCount(0)
     {
     }
@@ -280,8 +282,6 @@ struct aiMeshSampleSummary
 
 struct aiMeshSampleData
 {
-    // indices and their counts are available only when get by aiPolyMeshGetData()
-
     abcV3 *positions;
     abcV3 *velocities;
     abcV3 *normals;
@@ -423,11 +423,11 @@ aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample*
 aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data);
 // copy mesh data without splitting or triangulating. swap handedness and/or faces are applied.
 aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data);
-// copy triangulated mesh data.
-// if position indices and normal / uv indices are deferent, index expanding is applied.
+// copy triangulated mesh data. swap handedness and/or faces are applied.
+// if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
 // if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-aiCLinkage aiExport void            aiPolyMeshGetTriangurated(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices=false);
-// all these below are splitting
+aiCLinkage aiExport void            aiPolyMeshCopyDataWithTriangulation(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices=false);
+// all these below aiPolyMesh* are mesh splitting functions
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);
 aiCLinkage aiExport int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
