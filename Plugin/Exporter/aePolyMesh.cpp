@@ -31,6 +31,7 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         float scale = conf.scale;
         {
             m_buf_positions.resize(data.positionCount);
+            // sadly, memcpy() is way faster than std::copy() on VC
             memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3) * data.positionCount);
             if (conf.swapHandedness) {
                 for (auto &v : m_buf_positions) { v.x *= -1.0f; }

@@ -201,13 +201,13 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
     }
     else
     {
+        facesetIndices.resize(m_counts->size(), -1);
+
         // don't even fill faceset if we have no UVs to tile split the mesh
         if (uvs.valid() && submeshPerUVTile)
         {
             facesets.resize(1);
-            facesetIndices.resize(m_counts->size(), -1);
-
-            Faceset &faceset = facesets[0];
+            Faceset &faceset = facesets.front();
 
             for (size_t i=0; i<m_counts->size(); ++i)
             {
@@ -390,7 +390,8 @@ void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
 
     size_t smoothNormalsCount = m_positions->size();
     m_smoothNormals.resize(smoothNormalsCount);
-    std::fill(m_smoothNormals.begin(), m_smoothNormals.end(), abcV3());
+    // sadly, memset() is way faster than std::fill() on VC
+    memset(&m_smoothNormals[0], 0, sizeof(m_smoothNormals[0])*m_smoothNormals.size());
 
 
     const auto &counts = *(m_topology->m_counts);
@@ -534,8 +535,7 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN,
 
     size_t tangentsCount = m_topology->m_tangentsCount;
     m_tangents.resize(tangentsCount);
-    std::fill(m_tangents.begin(), m_tangents.end(), abcV4());
-
+    memset(&m_tangents[0], 0, sizeof(m_tangents[0])*m_tangents.size());
 
 
     abcV3 *tan1 = new Abc::V3f[2 * tangentsCount];
@@ -757,7 +757,7 @@ void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
 {
     if (m_positions) {
         dst.positionCount = m_positions->valid() ? m_positions->size() : 0;
-        dst.positions = const_cast<abcV3*>(m_positions->get());
+        dst.positions = (abcV3*)(m_positions->get());
     }
 
     if (m_velocities) {
@@ -788,8 +788,8 @@ void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
             dst.indices = (int*)m_topology->m_indices->get();
         }
         if (m_topology->m_counts) {
-            dst.faces = (int*)m_topology->m_counts->get();
             dst.faceCount = m_topology->m_counts->size();
+            dst.faces = (int*)m_topology->m_counts->get();
         }
     }
 
