@@ -25,8 +25,7 @@ static inline int CalculateIndexCount(Abc::Int32ArraySample &counts)
 // ---
 
 Topology::Topology()
-    : m_tangentIndicesCount(0)
-    , m_tangentIndices(0)
+    : m_triangulated_index_count(0)
     , m_tangentsCount(0)
 {
     m_indices.reset();
@@ -35,10 +34,6 @@ Topology::Topology()
 
 Topology::~Topology()
 {
-    if (m_tangentIndices)
-    {
-        delete[] m_tangentIndices;
-    }
 }
 
 void Topology::clear()
@@ -47,17 +42,17 @@ void Topology::clear()
     m_indices.reset();
     m_counts.reset();
 
-    if (m_tangentIndices)
-    {
-        delete[] m_tangentIndices;
-        m_tangentIndices = 0;
-    }
-    m_tangentIndicesCount = 0;
+    m_tangentIndices.clear();
     m_tangentsCount = 0;
 
     m_submeshes.clear();
     m_faceSplitIndices.clear();
     m_splits.clear();
+}
+
+int Topology::getTriangulatedIndexCount() const
+{
+
 }
 
 int Topology::getSplitCount() const
@@ -369,7 +364,7 @@ bool aiPolyMeshSample::hasUVs() const
 
 bool aiPolyMeshSample::hasTangents() const
 {
-    return (m_config.tangentsMode != TM_None && hasUVs() && !m_tangents.empty() && m_topology->m_tangentIndices);
+    return (m_config.tangentsMode != TM_None && hasUVs() && !m_tangents.empty() && !m_topology->m_tangentIndices.empty());
 }
 
 bool aiPolyMeshSample::smoothNormalsRequired() const
@@ -457,18 +452,7 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
     const Util::uint32_t *Nidxs = (indexedNormals ? m_normals.getIndices()->get() : 0);
 
     size_t tangentIndicesCount = indices.size();
-
-    if (!m_topology->m_tangentIndices)
-    {
-        m_topology->m_tangentIndices = new int[tangentIndicesCount];
-    }
-    else if (m_topology->m_tangentIndicesCount != tangentIndicesCount)
-    {
-        delete[] m_topology->m_tangentIndices;
-        m_topology->m_tangentIndices = new int[tangentIndicesCount];
-    }
-
-    m_topology->m_tangentIndicesCount = tangentIndicesCount;
+    m_topology->m_tangentIndices.resize(tangentIndicesCount);
     
     if (config.tangentsMode == TM_Smooth)
     {
@@ -690,7 +674,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
         if (N)
         {
             // do not compute indices if they are cached, constant topology and valid
-            if (!m_topology->m_tangentIndices ||
+            if (m_topology->m_tangentIndices.empty() ||
                 !config.cacheTangentsSplits ||
                 tangentsModeChanged)
             {
@@ -720,13 +704,11 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
             dataChanged = true;
         }
 
-        if (m_topology->m_tangentIndices && (m_ownTopology || !config.cacheTangentsSplits))
+        if (!m_topology->m_tangentIndices.empty() && (m_ownTopology || !config.cacheTangentsSplits))
         {
             aiLogger::Info("%s: Clear tangent indices", getSchema()->getObject()->getFullName());
             
-            delete[] m_topology->m_tangentIndices;
-            m_topology->m_tangentIndices = 0;
-            m_topology->m_tangentIndicesCount = 0;
+            m_topology->m_tangentIndices.clear();
             m_topology->m_tangentsCount = 0;
         }
     }
@@ -865,6 +847,12 @@ void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
     dst.center = dst.center;
     dst.size = dst.size;
 }
+
+void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &data, bool always_expand_indices)
+{
+
+}
+
 
 int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
 {
@@ -1505,7 +1493,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
         if (normals && ret->m_uvs.valid())
         {
             // topology may be shared, check tangent indices
-            if (!ret->m_topology->m_tangentIndices || !m_config.cacheTangentsSplits)
+            if (ret->m_topology->m_tangentIndices.empty() || !m_config.cacheTangentsSplits)
             {
                 ret->computeTangentIndices(m_config, normals, indexedNormals);
             }

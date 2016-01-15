@@ -133,11 +133,12 @@ class Topology
 public:
     Topology();
     ~Topology();
+    void clear();
 
+    int getTriangulatedIndexCount() const;
     int getSplitCount() const;
     int getSplitCount(bool forceRefresh);
 
-    void clear();
     
     void updateSplits();
 
@@ -154,14 +155,13 @@ public:
 public:
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
+    int m_triangulated_index_count;
 
     Submeshes m_submeshes;
-
     std::vector<int> m_faceSplitIndices;
     std::vector<SplitInfo> m_splits;
 
-    size_t m_tangentIndicesCount;
-    int *m_tangentIndices;
+    std::vector<int> m_tangentIndices;
     size_t m_tangentsCount;
 };
 
@@ -185,6 +185,7 @@ public:
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
     void getDataPointer(aiMeshSampleData &data);
     void copyData(aiMeshSampleData &data);
+    void copyTriangulatedMeshData(aiMeshSampleData &data, bool always_expand_indices);
 
     void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
