@@ -157,7 +157,7 @@ struct aiConfig
     bool submeshPerUVTile;
 
     inline aiConfig()
-        : swapHandedness(true)
+        : swapHandedness(false)
         , swapFaceWinding(false)
         , normalsMode(NM_ComputeIfMissing)
         , tangentsMode(TM_None)
@@ -418,11 +418,15 @@ aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFor
 aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh);
+aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness etc.) are applied.
 aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data);
 // copy mesh data without splitting or triangulating. swap handedness and/or faces are applied.
 aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data);
+// copy triangulated mesh data.
+// if position indices and normal / uv indices are deferent, index expanding is applied.
+// if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
+aiCLinkage aiExport void            aiPolyMeshGetTriangurated(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices=false);
 // all these below are splitting
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);

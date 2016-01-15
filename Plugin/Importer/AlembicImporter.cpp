@@ -218,6 +218,14 @@ aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSamp
     }
 }
 
+aiCLinkage aiExport void aiPolyMeshGetTriangurated(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices)
+{
+    if (sample)
+    {
+        sample->copyTriangulatedMeshData(*data, always_expand_indices);
+    }
+}
+
 
 aiCLinkage aiExport int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {

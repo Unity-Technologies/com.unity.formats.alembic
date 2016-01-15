@@ -8,17 +8,15 @@
 
 // ---
 
-static inline int CalculateIndexCount(Abc::Int32ArraySample &counts)
+static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
 {
     int r = 0;
     size_t n = counts.size();
-    
     for (size_t fi = 0; fi < n; ++fi)
     {
         int ngon = counts[fi];
         r += (ngon - 2) * 3;
     }
-
     return r;
 }
 
@@ -779,16 +777,66 @@ void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
     dst.size = m_bounds.size();
 }
 
+
+static inline void SwapHandedness(aiMeshSampleData &dst)
+{
+    auto body = [&](abcV3 *v, int n) {
+        if (v) {
+            for (int i = 0; i < n; ++i) { v[i].x *= -1.0f; }
+        }
+    };
+    body(dst.positions, dst.positionCount);
+    body(dst.velocities, dst.positionCount);
+    body(dst.normals, dst.normalCount);
+}
+
+static inline void Triangulate(aiMeshSampleData& src, int *dv, const int *indices, bool swap_face)
+{
+    if (!dv) { return; }
+
+    const int i1 = swap_face ? 2 : 1;
+    const int i2 = swap_face ? 1 : 2;
+
+    int n = 0;
+    int i = 0;
+    for (int fi = 0; fi < src.faceCount; ++fi) {
+        int ngon = src.faces[fi];
+        for (int ni = 0; ni < ngon - 2; ++ni) {
+            dv[i + 0] = indices[n + 0];
+            dv[i + 1] = indices[n + ni + i1];
+            dv[i + 2] = indices[n + ni + i2];
+            i += 3;
+        }
+        n += ngon;
+    }
+}
+
+template<class T>
+static inline void ExpandWithTriangulate(aiMeshSampleData& src, T *dv, const T *sv, const int *indices, bool swap_face)
+{
+    if (!dv || !sv) { return; }
+
+    const int i1 = swap_face ? 2 : 1;
+    const int i2 = swap_face ? 1 : 2;
+
+    int n = 0;
+    int i = 0;
+    for (int fi = 0; fi < src.faceCount; ++fi) {
+        int ngon = src.faces[fi];
+        for (int ni = 0; ni < ngon - 2; ++ni) {
+            dv[i + 0] = sv[indices[n + 0]];
+            dv[i + 1] = sv[indices[n + ni + i1]];
+            dv[i + 2] = sv[indices[n + ni + i2]];
+            i += 3;
+        }
+        n += ngon;
+    }
+}
+
 void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
 {
     const aiMeshSampleData src;
     getDataPointer((aiMeshSampleData&)src);
-
-    auto swap_handedness_if_needed = [&](abcV3 *d, int n) {
-        if (m_config.swapHandedness) {
-            for (int i = 0; i < n; ++i) { d[i].x *= -1.0f; }
-        }
-    };
 
     // sadly, memcpy() is way faster than std::copy()
 
@@ -798,21 +846,22 @@ void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
 
     if (src.positions && dst.positions && dst.positionCount >= src.positionCount) {
         memcpy(dst.positions, src.positions, src.positionCount * sizeof(*dst.positions));
-        swap_handedness_if_needed(dst.positions, src.positionCount);
     }
 
     if (src.velocities && dst.velocities && dst.positionCount >= src.positionCount) {
         memcpy(dst.velocities, src.velocities, src.positionCount * sizeof(*dst.velocities));
-        swap_handedness_if_needed(dst.velocities, src.positionCount);
     }
 
     if (src.normals && dst.normals && dst.normalCount >= src.normalCount) {
         memcpy(dst.normals, src.normals, src.normalCount * sizeof(*dst.normals));
-        swap_handedness_if_needed(dst.normals, src.normalCount);
     }
 
     if (src.uvs && dst.uvs && dst.uvCount >= src.uvCount) {
         memcpy(dst.uvs, src.uvs, src.uvCount * sizeof(*dst.uvs));
+    }
+
+    if (m_config.swapHandedness) {
+        SwapHandedness(dst);
     }
 
 
@@ -848,9 +897,33 @@ void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
     dst.size = dst.size;
 }
 
-void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &data, bool always_expand_indices)
-{
 
+void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &dst, bool always_expand_indices)
+{
+    aiMeshSampleData src;
+    getDataPointer(src);
+
+    // todo: check position indices and uv / normal indices are deferent
+    bool needs_expand = true;
+
+    if (needs_expand) {
+        ExpandWithTriangulate(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
+        ExpandWithTriangulate(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
+        ExpandWithTriangulate(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
+        ExpandWithTriangulate(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
+        // todo: generate normal and tangent
+    }
+    else {
+        int *indices = dst.indices;
+        dst.indices = nullptr; // skip needless copy
+        copyData(dst);
+        dst.indices = indices;
+        Triangulate(src, dst.indices, src.indices, m_config.swapFaceWinding);
+        // todo: generate normal and tangent
+    }
+
+    dst.center = dst.center;
+    dst.size = dst.size;
 }
 
 
@@ -1555,7 +1628,7 @@ int aiPolyMesh::getPeakIndexCount() const
             countsProp.get(counts, Abc::ISampleSelector(int64_t(iMax)));
         }
 
-        m_peakIndexCount = CalculateIndexCount(*counts);
+        m_peakIndexCount = CalculateTriangulatedIndexCount(*counts);
     }
 
     return m_peakIndexCount;
