@@ -117,8 +117,8 @@ aiCLinkage aiExport void aiFinalizeGraphicsDevice()
 
 #if !defined(aiMaster) && defined(aiWindows)
 
-// PatchLibrary で突っ込まれたモジュールは UnitySetGraphicsDevice() が呼ばれないので、
-// DLL_PROCESS_ATTACH のタイミングで先にロードされているモジュールからデバイスをもらって同等の処理を行う。
+// UnitySetGraphicsDevice() in injected (by PatchLibrary) modules will not be called automatically.
+// so we need to do equivalent procedure in DllMain()
 BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
 {
     if (reasonForCall == DLL_PROCESS_ATTACH)
@@ -140,11 +140,11 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reasonForCall, LPVOID reserved)
     return TRUE;
 }
 
-// "DllMain already defined in MSVCRT.lib" 対策
+// prevent "DllMain already defined in MSVCRT.lib"
 #ifdef _X86_
-extern "C" { int _afxForceUSRDLL; }
+    extern "C" { int _afxForceUSRDLL; }
 #else
-extern "C" { int __afxForceUSRDLL; }
+    extern "C" { int __afxForceUSRDLL; }
 #endif
 
 #endif

@@ -165,6 +165,7 @@ public class AbcAPI
         [MarshalAs(UnmanagedType.U4)] public aiTopologyVariance topologyVariance;
         public int peakVertexCount;
         public int peakIndexCount;
+        public int peakTriangulatedIndexCount;
         public int peakSubmeshCount;
     }
 

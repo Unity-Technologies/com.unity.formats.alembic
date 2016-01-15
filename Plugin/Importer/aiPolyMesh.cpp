@@ -790,6 +790,19 @@ static inline void SwapHandedness(aiMeshSampleData &dst)
     body(dst.normals, dst.normalCount);
 }
 
+// return true if position and uv / normal indices are deferent
+static inline bool IsIndicesDivergent(const aiMeshSampleData &dst)
+{
+    if ((dst.normalCount != 0 && dst.positionCount != dst.normalCount) ||
+        (dst.uvCount != 0 && dst.positionCount != dst.uvCount))
+    {
+        return true;
+    }
+
+    // maybe more detailed (=very slow) comparison is needed..
+    return false;
+}
+
 static inline void Triangulate(aiMeshSampleData& src, int *dv, const int *indices, bool swap_face)
 {
     if (!dv) { return; }
@@ -904,7 +917,7 @@ void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &dst, bool alwa
     getDataPointer(src);
 
     // todo: check position indices and uv / normal indices are deferent
-    bool needs_expand = true;
+    bool needs_expand = IsIndicesDivergent(dst) || always_expand_indices;
 
     if (needs_expand) {
         ExpandWithTriangulate(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
@@ -1386,6 +1399,7 @@ void aiPolyMeshSample::fillSubmeshIndices(const aiSubmeshSummary &summary, aiSub
 aiPolyMesh::aiPolyMesh(aiObject *obj)
     : super(obj)
     , m_peakIndexCount(0)
+    , m_peakTriangulatedIndexCount(0)
     , m_peakVertexCount(0)
     , m_ignoreNormals(false)
     , m_ignoreUVs(false)
@@ -1583,55 +1597,66 @@ int aiPolyMesh::getTopologyVariance() const
     return (int) m_schema.getTopologyVariance();
 }
 
-int aiPolyMesh::getPeakIndexCount() const
+
+void aiPolyMesh::updatePeakIndexCount() const
 {
-    if (m_peakIndexCount == 0)
+    if (m_peakIndexCount != 0) { return; }
+
+    DebugLog("aiPolyMesh::updateMaxIndex()");
+
+    Util::Dimensions dim;
+    Abc::Int32ArraySamplePtr counts;
+
+    auto indicesProp = m_schema.getFaceIndicesProperty();
+    auto countsProp = m_schema.getFaceCountsProperty();
+
+    int numSamples = (int)indicesProp.getNumSamples();
+    if (numSamples == 0) { return; }
+
+    size_t cMax = 0;
+    if (indicesProp.isConstant())
     {
-        DebugLog("aiPolyMesh::getPeakIndexCount()");
-        
-        Util::Dimensions dim;
-        Abc::Int32ArraySamplePtr counts;
+        auto ss = Abc::ISampleSelector(int64_t(0));
+        countsProp.get(counts, ss);
+        indicesProp.getDimensions(dim, ss);
+        cMax = dim.numPoints();
+    }
+    else
+    {
+        aiLogger::Info("Checking %d sample(s)", numSamples);
 
-        auto indicesProp = m_schema.getFaceIndicesProperty();
-        auto countsProp = m_schema.getFaceCountsProperty();
-        
-        int numSamples = (int)indicesProp.getNumSamples();
+        int iMax = 0;
 
-        if (numSamples == 0)
+        for (int i = 0; i < numSamples; ++i)
         {
-            return 0;
-        }
-        else if (indicesProp.isConstant())
-        {
-            countsProp.get(counts, Abc::ISampleSelector(int64_t(0)));
-        }
-        else
-        {
-            aiLogger::Info("Checking %d sample(s)", numSamples);
-            
-            int iMax = 0;
-            size_t cMax = 0;
+            indicesProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
 
-            for (int i = 0; i < numSamples; ++i)
+            size_t numIndices = dim.numPoints();
+
+            if (numIndices > cMax)
             {
-                indicesProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
-                
-                size_t numIndices = dim.numPoints();
-
-                if (numIndices > cMax)
-                {
-                    cMax = numIndices;
-                    iMax = i;
-                }
+                cMax = numIndices;
+                iMax = i;
             }
-
-            countsProp.get(counts, Abc::ISampleSelector(int64_t(iMax)));
         }
 
-        m_peakIndexCount = CalculateTriangulatedIndexCount(*counts);
+        countsProp.get(counts, Abc::ISampleSelector(int64_t(iMax)));
     }
 
-    return m_peakIndexCount;
+    m_peakIndexCount = cMax;
+    m_peakTriangulatedIndexCount = CalculateTriangulatedIndexCount(*counts);
+}
+
+int aiPolyMesh::getPeakIndexCount() const
+{
+    updatePeakIndexCount();
+    return m_peakTriangulatedIndexCount;
+}
+
+int aiPolyMesh::getPeakTriangulatedIndexCount() const
+{
+    updatePeakIndexCount();
+    return m_peakTriangulatedIndexCount;
 }
 
 int aiPolyMesh::getPeakVertexCount() const
@@ -1684,6 +1709,7 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
     summary.topologyVariance = getTopologyVariance();
     summary.peakVertexCount = getPeakVertexCount();
     summary.peakIndexCount = getPeakIndexCount();
+    summary.peakTriangulatedIndexCount = getPeakTriangulatedIndexCount();
     summary.peakSubmeshCount = ceildiv(summary.peakIndexCount, 64998);
 }
 

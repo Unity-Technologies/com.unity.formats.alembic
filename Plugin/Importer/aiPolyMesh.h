@@ -233,12 +233,17 @@ public:
 
     int getTopologyVariance() const;
     int getPeakIndexCount() const;
+    int getPeakTriangulatedIndexCount() const;
     int getPeakVertexCount() const;
 
     void getSummary(aiMeshSummary &summary) const;
 
 private:
+    void updatePeakIndexCount() const;
+
+private:
     mutable int m_peakIndexCount;
+    mutable int m_peakTriangulatedIndexCount;
     mutable int m_peakVertexCount;
 
     bool m_ignoreNormals;
