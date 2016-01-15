@@ -128,7 +128,7 @@ struct aeConfig
         , startTime(0.0f)
         , frameRate(30.0f)
         , xformType(aeXFromType_TRS)
-        , swapHandedness(true)
+        , swapHandedness(false)
         , swapFaces(false)
         , scale(1.0f)
     {
@@ -157,7 +157,7 @@ struct aeXFormSampleData
 struct aePolyMeshSampleData
 {
     const abcV3 *positions;
-    const abcV3 *velocities;    // can be null. must be same size of positions
+    const abcV3 *velocities;    // can be null. if not null, must be same size of positions
     const abcV3 *normals;       // can be null
     const abcV2 *uvs;           // can be null
 
@@ -173,10 +173,10 @@ struct aePolyMeshSampleData
     int indexCount;
     int normalIndexCount;       // if 0, assume same as indexCount
     int uvIndexCount;           // if 0, assume same as indexCount
-    int faceCount;              // only relevant if faces!=nullptr
+    int faceCount;              // only relevant if faces is not null
 
     aePolyMeshSampleData()
-        : positions(nullptr) , velocities(nullptr), normals(nullptr), uvs(nullptr)
+        : positions(nullptr), velocities(nullptr), normals(nullptr), uvs(nullptr)
         , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
         , positionCount(0), normalCount(0), uvCount(0)
         , indexCount(0), normalIndexCount(0), uvIndexCount(0), faceCount(0)
@@ -186,8 +186,8 @@ struct aePolyMeshSampleData
 struct aePointsSampleData
 {
     const abcV3 *positions;
-    const abcV3 *velocities; // can be null
-    const uint64_t *ids; // can be null
+    const abcV3 *velocities;    // can be null
+    const uint64_t *ids;        // can be null
     int count;
 
     inline aePointsSampleData()
