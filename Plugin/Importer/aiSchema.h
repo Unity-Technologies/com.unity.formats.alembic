@@ -39,9 +39,11 @@ public:
     void invokeConfigCallback(aiConfig *config);
     void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
 
-    virtual int                 getSampleCount() const = 0;
+    virtual int                 getNumSamples() const = 0;
     virtual aiSampleBase*       updateSample(const abcSampleSelector& ss) = 0;
     virtual const aiSampleBase* getSample(const abcSampleSelector& ss) const = 0;
+    virtual int                 getSampleIndex(const abcSampleSelector& ss) const = 0;
+    virtual float               getSampleTime(const abcSampleSelector& ss) const = 0;
 
     // for multithreaded updates, don't invoke C# callbacks from work threads
     void readConfig();
@@ -104,13 +106,17 @@ public:
         }
     }
 
-
-    int64_t getSampleIndex(const abcSampleSelector& ss) const
+    int getSampleIndex(const abcSampleSelector& ss) const override
     {
         return ss.getIndex(m_timeSampling, m_numSamples);
     }
 
-    int getSampleCount() const override
+    float getSampleTime(const abcSampleSelector& ss) const override
+    {
+        return m_timeSampling->getSampleTime(ss.getRequestedIndex());
+    }
+
+    int getNumSamples() const override
     {
         return m_numSamples;
     }

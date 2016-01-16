@@ -9,6 +9,6 @@ using UnityEditor;
 
 public abstract class AlembicCustomComponentCapturer : MonoBehaviour
 {
-    public abstract void CreateAbcObject(aeAPI.aeObject parent);
+    public abstract void CreateAbcObject(AbcAPI.aeObject parent);
     public abstract void Capture();
 }

@@ -41,7 +41,7 @@ namespace AlembicExporterExample
         {
             if(m_recording) { return; }
 
-            var time_sampling_type = (aeAPI.aeTypeSamplingType)m_dropdown_simesampling.value;
+            var time_sampling_type = (AbcAPI.aeTypeSamplingType)m_dropdown_simesampling.value;
             var frame_rate = int.Parse(m_input_fps.text);
 
             m_exporters = FindObjectsOfType<AlembicExporter>();

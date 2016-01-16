@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class AbcAPI
+public partial class AbcAPI
 {
     public enum aiAspectRatioMode
     {

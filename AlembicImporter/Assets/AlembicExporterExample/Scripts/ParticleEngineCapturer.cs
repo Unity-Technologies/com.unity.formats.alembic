@@ -14,11 +14,11 @@ namespace AlembicExporterExample
     public class ParticleEngineCapturer : AlembicCustomComponentCapturer
     {
         public bool m_captureVelocities = true;
-        aeAPI.aeObject m_abc;
+        AbcAPI.aeObject m_abc;
 
-        public override void CreateAbcObject(aeAPI.aeObject parent)
+        public override void CreateAbcObject(AbcAPI.aeObject parent)
         {
-            m_abc = aeAPI.aeNewPoints(parent, gameObject.name);
+            m_abc = AbcAPI.aeNewPoints(parent, gameObject.name);
         }
 
         public override void Capture()
@@ -27,7 +27,7 @@ namespace AlembicExporterExample
             var positions = target.positionBuffer;
             if (positions == null) { return; }
 
-            var data = new aeAPI.aePointsSampleData();
+            var data = new AbcAPI.aePointsSampleData();
             data.count = positions.Length;
             data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             if(m_captureVelocities)
@@ -38,7 +38,7 @@ namespace AlembicExporterExample
                     data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
                 }
             }
-            aeAPI.aePointsWriteSample(m_abc, ref data);
+            AbcAPI.aePointsWriteSample(m_abc, ref data);
         }
 
     }
