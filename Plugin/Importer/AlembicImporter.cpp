@@ -139,6 +139,21 @@ aiCLinkage aiExport const char* aiGetFullNameS(aiObject* obj)
     return (obj ? obj->getFullName() : "");
 }
 
+aiCLinkage aiExport int aiGetNumChildren(aiObject* obj)
+{
+    return (obj ? obj->getNumChildren() : 0);
+}
+
+aiCLinkage aiExport aiObject* aiGetChild(aiObject* obj, int i)
+{
+    return (obj ? obj->getChild(i) : nullptr);
+}
+
+aiCLinkage aiExport aiObject* aiGetParent(aiObject* obj)
+{
+    return (obj ? obj->getParent() : nullptr);
+}
+
 
 aiCLinkage aiExport void aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg)
 {
@@ -156,10 +171,9 @@ aiCLinkage aiExport void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfi
     }
 }
 
-
-aiCLinkage aiExport int aiSchemaGetSampleCount(aiSchemaBase* schema)
+aiCLinkage aiExport int aiSchemaGetNumSamples(aiSchemaBase* schema)
 {
-    return (schema ? schema->getSampleCount() : 0);
+    return (schema ? schema->getNumSamples() : 0);
 }
 
 aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
@@ -170,6 +184,16 @@ aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schem
 aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {
     return (schema ? schema->getSample(*ss) : 0);
+}
+
+aiCLinkage aiExport int aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss)
+{
+    return schema ? schema->getSampleIndex(*ss) : 0;
+}
+
+aiCLinkage aiExport float aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss)
+{
+    return schema ? schema->getSampleTime(*ss) : 0.0f;
 }
 
 

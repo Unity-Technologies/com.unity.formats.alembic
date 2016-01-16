@@ -416,12 +416,17 @@ aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);         
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
 aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
+aiCLinkage aiExport int             aiGetNumChildren(aiObject* obj);
+aiCLinkage aiExport aiObject*       aiGetChild(aiObject* obj, int i);
+aiCLinkage aiExport aiObject*       aiGetParent(aiObject* obj);
 
 aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-aiCLinkage aiExport int                 aiSchemaGetSampleCount(aiSchemaBase* schema);
+aiCLinkage aiExport int                 aiSchemaGetNumSamples(aiSchemaBase* schema);
 aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport int                 aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport float               aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
