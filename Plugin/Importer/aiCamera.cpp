@@ -65,13 +65,13 @@ aiCamera::Sample* aiCamera::newSample()
     return sample;
 }
 
-aiCamera::Sample* aiCamera::readSample(float time, bool &topologyChanged)
+aiCamera::Sample* aiCamera::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
     DebugLog("aiCamera::readSample(t=%f)", time);
     
     Sample *ret = newSample();
     
-    m_schema.get(ret->m_sample, MakeSampleSelector(time));
+    m_schema.get(ret->m_sample, ss);
 
     topologyChanged = false;
 

@@ -101,12 +101,11 @@ aiPoints::Sample* aiPoints::newSample()
     return sample;
 }
 
-aiPoints::Sample* aiPoints::readSample(float time, bool &topologyChanged)
+aiPoints::Sample* aiPoints::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
-    DebugLog("aiPoints::readSample(t=%f)", time);
+    DebugLog("aiPoints::readSample(t=%f)", (float)ss.getRequestedTime());
 
     Sample *ret = newSample();
-    auto ss = MakeSampleSelector(time);
 
     // read positions
     m_schema.getPositionsProperty().get(ret->m_positions, ss);

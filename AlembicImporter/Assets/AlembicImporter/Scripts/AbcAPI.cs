@@ -152,6 +152,13 @@ public class AbcAPI
         }
     }
 
+    public struct aiSampleSelector
+    {
+        public ulong requestedIndex;
+        public double requestedTime;
+        public int requestedTimeIndexType;
+    }
+
     public struct aiFacesets
     {
         [MarshalAs(UnmanagedType.U4)]public int count;
@@ -278,6 +285,8 @@ public class AbcAPI
     }
 
 
+    [DllImport ("AlembicImporter")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
+    [DllImport ("AlembicImporter")] public static extern            aiSampleSelector aiIndexToSampleSelector(int index);
 
     [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
 
@@ -304,8 +313,8 @@ public class AbcAPI
     
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
     [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
-    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, float time);
-    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, float time);
+    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
+    [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
 
     [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
@@ -349,7 +358,7 @@ public class AbcAPI
     {
         public AlembicStream abcStream;
         public Transform parent;
-        public float time;
+        public aiSampleSelector ss;
         public bool createMissingNodes;
         public List<aiObject> objectsToDelete;
     }
@@ -440,7 +449,7 @@ public class AbcAPI
         var ic = new ImportContext();
         ic.abcStream = root.GetComponent<AlembicStream>();
         ic.parent = root;
-        ic.time = time;
+        ic.ss = aiTimeToSampleSelector(time);
         ic.createMissingNodes = createMissingNodes;
         ic.objectsToDelete = new List<aiObject>();
 
@@ -511,7 +520,7 @@ public class AbcAPI
         if (elem)
         {
             elem.AbcSetup(ic.abcStream, obj, schema);
-            aiSchemaUpdateSample(schema, ic.time);
+            aiSchemaUpdateSample(schema, ref ic.ss);
             elem.AbcUpdate();
             
             ic.abcStream.AbcAddElement(elem);

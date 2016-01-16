@@ -42,6 +42,13 @@
         abcV4() {}
         abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
     };
+
+    struct abcSampleSelector
+    {
+        uint64_t m_requestedIndex;
+        double m_requestedTime;
+        int m_requestedTimeIndexType;
+    };
 #endif // AlembicImporter_h
 #endif // aeImpl
 

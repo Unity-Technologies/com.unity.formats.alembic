@@ -93,7 +93,7 @@ void aiObject::updateSample(float time)
 
     for (auto s : m_schemas)
     {
-        s->updateSample(time);
+        s->updateSample(aiTimeToSampleSelector(time));
     }
 }
 

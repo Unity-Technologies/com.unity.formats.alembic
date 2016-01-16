@@ -18,6 +18,16 @@
 #   define aiBreak() __builtin_trap()
 #endif // aiWindows
 
+aiCLinkage aiExport abcSampleSelector aiTimeToSampleSelector(float time)
+{
+    return abcSampleSelector(double(time), Abc::ISampleSelector::kFloorIndex);
+}
+
+aiCLinkage aiExport abcSampleSelector aiIndexToSampleSelector(int index)
+{
+    return abcSampleSelector(uint64_t(index), Abc::ISampleSelector::kFloorIndex);
+}
+
 
 aiCLinkage aiExport void aiEnableFileLog(bool on, const char *path)
 {
@@ -146,14 +156,20 @@ aiCLinkage aiExport void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfi
     }
 }
 
-aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time)
-{    
-    return (schema ? schema->updateSample(time) : 0);
+
+aiCLinkage aiExport int aiSchemaGetSampleCount(aiSchemaBase* schema)
+{
+    return (schema ? schema->getSampleCount() : 0);
 }
 
-aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, float time)
+aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
+{    
+    return (schema ? schema->updateSample(*ss) : 0);
+}
+
+aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {
-    return (schema ? schema->findSample(time) : 0);
+    return (schema ? schema->getSample(*ss) : 0);
 }
 
 
@@ -210,19 +226,16 @@ aiCLinkage aiExport void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMe
     }
 }
 
-aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data)
+aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data, bool triangulate, bool always_expand_indices)
 {
     if (sample)
     {
-        sample->copyData(*data);
-    }
-}
-
-aiCLinkage aiExport void aiPolyMeshCopyDataWithTriangulation(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices)
-{
-    if (sample)
-    {
-        sample->copyTriangulatedMeshData(*data, always_expand_indices);
+        if (triangulate) {
+            sample->copyDataWithTriangulation(*data, always_expand_indices);
+        }
+        else {
+            sample->copyData(*data);
+        }
     }
 }
 
@@ -338,9 +351,13 @@ aiCLinkage aiExport const char* aiPropertyGetNameS(aiProperty* prop)
     return prop->getName().c_str();
 }
 
-aiCLinkage aiExport void aiPropertyGetData(aiProperty* prop, aiPropertyData *o_data)
+aiCLinkage aiExport void aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data)
 {
-    *o_data = prop->getData();
+    prop->getDataPointer(*ss, *data);
+}
+aiCLinkage aiExport void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data)
+{
+    prop->copyData(*ss, *data);
 }
 
 

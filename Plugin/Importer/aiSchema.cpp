@@ -35,7 +35,6 @@ aiSchemaBase::aiSchemaBase(aiObject *obj)
 
 aiSchemaBase::~aiSchemaBase()
 {
-    for (auto &i : m_properties) { delete i; }
     m_properties.clear();
 }
 
@@ -107,16 +106,6 @@ void aiSchemaBase::notifyUpdate()
     }
 }
 
-Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(float time)
-{
-    return Abc::ISampleSelector(double(time), Abc::ISampleSelector::kFloorIndex);
-}
-
-Abc::ISampleSelector aiSchemaBase::MakeSampleSelector(int64_t index)
-{
-    return Abc::ISampleSelector(index, Abc::ISampleSelector::kFloorIndex);
-}
-
 
 int aiSchemaBase::getNumProperties() const
 {
@@ -125,18 +114,18 @@ int aiSchemaBase::getNumProperties() const
 
 aiProperty* aiSchemaBase::getPropertyByIndex(int i)
 {
-    auto r = m_properties[i];
+    auto& r = m_properties[i];
     if (r != nullptr) { r->setActive(true); }
-    return r;
+    return r.get();
 }
 
 aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
 {
     auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
-        [](aiProperty *a, const std::string& name) { return a->getName() < name; });
+        [](aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
     if (i != m_properties.end()) {
         (*i)->setActive(true);
-        return *i;
+        return i->get();
     }
     return nullptr;
 }
@@ -145,14 +134,22 @@ void aiSchemaBase::setupProperties()
 {
     auto cpro = getAbcProperties();
     if (!cpro.valid()) { return; }
+
     size_t n = cpro.getNumProperties();
     for (size_t i = 0; i < n; ++i) {
         auto header = cpro.getPropertyHeader(i);
         auto *prop = aiMakeProperty(cpro, header);
         if (prop != nullptr) {
-            m_properties.push_back(prop);
+            m_properties.emplace_back(prop);
         }
     }
     std::sort(m_properties.begin(), m_properties.end(),
-        [](aiProperty *a, aiProperty *b) { return a->getName() < b->getName(); });
+        [](aiPropertyPtr& a, aiPropertyPtr& b) { return a->getName() < b->getName(); });
+}
+
+void aiSchemaBase::updateProperties(const abcSampleSelector& ss)
+{
+    for (auto &prop : m_properties) {
+        prop->updateSample(ss);
+    }
 }

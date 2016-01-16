@@ -185,7 +185,7 @@ public:
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
     void getDataPointer(aiMeshSampleData &data);
     void copyData(aiMeshSampleData &data);
-    void copyTriangulatedMeshData(aiMeshSampleData &data, bool always_expand_indices);
+    void copyDataWithTriangulation(aiMeshSampleData &data, bool always_expand_indices);
 
     void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
@@ -229,7 +229,7 @@ public:
     aiPolyMesh(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(float time, bool &topologyChanged) override;
+    Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
 
     int getTopologyVariance() const;
     int getPeakIndexCount() const;

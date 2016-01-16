@@ -93,16 +93,6 @@ public abstract class AlembicElement : MonoBehaviour
     {
     }
 
-    public AbcAPI.aiSample AbcGetSample()
-    {
-        return AbcGetSample((m_abcStream != null ? m_abcStream.m_time : 0.0f));
-    }
-
-    public AbcAPI.aiSample AbcGetSample(float time)
-    {
-        return AbcAPI.aiSchemaGetSample(m_abcSchema, time);
-    }
-
     // Called by loading thread (not necessarily the main thread)
     public virtual void AbcGetConfig(ref AbcAPI.aiConfig config)
     {
