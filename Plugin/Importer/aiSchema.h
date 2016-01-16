@@ -25,6 +25,8 @@ protected:
 class aiSchemaBase
 {
 public:
+    typedef std::unique_ptr<aiProperty> aiPropertyPtr;
+
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
 
@@ -37,23 +39,22 @@ public:
     void invokeConfigCallback(aiConfig *config);
     void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
 
-    virtual aiSampleBase* updateSample(float time) = 0;
-    virtual const aiSampleBase* findSample(float time) const = 0;
+    virtual int                 getSampleCount() const = 0;
+    virtual aiSampleBase*       updateSample(const abcSampleSelector& ss) = 0;
+    virtual const aiSampleBase* getSample(const abcSampleSelector& ss) const = 0;
 
     // for multithreaded updates, don't invoke C# callbacks from work threads
     void readConfig();
     void notifyUpdate();
-
-    static Abc::ISampleSelector MakeSampleSelector(float time);
-    static Abc::ISampleSelector MakeSampleSelector(int64_t index);
 
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
     aiProperty* getPropertyByName(const std::string& name);
 
 protected:
-    virtual AbcGeom::ICompoundProperty getAbcProperties() = 0;
+    virtual abcProperties getAbcProperties() = 0;
     void setupProperties();
+    void updateProperties(const abcSampleSelector& ss);
 
 protected:
     aiObject *m_obj;
@@ -66,7 +67,7 @@ protected:
     bool m_varyingTopology;
     aiSampleBase *m_pendingSample;
     bool m_pendingTopologyChanged;
-    std::vector<aiProperty*> m_properties;
+    std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
 
@@ -103,13 +104,18 @@ public:
         }
     }
 
-    int64_t getSampleIndex(float time) const
+
+    int64_t getSampleIndex(const abcSampleSelector& ss) const
     {
-        Abc::ISampleSelector ss(double(time), Abc::ISampleSelector::kFloorIndex);
         return ss.getIndex(m_timeSampling, m_numSamples);
     }
 
-    aiSampleBase* updateSample(float time) override
+    int getSampleCount() const override
+    {
+        return m_numSamples;
+    }
+
+    aiSampleBase* updateSample(const abcSampleSelector& ss) override
     {
         DebugLog("aiTSchema::updateSample()");
         
@@ -122,7 +128,7 @@ public:
 
         Sample *sample = 0;
         bool topologyChanged = false;
-        int64_t sampleIndex = getSampleIndex(time);
+        int64_t sampleIndex = getSampleIndex(ss);
         
         if (dontUseCache())
         {
@@ -138,7 +144,7 @@ public:
             {
                 DebugLog("  Read sample");
                 
-                sample = readSample(time, topologyChanged);
+                sample = readSample(ss, topologyChanged);
                 
                 m_theSample = sample;
             }
@@ -168,7 +174,7 @@ public:
             {
                 DebugLog("  Create new cache sample");
                 
-                sp.reset(readSample(time, topologyChanged));
+                sp.reset(readSample(ss, topologyChanged));
 
                 sample = sp.get();
             }
@@ -220,14 +226,16 @@ public:
             erasePastSamples();
         }
 
+        updateProperties(ss);
+
         return sample;
     }
 
-    const Sample* findSample(float time) const override
+    const Sample* getSample(const abcSampleSelector& ss) const override
     {
-        DebugLog("aiTSchema::findSample(t=%f)", time);
+        DebugLog("aiTSchema::findSample(t=%f)", (float)ss.getRequestedTime());
 
-        int64_t sampleIndex = getSampleIndex(time);
+        int64_t sampleIndex = getSampleIndex(ss);
 
         if (dontUseCache())
         {
@@ -264,7 +272,7 @@ protected:
        }
     }
 
-    virtual Sample* readSample(float time, bool &topologyChanged) = 0;
+    virtual Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) = 0;
 
     void erasePastSamples()
     {
@@ -311,7 +319,7 @@ protected:
     AbcSchema m_schema;
     SampleCont m_samples;
     Sample* m_theSample;
-    AbcCoreAbstract::TimeSamplingPtr m_timeSampling;
+    Abc::TimeSamplingPtr m_timeSampling;
     int64_t m_numSamples;
     int64_t m_lastSampleIndex;
 };

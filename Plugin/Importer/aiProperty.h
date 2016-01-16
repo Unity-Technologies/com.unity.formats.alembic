@@ -9,8 +9,11 @@ public:
     virtual const std::string& getName() const = 0;
     virtual aiPropertyType getPropertyType() const = 0;
     virtual int getNumSamples() const = 0;
-    virtual aiPropertyData updateSample(float time) = 0;
-    virtual aiPropertyData getData() = 0;
+
+    // todo: implement caching. currently getData() simply redirect to updateSample()
+    virtual aiPropertyData* updateSample(const abcSampleSelector& ss) = 0;
+    virtual void getDataPointer(const abcSampleSelector& ss, aiPropertyData& data) = 0;
+    virtual void copyData(const abcSampleSelector& ss, aiPropertyData& data) = 0;
 
     bool isArray() const
     {

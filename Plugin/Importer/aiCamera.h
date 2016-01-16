@@ -30,7 +30,7 @@ public:
     aiCamera(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(float time, bool &topologyChanged) override;
+    Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
 };
 
 #endif

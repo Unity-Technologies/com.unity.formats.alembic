@@ -825,7 +825,7 @@ static inline void Triangulate(aiMeshSampleData& src, int *dv, const int *indice
 }
 
 template<class T>
-static inline void ExpandWithTriangulate(aiMeshSampleData& src, T *dv, const T *sv, const int *indices, bool swap_face)
+static inline void ExpandWithTriangulation(aiMeshSampleData& src, T *dv, const T *sv, const int *indices, bool swap_face)
 {
     if (!dv || !sv) { return; }
 
@@ -848,10 +848,10 @@ static inline void ExpandWithTriangulate(aiMeshSampleData& src, T *dv, const T *
 
 void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
 {
-    const aiMeshSampleData src;
-    getDataPointer((aiMeshSampleData&)src);
+    aiMeshSampleData src;
+    getDataPointer(src);
 
-    // sadly, memcpy() is way faster than std::copy()
+    // sadly, memcpy() is way faster than std::copy() on VC
 
     if (src.faces && dst.faces && dst.faceCount >= src.faceCount) {
         memcpy(dst.faces, src.faces, src.faceCount * sizeof(*dst.faces));
@@ -911,20 +911,19 @@ void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
 }
 
 
-void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &dst, bool always_expand_indices)
+void aiPolyMeshSample::copyDataWithTriangulation(aiMeshSampleData &dst, bool always_expand_indices)
 {
     aiMeshSampleData src;
     getDataPointer(src);
 
-    // todo: check position indices and uv / normal indices are deferent
     bool needs_expand = IsIndicesDivergent(dst) || always_expand_indices;
 
+    // todo: normal and tangent handling
     if (needs_expand) {
-        ExpandWithTriangulate(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
-        ExpandWithTriangulate(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
-        ExpandWithTriangulate(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
-        ExpandWithTriangulate(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
-        // todo: generate normal and tangent
+        ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
+        ExpandWithTriangulation(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
+        ExpandWithTriangulation(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
+        ExpandWithTriangulation(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
     }
     else {
         int *indices = dst.indices;
@@ -932,7 +931,6 @@ void aiPolyMeshSample::copyTriangulatedMeshData(aiMeshSampleData &dst, bool alwa
         copyData(dst);
         dst.indices = indices;
         Triangulate(src, dst.indices, src.indices, m_config.swapFaceWinding);
-        // todo: generate normal and tangent
     }
 
     dst.center = dst.center;
@@ -1473,13 +1471,11 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(float time, bool &topologyChanged)
+aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
-    DebugLog("aiPolyMesh::readSample(t=%f)", time);
+    DebugLog("aiPolyMesh::readSample(t=%f)", (float)ss.getRequestedTime());
     
     Sample *ret = newSample();
-
-    auto ss = MakeSampleSelector(time);
 
     topologyChanged = m_varyingTopology;
 

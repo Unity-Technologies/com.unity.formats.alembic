@@ -18,6 +18,7 @@
 
 #ifdef _MSC_VER
     #define aiSTDCall __stdcall
+    #pragma warning(disable: 4190)
 #else // _MSC_VER
     #define aiSTDCall __attribute__((stdcall))
 #endif // _MSC_VER
@@ -60,6 +61,13 @@
 
         abcV4() {}
         abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
+    };
+
+    struct abcSampleSelector
+    {
+        uint64_t m_requestedIndex;
+        double m_requestedTime;
+        int m_requestedTimeIndexType;
     };
 #endif // AlembicExporter_h
 #endif // aiImpl
@@ -104,7 +112,7 @@ enum aiNormalsMode
     NM_AlwaysCompute,
     NM_Ignore
 };
-    
+
 enum aiTangentsMode
 {
     TM_None = 0,
@@ -371,12 +379,12 @@ struct aiFacesets
 
 struct aiPropertyData
 {
-    const void *data;
+    void *data;
     int size;
     aiPropertyType type;
 
     aiPropertyData() : data(nullptr), size(0), type(aiPropertyType_Unknown) {}
-    aiPropertyData(aiPropertyType t, const void *d, int s) : data(d), size(s), type(t) {}
+    aiPropertyData(aiPropertyType t, void *d, int s) : data(d), size(s), type(t) {}
 };
 
 
@@ -384,6 +392,9 @@ typedef void (aiSTDCall *aiNodeEnumerator)(aiObject *node, void *userData);
 typedef void (aiSTDCall *aiConfigCallback)(void *csObj, aiConfig *config);
 typedef void (aiSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
 
+
+aiCLinkage aiExport abcSampleSelector aiTimeToSampleSelector(float time);
+aiCLinkage aiExport abcSampleSelector aiIndexToSampleSelector(int index);
 
 aiCLinkage aiExport void            aiEnableFileLog(bool on, const char *path);
 
@@ -399,8 +410,8 @@ aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 aiCLinkage aiExport void            aiDestroyObject(aiContext* ctx, aiObject* obj);
 
 aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
-aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);
-aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);
+aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);   // async version
+aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);                 // async version
 
 aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
@@ -408,8 +419,9 @@ aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
 
 aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, float time);
-aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, float time);
+aiCLinkage aiExport int                 aiSchemaGetSampleCount(aiSchemaBase* schema);
+aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 
 aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
@@ -419,14 +431,13 @@ aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
-// return pointers to actual data. no conversions (swap handedness etc.) are applied.
+// return pointers to actual data. no conversions (swap handedness / faces) are applied.
 aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data);
-// copy mesh data without splitting or triangulating. swap handedness and/or faces are applied.
-aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data);
-// copy triangulated mesh data. swap handedness and/or faces are applied.
-// if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
-// if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-aiCLinkage aiExport void            aiPolyMeshCopyDataWithTriangulation(aiPolyMeshSample* sample, aiMeshSampleData* data, bool always_expand_indices=false);
+// copy mesh data without splitting. swap handedness / faces are applied.
+// if triangulate is true, triangulation is applied. in this case:
+// - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
+// - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
+aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data, bool triangulate = false, bool always_expand_indices = false);
 // all these below aiPolyMesh* are mesh splitting functions
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);
@@ -450,7 +461,8 @@ aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* sch
 aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
 aiCLinkage aiExport const char*     aiPropertyGetNameS(aiProperty* prop);
 aiCLinkage aiExport aiPropertyType  aiPropertyGetType(aiProperty* prop);
-aiCLinkage aiExport void            aiPropertyGetData(aiProperty* prop, aiPropertyData *o_data);
+aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
+aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 
 #ifdef aiSupportTexture
 aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);

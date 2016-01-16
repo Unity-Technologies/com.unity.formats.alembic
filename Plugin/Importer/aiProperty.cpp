@@ -60,22 +60,28 @@ public:
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
 
-    aiPropertyData updateSample(float time) override
+    aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
         if (m_active) {
-            auto iss = Abc::ISampleSelector(double(time), Abc::ISampleSelector::kFloorIndex);
-            m_value = m_abcprop->getValue(iss);
-            m_data = aiPropertyData(getPropertyType(), &m_value, 1);
+            m_value = m_abcprop->getValue(ss);
+            m_data = aiPropertyData(getPropertyType(), (T*)&m_value, 1);
         }
-        return m_data;
+        return &m_data;
     }
 
-    aiPropertyData getData() override
+    void getDataPointer(const abcSampleSelector& ss, aiPropertyData& dst) override
     {
-        if (m_data.data == nullptr) {
-            updateSample(0.0f);
+        dst = *updateSample(ss);
+    }
+
+    void copyData(const abcSampleSelector& ss, aiPropertyData& dst) override
+    {
+        auto src = updateSample(ss);
+        if (dst.data) {
+            memcpy(dst.data, src->data, sizeof(T)*src->size);
         }
-        return m_data;
+        dst.size = src->size;
+        dst.type = src->type;
     }
 
 private:
@@ -113,22 +119,28 @@ public:
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
 
-    aiPropertyData updateSample(float time) override
+    aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
         if (m_active) {
-            auto iss = Abc::ISampleSelector(double(time), Abc::ISampleSelector::kFloorIndex);
-            m_value = m_abcprop->getValue(iss);
-            m_data = aiPropertyData(getPropertyType(), m_value->getData(), m_value->size());
+            m_value = m_abcprop->getValue(ss);
+            m_data = aiPropertyData(getPropertyType(), (T*)m_value->getData(), m_value->size());
         }
-        return m_data;
+        return &m_data;
     }
 
-    aiPropertyData getData() override
+    void getDataPointer(const abcSampleSelector& ss, aiPropertyData& dst) override
     {
-        if (m_data.data == nullptr) {
-            updateSample(0.0f);
+        dst = *updateSample(ss);
+    }
+
+    void copyData(const abcSampleSelector& ss, aiPropertyData& dst) override
+    {
+        auto src = updateSample(ss);
+        if (dst.data && src->size <= dst.size) {
+            memcpy(dst.data, src->data, sizeof(T)*src->size);
         }
-        return m_data;
+        dst.size = src->size;
+        dst.type = src->type;
     }
 
 private:

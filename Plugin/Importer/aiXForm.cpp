@@ -151,13 +151,13 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(float time, bool &topologyChanged)
+aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
     DebugLog("aiXForm::readSample(t=%f)", time);
     
     Sample *ret = newSample();
 
-    m_schema.get(ret->m_sample, MakeSampleSelector(time));
+    m_schema.get(ret->m_sample, ss);
 
     topologyChanged = false;
 
