@@ -186,7 +186,9 @@ public partial class AbcAPI
 
     public struct aiMeshSampleData
     {
-        // indices and their counts are available only when get by aiPolyMeshGetData()
+        // normalIndices, uvIndices, faces and their counts are
+        // available only when get by aiPolyMeshCopyData() without triangulating
+
         public IntPtr positions;
         public IntPtr velocities;
         public IntPtr normals;
@@ -206,6 +208,8 @@ public partial class AbcAPI
         public int normalIndexCount;
         public int uvIndexCount;
         public int faceCount;
+
+        public int triangulatedIndexCount;
 
         public Vector3 center;
         public Vector3 size;
@@ -245,26 +249,31 @@ public partial class AbcAPI
     public struct aiContext
     {
         public System.IntPtr ptr;
+        public static implicit operator bool(aiContext v) { return v.ptr != IntPtr.Zero; }
     }
 
     public struct aiObject
     {
         public System.IntPtr ptr;
+        public static implicit operator bool(aiObject v) { return v.ptr != IntPtr.Zero; }
     }
 
     public struct aiSchema
     {
         public System.IntPtr ptr;
+        public static implicit operator bool(aiSchema v) { return v.ptr != IntPtr.Zero; }
     }
 
     public struct aiProperty
     {
         public System.IntPtr ptr;
+        public static implicit operator bool(aiProperty v) { return v.ptr != IntPtr.Zero; }
     }
 
     public struct aiSample
     {
         public System.IntPtr ptr;
+        public static implicit operator bool(aiSample v) { return v.ptr != IntPtr.Zero; }
     }
 
     public struct aiPointsSampleData
@@ -316,11 +325,9 @@ public partial class AbcAPI
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
     [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasXForm(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasPolyMesh(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, bool forceRefresh);
@@ -331,11 +338,9 @@ public partial class AbcAPI
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
 
-    [DllImport ("AlembicImporter")] public static extern bool       aiHasCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetCamera(aiObject obj);
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
 
-    [DllImport("AlembicImporter")] public static extern bool        aiHasPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsSampleData data);
@@ -496,22 +501,22 @@ public partial class AbcAPI
         AlembicElement elem = null;
         aiSchema schema = default(aiSchema);
 
-        if (aiHasXForm(obj))
+        if (aiGetXForm(obj))
         {
             elem = GetOrAddComponent<AlembicXForm>(trans.gameObject);
             schema = aiGetXForm(obj);
         }
-        else if (aiHasPolyMesh(obj))
+        else if (aiGetPolyMesh(obj))
         {
             elem = GetOrAddComponent<AlembicMesh>(trans.gameObject);
             schema = aiGetPolyMesh(obj);
         }
-        else if (aiHasCamera(obj))
+        else if (aiGetCamera(obj))
         {
             elem = GetOrAddComponent<AlembicCamera>(trans.gameObject);
             schema = aiGetCamera(obj);
         }
-        else if (aiHasPoints(obj))
+        else if (aiGetPoints(obj))
         {
             elem = GetOrAddComponent<AlembicPoints>(trans.gameObject);
             schema = aiGetPoints(obj);

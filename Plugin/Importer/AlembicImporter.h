@@ -310,6 +310,8 @@ struct aiMeshSampleData
     int uvIndexCount;
     int faceCount;
 
+    int triangulatedIndexCount;
+
     abcV3 center;
     abcV3 size;
 
@@ -318,6 +320,7 @@ struct aiMeshSampleData
         , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
         , positionCount(0), normalCount(0), uvCount(0)
         , indexCount(0), normalIndexCount(0), uvIndexCount(0), faceCount(0)
+        , triangulatedIndexCount(0)
         , center(0.0f, 0.0f, 0.0f) , size(0.0f, 0.0f, 0.0f)
     {
     }
@@ -428,11 +431,9 @@ aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, 
 aiCLinkage aiExport int                 aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
 aiCLinkage aiExport float               aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
 
-aiCLinkage aiExport bool            aiHasXForm(aiObject* obj);
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
 aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
 
-aiCLinkage aiExport bool            aiHasPolyMesh(aiObject* obj);
 aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
@@ -451,11 +452,9 @@ aiCLinkage aiExport int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSam
 aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
 
-aiCLinkage aiExport bool            aiHasCamera(aiObject* obj);
 aiCLinkage aiExport aiCamera*       aiGetCamera(aiObject* obj);
 aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
 
-aiCLinkage aiExport bool            aiHasPoints(aiObject* obj);
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
 aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsSampleData *outData);
