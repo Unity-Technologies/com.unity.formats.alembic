@@ -113,14 +113,9 @@ uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(
 aiObject*   aiObject::getChild(int i) { return m_children[i]; }
 aiObject*   aiObject::getParent() { return m_parent; }
 
-bool aiObject::hasXForm() const { return m_xform != nullptr; }
-bool aiObject::hasPolyMesh() const { return m_polymesh != nullptr; }
-bool aiObject::hasCamera() const { return m_camera != nullptr; }
-bool aiObject::hasPoints() const { return m_points != nullptr; }
-
-aiXForm&    aiObject::getXForm()      { return *m_xform; }
-aiPolyMesh& aiObject::getPolyMesh()   { return *m_polymesh; }
-aiCamera&   aiObject::getCamera()     { return *m_camera; }
-aiPoints&   aiObject::getPoints()     { return *m_points; }
+aiXForm*    aiObject::getXForm()      { return m_xform.get(); }
+aiPolyMesh* aiObject::getPolyMesh()   { return m_polymesh.get(); }
+aiCamera*   aiObject::getCamera()     { return m_camera.get(); }
+aiPoints*   aiObject::getPoints()     { return m_points.get(); }
 
 

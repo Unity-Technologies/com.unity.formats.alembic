@@ -199,12 +199,12 @@ aiCLinkage aiExport float aiSchemaGetSampleTime(aiSchemaBase* schema, const abcS
 
 aiCLinkage aiExport bool aiHasXForm(aiObject* obj)
 {
-    return (obj ? obj->hasXForm() : false);
+    return obj && obj->getXForm();
 }
 
 aiCLinkage aiExport aiXForm* aiGetXForm(aiObject* obj)
 {
-    return (obj ? &(obj->getXForm()) : 0);
+    return obj ? obj->getXForm() : nullptr;
 }
 
 aiCLinkage aiExport void aiXFormGetData(aiXFormSample* sample, aiXFormData *outData)
@@ -218,12 +218,12 @@ aiCLinkage aiExport void aiXFormGetData(aiXFormSample* sample, aiXFormData *outD
 
 aiCLinkage aiExport bool aiHasPolyMesh(aiObject* obj)
 {
-    return (obj ? obj->hasPolyMesh() : false);
+    return obj && obj->getPolyMesh();
 }
 
 aiCLinkage aiExport aiPolyMesh* aiGetPolyMesh(aiObject* obj)
 {
-    return (obj ? &(obj->getPolyMesh()) : 0);
+    return obj ? obj->getPolyMesh() : nullptr;
 }
 
 aiCLinkage aiExport void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
@@ -303,12 +303,12 @@ aiCLinkage aiExport void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, 
 
 aiCLinkage aiExport bool aiHasCamera(aiObject* obj)
 {
-    return (obj ? obj->hasCamera() : false);
+    return obj && obj->getCamera();
 }
 
 aiCLinkage aiExport aiCamera* aiGetCamera(aiObject* obj)
 {
-    return (obj ? &(obj->getCamera()) : 0);
+    return obj ? obj->getCamera() : nullptr;
 }
 
 aiCLinkage aiExport void aiCameraGetData(aiCameraSample* sample, aiCameraData *outData)
@@ -321,14 +321,12 @@ aiCLinkage aiExport void aiCameraGetData(aiCameraSample* sample, aiCameraData *o
 
 aiCLinkage aiExport bool aiHasPoints(aiObject* obj)
 {
-    if (obj == nullptr) { return false; }
-    return obj->hasPoints();
+    return obj && obj->getPoints();
 }
 
 aiCLinkage aiExport aiPoints* aiGetPoints(aiObject* obj)
 {
-    if (obj == nullptr) { return nullptr; }
-    return &(obj->getPoints());
+    return obj ? obj->getPoints() : nullptr;
 }
 
 aiCLinkage aiExport int aiPointsGetPeakVertexCount(aiPoints *schema)

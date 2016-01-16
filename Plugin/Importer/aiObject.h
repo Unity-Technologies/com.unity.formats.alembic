@@ -23,16 +23,11 @@ public:
     void        readConfig();
     void        updateSample(float time);
     void        notifyUpdate();
-    
-    bool        hasXForm() const;
-    bool        hasPolyMesh() const;
-    bool        hasCamera() const;
-    bool        hasPoints() const;
-
-    aiXForm&    getXForm();
-    aiPolyMesh& getPolyMesh();
-    aiCamera&   getCamera();
-    aiPoints&   getPoints();
+ 
+    aiXForm*    getXForm();
+    aiPolyMesh* getPolyMesh();
+    aiCamera*   getCamera();
+    aiPoints*   getPoints();
 
     template<class F>
     void eachChildren(const F &f)

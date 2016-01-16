@@ -155,7 +155,7 @@ public:
 public:
     Abc::Int32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
-    int m_triangulated_index_count;
+    int m_triangulatedIndexCount;
 
     Submeshes m_submeshes;
     std::vector<int> m_faceSplitIndices;

@@ -23,7 +23,7 @@ static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
 // ---
 
 Topology::Topology()
-    : m_triangulated_index_count(0)
+    : m_triangulatedIndexCount(0)
     , m_tangentsCount(0)
 {
     m_indices.reset();
@@ -770,6 +770,7 @@ void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
         if (m_topology->m_counts) {
             dst.faceCount = m_topology->m_counts->size();
             dst.faces = (int*)m_topology->m_counts->get();
+            dst.triangulatedIndexCount = m_topology->m_triangulatedIndexCount;
         }
     }
 
@@ -1439,7 +1440,7 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     }
 
     m_varyingTopology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
-    
+
     DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
              (m_constant ? "true" : "false"),
              (m_varyingTopology ? "true" : "false"));
@@ -1483,6 +1484,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     {
         DebugLog("  Read face counts");
         m_schema.getFaceCountsProperty().get(ret->m_topology->m_counts, ss);
+        ret->m_topology->m_triangulatedIndexCount = CalculateTriangulatedIndexCount(*ret->m_topology->m_counts);
         topologyChanged = true;
     }
 
