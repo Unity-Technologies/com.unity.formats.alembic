@@ -136,7 +136,7 @@ public:
     {
         if (m_active) {
             m_value = m_abcprop->getValue(ss);
-            m_data = aiPropertyData(getPropertyType(), (T*)m_value->getData(), m_value->size());
+            m_data = aiPropertyData(getPropertyType(), (T*)m_value->getData(), (int)m_value->size());
         }
         return &m_data;
     }

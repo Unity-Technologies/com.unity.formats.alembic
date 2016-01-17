@@ -5,7 +5,7 @@
 
 aeContext::aeContext(const aeConfig &conf)
     : m_config(conf)
-    , m_time_sampling_index(0)
+    , m_default_timesampling_index(0)
 {
     aeDebugLog("aeContext::aeContext()");
 }
@@ -20,15 +20,17 @@ void aeContext::reset()
 {
     if (m_archive != nullptr) {
         if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
-            Abc::TimeSampling ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_times);
-            *m_archive.getTimeSampling(m_time_sampling_index) = ts;
+            for (int i = m_default_timesampling_index; i < (int)m_timesamplings.size(); ++i) {
+                auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_timesamplings[i]);
+                *m_archive.getTimeSampling(i) = ts;
+            }
         }
     }
 
     m_node_top.reset();
-    m_times.clear();
+    m_timesamplings.clear();
     m_archive.reset(); // flush archive
-    m_time_sampling_index = 0;
+    m_default_timesampling_index = 0;
 }
 
 bool aeContext::openArchive(const char *path)
@@ -53,9 +55,11 @@ bool aeContext::openArchive(const char *path)
     }
 
     Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(m_config.startTime));
-    m_time_sampling_index = m_archive.addTimeSampling(ts);
+    m_default_timesampling_index = m_archive.addTimeSampling(ts);
+    m_timesamplings.resize(m_default_timesampling_index + 1);
 
-    m_node_top.reset(new aeObject(this, nullptr, new AbcGeom::OObject(m_archive, AbcGeom::kTop, getTimeSaplingIndex())));
+    auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, m_default_timesampling_index);
+    m_node_top.reset(new aeObject(this, nullptr, top, m_default_timesampling_index));
     return true;
 }
 
@@ -64,9 +68,9 @@ const aeConfig& aeContext::getConfig() const
     return m_config;
 }
 
-uint32_t aeContext::getTimeSaplingIndex() const
+uint32_t aeContext::getDefaultTimeSaplingIndex() const
 {
-    return m_time_sampling_index;
+    return m_default_timesampling_index;
 }
 
 aeObject* aeContext::getTopObject()
@@ -74,7 +78,20 @@ aeObject* aeContext::getTopObject()
     return m_node_top.get();
 }
 
-void aeContext::setTime(float time)
+uint32_t aeContext::addTimeSampling(float start_time)
 {
-    m_times.push_back(time);
+    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(start_time));
+    uint32_t r = m_archive.addTimeSampling(ts);
+    m_timesamplings.resize(r + 1);
+    return r;
+}
+
+void aeContext::setTime(float time, uint32_t tsi)
+{
+    if (tsi == 0) { tsi = getDefaultTimeSaplingIndex(); }
+
+    auto &ts = m_timesamplings[tsi];
+    if (ts.empty() || ts.back() != time) {
+        ts.push_back(time);
+    }
 }

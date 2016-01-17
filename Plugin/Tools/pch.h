@@ -10,3 +10,5 @@
 #include <limits>
 #include <sstream>
 #include <type_traits>
+
+#pragma warning(disable: 4996)

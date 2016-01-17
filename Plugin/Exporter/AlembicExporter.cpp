@@ -29,9 +29,14 @@ aeCLinkage aeExport aeObject* aeGetTopObject(aeContext* ctx)
     return ctx->getTopObject();
 }
 
-aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time)
+aeCLinkage aeExport int aeAddTimeSampling(aeContext* ctx, float start_time)
 {
-    ctx->setTime(time);
+    return ctx->addTimeSampling(start_time);
+}
+
+aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time, int ts)
+{
+    ctx->setTime(time, ts);
 }
 
 
@@ -39,21 +44,21 @@ aeCLinkage aeExport void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-aeCLinkage aeExport aeXForm* aeNewXForm(aeObject *parent, const char *name)
+aeCLinkage aeExport aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aeXForm>(name);
+    return parent->newChild<aeXForm>(name, tsi);
 }
-aeCLinkage aeExport aePoints* aeNewPoints(aeObject *parent, const char *name)
+aeCLinkage aeExport aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aePoints>(name);
+    return parent->newChild<aePoints>(name, tsi);
 }
-aeCLinkage aeExport aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name)
+aeCLinkage aeExport aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aePolyMesh>(name);
+    return parent->newChild<aePolyMesh>(name, tsi);
 }
-aeCLinkage aeExport aeCamera* aeNewCamera(aeObject *parent, const char *name)
+aeCLinkage aeExport aeCamera* aeNewCamera(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aeCamera>(name);
+    return parent->newChild<aeCamera>(name, tsi);
 }
 
 aeCLinkage aeExport int aeGetNumChildren(aeObject *obj)

@@ -114,17 +114,17 @@ public:
 
     int getSampleIndex(const abcSampleSelector& ss) const override
     {
-        return ss.getIndex(m_timeSampling, m_numSamples);
+        return (int)ss.getIndex(m_timeSampling, m_numSamples);
     }
 
     float getSampleTime(const abcSampleSelector& ss) const override
     {
-        return m_timeSampling->getSampleTime(ss.getRequestedIndex());
+        return (float)m_timeSampling->getSampleTime(ss.getRequestedIndex());
     }
 
     int getNumSamples() const override
     {
-        return m_numSamples;
+        return (int)m_numSamples;
     }
 
     aiSampleBase* updateSample(const abcSampleSelector& ss) override
@@ -247,7 +247,7 @@ public:
     {
         DebugLog("aiTSchema::findSample(t=%f)", (float)ss.getRequestedTime());
 
-        int64_t sampleIndex = getSampleIndex(ss);
+        int sampleIndex = getSampleIndex(ss);
 
         if (dontUseCache())
         {

@@ -237,13 +237,14 @@ aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
-aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time); // relevant only if timeSamplingType is acyclic
+aeCLinkage aeExport int             aeAddTimeSampling(aeContext* ctx, float start_time);
+aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time, int tsi = 0); // relevant only if timeSamplingType is acyclic
 
 aeCLinkage aeExport void            aeDeleteObject(aeObject *obj);
-aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name);
-aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);
-aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name);
-aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *name);
+aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name, int tsi = 0);
+aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name, int tsi = 0);
+aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 0);
+aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *name, int tsi = 0);
 
 aeCLinkage aeExport int             aeGetNumChildren(aeObject *obj);
 aeCLinkage aeExport aeObject*       aeGetChild(aeObject *obj, int i);

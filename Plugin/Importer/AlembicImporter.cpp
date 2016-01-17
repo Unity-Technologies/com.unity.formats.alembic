@@ -25,7 +25,7 @@ aiCLinkage aiExport abcSampleSelector aiTimeToSampleSelector(float time)
 
 aiCLinkage aiExport abcSampleSelector aiIndexToSampleSelector(int index)
 {
-    return abcSampleSelector(uint64_t(index), Abc::ISampleSelector::kFloorIndex);
+    return abcSampleSelector(int64_t(index));
 }
 
 

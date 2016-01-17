@@ -150,7 +150,7 @@ bool aiGraphicsDeviceD3D9::readTexture(void *outBuf, size_t bufsize, void *tex_,
 
             // D3D9 の ARGB32 のピクセルの並びは BGRA になっているので並べ替える
             if (format == aiTextureFormat_ARGB32) {
-                BGRA2RGBA((RGBA<uint8_t>*)outBuf, bufsize / 4);
+                BGRA2RGBA((RGBA<uint8_t>*)outBuf, int(bufsize / 4));
             }
             ret = true;
         }
@@ -189,7 +189,7 @@ bool aiGraphicsDeviceD3D9::writeTexture(void *outTex, int width, int height, aiT
 
         // こちらも ARGB32 の場合 BGRA に並べ替える必要がある
         if (format == aiTextureFormat_ARGB32) {
-            CopyWithBGRA2RGBA((RGBA<uint8_t>*)wpixels, (RGBA<uint8_t>*)rpixels, bufsize / 4);
+            CopyWithBGRA2RGBA((RGBA<uint8_t>*)wpixels, (RGBA<uint8_t>*)rpixels, int(bufsize / 4));
         }
         else {
             memcpy(wpixels, rpixels, bufsize);
