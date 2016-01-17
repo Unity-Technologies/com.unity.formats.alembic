@@ -65,6 +65,11 @@ aeCLinkage aeExport aeObject* aeGetChild(aeObject *obj, int i)
     return obj->getChild(i);
 }
 
+aeCLinkage aeExport aeObject* aeGetParent(aeObject *obj)
+{
+    return obj->getParent();
+}
+
 aeCLinkage aeExport aeXForm* aeAsXForm(aeObject *obj)
 {
     return dynamic_cast<aeXForm*>(obj);

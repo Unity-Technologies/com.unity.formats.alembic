@@ -246,6 +246,7 @@ aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *na
 
 aeCLinkage aeExport int             aeGetNumChildren(aeObject *obj);
 aeCLinkage aeExport aeObject*       aeGetChild(aeObject *obj, int i);
+aeCLinkage aeExport aeObject*       aeGetParent(aeObject *obj);
 aeCLinkage aeExport aeXForm*        aeAsXForm(aeObject *obj);
 aeCLinkage aeExport aePoints*       aeAsPoints(aeObject *obj);
 aeCLinkage aeExport aePolyMesh*     aeAsPolyMesh(aeObject *obj);

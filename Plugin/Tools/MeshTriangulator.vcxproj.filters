@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="MeshTriangulator\MeshTriangulator.cpp">
+      <Filter>MeshTriangulator</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MeshTriangulator">
+      <UniqueIdentifier>{6cd7ce91-4476-4a3a-827d-5c2057c362a3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
