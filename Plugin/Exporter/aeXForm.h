@@ -10,8 +10,9 @@ public:
     abcXForm& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
-    void writeSample(const aeXFormSampleData &data);
-    void setFromPrevious() override;
+    size_t  getNumSamples() override;
+    void    setFromPrevious() override;
+    void    writeSample(const aeXFormSampleData &data);
 
 private:
     AbcGeom::OXformSchema m_schema;

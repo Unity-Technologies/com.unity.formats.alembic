@@ -9,8 +9,9 @@ public:
     abcPolyMesh& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
-    void writeSample(const aePolyMeshSampleData &data);
-    void setFromPrevious() override;
+    size_t  getNumSamples() override;
+    void    setFromPrevious() override;
+    void    writeSample(const aePolyMeshSampleData &data);
 
 private:
     AbcGeom::OPolyMeshSchema m_schema;

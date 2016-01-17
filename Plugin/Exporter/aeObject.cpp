@@ -114,7 +114,7 @@ aeObject::~aeObject()
 
 const char* aeObject::getName() const           { return m_abc->getName().c_str(); }
 const char* aeObject::getFullName() const       { return m_abc->getFullName().c_str(); }
-uint32_t    aeObject::getNumChildren() const    { return (uint32_t)m_children.size(); }
+size_t      aeObject::getNumChildren() const    { return m_children.size(); }
 aeObject*   aeObject::getChild(int i)           { return m_children[i]; }
 aeObject*   aeObject::getParent()               { return m_parent; }
 
@@ -179,6 +179,12 @@ aeProperty* aeObject::newProperty(const char *name)
     auto *ret = aeMakeProperty<T>::make(this, name);
     m_properties.emplace_back(aePropertyPtr(ret));
     return ret;
+}
+
+size_t aeObject::getNumSamples()
+{
+    aeDebugLog("aeObject::getNumSamples(): this should not be called!");
+    return 0;
 }
 
 void aeObject::setFromPrevious()

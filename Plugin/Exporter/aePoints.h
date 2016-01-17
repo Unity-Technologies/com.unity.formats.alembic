@@ -9,8 +9,9 @@ public:
     abcPoints& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
-    void writeSample(const aePointsSampleData &data);
-    void setFromPrevious() override;
+    size_t  getNumSamples() const;
+    void    setFromPrevious() override;
+    void    writeSample(const aePointsSampleData &data);
 
 private:
     AbcGeom::OPointsSchema m_schema;

@@ -21,6 +21,16 @@ abcProperties aePoints::getAbcProperties()
     return m_schema.getUserProperties();
 }
 
+size_t aePoints::getNumSamples() const
+{
+    return m_schema.getNumSamples();
+}
+
+void aePoints::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}
+
 void aePoints::writeSample(const aePointsSampleData &data_)
 {
     auto data = data_;
@@ -76,9 +86,4 @@ void aePoints::writeSample(const aePointsSampleData &data_)
     }
 
     m_schema.set(sample);
-}
-
-void aePoints::setFromPrevious()
-{
-    m_schema.setFromPrevious();
 }

@@ -21,6 +21,16 @@ abcProperties aeXForm::getAbcProperties()
     return m_schema.getUserProperties();
 }
 
+size_t aeXForm::getNumSamples()
+{
+    return m_schema.getNumSamples();
+}
+
+void aeXForm::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}
+
 void aeXForm::writeSample(const aeXFormSampleData &data_)
 {
     auto data = data_;
@@ -51,9 +61,4 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
 
     m_schema.set(m_sample);
     m_sample.reset();
-}
-
-void aeXForm::setFromPrevious()
-{
-    m_schema.setFromPrevious();
 }
