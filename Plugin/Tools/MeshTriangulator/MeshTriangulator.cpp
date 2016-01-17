@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "../Exporter/AlembicExporter.h"
-#include "../Importer/AlembicImporter.h"
+#include "Common.h"
 
 struct MeshTriangulatorConfig
 {
@@ -21,7 +20,9 @@ struct MeshTriangulatorConfig
     {}
 };
 
-tCLinkage tExport bool MeshTriangulator(
+
+
+tCLinkage tExport bool tMeshTriangulator(
     const char *src_abc_path,
     const char *dst_abc_path,
     const MeshTriangulatorConfig *conf)
@@ -41,6 +42,8 @@ tCLinkage tExport bool MeshTriangulator(
         return false;
     }
 
+
+    aiObject *itop = aiGetTopObject(ictx);
     // todo
 
     aeDestroyContext(ectx);
@@ -61,5 +64,5 @@ int main(int argc, char *argv[])
         // todo: parse option params
     }
 
-    return MeshTriangulator(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
+    return tMeshTriangulator(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
 }
