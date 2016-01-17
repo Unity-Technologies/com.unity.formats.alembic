@@ -4,8 +4,8 @@
 #include "aeObject.h"
 #include "aePolyMesh.h"
 
-aePolyMesh::aePolyMesh(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+aePolyMesh::aePolyMesh(aeObject *parent, const char *name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
 {
 }

@@ -5,8 +5,8 @@
 #include "aePoints.h"
 
 
-aePoints::aePoints(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new abcPoints(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+aePoints::aePoints(aeObject *parent, const char *name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcPoints(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
 {
 }

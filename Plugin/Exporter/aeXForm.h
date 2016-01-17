@@ -6,7 +6,7 @@ class aeXForm : public aeObject
 {
 typedef aeObject super;
 public:
-    aeXForm(aeObject *parent, const char *name);
+    aeXForm(aeObject *parent, const char *name, uint32_t tsi);
     abcXForm& getAbcObject() override;
     abcProperties getAbcProperties() override;
 

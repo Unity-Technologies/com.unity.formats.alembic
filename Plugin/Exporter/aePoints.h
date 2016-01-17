@@ -5,7 +5,7 @@ class aePoints : public aeObject
 {
 typedef aeObject super;
 public:
-    aePoints(aeObject *parent, const char *name);
+    aePoints(aeObject *parent, const char *name, uint32_t tsi);
     abcPoints& getAbcObject() override;
     abcProperties getAbcProperties() override;
 

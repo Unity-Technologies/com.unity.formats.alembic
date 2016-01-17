@@ -50,7 +50,7 @@ void Topology::clear()
 
 int Topology::getTriangulatedIndexCount() const
 {
-
+    return m_triangulatedIndexCount;
 }
 
 int Topology::getSplitCount() const
@@ -736,7 +736,7 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
 void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst)
 {
     if (m_positions) {
-        dst.positionCount = m_positions->valid() ? m_positions->size() : 0;
+        dst.positionCount = m_positions->valid() ? (int)m_positions->size() : 0;
         dst.positions = (abcV3*)(m_positions->get());
     }
 
@@ -745,18 +745,18 @@ void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst)
     }
 
     if (m_normals) {
-        dst.normalCount = m_normals.getVals()->size();
+        dst.normalCount = (int)m_normals.getVals()->size();
         dst.normals = (abcV3*)m_normals.getVals()->get();
-        dst.normalIndexCount = m_normals.isIndexed() ? m_normals.getIndices()->size() : 0;
+        dst.normalIndexCount = m_normals.isIndexed() ? (int)m_normals.getIndices()->size() : 0;
         if (dst.normalIndexCount) {
             dst.normalIndices = (int*)m_normals.getIndices()->get();
         }
     }
 
     if (m_uvs) {
-        dst.uvCount = m_uvs.getVals()->size();
+        dst.uvCount = (int)m_uvs.getVals()->size();
         dst.uvs = (abcV2*)m_uvs.getVals()->get();
-        dst.uvIndexCount = m_uvs.isIndexed() ? m_uvs.getIndices()->size() : 0;
+        dst.uvIndexCount = m_uvs.isIndexed() ? (int)m_uvs.getIndices()->size() : 0;
         if (dst.uvIndexCount) {
             dst.uvIndices = (int*)m_uvs.getIndices()->get();
         }
@@ -764,11 +764,11 @@ void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst)
 
     if (m_topology) {
         if (m_topology->m_indices) {
-            dst.indexCount = m_topology->m_indices->size();
+            dst.indexCount = (int)m_topology->m_indices->size();
             dst.indices = (int*)m_topology->m_indices->get();
         }
         if (m_topology->m_counts) {
-            dst.faceCount = m_topology->m_counts->size();
+            dst.faceCount = (int)m_topology->m_counts->size();
             dst.faces = (int*)m_topology->m_counts->get();
             dst.triangulatedIndexCount = m_topology->m_triangulatedIndexCount;
         }
@@ -1641,7 +1641,7 @@ void aiPolyMesh::updatePeakIndexCount() const
         countsProp.get(counts, Abc::ISampleSelector(int64_t(iMax)));
     }
 
-    m_peakIndexCount = cMax;
+    m_peakIndexCount = (int)cMax;
     m_peakTriangulatedIndexCount = CalculateTriangulatedIndexCount(*counts);
 }
 

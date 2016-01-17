@@ -5,8 +5,8 @@
 #include "aeCamera.h"
 
 
-aeCamera::aeCamera(aeObject *parent, const char *name)
-    : super(parent->getContext(), parent, new abcCamera(parent->getAbcObject(), name, parent->getContext()->getTimeSaplingIndex()))
+aeCamera::aeCamera(aeObject *parent, const char *name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcCamera(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
 {
 }

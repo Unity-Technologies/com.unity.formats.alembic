@@ -190,12 +190,13 @@ public partial class AbcAPI
 
     [DllImport("AlembicExporter")] public static extern bool        aeOpenArchive(aeContext ctx, string path);
     [DllImport("AlembicExporter")] public static extern aeObject    aeGetTopObject(aeContext ctx);
-    [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time); // relevant only if timeSamplingType is acyclic
+    [DllImport("AlembicExporter")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
+    [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = 0); // relevant only if timeSamplingType is acyclic
 
-    [DllImport("AlembicExporter")] public static extern aeObject    aeNewXForm(aeObject parent, string name);
-    [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name);
-    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPoints(aeObject parent, string name);
-    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 0);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 0);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPoints(aeObject parent, string name, int tsi = 0);
+    [DllImport("AlembicExporter")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name, int tsi = 0);
     [DllImport("AlembicExporter")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
     [DllImport("AlembicExporter")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
     [DllImport("AlembicExporter")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);

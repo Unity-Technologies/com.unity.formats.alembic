@@ -73,7 +73,7 @@ inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiT
     size_t bufsize = width * height * aiGetPixelSize(format);
     void *buf = aiGetConversionBuffer(bufsize);
     for (size_t i = 0; i < num_elements; ++i) {
-        converter(buf, data, i);
+        converter(buf, data, (int)i);
     }
     return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
 }

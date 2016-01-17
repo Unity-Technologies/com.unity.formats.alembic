@@ -32,7 +32,7 @@ void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
 void aiPointsSample::getDataPointer(aiPointsData &data)
 {
     if (m_positions) {
-        data.count = m_positions->size();
+        data.count = (int)m_positions->size();
         data.positions = (abcV3*)m_positions->get();
     }
 

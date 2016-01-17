@@ -31,6 +31,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#pragma warning(disable: 4996)
 
 #ifndef aiNoAutoLink
 #pragma comment(lib, "AlembicAbc.lib")

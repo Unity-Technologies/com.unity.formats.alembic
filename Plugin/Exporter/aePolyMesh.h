@@ -5,7 +5,7 @@ class aePolyMesh : public aeObject
 {
 typedef aeObject super;
 public:
-    aePolyMesh(aeObject *parent, const char *name);
+    aePolyMesh(aeObject *parent, const char *name, uint32_t tsi);
     abcPolyMesh& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
