@@ -5,7 +5,6 @@
 
 aeContext::aeContext(const aeConfig &conf)
     : m_config(conf)
-    , m_default_timesampling_index(0)
 {
     aeDebugLog("aeContext::aeContext()");
 }
@@ -20,7 +19,7 @@ void aeContext::reset()
 {
     if (m_archive != nullptr) {
         if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
-            for (int i = m_default_timesampling_index; i < (int)m_timesamplings.size(); ++i) {
+            for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_timesamplings[i]);
                 *m_archive.getTimeSampling(i) = ts;
             }
@@ -30,7 +29,6 @@ void aeContext::reset()
     m_node_top.reset();
     m_timesamplings.clear();
     m_archive.reset(); // flush archive
-    m_default_timesampling_index = 0;
 }
 
 bool aeContext::openArchive(const char *path)
@@ -55,22 +53,17 @@ bool aeContext::openArchive(const char *path)
     }
 
     Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(m_config.startTime));
-    m_default_timesampling_index = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(m_default_timesampling_index + 1);
+    auto tsi = m_archive.addTimeSampling(ts);
+    m_timesamplings.resize(tsi + 1);
 
-    auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, m_default_timesampling_index);
-    m_node_top.reset(new aeObject(this, nullptr, top, m_default_timesampling_index));
+    auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
+    m_node_top.reset(new aeObject(this, nullptr, top, tsi));
     return true;
 }
 
 const aeConfig& aeContext::getConfig() const
 {
     return m_config;
-}
-
-uint32_t aeContext::getDefaultTimeSaplingIndex() const
-{
-    return m_default_timesampling_index;
 }
 
 aeObject* aeContext::getTopObject()
@@ -88,8 +81,6 @@ uint32_t aeContext::addTimeSampling(float start_time)
 
 void aeContext::setTime(float time, uint32_t tsi)
 {
-    if (tsi == 0) { tsi = getDefaultTimeSaplingIndex(); }
-
     auto &ts = m_timesamplings[tsi];
     if (ts.empty() || ts.back() != time) {
         ts.push_back(time);

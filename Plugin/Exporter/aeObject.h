@@ -31,12 +31,12 @@ public:
     virtual abcProperties getAbcProperties();
 
     /// T: aeCamera, aeXForm, aePoint, aePolyMesh
-    template<class T> T*    newChild(const char *name, uint32_t tsi = 0);
+    template<class T> T*    newChild(const char *name, uint32_t tsi = 1);
     void                    removeChild(aeObject *c);
 
     /// T: abcFloatArrayProperty, abcFloatProperty, etc
     template<class T>
-    aeProperty*             newProperty(const char *name, uint32_t tsi = 0);
+    aeProperty*             newProperty(const char *name, uint32_t tsi = 1);
 
     virtual size_t  getNumSamples();
     virtual void    setFromPrevious();

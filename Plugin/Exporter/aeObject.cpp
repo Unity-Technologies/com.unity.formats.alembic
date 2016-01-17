@@ -127,8 +127,6 @@ AbcGeom::OObject&   aeObject::getAbcObject()        { return *m_abc; }
 template<class T>
 T* aeObject::newChild(const char *name, uint32_t tsi)
 {
-    if (tsi == 0) { tsi = m_ctx->getDefaultTimeSaplingIndex(); }
-
     T* child = new T(this, name, tsi);
     m_children.push_back(child);
     return child;
@@ -174,8 +172,6 @@ struct aeMakeProperty<T, true>
 template<class T>
 aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
 {
-    if (tsi == 0) { tsi = m_ctx->getDefaultTimeSaplingIndex(); }
-
     auto cprop = getAbcProperties();
     if (!cprop.valid()) {
         aeDebugLog("aeObject::newProperty() %s failed!", name);
