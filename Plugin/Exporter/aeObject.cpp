@@ -181,6 +181,11 @@ aeProperty* aeObject::newProperty(const char *name)
     return ret;
 }
 
+void aeObject::setFromPrevious()
+{
+    aeDebugLog("aeObject::setFromPrevious(): this should not be called!");
+}
+
 template aeProperty*    aeObject::newProperty<abcBoolProperty >(const char *name);
 template aeProperty*    aeObject::newProperty<abcIntProperty>(const char *name);
 template aeProperty*    aeObject::newProperty<abcUIntProperty>(const char *name);

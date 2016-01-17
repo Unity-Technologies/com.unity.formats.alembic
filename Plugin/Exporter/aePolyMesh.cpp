@@ -139,3 +139,8 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
     }
     m_schema.set(sample);
 }
+
+void aePolyMesh::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}

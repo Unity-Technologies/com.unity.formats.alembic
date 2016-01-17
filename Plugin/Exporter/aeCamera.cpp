@@ -50,3 +50,8 @@ void aeCamera::writeSample(const aeCameraSampleData &data_)
     sample.setHorizontalAperture(data.aperture * data.aspectRatio);
     m_schema.set(sample);
 }
+
+void aeCamera::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}
