@@ -138,7 +138,7 @@ void aiSchemaBase::setupProperties()
     size_t n = cpro.getNumProperties();
     for (size_t i = 0; i < n; ++i) {
         auto header = cpro.getPropertyHeader(i);
-        auto *prop = aiMakeProperty(cpro, header);
+        auto *prop = aiMakeProperty(this, cpro, header);
         if (prop != nullptr) {
             m_properties.emplace_back(prop);
         }

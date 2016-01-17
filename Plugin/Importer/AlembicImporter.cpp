@@ -196,6 +196,11 @@ aiCLinkage aiExport float aiSchemaGetSampleTime(aiSchemaBase* schema, const abcS
     return schema ? schema->getSampleTime(*ss) : 0.0f;
 }
 
+aiCLinkage aiExport int aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema)
+{
+    return schema ? schema->getTimeSamplingIndex() : 0;
+}
+
 
 aiCLinkage aiExport bool aiHasXForm(aiObject* obj)
 {
@@ -368,6 +373,11 @@ aiCLinkage aiExport aiPropertyType aiPropertyGetType(aiProperty* prop)
     return prop->getPropertyType();
 }
 
+aiCLinkage aiExport int aiPropertyGetTimeSamplingIndex(aiProperty* prop)
+{
+    return prop->getTimeSamplingIndex();
+}
+
 aiCLinkage aiExport const char* aiPropertyGetNameS(aiProperty* prop)
 {
     return prop->getName().c_str();
@@ -428,4 +438,5 @@ aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsData *data, void *tex,
         return false;
     }
 }
+
 #endif // aiSupportTexture

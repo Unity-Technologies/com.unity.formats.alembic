@@ -39,6 +39,7 @@ public:
     void invokeConfigCallback(aiConfig *config);
     void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
 
+    virtual int             getTimeSamplingIndex() const = 0;
     virtual int             getNumSamples() const = 0;
     virtual aiSampleBase*   updateSample(const abcSampleSelector& ss) = 0;
     virtual aiSampleBase*   getSample(const abcSampleSelector& ss) const = 0;
@@ -104,6 +105,11 @@ public:
         {
             delete m_theSample;
         }
+    }
+
+    int getTimeSamplingIndex() const override
+    {
+        return m_obj->getContext()->getTimeSamplingIndex(m_schema.getTimeSampling());
     }
 
     int getSampleIndex(const abcSampleSelector& ss) const override

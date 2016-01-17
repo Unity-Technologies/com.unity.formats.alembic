@@ -471,6 +471,7 @@ aiCLinkage aiExport aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, c
 aiCLinkage aiExport aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 aiCLinkage aiExport int             aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
 aiCLinkage aiExport float           aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport int             aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema);
 
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
 aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
@@ -506,6 +507,7 @@ aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* sch
 aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
 aiCLinkage aiExport const char*     aiPropertyGetNameS(aiProperty* prop);
 aiCLinkage aiExport aiPropertyType  aiPropertyGetType(aiProperty* prop);
+aiCLinkage aiExport int             aiPropertyGetTimeSamplingIndex(aiProperty* prop);
 aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 

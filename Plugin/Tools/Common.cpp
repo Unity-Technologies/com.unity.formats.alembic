@@ -121,18 +121,18 @@ aeObject* tContext::getEObject(aiObject *iobj)
     return i == m_iemap.end() ? nullptr : i->second;
 }
 
-void tContext::setXFormProcessor(const XFormProcessor& v)       { m_xfproc= v; }
-void tContext::setCameraProcessor(const CameraProcessor& v)     { m_camproc= v; }
-void tContext::setPointsProcessor(const PolyMeshProcessor& v)   { m_meshproc= v; }
-void tContext::setPolyMeshrocessor(const PointsProcessor& v)    { m_pointsproc= v; }
+void tContext::setXFormProcessor(const XFormProcessor& v)       { m_xfproc = v; }
+void tContext::setCameraProcessor(const CameraProcessor& v)     { m_camproc = v; }
+void tContext::setPointsProcessor(const PointsProcessor& v)     { m_pointsproc = v; }
+void tContext::setPolyMeshrocessor(const PolyMeshProcessor& v)  { m_meshproc = v; }
 
 void tContext::doExport()
 {
     if (!m_ictx || !m_ectx) { return; }
-    exportImpl(aiGetTopObject(m_ictx));
+    doExportImpl(aiGetTopObject(m_ictx));
 }
 
-void tContext::exportImpl(aiObject *iobj)
+void tContext::doExportImpl(aiObject *iobj)
 {
     aeObject *eobj = nullptr;
     if (iobj == aiGetTopObject(m_ictx)) {
@@ -171,7 +171,7 @@ void tContext::exportImpl(aiObject *iobj)
     int n = aiGetNumChildren(iobj);
     for (int i = 0; i < n; ++i) {
         auto *child = aiGetChild(iobj, i);
-        exportImpl(child);
+        doExportImpl(child);
     }
 
     m_estack.pop_back();

@@ -219,6 +219,19 @@ const std::string& aiContext::getPath() const
     return m_path;
 }
 
+
+int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
+{
+    int n = m_archive.getNumTimeSamplings();
+    for (int i = 0; i < n; ++i) {
+        if (m_archive.getTimeSampling(i) == ts) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+
 int aiContext::getUid() const
 {
     return m_uid;
