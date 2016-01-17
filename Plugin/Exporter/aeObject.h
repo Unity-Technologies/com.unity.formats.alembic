@@ -20,7 +20,7 @@ public:
 
     const char* getName() const;
     const char* getFullName() const;
-    uint32_t    getNumChildren() const;
+    size_t      getNumChildren() const;
     aeObject*   getChild(int i);
     aeObject*   getParent();
 
@@ -37,7 +37,8 @@ public:
     template<class T>
     aeProperty*             newProperty(const char *name);
 
-    virtual void setFromPrevious();
+    virtual size_t  getNumSamples();
+    virtual void    setFromPrevious();
 
 protected:
     typedef std::unique_ptr<aeProperty> aePropertyPtr;

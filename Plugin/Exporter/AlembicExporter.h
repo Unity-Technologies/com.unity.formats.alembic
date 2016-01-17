@@ -243,6 +243,17 @@ aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *nam
 aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name);
 aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name);
 aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *name);
+
+aeCLinkage aeExport int             aeGetNumChildren(aeObject *obj);
+aeCLinkage aeExport aeObject*       aeGetChild(aeObject *obj, int i);
+aeCLinkage aeExport aeXForm*        aeAsXForm(aeObject *obj);
+aeCLinkage aeExport aePoints*       aeAsPoints(aeObject *obj);
+aeCLinkage aeExport aePolyMesh*     aeAsPolyMesh(aeObject *obj);
+aeCLinkage aeExport aeCamera*       aeAsCamera(aeObject *obj);
+
+aeCLinkage aeExport int             aeGetNumSamples(aeObject *obj);
+aeCLinkage aeExport void            aeSetFromPrevious(aeObject *obj);
+
 aeCLinkage aeExport void            aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data);
 aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aePointsSampleData *data);
 aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data);

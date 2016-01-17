@@ -56,6 +56,42 @@ aeCLinkage aeExport aeCamera* aeNewCamera(aeObject *parent, const char *name)
     return parent->newChild<aeCamera>(name);
 }
 
+aeCLinkage aeExport int aeGetNumChildren(aeObject *obj)
+{
+    return (int)obj->getNumChildren();
+}
+aeCLinkage aeExport aeObject* aeGetChild(aeObject *obj, int i)
+{
+    return obj->getChild(i);
+}
+
+aeCLinkage aeExport aeXForm* aeAsXForm(aeObject *obj)
+{
+    return dynamic_cast<aeXForm*>(obj);
+}
+aeCLinkage aeExport aePoints* aeAsPoints(aeObject *obj)
+{
+    return dynamic_cast<aePoints*>(obj);
+}
+aeCLinkage aeExport aePolyMesh* aeAsPolyMesh(aeObject *obj)
+{
+    return dynamic_cast<aePolyMesh*>(obj);
+}
+aeCLinkage aeExport aeCamera* aeAsCamera(aeObject *obj)
+{
+    return dynamic_cast<aeCamera*>(obj);
+}
+
+
+aeCLinkage aeExport int aeGetNumSamples(aeObject *obj)
+{
+    return (int)obj->getNumSamples();
+}
+aeCLinkage aeExport void aeSetFromPrevious(aeObject *obj)
+{
+    obj->setFromPrevious();
+}
+
 aeCLinkage aeExport void aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data)
 {
     obj->writeSample(*data);

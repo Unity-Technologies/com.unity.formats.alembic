@@ -20,6 +20,16 @@ abcProperties aePolyMesh::getAbcProperties()
     return m_schema.getUserProperties();
 }
 
+size_t aePolyMesh::getNumSamples()
+{
+    return m_schema.getNumSamples();
+}
+
+void aePolyMesh::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}
+
 void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
 {
     aePolyMeshSampleData data = data_;
@@ -138,9 +148,4 @@ void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
         sample.setUVs(sample_uvs);
     }
     m_schema.set(sample);
-}
-
-void aePolyMesh::setFromPrevious()
-{
-    m_schema.setFromPrevious();
 }

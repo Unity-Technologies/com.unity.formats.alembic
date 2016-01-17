@@ -21,6 +21,16 @@ abcProperties aeCamera::getAbcProperties()
     return m_schema.getUserProperties();
 }
 
+size_t aeCamera::getNumSamples()
+{
+    return m_schema.getNumSamples();
+}
+
+void aeCamera::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}
+
 void aeCamera::writeSample(const aeCameraSampleData &data_)
 {
     auto data = data_;
@@ -49,9 +59,4 @@ void aeCamera::writeSample(const aeCameraSampleData &data_)
     sample.setVerticalAperture(data.aperture);
     sample.setHorizontalAperture(data.aperture * data.aspectRatio);
     m_schema.set(sample);
-}
-
-void aeCamera::setFromPrevious()
-{
-    m_schema.setFromPrevious();
 }
