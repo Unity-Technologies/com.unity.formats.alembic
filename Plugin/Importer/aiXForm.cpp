@@ -125,11 +125,8 @@ void aiXFormSample::getData(aiXFormData &outData) const
     outData.inherits = m_sample.getInheritsXforms();
     outData.translation = trans;
     outData.scale = scale;
-    outData.rotation = abcV4(rot.x * std::sin(rot.w * 0.5f),
-                             rot.y * std::sin(rot.w * 0.5f),
-                             rot.z * std::sin(rot.w * 0.5f),
-                             std::cos(rot.w * 0.5f) );
-
+    outData.rotationAxis = abcV3(rot.x * std::sin(rot.w * 0.5f), rot.y * std::sin(rot.w * 0.5f), rot.z * std::sin(rot.w * 0.5f));
+    outData.rotationAngle = std::cos(rot.w * 0.5f);
 }
 
 

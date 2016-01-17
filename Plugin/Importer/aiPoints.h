@@ -10,35 +10,14 @@ public:
     virtual ~aiPointsSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
-    void getDataPointer(aiPointsSampleData &data);
-    void copyData(aiPointsSampleData &data);
+    void getDataPointer(aiPointsData &data);
+    void copyData(aiPointsData &data);
 
 public:
     Abc::P3fArraySamplePtr m_positions;
     Abc::V3fArraySamplePtr m_velocities;
     Abc::UInt64ArraySamplePtr m_ids;
     Abc::Box3d m_bounds;
-};
-
-struct aiPointsSampleData
-{
-    abcV3 *positions;
-    abcV3 *velocities;
-    uint64_t *ids;
-    abcV3 boundsCenter;
-    abcV3 boundsExtents;
-    int32_t count;
-
-    inline aiPointsSampleData()
-        : positions(nullptr)
-        , velocities(nullptr)
-        , ids(nullptr)
-        , count(0)
-    {
-    }
-
-    aiPointsSampleData(const aiPointsSampleData&) = default;
-    aiPointsSampleData& operator=(const aiPointsSampleData&) = default;
 };
 
 

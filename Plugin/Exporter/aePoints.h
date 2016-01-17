@@ -11,7 +11,7 @@ public:
 
     size_t  getNumSamples() const;
     void    setFromPrevious() override;
-    void    writeSample(const aePointsSampleData &data);
+    void    writeSample(const aePointsData &data);
 
 private:
     AbcGeom::OPointsSchema m_schema;

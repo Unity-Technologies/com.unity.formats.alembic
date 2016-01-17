@@ -27,7 +27,7 @@ namespace AlembicExporterExample
             var positions = target.positionBuffer;
             if (positions == null) { return; }
 
-            var data = new AbcAPI.aePointsSampleData();
+            var data = new AbcAPI.aePointsData();
             data.count = positions.Length;
             data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             if(m_captureVelocities)

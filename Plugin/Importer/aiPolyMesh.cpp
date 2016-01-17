@@ -733,7 +733,7 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
 }
 
 
-void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
+void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst)
 {
     if (m_positions) {
         dst.positionCount = m_positions->valid() ? m_positions->size() : 0;
@@ -779,7 +779,7 @@ void aiPolyMeshSample::getDataPointer(aiMeshSampleData &dst)
 }
 
 
-static inline void SwapHandedness(aiMeshSampleData &dst)
+static inline void SwapHandedness(aiPolyMeshData &dst)
 {
     auto body = [&](abcV3 *v, int n) {
         if (v) {
@@ -792,7 +792,7 @@ static inline void SwapHandedness(aiMeshSampleData &dst)
 }
 
 // return true if position and uv / normal indices are deferent
-static inline bool IsIndicesDivergent(const aiMeshSampleData &dst)
+static inline bool IsIndicesDivergent(const aiPolyMeshData &dst)
 {
     if ((dst.normalCount != 0 && dst.positionCount != dst.normalCount) ||
         (dst.uvCount != 0 && dst.positionCount != dst.uvCount))
@@ -804,7 +804,7 @@ static inline bool IsIndicesDivergent(const aiMeshSampleData &dst)
     return false;
 }
 
-static inline void Triangulate(aiMeshSampleData& src, int *dv, const int *indices, bool swap_face)
+static inline void Triangulate(aiPolyMeshData& src, int *dv, const int *indices, bool swap_face)
 {
     if (!dv) { return; }
 
@@ -826,7 +826,7 @@ static inline void Triangulate(aiMeshSampleData& src, int *dv, const int *indice
 }
 
 template<class T>
-static inline void ExpandWithTriangulation(aiMeshSampleData& src, T *dv, const T *sv, const int *indices, bool swap_face)
+static inline void ExpandWithTriangulation(aiPolyMeshData& src, T *dv, const T *sv, const int *indices, bool swap_face)
 {
     if (!dv || !sv) { return; }
 
@@ -847,9 +847,9 @@ static inline void ExpandWithTriangulation(aiMeshSampleData& src, T *dv, const T
     }
 }
 
-void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
+void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
 {
-    aiMeshSampleData src;
+    aiPolyMeshData src;
     getDataPointer(src);
 
     // sadly, memcpy() is way faster than std::copy() on VC
@@ -912,9 +912,9 @@ void aiPolyMeshSample::copyData(aiMeshSampleData &dst)
 }
 
 
-void aiPolyMeshSample::copyDataWithTriangulation(aiMeshSampleData &dst, bool always_expand_indices)
+void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool always_expand_indices)
 {
-    aiMeshSampleData src;
+    aiPolyMeshData src;
     getDataPointer(src);
 
     bool needs_expand = IsIndicesDivergent(dst) || always_expand_indices;
@@ -946,7 +946,7 @@ int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
     return m_topology->getVertexBufferLength(splitIndex);
 }
 
-void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiMeshSampleData &data)
+void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
 {
     DebugLog("aiPolyMeshSample::fillVertexBuffer(splitIndex=%d)", splitIndex);
     

@@ -113,7 +113,7 @@ public partial class AbcAPI
         }
     }
 
-    public struct aeXFormSampleData
+    public struct aeXFormData
     {
         public Vector3 translation;
         public Vector3 rotationAxis;
@@ -122,7 +122,7 @@ public partial class AbcAPI
         [MarshalAs(UnmanagedType.U1)] public bool inherits;
     }
 
-    public struct aePointsSampleData
+    public struct aePointsData
     {
         public IntPtr positions; // Vector3*
         public IntPtr velocities; // Vector3*. can be null
@@ -130,7 +130,7 @@ public partial class AbcAPI
         public int count;
     }
 
-    public struct aePolyMeshSampleData
+    public struct aePolyMeshData
     {
         public IntPtr positions;        // Vector3*
         public IntPtr velocities;       // Vector3*. can be null
@@ -154,7 +154,7 @@ public partial class AbcAPI
         public int faceCount;
     }
 
-    public struct aeCameraSampleData
+    public struct aeCameraData
     {
         public float nearClippingPlane;
         public float farClippingPlane;
@@ -166,11 +166,11 @@ public partial class AbcAPI
         public float focusDistance;
         public float aperture;
 
-        public static aeCameraSampleData default_value
+        public static aeCameraData default_value
         {
             get
             {
-                return new aeCameraSampleData
+                return new aeCameraData
                 {
                     nearClippingPlane = 0.3f,
                     farClippingPlane = 1000.0f,
@@ -196,10 +196,10 @@ public partial class AbcAPI
     [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name);
     [DllImport("AlembicExporter")] public static extern aeObject    aeNewPoints(aeObject parent, string name);
     [DllImport("AlembicExporter")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name);
-    [DllImport("AlembicExporter")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormSampleData data);
-    [DllImport("AlembicExporter")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsSampleData data);
-    [DllImport("AlembicExporter")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshSampleData data);
-    [DllImport("AlembicExporter")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraSampleData data);
+    [DllImport("AlembicExporter")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
+    [DllImport("AlembicExporter")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
+    [DllImport("AlembicExporter")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);
+    [DllImport("AlembicExporter")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraData data);
 
     [DllImport("AlembicExporter")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
     [DllImport("AlembicExporter")] public static extern void        aePropertyWriteArraySample(aeProperty prop, IntPtr data, int num_data);

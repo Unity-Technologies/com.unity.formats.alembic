@@ -11,7 +11,7 @@ public:
 
     size_t  getNumSamples() override;
     void    setFromPrevious() override;
-    void    writeSample(const aeCameraSampleData &data);
+    void    writeSample(const aeCameraData &data);
 
 private:
     AbcGeom::OCameraSchema m_schema;

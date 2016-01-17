@@ -13,13 +13,13 @@ using UnityEditor;
 public class AlembicPoints : AlembicElement
 {
     // members
-    AbcAPI.aiPointsSampleData m_abcData;
+    AbcAPI.aiPointsData m_abcData;
     Vector3[] m_abcPositions;
     Int64[] m_abcIDs;
     int m_abcPeakVertexCount;
 
     // properties
-    public AbcAPI.aiPointsSampleData abcData { get { return m_abcData; } }
+    public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
     public Vector3[] abcPositions { get { return m_abcPositions; } }
     public Int64[] abcIDs { get { return m_abcIDs; } }
     public int abcPeakVertexCount

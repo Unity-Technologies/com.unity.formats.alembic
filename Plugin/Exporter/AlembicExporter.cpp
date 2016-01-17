@@ -97,19 +97,19 @@ aeCLinkage aeExport void aeSetFromPrevious(aeObject *obj)
     obj->setFromPrevious();
 }
 
-aeCLinkage aeExport void aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data)
+aeCLinkage aeExport void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aePointsWriteSample(aePoints *obj, const aePointsSampleData *data)
+aeCLinkage aeExport void aePointsWriteSample(aePoints *obj, const aePointsData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data)
+aeCLinkage aeExport void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraSampleData *data)
+aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
     obj->writeSample(*data);
 }
