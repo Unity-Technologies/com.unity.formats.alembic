@@ -9,6 +9,7 @@ public:
     virtual const std::string& getName() const = 0;
     virtual aiPropertyType getPropertyType() const = 0;
     virtual int getNumSamples() const = 0;
+    virtual int getTimeSamplingIndex() const = 0;
 
     // todo: implement caching. currently getData() simply redirect to updateSample()
     virtual aiPropertyData* updateSample(const abcSampleSelector& ss) = 0;
@@ -27,6 +28,6 @@ protected:
     bool m_active;
 };
 
-aiProperty* aiMakeProperty(AbcGeom::ICompoundProperty cprop, Abc::PropertyHeader header);
+aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header);
 
 #endif // aiProperty_h

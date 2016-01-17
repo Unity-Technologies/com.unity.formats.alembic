@@ -18,16 +18,16 @@ struct tContext
 public:
     typedef std::function<void(aiXForm*, aeXForm*)>         XFormProcessor;
     typedef std::function<void(aiCamera*, aeCamera*)>       CameraProcessor;
-    typedef std::function<void(aiPolyMesh*, aePolyMesh*)>   PolyMeshProcessor;
     typedef std::function<void(aiPoints*, aePoints*)>       PointsProcessor;
+    typedef std::function<void(aiPolyMesh*, aePolyMesh*)>   PolyMeshProcessor;
 
     tContext();
     ~tContext();
     void setArchives(aiContext *ictx, aeContext *ectx);
     void setXFormProcessor(const XFormProcessor& v);
     void setCameraProcessor(const CameraProcessor& v);
-    void setPointsProcessor(const PolyMeshProcessor& v);
-    void setPolyMeshrocessor(const PointsProcessor& v);
+    void setPointsProcessor(const PointsProcessor& v);
+    void setPolyMeshrocessor(const PolyMeshProcessor& v);
 
     aiObject* getIObject(aeObject *eobj);
     aeObject* getEObject(aiObject *iobj);
@@ -35,7 +35,7 @@ public:
     void doExport();
 
 private:
-    void exportImpl(aiObject *obj);
+    void doExportImpl(aiObject *obj);
 
 private:
     aiContext *m_ictx;

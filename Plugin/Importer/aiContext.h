@@ -66,6 +66,8 @@ public:
     const std::string& getPath() const;
     int getUid() const;
 
+    int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
+
     template<class F>
     void eachNodes(const F &f)
     {

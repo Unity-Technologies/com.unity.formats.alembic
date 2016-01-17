@@ -3,6 +3,8 @@
 #include "aiLogger.h"
 #include "aiContext.h"
 #include "aiProperty.h"
+#include "aiObject.h"
+#include "aiSchema.h"
 
 
 aiProperty::aiProperty()
@@ -51,14 +53,19 @@ public:
     typedef T property_type;
     typedef typename T::value_type value_type;
 
-    aiTScalarProprty(AbcGeom::ICompoundProperty cprop, const std::string &name)
-        : m_abcprop(new property_type(cprop, name))
+    aiTScalarProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
+        : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
         aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
+
+    int getTimeSamplingIndex() const override
+    {
+        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+    }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
@@ -85,6 +92,7 @@ public:
     }
 
 private:
+    aiSchemaBase *m_schema;
     std::unique_ptr<property_type> m_abcprop;
     value_type m_value;
     aiPropertyData m_data;
@@ -110,14 +118,19 @@ public:
     typedef typename T::value_type value_type;
     typedef typename T::sample_ptr_type sample_ptr_type;
 
-    aiTArrayProprty(AbcGeom::ICompoundProperty cprop, const std::string &name)
-        : m_abcprop(new property_type(cprop, name))
+    aiTArrayProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
+        : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
         aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
+
+    int getTimeSamplingIndex() const override
+    {
+        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+    }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
@@ -144,6 +157,7 @@ public:
     }
 
 private:
+    aiSchemaBase *m_schema;
     std::unique_ptr<property_type> m_abcprop;
     sample_ptr_type m_value;
     aiPropertyData m_data;
@@ -166,12 +180,18 @@ struct aiMakePropertyImpl;
 template<class T>
 struct aiMakePropertyImpl<T, false>
 {
-    static aiProperty* make(AbcGeom::ICompoundProperty cp, const std::string &name) { return new aiTScalarProprty<T>(cp, name); }
+    static aiProperty* make(aiSchemaBase *schema, abcProperties cp, const std::string &name)
+    {
+        return new aiTScalarProprty<T>(schema, cp, name);
+    }
 };
 template<class T>
 struct aiMakePropertyImpl<T, true>
 {
-    static aiProperty* make(AbcGeom::ICompoundProperty cp, const std::string &name) { return new aiTArrayProprty<T>(cp, name); }
+    static aiProperty* make(aiSchemaBase *schema, abcProperties cp, const std::string &name)
+    {
+        return new aiTArrayProprty<T>(schema, cp, name);
+    }
 };
 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
@@ -232,30 +252,30 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
     return aiPropertyType_Unknown;
 }
 
-aiProperty* aiMakeProperty(AbcGeom::ICompoundProperty cprop, Abc::PropertyHeader header)
+aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header)
 {
     aiPropertyType ptype = aiGetPropertyType(header);
     if (ptype == aiPropertyType_Unknown) { return nullptr; } // not supported type
 
     switch (ptype)
     {
-    case aiPropertyType_Bool: return aiMakePropertyImpl<abcBoolProperty>::make(cprop, header.getName());
-    case aiPropertyType_Int: return aiMakePropertyImpl<abcIntProperty>::make(cprop, header.getName());
-    case aiPropertyType_UInt: return aiMakePropertyImpl<abcUIntProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float: return aiMakePropertyImpl<abcFloatProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float2: return aiMakePropertyImpl<abcFloat2Property>::make(cprop, header.getName());
-    case aiPropertyType_Float3: return aiMakePropertyImpl<abcFloat3Property>::make(cprop, header.getName());
-    case aiPropertyType_Float4: return aiMakePropertyImpl<abcFloat4Property>::make(cprop, header.getName());
-    case aiPropertyType_Float4x4: return aiMakePropertyImpl<abcFloat4x4Property>::make(cprop, header.getName());
+    case aiPropertyType_Bool: return aiMakePropertyImpl<abcBoolProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Int: return aiMakePropertyImpl<abcIntProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_UInt: return aiMakePropertyImpl<abcUIntProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float: return aiMakePropertyImpl<abcFloatProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float2: return aiMakePropertyImpl<abcFloat2Property>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float3: return aiMakePropertyImpl<abcFloat3Property>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float4: return aiMakePropertyImpl<abcFloat4Property>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float4x4: return aiMakePropertyImpl<abcFloat4x4Property>::make(schema, cprop, header.getName());
 
-    case aiPropertyType_BoolArray: return aiMakePropertyImpl<abcBoolArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_IntArray: return aiMakePropertyImpl<abcIntArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_UIntArray: return aiMakePropertyImpl<abcUIntArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_FloatArray: return aiMakePropertyImpl<abcFloatArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float2Array: return aiMakePropertyImpl<abcFloat2ArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float3Array: return aiMakePropertyImpl<abcFloat3ArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float4Array: return aiMakePropertyImpl<abcFloat4ArrayProperty>::make(cprop, header.getName());
-    case aiPropertyType_Float4x4Array: return aiMakePropertyImpl<abcFloat4x4ArrayProperty>::make(cprop, header.getName());
+    case aiPropertyType_BoolArray: return aiMakePropertyImpl<abcBoolArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_IntArray: return aiMakePropertyImpl<abcIntArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_UIntArray: return aiMakePropertyImpl<abcUIntArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_FloatArray: return aiMakePropertyImpl<abcFloatArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float2Array: return aiMakePropertyImpl<abcFloat2ArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float3Array: return aiMakePropertyImpl<abcFloat3ArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float4Array: return aiMakePropertyImpl<abcFloat4ArrayProperty>::make(schema, cprop, header.getName());
+    case aiPropertyType_Float4x4Array: return aiMakePropertyImpl<abcFloat4x4ArrayProperty>::make(schema, cprop, header.getName());
     }
     return nullptr;
 }
