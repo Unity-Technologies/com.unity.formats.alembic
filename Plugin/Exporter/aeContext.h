@@ -39,7 +39,6 @@ public:
     bool openArchive(const char *path);
 
     const aeConfig& getConfig() const;
-    uint32_t getDefaultTimeSaplingIndex() const;
     aeObject* getTopObject();
 
     uint32_t addTimeSampling(float start_time);
@@ -50,7 +49,6 @@ private:
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;
     std::vector<std::vector<abcChrono>> m_timesamplings;
-    uint32_t m_default_timesampling_index;
 };
 
 #endif // aeContext_h
