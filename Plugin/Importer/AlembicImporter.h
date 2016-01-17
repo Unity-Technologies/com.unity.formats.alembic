@@ -79,31 +79,46 @@ struct  aiCameraData;
 struct  aiXFormData;
 struct  aiMeshSummary;
 struct  aiMeshSampleSummary;
-struct  aiMeshSampleData;
+struct  aiPolyMeshData;
 struct  aiSubmeshSummary;
 struct  aiSubmeshData;
 struct  aiFacesets;
 
 class   aiContext;
 class   aiObject;
-class   aiSchemaBase;
-class   aiSampleBase;
-class   aiXForm;
-class   aiXFormSample;
-class   aiPolyMesh;
-class   aiPolyMeshSample;
-class   aiPoints;
-class   aiPointsSample;
-struct  aiPointsSampleData;
-class   aiCurves;
-class   aiCurvesSample;
-struct  aiCurvesSampleData;
-class   aiSubD;
-class   aiSubDSample;
-struct  aiSubDSampleData;
-class   aiCamera;
-class   aiCameraSample;
+#ifdef aeImpl
+    class aiSchemaBase;
+    class aiSampleBase;
+    class aiXFormSample;    // : aiSampleBase
+    class aiCameraSample;   // : aiSampleBase
+    class aiPolyMeshSample; // : aiSampleBase
+    class aiPointsSample;   // : aiSampleBase
+    class aiCurvesSample;   // : aiSampleBase
+    class aiSubDSample;     // : aiSampleBase
+#else
+    // force make castable
+    typedef void aiSchemaBase;
+    typedef void aiSampleBase;
+    typedef void aiXFormSample;
+    typedef void aiCameraSample;
+    typedef void aiPolyMeshSample;
+    typedef void aiPointsSample;
+    typedef void aiCurvesSample;
+    typedef void aiSubDSample;
+#endif
+
+class   aiXForm;    // : aiSchemaBase
+class   aiCamera;   // : aiSchemaBase
+class   aiPolyMesh; // : aiSchemaBase
+class   aiPoints;   // : aiSchemaBase
+class   aiCurves;   // : aiSchemaBase
+class   aiSubD;     // : aiSchemaBase
 class   aiProperty;
+
+struct  aiPolyMeshData;
+struct  aiPointsData;
+struct  aiCurvesSampleData;
+struct  aiSubDSampleData;
 
 enum aiNormalsMode
 {
@@ -211,13 +226,15 @@ struct aiConfig
 struct aiXFormData
 {
     abcV3 translation;
-    abcV4 rotation;
+    abcV3 rotationAxis;
+    float rotationAngle;
     abcV3 scale;
     bool inherits;
 
     inline aiXFormData()
         : translation(0.0f, 0.0f, 0.0f)
-        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
+        , rotationAxis(0.0f, 1.0f, 0.0f)
+        , rotationAngle(0.0f)
         , scale(1.0f, 1.0f, 1.0f)
         , inherits(false)
     {
@@ -288,7 +305,7 @@ struct aiMeshSampleSummary
     aiMeshSampleSummary& operator=(const aiMeshSampleSummary&) = default;
 };
 
-struct aiMeshSampleData
+struct aiPolyMeshData
 {
     abcV3 *positions;
     abcV3 *velocities;
@@ -315,7 +332,7 @@ struct aiMeshSampleData
     abcV3 center;
     abcV3 size;
 
-    inline aiMeshSampleData()
+    inline aiPolyMeshData()
         : positions(nullptr), velocities(nullptr), normals(nullptr), uvs(nullptr), tangents(nullptr)
         , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
         , positionCount(0), normalCount(0), uvCount(0)
@@ -325,8 +342,8 @@ struct aiMeshSampleData
     {
     }
 
-    aiMeshSampleData(const aiMeshSampleData&) = default;
-    aiMeshSampleData& operator=(const aiMeshSampleData&) = default;
+    aiPolyMeshData(const aiPolyMeshData&) = default;
+    aiPolyMeshData& operator=(const aiPolyMeshData&) = default;
 };
 
 struct aiSubmeshSummary
@@ -380,6 +397,30 @@ struct aiFacesets
     aiFacesets& operator=(const aiFacesets&) = default;
 };
 
+struct aiPointsData
+{
+    abcV3       *positions;
+    abcV3       *velocities;
+    uint64_t    *ids;
+    int32_t     count;
+
+    abcV3       center;
+    abcV3       size;
+
+    inline aiPointsData()
+        : positions(nullptr)
+        , velocities(nullptr)
+        , ids(nullptr)
+        , count(0)
+        , center(0.0f, 0.0f, 0.0f)
+        , size(0.0f, 0.0f, 0.0f)
+    {
+    }
+
+    aiPointsData(const aiPointsData&) = default;
+    aiPointsData& operator=(const aiPointsData&) = default;
+};
+
 struct aiPropertyData
 {
     void *data;
@@ -425,11 +466,11 @@ aiCLinkage aiExport aiObject*       aiGetParent(aiObject* obj);
 
 aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-aiCLinkage aiExport int                 aiSchemaGetNumSamples(aiSchemaBase* schema);
-aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport int                 aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport float               aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport int             aiSchemaGetNumSamples(aiSchemaBase* schema);
+aiCLinkage aiExport aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport int             aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
+aiCLinkage aiExport float           aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
 
 aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
 aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
@@ -438,15 +479,15 @@ aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
-aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data);
+aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // copy mesh data without splitting. swap handedness / faces are applied.
 // if triangulate is true, triangulation is applied. in this case:
 // - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
 // - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data, bool triangulate = false, bool always_expand_indices = false);
+aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate = false, bool always_expand_indices = false);
 // all these below aiPolyMesh* are mesh splitting functions
 aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
-aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data);
+aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
 aiCLinkage aiExport int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
 aiCLinkage aiExport int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
 aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
@@ -457,8 +498,8 @@ aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCa
 
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
 aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
-aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsSampleData *outData);
-aiCLinkage aiExport void            aiPointsCopyData(aiPointsSample* sample, aiPointsSampleData *outData);
+aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
+aiCLinkage aiExport void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
 
 aiCLinkage aiExport int             aiSchemaGetNumProperties(aiSchemaBase* schema);
 aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
@@ -469,8 +510,8 @@ aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, c
 aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 
 #ifdef aiSupportTexture
-aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);
-aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt);
+aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt);
 #endif // aiSupportTexture
 
 #endif // AlembicImporter_h

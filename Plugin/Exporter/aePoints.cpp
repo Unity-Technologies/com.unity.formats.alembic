@@ -31,7 +31,7 @@ void aePoints::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aePoints::writeSample(const aePointsSampleData &data_)
+void aePoints::writeSample(const aePointsData &data_)
 {
     auto data = data_;
 

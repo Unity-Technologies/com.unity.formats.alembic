@@ -7,22 +7,35 @@
 #include "../Exporter/AlembicExporter.h"
 #include "../Importer/AlembicImporter.h"
 
+// default processors for tContext
+void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj);
+void tSimpleCopyCamera(aiCamera *iobj, aeCamera *eobj);
+void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj);
+void tSimpleCopyPoints(aiPoints *iobj, aePoints *eobj);
+
 struct tContext
 {
 public:
-    typedef std::function<void(aiObject*, aeObject*)> IEEnumerator;
+    typedef std::function<void(aiXForm*, aeXForm*)>         XFormProcessor;
+    typedef std::function<void(aiCamera*, aeCamera*)>       CameraProcessor;
+    typedef std::function<void(aiPolyMesh*, aePolyMesh*)>   PolyMeshProcessor;
+    typedef std::function<void(aiPoints*, aePoints*)>       PointsProcessor;
 
     tContext();
     ~tContext();
     void setArchives(aiContext *ictx, aeContext *ectx);
+    void setXFormProcessor(const XFormProcessor& v);
+    void setCameraProcessor(const CameraProcessor& v);
+    void setPointsProcessor(const PolyMeshProcessor& v);
+    void setPolyMeshrocessor(const PointsProcessor& v);
 
     aiObject* getIObject(aeObject *eobj);
     aeObject* getEObject(aiObject *iobj);
 
-    void constructIETree(const IEEnumerator &cb);
+    void doExport();
 
 private:
-    void constructIETreeImpl(aiObject *obj, const IEEnumerator &cb);
+    void exportImpl(aiObject *obj);
 
 private:
     aiContext *m_ictx;
@@ -31,4 +44,9 @@ private:
     std::map<aeObject*, aiObject*> m_eimap;
     std::vector<aiObject*> m_istack;
     std::vector<aeObject*> m_estack;
+
+    XFormProcessor      m_xfproc;
+    CameraProcessor     m_camproc;
+    PointsProcessor     m_pointsproc;
+    PolyMeshProcessor   m_meshproc;
 };

@@ -12,7 +12,7 @@ public:
 
     size_t  getNumSamples() override;
     void    setFromPrevious() override;
-    void    writeSample(const aeXFormSampleData &data);
+    void    writeSample(const aeXFormData &data);
 
 private:
     AbcGeom::OXformSchema m_schema;

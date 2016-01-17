@@ -39,11 +39,11 @@ public:
     void invokeConfigCallback(aiConfig *config);
     void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
 
-    virtual int                 getNumSamples() const = 0;
-    virtual aiSampleBase*       updateSample(const abcSampleSelector& ss) = 0;
-    virtual const aiSampleBase* getSample(const abcSampleSelector& ss) const = 0;
-    virtual int                 getSampleIndex(const abcSampleSelector& ss) const = 0;
-    virtual float               getSampleTime(const abcSampleSelector& ss) const = 0;
+    virtual int             getNumSamples() const = 0;
+    virtual aiSampleBase*   updateSample(const abcSampleSelector& ss) = 0;
+    virtual aiSampleBase*   getSample(const abcSampleSelector& ss) const = 0;
+    virtual int             getSampleIndex(const abcSampleSelector& ss) const = 0;
+    virtual float           getSampleTime(const abcSampleSelector& ss) const = 0;
 
     // for multithreaded updates, don't invoke C# callbacks from work threads
     void readConfig();
@@ -237,7 +237,7 @@ public:
         return sample;
     }
 
-    const Sample* getSample(const abcSampleSelector& ss) const override
+    Sample* getSample(const abcSampleSelector& ss) const override
     {
         DebugLog("aiTSchema::findSample(t=%f)", (float)ss.getRequestedTime());
 

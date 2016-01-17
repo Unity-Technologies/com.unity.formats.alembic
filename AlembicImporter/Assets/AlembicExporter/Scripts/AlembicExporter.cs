@@ -24,7 +24,7 @@ public class AlembicExporter : MonoBehaviour
 
     public static void CaptureTransform(AbcAPI.aeObject abc, Transform trans, bool inherits, bool invertForward)
     {
-        AbcAPI.aeXFormSampleData data;
+        AbcAPI.aeXFormData data;
         data.inherits = inherits;
 
         if (invertForward) { trans.forward = trans.forward * -1.0f; }
@@ -48,7 +48,7 @@ public class AlembicExporter : MonoBehaviour
 
     public static void CaptureCamera(AbcAPI.aeObject abc, Camera cam, AlembicCameraParams cparams = null)
     {
-        var data = AbcAPI.aeCameraSampleData.default_value;
+        var data = AbcAPI.aeCameraData.default_value;
         data.nearClippingPlane = cam.nearClipPlane;
         data.farClippingPlane = cam.farClipPlane;
         data.fieldOfView = cam.fieldOfView;
@@ -77,7 +77,7 @@ public class AlembicExporter : MonoBehaviour
         buf.normals = mesh.normals;
         buf.uvs = mesh.uv;
 
-        var data = new AbcAPI.aePolyMeshSampleData();
+        var data = new AbcAPI.aePolyMeshData();
         data.indices = GetArrayPtr(buf.indices);
         data.positions = GetArrayPtr(buf.vertices);
         if(buf.normals != null) { data.normals = GetArrayPtr(buf.normals); }
@@ -248,7 +248,7 @@ public class AlembicExporter : MonoBehaviour
             }
 
             // write!
-            var data = new AbcAPI.aePointsSampleData();
+            var data = new AbcAPI.aePointsData();
             data.positions = GetArrayPtr(m_buf_positions);
             data.count = count;
             AbcAPI.aePointsWriteSample(m_abc, ref data);

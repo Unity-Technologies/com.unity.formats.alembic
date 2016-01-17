@@ -31,7 +31,7 @@ void aeXForm::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeXForm::writeSample(const aeXFormSampleData &data_)
+void aeXForm::writeSample(const aeXFormData &data_)
 {
     auto data = data_;
     if (getConfig().swapHandedness)

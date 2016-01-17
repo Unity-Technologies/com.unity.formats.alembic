@@ -176,12 +176,12 @@ aiCLinkage aiExport int aiSchemaGetNumSamples(aiSchemaBase* schema)
     return (schema ? schema->getNumSamples() : 0);
 }
 
-aiCLinkage aiExport const aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
+aiCLinkage aiExport aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {    
     return (schema ? schema->updateSample(*ss) : 0);
 }
 
-aiCLinkage aiExport const aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
+aiCLinkage aiExport aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {
     return (schema ? schema->getSample(*ss) : 0);
 }
@@ -242,7 +242,7 @@ aiCLinkage aiExport void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, ai
     }
 }
 
-aiCLinkage aiExport void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMeshSampleData* data)
+aiCLinkage aiExport void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data)
 {
     if (sample)
     {
@@ -250,7 +250,7 @@ aiCLinkage aiExport void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiMe
     }
 }
 
-aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiMeshSampleData* data, bool triangulate, bool always_expand_indices)
+aiCLinkage aiExport void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate, bool always_expand_indices)
 {
     if (sample)
     {
@@ -269,7 +269,7 @@ aiCLinkage aiExport int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample
     return (sample ? sample->getVertexBufferLength(splitIndex) : 0);
 }
 
-aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiMeshSampleData* data)
+aiCLinkage aiExport void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data)
 {
     if (sample)
     {
@@ -335,13 +335,13 @@ aiCLinkage aiExport int aiPointsGetPeakVertexCount(aiPoints *schema)
     return schema->getPeakVertexCount();
 }
 
-aiCLinkage aiExport void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsSampleData *outData)
+aiCLinkage aiExport void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData)
 {
     if (sample == nullptr) { return; }
     sample->getDataPointer(*outData);
 }
 
-aiCLinkage aiExport void aiPointsCopyData(aiPointsSample* sample, aiPointsSampleData *outData)
+aiCLinkage aiExport void aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData)
 {
     if (sample == nullptr) { return; }
     sample->copyData(*outData);
@@ -387,7 +387,7 @@ aiCLinkage aiExport void aiPropertyCopyData(aiProperty* prop, const abcSampleSel
 
 #include "GraphicsDevice/aiGraphicsDevice.h"
 
-aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt)
 {
     if (data == nullptr) { return false; }
 
@@ -404,7 +404,7 @@ aiCLinkage aiExport bool aiPointsCopyPositionsToTexture(aiPointsSampleData *data
     }
 }
 
-aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsSampleData *data, void *tex, int width, int height, aiTextureFormat fmt)
+aiCLinkage aiExport bool aiPointsCopyIDsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt)
 {
     if (data == nullptr) { return false; }
 

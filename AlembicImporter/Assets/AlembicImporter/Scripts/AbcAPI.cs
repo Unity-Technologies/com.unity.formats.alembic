@@ -184,7 +184,7 @@ public partial class AbcAPI
         [MarshalAs(UnmanagedType.U1)] public bool hasTangents;
     }
 
-    public struct aiMeshSampleData
+    public struct aiPolyMeshData
     {
         // normalIndices, uvIndices, faces and their counts are
         // available only when get by aiPolyMeshCopyData() without triangulating
@@ -276,14 +276,15 @@ public partial class AbcAPI
         public static implicit operator bool(aiSample v) { return v.ptr != IntPtr.Zero; }
     }
 
-    public struct aiPointsSampleData
+    public struct aiPointsData
     {
         public IntPtr positions;
         public IntPtr velocities;
         public IntPtr ids;
+        public int count;
+
         public Vector3 boundsCenter;
         public Vector3 boundsExtents;
-        public int count;
     }
 
     public struct aiPropertyData
@@ -332,7 +333,7 @@ public partial class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
     [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, bool forceRefresh);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
-    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiMeshSampleData data);
+    [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
     [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
     [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
@@ -343,7 +344,7 @@ public partial class AbcAPI
 
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
     [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
-    [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsSampleData data);
+    [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsData data);
 
     [DllImport("AlembicImporter")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
     [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
@@ -354,9 +355,9 @@ public partial class AbcAPI
 
 
     // currently tex must be ARGBFloat
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyPositionsToTexture(ref aiPointsData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
     // currently tex must be RInt
-    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsSampleData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
+    [DllImport("AlembicImporter")] public static extern bool        aiPointsCopyIDsToTexture(ref aiPointsData data, IntPtr tex, int width, int height, aiTextureFormat fmt);
 
 
     class ImportContext

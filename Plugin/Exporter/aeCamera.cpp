@@ -31,7 +31,7 @@ void aeCamera::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeCamera::writeSample(const aeCameraSampleData &data_)
+void aeCamera::writeSample(const aeCameraData &data_)
 {
     auto data = data_;
 

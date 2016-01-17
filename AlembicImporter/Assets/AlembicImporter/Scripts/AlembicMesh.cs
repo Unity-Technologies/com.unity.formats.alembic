@@ -195,7 +195,7 @@ public class AlembicMesh : AlembicElement
 
         AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary, topologyChanged);
 
-        AbcAPI.aiMeshSampleData vertexData = default(AbcAPI.aiMeshSampleData);
+        AbcAPI.aiPolyMeshData vertexData = default(AbcAPI.aiPolyMeshData);
 
         UpdateSplits(m_sampleSummary.splitCount);
 

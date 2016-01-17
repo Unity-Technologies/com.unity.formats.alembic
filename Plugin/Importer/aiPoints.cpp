@@ -29,7 +29,7 @@ void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
 }
 
 
-void aiPointsSample::getDataPointer(aiPointsSampleData &data)
+void aiPointsSample::getDataPointer(aiPointsData &data)
 {
     if (m_positions) {
         data.count = m_positions->size();
@@ -44,11 +44,11 @@ void aiPointsSample::getDataPointer(aiPointsSampleData &data)
         data.ids = (uint64_t*)m_ids->get();
     }
 
-    data.boundsCenter = m_bounds.center();
-    data.boundsExtents = m_bounds.size();
+    data.center = m_bounds.center();
+    data.size = m_bounds.size();
 }
 
-void aiPointsSample::copyData(aiPointsSampleData &data)
+void aiPointsSample::copyData(aiPointsData &data)
 {
     int count = (int)m_positions->size();
     data.count = count;
@@ -76,8 +76,8 @@ void aiPointsSample::copyData(aiPointsSampleData &data)
         }
     }
 
-    data.boundsCenter = m_bounds.center();
-    data.boundsExtents = m_bounds.size();
+    data.center = m_bounds.center();
+    data.size = m_bounds.size();
 }
 
 // ---

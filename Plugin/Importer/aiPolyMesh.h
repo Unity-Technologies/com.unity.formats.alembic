@@ -183,16 +183,16 @@ public:
     bool tangentsRequired() const;
 
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
-    void getDataPointer(aiMeshSampleData &data);
-    void copyData(aiMeshSampleData &data);
-    void copyDataWithTriangulation(aiMeshSampleData &data, bool always_expand_indices);
+    void getDataPointer(aiPolyMeshData &data);
+    void copyData(aiPolyMeshData &data);
+    void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
 
     void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeSmoothNormals(const aiConfig &config);
 
     int getVertexBufferLength(int splitIndex) const;
-    void fillVertexBuffer(int splitIndex, aiMeshSampleData &data);
+    void fillVertexBuffer(int splitIndex, aiPolyMeshData &data);
 
     int prepareSubmeshes(const aiFacesets &inFacesets);
     int getSplitSubmeshCount(int splitIndex) const;

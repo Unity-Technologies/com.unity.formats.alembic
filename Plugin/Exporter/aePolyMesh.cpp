@@ -30,9 +30,9 @@ void aePolyMesh::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aePolyMesh::writeSample(const aePolyMeshSampleData &data_)
+void aePolyMesh::writeSample(const aePolyMeshData &data_)
 {
-    aePolyMeshSampleData data = data_;
+    aePolyMeshData data = data_;
     const auto &conf = getConfig();
 
 

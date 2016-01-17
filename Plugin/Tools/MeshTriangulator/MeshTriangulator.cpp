@@ -7,15 +7,15 @@ struct MeshTriangulatorConfig
     bool    expand_indices;
     bool    split;
     bool    swap_handedness;
-    bool    swap_face_winding;
+    bool    swap_faces;
     abcV3   scale;
 
     MeshTriangulatorConfig()
-        : triangulate(true)
-        , expand_indices(true)
+        : triangulate(false)
+        , expand_indices(false)
         , split(false)
         , swap_handedness(false)
-        , swap_face_winding(false)
+        , swap_faces(false)
         , scale(1.0f, 1.0f, 1.0f)
     {}
 };
@@ -42,27 +42,57 @@ tCLinkage tExport bool tMeshTriangulator(
         return false;
     }
 
-
-    aiObject *itop = aiGetTopObject(ictx);
-    // todo
+    {
+        tContext tctx;
+        tctx.setArchives(ictx, ectx);
+        tctx.doExport();
+    }
 
     aeDestroyContext(ectx);
     aiDestroyContext(ictx);
     return false;
 }
 
-int main(int argc, char *argv[])
+tCLinkage tExport bool tMeshTriangulator_CommandLine(int argc, char *argv[])
 {
-    if (argc < 3) {
-        printf("usage: %s [src .abc path] [dst .abc path] \n", argv[0]);
-        return 1;
-    }
+    if (argc < 3) { return false; }
+
     const char *src_abc_path = argv[1];
     const char *dst_abc_path = argv[2];
     MeshTriangulatorConfig conf;
-    for (int i = 3; i < argc; ++i) {
-        // todo: parse option params
-    }
 
+    // parse options
+    for (int i = 3; i < argc; ++i) {
+        if (strcmp(argv[i], "/triangulate") == 0) {
+            conf.triangulate = true;
+        }
+        else if (strcmp(argv[i], "/expand_indices") == 0) {
+            conf.expand_indices = true;
+        }
+        else if (strcmp(argv[i], "/split") == 0) {
+            conf.split = true;
+        }
+        else if (strcmp(argv[i], "/swap_handedness") == 0) {
+            conf.swap_handedness = true;
+        }
+        else if (strcmp(argv[i], "/swap_faces") == 0) {
+            conf.swap_faces = true;
+        }
+        else if (strncmp(argv[i], "/scale", 6) == 0) {
+            abcV3 v;
+            if (sscanf(argv[i], "/scale:%f,%f,%f", &v.x, &v.y, &v.z) == 3) {
+                conf.scale = v;
+            }
+        }
+    }
     return tMeshTriangulator(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc < 3) {
+        printf("usage: %s [src .abc path] [dst .abc path] (options - /triangulate /expand_indices /split /swap_handedness /swap_faces /scale:1.0,1.0,1.0)\n", argv[0]);
+        return 1;
+    }
+    return tMeshTriangulator_CommandLine(argc, argv) ? 0 : 1;
 }

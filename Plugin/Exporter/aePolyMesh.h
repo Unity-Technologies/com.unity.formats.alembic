@@ -11,7 +11,7 @@ public:
 
     size_t  getNumSamples() override;
     void    setFromPrevious() override;
-    void    writeSample(const aePolyMeshSampleData &data);
+    void    writeSample(const aePolyMeshData &data);
 
 private:
     AbcGeom::OPolyMeshSchema m_schema;

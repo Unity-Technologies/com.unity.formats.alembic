@@ -63,10 +63,11 @@ class aePoints;   // : aeObject
 class aePolyMesh; // : aeObject
 class aeCamera;   // : aeObject
 class aeProperty;
-struct aeXFormSampleData;
-struct aePointsSampleData;
-struct aePolyMeshSampleData;
-struct aeCameraSampleData;
+
+struct aeXFormData;
+struct aePointsData;
+struct aePolyMeshData;
+struct aeCameraData;
 
 
 enum aeArchiveType
@@ -143,7 +144,7 @@ struct aeConfig
 };
 
 
-struct aeXFormSampleData
+struct aeXFormData
 {
     abcV3 translation;
     abcV3 rotationAxis;
@@ -151,7 +152,7 @@ struct aeXFormSampleData
     abcV3 scale;
     bool inherits;
 
-    inline aeXFormSampleData()
+    inline aeXFormData()
         : translation(0.0f, 0.0f, 0.0f)
         , rotationAxis(0.0f, 1.0f, 0.0f)
         , rotationAngle(0.0f)
@@ -161,7 +162,7 @@ struct aeXFormSampleData
     }
 };
 
-struct aePolyMeshSampleData
+struct aePolyMeshData
 {
     const abcV3 *positions;
     const abcV3 *velocities;    // can be null. if not null, must be same size of positions
@@ -182,7 +183,7 @@ struct aePolyMeshSampleData
     int uvIndexCount;           // if 0, assume same as indexCount
     int faceCount;              // only relevant if faces is not null
 
-    aePolyMeshSampleData()
+    aePolyMeshData()
         : positions(nullptr), velocities(nullptr), normals(nullptr), uvs(nullptr)
         , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
         , positionCount(0), normalCount(0), uvCount(0)
@@ -190,14 +191,14 @@ struct aePolyMeshSampleData
     {}
 };
 
-struct aePointsSampleData
+struct aePointsData
 {
     const abcV3 *positions;
     const abcV3 *velocities;    // can be null
     const uint64_t *ids;        // can be null
     int count;
 
-    inline aePointsSampleData()
+    inline aePointsData()
         : positions(nullptr)
         , velocities(nullptr)
         , ids(nullptr)
@@ -206,7 +207,7 @@ struct aePointsSampleData
     }
 };
 
-struct aeCameraSampleData
+struct aeCameraData
 {
     float nearClippingPlane;
     float farClippingPlane;
@@ -217,7 +218,7 @@ struct aeCameraSampleData
     float focusDistance;
     float aperture;
 
-    inline aeCameraSampleData()
+    inline aeCameraData()
         : nearClippingPlane(0.3f)
         , farClippingPlane(1000.0f)
         , fieldOfView(60.0f)
@@ -255,10 +256,10 @@ aeCLinkage aeExport aeCamera*       aeAsCamera(aeObject *obj);
 aeCLinkage aeExport int             aeGetNumSamples(aeObject *obj);
 aeCLinkage aeExport void            aeSetFromPrevious(aeObject *obj);
 
-aeCLinkage aeExport void            aeXFormWriteSample(aeXForm *obj, const aeXFormSampleData *data);
-aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aePointsSampleData *data);
-aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshSampleData *data);
-aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeCameraSampleData *data);
+aeCLinkage aeExport void            aeXFormWriteSample(aeXForm *obj, const aeXFormData *data);
+aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aePointsData *data);
+aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
+aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
 
 aeCLinkage aeExport aeProperty*     aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
 aeCLinkage aeExport void            aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
