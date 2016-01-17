@@ -10,6 +10,7 @@ public:
     abcProperties getAbcProperties() override;
 
     void writeSample(const aeCameraSampleData &data);
+    void setFromPrevious() override;
 
 private:
     AbcGeom::OCameraSchema m_schema;

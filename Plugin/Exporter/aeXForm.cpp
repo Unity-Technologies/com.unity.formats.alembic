@@ -52,3 +52,8 @@ void aeXForm::writeSample(const aeXFormSampleData &data_)
     m_schema.set(m_sample);
     m_sample.reset();
 }
+
+void aeXForm::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}

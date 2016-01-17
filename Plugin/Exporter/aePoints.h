@@ -10,6 +10,7 @@ public:
     abcProperties getAbcProperties() override;
 
     void writeSample(const aePointsSampleData &data);
+    void setFromPrevious() override;
 
 private:
     AbcGeom::OPointsSchema m_schema;

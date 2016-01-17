@@ -77,3 +77,8 @@ void aePoints::writeSample(const aePointsSampleData &data_)
 
     m_schema.set(sample);
 }
+
+void aePoints::setFromPrevious()
+{
+    m_schema.setFromPrevious();
+}

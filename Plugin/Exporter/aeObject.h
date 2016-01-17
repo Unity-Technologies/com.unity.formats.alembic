@@ -37,6 +37,8 @@ public:
     template<class T>
     aeProperty*             newProperty(const char *name);
 
+    virtual void setFromPrevious();
+
 protected:
     typedef std::unique_ptr<aeProperty> aePropertyPtr;
     aeContext                   *m_ctx;
