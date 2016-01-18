@@ -220,6 +220,49 @@ const std::string& aiContext::getPath() const
 }
 
 
+int aiContext::getNumTimeSamplings()
+{
+    return (int)m_archive.getNumTimeSamplings();
+}
+
+void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
+{
+    auto ts = m_archive.getTimeSampling(i);
+    auto tst = ts->getTimeSamplingType();
+
+    dst.numTimes = (int)ts->getNumStoredTimes();
+    if (tst.isUniform() || tst.isCyclic()) {
+        size_t numCycles = (m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
+
+        dst.type = tst.isUniform() ? aiTimeSamplingType_Uniform : aiTimeSamplingType_Cyclic;
+        dst.interval = (float)tst.getTimePerCycle();
+        dst.startTime = (float)ts->getStoredTimes()[0];
+        dst.endTime = dst.startTime + dst.interval * (numCycles - 1);
+    }
+    else if (tst.isAcyclic()) {
+        dst.type = aiTimeSamplingType_Acyclic;
+        dst.startTime = (float)ts->getSampleTime(0);
+        dst.endTime = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
+        dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
+    }
+}
+
+void aiContext::copyTimeSampling(int i, aiTimeSamplingData& dst)
+{
+    int dst_numSamples = dst.numTimes;
+    double *dst_samples = dst.times;
+
+    getTimeSampling(i, dst);
+
+    if (dst.type == aiTimeSamplingType_Acyclic) {
+        const auto& times = m_archive.getTimeSampling(i)->getStoredTimes();
+        if (dst_samples && dst_numSamples >= times.size()) {
+            // memcpy() is way faster than std::copy() on VC...
+            memcpy(dst.times, &times[0], sizeof(times[0])*times.size());
+        }
+    }
+}
+
 int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
 {
     int n = m_archive.getNumTimeSamplings();

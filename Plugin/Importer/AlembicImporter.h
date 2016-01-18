@@ -135,6 +135,13 @@ enum aiTangentsMode
     TM_Split
 };
 
+enum aiTimeSamplingType
+{
+    aiTimeSamplingType_Uniform,
+    aiTimeSamplingType_Cyclic,
+    aiTimeSamplingType_Acyclic,
+};
+
 enum aiPropertyType
 {
     aiPropertyType_Unknown,
@@ -221,6 +228,22 @@ struct aiConfig
         
         return oss.str();
     }
+};
+
+struct aiTimeSamplingData
+{
+    aiTimeSamplingType type;
+    float startTime;
+    float endTime;
+    float interval;     // relevant only if type is Uniform or Cyclic
+    int numTimes;       // relevant only if type is Acyclic
+    double *times;      // relevant only if type is Acyclic
+
+    aiTimeSamplingData()
+        : type(aiTimeSamplingType_Uniform)
+        , startTime(0.0f), endTime(0.0f), interval(1.0f / 30.0f)
+        , numTimes(0), times(nullptr)
+    {}
 };
 
 struct aiXFormData
@@ -452,6 +475,11 @@ aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
 aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
 aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
 aiCLinkage aiExport void            aiDestroyObject(aiContext* ctx, aiObject* obj);
+
+aiCLinkage aiExport int             aiGetNumTimeSamplings(aiContext* ctx);
+aiCLinkage aiExport void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
+// deep copy to dst->times. if time sampling type is not Acyclic (which have no times), do exact same thing as aiGetTimeSampling()
+aiCLinkage aiExport void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 
 aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
 aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);   // async version

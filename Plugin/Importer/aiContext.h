@@ -66,6 +66,9 @@ public:
     const std::string& getPath() const;
     int getUid() const;
 
+    int getNumTimeSamplings();
+    void getTimeSampling(int i, aiTimeSamplingData& dst);
+    void copyTimeSampling(int i, aiTimeSamplingData& dst);
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
     template<class F>

@@ -93,6 +93,23 @@ aiCLinkage aiExport void aiDestroyObject(aiContext* ctx, aiObject* obj)
     }
 }
 
+aiCLinkage aiExport int aiGetNumTimeSamplings(aiContext* ctx)
+{
+    if (ctx)
+    {
+        return ctx->getNumTimeSamplings();
+    }
+    return 0;
+}
+aiCLinkage aiExport void aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
+{
+    return ctx->getTimeSampling(i, *dst);
+}
+aiCLinkage aiExport void aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
+{
+    return ctx->copyTimeSampling(i, *dst);
+}
+
 aiCLinkage aiExport void aiUpdateSamples(aiContext* ctx, float time)
 {
     if (ctx)
