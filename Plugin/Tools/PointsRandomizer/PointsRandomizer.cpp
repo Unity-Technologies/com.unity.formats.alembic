@@ -56,5 +56,10 @@ tCLinkage tExport bool tPointsRanfomizer_CommandLine(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    if (argc < 3) {
+        printf("usage: PointsRandomizer [src .abc path] [dst .abc path]"
+            " (options - /count_rate:1.0 /random_diffuse:0.0,0.0,0.0 /repulse_iteration:5 /repulse_timestep:0.016666\n");
+        return 1;
+    }
     return tPointsRanfomizer_CommandLine(argc, argv) ? 0 : 1;
 }

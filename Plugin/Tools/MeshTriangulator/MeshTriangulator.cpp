@@ -11,7 +11,7 @@ struct MeshTriangulatorConfig
     abcV3   scale;
 
     MeshTriangulatorConfig()
-        : triangulate(false)
+        : triangulate(true)
         , expand_indices(false)
         , split(false)
         , swap_handedness(false)
@@ -32,7 +32,7 @@ tCLinkage tExport bool tMeshTriangulator(
 
     aiContext *ictx = aiCreateContext(0);
     aiSetConfig(ictx, &iconf);
-    if (!aiLoad(ictx, dst_abc_path)) {
+    if (!aiLoad(ictx, src_abc_path)) {
         return false;
     }
 
@@ -92,7 +92,7 @@ tCLinkage tExport bool tMeshTriangulator_CommandLine(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     if (argc < 3) {
-        printf("usage: %s [src .abc path] [dst .abc path] (options - /triangulate /expand_indices /split /swap_handedness /swap_faces /scale:1.0,1.0,1.0)\n", argv[0]);
+        printf("usage: MeshTriangulator [src .abc path] [dst .abc path] (options - /triangulate /expand_indices /split /swap_handedness /swap_faces /scale:1.0,1.0,1.0)\n");
         return 1;
     }
     return tMeshTriangulator_CommandLine(argc, argv) ? 0 : 1;
