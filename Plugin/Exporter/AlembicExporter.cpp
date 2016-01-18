@@ -8,14 +8,19 @@
 #include "aeCamera.h"
 
 
-aeCLinkage aeExport aeContext* aeCreateContext(const aeConfig *conf)
+aeCLinkage aeExport aeContext* aeCreateContext()
 {
-    return new aeContext(*conf);
+    return new aeContext();
 }
 
 aeCLinkage aeExport void aeDestroyContext(aeContext* ctx)
 {
     delete ctx;
+}
+
+aeCLinkage aeExport void aeSetConfig(aeContext* ctx, const aeConfig *conf)
+{
+    return ctx->setConfig(*conf);
 }
 
 aeCLinkage aeExport bool aeOpenArchive(aeContext* ctx, const char *path)
@@ -34,9 +39,9 @@ aeCLinkage aeExport int aeAddTimeSampling(aeContext* ctx, float start_time)
     return ctx->addTimeSampling(start_time);
 }
 
-aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time, int ts)
+aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time, int tsi)
 {
-    ctx->setTime(time, ts);
+    ctx->addTime(time, tsi);
 }
 
 

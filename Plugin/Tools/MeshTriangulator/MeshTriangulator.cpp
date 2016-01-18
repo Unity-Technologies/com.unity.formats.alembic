@@ -28,7 +28,6 @@ tCLinkage tExport bool tMeshTriangulator(
     const MeshTriangulatorConfig *conf)
 {
     aiConfig iconf;
-    aeConfig econf;
 
     aiContext *ictx = aiCreateContext(0);
     aiSetConfig(ictx, &iconf);
@@ -36,7 +35,7 @@ tCLinkage tExport bool tMeshTriangulator(
         return false;
     }
 
-    aeContext *ectx = aeCreateContext(&econf);
+    aeContext *ectx = aeCreateContext();
     if (!aeOpenArchive(ectx, dst_abc_path)) {
         aiDestroyContext(ictx);
         return false;

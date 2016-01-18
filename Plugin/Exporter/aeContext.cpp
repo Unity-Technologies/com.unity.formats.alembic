@@ -3,8 +3,7 @@
 #include "aeContext.h"
 #include "aeObject.h"
 
-aeContext::aeContext(const aeConfig &conf)
-    : m_config(conf)
+aeContext::aeContext()
 {
     aeDebugLog("aeContext::aeContext()");
 }
@@ -18,7 +17,16 @@ aeContext::~aeContext()
 void aeContext::reset()
 {
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
+        if (m_config.timeSamplingType == aeTimeSamplingType_Cyclic) {
+            for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
+                auto &t = m_timesamplings[i];
+                if (!t.empty()) {
+                    auto ts = Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.size(), t.back()), t);
+                    *m_archive.getTimeSampling(i) = ts;
+                }
+            }
+        }
+        else if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_timesamplings[i]);
                 *m_archive.getTimeSampling(i) = ts;
@@ -29,6 +37,11 @@ void aeContext::reset()
     m_node_top.reset();
     m_timesamplings.clear();
     m_archive.reset(); // flush archive
+}
+
+void aeContext::setConfig(const aeConfig &conf)
+{
+    m_config = conf;
 }
 
 bool aeContext::openArchive(const char *path)
@@ -79,10 +92,21 @@ uint32_t aeContext::addTimeSampling(float start_time)
     return r;
 }
 
-void aeContext::setTime(float time, uint32_t tsi)
+void aeContext::addTime(float time, uint32_t tsi)
 {
-    auto &ts = m_timesamplings[tsi];
-    if (ts.empty() || ts.back() != time) {
-        ts.push_back(time);
+    // if tsi==-1, add time to all time samplings
+    if (tsi==-1) {
+        for (size_t i = 1; i < m_timesamplings.size(); ++i) {
+            auto &ts = m_timesamplings[i];
+            if (ts.empty() || ts.back() != time) {
+                ts.push_back(time);
+            }
+        }
+    }
+    else {
+        auto &ts = m_timesamplings[tsi];
+        if (ts.empty() || ts.back() != time) {
+            ts.push_back(time);
+        }
     }
 }

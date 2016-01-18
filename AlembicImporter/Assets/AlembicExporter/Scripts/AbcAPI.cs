@@ -20,6 +20,7 @@ public partial class AbcAPI
     public enum aeTypeSamplingType
     {
         Uniform,
+        Cyclic,
         Acyclic,
     };
 
@@ -184,13 +185,15 @@ public partial class AbcAPI
     }
 
 
-    [DllImport("AlembicExporter")] public static extern aeContext   aeCreateContext(ref aeConfig conf);
+    [DllImport("AlembicExporter")] public static extern aeContext   aeCreateContext();
     [DllImport("AlembicExporter")] public static extern void        aeDestroyContext(aeContext ctx);
 
+    [DllImport("AlembicExporter")] public static extern void        aeSetConfig(aeContext ctx, ref aeConfig conf);
     [DllImport("AlembicExporter")] public static extern bool        aeOpenArchive(aeContext ctx, string path);
     [DllImport("AlembicExporter")] public static extern aeObject    aeGetTopObject(aeContext ctx);
     [DllImport("AlembicExporter")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
-    [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = 1); // relevant only if timeSamplingType is acyclic
+    // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
+    [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = -1);
 
     [DllImport("AlembicExporter")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 1);
     [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 1);

@@ -9,6 +9,33 @@
 #include "aiCamera.h"
 #include <limits>
 
+
+std::string ToString(const aiConfig &v)
+{
+    std::ostringstream oss;
+
+    oss << "{swapHandedness: " << (v.swapHandedness ? "true" : "false");
+    oss << ", swapFaceWinding: " << (v.swapFaceWinding ? "true" : "false");
+    oss << ", submeshPerUVTile: " << (v.submeshPerUVTile ? "true" : "false");
+    oss << ", normalsMode: " << (v.normalsMode == NM_ReadFromFile
+        ? "read_from_file"
+        : (v.normalsMode == NM_ComputeIfMissing
+            ? "compute_if_missing"
+            : (v.normalsMode == NM_AlwaysCompute
+                ? "always_compute"
+                : "ignore")));
+    oss << ", tangentsMode: " << (v.tangentsMode == TM_None
+        ? "none"
+        : (v.tangentsMode == TM_Smooth
+            ? "smooth"
+            : "split"));
+    oss << ", cacheTangentsSplits: " << (v.cacheTangentsSplits ? "true" : "false");
+    oss << ", aspectRatio: " << v.aspectRatio;
+    oss << ", forceUpdate: " << (v.forceUpdate ? "true" : "false") << "}";
+
+    return oss.str();
+}
+
 class GlobalCache
 {
 public:
@@ -287,7 +314,7 @@ const aiConfig& aiContext::getConfig() const
 
 void aiContext::setConfig(const aiConfig &config)
 {
-    DebugLog("aiContext::setConfig: %s", config.toString().c_str());
+    DebugLog("aiContext::setConfig: %s", ToString(config).c_str());
     m_config = config;
 }
 
