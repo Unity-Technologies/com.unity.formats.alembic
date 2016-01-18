@@ -232,7 +232,7 @@ void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
 
     dst.numTimes = (int)ts->getNumStoredTimes();
     if (tst.isUniform() || tst.isCyclic()) {
-        size_t numCycles = (m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
+        int numCycles = int(m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
 
         dst.type = tst.isUniform() ? aiTimeSamplingType_Uniform : aiTimeSamplingType_Cyclic;
         dst.interval = (float)tst.getTimePerCycle();
@@ -256,7 +256,7 @@ void aiContext::copyTimeSampling(int i, aiTimeSamplingData& dst)
 
     if (dst.type == aiTimeSamplingType_Acyclic) {
         const auto& times = m_archive.getTimeSampling(i)->getStoredTimes();
-        if (dst_samples && dst_numSamples >= times.size()) {
+        if (dst_samples && dst_numSamples >= (int)times.size()) {
             // memcpy() is way faster than std::copy() on VC...
             memcpy(dst.times, &times[0], sizeof(times[0])*times.size());
         }
@@ -426,7 +426,7 @@ bool aiContext::load(const char *inPath)
 
             if (tst.isCyclic() || tst.isUniform())
             {
-                size_t numCycles = (m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
+                int numCycles = int(m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
 
                 m_timeRange[0] = ts->getStoredTimes()[0];
                 m_timeRange[1] = m_timeRange[0] + (numCycles - 1) * tst.getTimePerCycle();

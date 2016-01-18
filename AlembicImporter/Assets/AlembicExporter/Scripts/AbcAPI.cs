@@ -116,8 +116,7 @@ public partial class AbcAPI
     public struct aeXFormData
     {
         public Vector3 translation;
-        public Vector3 rotationAxis;
-        public float rotationAngle;
+        public Quaternion rotation;
         public Vector3 scale;
         [MarshalAs(UnmanagedType.U1)] public bool inherits;
     }

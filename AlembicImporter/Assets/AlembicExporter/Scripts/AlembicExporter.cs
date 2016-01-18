@@ -32,14 +32,14 @@ public class AlembicExporter : MonoBehaviour
         if (inherits)
         {
             data.translation = trans.localPosition;
+            data.rotation = trans.localRotation;
             data.scale = trans.localScale;
-            trans.localRotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
         }
         else
         {
             data.translation = trans.position;
+            data.rotation = trans.rotation;
             data.scale = trans.lossyScale;
-            trans.rotation.ToAngleAxis(out data.rotationAngle, out data.rotationAxis);
         }
 
         if (invertForward) { trans.forward = trans.forward * -1.0f; }
