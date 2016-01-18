@@ -127,7 +127,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -144,7 +145,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -161,7 +163,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -203,7 +206,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -215,7 +219,8 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -227,7 +232,8 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\AlembicExporter\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

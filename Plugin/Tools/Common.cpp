@@ -8,6 +8,7 @@ void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+        aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
         aiXFormGetData(sample, &idata);
 
@@ -27,6 +28,7 @@ void tSimpleCopyCamera(aiCamera *iobj, aeCamera *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+        aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
         aiCameraGetData(sample, &idata);
 
@@ -46,6 +48,7 @@ void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+        aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
         aiPolyMeshGetDataPointer(sample, &idata);
 
@@ -76,6 +79,7 @@ void tSimpleCopyPoints(aiPoints *iobj, aePoints *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+        aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
         aiPointsGetDataPointer(sample, &idata);
 
