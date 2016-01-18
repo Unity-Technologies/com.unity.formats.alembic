@@ -134,6 +134,32 @@ void tContext::setPolyMeshrocessor(const PolyMeshProcessor& v)  { m_meshproc = v
 void tContext::doExport()
 {
     if (!m_ictx || !m_ectx) { return; }
+
+    aiTimeSamplingData tsd;
+    int tsi = aiGetNumTimeSamplings(m_ictx) > 1 ? 1 : 0;
+    aiGetTimeSampling(m_ictx, tsi, &tsd);
+
+    aeConfig econf;
+    if (tsd.type == aiTimeSamplingType_Uniform) {
+        econf.timeSamplingType = aeTimeSamplingType_Uniform;
+        econf.startTime = tsd.startTime;
+        econf.frameRate = 1.0f / tsd.interval;
+    }
+    else if (tsd.type == aiTimeSamplingType_Cyclic) {
+        econf.timeSamplingType = aeTimeSamplingType_Cyclic;
+        econf.startTime = tsd.startTime;
+        econf.frameRate = 1.0f / tsd.interval;
+    }
+    else if (tsd.type == aiTimeSamplingType_Acyclic) {
+        econf.timeSamplingType = aeTimeSamplingType_Acyclic;
+        econf.startTime = tsd.startTime;
+        econf.frameRate = 1.0f / tsd.interval;
+    }
+    aeSetConfig(m_ectx, &econf);
+    for (int i = 0; i < tsd.numTimes; ++i) {
+        aeAddTime(m_ectx, (float)tsd.times[i]);
+    }
+
     doExportImpl(aiGetTopObject(m_ictx));
 }
 

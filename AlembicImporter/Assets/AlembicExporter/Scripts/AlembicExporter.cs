@@ -650,11 +650,13 @@ public class AlembicExporter : MonoBehaviour
         }
 
         // create context and open archive
-        m_ctx = AbcAPI.aeCreateContext(ref m_conf);
+        m_ctx = AbcAPI.aeCreateContext();
         if(m_ctx.ptr == IntPtr.Zero) {
             Debug.LogWarning("aeCreateContext() failed");
             return false;
         }
+
+        AbcAPI.aeSetConfig(m_ctx, ref m_conf);
         if(!AbcAPI.aeOpenArchive(m_ctx, m_outputPath)) {
             Debug.LogWarning("aeOpenArchive() failed");
             AbcAPI.aeDestroyContext(m_ctx);

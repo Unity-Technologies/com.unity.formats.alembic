@@ -84,7 +84,7 @@ void aiSchemaBase::readConfig()
 
     bool useThreads = m_config.useThreads;
 
-    DebugLog("  Original config: %s", m_config.toString().c_str());
+    DebugLog("  Original config: %s", ToString(m_config).c_str());
 
     // get object config overrides (if any)
     invokeConfigCallback(&m_config);
@@ -92,7 +92,7 @@ void aiSchemaBase::readConfig()
     // don't allow override of useThreads option
     m_config.useThreads = useThreads;
 
-    DebugLog("  Override config: %s", m_config.toString().c_str());
+    DebugLog("  Override config: %s", ToString(m_config).c_str());
 }
 
 void aiSchemaBase::notifyUpdate()

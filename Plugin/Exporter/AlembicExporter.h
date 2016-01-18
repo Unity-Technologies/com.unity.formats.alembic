@@ -79,6 +79,7 @@ enum aeArchiveType
 enum aeTimeSamplingType
 {
     aeTimeSamplingType_Uniform,
+    aeTimeSamplingType_Cyclic,
     aeTimeSamplingType_Acyclic,
 };
 
@@ -230,13 +231,15 @@ struct aeCameraData
 
 
 
-aeCLinkage aeExport aeContext*      aeCreateContext(const aeConfig *conf);
+aeCLinkage aeExport aeContext*      aeCreateContext();
 aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
 
+aeCLinkage aeExport void            aeSetConfig(aeContext* ctx, const aeConfig *conf);
 aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
 aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
 aeCLinkage aeExport int             aeAddTimeSampling(aeContext* ctx, float start_time);
-aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time, int tsi = 1); // relevant only if timeSamplingType is acyclic
+// relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
+aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time, int tsi = -1);
 
 aeCLinkage aeExport void            aeDeleteObject(aeObject *obj);
 aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name, int tsi = 1);

@@ -31,6 +31,8 @@ typedef Abc::IM44fArrayProperty     abcFloat4x4ArrayProperty;
 
 
 class aiObject;
+std::string ToString(const aiConfig &conf);
+
 
 class aiContext
 {

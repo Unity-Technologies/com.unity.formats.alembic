@@ -33,16 +33,17 @@ public:
     typedef std::vector<aeObject*> NodeCont;
     typedef NodeCont::iterator NodeIter;
 
-    aeContext(const aeConfig &conf);
+    aeContext();
     ~aeContext();
     void reset();
+    void setConfig(const aeConfig &conf);
     bool openArchive(const char *path);
 
     const aeConfig& getConfig() const;
     aeObject* getTopObject();
 
     uint32_t addTimeSampling(float start_time);
-    void setTime(float time, uint32_t tsi = 0);
+    void addTime(float time, uint32_t tsi = -1);
 
 private:
     aeConfig m_config;
