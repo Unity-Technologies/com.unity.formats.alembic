@@ -13,10 +13,10 @@ void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj)
         aiXFormGetData(sample, &idata);
 
         edata.translation   = idata.translation;
-        edata.rotationAxis  = idata.rotationAxis;
-        edata.rotationAngle = idata.rotationAngle;
+        edata.rotation      = idata.rotation;
         edata.scale         = idata.scale;
         edata.inherits      = idata.inherits;
+
         aeXFormWriteSample(eobj, &edata);
     }
 }
@@ -67,6 +67,7 @@ void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj)
         edata.indexCount        = idata.indexCount;
         edata.normalIndexCount  = idata.normalIndexCount;
         edata.uvIndexCount      = idata.uvIndexCount;
+        edata.faceCount         = idata.faceCount;
 
         aePolyMeshWriteSample(eobj, &edata);
     }

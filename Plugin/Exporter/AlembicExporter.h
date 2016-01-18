@@ -147,17 +147,15 @@ struct aeConfig
 struct aeXFormData
 {
     abcV3 translation;
-    abcV3 rotationAxis;
-    float rotationAngle;
+    abcV4 rotation; // quaternion
     abcV3 scale;
     bool inherits;
 
     inline aeXFormData()
         : translation(0.0f, 0.0f, 0.0f)
-        , rotationAxis(0.0f, 1.0f, 0.0f)
-        , rotationAngle(0.0f)
+        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
         , scale(1.0f, 1.0f, 1.0f)
-        , inherits(false)
+        , inherits(true)
     {
     }
 };

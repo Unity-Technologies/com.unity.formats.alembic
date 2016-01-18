@@ -51,7 +51,7 @@ inline abcV3 aiExtractTranslation(const AbcGeom::XformSample &sample, bool swapH
     return ret;
 }
 
-// ret abcV4(axis.x, axis.y, axis.z, angle)
+// return rotation in quaternion
 inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHandedness)
 {
     // XformSample は内部的にトランスフォームを行列で保持しており、getAxis(), getScale() などはその行列から値を復元しようとする。
@@ -60,7 +60,9 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
     // それ以外の場合 getAxis() に fallback する。
 
     const float Deg2Rad = (aiPI / 180.0f);
-    abcV4 ret;
+
+    abcV3 axis;
+    float angle;
 
     size_t n = sample.getNumOps();
     size_t n_rot_op = 0;
@@ -68,8 +70,8 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
         const auto &op = sample.getOp(i);
         if (op.getType() == AbcGeom::kRotateOperation) {
             if (++n_rot_op == 1) {
-                abcV3 ax = op.getAxis();
-                ret = abcV4(ax.x, ax.y, ax.z, (float)op.getAngle() * Deg2Rad);
+                axis = op.getAxis();
+                angle = (float)op.getAngle()* Deg2Rad;
             }
         }
         else if (op.getType() == AbcGeom::kMatrixOperation) {
@@ -78,16 +80,19 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
     }
 
     if (n_rot_op != 1) {
-        abcV3 ax = sample.getAxis();
-        ret = abcV4(ax.x, ax.y, ax.z, (float)sample.getAngle() * Deg2Rad);
+        axis = sample.getAxis();
+        angle = (float)sample.getAngle()* Deg2Rad;
     }
 
     if (swapHandedness)
     {
-        ret.x *= -1.0f;
-        ret.w *= -1.0f;
+        axis.x *= -1.0f;
+        angle *= -1.0f;
     }
-    return ret;
+
+    float rs = std::sin(angle * 0.5f);
+    float rc = std::cos(angle * 0.5f);
+    return abcV4(axis.x*rs, axis.y*rs, axis.z*rs, rc);
 }
 
 inline abcV3 aiExtractScale(const AbcGeom::XformSample &sample)
@@ -124,9 +129,8 @@ void aiXFormSample::getData(aiXFormData &outData) const
 
     outData.inherits = m_sample.getInheritsXforms();
     outData.translation = trans;
+    outData.rotation = rot;
     outData.scale = scale;
-    outData.rotationAxis = abcV3(rot.x * std::sin(rot.w * 0.5f), rot.y * std::sin(rot.w * 0.5f), rot.z * std::sin(rot.w * 0.5f));
-    outData.rotationAngle = std::cos(rot.w * 0.5f);
 }
 
 
