@@ -22,6 +22,49 @@ struct MeshTriangulatorConfig
 };
 
 
+tCLinkage tExport void tMeshTriangulatorConvert(tContext *tctx_, const MeshTriangulatorConfig *conf)
+{
+    tContext &tctx = *tctx_;
+
+    tPolyMeshBuffer buf;
+    tctx.setPolyMeshrocessor([&](aiPolyMesh *iobj, aePolyMesh *eobj) {
+        int n = aiSchemaGetNumSamples(iobj);
+        for (int i = 0; i < n; ++i) {
+            auto ss = aiIndexToSampleSelector(i);
+            aiSchemaUpdateSample(iobj, &ss);
+
+            auto *sample = aiSchemaGetSample(iobj, &ss);
+            aiPolyMeshData idata;
+            aiPolyMeshGetDataPointer(sample, &idata);
+
+            // make buffers to store triangulated mesh data
+            if (idata.positions) {
+                buf.allocatePositions(idata.triangulatedIndexCount, idata.triangulatedIndexCount);
+            }
+            if (idata.velocities) {
+                buf.allocateVelocity(true);
+            }
+            if (idata.normals) {
+                buf.allocateNormals(idata.triangulatedIndexCount);
+            }
+            if (idata.uvs) {
+                buf.allocateUVs(idata.triangulatedIndexCount);
+            }
+            if (idata.faces) {
+                buf.allocateFaces(idata.triangulatedIndexCount / 3);
+            }
+
+            auto triangulated = buf.asImportData();
+            aiPolyMeshCopyData(sample, &triangulated, true, conf->expand_indices);
+
+            auto edata = tImportDataToExportData(triangulated);
+            aePolyMeshWriteSample(eobj, &edata);
+        }
+    });
+
+    tctx.doExport();
+}
+
 tCLinkage tExport bool tMeshTriangulator(
     const char *src_abc_path,
     const char *dst_abc_path,
@@ -55,44 +98,7 @@ tCLinkage tExport bool tMeshTriangulator(
         tContext tctx;
         tctx.setExportConfig(econf);
         tctx.setArchives(ictx, ectx);
-
-        tPolyMeshBuffer buf;
-        tctx.setPolyMeshrocessor([&](aiPolyMesh *iobj, aePolyMesh *eobj) {
-            int n = aiSchemaGetNumSamples(iobj);
-            for (int i = 0; i < n; ++i) {
-                auto ss = aiIndexToSampleSelector(i);
-                aiSchemaUpdateSample(iobj, &ss);
-
-                auto *sample = aiSchemaGetSample(iobj, &ss);
-                aiPolyMeshData idata;
-                aiPolyMeshGetDataPointer(sample, &idata);
-
-                // make buffers to store triangulated mesh data
-                if (idata.positions) {
-                    buf.allocatePositions(idata.triangulatedIndexCount, idata.triangulatedIndexCount);
-                }
-                if (idata.velocities) {
-                    buf.allocateVelocity(true);
-                }
-                if (idata.normals) {
-                    buf.allocateNormals(idata.triangulatedIndexCount);
-                }
-                if (idata.uvs) {
-                    buf.allocateUVs(idata.triangulatedIndexCount);
-                }
-                if (idata.faces) {
-                    buf.allocateFaces(idata.triangulatedIndexCount / 3);
-                }
-
-                auto triangulated = buf.asImportData();
-                aiPolyMeshCopyData(sample, &triangulated, true, conf->expand_indices);
-
-                auto edata = tImportDataToExportData(triangulated);
-                aePolyMeshWriteSample(eobj, &edata);
-            }
-        });
-
-        tctx.doExport();
+        tMeshTriangulatorConvert(&tctx, conf);
     }
 
     aeDestroyContext(ectx);

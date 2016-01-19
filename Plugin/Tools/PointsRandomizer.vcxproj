@@ -107,50 +107,50 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterEXE|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86_64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);Foundation;GraphicsDevice;external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterEXE|Win32'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);Foundation;GraphicsDevice;external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);Foundation;GraphicsDevice;external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);Foundation;GraphicsDevice;external;external\glew\include;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>external\libs\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
