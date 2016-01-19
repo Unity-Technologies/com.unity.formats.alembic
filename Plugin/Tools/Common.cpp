@@ -1,6 +1,165 @@
 #include "pch.h"
 #include "Common.h"
 
+
+void tPointsBuffer::allocate(size_t size, bool alloc_velocities, bool alloc_ids)
+{
+    positions.resize(size);
+    velocities.resize(alloc_velocities ? size : 0);
+    ids.resize(alloc_velocities ? size : 0);
+}
+
+aiPointsData tPointsBuffer::asImportData()
+{
+    aiPointsData ret;
+    ret.positions   = positions.empty() ? nullptr : &positions[0];
+    ret.velocities  = velocities.empty() ? nullptr : &velocities[0];
+    ret.ids         = ids.empty() ? nullptr : &ids[0];
+    ret.count       = (int)positions.size();
+    return ret;
+}
+
+aePointsData tPointsBuffer::asExportData()
+{
+    aePointsData ret;
+    ret.positions   = positions.empty() ? nullptr : &positions[0];
+    ret.velocities  = velocities.empty() ? nullptr : &velocities[0];
+    ret.ids         = ids.empty() ? nullptr : &ids[0];
+    ret.count       = (int)positions.size();
+    return ret;
+}
+
+
+
+void tPolyMeshBuffer::allocatePositions(size_t size, size_t index_size)
+{
+    positions.resize(size);
+    if (!velocities.empty()) {
+        velocities.resize(size);
+    }
+    indices.resize(index_size);
+}
+
+void tPolyMeshBuffer::allocateVelocity(bool alloc)
+{
+    velocities.resize(alloc ? positions.size() : 0);
+}
+
+void tPolyMeshBuffer::allocateNormals(size_t size, size_t index_size)
+{
+    normals.resize(size);
+    normal_indices.resize(index_size);
+}
+
+void tPolyMeshBuffer::allocateUVs(size_t size, size_t index_size)
+{
+    uvs.resize(size);
+    uv_indices.resize(index_size);
+}
+
+void tPolyMeshBuffer::allocateFaces(size_t size)
+{
+    faces.resize(size);
+}
+
+aiPolyMeshData tPolyMeshBuffer::asImportData()
+{
+    aiPolyMeshData ret;
+
+    ret.positions     = positions.empty() ? nullptr : &positions[0];
+    ret.velocities    = velocities.empty() ? nullptr : &velocities[0];
+    ret.normals       = normals.empty() ? nullptr : &normals[0];
+    ret.uvs           = uvs.empty() ? nullptr : &uvs[0];
+    ret.indices       = indices.empty() ? nullptr : &indices[0];
+    ret.normalIndices = normal_indices.empty() ? nullptr : &normal_indices[0];
+    ret.uvIndices     = uv_indices.empty() ? nullptr : &uv_indices[0];
+    ret.faces         = faces.empty() ? nullptr : &faces[0];
+
+    ret.positionCount     = (int)positions.size();
+    ret.normalCount       = (int)normals.size();
+    ret.uvCount           = (int)uvs.size();
+    ret.indexCount        = (int)indices.size();
+    ret.normalIndexCount  = (int)normal_indices.size();
+    ret.uvIndexCount      = (int)uv_indices.size();
+    ret.faceCount         = (int)faces.size();
+
+    return ret;
+}
+
+aePolyMeshData tPolyMeshBuffer::asExportData()
+{
+    aePolyMeshData ret;
+
+    ret.positions     = positions.empty() ? nullptr : &positions[0];
+    ret.velocities    = velocities.empty() ? nullptr : &velocities[0];
+    ret.normals       = normals.empty() ? nullptr : &normals[0];
+    ret.uvs           = uvs.empty() ? nullptr : &uvs[0];
+    ret.indices       = indices.empty() ? nullptr : &indices[0];
+    ret.normalIndices = normal_indices.empty() ? nullptr : &normal_indices[0];
+    ret.uvIndices     = uv_indices.empty() ? nullptr : &uv_indices[0];
+    ret.faces         = faces.empty() ? nullptr : &faces[0];
+
+    ret.positionCount     = (int)positions.size();
+    ret.normalCount       = (int)normals.size();
+    ret.uvCount           = (int)uvs.size();
+    ret.indexCount        = (int)indices.size();
+    ret.normalIndexCount  = (int)normal_indices.size();
+    ret.uvIndexCount      = (int)uv_indices.size();
+    ret.faceCount         = (int)faces.size();
+
+    return ret;
+}
+
+
+aeXFormData tImportDataToExportData(const aiXFormData& idata)
+{
+    aeXFormData edata;
+    edata.translation   = idata.translation;
+    edata.rotation      = idata.rotation;
+    edata.scale         = idata.scale;
+    edata.inherits      = idata.inherits;
+    return edata;
+}
+
+aeCameraData tImportDataToExportData(const aiCameraData& idata)
+{
+    aeCameraData edata;
+    edata.nearClippingPlane = idata.nearClippingPlane;
+    edata.farClippingPlane  = idata.farClippingPlane;
+    edata.fieldOfView       = idata.fieldOfView;
+    edata.focusDistance     = idata.focusDistance;
+    edata.focalLength       = idata.focalLength;
+    return edata;
+}
+
+aePointsData tImportDataToExportData(const aiPointsData& idata)
+{
+    aePointsData edata;
+    edata.positions     = idata.positions;
+    edata.velocities    = idata.velocities;
+    edata.ids           = idata.ids;
+    edata.count         = idata.count;
+    return edata;
+}
+
+aePolyMeshData tImportDataToExportData(const aiPolyMeshData& idata)
+{
+    aePolyMeshData edata;
+    edata.positions     = idata.positions;
+    edata.velocities    = idata.velocities;
+    edata.normals       = idata.normals;
+    edata.uvs           = idata.uvs;
+    edata.indices       = idata.indices;
+    edata.faces         = idata.faces;
+
+    edata.positionCount = idata.positionCount;
+    edata.normalCount   = idata.normalCount;
+    edata.uvCount       = idata.uvCount;
+    edata.indexCount    = idata.indexCount;
+    edata.faceCount     = idata.faceCount;
+    return edata;
+}
+
 void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj)
 {
     aiXFormData idata;
@@ -8,14 +167,12 @@ void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+
         aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
-        aiXFormGetData(sample, &idata);
 
-        edata.translation   = idata.translation;
-        edata.rotation      = idata.rotation;
-        edata.scale         = idata.scale;
-        edata.inherits      = idata.inherits;
+        aiXFormGetData(sample, &idata);
+        edata = tImportDataToExportData(idata);
 
         aeXFormWriteSample(eobj, &edata);
     }
@@ -28,48 +185,14 @@ void tSimpleCopyCamera(aiCamera *iobj, aeCamera *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+
         aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
+
         aiCameraGetData(sample, &idata);
+        edata = tImportDataToExportData(idata);
 
-        edata.nearClippingPlane = idata.nearClippingPlane;
-        edata.farClippingPlane  = idata.farClippingPlane;
-        edata.fieldOfView       = idata.fieldOfView;
-        edata.focusDistance     = idata.focusDistance;
-        edata.focalLength       = idata.focalLength;
         aeCameraWriteSample(eobj, &edata);
-    }
-}
-
-void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj)
-{
-    aiPolyMeshData idata;
-    aePolyMeshData edata;
-    int n = aiSchemaGetNumSamples(iobj);
-    for (int i = 0; i < n; ++i) {
-        auto ss = aiIndexToSampleSelector(i);
-        aiSchemaUpdateSample(iobj, &ss);
-        auto *sample = aiSchemaGetSample(iobj, &ss);
-        aiPolyMeshGetDataPointer(sample, &idata);
-
-        edata.positions     = idata.positions;
-        edata.velocities    = idata.velocities;
-        edata.normals       = idata.normals;
-        edata.uvs           = idata.uvs;
-        edata.indices       = idata.indices;
-        edata.normalIndices = idata.normalIndices;
-        edata.uvIndices     = idata.uvIndices;
-        edata.faces         = idata.faces;
-
-        edata.positionCount     = idata.positionCount;
-        edata.normalCount       = idata.normalCount;
-        edata.uvCount           = idata.uvCount;
-        edata.indexCount        = idata.indexCount;
-        edata.normalIndexCount  = idata.normalIndexCount;
-        edata.uvIndexCount      = idata.uvIndexCount;
-        edata.faceCount         = idata.faceCount;
-
-        aePolyMeshWriteSample(eobj, &edata);
     }
 }
 
@@ -80,16 +203,32 @@ void tSimpleCopyPoints(aiPoints *iobj, aePoints *eobj)
     int n = aiSchemaGetNumSamples(iobj);
     for (int i = 0; i < n; ++i) {
         auto ss = aiIndexToSampleSelector(i);
+
         aiSchemaUpdateSample(iobj, &ss);
         auto *sample = aiSchemaGetSample(iobj, &ss);
-        aiPointsGetDataPointer(sample, &idata);
 
-        edata.positions     = idata.positions;
-        edata.velocities    = idata.velocities;
-        edata.ids           = idata.ids;
-        edata.count         = idata.count;
+        aiPointsGetDataPointer(sample, &idata);
+        edata = tImportDataToExportData(idata);
 
         aePointsWriteSample(eobj, &edata);
+    }
+}
+
+void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj)
+{
+    aiPolyMeshData idata;
+    aePolyMeshData edata;
+    int n = aiSchemaGetNumSamples(iobj);
+    for (int i = 0; i < n; ++i) {
+        auto ss = aiIndexToSampleSelector(i);
+
+        aiSchemaUpdateSample(iobj, &ss);
+        auto *sample = aiSchemaGetSample(iobj, &ss);
+
+        aiPolyMeshGetDataPointer(sample, &idata);
+        edata = tImportDataToExportData(idata);
+
+        aePolyMeshWriteSample(eobj, &edata);
     }
 }
 
@@ -112,6 +251,11 @@ void tContext::setArchives(aiContext *ictx, aeContext *ectx)
 {
     m_ictx = ictx;
     m_ectx = ectx;
+}
+
+void tContext::setExportConfig(const aeConfig &conf)
+{
+    m_econf = conf;
 }
 
 aiObject* tContext::getIObject(aeObject *eobj)
@@ -139,23 +283,22 @@ void tContext::doExport()
     int tsi = aiGetNumTimeSamplings(m_ictx) > 1 ? 1 : 0;
     aiGetTimeSampling(m_ictx, tsi, &tsd);
 
-    aeConfig econf;
     if (tsd.type == aiTimeSamplingType_Uniform) {
-        econf.timeSamplingType = aeTimeSamplingType_Uniform;
-        econf.startTime = tsd.startTime;
-        econf.frameRate = 1.0f / tsd.interval;
+        m_econf.timeSamplingType = aeTimeSamplingType_Uniform;
+        m_econf.startTime = tsd.startTime;
+        m_econf.frameRate = 1.0f / tsd.interval;
     }
     else if (tsd.type == aiTimeSamplingType_Cyclic) {
-        econf.timeSamplingType = aeTimeSamplingType_Cyclic;
-        econf.startTime = tsd.startTime;
-        econf.frameRate = 1.0f / tsd.interval;
+        m_econf.timeSamplingType = aeTimeSamplingType_Cyclic;
+        m_econf.startTime = tsd.startTime;
+        m_econf.frameRate = 1.0f / tsd.interval;
     }
     else if (tsd.type == aiTimeSamplingType_Acyclic) {
-        econf.timeSamplingType = aeTimeSamplingType_Acyclic;
-        econf.startTime = tsd.startTime;
-        econf.frameRate = 1.0f / tsd.interval;
+        m_econf.timeSamplingType = aeTimeSamplingType_Acyclic;
+        m_econf.startTime = tsd.startTime;
+        m_econf.frameRate = 1.0f / tsd.interval;
     }
-    aeSetConfig(m_ectx, &econf);
+    aeSetConfig(m_ectx, &m_econf);
     for (int i = 0; i < tsd.numTimes; ++i) {
         aeAddTime(m_ectx, (float)tsd.times[i]);
     }
