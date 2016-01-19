@@ -813,15 +813,29 @@ static inline void TriangulateIndices(aiPolyMeshData& src, int *dv, const int *i
 
     int n = 0;
     int i = 0;
-    for (int fi = 0; fi < src.faceCount; ++fi) {
-        int ngon = src.faces[fi];
-        for (int ni = 0; ni < ngon - 2; ++ni) {
-            dv[i + 0] = indices[n + 0];
-            dv[i + 1] = indices[n + ni + i1];
-            dv[i + 2] = indices[n + ni + i2];
-            i += 3;
+    if (indices) {
+        for (int fi = 0; fi < src.faceCount; ++fi) {
+            int ngon = src.faces[fi];
+            for (int ni = 0; ni < ngon - 2; ++ni) {
+                dv[i + 0] = indices[n + 0];
+                dv[i + 1] = indices[n + ni + i1];
+                dv[i + 2] = indices[n + ni + i2];
+                i += 3;
+            }
+            n += ngon;
         }
-        n += ngon;
+    }
+    else {
+        for (int fi = 0; fi < src.faceCount; ++fi) {
+            int ngon = src.faces[fi];
+            for (int ni = 0; ni < ngon - 2; ++ni) {
+                dv[i + 0] = n + 0;
+                dv[i + 1] = n + ni + i1;
+                dv[i + 2] = n + ni + i2;
+                i += 3;
+            }
+            n += ngon;
+        }
     }
 }
 
@@ -835,15 +849,29 @@ static inline void ExpandWithTriangulation(aiPolyMeshData& src, T *dv, const T *
 
     int n = 0;
     int i = 0;
-    for (int fi = 0; fi < src.faceCount; ++fi) {
-        int ngon = src.faces[fi];
-        for (int ni = 0; ni < ngon - 2; ++ni) {
-            dv[i + 0] = sv[indices[n + 0]];
-            dv[i + 1] = sv[indices[n + ni + i1]];
-            dv[i + 2] = sv[indices[n + ni + i2]];
-            i += 3;
+    if (indices) {
+        for (int fi = 0; fi < src.faceCount; ++fi) {
+            int ngon = src.faces[fi];
+            for (int ni = 0; ni < ngon - 2; ++ni) {
+                dv[i + 0] = sv[indices[n + 0]];
+                dv[i + 1] = sv[indices[n + ni + i1]];
+                dv[i + 2] = sv[indices[n + ni + i2]];
+                i += 3;
+            }
+            n += ngon;
         }
-        n += ngon;
+    }
+    else {
+        for (int fi = 0; fi < src.faceCount; ++fi) {
+            int ngon = src.faces[fi];
+            for (int ni = 0; ni < ngon - 2; ++ni) {
+                dv[i + 0] = sv[n + 0];
+                dv[i + 1] = sv[n + ni + i1];
+                dv[i + 2] = sv[n + ni + i2];
+                i += 3;
+            }
+            n += ngon;
+        }
     }
 }
 
@@ -936,21 +964,16 @@ void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool alway
     aiPolyMeshData src;
     getDataPointer(src);
 
-    bool needs_expand = IsIndicesDivergent(dst) || always_expand_indices;
+    bool needs_expand = IsIndicesDivergent(src) || always_expand_indices;
 
-    {
-        dst.triangulatedIndexCount = src.triangulatedIndexCount;
-        int num_triangles = src.triangulatedIndexCount / 3;
-        if (dst.faces && dst.faceCount >= num_triangles) {
-            std::fill(dst.faces, dst.faces + num_triangles, 3);
-            dst.faceCount = num_triangles;
-        }
-        else {
-            dst.faceCount = 0;
-        }
-    }
+    // triangulated mesh has one index buffer
+    dst.normalIndices = nullptr;
+    dst.normalIndexCount = 0;
+    dst.uvIndices = nullptr;
+    dst.uvIndexCount = 0;
 
-    // todo: generating normals and tangents
+    // todo: generate normals and tangents if required
+
     if (needs_expand) {
         if (src.positions && dst.positions && dst.positionCount >= src.triangulatedIndexCount) {
             ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
@@ -979,15 +1002,31 @@ void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool alway
         else {
             dst.uvCount = 0;
         }
+
+        if (dst.indices && dst.indexCount >= src.triangulatedIndexCount) {
+            for (int i = 0; i < src.triangulatedIndexCount; ++i) {
+                dst.indices[i] = i;
+            }
+        }
     }
     else {
         int *indices = dst.indices;
         dst.indices = nullptr;      // skip needless copy
-        dst.normalIndices = nullptr;// 
-        dst.uvIndices = nullptr;    // 
         copyData(dst);
         dst.indices = indices;
         TriangulateIndices(src, dst.indices, src.indices, m_config.swapFaceWinding);
+    }
+
+    {
+        dst.triangulatedIndexCount = src.triangulatedIndexCount;
+        int num_triangles = src.triangulatedIndexCount / 3;
+        if (dst.faces && dst.faceCount >= num_triangles) {
+            std::fill(dst.faces, dst.faces + num_triangles, 3);
+            dst.faceCount = num_triangles;
+        }
+        else {
+            dst.faceCount = 0;
+        }
     }
 
     dst.center = dst.center;
