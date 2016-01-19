@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Common.h"
+#include "MassParticle.h"
 
 
 struct PointsRandomizerConfig
@@ -16,6 +17,32 @@ struct PointsRandomizerConfig
         , repulse_timestep(1.0f / 60.0f)
     {}
 };
+
+tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
+{
+    tContext& tctx = *tctx_;
+
+    tPointsBuffer buf;
+    tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
+        int n = aiSchemaGetNumSamples(iobj);
+        for (int i = 0; i < n; ++i) {
+            auto ss = aiIndexToSampleSelector(i);
+
+            aiSchemaUpdateSample(iobj, &ss);
+            auto *sample = aiSchemaGetSample(iobj, &ss);
+
+            aiPointsData idata;
+            aiPointsGetDataPointer(sample, &idata);
+
+            // todo
+
+            auto edata = tImportDataToExportData(idata);
+            aePointsWriteSample(eobj, &edata);
+        }
+    });
+
+    tctx.doExport();
+}
 
 tCLinkage tExport bool tPointsRanfomizer(
     const char *src_abc_path,
@@ -46,27 +73,7 @@ tCLinkage tExport bool tPointsRanfomizer(
         tContext tctx;
         tctx.setExportConfig(econf);
         tctx.setArchives(ictx, ectx);
-
-        tPointsBuffer buf;
-        tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
-            int n = aiSchemaGetNumSamples(iobj);
-            for (int i = 0; i < n; ++i) {
-                auto ss = aiIndexToSampleSelector(i);
-
-                aiSchemaUpdateSample(iobj, &ss);
-                auto *sample = aiSchemaGetSample(iobj, &ss);
-
-                aiPointsData idata;
-                aiPointsGetDataPointer(sample, &idata);
-
-                // todo
-
-                auto edata = tImportDataToExportData(idata);
-                aePointsWriteSample(eobj, &edata);
-            }
-        });
-
-        tctx.doExport();
+        tPointsRanfomizerConvert(&tctx, conf);
     }
 
     aeDestroyContext(ectx);
