@@ -8,7 +8,8 @@ struct MeshTriangulatorConfig
     bool    split;
     bool    swap_handedness;
     bool    swap_faces;
-    abcV3   scale;
+    float   scale;
+    // todo: normal option
 
     MeshTriangulatorConfig()
         : triangulate(true)
@@ -16,7 +17,7 @@ struct MeshTriangulatorConfig
         , split(false)
         , swap_handedness(false)
         , swap_faces(false)
-        , scale(1.0f, 1.0f, 1.0f)
+        , scale(1.0f)
     {}
 };
 
@@ -35,6 +36,9 @@ tCLinkage tExport bool tMeshTriangulator(
     iconf.swapHandedness = conf->swap_handedness;
     iconf.swapFaceWinding = conf->swap_faces;
 
+    aeConfig econf;
+    econf.scale = conf->scale;
+
     aiContext *ictx = aiCreateContext(0);
     aiSetConfig(ictx, &iconf);
     if (!aiLoad(ictx, src_abc_path)) {
@@ -49,73 +53,41 @@ tCLinkage tExport bool tMeshTriangulator(
 
     {
         tContext tctx;
+        tctx.setExportConfig(econf);
         tctx.setArchives(ictx, ectx);
 
-        std::vector<abcV3> positions;
-        std::vector<abcV3> velocities;
-        std::vector<abcV3> normals;
-        std::vector<abcV2> uvs;
-        std::vector<int> indices;
-        std::vector<int> faces;
-
+        tPolyMeshBuffer buf;
         tctx.setPolyMeshrocessor([&](aiPolyMesh *iobj, aePolyMesh *eobj) {
-            aiPolyMeshData idata;
-            aiPolyMeshData triangulated;
-            aePolyMeshData edata;
             int n = aiSchemaGetNumSamples(iobj);
             for (int i = 0; i < n; ++i) {
                 auto ss = aiIndexToSampleSelector(i);
                 aiSchemaUpdateSample(iobj, &ss);
 
                 auto *sample = aiSchemaGetSample(iobj, &ss);
+                aiPolyMeshData idata;
                 aiPolyMeshGetDataPointer(sample, &idata);
 
-                // make buffers to store triangle mesh data
+                // make buffers to store triangulated mesh data
                 if (idata.positions) {
-                    positions.resize(idata.triangulatedIndexCount);
-                    triangulated.positions = &positions[0];
-                    triangulated.positionCount = (int)positions.size();
+                    buf.allocatePositions(idata.triangulatedIndexCount, idata.triangulatedIndexCount);
                 }
                 if (idata.velocities) {
-                    velocities.resize(idata.triangulatedIndexCount);
-                    triangulated.velocities = &velocities[0];
+                    buf.allocateVelocity(true);
                 }
                 if (idata.normals) {
-                    normals.resize(idata.triangulatedIndexCount);
-                    triangulated.normals = &normals[0];
-                    triangulated.normalCount = (int)normals.size();
+                    buf.allocateNormals(idata.triangulatedIndexCount);
                 }
                 if (idata.uvs) {
-                    uvs.resize(idata.triangulatedIndexCount);
-                    triangulated.uvs = &uvs[0];
-                    triangulated.uvCount = (int)uvs.size();
-                }
-                if(idata.indices) {
-                    indices.resize(idata.triangulatedIndexCount);
-                    triangulated.indices = &indices[0];
-                    triangulated.indexCount = (int)indices.size();
+                    buf.allocateUVs(idata.triangulatedIndexCount);
                 }
                 if (idata.faces) {
-                    faces.resize(idata.triangulatedIndexCount / 3);
-                    triangulated.faces = &faces[0];
-                    triangulated.faceCount = (int)faces.size();
+                    buf.allocateFaces(idata.triangulatedIndexCount / 3);
                 }
 
+                auto triangulated = buf.asImportData();
                 aiPolyMeshCopyData(sample, &triangulated, true, conf->expand_indices);
 
-                edata.positions = triangulated.positions;
-                edata.velocities = triangulated.velocities;
-                edata.normals = triangulated.normals;
-                edata.uvs = triangulated.uvs;
-                edata.indices = triangulated.indices;
-                edata.faces = triangulated.faces;
-
-                edata.positionCount = triangulated.positionCount;
-                edata.normalCount = triangulated.normalCount;
-                edata.uvCount = triangulated.uvCount;
-                edata.indexCount = triangulated.indexCount;
-                edata.faceCount = triangulated.faceCount;
-
+                auto edata = tImportDataToExportData(triangulated);
                 aePolyMeshWriteSample(eobj, &edata);
             }
         });
@@ -154,8 +126,8 @@ tCLinkage tExport bool tMeshTriangulator_CommandLine(int argc, char *argv[])
             conf.swap_faces = true;
         }
         else if (strncmp(argv[i], "/scale", 6) == 0) {
-            abcV3 v;
-            if (sscanf(argv[i], "/scale:%f,%f,%f", &v.x, &v.y, &v.z) == 3) {
+            float v;
+            if (sscanf(argv[i], "/scale:%f", &v) == 1) {
                 conf.scale = v;
             }
         }
@@ -166,7 +138,15 @@ tCLinkage tExport bool tMeshTriangulator_CommandLine(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     if (argc < 3) {
-        printf("usage: MeshTriangulator [src .abc path] [dst .abc path] (options - /triangulate /expand_indices /split /swap_handedness /swap_faces /scale:1.0,1.0,1.0)\n");
+        printf(
+            "usage: MeshTriangulator [source .abc path] [destination .abc path] [options]\n"
+            "options:\n"
+            "    /expand_indices\n"
+            "    /split\n"
+            "    /swap_handedness\n"
+            "    /swap_faces\n"
+            "    /scale:1.0,1.0,1.0\n"
+            );
         return 1;
     }
     return tMeshTriangulator_CommandLine(argc, argv) ? 0 : 1;
