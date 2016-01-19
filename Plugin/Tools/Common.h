@@ -14,7 +14,7 @@
 class tPointsBuffer
 {
 public:
-    void allocate(size_t size, bool alloc_velocities = false, bool alloc_ids = false);
+    void allocate(size_t size, bool alloc_velocities = false, bool alloc_ids = true);
 
     aiPointsData asImportData();
     aePointsData asExportData();

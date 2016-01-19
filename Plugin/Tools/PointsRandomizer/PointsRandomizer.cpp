@@ -8,12 +8,14 @@ struct PointsRandomizerConfig
     float   count_rate;
     abcV3   random_diffuse;
     int     repulse_iteration;
+    float   repulse_particle_size;
     float   repulse_timestep;
 
     PointsRandomizerConfig()
         : count_rate(1.0f)
         , random_diffuse(0.0f, 0.0f, 0.0f)
         , repulse_iteration(8)
+        , repulse_particle_size(0.1f)
         , repulse_timestep(1.0f / 60.0f)
     {}
 };
@@ -22,8 +24,14 @@ tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRan
 {
     tContext& tctx = *tctx_;
 
+    mpKernelParams mpparams;
+    auto mp = mpCreateContext();
+
     tPointsBuffer buf;
     tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
+        mpparams.max_particles = aiPointsGetPeakVertexCount(iobj);
+        mpparams.particle_size = conf->repulse_particle_size;
+
         int n = aiSchemaGetNumSamples(iobj);
         for (int i = 0; i < n; ++i) {
             auto ss = aiIndexToSampleSelector(i);
@@ -34,12 +42,42 @@ tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRan
             aiPointsData idata;
             aiPointsGetDataPointer(sample, &idata);
 
-            // todo
+            // todo: bounds & division
+            // todo: count rate
 
-            auto edata = tImportDataToExportData(idata);
+            // apply repulsion
+            mpSetKernelParams(mp, &mpparams);
+            mpClearParticles(mp);
+            mpForceSetNumParticles(mp, idata.count);
+            mpParticle *particles = mpGetParticles(mp);
+            for (int i = 0; i < idata.count; ++i) {
+                particles[i].position = (mpV3&)idata.positions[i];
+                particles[i].velocity = mpV3();
+                particles[i].lifetime = std::numeric_limits<float>::max();
+                particles[i].userdata = i;
+            }
+            for (int i = 0; i < conf->repulse_iteration; ++i) {
+                mpUpdate(mp, conf->repulse_timestep);
+            }
+            std::sort(particles, particles + idata.count,
+                [](const mpParticle& a, const mpParticle& b) { return a.userdata < b.userdata; });
+
+            buf.allocate(idata.count, idata.velocities != nullptr);
+            for (int i = 0; i < idata.count; ++i) {
+                buf.positions[i] = (abcV3&)particles[i].position;
+                buf.ids[i] = idata.ids[i];
+            }
+            if (idata.velocities) {
+                for (int i = 0; i < idata.count; ++i) {
+                    buf.velocities[i] = (abcV3&)particles[i].velocity;
+                }
+            }
+
+            auto edata = buf.asExportData();
             aePointsWriteSample(eobj, &edata);
         }
     });
+    mpDestroyContext(mp);
 
     tctx.doExport();
 }
