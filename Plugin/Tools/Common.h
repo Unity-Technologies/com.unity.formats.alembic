@@ -7,6 +7,8 @@
 #include "../Exporter/AlembicExporter.h"
 #include "../Importer/AlembicImporter.h"
 
+#define tLog(...)
+
 // default processors for tContext
 void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj);
 void tSimpleCopyCamera(aiCamera *iobj, aeCamera *eobj);

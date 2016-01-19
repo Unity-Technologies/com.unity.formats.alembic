@@ -804,7 +804,7 @@ static inline bool IsIndicesDivergent(const aiPolyMeshData &dst)
     return false;
 }
 
-static inline void Triangulate(aiPolyMeshData& src, int *dv, const int *indices, bool swap_face)
+static inline void TriangulateIndices(aiPolyMeshData& src, int *dv, const int *indices, bool swap_face)
 {
     if (!dv) { return; }
 
@@ -856,10 +856,18 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
 
     if (src.faces && dst.faces && dst.faceCount >= src.faceCount) {
         memcpy(dst.faces, src.faces, src.faceCount * sizeof(*dst.faces));
+        dst.faceCount = src.faceCount;
+    }
+    else {
+        dst.faceCount = 0;
     }
 
     if (src.positions && dst.positions && dst.positionCount >= src.positionCount) {
         memcpy(dst.positions, src.positions, src.positionCount * sizeof(*dst.positions));
+        dst.positionCount = src.positionCount;
+    }
+    else {
+        dst.positionCount = 0;
     }
 
     if (src.velocities && dst.velocities && dst.positionCount >= src.positionCount) {
@@ -868,10 +876,18 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
 
     if (src.normals && dst.normals && dst.normalCount >= src.normalCount) {
         memcpy(dst.normals, src.normals, src.normalCount * sizeof(*dst.normals));
+        dst.normalCount = src.normalCount;
+    }
+    else {
+        dst.normalCount = 0;
     }
 
     if (src.uvs && dst.uvs && dst.uvCount >= src.uvCount) {
         memcpy(dst.uvs, src.uvs, src.uvCount * sizeof(*dst.uvs));
+        dst.uvCount = src.uvCount;
+    }
+    else {
+        dst.uvCount = 0;
     }
 
     if (m_config.swapHandedness) {
@@ -899,12 +915,15 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
 
     if (src.indices && dst.indices && dst.indexCount >= src.indexCount) {
         copy_indices(dst.indices, src.indices, src.indexCount);
+        dst.indexCount = src.indexCount;
     }
     if (src.normalIndices && dst.normalIndices && dst.normalIndexCount >= src.normalIndexCount) {
         copy_indices(dst.normalIndices, src.normalIndices, src.normalIndexCount);
+        dst.normalIndexCount = src.normalIndexCount;
     }
     if (src.uvIndices && dst.uvIndices && dst.uvIndexCount >= src.uvIndexCount) {
         copy_indices(dst.uvIndices, src.uvIndices, src.uvIndexCount);
+        dst.uvIndexCount = src.uvIndexCount;
     }
 
     dst.center = dst.center;
@@ -919,19 +938,56 @@ void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool alway
 
     bool needs_expand = IsIndicesDivergent(dst) || always_expand_indices;
 
-    // todo: normal and tangent handling
+    {
+        dst.triangulatedIndexCount = src.triangulatedIndexCount;
+        int num_triangles = src.triangulatedIndexCount / 3;
+        if (dst.faces && dst.faceCount >= num_triangles) {
+            std::fill(dst.faces, dst.faces + num_triangles, 3);
+            dst.faceCount = num_triangles;
+        }
+        else {
+            dst.faceCount = 0;
+        }
+    }
+
+    // todo: generating normals and tangents
     if (needs_expand) {
-        ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
-        ExpandWithTriangulation(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
-        ExpandWithTriangulation(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
-        ExpandWithTriangulation(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
+        if (src.positions && dst.positions && dst.positionCount >= src.triangulatedIndexCount) {
+            ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
+            dst.positionCount = src.triangulatedIndexCount;
+        }
+        else {
+            dst.positionCount = 0;
+        }
+
+        if (src.velocities && dst.velocities && dst.positionCount >= src.triangulatedIndexCount) {
+            ExpandWithTriangulation(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
+        }
+
+        if (src.normals && dst.normals && dst.normalCount >= src.triangulatedIndexCount) {
+            ExpandWithTriangulation(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
+            dst.normalCount = src.triangulatedIndexCount;
+        }
+        else {
+            dst.normalCount = 0;
+        }
+
+        if (src.uvs && dst.uvs && dst.uvCount >= src.triangulatedIndexCount) {
+            ExpandWithTriangulation(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
+            dst.uvCount = src.triangulatedIndexCount;
+        }
+        else {
+            dst.uvCount = 0;
+        }
     }
     else {
         int *indices = dst.indices;
-        dst.indices = nullptr; // skip needless copy
+        dst.indices = nullptr;      // skip needless copy
+        dst.normalIndices = nullptr;// 
+        dst.uvIndices = nullptr;    // 
         copyData(dst);
         dst.indices = indices;
-        Triangulate(src, dst.indices, src.indices, m_config.swapFaceWinding);
+        TriangulateIndices(src, dst.indices, src.indices, m_config.swapFaceWinding);
     }
 
     dst.center = dst.center;

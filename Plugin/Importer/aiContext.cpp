@@ -265,11 +265,14 @@ void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
         dst.interval = (float)tst.getTimePerCycle();
         dst.startTime = (float)ts->getStoredTimes()[0];
         dst.endTime = dst.startTime + dst.interval * (numCycles - 1);
+        dst.numTimes = (int)ts->getNumStoredTimes();
+        dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
     }
     else if (tst.isAcyclic()) {
         dst.type = aiTimeSamplingType_Acyclic;
         dst.startTime = (float)ts->getSampleTime(0);
         dst.endTime = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
+        dst.numTimes = (int)ts->getNumStoredTimes();
         dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
     }
 }
