@@ -158,13 +158,12 @@ public partial class AbcAPI
     {
         public float nearClippingPlane;
         public float farClippingPlane;
-        public float fieldOfView; // degree. relevant only if focusDistance==0.0 (default)
+        public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)
         public float aspectRatio;
 
-        // if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.05f.
-        public float focalLength;
-        public float focusDistance;
-        public float aperture;
+        public float focusDistance; // in cm
+        public float focalLength;   // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
+        public float aperture;      // in cm. vertical one
 
         public static aeCameraData default_value
         {
@@ -176,8 +175,8 @@ public partial class AbcAPI
                     farClippingPlane = 1000.0f,
                     fieldOfView = 60.0f,
                     aspectRatio = 16.0f / 9.0f,
-                    focalLength = 0.0f,
                     focusDistance = 5.0f,
+                    focalLength = 0.0f,
                     aperture = 2.4f,
                 };
             }

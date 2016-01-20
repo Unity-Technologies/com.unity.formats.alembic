@@ -43,8 +43,11 @@ void aiCameraSample::getData(aiCameraData &outData)
     outData.farClippingPlane = (float) m_sample.getFarClippingPlane();
     // CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
     outData.fieldOfView = 2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
-    outData.focusDistance = (float) m_sample.getFocusDistance() * 0.1f; // centimeter to meter
-    outData.focalLength = focalLength * 0.01f; // milimeter to meter
+
+    outData.focusDistance = (float)m_sample.getFocusDistance();
+    outData.focalLength = focalLength;
+    outData.aperture = verticalAperture;
+    outData.aspectRatio = float(m_sample.getHorizontalAperture() / verticalAperture);
 }
 
 
