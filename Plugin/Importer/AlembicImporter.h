@@ -243,16 +243,21 @@ struct aiCameraData
 {
     float nearClippingPlane;
     float farClippingPlane;
-    float fieldOfView;
-    float focusDistance;
-    float focalLength;
+    float fieldOfView;      // in degree. vertical one
+    float aspectRatio;
+
+    float focusDistance;    // in cm
+    float focalLength;      // in mm
+    float aperture;         // in cm. vertical one
 
     inline aiCameraData()
-        : nearClippingPlane(0.0f)
-        , farClippingPlane(0.0f)
-        , fieldOfView(0.0f)
-        , focusDistance(0.0f)
+        : nearClippingPlane(0.3f)
+        , farClippingPlane(1000.0f)
+        , fieldOfView(60.0f)
+        , aspectRatio(16.0f / 9.0f)
+        , focusDistance(5.0f)
         , focalLength(0.0f)
+        , aperture(2.4f)
     {
     }
 

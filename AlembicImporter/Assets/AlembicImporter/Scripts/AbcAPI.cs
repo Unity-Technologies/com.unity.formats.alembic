@@ -241,9 +241,12 @@ public partial class AbcAPI
     {
         public float nearClippingPlane;
         public float farClippingPlane;
-        public float fieldOfView;
-        public float focusDistance;
-        public float focalLength;
+        public float fieldOfView;   // in degree. vertical one
+        public float aspectRatio;
+
+        public float focusDistance; // in cm
+        public float focalLength;   // in mm
+        public float aperture;      // in cm. vertical one
     }
 
     public struct aiContext

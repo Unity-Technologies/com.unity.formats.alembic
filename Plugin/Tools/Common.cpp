@@ -127,8 +127,10 @@ aeCameraData tImportDataToExportData(const aiCameraData& idata)
     edata.nearClippingPlane = idata.nearClippingPlane;
     edata.farClippingPlane  = idata.farClippingPlane;
     edata.fieldOfView       = idata.fieldOfView;
+    edata.aspectRatio       = idata.aspectRatio;
     edata.focusDistance     = idata.focusDistance;
     edata.focalLength       = idata.focalLength;
+    edata.aperture          = idata.aperture;
     return edata;
 }
 

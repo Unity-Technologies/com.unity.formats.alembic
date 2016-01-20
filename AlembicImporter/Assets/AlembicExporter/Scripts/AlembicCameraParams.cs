@@ -19,8 +19,14 @@ public class AlembicCameraParams : MonoBehaviour
     };
 
     public AspectRatioMode m_aspectRatioMode = AspectRatioMode.Ratio_16_9;
+
+    [Tooltip("in cm")]
+    public float m_focusDistance = 5.0f;
+
+    [Tooltip("in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0")]
     public float m_focalLength = 0.0f;
-    public float m_focusDistance = 5.0f; // if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.05f.
+
+    [Tooltip("in cm")]
     public float m_aperture = 2.4f;
 
     public float GetAspectRatio()
