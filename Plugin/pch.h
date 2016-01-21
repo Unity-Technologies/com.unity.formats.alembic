@@ -31,6 +31,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#ifdef max
+    #undef max
+    #undef min
+#endif
 #pragma warning(disable: 4996)
 
 #ifndef aiNoAutoLink

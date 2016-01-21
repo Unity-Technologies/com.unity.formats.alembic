@@ -8,7 +8,16 @@
 #include <mutex>
 #include <functional>
 #include <limits>
+#include <random>
+#include <chrono>
 #include <sstream>
 #include <type_traits>
 
 #pragma warning(disable: 4996)
+#ifdef _WIN32
+#include <windows.h>
+#ifdef max
+    #undef max
+    #undef min
+#endif
+#endif

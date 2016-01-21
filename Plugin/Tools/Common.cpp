@@ -1,12 +1,31 @@
 #include "pch.h"
 #include "Common.h"
 
+std::mt19937 g_rand;
+
+float tRand()
+{
+    static std::uniform_real_distribution<float> s_dist(-1.0f, 1.0f);
+    return s_dist(g_rand);
+}
+
+abcV3 tRandV3()
+{
+    return abcV3(tRand(), tRand(), tRand());
+}
+
+double tGetTime()
+{
+    using namespace std::chrono;
+    return (double)duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count() * 1e-6f;
+}
+
 
 void tPointsBuffer::allocate(size_t size, bool alloc_velocities, bool alloc_ids)
 {
     positions.resize(size);
     velocities.resize(alloc_velocities ? size : 0);
-    ids.resize(alloc_velocities ? size : 0);
+    ids.resize(alloc_ids ? size : 0);
 }
 
 aiPointsData tPointsBuffer::asImportData()
