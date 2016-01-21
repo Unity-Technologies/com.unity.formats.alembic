@@ -397,6 +397,27 @@ struct aiFacesets
     aiFacesets& operator=(const aiFacesets&) = default;
 };
 
+
+struct aiPointsSummary
+{
+    bool hasVelocity;
+    bool positionIsConstant;
+    bool idIsConstant;
+    int32_t peakCount;
+    uint64_t minID;
+    uint64_t maxID;
+    abcV3 boundsCenter;
+    abcV3 boundsExtents;
+
+    aiPointsSummary()
+        : hasVelocity(false)
+        , positionIsConstant(false), idIsConstant(false)
+        , peakCount(0)
+        , minID(0), maxID(0)
+        , boundsCenter(0.0f, 0.0f, 0.0f), boundsExtents(0.0f, 0.0f, 0.0f)
+    {}
+};
+
 struct aiPointsData
 {
     abcV3       *positions;
@@ -503,7 +524,7 @@ aiCLinkage aiExport aiCamera*       aiGetCamera(aiObject* obj);
 aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
 
 aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
-aiCLinkage aiExport int             aiPointsGetPeakVertexCount(aiPoints *schema);
+aiCLinkage aiExport void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
 aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
 aiCLinkage aiExport void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
 

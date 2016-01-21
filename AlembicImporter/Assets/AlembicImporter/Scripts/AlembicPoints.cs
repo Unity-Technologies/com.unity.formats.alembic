@@ -15,21 +15,21 @@ public class AlembicPoints : AlembicElement
     // members
     AbcAPI.aiPointsData m_abcData;
     Vector3[] m_abcPositions;
-    Int64[] m_abcIDs;
-    int m_abcPeakVertexCount;
+    ulong[] m_abcIDs;
+    AbcAPI.aiPointsSummary m_summary;
 
     // properties
     public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
     public Vector3[] abcPositions { get { return m_abcPositions; } }
-    public Int64[] abcIDs { get { return m_abcIDs; } }
+    public ulong[] abcIDs { get { return m_abcIDs; } }
     public int abcPeakVertexCount
     {
         get {
-            if (m_abcPeakVertexCount == 0)
+            if (m_summary.peakCount == 0)
             {
-                m_abcPeakVertexCount = AbcAPI.aiPointsGetPeakVertexCount(m_abcSchema);
+                AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
             }
-            return m_abcPeakVertexCount;
+            return m_summary.peakCount;
         }
     }
 
@@ -40,9 +40,9 @@ public class AlembicPoints : AlembicElement
     {
         if(m_abcPositions == null)
         {
-            m_abcPeakVertexCount = AbcAPI.aiPointsGetPeakVertexCount(m_abcSchema);
-            m_abcPositions = new Vector3[m_abcPeakVertexCount];
-            m_abcIDs = new Int64[m_abcPeakVertexCount];
+            AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
+            m_abcPositions = new Vector3[m_summary.peakCount];
+            m_abcIDs = new ulong[m_summary.peakCount];
 
             m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
             m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);

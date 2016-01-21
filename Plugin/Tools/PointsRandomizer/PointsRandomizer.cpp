@@ -29,7 +29,10 @@ tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRan
 
     tPointsBuffer buf;
     tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
-        mpparams.max_particles = aiPointsGetPeakVertexCount(iobj);
+        aiPointsSummary summary;
+        aiPointsGetSummary(iobj, &summary);
+
+        mpparams.max_particles = summary.peakCount;
         mpparams.particle_size = conf->repulse_particle_size;
 
         int n = aiSchemaGetNumSamples(iobj);
