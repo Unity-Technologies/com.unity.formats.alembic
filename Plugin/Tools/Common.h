@@ -7,9 +7,23 @@
 #include "../Exporter/AlembicExporter.h"
 #include "../Importer/AlembicImporter.h"
 
-#define tLog(...)
+#define tLog(...) printf(__VA_ARGS__); fflush(stdout);
 
+template<class IntType>
+inline IntType ceildiv(IntType a, IntType b)
+{
+    return a / b + (a%b == 0 ? 0 : 1);
+}
 
+template<class Scalar>
+inline Scalar clamp(Scalar v, Scalar min, Scalar max)
+{
+    return std::min<Scalar>(std::max<Scalar>(v, min), max);
+}
+
+float tRand();
+abcV3 tRandV3();
+double tGetTime();
 
 class tPointsBuffer
 {

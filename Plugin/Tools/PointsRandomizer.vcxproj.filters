@@ -10,6 +10,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="Concurrency.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="PointsRandomizer">
