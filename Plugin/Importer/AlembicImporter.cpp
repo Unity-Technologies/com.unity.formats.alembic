@@ -351,10 +351,10 @@ aiCLinkage aiExport aiPoints* aiGetPoints(aiObject* obj)
     return obj ? obj->getPoints() : nullptr;
 }
 
-aiCLinkage aiExport int aiPointsGetPeakVertexCount(aiPoints *schema)
+aiCLinkage aiExport void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary)
 {
-    if (schema == nullptr) { return 0; }
-    return schema->getPeakVertexCount();
+    if (schema == nullptr) { return; }
+    *summary = schema->getSummary();
 }
 
 aiCLinkage aiExport void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData)

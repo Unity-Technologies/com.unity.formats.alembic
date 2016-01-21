@@ -53,6 +53,7 @@ void aiPointsSample::copyData(aiPointsData &data)
     int count = (int)m_positions->size();
     data.count = count;
 
+    // copy positions
     if (m_positions && data.positions) {
         for (int i = 0; i < count; ++i) {
             data.positions[i] = (*m_positions)[i];
@@ -64,12 +65,14 @@ void aiPointsSample::copyData(aiPointsData &data)
         }
     }
 
+    // copy velocities
     if (m_velocities && data.velocities) {
         for (int i = 0; i < count; ++i) {
             data.velocities[i] = (*m_velocities)[i];
         }
     }
 
+    // copy ids
     if (m_ids && data.ids) {
         for (int i = 0; i < count; ++i) {
             data.ids[i] = (*m_ids)[i];
@@ -84,7 +87,6 @@ void aiPointsSample::copyData(aiPointsData &data)
 
 aiPoints::aiPoints(aiObject *obj)
     : super(obj)
-    , m_peakVertexCount(0)
 {
 
 }
@@ -128,6 +130,7 @@ aiPoints::Sample* aiPoints::readSample(const abcSampleSelector& ss, bool &topolo
         idProp.get(ret->m_ids, ss);
     }
 
+    // read bounds
     auto boundsProp = m_schema.getSelfBoundsProperty();
     if (boundsProp.valid())
     {
@@ -138,45 +141,29 @@ aiPoints::Sample* aiPoints::readSample(const abcSampleSelector& ss, bool &topolo
     return ret;
 }
 
-int aiPoints::getPeakVertexCount() const
+
+const aiPointsSummary& aiPoints::getSummary() const
 {
-    if (m_peakVertexCount == 0)
-    {
-        DebugLog("aiPoints::getPeakVertexCount()");
+    if (m_summary.peakCount == 0) {
+        auto positions = m_schema.getPositionsProperty();
+        auto velocities = m_schema.getVelocitiesProperty();
+        auto ids = m_schema.getIdsProperty();
 
-        Util::Dimensions dim;
+        m_summary.hasVelocity = velocities.valid();
+        m_summary.positionIsConstant = positions.isConstant();
+        m_summary.idIsConstant = ids.isConstant();
 
-        auto positionsProp = m_schema.getPositionsProperty();
+        m_summary.peakCount = (int)abcArrayPropertyGetPeakSize(positions);
 
-        int numSamples = (int)positionsProp.getNumSamples();
+        auto id_minmax = abcArrayPropertyGetMinMaxValue(ids);
+        m_summary.minID = id_minmax.first;
+        m_summary.maxID = id_minmax.second;
 
-        if (numSamples == 0)
-        {
-            return 0;
-        }
-        else if (positionsProp.isConstant())
-        {
-            positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(0)));
+        auto bounds = abcGetMaxBounds(m_schema.getSelfBoundsProperty());
+        m_summary.boundsCenter = bounds.center();
+        m_summary.boundsExtents = bounds.size();
 
-            m_peakVertexCount = (int)dim.numPoints();
-        }
-        else
-        {
-            m_peakVertexCount = 0;
-
-            for (int i = 0; i < numSamples; ++i)
-            {
-                positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
-
-                size_t numVertices = dim.numPoints();
-
-                if (numVertices > size_t(m_peakVertexCount))
-                {
-                    m_peakVertexCount = int(numVertices);
-                }
-            }
-        }
     }
 
-    return m_peakVertexCount;
+    return m_summary;
 }

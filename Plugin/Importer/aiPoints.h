@@ -36,10 +36,10 @@ public:
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
 
-    int getPeakVertexCount() const;
+    const aiPointsSummary& getSummary() const;
 
 private:
-    mutable int m_peakVertexCount;
+    mutable aiPointsSummary m_summary;
 };
 
 #endif

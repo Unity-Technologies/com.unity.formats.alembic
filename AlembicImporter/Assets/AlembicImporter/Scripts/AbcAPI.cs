@@ -279,6 +279,18 @@ public partial class AbcAPI
         public static implicit operator bool(aiSample v) { return v.ptr != IntPtr.Zero; }
     }
 
+    public struct aiPointsSummary
+    {
+        [MarshalAs(UnmanagedType.U1)] public bool hasVelocity;
+        [MarshalAs(UnmanagedType.U1)] public bool positionIsConstant;
+        [MarshalAs(UnmanagedType.U1)] public bool idIsConstant;
+        public int peakCount;
+        public ulong minID;
+        public ulong maxID;
+        public Vector3 boundsCenter;
+        public Vector3 boundsExtents;
+    };
+
     public struct aiPointsData
     {
         public IntPtr positions;
@@ -346,7 +358,7 @@ public partial class AbcAPI
     [DllImport ("AlembicImporter")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
 
     [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
-    [DllImport("AlembicImporter")] public static extern int         aiPointsGetPeakVertexCount(aiSchema schema);
+    [DllImport("AlembicImporter")] public static extern void        aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
     [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsData data);
 
     [DllImport("AlembicImporter")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);

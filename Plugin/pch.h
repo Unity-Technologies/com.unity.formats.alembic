@@ -67,6 +67,7 @@ using namespace Alembic;
 
 typedef Imath::V2f      abcV2;
 typedef Imath::V3f      abcV3;
+typedef Imath::V3d      abcV3d;
 typedef Imath::V4f      abcV4;
 typedef Imath::M44f     abcM44;
 typedef Imath::M44d     abcM44d;
