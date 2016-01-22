@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace AlembicExporterExample
+namespace UTJ
 {
 
     [RequireComponent(typeof(ParticleEngine))]

@@ -9,66 +9,69 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-[ExecuteInEditMode]
-public class AlembicPoints : AlembicElement
+namespace UTJ
 {
-    // members
-    AbcAPI.aiPointsData m_abcData;
-    Vector3[] m_abcPositions;
-    ulong[] m_abcIDs;
-    AbcAPI.aiPointsSummary m_summary;
-
-    // properties
-    public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
-    public Vector3[] abcPositions { get { return m_abcPositions; } }
-    public ulong[] abcIDs { get { return m_abcIDs; } }
-    public int abcPeakVertexCount
+    [ExecuteInEditMode]
+    public class AlembicPoints : AlembicElement
     {
-        get {
-            if (m_summary.peakCount == 0)
+        // members
+        AbcAPI.aiPointsData m_abcData;
+        Vector3[] m_abcPositions;
+        ulong[] m_abcIDs;
+        AbcAPI.aiPointsSummary m_summary;
+    
+        // properties
+        public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
+        public Vector3[] abcPositions { get { return m_abcPositions; } }
+        public ulong[] abcIDs { get { return m_abcIDs; } }
+        public int abcPeakVertexCount
+        {
+            get {
+                if (m_summary.peakCount == 0)
+                {
+                    AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
+                }
+                return m_summary.peakCount;
+            }
+        }
+    
+    
+        // No config overrides on AlembicPoints
+    
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        {
+            if(m_abcPositions == null)
             {
                 AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
+                m_abcPositions = new Vector3[m_summary.peakCount];
+                m_abcIDs = new ulong[m_summary.peakCount];
+    
+                m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
+                m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
             }
-            return m_summary.peakCount;
+    
+            AbcAPI.aiPointsCopyData(sample, ref m_abcData);
+            AbcDirty();
         }
-    }
-
-
-    // No config overrides on AlembicPoints
-
-    public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
-    {
-        if(m_abcPositions == null)
+    
+        public override void AbcUpdate()
         {
-            AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
-            m_abcPositions = new Vector3[m_summary.peakCount];
-            m_abcIDs = new ulong[m_summary.peakCount];
-
-            m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
-            m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
+            if (AbcIsDirty())
+            {
+                // nothing to do in this component.
+                AbcClean();
+            }
         }
-
-        AbcAPI.aiPointsCopyData(sample, ref m_abcData);
-        AbcDirty();
-    }
-
-    public override void AbcUpdate()
-    {
-        if (AbcIsDirty())
+    
+    
+        void Reset()
         {
-            // nothing to do in this component.
-            AbcClean();
-        }
-    }
-
-
-    void Reset()
-    {
-        // add renderer
-        var c = gameObject.GetComponent<AlembicPointsRenderer>();
-        if (c == null)
-        {
-            c = gameObject.AddComponent<AlembicPointsRenderer>();
+            // add renderer
+            var c = gameObject.GetComponent<AlembicPointsRenderer>();
+            if (c == null)
+            {
+                c = gameObject.AddComponent<AlembicPointsRenderer>();
+            }
         }
     }
 }

@@ -17,9 +17,9 @@ Shader "Utility/DataViz" {
 
          struct VSHDout {
             float4 position : SV_POSITION;
-            float4 data : TEXCOORD0; 
+            float4 data : TEXCOORD0;
          };
-         
+
          uniform float _Data;
          uniform float _Space;
          uniform float _UVSet;
@@ -30,7 +30,7 @@ Shader "Utility/DataViz" {
             VSHDout o;
 
             o.position = mul(UNITY_MATRIX_MVP, i.vertex);
-            
+
             if (_Data == 0)
             {
                // Normal
@@ -107,7 +107,7 @@ Shader "Utility/DataViz" {
                // Colors
                o.data = i.color;
             }
-            
+
             return o;
          }
 
@@ -116,6 +116,6 @@ Shader "Utility/DataViz" {
          }
          ENDCG
       }
-   } 
+   }
    FallBack Off
 }

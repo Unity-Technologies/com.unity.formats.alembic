@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-namespace AlembicExporterExample
+namespace UTJ
 {
     [ExecuteInEditMode]
     public class AlembicExporterGUI : MonoBehaviour

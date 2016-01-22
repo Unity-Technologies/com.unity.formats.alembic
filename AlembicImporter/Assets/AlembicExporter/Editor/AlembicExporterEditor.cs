@@ -2,35 +2,38 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AlembicExporter))]
-public class AlembicExporterEditor : Editor
+namespace UTJ
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(AlembicExporter))]
+    public class AlembicExporterEditor : Editor
     {
-        DrawDefaultInspector();
-
-        GUILayout.Space(10);
-        EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-
-        var t = target as AlembicExporter;
-
-        if (t.isRecording)
+        public override void OnInspectorGUI()
         {
-            if (GUILayout.Button("End Capture"))
+            DrawDefaultInspector();
+    
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
+    
+            var t = target as AlembicExporter;
+    
+            if (t.isRecording)
             {
-                t.EndCapture();
+                if (GUILayout.Button("End Capture"))
+                {
+                    t.EndCapture();
+                }
             }
-        }
-        else
-        {
-            if (GUILayout.Button("Begin Capture"))
+            else
             {
-                t.BeginCapture();
-            }
-
-            if (GUILayout.Button("One Shot"))
-            {
-                t.OneShot();
+                if (GUILayout.Button("Begin Capture"))
+                {
+                    t.BeginCapture();
+                }
+    
+                if (GUILayout.Button("One Shot"))
+                {
+                    t.OneShot();
+                }
             }
         }
     }

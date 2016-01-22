@@ -37,7 +37,7 @@ void vert_texturemesh(inout appdata_full v, out Input o)
 
     int2 ii2 = int2( ii1 & 0x3ff, ii1 >> 10 );  // assume texture width is 1024
     int  vi1 = _Indices[ii2];
-    int2 vi2 = int2( vi1 & 0x3ff, vi1 >> 10 );  // 
+    int2 vi2 = int2( vi1 & 0x3ff, vi1 >> 10 );  //
 
     v.vertex = float4(
         _Vertices[vi2 * int2(3,1) + int2(0,0)],
