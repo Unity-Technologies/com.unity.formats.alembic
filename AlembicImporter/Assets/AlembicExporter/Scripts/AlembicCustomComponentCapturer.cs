@@ -7,8 +7,11 @@ using UnityEditor;
 #endif
 
 
-public abstract class AlembicCustomComponentCapturer : MonoBehaviour
+namespace UTJ
 {
-    public abstract void CreateAbcObject(AbcAPI.aeObject parent);
-    public abstract void Capture();
+    public abstract class AlembicCustomComponentCapturer : MonoBehaviour
+    {
+        public abstract void CreateAbcObject(AbcAPI.aeObject parent);
+        public abstract void Capture();
+    }
 }

@@ -2,17 +2,20 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AlembicPointsRenderer))]
-public class AlembicPointsRendererEditor : Editor
+namespace UTJ
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(AlembicPointsRenderer))]
+    public class AlembicPointsRendererEditor : Editor
     {
-        DrawDefaultInspector();
-
-        var t = target as AlembicPointsRenderer;
-        if (GUILayout.Button("Apply Material"))
+        public override void OnInspectorGUI()
         {
-            t.RefleshMaterials();
+            DrawDefaultInspector();
+
+            var t = target as AlembicPointsRenderer;
+            if (GUILayout.Button("Apply Material"))
+            {
+                t.RefleshMaterials();
+            }
         }
     }
 }

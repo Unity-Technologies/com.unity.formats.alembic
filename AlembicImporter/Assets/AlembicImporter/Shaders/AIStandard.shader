@@ -40,5 +40,5 @@ void surf(Input IN, inout SurfaceOutputStandard o)
     o.Alpha = c.a;
 }
 ENDCG
-} 
+}
 }
