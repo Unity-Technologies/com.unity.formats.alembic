@@ -11,7 +11,7 @@ namespace UTJ
         string materialFolder = "";
         GameObject assetRoot = null;
 
-        [MenuItem ("Assets/Import Alembic Materials")]
+        [MenuItem ("Assets/UTJ/Import Alembic Materials")]
         public static void ShowWindow()
         {
             EditorWindow.GetWindow (typeof(AlembicMaterialEditor));

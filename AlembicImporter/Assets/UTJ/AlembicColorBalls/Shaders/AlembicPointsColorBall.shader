@@ -1,4 +1,4 @@
-Shader "Alembic/PointsColorBall" {
+Shader "UTJ/Alembic/PointsColorBall" {
 Properties {
     [Toggle(APPLY_TRANSFORM)] _ApplyTransform("Apply Transform", Int) = 1
     [Toggle(APPLY_SMOOTHING)] _ApplySmoothing("Apply Smoothing", Int) = 1
@@ -21,7 +21,7 @@ CGPROGRAM
 #pragma multi_compile ___ APPLY_SMOOTHING
 #pragma multi_compile ___ APPLY_POINT_ID
 
-#include "Assets/AlembicImporter/Shaders/PseudoInstancing.cginc"
+#include "Assets/UTJ/AlembicImporter/Shaders/PseudoInstancing.cginc"
 
 sampler2D _RandomBuffer;
 sampler2D _ColorBuffer;

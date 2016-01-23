@@ -421,7 +421,7 @@ namespace UTJ
             return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
         }
     
-        [MenuItem ("Assets/Import Alembic")]
+        [MenuItem ("Assets/UTJ/Import Alembic")]
         static void Import()
         {
             var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));

@@ -14,7 +14,7 @@ using UnityEditor;
 namespace UTJ
 {
     [ExecuteInEditMode]
-    [AddComponentMenu("Alembic/Exporter")]
+    [AddComponentMenu("UTJ/Alembic/Exporter")]
     public class AlembicExporter : MonoBehaviour
     {
         #region impl

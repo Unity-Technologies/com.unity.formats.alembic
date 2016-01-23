@@ -1,4 +1,4 @@
-Shader "Alembic/PointsInstancing" {
+Shader "UTJ/Alembic/PointsInstancing" {
 Properties {
     [Toggle(APPLY_TRANSFORM)] _ApplyTransform("Apply Transform", Int) = 1
     _Color ("Color", Color) = (1,1,1,1)
