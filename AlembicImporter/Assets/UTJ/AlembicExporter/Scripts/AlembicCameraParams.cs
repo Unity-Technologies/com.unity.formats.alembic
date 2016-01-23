@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace UTJ
 {
-    [AddComponentMenu("Alembic/Camera Params")]
+    [AddComponentMenu("UTJ/Alembic/Camera Params")]
     [RequireComponent(typeof(Camera))]
     public class AlembicCameraParams : MonoBehaviour
     {

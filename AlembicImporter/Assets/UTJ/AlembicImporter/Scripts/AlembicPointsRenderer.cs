@@ -12,7 +12,7 @@ using UnityEditor;
 namespace UTJ
 {
     [ExecuteInEditMode]
-    [AddComponentMenu("Alembic/PointsRenderer")]
+    [AddComponentMenu("UTJ/Alembic/PointsRenderer")]
     [RequireComponent(typeof(AlembicPoints))]
     public class AlembicPointsRenderer : MonoBehaviour
     {
