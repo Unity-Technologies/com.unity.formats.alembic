@@ -90,9 +90,9 @@ inline size_t abcArrayPropertyGetPeakSize(AbcArrayPropertyType& prop)
     else
     {
         size_t peak = 0;
-        for (int i = 0; i < num_samples; ++i)
+        for (size_t i = 0; i < num_samples; ++i)
         {
-            prop.getDimensions(dim, aiIndexToSampleSelector(i));
+            prop.getDimensions(dim, aiIndexToSampleSelector((int)i));
             peak = std::max<size_t>(peak, dim.numPoints());
         }
         return peak;
