@@ -6,14 +6,16 @@
 
 struct PointsRandomizerConfig
 {
-    float   count_rate;
-    abcV3   random_diffuse;
-    int     repulse_iteration;
-    float   repulse_particle_size;
-    float   repulse_timestep;
+    float       count_rate;
+    uint32_t    random_seed;
+    abcV3       random_diffuse;
+    int         repulse_iteration;
+    float       repulse_particle_size;
+    float       repulse_timestep;
 
     PointsRandomizerConfig()
         : count_rate(1.0f)
+        , random_seed(0)
         , random_diffuse(0.2f, 0.2f, 0.2f)
         , repulse_iteration(2)
         , repulse_particle_size(0.4f)
@@ -85,6 +87,7 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
             return (tPointInfoHeader&)point_info[info_size * (id - summary.minID)];
         };
 
+        tRandSetSeed(conf->random_seed);
         uint64_t id_size_scaled = uint64_t((double)ids.size() * conf->count_rate);
         for (size_t pi = 0; pi < id_size_scaled; ++pi) {
             size_t spi = size_t((double)pi / conf->count_rate);

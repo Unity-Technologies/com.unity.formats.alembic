@@ -1,7 +1,42 @@
 #include "pch.h"
 #include "Common.h"
 
+
+// logging
+#ifdef _WIN32
+    #define tvsnprintf(buf, count, format, va)    _vsnprintf(buf, count, format, va)
+#else
+    #define tvsnprintf(buf, count, format, va)    vsnprintf(buf, count, format, va)
+#endif
+
+void __stdcall tDefaultLogCallback(const char *message) { printf(message); }
+tLogCallback g_log_callback = tDefaultLogCallback;
+
+void tLogSetCallback(tLogCallback cb)
+{
+    g_log_callback = cb;
+}
+
+void tLog(const char *format, ...)
+{
+    const int Len = 1024 * 2;
+    char buf[Len];
+    va_list vl;
+    va_start(vl, format);
+    int r = tvsnprintf(buf, Len, format, vl);
+    va_end(vl);
+    if (g_log_callback) { g_log_callback(buf); }
+}
+
+
+// random
+
 std::mt19937 g_rand;
+
+void tRandSetSeed(uint32_t seed)
+{
+    g_rand.seed(seed);
+}
 
 float tRand()
 {
@@ -14,12 +49,17 @@ abcV3 tRandV3()
     return abcV3(tRand(), tRand(), tRand());
 }
 
+
+// timer
+
 double tGetTime()
 {
     using namespace std::chrono;
     return (double)duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count() * 1e-6f;
 }
 
+
+// buffer
 
 void tPointsBuffer::allocate(size_t size, bool alloc_velocities, bool alloc_ids)
 {
@@ -181,6 +221,9 @@ aePolyMeshData tImportDataToExportData(const aiPolyMeshData& idata)
     return edata;
 }
 
+
+// alembic element processor
+
 void tSimpleCopyXForm(aiXForm *iobj, aeXForm *eobj)
 {
     aiXFormData idata;
@@ -253,6 +296,9 @@ void tSimpleCopyPolyMesh(aiPolyMesh *iobj, aePolyMesh *eobj)
     }
 }
 
+
+
+// tContext
 
 tContext::tContext()
     : m_ictx(nullptr), m_ectx(nullptr)

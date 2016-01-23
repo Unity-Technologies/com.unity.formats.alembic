@@ -156,7 +156,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -173,7 +174,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -190,7 +192,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -214,7 +217,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterEXE|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_64\</Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>

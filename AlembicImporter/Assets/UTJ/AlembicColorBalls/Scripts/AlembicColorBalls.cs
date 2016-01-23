@@ -12,12 +12,47 @@ using UnityEditor;
 
 namespace UTJ
 {
+    [Serializable]
+    public struct PointsRandomizerConfig
+    {
+        public float    countRate;
+        public uint     randomSeed;
+        public Vector3  randomDiffuse;
+        public int      repulseIteration;
+        public float    repulseParticleSize;
+        public float    repulseTimestep;
+
+        public static PointsRandomizerConfig default_value
+        {
+            get
+            {
+                return new PointsRandomizerConfig
+                {
+                    countRate = 1.0f,
+                    randomSeed = 0,
+                    randomDiffuse = new Vector3(0.0f, 0.0f, 0.0f),
+                    repulseIteration = 0,
+                    repulseParticleSize = 0.2f,
+                    repulseTimestep = 1.0f / 60.0f,
+                };
+            }
+        }
+    };
+
+
     [ExecuteInEditMode]
+    [AddComponentMenu("UTJ/Alembic/Color Balls")]
     [RequireComponent(typeof(AlembicPointsRenderer))]
     public class AlembicColorBalls : MonoBehaviour
     {
+        [Header("Color")]
         public Color[] m_colors = new Color[] { Color.red, Color.green, Color.blue };
         Texture2D m_color_texture;
+
+        [Header("Randomizer")]
+        public PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
+        public string m_outputPath;
+
 
         void UpdateTexture()
         {
@@ -32,12 +67,47 @@ namespace UTJ
             apr.RefleshMaterials();
         }
 
-    #if UNITY_EDITOR
+
+#if UNITY_EDITOR
+        [DllImport("PointsRandomizer")]
+        public static extern bool tPointsRandomizer(string src_abc_path, string dst_abc_path, ref PointsRandomizerConfig conf);
+
+        public void DoExport()
+        {
+            var abc_stream = GetComponentInParent<AlembicStream>();
+            if(abc_stream != null)
+            {
+                tPointsRandomizer(abc_stream.m_pathToAbc, m_outputPath, ref m_conf);
+            }
+        }
+
+        void UpdateOutputPath()
+        {
+            if (m_outputPath == null || m_outputPath == "")
+            {
+                m_outputPath = gameObject.name + ".abc";
+            }
+        }
+#endif // UNITY_EDITOR
+
+
+
+#if UNITY_EDITOR
         void OnValidate()
         {
             UpdateTexture();
         }
-    #endif // UNITY_EDITOR
+
+        void Reset()
+        {
+            UpdateOutputPath();
+        }
+#endif
+
+        void OnEnable()
+        {
+            UpdateOutputPath();
+        }
 
         void Awake()
         {
