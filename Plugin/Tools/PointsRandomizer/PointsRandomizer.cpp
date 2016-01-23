@@ -41,7 +41,7 @@ struct tPointInfoHeader
 };
 
 
-tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
+tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
 {
     tContext& tctx = *tctx_;
 
@@ -181,7 +181,7 @@ tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRan
     tctx.doExport();
 }
 
-tCLinkage tExport bool tPointsRanfomizer(
+tCLinkage tExport bool tPointsRandomizer(
     const char *src_abc_path,
     const char *dst_abc_path,
     const PointsRandomizerConfig *conf)
@@ -210,7 +210,7 @@ tCLinkage tExport bool tPointsRanfomizer(
         tContext tctx;
         tctx.setExportConfig(econf);
         tctx.setArchives(ictx, ectx);
-        tPointsRanfomizerConvert(&tctx, conf);
+        tPointsRandomizerConvert(&tctx, conf);
     }
 
     aeDestroyContext(ectx);
@@ -218,7 +218,7 @@ tCLinkage tExport bool tPointsRanfomizer(
     return false;
 }
 
-tCLinkage tExport bool tPointsRanfomizer_CommandLine(int argc, char *argv[])
+tCLinkage tExport bool tPointsRandomizer_CommandLine(int argc, char *argv[])
 {
     if (argc < 3) { return false; }
 
@@ -244,7 +244,7 @@ tCLinkage tExport bool tPointsRanfomizer_CommandLine(int argc, char *argv[])
             conf.repulse_timestep = vf;
         }
     }
-    return tPointsRanfomizer(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
+    return tPointsRandomizer(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
 }
 
 
@@ -261,5 +261,5 @@ int main(int argc, char *argv[])
             );
         return 1;
     }
-    return tPointsRanfomizer_CommandLine(argc, argv) ? 0 : 1;
+    return tPointsRandomizer_CommandLine(argc, argv) ? 0 : 1;
 }
