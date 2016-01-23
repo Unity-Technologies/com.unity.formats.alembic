@@ -14,51 +14,51 @@ struct PointsRandomizerConfig
 
     PointsRandomizerConfig()
         : count_rate(1.0f)
-        , random_diffuse(0.0f, 0.0f, 0.0f)
-        , repulse_iteration(8)
-        , repulse_particle_size(0.1f)
+        , random_diffuse(0.2f, 0.2f, 0.2f)
+        , repulse_iteration(2)
+        , repulse_particle_size(0.4f)
         , repulse_timestep(1.0f / 60.0f)
     {}
 };
 
 struct tPointInfo
 {
-    uint64_t num;
-    uint64_t ids[1];
+    uint32_t id;
+    abcV3 random_diffuse;
 };
+
+struct tPointInfoHeader
+{
+    uint64_t num;
+
+    tPointInfo& operator[](size_t i) { return ((tPointInfo*)(this + 1))[i]; }
+    tPointInfo& push() { return (*this)[num++]; }
+
+    template<class Body>
+    void each(const Body& body) {
+        for (uint64_t i = 0; i < num; ++i) { body((*this)[i]); }
+    }
+};
+
 
 tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
 {
     tContext& tctx = *tctx_;
 
-    mpKernelParams mpparams;
-    auto mp = mpCreateContext();
-
-    tPointsBuffer buf;
-    std::vector<uint64_t> ids, ids_tmp1, ids_tmp2;
-    std::vector<char> info;
-    std::vector<abcV3> random_diffuse; // tPointInfo
     tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
+        tPointsBuffer buf;
+        std::vector<uint64_t> ids, ids_tmp1, ids_tmp2;
+        std::vector<char> point_info;
+
         aiPointsSummary summary;
         aiPointsGetSummary(iobj, &summary);
 
-        const float rcp_cr = 1.0f / conf->count_rate;
-        uint64_t id_seed = 0;
-        uint64_t id_begin = summary.minID;
-        uint64_t id_range = summary.maxID - summary.minID + 1;
-        uint64_t id_range_scaled = size_t((double)id_range * conf->count_rate);
 
-        random_diffuse.resize(id_range_scaled);
-        for (auto& v : random_diffuse) { v = tRandV3(); }
-
-        mpparams.max_particles = summary.peakCount;
-        mpparams.particle_size = conf->repulse_particle_size;
-
-        int n = aiSchemaGetNumSamples(iobj);
+        int num_samples = aiSchemaGetNumSamples(iobj);
 
         // build list of all ids
         tLog("building list of all ids...\n");
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < num_samples; ++i) {
             auto ss = aiIndexToSampleSelector(i);
 
             aiSchemaUpdateSample(iobj, &ss);
@@ -73,69 +73,112 @@ tCLinkage tExport void tPointsRanfomizerConvert(tContext *tctx_, const PointsRan
             ids_tmp2.resize(ids_tmp1.size() + ids.size());
             std::merge(ids_tmp1.begin(), ids_tmp1.end(), ids.begin(), ids.end(), ids_tmp2.begin());
             ids_tmp2.erase(std::unique(ids_tmp2.begin(), ids_tmp2.end()), ids_tmp2.end());
-            ids.assign(ids_tmp1.begin(), ids_tmp1.end());
+            ids.assign(ids_tmp2.begin(), ids_tmp2.end());
         }
 
-        size_t info_size = size_t(8 * (1 + std::ceil(conf->count_rate)));
-        info.resize(ids.size() * info_size);
+        // 
+        size_t info_size = size_t(sizeof(tPointInfoHeader) + sizeof(tPointInfo) * std::ceil(conf->count_rate));
+        uint64_t id_range = summary.maxID - summary.minID + 1;
+        point_info.resize(info_size * id_range);
 
-        if (conf->repulse_iteration > 0) {
-            tLog("calculating repulsion...\n");
-            for (int i = 0; i < n; ++i) {
-                double repulsion_begin_time = tGetTime();
-                auto ss = aiIndexToSampleSelector(i);
+        auto getPointInfoByID = [&](size_t id) -> tPointInfoHeader& {
+            return (tPointInfoHeader&)point_info[info_size * (id - summary.minID)];
+        };
 
-                aiSchemaUpdateSample(iobj, &ss);
-                auto *sample = aiSchemaGetSample(iobj, &ss);
+        uint64_t id_size_scaled = uint64_t((double)ids.size() * conf->count_rate);
+        for (size_t pi = 0; pi < id_size_scaled; ++pi) {
+            size_t spi = size_t((double)pi / conf->count_rate);
+            size_t id = ids[spi];
+            tPointInfo &pf = getPointInfoByID(id).push();
+            pf.id = (uint32_t)pi;
+            pf.random_diffuse = conf->random_diffuse * tRandV3();
+        }
 
-                aiPointsData idata;
-                aiPointsGetDataPointer(sample, &idata);
+
+        mpKernelParams mpparams;
+        mpparams.damping = 0.1f;
+        mpparams.max_particles = int(summary.peakCount * std::ceil(conf->count_rate));
+        mpparams.particle_size = conf->repulse_particle_size;
+        auto mp = mpCreateContext();
+
+        // process all frames
+        for (int fi = 0; fi < num_samples; ++fi) {
+            double repulsion_begin_time = tGetTime();
+            auto ss = aiIndexToSampleSelector(fi);
+
+            // get points data from alembic
+            aiSchemaUpdateSample(iobj, &ss);
+            auto *sample = aiSchemaGetSample(iobj, &ss);
+            aiPointsData idata;
+            aiPointsGetDataPointer(sample, &idata);
+
+            // create inc/decreased points buffer
+            size_t num_scaled = 0;
+            for (size_t pi = 0; pi < idata.count; ++pi) {
+                tPointInfoHeader& pinfo = getPointInfoByID(idata.ids[pi]);
+                num_scaled += pinfo.num;
+            }
+            buf.allocate(num_scaled, idata.velocities != nullptr);
+
+            for (size_t pi = 0, spi = 0; pi < idata.count; ++pi) {
+                getPointInfoByID(idata.ids[pi]).each([&](const tPointInfo &pinfo) {
+                    buf.positions[spi] = idata.positions[pi] + pinfo.random_diffuse;
+                    buf.ids[spi] = pinfo.id;
+                    if (idata.velocities) {
+                        buf.velocities[spi] = idata.velocities[pi];
+                    }
+                    ++spi;
+                });
+            }
+
+
+            // repulsion
+            if (conf->repulse_iteration > 0) {
+                tLog("calculating repulsion...\n");
 
                 mpparams.world_center = (mpV3&)idata.center;
                 mpparams.world_extent = (mpV3&)idata.size;
                 mpparams.world_div = mpV3i(
-                    int(mpparams.world_extent.x * 2.0f / conf->repulse_particle_size),
-                    int(mpparams.world_extent.y * 2.0f / conf->repulse_particle_size),
-                    int(mpparams.world_extent.z * 2.0f / conf->repulse_particle_size) );
+                    std::min<int>(int(mpparams.world_extent.x * 2.0f / conf->repulse_particle_size), 256),
+                    std::min<int>(int(mpparams.world_extent.y * 2.0f / conf->repulse_particle_size), 256),
+                    std::min<int>(int(mpparams.world_extent.z * 2.0f / conf->repulse_particle_size), 256) );
 
                 // apply repulsion
                 mpSetKernelParams(mp, &mpparams);
                 mpClearParticles(mp);
-                mpForceSetNumParticles(mp, idata.count);
+                mpForceSetNumParticles(mp, (int)num_scaled);
                 mpParticle *particles = mpGetParticles(mp);
-                for (int i = 0; i < idata.count; ++i) {
-                    particles[i].position = (mpV3&)idata.positions[i];
-                    particles[i].velocity = mpV3();
-                    particles[i].lifetime = std::numeric_limits<float>::max();
-                    particles[i].userdata = i;
+                for (size_t pi = 0; pi < num_scaled; ++pi) {
+                    particles[pi].position = (mpV3&)buf.positions[pi];
+                    particles[pi].velocity = mpV3();
+                    particles[pi].lifetime = std::numeric_limits<float>::max();
+                    particles[pi].userdata = (int)pi;
                 }
-                for (int i = 0; i < conf->repulse_iteration; ++i) {
+                for (int ri = 0; ri < conf->repulse_iteration; ++ri) {
                     mpUpdate(mp, conf->repulse_timestep);
                 }
-                std::sort(particles, particles + idata.count,
+                ist::parallel_sort(particles, particles + num_scaled,
                     [](const mpParticle& a, const mpParticle& b) { return a.userdata < b.userdata; });
 
-                buf.allocate(idata.count, idata.velocities != nullptr);
-                for (int i = 0; i < idata.count; ++i) {
-                    buf.positions[i] = (abcV3&)particles[i].position;
-                    buf.ids[i] = idata.ids[i];
+                for (int pi = 0; pi < num_scaled; ++pi) {
+                    buf.positions[pi] = (abcV3&)particles[pi].position;
                 }
                 if (idata.velocities) {
-                    for (int i = 0; i < idata.count; ++i) {
-                        buf.velocities[i] = (abcV3&)particles[i].velocity;
+                    for (int pi = 0; pi < num_scaled; ++pi) {
+                        buf.velocities[pi] = (abcV3&)particles[pi].velocity;
                     }
                 }
-
-                auto edata = buf.asExportData();
-                aePointsWriteSample(eobj, &edata);
-                tLog("  frame %d: %.2lf ms (%d iteration)\n", i, tGetTime() - repulsion_begin_time, conf->repulse_iteration);
+                tLog("  frame %d: %.2lf ms (%d iteration)\n", fi, tGetTime() - repulsion_begin_time, conf->repulse_iteration);
             }
+
+
+            auto edata = buf.asExportData();
+            aePointsWriteSample(eobj, &edata);
         }
+        mpDestroyContext(mp);
     });
 
     tctx.doExport();
-
-    mpDestroyContext(mp);
 }
 
 tCLinkage tExport bool tPointsRanfomizer(
