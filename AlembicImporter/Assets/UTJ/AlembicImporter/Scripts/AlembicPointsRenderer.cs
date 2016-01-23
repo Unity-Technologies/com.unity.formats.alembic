@@ -285,8 +285,8 @@ namespace UTJ
     #if UNITY_EDITOR
         void Reset()
         {
-            m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/AlembicImporter/Meshes/IcoSphere.asset");
-            m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/AlembicImporter/Materials/AlembicPointsDefault.mat") };
+            m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/UTJ/AlembicImporter/Meshes/IcoSphere.asset");
+            m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/UTJ/AlembicImporter/Materials/AlembicPointsDefault.mat") };
             ReleaseGPUResoureces();
         }
     
