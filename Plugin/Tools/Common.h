@@ -21,6 +21,14 @@ inline Scalar clamp(Scalar v, Scalar min, Scalar max)
     return std::min<Scalar>(std::max<Scalar>(v, min), max);
 }
 
+inline abcV3 operator+(const abcV3 &a, const abcV3 &b) { return abcV3(a.x+b.x, a.y+b.y, a.z+b.z); }
+inline abcV3 operator-(const abcV3 &a, const abcV3 &b) { return abcV3(a.x-b.x, a.y-b.y, a.z-b.z); }
+inline abcV3 operator*(const abcV3 &a, const abcV3 &b) { return abcV3(a.x*b.x, a.y*b.y, a.z*b.z); }
+inline abcV3 operator/(const abcV3 &a, const abcV3 &b) { return abcV3(a.x/b.x, a.y/b.y, a.z/b.z); }
+inline abcV3 operator*(const abcV3 &a, float b) { return abcV3(a.x*b, a.y*b, a.z*b); }
+inline abcV3 operator/(const abcV3 &a, float b) { return abcV3(a.x/b, a.y/b, a.z/b); }
+
+
 float tRand();
 abcV3 tRandV3();
 double tGetTime();
