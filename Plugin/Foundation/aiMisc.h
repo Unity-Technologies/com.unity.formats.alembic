@@ -109,6 +109,8 @@ inline std::pair<
 
     auto ret = std::make_pair(value_type(), value_type());
 
+    if (!prop.valid()) { return ret; }
+
     size_t num_samples = prop.getNumSamples();
     if (num_samples == 0) { return ret; }
 
@@ -120,12 +122,23 @@ inline std::pair<
         }
     };
 
-    auto sample = prop.getValue(aiIndexToSampleSelector(0));
-    ret.first = ret.second = sample->get()[0];
+    sample_ptr_type sample = prop.getValue(aiIndexToSampleSelector(0));
+
+    bool first = true;
+    if (sample->size()) {
+        ret.first = ret.second = sample->get()[0];
+        first = false;
+    }
     scan_minmax(sample->get(), sample->size());
+
     if (!prop.isConstant()) {
         for (size_t i = 1; i < num_samples; ++i) {
             sample = prop.getValue(aiIndexToSampleSelector((int)i));
+            if (first && sample->size()) {
+                ret.first = ret.second = sample->get()[0];
+                first = false;
+            }
+
             scan_minmax(sample->get(), sample->size());
         }
     }
