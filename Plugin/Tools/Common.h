@@ -7,7 +7,6 @@
 #include "../Exporter/AlembicExporter.h"
 #include "../Importer/AlembicImporter.h"
 
-#define tLog(...) printf(__VA_ARGS__); fflush(stdout);
 
 template<class IntType>
 inline IntType ceildiv(IntType a, IntType b)
@@ -29,9 +28,17 @@ inline abcV3 operator*(const abcV3 &a, float b) { return abcV3(a.x*b, a.y*b, a.z
 inline abcV3 operator/(const abcV3 &a, float b) { return abcV3(a.x/b, a.y/b, a.z/b); }
 
 
-float tRand();
+typedef void(__stdcall *tLogCallback)(const char *);
+void tLogSetCallback(tLogCallback cb);
+void tLog(const char *format, ...);
+
+
+void tRandSetSeed(uint32_t seed);
+float tRand(); // return -1.0 ~ 1.0
 abcV3 tRandV3();
-double tGetTime();
+
+double tGetTime(); // in milliseconds
+
 
 class tPointsBuffer
 {
