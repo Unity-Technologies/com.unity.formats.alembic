@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <cmath>
 #include <algorithm>
 #include <map>
 #include <set>

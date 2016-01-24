@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "Common.h"
+#include "Foundation.h"
+#include "AlembicProcessor.h"
 #include "Concurrency.h"
 #include "MassParticle.h"
 
@@ -8,7 +9,7 @@ struct PointsRandomizerConfig
 {
     float       count_rate;
     uint32_t    random_seed;
-    abcV3       random_diffuse;
+    float3      random_diffuse;
     int         repulse_iteration;
     float       repulse_particle_size;
     float       repulse_timestep;
@@ -26,19 +27,19 @@ struct PointsRandomizerConfig
 struct tPointInfo
 {
     uint32_t id;
-    abcV3 random_diffuse;
+    float3 random_diffuse;
 };
 
 struct tPointInfoHeader
 {
-    uint64_t num;
+    uint32_t num;
 
     tPointInfo& operator[](size_t i) { return ((tPointInfo*)(this + 1))[i]; }
-    tPointInfo& push() { return (*this)[num++]; }
+    tPointInfo& push() { return (*this)[(size_t)(num++)]; }
 
     template<class Body>
     void each(const Body& body) {
-        for (uint64_t i = 0; i < num; ++i) { body((*this)[i]); }
+        for (uint32_t i = 0; i < num; ++i) { body((*this)[i]); }
     }
 };
 
@@ -81,20 +82,20 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
         // 
         size_t info_size = size_t(sizeof(tPointInfoHeader) + sizeof(tPointInfo) * std::ceil(conf->count_rate));
         uint64_t id_range = summary.maxID - summary.minID + 1;
-        point_info.resize(info_size * id_range);
+        point_info.resize(info_size * (size_t)id_range);
 
-        auto getPointInfoByID = [&](size_t id) -> tPointInfoHeader& {
-            return (tPointInfoHeader&)point_info[info_size * (id - summary.minID)];
+        auto getPointInfoByID = [&](uint64_t id) -> tPointInfoHeader& {
+            return (tPointInfoHeader&)point_info[info_size * size_t(id - summary.minID)];
         };
 
         tRandSetSeed(conf->random_seed);
         uint64_t id_size_scaled = uint64_t((double)ids.size() * conf->count_rate);
         for (size_t pi = 0; pi < id_size_scaled; ++pi) {
             size_t spi = size_t((double)pi / conf->count_rate);
-            size_t id = ids[spi];
+            uint64_t id = ids[spi];
             tPointInfo &pf = getPointInfoByID(id).push();
             pf.id = (uint32_t)pi;
-            pf.random_diffuse = conf->random_diffuse * tRandV3();
+            pf.random_diffuse = conf->random_diffuse * tRand3();
         }
 
 
@@ -117,18 +118,18 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
 
             // create inc/decreased points buffer
             size_t num_scaled = 0;
-            for (size_t pi = 0; pi < idata.count; ++pi) {
+            for (int pi = 0; pi < idata.count; ++pi) {
                 tPointInfoHeader& pinfo = getPointInfoByID(idata.ids[pi]);
                 num_scaled += pinfo.num;
             }
             buf.allocate(num_scaled, idata.velocities != nullptr);
 
-            for (size_t pi = 0, spi = 0; pi < idata.count; ++pi) {
+            for (int pi = 0, spi = 0; pi < idata.count; ++pi) {
                 getPointInfoByID(idata.ids[pi]).each([&](const tPointInfo &pinfo) {
-                    buf.positions[spi] = idata.positions[pi] + pinfo.random_diffuse;
+                    buf.positions[spi] = (float3&)idata.positions[pi] + pinfo.random_diffuse;
                     buf.ids[spi] = pinfo.id;
                     if (idata.velocities) {
-                        buf.velocities[spi] = idata.velocities[pi];
+                        buf.velocities[spi] = (float3&)idata.velocities[pi];
                     }
                     ++spi;
                 });
@@ -163,12 +164,12 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
                 ist::parallel_sort(particles, particles + num_scaled,
                     [](const mpParticle& a, const mpParticle& b) { return a.userdata < b.userdata; });
 
-                for (int pi = 0; pi < num_scaled; ++pi) {
-                    buf.positions[pi] = (abcV3&)particles[pi].position;
+                for (size_t pi = 0; pi < num_scaled; ++pi) {
+                    buf.positions[pi] = (float3&)particles[pi].position;
                 }
                 if (idata.velocities) {
-                    for (int pi = 0; pi < num_scaled; ++pi) {
-                        buf.velocities[pi] = (abcV3&)particles[pi].velocity;
+                    for (size_t pi = 0; pi < num_scaled; ++pi) {
+                        buf.velocities[pi] = (float3&)particles[pi].velocity;
                     }
                 }
                 tLog("  frame %d: %.2lf ms (%d iteration)\n", fi, tGetTime() - repulsion_begin_time, conf->repulse_iteration);
@@ -231,7 +232,7 @@ tCLinkage tExport bool tPointsRandomizerCommandLine(int argc, char *argv[])
 
     int vi;
     float vf;
-    abcV3 v3f;
+    float3 v3f;
     // parse options
     for (int i = 3; i < argc; ++i) {
         if (sscanf(argv[i], "/count_rate:%f", &vf) == 1) {

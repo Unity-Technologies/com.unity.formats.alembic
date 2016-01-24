@@ -1,73 +1,9 @@
-#define tCLinkage extern "C"
-#ifdef _MSC_VER
-    #define tExport __declspec(dllexport)
-#else
-    #define tExport __attribute__((visibility("default")))
-#endif
-#include "../Exporter/AlembicExporter.h"
-#include "../Importer/AlembicImporter.h"
+#ifndef AlembicProcessor_h
+#define AlembicProcessor_h
 
-
-template<class IntType>
-inline IntType ceildiv(IntType a, IntType b)
-{
-    return a / b + (a%b == 0 ? 0 : 1);
-}
-
-template<class Scalar>
-inline Scalar clamp(Scalar v, Scalar min, Scalar max)
-{
-    return std::min<Scalar>(std::max<Scalar>(v, min), max);
-}
-
-template<class T>
-struct RGBA
-{
-    T r, g, b, a;
-};
-
-template<class T>
-inline void BGRA2RGBA(RGBA<T> *data, int numPixels)
-{
-    for (int i = 0; i < numPixels; ++i) {
-        std::swap(data[i].r, data[i].b);
-    }
-}
-
-template<class T>
-inline void CopyWithBGRA2RGBA(RGBA<T> *dst, const RGBA<T> *src, int numPixels)
-{
-    for (int i = 0; i < numPixels; ++i) {
-        RGBA<T> &d = dst[i];
-        const RGBA<T> &s = src[i];
-        d.r = s.b;
-        d.g = s.g;
-        d.b = s.r;
-        d.a = s.a;
-    }
-}
-
-inline abcV3 operator+(const abcV3 &a, const abcV3 &b) { return abcV3(a.x+b.x, a.y+b.y, a.z+b.z); }
-inline abcV3 operator-(const abcV3 &a, const abcV3 &b) { return abcV3(a.x-b.x, a.y-b.y, a.z-b.z); }
-inline abcV3 operator*(const abcV3 &a, const abcV3 &b) { return abcV3(a.x*b.x, a.y*b.y, a.z*b.z); }
-inline abcV3 operator/(const abcV3 &a, const abcV3 &b) { return abcV3(a.x/b.x, a.y/b.y, a.z/b.z); }
-inline abcV3 operator*(const abcV3 &a, float b) { return abcV3(a.x*b, a.y*b, a.z*b); }
-inline abcV3 operator/(const abcV3 &a, float b) { return abcV3(a.x/b, a.y/b, a.z/b); }
-
-
-typedef void(__stdcall *tLogCallback)(const char *);
-void tLogSetCallback(tLogCallback cb);
-void tLog(const char *format, ...);
-
-void tAddDLLSearchPath(const char *path_to_add);
-const char* tGetDirectoryOfCurrentModule();
-
-
-void tRandSetSeed(uint32_t seed);
-float tRand(); // return -1.0 ~ 1.0
-abcV3 tRandV3();
-
-double tGetTime(); // in milliseconds
+#include "../../Exporter/AlembicExporter.h"
+#include "../../Importer/AlembicImporter.h"
+#include "Foundation.h"
 
 
 class tPointsBuffer
@@ -79,8 +15,8 @@ public:
     aePointsData asExportData();
 
 public:
-    std::vector<abcV3> positions;
-    std::vector<abcV3> velocities;
+    std::vector<float3> positions;
+    std::vector<float3> velocities;
     std::vector<uint64_t> ids;
 };
 
@@ -98,10 +34,10 @@ public:
     aePolyMeshData asExportData();
 
 public:
-    std::vector<abcV3> positions;
-    std::vector<abcV3> velocities;
-    std::vector<abcV3> normals;
-    std::vector<abcV2> uvs;
+    std::vector<float3> positions;
+    std::vector<float3> velocities;
+    std::vector<float3> normals;
+    std::vector<float2> uvs;
     std::vector<int> indices;
     std::vector<int> normal_indices;
     std::vector<int> uv_indices;
@@ -161,3 +97,4 @@ private:
     PointsProcessor     m_pointsproc;
     PolyMeshProcessor   m_meshproc;
 };
+#endif // AlembicProcessor_h

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Common.h"
+#include "Foundation.h"
 
 tCLinkage tExport const char* GetDirectoryOfCurrentModule()
 {

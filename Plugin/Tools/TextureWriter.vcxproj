@@ -27,15 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AlembicExporter.vcxproj">
-      <Project>{35e1c482-1aee-4aae-bbe9-0309cb84f321}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\AlembicImporter.vcxproj">
-      <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="Common\Foundation.cpp" />
     <ClCompile Include="GraphicsDevice\GraphicsDevice.cpp" />
     <ClCompile Include="GraphicsDevice\GraphicsDeviceD3D11.cpp" />
     <ClCompile Include="GraphicsDevice\GraphicsDeviceD3D9.cpp" />
@@ -51,8 +43,8 @@
     <ClCompile Include="TextureWriter\TextureWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="Concurrency.h" />
+    <ClInclude Include="Common\Concurrency.h" />
+    <ClInclude Include="Common\Foundation.h" />
     <ClInclude Include="GraphicsDevice\GraphicsDevice.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -93,37 +85,37 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\MassParticle\include;$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
