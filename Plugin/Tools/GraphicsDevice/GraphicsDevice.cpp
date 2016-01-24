@@ -45,8 +45,9 @@ tIGraphicsDevice* aiCreateGraphicsDeviceOpenGL(void *device);
 tIGraphicsDevice* aiCreateGraphicsDeviceD3D9(void *device);
 tIGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
 
-
-tIGraphicsDevice *g_theGraphicsDevice;
+namespace {
+    tIGraphicsDevice *g_theGraphicsDevice;
+}
 tCLinkage tExport tIGraphicsDevice* tGetGraphicsDevice() { return g_theGraphicsDevice; }
 typedef tIGraphicsDevice* (*aiGetGraphicsDeviceT)();
 

@@ -19,10 +19,11 @@
     #ifdef _MSC_VER
         #ifndef aeStaticLink
             #define aeExport __declspec(dllimport)
+            #pragma comment(lib, "AlembicExporter.lib")
         #else
             #define aeExport 
+            #pragma comment(lib, "AlembicExporter_s.lib")
         #endif
-        #pragma comment(lib, "AlembicExporter.lib")
     #else
     #endif
 

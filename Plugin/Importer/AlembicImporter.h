@@ -31,10 +31,11 @@
     #ifdef _MSC_VER
         #ifndef aiStaticLink
             #define aiExport __declspec(dllimport)
+            #pragma comment(lib, "AlembicImporter.lib")
         #else
             #define aiExport 
+            #pragma comment(lib, "AlembicImporter_s.lib")
         #endif
-        #pragma comment(lib, "AlembicImporter.lib")
     #else
     #endif
 

@@ -10,7 +10,9 @@
 #endif
 
 void __stdcall tDefaultLogCallback(const char *message) { printf(message); }
-tLogCallback g_log_callback = tDefaultLogCallback;
+namespace {
+    tLogCallback g_log_callback = tDefaultLogCallback;
+}
 
 void tLogSetCallback(tLogCallback cb)
 {
@@ -86,7 +88,9 @@ double tGetTime()
 
 // random
 
-std::mt19937 g_rand;
+namespace {
+    std::mt19937 g_rand;
+}
 
 void tRandSetSeed(uint32_t seed)
 {
