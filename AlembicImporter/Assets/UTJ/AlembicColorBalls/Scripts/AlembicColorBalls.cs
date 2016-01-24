@@ -47,6 +47,7 @@ namespace UTJ
     {
         [Header("Color")]
         public Color[] m_colors = new Color[] { Color.red, Color.green, Color.blue };
+        public bool m_interpolation = false;
         Texture2D m_color_texture;
 
         [Header("Randomizer")]
@@ -64,6 +65,7 @@ namespace UTJ
         void UpdateTexture()
         {
             m_color_texture = new Texture2D(m_colors.Length, 1, TextureFormat.RGBA32, false, false);
+            m_color_texture.filterMode = m_interpolation ? FilterMode.Bilinear : FilterMode.Point;
             m_color_texture.SetPixels(m_colors);
 
             var apr = GetComponent<AlembicPointsRenderer>();
@@ -95,7 +97,8 @@ namespace UTJ
         {
             if (m_outputPath == null || m_outputPath == "")
             {
-                m_outputPath = gameObject.name + ".abc";
+                var root = GetComponent<Transform>().root;
+                m_outputPath = root.gameObject.name + "_mod.abc";
             }
         }
 #endif // UNITY_EDITOR
