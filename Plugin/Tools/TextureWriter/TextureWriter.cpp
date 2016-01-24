@@ -182,7 +182,9 @@ tCLinkage tExport int tWriteTexture(
 // async API
 #include "Concurrency.h"
 
-ist::task_group g_task_group;
+namespace {
+    ist::task_group g_task_group;
+}
 
 struct tWriteTextureTask
 {
