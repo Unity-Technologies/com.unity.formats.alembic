@@ -220,8 +220,8 @@ xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86_64\
-xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_64\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -289,8 +289,8 @@ xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86\
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
-xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86\</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

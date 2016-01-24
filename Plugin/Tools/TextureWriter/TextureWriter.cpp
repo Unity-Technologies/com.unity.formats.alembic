@@ -1,75 +1,16 @@
 #include "pch.h"
-#include "Common.h"
+#include "Foundation.h"
 #include "GraphicsDevice.h"
 #include "half.h"
 
 #pragma comment(lib, "Half.lib")
 
 
-
-template<class T> struct tvec2;
-template<class T> struct tvec3;
-template<class T> struct tvec4;
-
-template<class T> struct tvec2
-{
-    T x, y;
-    tvec2() {} // !not clear members!
-    tvec2(T a) : x(a), y(a) {}
-    tvec2(T a, T b) : x(a), y(b) {}
-    template<class U> tvec2(const tvec2<U>& src);
-    template<class U> tvec2(const tvec3<U>& src);
-    template<class U> tvec2(const tvec4<U>& src);
-};
-
-template<class T> struct tvec3
-{
-    T x, y, z;
-    tvec3() {} // !not clear members!
-    tvec3(T a) : x(a), y(a), z(a) {}
-    tvec3(T a, T b, T c) : x(a), y(b), z(c) {}
-    template<class U> tvec3(const tvec2<U>& src);
-    template<class U> tvec3(const tvec3<U>& src);
-    template<class U> tvec3(const tvec4<U>& src);
-};
-
-template<class T> struct tvec4
-{
-    T x, y, z, w;
-    tvec4() {} // !not clear members!
-    tvec4(T a) : x(a), y(a), z(a), w(a) {}
-    tvec4(T a, T b, T c, T d) : x(a), y(b), z(c), w(d) {}
-    template<class U> tvec4(const tvec2<U>& src);
-    template<class U> tvec4(const tvec3<U>& src);
-    template<class U> tvec4(const tvec4<U>& src);
-};
-
-template<class DstType, class SrcType> inline DstType tScalar(SrcType src) { return DstType(src); }
 template<> inline half tScalar<>(int src) { return half((float)src); }
-
-template<class T> template<class U> tvec2<T>::tvec2(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
-template<class T> template<class U> tvec2<T>::tvec2(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
-template<class T> template<class U> tvec2<T>::tvec2(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
-template<class T> template<class U> tvec3<T>::tvec3(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z() {}
-template<class T> template<class U> tvec3<T>::tvec3(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)) {}
-template<class T> template<class U> tvec3<T>::tvec3(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)) {}
-template<class T> template<class U> tvec4<T>::tvec4(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(), w() {}
-template<class T> template<class U> tvec4<T>::tvec4(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)), w() {}
-template<class T> template<class U> tvec4<T>::tvec4(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)), w(tScalar<T>(src.w)) {}
-
-typedef int64_t lint;
 typedef tvec2<half> half2;
 typedef tvec3<half> half3;
 typedef tvec4<half> half4;
-typedef tvec2<float> float2;
-typedef tvec3<float> float3;
-typedef tvec4<float> float4;
-typedef tvec2<int> int2;
-typedef tvec3<int> int3;
-typedef tvec4<int> int4;
-typedef tvec2<lint> lint2;
-typedef tvec3<lint> lint3;
-typedef tvec4<lint> lint4;
+
 
 
 

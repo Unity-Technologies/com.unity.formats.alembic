@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 
 #ifdef tSupportD3D11
-#include "Common.h"
+#include "Foundation.h"
 #include "GraphicsDevice.h"
 #include <d3d11.h>
 

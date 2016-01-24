@@ -1,109 +1,6 @@
 #include "pch.h"
-#include "Common.h"
-
-
-// logging
-#ifdef _WIN32
-    #define tvsnprintf(buf, count, format, va)    _vsnprintf(buf, count, format, va)
-#else
-    #define tvsnprintf(buf, count, format, va)    vsnprintf(buf, count, format, va)
-#endif
-
-void __stdcall tDefaultLogCallback(const char *message) { printf(message); }
-tLogCallback g_log_callback = tDefaultLogCallback;
-
-void tLogSetCallback(tLogCallback cb)
-{
-    g_log_callback = cb;
-}
-
-void tLog(const char *format, ...)
-{
-    const int Len = 1024 * 2;
-    char buf[Len];
-    va_list vl;
-    va_start(vl, format);
-    int r = tvsnprintf(buf, Len, format, vl);
-    va_end(vl);
-    if (g_log_callback) { g_log_callback(buf); }
-}
-
-
-// dll related
-
-void tAddDLLSearchPath(const char *path_to_add)
-{
-#ifdef _WIN32
-    std::string path;
-    path.resize(1024 * 64);
-
-    DWORD ret = ::GetEnvironmentVariableA("PATH", &path[0], (DWORD)path.size());
-    path.resize(ret);
-    path += ";";
-    path += path_to_add;
-    ::SetEnvironmentVariableA("PATH", path.c_str());
-
-#else 
-    std::string path = getenv("LD_LIBRARY_PATH");
-    path += ";";
-    path += path_to_add;
-    setenv("LD_LIBRARY_PATH", path.c_str(), 1);
-#endif
-}
-
-const char* tGetDirectoryOfCurrentModule()
-{
-    static std::string s_path;
-    if (s_path.empty()) {
-#ifdef _WIN32
-        char buf[MAX_PATH];
-        HMODULE mod = 0;
-        ::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCSTR)&tGetDirectoryOfCurrentModule, &mod);
-        DWORD size = ::GetModuleFileNameA(mod, buf, sizeof(buf));
-        for (int i = size - 1; i >= 0; --i) {
-            if (buf[i] == '\\') {
-                buf[i] = '\0';
-                s_path = buf;
-                break;
-            }
-        }
-#else 
-    // todo:
-#endif
-    }
-    return s_path.c_str();
-}
-
-
-
-// random
-
-std::mt19937 g_rand;
-
-void tRandSetSeed(uint32_t seed)
-{
-    g_rand.seed(seed);
-}
-
-float tRand()
-{
-    static std::uniform_real_distribution<float> s_dist(-1.0f, 1.0f);
-    return s_dist(g_rand);
-}
-
-abcV3 tRandV3()
-{
-    return abcV3(tRand(), tRand(), tRand());
-}
-
-
-// timer
-
-double tGetTime()
-{
-    using namespace std::chrono;
-    return (double)duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count() * 1e-6f;
-}
+#include "Foundation.h"
+#include "AlembicProcessor.h"
 
 
 // buffer
@@ -118,20 +15,20 @@ void tPointsBuffer::allocate(size_t size, bool alloc_velocities, bool alloc_ids)
 aiPointsData tPointsBuffer::asImportData()
 {
     aiPointsData ret;
-    ret.positions   = positions.empty() ? nullptr : &positions[0];
-    ret.velocities  = velocities.empty() ? nullptr : &velocities[0];
-    ret.ids         = ids.empty() ? nullptr : &ids[0];
-    ret.count       = (int)positions.size();
+    ret.positions = positions.empty() ? nullptr : (abcV3*)&positions[0];
+    ret.velocities = velocities.empty() ? nullptr : (abcV3*)&velocities[0];
+    ret.ids = ids.empty() ? nullptr : &ids[0];
+    ret.count = (int)positions.size();
     return ret;
 }
 
 aePointsData tPointsBuffer::asExportData()
 {
     aePointsData ret;
-    ret.positions   = positions.empty() ? nullptr : &positions[0];
-    ret.velocities  = velocities.empty() ? nullptr : &velocities[0];
-    ret.ids         = ids.empty() ? nullptr : &ids[0];
-    ret.count       = (int)positions.size();
+    ret.positions = positions.empty() ? nullptr : (abcV3*)&positions[0];
+    ret.velocities = velocities.empty() ? nullptr : (abcV3*)&velocities[0];
+    ret.ids = ids.empty() ? nullptr : &ids[0];
+    ret.count = (int)positions.size();
     return ret;
 }
 
@@ -172,22 +69,22 @@ aiPolyMeshData tPolyMeshBuffer::asImportData()
 {
     aiPolyMeshData ret;
 
-    ret.positions     = positions.empty() ? nullptr : &positions[0];
-    ret.velocities    = velocities.empty() ? nullptr : &velocities[0];
-    ret.normals       = normals.empty() ? nullptr : &normals[0];
-    ret.uvs           = uvs.empty() ? nullptr : &uvs[0];
-    ret.indices       = indices.empty() ? nullptr : &indices[0];
+    ret.positions = positions.empty() ? nullptr : (abcV3*)&positions[0];
+    ret.velocities = velocities.empty() ? nullptr : (abcV3*)&velocities[0];
+    ret.normals = normals.empty() ? nullptr : (abcV3*)&normals[0];
+    ret.uvs = uvs.empty() ? nullptr : (abcV2*)&uvs[0];
+    ret.indices = indices.empty() ? nullptr : &indices[0];
     ret.normalIndices = normal_indices.empty() ? nullptr : &normal_indices[0];
-    ret.uvIndices     = uv_indices.empty() ? nullptr : &uv_indices[0];
-    ret.faces         = faces.empty() ? nullptr : &faces[0];
+    ret.uvIndices = uv_indices.empty() ? nullptr : &uv_indices[0];
+    ret.faces = faces.empty() ? nullptr : &faces[0];
 
-    ret.positionCount     = (int)positions.size();
-    ret.normalCount       = (int)normals.size();
-    ret.uvCount           = (int)uvs.size();
-    ret.indexCount        = (int)indices.size();
-    ret.normalIndexCount  = (int)normal_indices.size();
-    ret.uvIndexCount      = (int)uv_indices.size();
-    ret.faceCount         = (int)faces.size();
+    ret.positionCount = (int)positions.size();
+    ret.normalCount = (int)normals.size();
+    ret.uvCount = (int)uvs.size();
+    ret.indexCount = (int)indices.size();
+    ret.normalIndexCount = (int)normal_indices.size();
+    ret.uvIndexCount = (int)uv_indices.size();
+    ret.faceCount = (int)faces.size();
 
     return ret;
 }
@@ -196,22 +93,22 @@ aePolyMeshData tPolyMeshBuffer::asExportData()
 {
     aePolyMeshData ret;
 
-    ret.positions     = positions.empty() ? nullptr : &positions[0];
-    ret.velocities    = velocities.empty() ? nullptr : &velocities[0];
-    ret.normals       = normals.empty() ? nullptr : &normals[0];
-    ret.uvs           = uvs.empty() ? nullptr : &uvs[0];
-    ret.indices       = indices.empty() ? nullptr : &indices[0];
+    ret.positions = positions.empty() ? nullptr : (abcV3*)&positions[0];
+    ret.velocities = velocities.empty() ? nullptr : (abcV3*)&velocities[0];
+    ret.normals = normals.empty() ? nullptr : (abcV3*)&normals[0];
+    ret.uvs = uvs.empty() ? nullptr : (abcV2*)&uvs[0];
+    ret.indices = indices.empty() ? nullptr : &indices[0];
     ret.normalIndices = normal_indices.empty() ? nullptr : &normal_indices[0];
-    ret.uvIndices     = uv_indices.empty() ? nullptr : &uv_indices[0];
-    ret.faces         = faces.empty() ? nullptr : &faces[0];
+    ret.uvIndices = uv_indices.empty() ? nullptr : &uv_indices[0];
+    ret.faces = faces.empty() ? nullptr : &faces[0];
 
-    ret.positionCount     = (int)positions.size();
-    ret.normalCount       = (int)normals.size();
-    ret.uvCount           = (int)uvs.size();
-    ret.indexCount        = (int)indices.size();
-    ret.normalIndexCount  = (int)normal_indices.size();
-    ret.uvIndexCount      = (int)uv_indices.size();
-    ret.faceCount         = (int)faces.size();
+    ret.positionCount = (int)positions.size();
+    ret.normalCount = (int)normals.size();
+    ret.uvCount = (int)uvs.size();
+    ret.indexCount = (int)indices.size();
+    ret.normalIndexCount = (int)normal_indices.size();
+    ret.uvIndexCount = (int)uv_indices.size();
+    ret.faceCount = (int)faces.size();
 
     return ret;
 }
@@ -220,10 +117,10 @@ aePolyMeshData tPolyMeshBuffer::asExportData()
 aeXFormData tImportDataToExportData(const aiXFormData& idata)
 {
     aeXFormData edata;
-    edata.translation   = idata.translation;
-    edata.rotation      = idata.rotation;
-    edata.scale         = idata.scale;
-    edata.inherits      = idata.inherits;
+    edata.translation = idata.translation;
+    edata.rotation = idata.rotation;
+    edata.scale = idata.scale;
+    edata.inherits = idata.inherits;
     return edata;
 }
 
@@ -231,40 +128,40 @@ aeCameraData tImportDataToExportData(const aiCameraData& idata)
 {
     aeCameraData edata;
     edata.nearClippingPlane = idata.nearClippingPlane;
-    edata.farClippingPlane  = idata.farClippingPlane;
-    edata.fieldOfView       = idata.fieldOfView;
-    edata.aspectRatio       = idata.aspectRatio;
-    edata.focusDistance     = idata.focusDistance;
-    edata.focalLength       = idata.focalLength;
-    edata.aperture          = idata.aperture;
+    edata.farClippingPlane = idata.farClippingPlane;
+    edata.fieldOfView = idata.fieldOfView;
+    edata.aspectRatio = idata.aspectRatio;
+    edata.focusDistance = idata.focusDistance;
+    edata.focalLength = idata.focalLength;
+    edata.aperture = idata.aperture;
     return edata;
 }
 
 aePointsData tImportDataToExportData(const aiPointsData& idata)
 {
     aePointsData edata;
-    edata.positions     = idata.positions;
-    edata.velocities    = idata.velocities;
-    edata.ids           = idata.ids;
-    edata.count         = idata.count;
+    edata.positions = idata.positions;
+    edata.velocities = idata.velocities;
+    edata.ids = idata.ids;
+    edata.count = idata.count;
     return edata;
 }
 
 aePolyMeshData tImportDataToExportData(const aiPolyMeshData& idata)
 {
     aePolyMeshData edata;
-    edata.positions     = idata.positions;
-    edata.velocities    = idata.velocities;
-    edata.normals       = idata.normals;
-    edata.uvs           = idata.uvs;
-    edata.indices       = idata.indices;
-    edata.faces         = idata.faces;
+    edata.positions = idata.positions;
+    edata.velocities = idata.velocities;
+    edata.normals = idata.normals;
+    edata.uvs = idata.uvs;
+    edata.indices = idata.indices;
+    edata.faces = idata.faces;
 
     edata.positionCount = idata.positionCount;
-    edata.normalCount   = idata.normalCount;
-    edata.uvCount       = idata.uvCount;
-    edata.indexCount    = idata.indexCount;
-    edata.faceCount     = idata.faceCount;
+    edata.normalCount = idata.normalCount;
+    edata.uvCount = idata.uvCount;
+    edata.indexCount = idata.indexCount;
+    edata.faceCount = idata.faceCount;
     return edata;
 }
 
@@ -354,7 +251,7 @@ tContext::tContext()
     , m_meshproc(tSimpleCopyPolyMesh)
     , m_pointsproc(tSimpleCopyPoints)
 {
-    
+
 }
 
 tContext::~tContext()
@@ -384,10 +281,10 @@ aeObject* tContext::getEObject(aiObject *iobj)
     return i == m_iemap.end() ? nullptr : i->second;
 }
 
-void tContext::setXFormProcessor(const XFormProcessor& v)       { m_xfproc = v; }
-void tContext::setCameraProcessor(const CameraProcessor& v)     { m_camproc = v; }
-void tContext::setPointsProcessor(const PointsProcessor& v)     { m_pointsproc = v; }
-void tContext::setPolyMeshrocessor(const PolyMeshProcessor& v)  { m_meshproc = v; }
+void tContext::setXFormProcessor(const XFormProcessor& v) { m_xfproc = v; }
+void tContext::setCameraProcessor(const CameraProcessor& v) { m_camproc = v; }
+void tContext::setPointsProcessor(const PointsProcessor& v) { m_pointsproc = v; }
+void tContext::setPolyMeshrocessor(const PolyMeshProcessor& v) { m_meshproc = v; }
 
 void tContext::doExport()
 {

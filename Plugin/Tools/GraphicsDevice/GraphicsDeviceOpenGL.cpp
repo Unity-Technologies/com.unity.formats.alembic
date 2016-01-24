@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #ifdef tSupportOpenGL
-#include "Common.h"
+#include "Foundation.h"
 #include "GraphicsDevice.h"
 
 #include <GL/glew.h>

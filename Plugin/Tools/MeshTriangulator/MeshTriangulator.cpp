@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "Common.h"
+#include "Foundation.h"
+#include "AlembicProcessor.h"
 
 struct MeshTriangulatorConfig
 {
