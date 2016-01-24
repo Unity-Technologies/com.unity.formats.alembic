@@ -89,7 +89,10 @@ namespace UTJ
             var abc_stream = GetComponentInParent<AlembicStream>();
             if(abc_stream != null)
             {
-                tPointsRandomizer(abc_stream.m_pathToAbc, m_outputPath, ref m_conf);
+                tPointsRandomizer(
+                    Application.streamingAssetsPath + "/" + abc_stream.m_pathToAbc,
+                    Application.streamingAssetsPath + "/" + m_outputPath,
+                    ref m_conf);
             }
         }
 
