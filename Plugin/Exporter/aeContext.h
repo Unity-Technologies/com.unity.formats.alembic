@@ -26,6 +26,14 @@ typedef Abc::OV3fArrayProperty      abcFloat3ArrayProperty;
 typedef Abc::OC4fArrayProperty      abcFloat4ArrayProperty;
 typedef Abc::OM44fArrayProperty     abcFloat4x4ArrayProperty;
 
+struct aeTimeSampling
+{
+    abcChrono start_time;
+    std::vector<abcChrono> times;
+
+    aeTimeSampling() : start_time(0.0) {}
+};
+
 
 class aeContext
 {
@@ -42,6 +50,8 @@ public:
     const aeConfig& getConfig() const;
     aeObject* getTopObject();
 
+    uint32_t getNumTimeSampling() const;
+    aeTimeSampling& getTimeSampling(uint32_t i);
     uint32_t addTimeSampling(float start_time);
     void addTime(float time, uint32_t tsi = -1);
 
@@ -49,7 +59,7 @@ private:
     aeConfig m_config;
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;
-    std::vector<std::vector<abcChrono>> m_timesamplings;
+    std::vector<aeTimeSampling> m_timesamplings;
 };
 
 #endif // aeContext_h

@@ -17,18 +17,24 @@ aeContext::~aeContext()
 void aeContext::reset()
 {
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTimeSamplingType_Cyclic) {
+        if (m_config.timeSamplingType == aeTimeSamplingType_Uniform) {
+            // start time in default timeline maybe changed.
+            Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), m_config.startTime);
+            *m_archive.getTimeSampling(1) = ts;
+        }
+        else if (m_config.timeSamplingType == aeTimeSamplingType_Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
-                if (!t.empty()) {
-                    auto ts = Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.size(), t.back()), t);
+                if (!t.times.empty()) {
+                    auto ts = Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.times.size(), t.times.back()), t.times);
                     *m_archive.getTimeSampling(i) = ts;
                 }
             }
         }
         else if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
-                auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), m_timesamplings[i]);
+                auto &t = m_timesamplings[i];
+                auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
                 *m_archive.getTimeSampling(i) = ts;
             }
         }
@@ -84,6 +90,16 @@ aeObject* aeContext::getTopObject()
     return m_node_top.get();
 }
 
+uint32_t aeContext::getNumTimeSampling() const
+{
+    return (uint32_t)m_timesamplings.size();
+}
+
+aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
+{
+    return m_timesamplings[i];
+}
+
 uint32_t aeContext::addTimeSampling(float start_time)
 {
     Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(start_time));
@@ -95,18 +111,18 @@ uint32_t aeContext::addTimeSampling(float start_time)
 void aeContext::addTime(float time, uint32_t tsi)
 {
     // if tsi==-1, add time to all time samplings
-    if (tsi==-1) {
+    if (tsi == -1) {
         for (size_t i = 1; i < m_timesamplings.size(); ++i) {
             auto &ts = m_timesamplings[i];
-            if (ts.empty() || ts.back() != time) {
-                ts.push_back(time);
+            if (ts.times.empty() || ts.times.back() != time) {
+                ts.times.push_back(time);
             }
         }
     }
     else {
         auto &ts = m_timesamplings[tsi];
-        if (ts.empty() || ts.back() != time) {
-            ts.push_back(time);
+        if (ts.times.empty() || ts.times.back() != time) {
+            ts.times.push_back(time);
         }
     }
 }
