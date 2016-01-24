@@ -15,12 +15,17 @@ namespace UTJ
     [Serializable]
     public struct PointsRandomizerConfig
     {
+        [Header("Inc/Decrease")]
         public float    countRate;
-        public uint     randomSeed;
-        public Vector3  randomDiffuse;
-        public int      repulseIteration;
-        public float    repulseParticleSize;
-        public float    repulseTimestep;
+
+        [Header("Randomness")]
+        public uint     seed;
+        public Vector3  diffusion;
+
+        [Header("Repulsion")]
+        public int      iteration;
+        public float    particleRadius;
+        public float    timestep;
 
         public static PointsRandomizerConfig default_value
         {
@@ -29,11 +34,11 @@ namespace UTJ
                 return new PointsRandomizerConfig
                 {
                     countRate = 1.0f,
-                    randomSeed = 0,
-                    randomDiffuse = new Vector3(0.0f, 0.0f, 0.0f),
-                    repulseIteration = 0,
-                    repulseParticleSize = 0.2f,
-                    repulseTimestep = 1.0f / 60.0f,
+                    seed = 0,
+                    diffusion = new Vector3(0.0f, 0.0f, 0.0f),
+                    iteration = 0,
+                    particleRadius = 0.3f,
+                    timestep = 1.0f / 60.0f,
                 };
             }
         }
