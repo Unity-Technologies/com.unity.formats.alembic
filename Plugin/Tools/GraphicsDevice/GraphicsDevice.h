@@ -64,16 +64,14 @@ void* tGetConversionBuffer(size_t size); // return thread-local buffer
 //     [](void *dst, const abcV3 *src, int i) {
 //         ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
 //     }
-template<class T, class F>
-inline bool tWriteTextureWithConversion(void *o_tex, int width, int height, tTextureFormat format, const T *data, size_t num_elements, const F& converter)
+template<class SrcPtr, class F>
+inline bool tWriteTextureWithConversion(void *o_tex, int width, int height, tTextureFormat format, SrcPtr data, size_t num_elements, const F& converter)
 {
     auto dev = tGetGraphicsDevice();
     if (dev == nullptr) { return false; }
 
     size_t bufsize = width * height * tGetPixelSize(format);
     void *buf = tGetConversionBuffer(bufsize);
-    for (size_t i = 0; i < num_elements; ++i) {
-        converter(buf, data, (int)i);
-    }
+    converter(buf, data, num_elements);
     return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
 }
