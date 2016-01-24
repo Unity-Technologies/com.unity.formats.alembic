@@ -29,6 +29,53 @@ void tLog(const char *format, ...)
 }
 
 
+// dll related
+
+void tAddDLLSearchPath(const char *path_to_add)
+{
+#ifdef _WIN32
+    std::string path;
+    path.resize(1024 * 64);
+
+    DWORD ret = ::GetEnvironmentVariableA("PATH", &path[0], (DWORD)path.size());
+    path.resize(ret);
+    path += ";";
+    path += path_to_add;
+    ::SetEnvironmentVariableA("PATH", path.c_str());
+
+#else 
+    std::string path = getenv("LD_LIBRARY_PATH");
+    path += ";";
+    path += path_to_add;
+    setenv("LD_LIBRARY_PATH", path.c_str(), 1);
+#endif
+}
+
+const char* tGetDirectoryOfCurrentModule()
+{
+    static std::string s_path;
+    if (s_path.empty()) {
+#ifdef _WIN32
+        char buf[MAX_PATH];
+        HMODULE mod = 0;
+        ::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCSTR)&tGetDirectoryOfCurrentModule, &mod);
+        DWORD size = ::GetModuleFileNameA(mod, buf, sizeof(buf));
+        for (int i = size - 1; i >= 0; --i) {
+            if (buf[i] == '\\') {
+                buf[i] = '\0';
+                s_path = buf;
+                break;
+            }
+        }
+#else 
+    // todo:
+#endif
+    }
+    return s_path.c_str();
+}
+
+
+
 // random
 
 std::mt19937 g_rand;

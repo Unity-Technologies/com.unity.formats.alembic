@@ -54,6 +54,13 @@ namespace UTJ
         public string m_outputPath;
 
 
+        AlembicColorBalls()
+        {
+#if UNITY_EDITOR
+            AddDLLSearchPath();
+#endif // UNITY_EDITOR
+        }
+
         void UpdateTexture()
         {
             m_color_texture = new Texture2D(m_colors.Length, 1, TextureFormat.RGBA32, false, false);
@@ -69,6 +76,9 @@ namespace UTJ
 
 
 #if UNITY_EDITOR
+        [DllImport("AddDLLSearchPath")]
+        public static extern void AddDLLSearchPath(string path_to_add = null);
+
         [DllImport("PointsRandomizer")]
         public static extern bool tPointsRandomizer(string src_abc_path, string dst_abc_path, ref PointsRandomizerConfig conf);
 

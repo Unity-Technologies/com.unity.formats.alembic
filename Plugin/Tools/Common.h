@@ -32,6 +32,9 @@ typedef void(__stdcall *tLogCallback)(const char *);
 void tLogSetCallback(tLogCallback cb);
 void tLog(const char *format, ...);
 
+void tAddDLLSearchPath(const char *path_to_add);
+const char* tGetDirectoryOfCurrentModule();
+
 
 void tRandSetSeed(uint32_t seed);
 float tRand(); // return -1.0 ~ 1.0

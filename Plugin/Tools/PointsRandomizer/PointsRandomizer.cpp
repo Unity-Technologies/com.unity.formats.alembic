@@ -190,7 +190,7 @@ tCLinkage tExport bool tPointsRandomizer(
     const PointsRandomizerConfig *conf)
 {
     if (!src_abc_path || !dst_abc_path || !conf) {
-        tLog("tMeshTriangulator(): parameter is null");
+        tLog("tPointsRandomizer(): parameter is null");
         return false;
     }
 
