@@ -25,6 +25,7 @@
     <ClInclude Include="GraphicsDevice\GraphicsDevice.h">
       <Filter>GraphicsDevice</Filter>
     </ClInclude>
+    <ClInclude Include="Concurrency.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GraphicsDevice">
