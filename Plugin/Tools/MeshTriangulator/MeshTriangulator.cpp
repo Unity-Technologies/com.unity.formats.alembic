@@ -106,7 +106,7 @@ tCLinkage tExport bool tMeshTriangulator(
     return false;
 }
 
-tCLinkage tExport bool tMeshTriangulator_CommandLine(int argc, char *argv[])
+tCLinkage tExport bool tMeshTriangulatorCommandLine(int argc, char *argv[])
 {
     if (argc < 3) { return false; }
 
@@ -155,5 +155,5 @@ int main(int argc, char *argv[])
             );
         return 1;
     }
-    return tMeshTriangulator_CommandLine(argc, argv) ? 0 : 1;
+    return tMeshTriangulatorCommandLine(argc, argv) ? 0 : 1;
 }

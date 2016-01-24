@@ -221,7 +221,7 @@ tCLinkage tExport bool tPointsRandomizer(
     return false;
 }
 
-tCLinkage tExport bool tPointsRandomizer_CommandLine(int argc, char *argv[])
+tCLinkage tExport bool tPointsRandomizerCommandLine(int argc, char *argv[])
 {
     if (argc < 3) { return false; }
 
@@ -264,5 +264,5 @@ int main(int argc, char *argv[])
             );
         return 1;
     }
-    return tPointsRandomizer_CommandLine(argc, argv) ? 0 : 1;
+    return tPointsRandomizerCommandLine(argc, argv) ? 0 : 1;
 }

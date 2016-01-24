@@ -29,10 +29,6 @@
   <ItemGroup>
     <ClCompile Include="Foundation\aiLogger.cpp" />
     <ClCompile Include="Foundation\aiThreadPool.cpp" />
-    <ClCompile Include="GraphicsDevice\aiGraphicsDevice.cpp" />
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D11.cpp" />
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D9.cpp" />
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceOpenGL.cpp" />
     <ClCompile Include="Importer\aiCamera.cpp" />
     <ClCompile Include="Importer\aiContext.cpp" />
     <ClCompile Include="Importer\aiObject.cpp" />
@@ -55,7 +51,6 @@
     <ClInclude Include="Foundation\aiLogger.h" />
     <ClInclude Include="Foundation\aiMisc.h" />
     <ClInclude Include="Foundation\aiThreadPool.h" />
-    <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h" />
     <ClInclude Include="Importer\aiCamera.h" />
     <ClInclude Include="Importer\aiContext.h" />
     <ClInclude Include="Importer\aiObject.h" />

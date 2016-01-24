@@ -55,14 +55,6 @@
 #pragma comment(lib, "IexMath-2_2.lib")
 #endif // aiNoAutoLink
 
-#ifdef aiSupportD3D11
-#include <d3d11.h>
-#endif // aiSupportD3D11
-
-#ifdef aiSupportD3D9
-#include <d3d9.h>
-#endif // aiSupportD3D9
-
 #endif // _WIN32
 
 using namespace Alembic;

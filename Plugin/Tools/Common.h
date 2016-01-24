@@ -20,6 +20,33 @@ inline Scalar clamp(Scalar v, Scalar min, Scalar max)
     return std::min<Scalar>(std::max<Scalar>(v, min), max);
 }
 
+template<class T>
+struct RGBA
+{
+    T r, g, b, a;
+};
+
+template<class T>
+inline void BGRA2RGBA(RGBA<T> *data, int numPixels)
+{
+    for (int i = 0; i < numPixels; ++i) {
+        std::swap(data[i].r, data[i].b);
+    }
+}
+
+template<class T>
+inline void CopyWithBGRA2RGBA(RGBA<T> *dst, const RGBA<T> *src, int numPixels)
+{
+    for (int i = 0; i < numPixels; ++i) {
+        RGBA<T> &d = dst[i];
+        const RGBA<T> &s = src[i];
+        d.r = s.b;
+        d.g = s.g;
+        d.b = s.r;
+        d.a = s.a;
+    }
+}
+
 inline abcV3 operator+(const abcV3 &a, const abcV3 &b) { return abcV3(a.x+b.x, a.y+b.y, a.z+b.z); }
 inline abcV3 operator-(const abcV3 &a, const abcV3 &b) { return abcV3(a.x-b.x, a.y-b.y, a.z-b.z); }
 inline abcV3 operator*(const abcV3 &a, const abcV3 &b) { return abcV3(a.x*b.x, a.y*b.y, a.z*b.z); }
