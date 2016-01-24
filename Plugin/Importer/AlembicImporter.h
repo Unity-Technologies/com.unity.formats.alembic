@@ -1,14 +1,6 @@
 #ifndef AlembicImporter_h
 #define AlembicImporter_h
 
-// options:
-// graphics device options are relevant only if aiSupportTexture is defined
-// 
-// #define aiSupportTexture
-//  #define aiSupportD3D11
-//  #define aiSupportOpenGL
-// 
-// #define aiWithTBB
 
 #include <cstdint>
 

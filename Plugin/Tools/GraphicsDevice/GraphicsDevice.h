@@ -1,7 +1,5 @@
 ﻿#include "pch.h"
 
-#if defined(aiSupportTexture)
-
 // Graphics device identifiers in Unity
 enum GfxDeviceRenderer
 {
@@ -28,34 +26,36 @@ enum GfxDeviceEventType {
 };
 
 
-enum aiTextureFormat
+enum tTextureFormat
 {
-    aiTextureFormat_Unknown,
-    aiTextureFormat_ARGB32,
-    aiTextureFormat_ARGB2101010,
-    aiTextureFormat_RHalf,
-    aiTextureFormat_RGHalf,
-    aiTextureFormat_ARGBHalf,
-    aiTextureFormat_RFloat,
-    aiTextureFormat_RGFloat,
-    aiTextureFormat_ARGBFloat,
-    aiTextureFormat_RInt,
-    aiTextureFormat_RGInt,
-    aiTextureFormat_ARGBInt,
+    tTextureFormat_Unknown,
+    tTextureFormat_ARGB32,
+    tTextureFormat_ARGB2101010,
+    tTextureFormat_RHalf,
+    tTextureFormat_RGHalf,
+    tTextureFormat_ARGBHalf,
+    tTextureFormat_RFloat,
+    tTextureFormat_RGFloat,
+    tTextureFormat_ARGBFloat,
+    tTextureFormat_RInt,
+    tTextureFormat_RGInt,
+    tTextureFormat_ARGBInt,
 };
 
-class aiIGraphicsDevice
+class tIGraphicsDevice
 {
 public:
-    virtual ~aiIGraphicsDevice() {}
+    virtual ~tIGraphicsDevice() {}
     virtual void* getDevicePtr() = 0;
     virtual int getDeviceType() = 0;
-    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, aiTextureFormat format) = 0;
-    virtual bool writeTexture(void *o_tex, int width, int height, aiTextureFormat format, const void *data, size_t datasize) = 0;
+    virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, tTextureFormat format) = 0;
+    virtual bool writeTexture(void *o_tex, int width, int height, tTextureFormat format, const void *data, size_t datasize) = 0;
 };
-aiCLinkage aiExport aiIGraphicsDevice* aiGetGraphicsDevice();
-int aiGetPixelSize(aiTextureFormat format);
-void* aiGetConversionBuffer(size_t size); // return thread-local buffer
+tCLinkage tExport tIGraphicsDevice* tGetGraphicsDevice();
+
+
+int tGetPixelSize(tTextureFormat format);
+void* tGetConversionBuffer(size_t size); // return thread-local buffer
 
 // T: input data type
 // F: convert function
@@ -65,17 +65,15 @@ void* aiGetConversionBuffer(size_t size); // return thread-local buffer
 //         ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
 //     }
 template<class T, class F>
-inline bool aiWriteTextureWithConversion(void *o_tex, int width, int height, aiTextureFormat format, const T *data, size_t num_elements, const F& converter)
+inline bool tWriteTextureWithConversion(void *o_tex, int width, int height, tTextureFormat format, const T *data, size_t num_elements, const F& converter)
 {
-    auto dev = aiGetGraphicsDevice();
+    auto dev = tGetGraphicsDevice();
     if (dev == nullptr) { return false; }
 
-    size_t bufsize = width * height * aiGetPixelSize(format);
-    void *buf = aiGetConversionBuffer(bufsize);
+    size_t bufsize = width * height * tGetPixelSize(format);
+    void *buf = tGetConversionBuffer(bufsize);
     for (size_t i = 0; i < num_elements; ++i) {
         converter(buf, data, (int)i);
     }
     return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
 }
-
-#endif

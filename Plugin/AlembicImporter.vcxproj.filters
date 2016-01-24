@@ -2,15 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D11.cpp">
-      <Filter>GraphicsDevice</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceOpenGL.cpp">
-      <Filter>GraphicsDevice</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsDevice\aiGraphicsDevice.cpp">
-      <Filter>GraphicsDevice</Filter>
-    </ClCompile>
     <ClCompile Include="Foundation\aiLogger.cpp">
       <Filter>Foundation</Filter>
     </ClCompile>
@@ -44,15 +35,9 @@
     <ClCompile Include="Importer\aiProperty.cpp">
       <Filter>Importer</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsDevice\aiGraphicsDeviceD3D9.cpp">
-      <Filter>GraphicsDevice</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="GraphicsDevice\aiGraphicsDevice.h">
-      <Filter>GraphicsDevice</Filter>
-    </ClInclude>
     <ClInclude Include="Foundation\aiThreadPool.h">
       <Filter>Foundation</Filter>
     </ClInclude>
@@ -91,9 +76,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="GraphicsDevice">
-      <UniqueIdentifier>{a0e5e438-2063-4574-b032-d8b71c7d8d73}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Importer">
       <UniqueIdentifier>{c94f82d9-acb1-49f5-85b5-aed90514a514}</UniqueIdentifier>
     </Filter>
