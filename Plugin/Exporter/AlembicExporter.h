@@ -6,14 +6,22 @@
 #define aeCLinkage extern "C"
 
 #ifdef aeImpl
-    #ifdef _MSC_VER
-        #define aeExport __declspec(dllexport)
+    #ifndef aeStaticLink
+        #ifdef _MSC_VER
+            #define aeExport __declspec(dllexport)
+        #else
+            #define aeExport __attribute__((visibility("default")))
+        #endif
     #else
-        #define aeExport __attribute__((visibility("default")))
+        #define aeExport 
     #endif
 #else
     #ifdef _MSC_VER
-        #define aeExport __declspec(dllimport)
+        #ifndef aeStaticLink
+            #define aeExport __declspec(dllimport)
+        #else
+            #define aeExport 
+        #endif
         #pragma comment(lib, "AlembicExporter.lib")
     #else
     #endif

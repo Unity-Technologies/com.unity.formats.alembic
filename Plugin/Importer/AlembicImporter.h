@@ -18,14 +18,22 @@
 #define aiCLinkage extern "C"
 
 #ifdef aiImpl
-    #ifdef _MSC_VER
-        #define aiExport __declspec(dllexport)
+    #ifndef aiStaticLink
+        #ifdef _MSC_VER
+            #define aiExport __declspec(dllexport)
+        #else
+            #define aiExport __attribute__((visibility("default")))
+        #endif
     #else
-        #define aiExport __attribute__((visibility("default")))
+        #define aiExport 
     #endif
 #else
     #ifdef _MSC_VER
-        #define aiExport __declspec(dllimport)
+        #ifndef aiStaticLink
+            #define aiExport __declspec(dllimport)
+        #else
+            #define aiExport 
+        #endif
         #pragma comment(lib, "AlembicImporter.lib")
     #else
     #endif

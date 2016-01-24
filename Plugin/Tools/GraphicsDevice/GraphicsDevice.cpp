@@ -83,30 +83,3 @@ tCLinkage tExport void UnitySetGraphicsDevice(void* device, int deviceType, int 
 tCLinkage tExport void UnityRenderEvent(int eventID)
 {
 }
-
-
-#ifdef tSupportOpenGL
-tCLinkage tExport void tInitializeOpenGL()
-{
-    UnitySetGraphicsDevice(nullptr, kGfxRendererOpenGL, kGfxDeviceEventInitialize);
-}
-#endif
-
-#ifdef tSupportD3D9
-tCLinkage tExport void tInitializeD3D9(void *device)
-{
-    UnitySetGraphicsDevice(device, kGfxRendererD3D9, kGfxDeviceEventInitialize);
-}
-#endif
-
-#ifdef tSupportD3D11
-tCLinkage tExport void tInitializeD3D11(void *device)
-{
-    UnitySetGraphicsDevice(device, kGfxRendererD3D11, kGfxDeviceEventInitialize);
-}
-#endif
-
-tCLinkage tExport void tFinalizeGraphicsDevice()
-{
-    UnitySetGraphicsDevice(nullptr, kGfxRendererNull, kGfxDeviceEventShutdown);
-}
