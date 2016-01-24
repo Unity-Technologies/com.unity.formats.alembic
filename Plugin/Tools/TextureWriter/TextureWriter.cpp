@@ -17,9 +17,9 @@ template<class T> struct tvec2
     tvec2() {} // !not clear members!
     tvec2(T a) : x(a), y(a) {}
     tvec2(T a, T b) : x(a), y(b) {}
-    tvec2(const tvec3<T>& src);
-    tvec2(const tvec4<T>& src);
-    template<class U> tvec2(const tvec2<U>& src) : x(T(src.x)), y(T(src.y)) {}
+    template<class U> tvec2(const tvec2<U>& src);
+    template<class U> tvec2(const tvec3<U>& src);
+    template<class U> tvec2(const tvec4<U>& src);
 };
 
 template<class T> struct tvec3
@@ -28,9 +28,9 @@ template<class T> struct tvec3
     tvec3() {} // !not clear members!
     tvec3(T a) : x(a), y(a), z(a) {}
     tvec3(T a, T b, T c) : x(a), y(b), z(c) {}
-    tvec3(const tvec2<T>& src);
-    tvec3(const tvec4<T>& src);
-    template<class U> tvec3(const tvec3<U>& src) : x(T(src.x)), y(T(src.y)), z(T(src.z)) {}
+    template<class U> tvec3(const tvec2<U>& src);
+    template<class U> tvec3(const tvec3<U>& src);
+    template<class U> tvec3(const tvec4<U>& src);
 };
 
 template<class T> struct tvec4
@@ -39,18 +39,23 @@ template<class T> struct tvec4
     tvec4() {} // !not clear members!
     tvec4(T a) : x(a), y(a), z(a), w(a) {}
     tvec4(T a, T b, T c, T d) : x(a), y(b), z(c), w(d) {}
-    tvec4(const tvec2<T>& src);
-    tvec4(const tvec3<T>& src);
-    template<class U> tvec4(const tvec3<U>& src) : x(T(src.x)), y(T(src.y)), z(T(src.z)), w() {}
-    template<class U> tvec4(const tvec4<U>& src) : x(T(src.x)), y(T(src.y)), z(T(src.z)), w(T(src.w)) {}
+    template<class U> tvec4(const tvec2<U>& src);
+    template<class U> tvec4(const tvec3<U>& src);
+    template<class U> tvec4(const tvec4<U>& src);
 };
 
-template<class T> tvec2<T>::tvec2(const tvec3<T>& src) : x(src.x), y(src.y) {}
-template<class T> tvec2<T>::tvec2(const tvec4<T>& src) : x(src.x), y(src.y) {}
-template<class T> tvec3<T>::tvec3(const tvec2<T>& src) : x(src.x), y(src.y), z() {}
-template<class T> tvec3<T>::tvec3(const tvec4<T>& src) : x(src.x), y(src.y), z(src.z) {}
-template<class T> tvec4<T>::tvec4(const tvec2<T>& src) : x(src.x), y(src.y), z(), w() {}
-template<class T> tvec4<T>::tvec4(const tvec3<T>& src) : x(src.x), y(src.y), z(src.z), w() {}
+template<class DstType, class SrcType> inline DstType tScalar(SrcType src) { return DstType(src); }
+template<> inline half tScalar<>(int src) { return half((float)src); }
+
+template<class T> template<class U> tvec2<T>::tvec2(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
+template<class T> template<class U> tvec2<T>::tvec2(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
+template<class T> template<class U> tvec2<T>::tvec2(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)) {}
+template<class T> template<class U> tvec3<T>::tvec3(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z() {}
+template<class T> template<class U> tvec3<T>::tvec3(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)) {}
+template<class T> template<class U> tvec3<T>::tvec3(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)) {}
+template<class T> template<class U> tvec4<T>::tvec4(const tvec2<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(), w() {}
+template<class T> template<class U> tvec4<T>::tvec4(const tvec3<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)), w() {}
+template<class T> template<class U> tvec4<T>::tvec4(const tvec4<U>& src) : x(tScalar<T>(src.x)), y(tScalar<T>(src.y)), z(tScalar<T>(src.z)), w(tScalar<T>(src.w)) {}
 
 typedef int64_t lint;
 typedef tvec2<half> half2;
@@ -73,6 +78,12 @@ inline void tConvert(DstType& dst, const SrcType& src)
 {
     dst = DstType(src);
 }
+template<>
+inline void tConvert<half, int>(half& dst, const int& src)
+{
+    dst = half((float)src); // prevent warning
+}
+
 
 template<class DstType, class SrcType>
 struct tConvertArrayImpl
@@ -152,15 +163,15 @@ Def(tTextureFormat_ARGBInt, int4)
 #undef Def
 
 
-tCLinkage tExport bool tWriteTexture(
+tCLinkage tExport int tWriteTexture(
     void *dst_tex, int dst_width, int dst_height, tTextureFormat dst_fmt,
     const void *src, int src_num, tDataFormat src_fmt)
 {
-    if (dst_tex == nullptr || src == nullptr) { return false; }
-    if (src_num == 0) { return true; }
+    if (dst_tex == nullptr || src == nullptr) { return 0; }
+    if (src_num == 0) { return 1; }
 
 #define TConvert(A1, A2)\
-    case A2: return tWriteTextureWithConversion(dst_tex, dst_width, dst_height, dst_fmt, src, src_num,\
+    case A2: return (int)tWriteTextureWithConversion(dst_tex, dst_width, dst_height, dst_fmt, src, src_num,\
         tConvertArray<tTextureFormatToType<A1>::type, tDataFormatToType<A2>::type>)\
 
     switch (dst_fmt)
@@ -221,55 +232,51 @@ tCLinkage tExport bool tWriteTexture(
 
 #undef TConvert
 
-    tLog("tWriteTexture(): this format combination is not supported");
-    return false;
+    tLog("tWriteTexture(): this format combination is not supported %d - %d", dst_fmt, src_fmt);
+    return 0;
 }
 
 
-tCLinkage tExport bool tPointsCopyPositionsToTexture(aiPointsData *data, void *tex, int width, int height, tTextureFormat fmt)
-{
-    if (data == nullptr) { return false; }
 
-    if (fmt == tTextureFormat_ARGBFloat)
-    {
-        return tWriteTextureWithConversion(tex, width, height, fmt, data->positions, data->count,
-            [](void *dst, const abcV3 *src, size_t len) {
-                for (size_t i = 0; i < len; ++i) {
-                    ((abcV4*)dst)[i] = abcV4(src[i].x, src[i].y, src[i].z, 0.0f);
-                }
-            });
-    }
-    else {
-        tLog("aiPointsCopyPositionsToTexture(): format must be ARGBFloat");
-        return false;
-    }
+// async API
+#include "Concurrency.h"
+
+ist::task_group g_task_group;
+
+struct tWriteTextureTask
+{
+    bool task_completed;
+    int result;
+
+    tWriteTextureTask() : task_completed(false), result(0) {}
+};
+
+tCLinkage tExport tWriteTextureTask* tWriteTextureBegin(
+    void *dst_tex, int dst_width, int dst_height, tTextureFormat dst_fmt,
+    const void *src, int src_num, tDataFormat src_fmt)
+{
+    tWriteTextureTask *task = new tWriteTextureTask();
+
+    g_task_group.run([=]() {
+        task->result = tWriteTexture(dst_tex, dst_width, dst_height, dst_fmt, src, src_num, src_fmt);
+        task->task_completed = true;
+    });
+
+    return task;
 }
 
-tCLinkage tExport bool tPointsCopyIDsToTexture(aiPointsData *data, void *tex, int width, int height, tTextureFormat fmt)
+tCLinkage tExport int tWriteTextureEnd(tWriteTextureTask *task)
 {
-    if (data == nullptr) { return false; }
+    while (!task->task_completed) {
+        std::this_thread::yield();
+    }
 
-    if (fmt == tTextureFormat_RInt)
-    {
-        return tWriteTextureWithConversion(tex, width, height, fmt, data->ids, data->count,
-            [](void *dst, const uint64_t *src, size_t len) {
-                for (size_t i = 0; i < len; ++i) {
-                    ((int32_t*)dst)[i] = (int32_t)(src[i]);
-                }
-            });
-    }
-    else if (fmt == tTextureFormat_RFloat)
-    {
-        return tWriteTextureWithConversion(tex, width, height, fmt, data->ids, data->count,
-            [](void *dst, const uint64_t *src, size_t len) {
-                for (size_t i = 0; i < len; ++i) {
-                    ((float*)dst)[i] = (float)(src[i]);
-                }
-            });
-    }
-    else
-    {
-        tLog("aiPointsCopyIDsToTexture(): format must be RFloat or RInt");
-        return false;
-    }
+    int ret = task->result;
+    delete task;
+    return ret;
+}
+
+tCLinkage tExport int tWriteTextureIsComplete(tWriteTextureTask *task)
+{
+    return task->task_completed ? 1 : 0;
 }

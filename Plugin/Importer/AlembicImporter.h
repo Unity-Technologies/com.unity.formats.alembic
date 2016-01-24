@@ -529,9 +529,4 @@ aiCLinkage aiExport int             aiPropertyGetTimeSamplingIndex(aiProperty* p
 aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 
-#ifdef aiSupportTexture
-aiCLinkage aiExport bool            aiPointsCopyPositionsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt);
-aiCLinkage aiExport bool            aiPointsCopyIDsToTexture(aiPointsData *data, void *tex, int width, int height, aiTextureFormat fmt);
-#endif // aiSupportTexture
-
 #endif // AlembicImporter_h

@@ -202,8 +202,8 @@ namespace UTJ
                 m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
                 m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
             }
-            AbcAPI.aiPointsCopyPositionsToTexture(ref abcData, m_texPositions.GetNativeTexturePtr(), m_texPositions.width, m_texPositions.height, AbcAPI.GetTextureFormat(m_texPositions));
-            AbcAPI.aiPointsCopyIDsToTexture(ref abcData, m_texIDs.GetNativeTexturePtr(), m_texIDs.width, m_texIDs.height, AbcAPI.GetTextureFormat(m_texIDs));
+            TextureWriter.Write(m_texPositions, abcData.positions, abcData.count, TextureWriter.tDataFormat.Float3);
+            TextureWriter.Write(m_texIDs, abcData.ids, abcData.count, TextureWriter.tDataFormat.LInt);
     
     
             if (m_expanded_mesh == null)
