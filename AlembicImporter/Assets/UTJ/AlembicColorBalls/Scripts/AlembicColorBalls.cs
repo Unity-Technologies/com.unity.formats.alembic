@@ -18,19 +18,17 @@ namespace UTJ
     [Serializable]
     public struct PointsRandomizerConfig
     {
-        [Header("Inc/Decrease")]
-        public float    countRate;
+        public float    count_rate;
+        public uint     random_seed;
+        public Vector3  random_diffuse;
+        public int      repulse_iteration;
+        public float    repulse_timestep;
+        public float    repulse_damping;
+        public float    repulse_advection;
+        public float    repulse_particle_size;
+        public float    repulse_stiffness;
 
-        [Header("Randomness")]
-        public uint     seed;
-        public Vector3  diffusion;
-
-        [Header("Repulsion")]
-        public int      iteration;
-        public float    particleRadius;
-        public float    timestep;
-
-        public tLogCallback logCallback;
+        public tLogCallback log_callback;
 
         public static PointsRandomizerConfig default_value
         {
@@ -38,13 +36,16 @@ namespace UTJ
             {
                 return new PointsRandomizerConfig
                 {
-                    countRate = 1.0f,
-                    seed = 0,
-                    diffusion = new Vector3(0.0f, 0.0f, 0.0f),
-                    iteration = 0,
-                    particleRadius = 0.3f,
-                    timestep = 1.0f / 60.0f,
-                    logCallback = null,
+                    count_rate = 1.0f,
+                    random_seed = 0,
+                    random_diffuse = new Vector3(0.0f, 0.0f, 0.0f),
+                    repulse_iteration = 0,
+                    repulse_timestep = 1.0f / 60.0f,
+                    repulse_damping = 0.1f,
+                    repulse_advection = 0.1f,
+                    repulse_particle_size = 0.3f,
+                    repulse_stiffness = 500.0f,
+                    log_callback = null,
                 };
             }
         }
@@ -62,10 +63,25 @@ namespace UTJ
         Texture2D m_color_texture;
 
 #if UNITY_EDITOR
-        [Header("Randomizer")]
-        public PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
+        [Header("Export Settings")]
         public string m_outputPath;
         public bool m_logging = true;
+
+        public float m_countRate = 1.0f;
+
+        [Header("- Random Diffuse")]
+        public bool m_enableRandom = false;
+        public uint m_randomSeed = 0;
+        public Vector3 m_diffusion = new Vector3(0.2f, 0.2f, 0.2f);
+
+        [Header("- Repulsion")]
+        public bool m_enableRepulsion = false;
+        public int m_iteration = 2;
+        public float m_particleRadius = 0.3f;
+        public float m_moveAmount = 1.0f;
+
+
+        PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
 
         List<string> m_log = new List<string>();
         Thread m_exportThread;
@@ -104,8 +120,16 @@ namespace UTJ
                 string path_to_src_abc = Application.streamingAssetsPath + "/" + abc_stream.m_pathToAbc;
                 string path_to_dst_abc = Application.streamingAssetsPath + "/" + m_outputPath;
 
-                if(m_logging) { m_conf.logCallback = LogCallback; }
-                else { m_conf.logCallback = null; }
+                m_conf.count_rate = m_countRate;
+                m_conf.random_seed = m_randomSeed;
+                m_conf.random_diffuse = m_enableRandom ? m_diffusion : Vector3.zero;
+                m_conf.repulse_iteration = m_enableRepulsion ? m_iteration : 0;
+                m_conf.repulse_timestep = 0.01f; // 10ms
+                m_conf.repulse_particle_size = m_particleRadius;
+                m_conf.repulse_stiffness = 100.0f * m_moveAmount;
+
+                if (m_logging) { m_conf.log_callback = LogCallback; }
+                else { m_conf.log_callback = null; }
 
                 Debug.Log("export started: " + path_to_dst_abc);
                 m_exportThread = new Thread(()=> {
