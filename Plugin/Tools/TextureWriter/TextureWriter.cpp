@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Foundation.h"
 #include "GraphicsDevice.h"
+#include "TextureWriter.h"
 
 #include "half.h"
 #pragma comment(lib, "Half.lib")
@@ -40,24 +41,6 @@ template<class DstType, class SrcType> inline void tConvertArray(void *&dst, con
 }
 
 
-
-enum tDataFormat
-{
-    tDataFormat_Unknown,
-    tDataFormat_Half1,
-    tDataFormat_Half2,
-    tDataFormat_Half3,
-    tDataFormat_Half4,
-    tDataFormat_Float1,
-    tDataFormat_Float2,
-    tDataFormat_Float3,
-    tDataFormat_Float4,
-    tDataFormat_Int1,
-    tDataFormat_Int2,
-    tDataFormat_Int3,
-    tDataFormat_Int4,
-    tDataFormat_LInt1, // 64bit int
-};
 
 template<tDataFormat F> struct tDataFormatToType;
 template<tTextureFormat F> struct tTextureFormatToType;
@@ -187,3 +170,5 @@ tCLinkage tExport int tWriteTextureIsComplete(tWriteTextureTask *task)
 {
     return task->task_completed ? 1 : 0;
 }
+
+tDefineUnityPluginEntryPoint()

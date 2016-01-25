@@ -2,10 +2,14 @@
 #define tFoundation_h
 
 #define tCLinkage extern "C"
-#ifdef _MSC_VER
-    #define tExport __declspec(dllexport)
+#ifdef tStaticLink
+    #define tExport 
 #else
-    #define tExport __attribute__((visibility("default")))
+    #ifdef _MSC_VER
+        #define tExport __declspec(dllexport)
+    #else
+        #define tExport __attribute__((visibility("default")))
+    #endif
 #endif
 
 
