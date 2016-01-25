@@ -13,6 +13,8 @@ using UnityEditor;
 
 namespace UTJ
 {
+    public delegate void tLogCallback(IntPtr message);
+
     [Serializable]
     public struct PointsRandomizerConfig
     {
@@ -28,6 +30,8 @@ namespace UTJ
         public float    particleRadius;
         public float    timestep;
 
+        public tLogCallback logCallback;
+
         public static PointsRandomizerConfig default_value
         {
             get
@@ -40,6 +44,7 @@ namespace UTJ
                     iteration = 0,
                     particleRadius = 0.3f,
                     timestep = 1.0f / 60.0f,
+                    logCallback = null,
                 };
             }
         }
@@ -56,10 +61,15 @@ namespace UTJ
         public bool m_interpolation = false;
         Texture2D m_color_texture;
 
+#if UNITY_EDITOR
         [Header("Randomizer")]
         public PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
         public string m_outputPath;
+        public bool m_logging = true;
+
+        List<string> m_log = new List<string>();
         Thread m_exportThread;
+#endif // UNITY_EDITOR
 
 
         void UpdateTexture()
@@ -93,6 +103,10 @@ namespace UTJ
             {
                 string path_to_src_abc = Application.streamingAssetsPath + "/" + abc_stream.m_pathToAbc;
                 string path_to_dst_abc = Application.streamingAssetsPath + "/" + m_outputPath;
+
+                if(m_logging) { m_conf.logCallback = LogCallback; }
+                else { m_conf.logCallback = null; }
+
                 Debug.Log("export started: " + path_to_dst_abc);
                 m_exportThread = new Thread(()=> {
                     tPointsRandomizer(path_to_src_abc, path_to_dst_abc, ref m_conf);
@@ -102,11 +116,27 @@ namespace UTJ
             }
         }
 
+        // log callback. called from worker thread
+        void LogCallback(IntPtr message)
+        {
+            lock (m_log)
+            {
+                m_log.Add(Marshal.PtrToStringAnsi(message));
+            }
+        }
+
         void UpdateExport()
         {
             if(m_exportThread != null)
             {
-                if(!m_exportThread.IsAlive)
+                // flush log messages
+                lock (m_log)
+                {
+                    foreach(var m in m_log) { Debug.Log(m); }
+                    m_log.Clear();
+                }
+
+                if (!m_exportThread.IsAlive)
                 {
                     Debug.Log("export finished");
                     m_exportThread = null;

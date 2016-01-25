@@ -13,6 +13,7 @@ struct PointsRandomizerConfig
     int         repulse_iteration;
     float       repulse_particle_size;
     float       repulse_timestep;
+    tLogCallback logCB;
 
     PointsRandomizerConfig()
         : count_rate(1.0f)
@@ -21,6 +22,7 @@ struct PointsRandomizerConfig
         , repulse_iteration(2)
         , repulse_particle_size(0.4f)
         , repulse_timestep(1.0f / 60.0f)
+        , logCB(nullptr)
     {}
 };
 
@@ -47,8 +49,13 @@ struct tPointInfoHeader
 tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
 {
     tContext& tctx = *tctx_;
+    tLogSetCallback(conf->logCB);
 
     tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
+        double time_proc_begin = tGetTime();
+        const char* target_name = aiGetNameS(aiSchemaGetObject(iobj));
+        tLog("processing \"%s\"\n", target_name);
+
         tPointsBuffer buf;
         std::vector<uint64_t> ids, ids_tmp1, ids_tmp2;
         std::vector<char> point_info;
@@ -60,7 +67,6 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
         int num_samples = aiSchemaGetNumSamples(iobj);
 
         // build list of all ids
-        tLog("building list of all ids...\n");
         for (int i = 0; i < num_samples; ++i) {
             auto ss = aiIndexToSampleSelector(i);
 
@@ -78,6 +84,7 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
             ids_tmp2.erase(std::unique(ids_tmp2.begin(), ids_tmp2.end()), ids_tmp2.end());
             ids.assign(ids_tmp2.begin(), ids_tmp2.end());
         }
+        tLog("  listed all IDs. %d elements (%.2lfms)\n", (int)ids.size(), tGetTime() - time_proc_begin);
 
         // 
         size_t info_size = size_t(sizeof(tPointInfoHeader) + sizeof(tPointInfo) * std::ceil(conf->count_rate));
@@ -107,7 +114,7 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
 
         // process all frames
         for (int fi = 0; fi < num_samples; ++fi) {
-            double repulsion_begin_time = tGetTime();
+            double time_frame_begin = tGetTime();
             auto ss = aiIndexToSampleSelector(fi);
 
             // get points data from alembic
@@ -138,8 +145,6 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
 
             // repulsion
             if (conf->repulse_iteration > 0) {
-                tLog("calculating repulsion...\n");
-
                 mpparams.world_center = (mpV3&)idata.center;
                 mpparams.world_extent = (mpV3&)idata.size;
                 mpparams.world_div = mpV3i(
@@ -172,14 +177,17 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
                         buf.velocities[pi] = (float3&)particles[pi].velocity;
                     }
                 }
-                tLog("  frame %d: %.2lf ms (%d iteration)\n", fi, tGetTime() - repulsion_begin_time, conf->repulse_iteration);
             }
-
 
             auto edata = buf.asExportData();
             aePointsWriteSample(eobj, &edata);
+
+            tLog("  frame %d: %d -> %d points (%.2lfms)\n",
+                fi, idata.count, (int)num_scaled, tGetTime() - time_frame_begin);
         }
         mpDestroyContext(mp);
+
+        tLog("finished \"%s\" (%.2lfms)\n", target_name, tGetTime() - time_proc_begin);
     });
 
     tctx.doExport();
@@ -191,7 +199,7 @@ tCLinkage tExport bool tPointsRandomizer(
     const PointsRandomizerConfig *conf)
 {
     if (!src_abc_path || !dst_abc_path || !conf) {
-        tLog("tPointsRandomizer(): parameter is null");
+        tLog("tPointsRandomizer(): parameter is null\n");
         return false;
     }
 

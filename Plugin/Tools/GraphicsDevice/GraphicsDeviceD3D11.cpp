@@ -129,7 +129,7 @@ void tGraphicsDeviceD3D11::clearStagingTextures()
 bool tGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_, int width, int height, tTextureFormat format)
 {
     if (tex_ == nullptr) {
-        tLog("aiGraphicsDeviceD3D11::readTexture(): texture is null");
+        tLog("aiGraphicsDeviceD3D11::readTexture(): texture is null\n");
         return false;
     }
 
@@ -183,7 +183,7 @@ bool tGraphicsDeviceD3D11::readTexture(void *outBuf, size_t bufsize, void *tex_,
 bool tGraphicsDeviceD3D11::writeTexture(void *outTex, int width, int height, tTextureFormat format, const void *buf, size_t bufsize)
 {
     if (outTex == nullptr) {
-        tLog("aiGraphicsDeviceD3D11::writeTexture(): texture is null");
+        tLog("aiGraphicsDeviceD3D11::writeTexture(): texture is null\n");
         return false;
     }
 
