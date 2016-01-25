@@ -11,8 +11,11 @@ struct PointsRandomizerConfig
     uint32_t    random_seed;
     float3      random_diffuse;
     int         repulse_iteration;
-    float       repulse_particle_size;
     float       repulse_timestep;
+    float       repulse_damping;
+    float       repulse_advection;
+    float       repulse_particle_size;
+    float       repulse_stiffness;
     tLogCallback logCB;
 
     PointsRandomizerConfig()
@@ -20,8 +23,11 @@ struct PointsRandomizerConfig
         , random_seed(0)
         , random_diffuse(0.2f, 0.2f, 0.2f)
         , repulse_iteration(2)
-        , repulse_particle_size(0.4f)
         , repulse_timestep(1.0f / 60.0f)
+        , repulse_damping(0.1f)
+        , repulse_advection(0.0f)
+        , repulse_particle_size(0.4f)
+        , repulse_stiffness(500.0f)
         , logCB(nullptr)
     {}
 };
@@ -53,7 +59,7 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
 
     tctx.setPointsProcessor([&](aiPoints *iobj, aePoints *eobj) {
         double time_proc_begin = tGetTime();
-        const char* target_name = aiGetNameS(aiSchemaGetObject(iobj));
+        const char* target_name = aiGetNameS(aiGetParent(aiSchemaGetObject(iobj)));
         tLog("processing \"%s\"\n", target_name);
 
         tPointsBuffer buf;
@@ -107,9 +113,11 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
 
 
         mpKernelParams mpparams;
-        mpparams.damping = 0.1f;
+        mpparams.damping = conf->repulse_damping;
+        mpparams.advection = conf->repulse_advection;
         mpparams.max_particles = int(summary.peakCount * std::ceil(conf->count_rate));
         mpparams.particle_size = conf->repulse_particle_size;
+        mpparams.pressure_stiffness = conf->repulse_stiffness;
         auto mp = mpCreateContext();
 
         // process all frames
