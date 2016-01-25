@@ -196,7 +196,8 @@ xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -208,7 +209,8 @@ xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -220,7 +222,8 @@ xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86_
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\</Command>
+      <Command>xcopy /Yq $(TargetPath) $(SolutionDir)Bin\x86\
+xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Plugins\x86\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

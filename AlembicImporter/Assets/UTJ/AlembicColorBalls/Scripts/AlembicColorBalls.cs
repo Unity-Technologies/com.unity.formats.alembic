@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -58,14 +59,8 @@ namespace UTJ
         [Header("Randomizer")]
         public PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
         public string m_outputPath;
+        Thread m_exportThread;
 
-
-        AlembicColorBalls()
-        {
-#if UNITY_EDITOR
-            AddDLLSearchPath();
-#endif // UNITY_EDITOR
-        }
 
         void UpdateTexture()
         {
@@ -83,21 +78,40 @@ namespace UTJ
 
 
 #if UNITY_EDITOR
-        [DllImport("AddDLLSearchPath")]
-        public static extern void AddDLLSearchPath(string path_to_add = null);
-
         [DllImport("PointsRandomizer")]
         public static extern bool tPointsRandomizer(string src_abc_path, string dst_abc_path, ref PointsRandomizerConfig conf);
 
         public void DoExport()
         {
+            if(m_exportThread != null && m_exportThread.IsAlive)
+            {
+                Debug.Log("another export process is running");
+            }
+
             var abc_stream = GetComponentInParent<AlembicStream>();
             if(abc_stream != null)
             {
-                tPointsRandomizer(
-                    Application.streamingAssetsPath + "/" + abc_stream.m_pathToAbc,
-                    Application.streamingAssetsPath + "/" + m_outputPath,
-                    ref m_conf);
+                string path_to_src_abc = Application.streamingAssetsPath + "/" + abc_stream.m_pathToAbc;
+                string path_to_dst_abc = Application.streamingAssetsPath + "/" + m_outputPath;
+                Debug.Log("export started: " + path_to_dst_abc);
+                m_exportThread = new Thread(()=> {
+                    tPointsRandomizer(path_to_src_abc, path_to_dst_abc, ref m_conf);
+                });
+                m_exportThread.Start();
+                EditorApplication.update += UpdateExport;
+            }
+        }
+
+        void UpdateExport()
+        {
+            if(m_exportThread != null)
+            {
+                if(!m_exportThread.IsAlive)
+                {
+                    Debug.Log("export finished");
+                    m_exportThread = null;
+                    EditorApplication.update -= UpdateExport;
+                }
             }
         }
 
