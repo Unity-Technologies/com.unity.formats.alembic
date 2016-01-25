@@ -48,11 +48,10 @@ tIGraphicsDevice* aiCreateGraphicsDeviceD3D11(void *device);
 namespace {
     tIGraphicsDevice *g_theGraphicsDevice;
 }
-tCLinkage tExport tIGraphicsDevice* tGetGraphicsDevice() { return g_theGraphicsDevice; }
-typedef tIGraphicsDevice* (*aiGetGraphicsDeviceT)();
+tIGraphicsDevice* tGetGraphicsDevice() { return g_theGraphicsDevice; }
 
 
-tCLinkage tExport void UnitySetGraphicsDevice(void* device, int deviceType, int eventType)
+void tUnitySetGraphicsDevice(void* device, int deviceType, int eventType)
 {
     if (eventType == kGfxDeviceEventInitialize) {
 #ifdef tSupportD3D9
@@ -81,6 +80,3 @@ tCLinkage tExport void UnitySetGraphicsDevice(void* device, int deviceType, int 
     }
 }
 
-tCLinkage tExport void UnityRenderEvent(int eventID)
-{
-}

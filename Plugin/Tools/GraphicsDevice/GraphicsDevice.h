@@ -51,10 +51,9 @@ public:
     virtual bool readTexture(void *o_buf, size_t bufsize, void *tex, int width, int height, tTextureFormat format) = 0;
     virtual bool writeTexture(void *o_tex, int width, int height, tTextureFormat format, const void *data, size_t datasize) = 0;
 };
-tCLinkage tExport tIGraphicsDevice* tGetGraphicsDevice();
+tIGraphicsDevice* tGetGraphicsDevice();
 
-
-int tGetPixelSize(tTextureFormat format);
+int tGetPixelSize(tTextureFormat format); // pixel size in byte (ARGBFloat -> 16)
 void* tGetConversionBuffer(size_t size); // return thread-local buffer
 
 // T: input data type
@@ -75,3 +74,16 @@ inline bool tWriteTextureWithConversion(void *o_tex, int width, int height, tTex
     converter(buf, data, num_elements);
     return dev->writeTexture(o_tex, width, height, format, buf, bufsize);
 }
+
+void tUnitySetGraphicsDevice(void* device, int deviceType, int eventType);
+#ifdef tStaticLink
+    #define tDefineUnityPluginEntryPoint()
+#else
+    #define tDefineUnityPluginEntryPoint()\
+        tCLinkage tExport void UnitySetGraphicsDevice(void* device, int deviceType, int eventType)\
+        {\
+            tUnitySetGraphicsDevice(device, deviceType, eventType);\
+        }\
+        tCLinkage tExport void UnityRenderEvent(int eventID)\
+        {}
+#endif

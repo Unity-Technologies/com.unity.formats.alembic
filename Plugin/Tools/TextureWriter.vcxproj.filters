@@ -32,6 +32,9 @@
     <ClInclude Include="Common\Concurrency.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="TextureWriter\TextureWriter.h">
+      <Filter>TextureWtiter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GraphicsDevice">
