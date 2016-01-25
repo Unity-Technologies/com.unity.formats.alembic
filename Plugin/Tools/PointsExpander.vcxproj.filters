@@ -2,14 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="PointsRandomizer\PointsRandomizer.cpp">
-      <Filter>PointsRandomizer</Filter>
-    </ClCompile>
     <ClCompile Include="Common\Foundation.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\AlembicProcessor.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PointsExpander\PointsExpander.cpp">
+      <Filter>PointsExpander</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -25,11 +25,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="PointsRandomizer">
-      <UniqueIdentifier>{b64acc0c-4ec2-4581-b0d7-b20002a91809}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common">
       <UniqueIdentifier>{7f65f5ec-2fb8-4365-af0b-93152a2739cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PointsExpander">
+      <UniqueIdentifier>{628c1555-f9ed-4907-b142-9e05e7064474}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

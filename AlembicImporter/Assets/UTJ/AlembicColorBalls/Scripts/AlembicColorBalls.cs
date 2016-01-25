@@ -16,7 +16,7 @@ namespace UTJ
     public delegate void tLogCallback(IntPtr message);
 
     [Serializable]
-    public struct PointsRandomizerConfig
+    public struct PointsExpanderConfig
     {
         public float    count_rate;
         public uint     random_seed;
@@ -30,11 +30,11 @@ namespace UTJ
 
         public tLogCallback log_callback;
 
-        public static PointsRandomizerConfig default_value
+        public static PointsExpanderConfig default_value
         {
             get
             {
-                return new PointsRandomizerConfig
+                return new PointsExpanderConfig
                 {
                     count_rate = 1.0f,
                     random_seed = 0,
@@ -81,7 +81,7 @@ namespace UTJ
         public float m_moveAmount = 1.0f;
 
 
-        PointsRandomizerConfig m_conf = PointsRandomizerConfig.default_value;
+        PointsExpanderConfig m_conf = PointsExpanderConfig.default_value;
 
         List<string> m_log = new List<string>();
         Thread m_exportThread;
@@ -104,8 +104,8 @@ namespace UTJ
 
 
 #if UNITY_EDITOR
-        [DllImport("PointsRandomizer")]
-        public static extern bool tPointsRandomizer(string src_abc_path, string dst_abc_path, ref PointsRandomizerConfig conf);
+        [DllImport("PointsExpander")]
+        public static extern bool tPointsExpander(string src_abc_path, string dst_abc_path, ref PointsExpanderConfig conf);
 
         public void DoExport()
         {
@@ -133,7 +133,7 @@ namespace UTJ
 
                 Debug.Log("export started: " + path_to_dst_abc);
                 m_exportThread = new Thread(()=> {
-                    tPointsRandomizer(path_to_src_abc, path_to_dst_abc, ref m_conf);
+                    tPointsExpander(path_to_src_abc, path_to_dst_abc, ref m_conf);
                 });
                 m_exportThread.Start();
                 EditorApplication.update += UpdateExport;

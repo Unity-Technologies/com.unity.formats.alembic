@@ -5,7 +5,7 @@
 #include "MassParticle.h"
 
 
-struct PointsRandomizerConfig
+struct PointsExpanderConfig
 {
     float       count_rate;
     uint32_t    random_seed;
@@ -18,7 +18,7 @@ struct PointsRandomizerConfig
     float       repulse_stiffness;
     tLogCallback logCB;
 
-    PointsRandomizerConfig()
+    PointsExpanderConfig()
         : count_rate(1.0f)
         , random_seed(0)
         , random_diffuse(0.2f, 0.2f, 0.2f)
@@ -52,7 +52,7 @@ struct tPointInfoHeader
 };
 
 
-tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRandomizerConfig *conf)
+tCLinkage tExport void tPointsExpanderConvert(tContext *tctx_, const PointsExpanderConfig *conf)
 {
     tContext& tctx = *tctx_;
     tLogSetCallback(conf->logCB);
@@ -201,13 +201,13 @@ tCLinkage tExport void tPointsRandomizerConvert(tContext *tctx_, const PointsRan
     tctx.doExport();
 }
 
-tCLinkage tExport bool tPointsRandomizer(
+tCLinkage tExport bool tPointsExpander(
     const char *src_abc_path,
     const char *dst_abc_path,
-    const PointsRandomizerConfig *conf)
+    const PointsExpanderConfig *conf)
 {
     if (!src_abc_path || !dst_abc_path || !conf) {
-        tLog("tPointsRandomizer(): parameter is null\n");
+        tLog("tPointsExpander(): parameter is null\n");
         return false;
     }
 
@@ -230,7 +230,7 @@ tCLinkage tExport bool tPointsRandomizer(
         tContext tctx;
         tctx.setExportConfig(econf);
         tctx.setArchives(ictx, ectx);
-        tPointsRandomizerConvert(&tctx, conf);
+        tPointsExpanderConvert(&tctx, conf);
     }
 
     aeDestroyContext(ectx);
@@ -238,13 +238,13 @@ tCLinkage tExport bool tPointsRandomizer(
     return false;
 }
 
-tCLinkage tExport bool tPointsRandomizerCommandLine(int argc, char *argv[])
+tCLinkage tExport bool tPointsExpanderCommandLine(int argc, char *argv[])
 {
     if (argc < 3) { return false; }
 
     const char *src_abc_path = argv[1];
     const char *dst_abc_path = argv[2];
-    PointsRandomizerConfig conf;
+    PointsExpanderConfig conf;
 
     int vi;
     float vf;
@@ -264,7 +264,7 @@ tCLinkage tExport bool tPointsRandomizerCommandLine(int argc, char *argv[])
             conf.repulse_timestep = vf;
         }
     }
-    return tPointsRandomizer(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
+    return tPointsExpander(src_abc_path, dst_abc_path, &conf) ? 0 : 1;
 }
 
 
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3) {
         printf(
-            "usage: PointsRandomizer [src .abc path] [dst .abc path] [options]\n"
+            "usage: PointsExpander [src .abc path] [dst .abc path] [options]\n"
             "options:\n"
             "    /count_rate:1.0\n"
             "    /random_diffuse:0.0,0.0,0.0\n"
@@ -281,5 +281,5 @@ int main(int argc, char *argv[])
             );
         return 1;
     }
-    return tPointsRandomizerCommandLine(argc, argv) ? 0 : 1;
+    return tPointsExpanderCommandLine(argc, argv) ? 0 : 1;
 }
