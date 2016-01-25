@@ -53,7 +53,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterEXE|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PointsRandomizer\PointsRandomizer.cpp" />
+    <ClCompile Include="PointsExpander\PointsExpander.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlembicExporter.vcxproj">
@@ -64,7 +64,7 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{AD022B67-4DBD-463E-A165-AEAE482AC97D}</ProjectGuid>
+    <ProjectGuid>{F24CB1AB-9651-477F-B9ED-30808FF1A334}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
