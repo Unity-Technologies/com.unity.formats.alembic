@@ -72,7 +72,7 @@ tCLinkage tExport bool tMeshTriangulator(
     const MeshTriangulatorConfig *conf)
 {
     if (!src_abc_path || !dst_abc_path || !conf) {
-        tLog("tMeshTriangulator(): parameter is null");
+        tLog("tMeshTriangulator(): parameter is null\n");
         return false;
     }
 

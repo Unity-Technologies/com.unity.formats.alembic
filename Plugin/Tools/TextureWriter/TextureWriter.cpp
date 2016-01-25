@@ -120,7 +120,7 @@ tCLinkage tExport int tWriteTexture(
 #undef TBlock
 #undef TCase
 
-    tLog("tWriteTexture(): this format combination is not supported %d - %d", dst_fmt, src_fmt);
+    tLog("tWriteTexture(): this format combination is not supported %d - %d\n", dst_fmt, src_fmt);
     return 0;
 }
 

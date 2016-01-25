@@ -188,6 +188,12 @@ aiCLinkage aiExport void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfi
     }
 }
 
+
+aiCLinkage aiExport aiObject* aiSchemaGetObject(aiSchemaBase* schema)
+{
+    return (schema ? schema->getObject() : nullptr);
+}
+
 aiCLinkage aiExport int aiSchemaGetNumSamples(aiSchemaBase* schema)
 {
     return (schema ? schema->getNumSamples() : 0);

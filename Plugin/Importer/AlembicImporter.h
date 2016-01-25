@@ -493,6 +493,7 @@ aiCLinkage aiExport aiObject*       aiGetParent(aiObject* obj);
 
 aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
+aiCLinkage aiExport aiObject*       aiSchemaGetObject(aiSchemaBase* schema);
 aiCLinkage aiExport int             aiSchemaGetNumSamples(aiSchemaBase* schema);
 aiCLinkage aiExport aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 aiCLinkage aiExport aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
