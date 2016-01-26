@@ -67,6 +67,7 @@ namespace UTJ
         public string m_outputPath;
         public bool m_logging = true;
 
+        [Header("- Inc/Decrease Points")]
         public float m_countRate = 1.0f;
 
         [Header("- Random Diffuse")]
