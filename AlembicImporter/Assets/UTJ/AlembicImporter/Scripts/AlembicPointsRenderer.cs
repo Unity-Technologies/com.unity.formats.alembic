@@ -17,7 +17,8 @@ namespace UTJ
     public class AlembicPointsRenderer : MonoBehaviour
     {
         const int TextureWidth = 2048;
-    
+
+        public bool m_makeChildRenderers = true;
         public Mesh m_mesh;
         public Material[] m_materials;
         public bool m_cast_shadow = false;
@@ -34,6 +35,7 @@ namespace UTJ
         Mesh m_expanded_mesh;
         Bounds m_bounds;
         List<List<Material>> m_actual_materials;
+        [SerializeField] List<MeshRenderer> m_child_renderers;
     
         RenderTexture m_texPositions;
         RenderTexture m_texIDs;
@@ -210,6 +212,7 @@ namespace UTJ
             {
                 m_expanded_mesh = CreateExpandedMesh(m_mesh, max_instances, out m_instances_par_batch);
                 m_expanded_mesh.UploadMeshData(true);
+                m_expanded_mesh.name = m_mesh.name + "_expanded";
                 return;
             }
     
@@ -250,18 +253,61 @@ namespace UTJ
                 m.SetMatrix("_Transform", worldToLocalMatrix);
             });
     
-            // issue draw calls
-            int layer = gameObject.layer;
-            Matrix4x4 matrix = Matrix4x4.identity;
-            m_actual_materials.ForEach(a =>
+            if(m_makeChildRenderers)
             {
-                for (int i = 0; i < batch_count; ++i)
+                if(m_child_renderers == null)
                 {
-                    Graphics.DrawMesh(m_expanded_mesh, matrix, a[i], layer, null, 0, null, m_cast_shadow, m_receive_shadow);
+                    m_child_renderers = new List<MeshRenderer>();
                 }
-            });
+
+                while(m_child_renderers.Count < m_actual_materials.Count)
+                {
+                    m_child_renderers.Add(MakeChildRenderer(m_child_renderers.Count));
+                }
+
+                for(int i=0; i < m_actual_materials.Count; ++i)
+                {
+                    m_child_renderers[i].sharedMaterials = m_actual_materials[i].ToArray();
+                }
+            }
+            else
+            {
+                if(m_child_renderers != null)
+                {
+                    foreach(var c in m_child_renderers)
+                    {
+                        DestroyImmediate(c.gameObject);
+                    }
+                    m_child_renderers = null;
+                }
+
+                // issue draw calls
+                int layer = gameObject.layer;
+                Matrix4x4 matrix = Matrix4x4.identity;
+                m_actual_materials.ForEach(a =>
+                {
+                    for (int i = 0; i < batch_count; ++i)
+                    {
+                        Graphics.DrawMesh(m_expanded_mesh, matrix, a[i], layer, null, 0, null, m_cast_shadow, m_receive_shadow);
+                    }
+                });
+            }
         }
-    
+
+        MeshRenderer MakeChildRenderer(int i)
+        {
+            var child = new GameObject();
+            var transform = child.GetComponent<Transform>();
+            var filter = child.AddComponent<MeshFilter>();
+            var renderer = child.AddComponent<MeshRenderer>();
+
+            child.name = "MeshRenderer["+i+"]";
+            transform.SetParent(GetComponent<Transform>());
+            filter.sharedMesh = m_expanded_mesh;
+            return renderer;
+        }
+
+
         void ReleaseGPUResoureces()
         {
             if (m_actual_materials != null)
@@ -285,8 +331,12 @@ namespace UTJ
     #if UNITY_EDITOR
         void Reset()
         {
-            m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/UTJ/AlembicImporter/Meshes/IcoSphere.asset");
-            m_materials = new Material[1] { AssetDatabase.LoadAssetAtPath<Material>("Assets/UTJ/AlembicImporter/Materials/AlembicPointsDefault.mat") };
+            // IcoSphere.asset
+            m_mesh = AssetDatabase.LoadAssetAtPath<Mesh>(AssetDatabase.GUIDToAssetPath("b63f02850eb90a641b0e2db0da7e9e74"));
+            m_materials = new Material[1] {
+                // AlembicPointsDefault.mat
+                AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath("5dfafd6734133bb4b9012fba0eadd4af"))
+            };
             ReleaseGPUResoureces();
         }
     
