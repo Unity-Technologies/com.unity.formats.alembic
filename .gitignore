@@ -2,6 +2,7 @@ release/
 debug/
 dependencies/
 Plugin/Bin
+Plugin/external/libs
 .build/
 *.dblite
 excons.cache
