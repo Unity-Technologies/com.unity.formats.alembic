@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assignments>
+	<node path="/root/meshes/shared/torus/torusShape">
+		<shader instance="0" name="blinn1"/>
+	</node>
+	<node path="/root/meshes/shared">
+		<shader name="blinn1"/>
+	</node>
+	<node path="/root/meshes/spheres/sphere3">
+		<shader name="blinn2"/>
+	</node>
+	<node path="/root/meshes/spheres/sphere2/sphereShape">
+		<shader instance="1" name="blinn3">
+			0-13,17-33,37-53,57-73,77-93,97-113,117-133,137-153,157-159,240-253,257-273,277-293,297-313,317-333,337-353,357-373,377-393,397-399
+		</shader>
+		<shader instance="1" name="blinn1">
+			14-16,34-36,54-56,74-76,94-96,114-116,134-136,154-156,160-239,254-256,274-276,294-296,314-316,334-336,354-356,374-376,394-396
+		</shader>
+	</node>
+	<node path="/root/meshes/spheres/sphere1/sphereShape">
+		<shader instance="0" name="blinn3">
+			40,51,60,71,80,91,100,111,120,131-132,139-140,151-152,159
+		</shader>
+		<shader instance="0" name="blinn2">
+			0-14,17-34,37-39,41-50,52-54,57-59,61-70,72-74,77-79,81-90,92-94,97-99,101-110,112-114,117-119,121-130,133-134,137-138,141-150,153-154,157-158,160-174,177-194,197-214,217-219,260-274,277-294,297-314,317-334,337-354,357-374,377-394,397-399
+		</shader>
+		<shader instance="0" name="blinn1">
+			15-16,35-36,55-56,75-76,95-96,115-116,135-136,155-156,175-176,195-196,215-216,220-259,275-276,295-296,315-316,335-336,355-356,375-376,395-396
+		</shader>
+	</node>
+	<node path="/root/meshes/shared/torus">
+		<shader name="blinn1"/>
+	</node>
+	<node path="/root/meshes/shared/sphere4/sphereShape">
+		<shader instance="3" name="blinn1"/>
+	</node>
+	<node path="/root/meshes/spheres/sphere3/sphereShape">
+		<shader instance="2" name="blinn2"/>
+	</node>
+	<node path="/root/meshes/shared/sphere4">
+		<shader name="blinn1"/>
+	</node>
+	<node path="/root/cone/coneShape">
+		<shader instance="0" name="blinn3"/>
+	</node>
+	<node path="/root/cone">
+		<shader name="blinn3"/>
+	</node>
+</assignments>
