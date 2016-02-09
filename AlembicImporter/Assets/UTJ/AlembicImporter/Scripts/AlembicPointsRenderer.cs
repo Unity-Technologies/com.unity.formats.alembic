@@ -29,30 +29,29 @@ namespace UTJ
     #if UNITY_EDITOR
         public bool m_show_bounds = true;
     #endif
-    
+
         int m_instances_par_batch;
         int m_layer;
         Mesh m_expanded_mesh;
         Bounds m_bounds;
         List<List<Material>> m_actual_materials;
         [SerializeField] List<MeshRenderer> m_child_renderers;
-    
+
         RenderTexture m_texPositions;
         RenderTexture m_texIDs;
-    
-    
+
         #region static
-    
+
         public static int ceildiv(int v, int d)
         {
             return v / d + (v % d == 0 ? 0 : 1);
         }
-    
+
         public static Vector3 mul(Vector3 a, Vector3 b)
         {
             return new Vector3(a.x*b.x, a.y*b.y, a.z*b.z);
         }
-    
+
         static RenderTexture CreateDataTexture(int w, int h, RenderTextureFormat f)
         {
             RenderTexture r = new RenderTexture(w, h, 0, f);
@@ -62,9 +61,9 @@ namespace UTJ
             r.Create();
             return r;
         }
-    
+
         public const int MaxVertices = 65000; // Mesh's limitation
-    
+
         public static Mesh CreateExpandedMesh(Mesh mesh, int required_instances, out int instances_par_batch)
         {
             Vector3[] vertices_base = mesh.vertices;
@@ -74,7 +73,7 @@ namespace UTJ
             Color[] colors_base = (mesh.colors == null || mesh.colors.Length == 0) ? null : mesh.colors;
             int[] indices_base = (mesh.triangles == null || mesh.triangles.Length == 0) ? null : mesh.triangles;
             instances_par_batch = Mathf.Min(MaxVertices / mesh.vertexCount, required_instances);
-    
+
             Vector3[] vertices = new Vector3[vertices_base.Length * instances_par_batch];
             Vector2[] idata = new Vector2[vertices_base.Length * instances_par_batch];
             Vector3[] normals = normals_base == null ? null : new Vector3[normals_base.Length * instances_par_batch];
@@ -82,7 +81,7 @@ namespace UTJ
             Vector2[] uv = uv_base == null ? null : new Vector2[uv_base.Length * instances_par_batch];
             Color[] colors = colors_base == null ? null : new Color[colors_base.Length * instances_par_batch];
             int[] indices = indices_base == null ? null : new int[indices_base.Length * instances_par_batch];
-    
+
             for (int ii = 0; ii < instances_par_batch; ++ii)
             {
                 for (int vi = 0; vi < vertices_base.Length; ++vi)
@@ -131,7 +130,7 @@ namespace UTJ
                         indices[i] = ii * vertices_base.Length + indices_base[vi];
                     }
                 }
-    
+
             }
             Mesh ret = new Mesh();
             ret.vertices = vertices;
@@ -143,22 +142,16 @@ namespace UTJ
             ret.triangles = indices;
             return ret;
         }
-    
+
         #endregion
-    
-    
-        void ForEachEveryMaterials(System.Action<Material> a)
-        {
-            m_actual_materials.ForEach((ma) => { ma.ForEach(v => { a(v); }); });
-        }
-    
+
         Material CloneMaterial(Material src, int nth)
         {
             Material m = new Material(src);
             m.SetInt("_BatchBegin", nth * m_instances_par_batch);
             m.SetTexture("_PositionBuffer", m_texPositions);
             m.SetTexture("_IDBuffer", m_texIDs);
-    
+
             // fix rendering order for transparent objects
             if (m.renderQueue >= 3000)
             {
@@ -166,13 +159,13 @@ namespace UTJ
             }
             return m;
         }
-    
+
         public void RefleshMaterials()
         {
             m_actual_materials = null;
             Flush();
         }
-    
+
         public void Flush()
         {
             if(m_mesh == null)
@@ -185,18 +178,16 @@ namespace UTJ
                 Debug.LogWarning("AlembicPointsRenderer: material is not assigned");
                 return;
             }
-    
-    
-    
+
             var points = GetComponent<AlembicPoints>();
             var abcData = points.abcData;
             int max_instances = points.abcPeakVertexCount;
             int instance_count = abcData.count;
             m_bounds.center = mul(abcData.boundsCenter, m_trans_scale);
             m_bounds.extents = mul(abcData.boundsExtents, m_trans_scale);
-    
+
             if (instance_count == 0) { return; } // nothing to draw
-    
+
             // update data texture
             if (m_texPositions == null)
             {
@@ -206,16 +197,14 @@ namespace UTJ
             }
             TextureWriter.Write(m_texPositions, abcData.positions, abcData.count, TextureWriter.tDataFormat.Float3);
             TextureWriter.Write(m_texIDs, abcData.ids, abcData.count, TextureWriter.tDataFormat.LInt);
-    
-    
+
             if (m_expanded_mesh == null)
             {
                 m_expanded_mesh = CreateExpandedMesh(m_mesh, max_instances, out m_instances_par_batch);
                 m_expanded_mesh.UploadMeshData(true);
                 m_expanded_mesh.name = m_mesh.name + "_expanded";
-                return;
             }
-    
+
             if (m_actual_materials == null)
             {
                 m_actual_materials = new List<List<Material>>();
@@ -224,13 +213,13 @@ namespace UTJ
                     m_actual_materials.Add(new List<Material>());
                 }
             }
-    
+
             var trans = GetComponent<Transform>();
             m_expanded_mesh.bounds = m_bounds;
             m_count_rate = Mathf.Max(m_count_rate, 0.0f);
             instance_count = Mathf.Min((int)(instance_count * m_count_rate), (int)(max_instances * m_count_rate));
             int batch_count = ceildiv(instance_count, m_instances_par_batch);
-    
+
             // clone materials if needed
             for (int i = 0; i < m_actual_materials.Count; ++i)
             {
@@ -241,19 +230,28 @@ namespace UTJ
                     a.Add(m);
                 }
             }
-    
+
             // update materials
             var worldToLocalMatrix = trans.localToWorldMatrix;
-            ForEachEveryMaterials((m) =>
+            for (int i = 0; i < m_actual_materials.Count; ++i)
             {
-                m.SetInt("_NumInstances", instance_count);
-                m.SetVector("_CountRate", new Vector4(m_count_rate, 1.0f / m_count_rate, 0.0f, 0.0f));
-                m.SetVector("_ModelScale", m_model_scale);
-                m.SetVector("_TransScale", m_trans_scale);
-                m.SetMatrix("_Transform", worldToLocalMatrix);
-            });
-    
-            if(m_makeChildRenderers)
+                var materials = m_actual_materials[i];
+                for (int j = 0; j < materials.Count; ++j)
+                {
+                    var m = materials[j];
+                    m.SetInt("_BatchBegin", j * m_instances_par_batch);
+                    m.SetTexture("_PositionBuffer", m_texPositions);
+                    m.SetTexture("_IDBuffer", m_texIDs);
+
+                    m.SetInt("_NumInstances", instance_count);
+                    m.SetVector("_CountRate", new Vector4(m_count_rate, 1.0f / m_count_rate, 0.0f, 0.0f));
+                    m.SetVector("_ModelScale", m_model_scale);
+                    m.SetVector("_TransScale", m_trans_scale);
+                    m.SetMatrix("_Transform", worldToLocalMatrix);
+                }
+            }
+
+            if (m_makeChildRenderers)
             {
                 if(m_child_renderers == null)
                 {
@@ -274,9 +272,12 @@ namespace UTJ
             {
                 if(m_child_renderers != null)
                 {
-                    foreach(var c in m_child_renderers)
+                    foreach(var child in m_child_renderers)
                     {
-                        DestroyImmediate(c.gameObject);
+                        if (child != null)
+                        {
+                            DestroyImmediate(child.gameObject);
+                        }
                     }
                     m_child_renderers = null;
                 }
@@ -307,7 +308,6 @@ namespace UTJ
             return renderer;
         }
 
-
         void ReleaseGPUResoureces()
         {
             if (m_actual_materials != null)
@@ -326,8 +326,7 @@ namespace UTJ
             }
             m_bounds = new Bounds();
         }
-    
-    
+
     #if UNITY_EDITOR
         void Reset()
         {
@@ -339,23 +338,23 @@ namespace UTJ
             };
             ReleaseGPUResoureces();
         }
-    
+
         void OnValidate()
         {
             ReleaseGPUResoureces();
         }
     #endif
-    
+
         void OnDisable()
         {
             ReleaseGPUResoureces();
         }
-    
+
         void LateUpdate()
         {
             Flush();
         }
-    
+
     #if UNITY_EDITOR
         void OnDrawGizmos()
         {
