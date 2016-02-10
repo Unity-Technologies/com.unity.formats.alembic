@@ -189,7 +189,7 @@ namespace UTJ
             if (instance_count == 0) { return; } // nothing to draw
 
             // update data texture
-            if (m_texPositions == null)
+            if (m_texPositions == null || !m_texPositions.IsCreated())
             {
                 int height = ceildiv(max_instances, TextureWidth);
                 m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
@@ -198,6 +198,15 @@ namespace UTJ
             TextureWriter.Write(m_texPositions, abcData.positions, abcData.count, TextureWriter.tDataFormat.Float3);
             TextureWriter.Write(m_texIDs, abcData.ids, abcData.count, TextureWriter.tDataFormat.LInt);
 
+            // update expanded mesh
+            if(m_expanded_mesh != null)
+            {
+                // destroy existing expanded mesh if mesh is replaced
+                if(m_expanded_mesh.name != m_mesh.name + "_expanded")
+                {
+                    m_expanded_mesh = null;
+                }
+            }
             if (m_expanded_mesh == null)
             {
                 m_expanded_mesh = CreateExpandedMesh(m_mesh, max_instances, out m_instances_par_batch);
@@ -223,11 +232,11 @@ namespace UTJ
             // clone materials if needed
             for (int i = 0; i < m_actual_materials.Count; ++i)
             {
-                var a = m_actual_materials[i];
-                while (a.Count < batch_count)
+                var materials = m_actual_materials[i];
+                while (materials.Count < batch_count)
                 {
-                    Material m = CloneMaterial(m_materials[i], a.Count);
-                    a.Add(m);
+                    Material m = CloneMaterial(m_materials[i], materials.Count);
+                    materials.Add(m);
                 }
             }
 
@@ -253,24 +262,38 @@ namespace UTJ
 
             if (m_makeChildRenderers)
             {
+                // create child renderers if needed
                 if(m_child_renderers == null)
                 {
                     m_child_renderers = new List<MeshRenderer>();
                 }
-
-                while(m_child_renderers.Count < m_actual_materials.Count)
+                while(m_child_renderers.Count < m_materials.Length)
                 {
                     m_child_renderers.Add(MakeChildRenderer(m_child_renderers.Count));
                 }
 
+                // assign materials to child renderers
                 for(int i=0; i < m_actual_materials.Count; ++i)
                 {
-                    m_child_renderers[i].sharedMaterials = m_actual_materials[i].ToArray();
+                    var materials = m_actual_materials[i];
+                    materials.RemoveRange(batch_count, materials.Count - batch_count);
+                    m_child_renderers[i].sharedMaterials = materials.ToArray();
+                }
+
+                // update mesh in child renderers if m_mesh is replaced
+                for(int i=0; i<m_child_renderers.Count; ++i)
+                {
+                    var mesh_filter = m_child_renderers[i].GetComponent<MeshFilter>();
+                    if (mesh_filter.sharedMesh != m_expanded_mesh)
+                    {
+                        mesh_filter.sharedMesh = m_expanded_mesh;
+                    }
                 }
             }
             else
             {
-                if(m_child_renderers != null)
+                // clear child renderers
+                if (m_child_renderers != null)
                 {
                     foreach(var child in m_child_renderers)
                     {
