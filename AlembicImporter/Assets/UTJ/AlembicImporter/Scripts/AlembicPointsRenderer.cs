@@ -38,6 +38,7 @@ namespace UTJ
         [SerializeField] List<MeshRenderer> m_child_renderers;
 
         RenderTexture m_texPositions;
+        RenderTexture m_texVelocities;
         RenderTexture m_texIDs;
 
         #region static
@@ -150,6 +151,7 @@ namespace UTJ
             Material m = new Material(src);
             m.SetInt("_BatchBegin", nth * m_instances_par_batch);
             m.SetTexture("_PositionBuffer", m_texPositions);
+            m.SetTexture("_VelocityBuffer", m_texVelocities);
             m.SetTexture("_IDBuffer", m_texIDs);
 
             // fix rendering order for transparent objects
@@ -193,6 +195,7 @@ namespace UTJ
             {
                 int height = ceildiv(max_instances, TextureWidth);
                 m_texPositions = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
+                m_texVelocities = CreateDataTexture(TextureWidth, height, RenderTextureFormat.ARGBFloat);
                 m_texIDs = CreateDataTexture(TextureWidth, height, RenderTextureFormat.RFloat);
             }
             TextureWriter.Write(m_texPositions, abcData.positions, abcData.count, TextureWriter.tDataFormat.Float3);
@@ -250,6 +253,7 @@ namespace UTJ
                     var m = materials[j];
                     m.SetInt("_BatchBegin", j * m_instances_par_batch);
                     m.SetTexture("_PositionBuffer", m_texPositions);
+                    m.SetTexture("_VelocityBuffer", m_texVelocities);
                     m.SetTexture("_IDBuffer", m_texIDs);
 
                     m.SetInt("_NumInstances", instance_count);
@@ -341,6 +345,11 @@ namespace UTJ
             {
                 m_texPositions.Release();
                 m_texPositions = null;
+            }
+            if (m_texVelocities != null)
+            {
+                m_texVelocities.Release();
+                m_texVelocities = null;
             }
             if (m_texIDs != null)
             {

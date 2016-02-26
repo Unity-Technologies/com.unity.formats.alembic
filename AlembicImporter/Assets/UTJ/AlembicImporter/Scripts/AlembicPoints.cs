@@ -17,6 +17,7 @@ namespace UTJ
         // members
         AbcAPI.aiPointsData m_abcData;
         Vector3[] m_abcPositions;
+        Vector3[] m_abcVelocities;
         ulong[] m_abcIDs;
         AbcAPI.aiPointsSummary m_summary;
     
@@ -44,12 +45,16 @@ namespace UTJ
             {
                 AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
                 m_abcPositions = new Vector3[m_summary.peakCount];
-                m_abcIDs = new ulong[m_summary.peakCount];
-    
+                m_abcIDs = new ulong[m_summary.peakCount];    
                 m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
                 m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
+                if (m_summary.hasVelocity)
+                {
+                    m_abcVelocities = new Vector3[m_summary.peakCount];
+                    m_abcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcVelocities, 0);
+                }
             }
-    
+
             AbcAPI.aiPointsCopyData(sample, ref m_abcData);
             AbcDirty();
         }
