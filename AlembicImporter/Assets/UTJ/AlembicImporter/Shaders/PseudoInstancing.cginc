@@ -7,6 +7,7 @@ float4      _TransScale;
 int         _BatchBegin;
 
 sampler2D   _PositionBuffer;
+sampler2D   _VelocityBuffer;
 sampler2D   _IDBuffer;
 float4      _PositionBuffer_TexelSize;
 float4      _CountRate; // x: count rate, y: 1.0 / count rate
@@ -27,6 +28,7 @@ float4  InstanceTexcoord(float i)
 }
 
 float3  GetInstanceTranslation(float i) { return tex2Dlod(_PositionBuffer, InstanceTexcoord(i)).xyz; }
+float3  GetInstanceVelocity(float i)    { return tex2Dlod(_VelocityBuffer, InstanceTexcoord(i)).xyz; }
 float   GetObjectID(float i)            { return tex2Dlod(_IDBuffer, InstanceTexcoord(i)).x; }
 
 #endif // PseudoInstancing_h
