@@ -51,7 +51,11 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
 void aiPointsSample::copyData(aiPointsData &data)
 {
     int count = (int)m_positions->size();
+    int v_count = (int)m_velocities->size();
     data.count = count;
+
+    // somehow v_count != count usually happens...
+    v_count = std::min<int>(count, v_count);
 
     // copy positions
     if (m_positions && data.positions) {
@@ -67,7 +71,7 @@ void aiPointsSample::copyData(aiPointsData &data)
 
     // copy velocities
     if (m_velocities && data.velocities) {
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < v_count; ++i) {
             data.velocities[i] = (*m_velocities)[i];
         }
     }
