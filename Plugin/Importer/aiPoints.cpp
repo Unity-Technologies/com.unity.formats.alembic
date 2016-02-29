@@ -51,11 +51,14 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
 void aiPointsSample::copyData(aiPointsData &data)
 {
     int count = (int)m_positions->size();
-    int v_count = (int)m_velocities->size();
     data.count = count;
 
-    // somehow v_count != count usually happens...
-    v_count = std::min<int>(count, v_count);
+    int v_count = 0;
+    if (m_velocities) {
+        v_count = (int)m_velocities->size();
+        // somehow v_count != count usually happens...
+        v_count = std::min<int>(count, v_count);
+    }
 
     // copy positions
     if (m_positions && data.positions) {
