@@ -24,6 +24,8 @@ public class AlembicImporterPackaging
 "Assets/UTJ/AlembicImporter",
 "Assets/UTJ/Plugins/x86/AlembicImporter.dll",
 "Assets/UTJ/Plugins/x86_64/AlembicImporter.dll",
+"Assets/StreamingAssets/UTJ/AlembicImporter",
+"Assets/StreamingAssets/AlembicData/Example.abc",
         };
         AssetDatabase.ExportPackage(files, "AlembicImporter.unitypackage", ExportPackageOptions.Recurse);
     }
