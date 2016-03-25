@@ -23,6 +23,7 @@ const char* tGetDirectoryOfCurrentModule();
 
 double tGetTime(); // in milliseconds
 
+void tGlob(const char *pattern, const std::function<void (const char*)>& f);
 
 
 template<class T> struct tvec1;

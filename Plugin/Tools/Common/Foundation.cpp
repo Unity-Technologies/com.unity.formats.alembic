@@ -86,6 +86,45 @@ double tGetTime()
 }
 
 
+// glob
+
+std::pair<std::string, std::string> tSplitDirFile(const std::string &path)
+{
+    auto last_sep = path.find_last_of("/");
+    if (last_sep != std::string::npos) {
+        return std::make_pair(std::string(path.begin(), path.begin() + last_sep),
+            std::string(path.begin() + last_sep + 1, path.end()));
+    }
+    return std::make_pair(".", path);
+}
+
+void tGlob(const char *pattern, const std::function<void(const char*)>& f)
+{
+#ifdef _WIN32
+    WIN32_FIND_DATA find_data;
+    auto h = FindFirstFile(pattern, &find_data);
+    if (h != INVALID_HANDLE_VALUE) {
+        f(find_data.cFileName);
+        while (FindNextFile(h, &find_data)) {
+            f(find_data.cFileName);
+        }
+        CloseHandle(h);
+    }
+
+#else
+
+    auto dir_and_mask = tSplitDirFile(pattern);
+    auto dir = opendir(dir_and_mask.first.c_str());
+    dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (!fnmatch(dir_and_mask.second.c_str(), entry->d_name, FNM_CASEFOLD | FNM_NOESCAPE | FNM_PERIOD)) {
+            f((dir_and_mask.first + entry->d_name).c_str());
+        }
+    }
+#endif
+}
+
+
 // random
 
 namespace {
