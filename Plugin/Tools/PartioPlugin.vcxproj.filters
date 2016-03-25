@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="PartioPlugin\PartioPlugin.cpp">
+      <Filter>PartioPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PartioPlugin\pch.cpp">
+      <Filter>PartioPlugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PartioPlugin\PartioPlugin.h">
+      <Filter>PartioPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="PartioPlugin\pch.h">
+      <Filter>PartioPlugin</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="PartioPlugin">
+      <UniqueIdentifier>{c83a331a-e645-4cc3-9bcc-82ad7fa29285}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
