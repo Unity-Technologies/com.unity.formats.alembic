@@ -7,6 +7,15 @@
     <ClCompile Include="PartioPlugin\pch.cpp">
       <Filter>PartioPlugin</Filter>
     </ClCompile>
+    <ClCompile Include="Common\Foundation.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PartioPlugin\ppCache.cpp">
+      <Filter>PartioPlugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PartioPlugin\ppContext.cpp">
+      <Filter>PartioPlugin</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PartioPlugin\PartioPlugin.h">
@@ -15,10 +24,22 @@
     <ClInclude Include="PartioPlugin\pch.h">
       <Filter>PartioPlugin</Filter>
     </ClInclude>
+    <ClInclude Include="Common\Foundation.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="PartioPlugin\ppContext.h">
+      <Filter>PartioPlugin</Filter>
+    </ClInclude>
+    <ClInclude Include="PartioPlugin\ppCache.h">
+      <Filter>PartioPlugin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="PartioPlugin">
       <UniqueIdentifier>{c83a331a-e645-4cc3-9bcc-82ad7fa29285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{4b5fa69d-91c4-4009-85ef-902a1880dbcf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
