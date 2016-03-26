@@ -88,14 +88,26 @@ double tGetTime()
 
 // glob
 
-std::pair<std::string, std::string> tSplitDirFile(const std::string &path)
+tStringPair tSplitDirFile(const std::string &path)
 {
     auto last_sep = path.find_last_of("/");
     if (last_sep != std::string::npos) {
-        return std::make_pair(std::string(path.begin(), path.begin() + last_sep),
-            std::string(path.begin() + last_sep + 1, path.end()));
+        return tStringPair(
+            std::string(path.begin(), path.begin() + last_sep),
+            std::string(path.begin() + (last_sep + 1), path.end()) );
     }
-    return std::make_pair(".", path);
+    return tStringPair(".", path);
+}
+
+tStringPair tSplitFileExt(const std::string &path)
+{
+    auto last_sep = path.find_last_of(".");
+    if (last_sep != std::string::npos) {
+        return tStringPair(
+            std::string(path.begin(), path.begin() + (last_sep - 1)),
+            std::string(path.begin() + last_sep, path.end()));
+    }
+    return tStringPair(path, "");
 }
 
 void tGlob(const char *pattern, const std::function<void(const char*)>& f)

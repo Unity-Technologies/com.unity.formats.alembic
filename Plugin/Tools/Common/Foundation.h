@@ -23,6 +23,9 @@ const char* tGetDirectoryOfCurrentModule();
 
 double tGetTime(); // in milliseconds
 
+typedef std::pair<std::string, std::string> tStringPair;
+tStringPair tSplitDirFile(const std::string &path);
+tStringPair tSplitFileExt(const std::string &path);
 void tGlob(const char *pattern, const std::function<void (const char*)>& f);
 
 

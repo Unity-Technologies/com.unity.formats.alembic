@@ -27,10 +27,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Foundation.h" />
     <ClInclude Include="PartioPlugin\PartioPlugin.h" />
     <ClInclude Include="PartioPlugin\pch.h" />
+    <ClInclude Include="PartioPlugin\ppCache.h" />
+    <ClInclude Include="PartioPlugin\ppContext.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Foundation.cpp" />
     <ClCompile Include="PartioPlugin\PartioPlugin.cpp" />
     <ClCompile Include="PartioPlugin\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -40,6 +44,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterEXE|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PartioPlugin\ppCache.cpp" />
+    <ClCompile Include="PartioPlugin\ppContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AlembicExporter.vcxproj">
@@ -88,37 +94,37 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterEXE|x64'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86_64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterEXE|Win32'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)external\partio\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)external\partio\include;$(SolutionDir)external\ilmbase\include;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\libs\x86;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
