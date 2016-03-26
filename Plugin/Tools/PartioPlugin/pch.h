@@ -29,4 +29,4 @@
 
 typedef Imath::V2f ppV2;
 typedef Imath::V3f ppV3;
-typedef std::future<size_t> ppIOAsync;
+typedef std::future<int> ppIOAsync;

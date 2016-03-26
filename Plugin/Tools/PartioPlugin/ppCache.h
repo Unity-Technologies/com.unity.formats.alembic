@@ -4,14 +4,24 @@
 class ppCache
 {
 public:
-    ppCache();
+    ppCache(int num_particles);
+    ppCache(const char *path);
     ~ppCache();
+    operator bool() const;
 
-    bool read(const char *path);
-    bool write(const char *path);
+    bool writeFile(const char *path);
+
+    int getNumParticles();
+
+    int             getNumAttributes();
+    int             addAttribute(const char *name, ppAttributeType type);
+    ppAttributeData getAttributeByID(int i);
+    ppAttributeData getAttributeByName(const char *name);
 
 private:
-    Partio::ParticlesData *m_data;
+    Partio::ParticlesDataMutable *m_data;
+    std::vector<Partio::ParticleAttribute> m_attributes;
+    std::vector<Partio::FixedAttribute> m_fattributes;
 };
 
 #endif // ppCache_h

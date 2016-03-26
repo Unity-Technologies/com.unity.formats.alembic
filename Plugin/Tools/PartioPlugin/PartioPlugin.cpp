@@ -30,10 +30,10 @@ ppCLinkage ppExport ppIOAsync* ppReadFilesAsync(ppContext *ctx, const char *path
     return &ctx->readFilesAsync(path);
 }
 
-ppCLinkage ppExport bool ppWriteFile(ppContext *ctx, const char *path, int nth)
+ppCLinkage ppExport bool ppWriteFile(ppContext *ctx, const char *path, int i)
 {
     if (!ctx) return false;
-    return ctx->writeFile(path, nth);
+    return ctx->writeFile(path, i);
 }
 ppCLinkage ppExport size_t ppWriteFiles(ppContext *ctx, const char *path)
 {
@@ -44,4 +44,55 @@ ppCLinkage ppExport ppIOAsync* ppWriteFilesAsync(ppContext *ctx, const char *pat
 {
     if (!ctx) return nullptr;
     return &ctx->writeFilesAsync(path);
+}
+
+ppCLinkage ppExport void ppClearCaches(ppContext *ctx)
+{
+    if (!ctx) return;
+    ctx->clearCache();
+}
+ppCLinkage ppExport int ppGetNumCaches(ppContext *ctx)
+{
+    if (!ctx) return 0;
+    return (int)ctx->getNumCaches();
+}
+ppCLinkage ppExport ppCache* ppGetCache(ppContext *ctx, int i)
+{
+    if (!ctx) return nullptr;
+    return ctx->getCache(i);
+}
+ppCLinkage ppExport ppCache* ppAddCache(ppContext *ctx, int num_particles)
+{
+    if (!ctx) return nullptr;
+    return ctx->addCache(num_particles);
+}
+
+ppCLinkage ppExport int ppGetNumParticles(ppCache *cache)
+{
+    if (!cache) return 0;
+    return cache->getNumParticles();
+}
+
+ppCLinkage ppExport int ppGetNumAttributes(ppCache *cache)
+{
+    if (!cache) return 0;
+    return cache->getNumAttributes();
+}
+
+ppCLinkage ppExport int ppAddAttribute(ppCache *cache, const char *name, ppAttributeType type)
+{
+    if (!cache) return 0;
+    return cache->addAttribute(name, type);
+}
+
+ppCLinkage ppExport void ppGetAttributeDataByID(ppCache *cache, int i, ppAttributeData *dst)
+{
+    if (!cache || !dst) return;
+    *dst = cache->getAttributeByID(i);
+}
+
+ppCLinkage ppExport void ppGetAttributeDataName(ppCache *cache, const char *name, ppAttributeData *dst)
+{
+    if (!cache || !dst) return;
+    *dst = cache->getAttributeByName(name);
 }
