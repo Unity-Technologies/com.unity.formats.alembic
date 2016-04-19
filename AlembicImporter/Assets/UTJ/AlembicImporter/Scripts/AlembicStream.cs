@@ -291,8 +291,6 @@ namespace UTJ
                 {
                     m_startTime = AbcAPI.aiGetStartTime(m_abc);
                     m_endTime = AbcAPI.aiGetEndTime(m_abc);
-                    m_timeOffset = -m_startTime;
-                    m_timeScale = 1.0f;
                     m_preserveStartTime = true;
                     m_forceRefresh = true;
                     m_trans = GetComponent<Transform>();
@@ -450,8 +448,6 @@ namespace UTJ
             {
                 m_startTime = AbcAPI.aiGetStartTime(m_abc);
                 m_endTime = AbcAPI.aiGetEndTime(m_abc);
-                m_timeOffset = -m_startTime;
-                m_timeScale = 1.0f;
                 m_preserveStartTime = true;
                 m_forceRefresh = true;
     
