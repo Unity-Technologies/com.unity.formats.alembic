@@ -21,9 +21,9 @@ namespace UTJ
     
         public enum aeTypeSamplingType
         {
-            Uniform,
-            Cyclic,
-            Acyclic,
+            Uniform = 0,
+            // Cyclic = 1,
+            Acyclic = 2,
         };
     
         public enum aeXFormType
@@ -104,7 +104,7 @@ namespace UTJ
                     return new aeConfig
                     {
                         archiveType = aeArchiveType.Ogawa,
-                        timeSamplingType = aeTypeSamplingType.Uniform,
+                        timeSamplingType = aeTypeSamplingType.Acyclic,
                         startTime = 0.0f,
                         frameRate = 30.0f,
                         xformType = aeXFormType.TRS,
