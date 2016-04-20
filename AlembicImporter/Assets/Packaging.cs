@@ -10,7 +10,7 @@ using UnityEditor;
 
 public class AlembicImporterPackaging
 {
-    [MenuItem("Assets/Make Packages")]
+    [MenuItem("Assets/UTJ/AlembicImporter/Make Packages")]
     public static void MakePackage_Alembic()
     {
         MakePackage_AlembicImporter();
@@ -22,6 +22,7 @@ public class AlembicImporterPackaging
         string[] files = new string[]
         {
 "Assets/UTJ/AlembicImporter",
+"Assets/UTJ/TextureWriter",
 "Assets/UTJ/Plugins/x86/AlembicImporter.dll",
 "Assets/UTJ/Plugins/x86_64/AlembicImporter.dll",
 "Assets/UTJ/Plugins/x86/TextureWriter.dll",
