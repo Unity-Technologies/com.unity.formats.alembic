@@ -24,6 +24,8 @@ public class AlembicImporterPackaging
 "Assets/UTJ/AlembicImporter",
 "Assets/UTJ/Plugins/x86/AlembicImporter.dll",
 "Assets/UTJ/Plugins/x86_64/AlembicImporter.dll",
+"Assets/UTJ/Plugins/x86/TextureWriter.dll",
+"Assets/UTJ/Plugins/x86_64/TextureWriter.dll",
 "Assets/StreamingAssets/UTJ/AlembicImporter",
 "Assets/StreamingAssets/AlembicData/Example.abc",
         };
@@ -38,6 +40,7 @@ public class AlembicImporterPackaging
 "Assets/UTJ/Plugins/x86/AlembicExporter.dll",
 "Assets/UTJ/Plugins/x86_64/AlembicExporter.dll",
 "Assets/UTJ/AlembicExporterExample",
+"Assets/StreamingAssets/UTJ/AlembicImporter",
         };
         AssetDatabase.ExportPackage(files, "AlembicExporter.unitypackage", ExportPackageOptions.Recurse);
     }
