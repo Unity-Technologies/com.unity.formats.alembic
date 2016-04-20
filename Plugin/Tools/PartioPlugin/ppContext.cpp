@@ -11,6 +11,9 @@ ppContext::ppContext()
 
 ppContext::~ppContext()
 {
+    if (m_io_async.valid()) {
+        m_io_async.wait();
+    }
 }
 
 

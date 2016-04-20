@@ -46,6 +46,14 @@ ppCLinkage ppExport ppIOAsync* ppWriteFilesAsync(ppContext *ctx, const char *pat
     return &ctx->writeFilesAsync(path);
 }
 
+ppCLinkage ppExport void ppWait(ppIOAsync *async)
+{
+    if (async->valid()) {
+        async->wait();
+    }
+}
+
+
 ppCLinkage ppExport void ppClearCaches(ppContext *ctx)
 {
     if (!ctx) return;
@@ -95,4 +103,14 @@ ppCLinkage ppExport void ppGetAttributeDataName(ppCache *cache, const char *name
 {
     if (!cache || !dst) return;
     *dst = cache->getAttributeByName(name);
+}
+
+
+ppCLinkage ppExport void ppGetParticleData(ppCache *cache, ppCacheData *data)
+{
+    if (!cache || !data) return;
+}
+ppCLinkage ppExport void ppSetParticleData(ppCache *cache, ppCacheData *data)
+{
+    if (!cache || !data) return;
 }
