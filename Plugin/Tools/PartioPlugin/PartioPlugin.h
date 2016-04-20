@@ -73,10 +73,10 @@ ppCLinkage ppExport void        ppDestroyContext(ppContext *ctx);
 ppCLinkage ppExport bool        ppReadFile(ppContext *ctx, const char *path);
 ppCLinkage ppExport size_t      ppReadFiles(ppContext *ctx, const char *pattern);
 ppCLinkage ppExport ppIOAsync*  ppReadFilesAsync(ppContext *ctx, const char *pattern); // async variant
-
 ppCLinkage ppExport bool        ppWriteFile(ppContext *ctx, const char *path, int i);
 ppCLinkage ppExport size_t      ppWriteFiles(ppContext *ctx, const char *pattern);
 ppCLinkage ppExport ppIOAsync*  ppWriteFilesAsync(ppContext *ctx, const char *pattern);// async variant
+ppCLinkage ppExport void        ppWait(ppIOAsync *async);
 
 ppCLinkage ppExport void        ppClearCaches(ppContext *ctx);
 ppCLinkage ppExport int         ppGetNumCaches(ppContext *ctx);
@@ -99,7 +99,7 @@ struct ppCacheData
 
     ppCacheData() : positions(), velocities(), ids(), num() {}
 };
-ppCLinkage ppExport void        ppGetData(ppCache *cache, ppCacheData *data);
-ppCLinkage ppExport void        ppSetData(ppCache *cache, ppCacheData *data);
+ppCLinkage ppExport void        ppGetParticleData(ppCache *cache, ppCacheData *data);
+ppCLinkage ppExport void        ppSetParticleData(ppCache *cache, ppCacheData *data);
 
 #endif // PartioPlugin_h
