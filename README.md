@@ -91,6 +91,9 @@ Alembic 側のノードには名前に "(0000283C)" のような ID が付与さ
 
 
 ## History
+- 2016/04/20
+  - [Exporter] Cloth 対応
+  - [Importer/Exporter] 色々細かい改良
 - 2016/01/07
   - [Importer/Exporter] x86 版プラグインを追加
 - 2015/12/28
