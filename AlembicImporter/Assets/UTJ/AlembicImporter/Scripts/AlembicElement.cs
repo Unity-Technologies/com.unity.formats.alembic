@@ -24,13 +24,14 @@ namespace UTJ
         bool m_verbose;
         bool m_pendingUpdate;
 
-
+        [AOT.MonoPInvokeCallback(typeof(AbcAPI.aiConfigCallback))]
         static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
             _this.AbcGetConfig(ref config);
         }
 
+        [AOT.MonoPInvokeCallback(typeof(AbcAPI.aiSampleCallback))]
         static void SampleCallback(IntPtr __this, AbcAPI.aiSample sample, bool topologyChanged)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;

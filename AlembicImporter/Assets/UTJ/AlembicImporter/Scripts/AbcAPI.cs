@@ -320,7 +320,8 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern void       aiCleanup();
         [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext(int uid);
         [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
-        
+
+        [return: MarshalAs(UnmanagedType.U1)]
         [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
         [DllImport ("AlembicImporter")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
         [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
@@ -344,6 +345,7 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
     
         [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
+        [return: MarshalAs(UnmanagedType.U1)]
         [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
     
         [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
@@ -353,6 +355,7 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
         [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
         [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
+        [return: MarshalAs(UnmanagedType.U1)]
         [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
         [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
     
@@ -484,7 +487,8 @@ namespace UTJ
                 }
             }
         }
-    
+
+        [AOT.MonoPInvokeCallback(typeof(aiNodeEnumerator))]
         static void ImportEnumerator(aiObject obj, IntPtr userData)
         {
             var ic = GCHandle.FromIntPtr(userData).Target as ImportContext;
