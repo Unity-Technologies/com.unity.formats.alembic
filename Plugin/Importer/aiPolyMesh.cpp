@@ -1503,9 +1503,8 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     auto normals = m_schema.getNormalsParam();
     if (normals.valid())
     {
-        if (normals.getScope() == AbcGeom::kFacevaryingScope ||
-            normals.getScope() == AbcGeom::kVaryingScope ||
-            normals.getScope() == AbcGeom::kVertexScope)
+        auto scope = normals.getScope();
+        if (scope != AbcGeom::kUnknownScope)
         {
             if (!normals.isConstant())
             {
@@ -1521,7 +1520,8 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     auto uvs = m_schema.getUVsParam();
     if (uvs.valid())
     {
-        if (uvs.getScope() == AbcGeom::kFacevaryingScope)
+        auto scope = normals.getScope();
+        if (scope != AbcGeom::kUnknownScope)
         {
             if (!uvs.isConstant())
             {
