@@ -32,8 +32,24 @@ void aePolyMesh::setFromPrevious()
 
 void aePolyMesh::writeSample(const aePolyMeshData &data_)
 {
-    aePolyMeshData data = data_;
     const auto &conf = getConfig();
+    aePolyMeshData data = data_;
+
+    // update normal and uv count
+    if (data.normals != nullptr) {
+        if (data.normalCount == 0) {
+            data.normalCount = data.positionCount;
+            data.normalIndices = data.indices;
+            data.normalIndexCount = data.indexCount;
+        }
+    }
+    if (data.uvs != nullptr) {
+        if (data.uvCount == 0) {
+            data.uvCount = data.positionCount;
+            data.uvIndices = data.indices;
+            data.uvIndexCount = data.indexCount;
+        }
+    }
 
 
     // handle swapHandedness and scaling for positions, velocities
@@ -128,21 +144,11 @@ void aePolyMesh::writeSample(const aePolyMeshData &data_)
         sample.setVelocities(Abc::V3fArraySample(data.velocities, data.positionCount));
     }
     if (data.normals != nullptr) {
-        if (data.normalCount == 0) {
-            data.normalCount = data.positionCount;
-            data.normalIndices = data.indices;
-            data.normalIndexCount = data.indexCount;
-        }
         sample_normals.setIndices(Abc::UInt32ArraySample((uint32_t*)data.normalIndices, data.normalIndexCount));
         sample_normals.setVals(Abc::V3fArraySample(data.normals, data.normalCount));
         sample.setNormals(sample_normals);
     }
     if (data.uvs != nullptr) {
-        if (data.uvCount == 0) {
-            data.uvIndices = data.indices;
-            data.uvCount = data.positionCount;
-            data.uvIndexCount = data.indexCount;
-        }
         sample_uvs.setIndices(Abc::UInt32ArraySample((uint32_t*)data.uvIndices, data.uvIndexCount));
         sample_uvs.setVals(Abc::V2fArraySample(data.uvs, data.uvCount));
         sample.setUVs(sample_uvs);
