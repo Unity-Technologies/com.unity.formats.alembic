@@ -1,4 +1,8 @@
+## This plugin will be superceded by [USD For Unity](https://github.com/unity3d-jp/USDForUnity), which also can import Alembic. 
+
+
 # Alembic Importer / Exporter
+
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
 - [Alembic?](#alembic)
 - [Alembic Importer](#alembic-importer)
