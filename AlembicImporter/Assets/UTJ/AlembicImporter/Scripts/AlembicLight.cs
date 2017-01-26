@@ -1,24 +1,16 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
+
 #endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
     public class AlembicLight : AlembicElement
     {
-        public override void AbcSetup(AlembicStream abcStream,
-                                      AbcAPI.aiObject abcObj,
-                                      AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
         {
-            base.AbcSetup(abcStream, abcObj, abcSchema);
+            base.AbcSetup( abcObj, abcSchema);
 
             Light light = GetOrAddComponent<Light>();
 

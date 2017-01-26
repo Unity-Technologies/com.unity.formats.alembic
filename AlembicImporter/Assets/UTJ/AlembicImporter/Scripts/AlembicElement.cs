@@ -1,99 +1,70 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
+
 #endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
-    public abstract class AlembicElement : MonoBehaviour
+    public abstract class AlembicElement : AlembicDisposable 
     {
-        public AlembicStream m_abcStream;
-        public AbcAPI.aiObject m_abcObj;
-        public AbcAPI.aiSchema m_abcSchema;
-        public GCHandle m_thisHandle;
+	    public AlembicTreeNode AlembicTreeNode { get; set; }
 
-        protected Transform m_trans;
+	    protected AbcAPI.aiObject m_abcObj;
+		protected AbcAPI.aiSchema m_abcSchema;
+		protected GCHandle m_thisHandle;
 
-        bool m_verbose;
-        bool m_pendingUpdate;
+        private bool m_verbose;
+        private bool m_pendingUpdate;
 
-        [AOT.MonoPInvokeCallback(typeof(AbcAPI.aiConfigCallback))]
-        static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
+		static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
             _this.AbcGetConfig(ref config);
         }
 
-        [AOT.MonoPInvokeCallback(typeof(AbcAPI.aiSampleCallback))]
         static void SampleCallback(IntPtr __this, AbcAPI.aiSample sample, bool topologyChanged)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
             _this.AbcSampleUpdated(sample, topologyChanged);
         }
 
-
         public T GetOrAddComponent<T>() where T : Component
         {
-            var c = gameObject.GetComponent<T>();
+            var c = AlembicTreeNode.linkedGameObj.GetComponent<T>();
             if (c == null)
             {
-                c = gameObject.AddComponent<T>();
+                c = AlembicTreeNode.linkedGameObj.AddComponent<T>();
             }
             return c;
         }
 
-        public virtual void OnDestroy()
-        {
+		protected override void Dispose(bool disposing)
+		{
             m_thisHandle.Free();
 
-            if (!Application.isPlaying)
-            {
-    #if UNITY_EDITOR
-                if (!EditorApplication.isPlayingOrWillChangePlaymode)
-                {
-                    AbcDestroy();
+			if (disposing)
+			{
+				if (AlembicTreeNode != null )
+					AlembicTreeNode.RemoveAlembicObject(this);
+			}
 
-                    if (m_abcStream != null)
-                    {
-                        m_abcStream.AbcRemoveElement(this);
-                    }
-                }
-    #else
-                AbcDestroy();
+			base.Dispose( disposing );
+		}
 
-                if (m_abcStream != null)
-                {
-                    m_abcStream.AbcRemoveElement(this);
-                }
-    #endif
-            }
-        }
-
-        public virtual void AbcSetup(AlembicStream abcStream,
-                                     AbcAPI.aiObject abcObj,
+        public virtual void AbcSetup(AbcAPI.aiObject abcObj,
                                      AbcAPI.aiSchema abcSchema)
         {
-            m_abcStream = abcStream;
             m_abcObj = abcObj;
             m_abcSchema = abcSchema;
             m_thisHandle = GCHandle.Alloc(this);
-            m_trans = GetComponent<Transform>();
 
             IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
 
             AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
             AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
-        }
-
-        public virtual void AbcDestroy()
-        {
         }
 
         // Called by loading thread (not necessarily the main thread)
@@ -111,7 +82,7 @@ namespace UTJ
 
         protected void AbcVerboseLog(string msg)
         {
-            if (m_abcStream != null && m_abcStream.m_verbose)
+            if (AlembicTreeNode != null && AlembicTreeNode.stream != null && AlembicTreeNode.stream.m_diagSettings.m_verbose)
             {
                 Debug.Log(msg);
             }
@@ -131,5 +102,7 @@ namespace UTJ
         {
             return m_pendingUpdate;
         }
+
+
     }
 }

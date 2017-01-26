@@ -1,30 +1,20 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
+
 #endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
     public class AlembicPoints : AlembicElement
     {
         // members
         AbcAPI.aiPointsData m_abcData;
-        Vector3[] m_abcPositions;
-        Vector3[] m_abcVelocities;
-        ulong[] m_abcIDs;
         AbcAPI.aiPointsSummary m_summary;
     
         // properties
         public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
-        public Vector3[] abcPositions { get { return m_abcPositions; } }
-        public ulong[] abcIDs { get { return m_abcIDs; } }
         public int abcPeakVertexCount
         {
             get {
@@ -41,42 +31,47 @@ namespace UTJ
     
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
-            if(m_abcPositions == null)
+			// get points cloud component
+			var cloud = AlembicTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
+			            AlembicTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
+
+
+			if (cloud.abcPositions == null)
             {
                 AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
-                m_abcPositions = new Vector3[m_summary.peakCount];
-                m_abcIDs = new ulong[m_summary.peakCount];    
-                m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcPositions, 0);
-                m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcIDs, 0);
+				cloud.m_abcPositions = new Vector3[m_summary.peakCount];
+				cloud.m_abcIDs = new ulong[m_summary.peakCount];
+				cloud.m_peakVertexCount = m_summary.peakCount;
+				m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcPositions, 0);
+                m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcIDs, 0);
                 if (m_summary.hasVelocity)
                 {
-                    m_abcVelocities = new Vector3[m_summary.peakCount];
-                    m_abcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(m_abcVelocities, 0);
+					cloud.m_abcVelocities = new Vector3[m_summary.peakCount];
+                    m_abcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcVelocities, 0);
                 }
             }
 
-            AbcAPI.aiPointsCopyData(sample, ref m_abcData);
-            AbcDirty();
+			m_abcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcPositions, 0);
+			m_abcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcIDs, 0);
+			if (m_summary.hasVelocity)
+				m_abcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcVelocities, 0);
+
+			AbcAPI.aiPointsCopyData(sample, ref m_abcData);
+	        cloud.m_boundsCenter = m_abcData.boundsCenter;
+			cloud.m_boundsExtents = m_abcData.boundsExtents;
+			cloud.m_count = m_abcData.count;
+
+			AbcDirty();
         }
     
         public override void AbcUpdate()
         {
-            if (AbcIsDirty())
+			if (AbcIsDirty())
             {
                 // nothing to do in this component.
                 AbcClean();
             }
         }
     
-    
-        void Reset()
-        {
-            // add renderer
-            var c = gameObject.GetComponent<AlembicPointsRenderer>();
-            if (c == null)
-            {
-                c = gameObject.AddComponent<AlembicPointsRenderer>();
-            }
-        }
     }
 }

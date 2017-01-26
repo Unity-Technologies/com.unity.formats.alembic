@@ -3,15 +3,15 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
-    class AlembicMaterialEditor : EditorWindow
+	class AlembicMaterialEditor : EditorWindow
     {
         string xmlPath = "";
         string materialFolder = "";
         GameObject assetRoot = null;
 
-        [MenuItem ("Assets/UTJ/Import Alembic Materials")]
+        //[MenuItem ("Assets/UTJ/Import Alembic Materials")]
         public static void ShowWindow()
         {
             EditorWindow.GetWindow (typeof(AlembicMaterialEditor));
