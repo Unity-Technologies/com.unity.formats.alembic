@@ -1,17 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using UnityEngine;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public class AlembicMesh : AlembicElement
     {
-        [Serializable]
         public class Split
         {
             public Vector3[] positionCache;
@@ -28,8 +23,7 @@ namespace UTJ
             public Vector3 center;
             public Vector3 size;
         }
-    
-        [Serializable]
+
         public class Submesh
         {
             public int[] indexCache;
@@ -45,14 +39,13 @@ namespace UTJ
         public AbcAPI.aiTangentsModeOverride m_tangentsMode = AbcAPI.aiTangentsModeOverride.InheritStreamSetting;
         public bool m_cacheTangentsSplits = true;
         
-        [HideInInspector] public bool hasFacesets = false;
-        [HideInInspector] public List<Submesh> m_submeshes = new List<Submesh>();
-        [HideInInspector] public List<Split> m_splits = new List<Split>();
+        public bool hasFacesets = false;
+        public List<Submesh> m_submeshes = new List<Submesh>();
+        public List<Split> m_splits = new List<Split>();
     
         AbcAPI.aiMeshSummary m_summary;
         AbcAPI.aiMeshSampleSummary m_sampleSummary;
         bool m_freshSetup = false;
-    
     
         public static IntPtr GetArrayPtr(Array a)
         {
@@ -103,7 +96,7 @@ namespace UTJ
                         uvCache = new Vector2[0],
                         tangentCache = new Vector4[0],
                         mesh = null,
-                        host = m_trans.gameObject,
+                        host = AlembicTreeNode.linkedGameObj,
                         clear = true,
                         submeshCount = 0,
                         active = true,
@@ -125,19 +118,13 @@ namespace UTJ
             }
         }
     
-        public override void AbcSetup(AlembicStream abcStream,
-                                      AbcAPI.aiObject abcObj,
-                                      AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
         {
-            base.AbcSetup(abcStream, abcObj, abcSchema);
+            base.AbcSetup(abcObj, abcSchema);
     
             AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
     
             m_freshSetup = true;
-        }
-        
-        public override void AbcDestroy()
-        {
         }
     
         public override void AbcGetConfig(ref AbcAPI.aiConfig config)
@@ -162,14 +149,14 @@ namespace UTJ
             // if 'forceUpdate' is set true, even if alembic sample data do not change at all
             // AbcSampleUpdated will still be called (topologyChanged will be false)
     
-            AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
+            var abcMaterials = AlembicTreeNode.linkedGameObj.GetComponent<AlembicMaterial>();
     
             config.forceUpdate = m_freshSetup || (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
         }
     
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
-            AlembicMaterial abcMaterials = m_trans.GetComponent<AlembicMaterial>();
+            var abcMaterials = AlembicTreeNode.linkedGameObj.GetComponent<AlembicMaterial>();
     
             if (abcMaterials != null)
             {
@@ -351,9 +338,9 @@ namespace UTJ
                     {
                         if (useSubObjects)
                         {
-                            string name = m_trans.gameObject.name + "_split_" + s;
+                            string name = AlembicTreeNode.linkedGameObj.name + "_split_" + s;
     
-                            Transform trans = m_trans.FindChild(name);
+                            Transform trans = AlembicTreeNode.linkedGameObj.transform.FindChild(name);
     
                             if (trans == null)
                             {
@@ -361,7 +348,7 @@ namespace UTJ
                                 go.name = name;
     
                                 trans = go.GetComponent<Transform>();
-                                trans.parent = m_trans;
+                                trans.parent = AlembicTreeNode.linkedGameObj.transform;
                                 trans.localPosition = Vector3.zero;
                                 trans.localEulerAngles = Vector3.zero;
                                 trans.localScale = Vector3.one;
@@ -371,7 +358,7 @@ namespace UTJ
                         }
                         else
                         {
-                            split.host = m_trans.gameObject;
+                            split.host = AlembicTreeNode.linkedGameObj;
                         }
                     }
     
@@ -379,7 +366,7 @@ namespace UTJ
                     if (split.mesh == null)
                     {
                         split.mesh = AddMeshComponents(m_abcObj, split.host);
-                        split.mesh.name = split.host.name;
+//                        split.mesh.name = ""split.host.name;
                     }
     
                     if (split.clear)
@@ -467,11 +454,15 @@ namespace UTJ
             Mesh mesh = null;
             
             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
-            
-            if (meshFilter == null || meshFilter.sharedMesh == null)
+
+	        bool hasMesh = meshFilter != null
+	                       && meshFilter.sharedMesh != null
+	                       && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+
+			if( !hasMesh)
             {
-                mesh = new Mesh();
-                mesh.MarkDynamic();
+	            mesh = new Mesh {name = "dyn: " + gameObject.name};
+	            mesh.MarkDynamic();
     
                 if (meshFilter == null)
                 {

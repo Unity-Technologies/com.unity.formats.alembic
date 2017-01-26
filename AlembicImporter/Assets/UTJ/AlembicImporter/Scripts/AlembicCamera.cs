@@ -1,15 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
     public class AlembicCamera : AlembicElement
@@ -17,15 +8,14 @@ namespace UTJ
         public AbcAPI.aiAspectRatioModeOverride m_aspectRatioMode = AbcAPI.aiAspectRatioModeOverride.InheritStreamSetting;
         public bool m_ignoreClippingPlanes = false;
 
-        Camera m_camera;
-        AbcAPI.aiCameraData m_abcData;
-        bool m_lastIgnoreClippingPlanes = false;
+        private Camera m_camera;
+        private AbcAPI.aiCameraData m_abcData;
+        private bool m_lastIgnoreClippingPlanes = false;
 
-        public override void AbcSetup(AlembicStream abcStream,
-                                      AbcAPI.aiObject abcObj,
+        public override void AbcSetup(AbcAPI.aiObject abcObj,
                                       AbcAPI.aiSchema abcSchema)
         {
-            base.AbcSetup(abcStream, abcObj, abcSchema);
+            base.AbcSetup( abcObj, abcSchema);
 
             m_camera = GetOrAddComponent<Camera>();
         }
@@ -49,7 +39,7 @@ namespace UTJ
         {
             if (AbcIsDirty() || m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
             {
-                m_trans.forward = -m_trans.parent.forward;
+				AlembicTreeNode.linkedGameObj.transform.forward = -AlembicTreeNode.linkedGameObj.transform.parent.forward;
                 m_camera.fieldOfView = m_abcData.fieldOfView;
 
                 if (!m_ignoreClippingPlanes)

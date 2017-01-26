@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Reflection;
@@ -9,7 +10,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     public partial class AbcAPI
     {
@@ -320,8 +321,7 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern void       aiCleanup();
         [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext(int uid);
         [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
-
-        [return: MarshalAs(UnmanagedType.U1)]
+        
         [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
         [DllImport ("AlembicImporter")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
         [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
@@ -345,7 +345,6 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
     
         [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
-        [return: MarshalAs(UnmanagedType.U1)]
         [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
     
         [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
@@ -355,7 +354,6 @@ namespace UTJ
         [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
         [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
         [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
-        [return: MarshalAs(UnmanagedType.U1)]
         [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
         [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
     
@@ -374,11 +372,13 @@ namespace UTJ
         [DllImport("AlembicImporter")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData o_data);
 
 
-        class ImportContext
+
+
+
+		class ImportContext
         {
-            public AlembicStream abcStream;
-            public Transform parent;
-            public aiSampleSelector ss;
+	        public AlembicTreeNode alembicTreeNode;
+			public aiSampleSelector ss;
             public bool createMissingNodes;
             public List<aiObject> objectsToDelete;
         }
@@ -417,15 +417,7 @@ namespace UTJ
             Uri pathToAssets = new Uri(Application.streamingAssetsPath + "/");
             return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
         }
-    
-        [MenuItem ("Assets/UTJ/Import Alembic")]
-        static void Import()
-        {
-            var path = MakeRelativePath(EditorUtility.OpenFilePanel("Select alembic (.abc) file in StreamingAssets directory", Application.streamingAssetsPath, "abc"));
-            ImportParams p = new ImportParams();
-            ImportImpl(path, p);
-        }
-    
+    /*
         public static GameObject ImportAbc(string path)
         {
             var relPath = MakeRelativePath(path);
@@ -433,7 +425,7 @@ namespace UTJ
             return ImportImpl(relPath, p);
         }
     
-        static GameObject ImportImpl(string path, ImportParams p)
+        private static GameObject ImportImpl(string path, ImportParams p)
         {
             if (path == null || path == "")
             {
@@ -449,31 +441,32 @@ namespace UTJ
                 name = baseName + index;
                 ++index;
             }
-    
-            GameObject root = new GameObject();
-            root.name = name;
-    
-            var abcStream = root.AddComponent<AlembicStream>();
-            abcStream.m_pathToAbc = path;
-            abcStream.m_swapHandedness = p.swapHandedness;
-            abcStream.m_swapFaceWinding = p.swapFaceWinding;
-            abcStream.AbcLoad(true);
+
+	        var root = new GameObject {name = name};
+	        var abcStream = new AlembicStream( root )
+	        {
+		        m_pathToAbc = path,
+		        m_swapHandedness = p.swapHandedness,
+		        m_swapFaceWinding = p.swapFaceWinding
+	        };
+	        abcStream.AbcLoad(true);
     
             return root;
         }
-    
+    */
     #endif
         
-        public static void UpdateAbcTree(aiContext ctx, Transform root, float time, bool createMissingNodes=false)
+        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=false)
         {
-            var ic = new ImportContext();
-            ic.abcStream = root.GetComponent<AlembicStream>();
-            ic.parent = root;
-            ic.ss = aiTimeToSampleSelector(time);
-            ic.createMissingNodes = createMissingNodes;
-            ic.objectsToDelete = new List<aiObject>();
-    
-            GCHandle hdl = GCHandle.Alloc(ic);
+	        var ic = new ImportContext
+	        {
+				alembicTreeNode = node,
+		        ss = aiTimeToSampleSelector(time),
+		        createMissingNodes = createMissingNodes,
+		        objectsToDelete = new List<aiObject>()
+	        };
+
+	        GCHandle hdl = GCHandle.Alloc(ic);
     
             aiObject top = aiGetTopObject(ctx);
     
@@ -487,69 +480,78 @@ namespace UTJ
                 }
             }
         }
-
-        [AOT.MonoPInvokeCallback(typeof(aiNodeEnumerator))]
+    
         static void ImportEnumerator(aiObject obj, IntPtr userData)
         {
             var ic = GCHandle.FromIntPtr(userData).Target as ImportContext;
-            Transform parent = ic.parent;
+			AlembicTreeNode treeNode = ic.alembicTreeNode;
     
+			// Get child. create if needed and allowed.
             string childName = aiGetName(obj);
-            var trans = parent.FindChild(childName);
-    
-            if (trans == null)
+
+			// Find targetted child GameObj
+	        AlembicTreeNode childTreeNode = null;
+	        GameObject childGO = null;
+			var childTransf = treeNode.linkedGameObj.transform.FindChild(childName);
+	        if (childTransf == null)
+	        {
+		        if (!ic.createMissingNodes)
+		        {
+			        ic.objectsToDelete.Add(obj);
+			        return;
+		        }
+
+		        childGO = new GameObject {name = childName};
+		        var trans = childGO.GetComponent<Transform>();
+		        trans.parent = treeNode.linkedGameObj.transform;
+		        trans.localPosition = Vector3.zero;
+		        trans.localEulerAngles = Vector3.zero;
+		        trans.localScale = Vector3.one;
+	        }
+	        else
+		        childGO = childTransf.gameObject;
+
+			if (childTreeNode == null )
             {
-                if (!ic.createMissingNodes)
-                {
-                    ic.objectsToDelete.Add(obj);
-                    return;
-                }
-    
-                GameObject go = new GameObject();
-                go.name = childName;
-                trans = go.GetComponent<Transform>();
-                trans.parent = parent;
-                trans.localPosition = Vector3.zero;
-                trans.localEulerAngles = Vector3.zero;
-                trans.localScale = Vector3.one;
+				childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
+				treeNode.children.Add(childTreeNode);
             }
     
+			// Update
             AlembicElement elem = null;
             aiSchema schema = default(aiSchema);
     
             if (aiGetXForm(obj))
             {
-                elem = GetOrAddComponent<AlembicXForm>(trans.gameObject);
+                elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
                 schema = aiGetXForm(obj);
             }
             else if (aiGetPolyMesh(obj))
             {
-                elem = GetOrAddComponent<AlembicMesh>(trans.gameObject);
+                elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
                 schema = aiGetPolyMesh(obj);
             }
             else if (aiGetCamera(obj))
             {
-                elem = GetOrAddComponent<AlembicCamera>(trans.gameObject);
+                elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
                 schema = aiGetCamera(obj);
             }
             else if (aiGetPoints(obj))
             {
-                elem = GetOrAddComponent<AlembicPoints>(trans.gameObject);
+                elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
                 schema = aiGetPoints(obj);
             }
     
-            if (elem)
+            if (elem != null)
             {
-                elem.AbcSetup(ic.abcStream, obj, schema);
+                elem.AbcSetup(obj, schema);
                 aiSchemaUpdateSample(schema, ref ic.ss);
                 elem.AbcUpdate();
-                
-                ic.abcStream.AbcAddElement(elem);
             }
     
-            ic.parent = trans;
+            ic.alembicTreeNode = childTreeNode;
             aiEnumerateChild(obj, ImportEnumerator, userData);
-            ic.parent = parent;
+            ic.alembicTreeNode = treeNode;
         }
         
         public static T GetOrAddComponent<T>(GameObject go) where T : Component
