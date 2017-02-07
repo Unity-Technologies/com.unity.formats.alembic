@@ -14,13 +14,10 @@ namespace UTJ.Alembic
 			SerializedProperty iterator = this.serializedObject.GetIterator();
 			for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
 			{
-                using (new EditorGUI.DisabledScope(false))
-                {
-                    EditorGUILayout.PropertyField(iterator, true, new GUILayoutOption[0]);                    
-                }
+				using (new EditorGUI.DisabledScope(false))
+					EditorGUILayout.PropertyField(iterator, true, new GUILayoutOption[0]);                    
 			}
-            this.serializedObject.ApplyModifiedProperties();
-        }
-
-    }
+			this.serializedObject.ApplyModifiedProperties();
+		}
+	}
 }
