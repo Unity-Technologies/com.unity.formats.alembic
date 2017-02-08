@@ -15,9 +15,9 @@ namespace UTJ.Alembic
 			for (bool enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
 			{
 				using (new EditorGUI.DisabledScope(false))
-					EditorGUILayout.PropertyField(iterator, true, new GUILayoutOption[0]);
+					EditorGUILayout.PropertyField(iterator, true, new GUILayoutOption[0]);                    
 			}
+			this.serializedObject.ApplyModifiedProperties();
 		}
-
 	}
 }
