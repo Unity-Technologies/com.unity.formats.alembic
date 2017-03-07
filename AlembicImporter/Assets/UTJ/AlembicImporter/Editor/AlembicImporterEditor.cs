@@ -7,7 +7,7 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
 	[CustomEditor(typeof(AlembicImporter))]
-	public class AlembicImporterEditor : ScriptedImporterInspector
+	public class AlembicImporterEditor : UnityEditor.Experimental.ScriptedImporterEditor
 	{
 
 		public override void OnInspectorGUI()

@@ -5,34 +5,34 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-	[ScriptedImporter(1, "abc")]
-    public class AlembicImporter : ScriptedImporter
+	[UnityEditor.Experimental.ScriptedImporter(1, "abc")]
+    public class AlembicImporter : UnityEditor.Experimental.ScriptedImporter
 	{
 		[SerializeField] public AlembicImportSettings m_ImportSettings = new AlembicImportSettings();
 		[HideInInspector][SerializeField] public AlembicDiagnosticSettings m_diagSettings = new AlembicDiagnosticSettings();
 		[HideInInspector][SerializeField] public AlembicImportMode m_importMode = AlembicImportMode.AutomaticStreamingSetup;
 
-		public override void OnImportAsset(ImportAssetEventArgs args)
+		public override void OnImportAsset()
 		{
-			m_ImportSettings.m_pathToAbc = args.AssetSourcePath;
+			m_ImportSettings.m_pathToAbc = assetSourcePath;
 			var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
 			{
-				GenerateSubAssets(args, mainGO, stream);
+				GenerateSubAssets(mainGO, stream);
 				if(streamDescr != null)
-					args.AddSubAsset( mainGO.name, streamDescr);
+					AddSubAsset( mainGO.name, streamDescr);
 			});
-			args.SetMainAsset(mainObject.name, mainObject);
+			SetMainAsset(mainObject.name, mainObject);
 		}
 
-		private void GenerateSubAssets(ImportAssetEventArgs args, GameObject go, AlembicStream stream)
+		private void GenerateSubAssets( GameObject go, AlembicStream stream)
 		{
 			var material = new Material(Shader.Find("Standard")) { };
-			args.AddSubAsset("Default Material", material);
+			AddSubAsset("Default Material", material);
 
-			CollectSubAssets(stream.AlembicTreeRoot, args, material);
+			CollectSubAssets(stream.AlembicTreeRoot, material);
 		}
 
-		private void CollectSubAssets(AlembicTreeNode node, ImportAssetEventArgs args, Material mat)
+		private void CollectSubAssets(AlembicTreeNode node,  Material mat)
 		{
 			if (m_ImportSettings.m_importMeshes)
 			{
@@ -41,7 +41,7 @@ namespace UTJ.Alembic
 				{
 					var m = meshFilter.sharedMesh;
 					m.name = node.linkedGameObj.name;
-					args.AddSubAsset(m.name, m);
+					AddSubAsset(m.name, m);
 				}
 			}
 
@@ -50,7 +50,7 @@ namespace UTJ.Alembic
 				renderer.material = mat;
 
 			foreach( var child in node.children )
-				CollectSubAssets(child, args, mat);
+				CollectSubAssets(child, mat);
 		}
 
 	}
