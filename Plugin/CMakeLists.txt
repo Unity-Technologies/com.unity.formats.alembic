@@ -1,83 +1,91 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.4)
-PROJECT(AlembicPlugins)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(AlembicForUnity)
 
-OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
-OPTION (USE_GRAPHICS_DEVICE "Use Graphics Devices (Required by write-data-to-texture feature)" ON)
-OPTION (USE_EXTERNALS "Use Externals (Add externals/alembic etc to include & library path)" ON)
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+FIND_PACKAGE(OpenEXR QUIET)
+FIND_PACKAGE(HDF5 QUIET)
+FIND_PACKAGE(Alembic QUIET)
 
-IF(MSVC)
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MT")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11")
+
+IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    OPTION(ABCI_ENABLE_OSX_BUNDLE "Build bundle." OFF)
+    SET(CMAKE_MACOSX_RPATH ON)
+
+    IF(ABCI_ENABLE_OSX_BUNDLE)
+        SET(CMAKE_SKIP_RPATH ON)
+    ELSE()
+        SET(CMAKE_SKIP_RPATH OFF)
+    ENDIF()
 ENDIF()
 
-SET( INCLUDES
+SET(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../AlembicImporter/Assets")
+SET(PLUGINS_DIR "${ASSETS_DIR}/UTJ/Plugins/x86_64")
+
+INCLUDE_DIRECTORIES(
     .
-    Foundation
+    ${OPENEXR_INCLUDE_DIRS}
+    ${ALEMBIC_INCLUDE_DIR}
 )
-IF(USE_EXTERNALS)
-    SET (INCLUDES
-        ${INCLUDES}
-        external/glew-1.13.0/include
-        external/alembic-1_05_08/lib
-        external/ilmbase-2.2.0/Imath
-        external/ilmbase-2.2.0/IlmThread
-        external/ilmbase-2.2.0/IexMath
-        external/ilmbase-2.2.0/Iex
-        external/ilmbase-2.2.0/Half
-        external/ilmbase-2.2.0/config
-        external/hdf5-1.8.14/hl/src
-        external/hdf5-1.8.14/src
-        external/hdf5-1.8.14
-    )
+
+
+# AlembicImporter
+FILE(GLOB AI_CXX_FILES Importer/*.cpp Foundation/*.cpp)
+FILE(GLOB AI_H_FILES Importer/*.h Foundation/*.h)
+IF(ABCI_ENABLE_OSX_BUNDLE)
+    ADD_LIBRARY(AlembicImporter MODULE ${AI_CXX_FILES} ${AI_H_FILES})
+ELSE()
+    ADD_LIBRARY(AlembicImporter SHARED ${AI_CXX_FILES} ${AI_H_FILES})
 ENDIF()
-INCLUDE_DIRECTORIES(${INCLUDES})
+TARGET_INCLUDE_DIRECTORIES(AlembicImporter PUBLIC ./Foundation)
+TARGET_LINK_LIBRARIES(AlembicImporter
+    ${OPENEXR_Half_LIBRARY}
+    ${OPENEXR_Iex_LIBRARY}
+    ${OPENEXR_IexMath_LIBRARY}
+    ${HDF5_C_LIBRARIES}
+    ${HDF5_HL_LIBRARIES}
+    ${ALEMBIC_LIBRARY}
+)
 
-IF(USE_EXTERNALS)
-    LINK_DIRECTORIES (
-        ${CMAKE_SOURCE_DIR}/external/libs/x86_64
-    )
+
+# AlembicExporter
+FILE(GLOB AE_CXX_FILES Exporter/*.cpp Foundation/*.cpp)
+FILE(GLOB AE_H_FILES Exporter/*.h Foundation/*.h)
+IF(ABCI_ENABLE_OSX_BUNDLE)
+    ADD_LIBRARY(AlembicExporter MODULE ${AE_CXX_FILES} ${AI_H_FILES})
+ELSE()
+    ADD_LIBRARY(AlembicExporter SHARED ${AE_CXX_FILES} ${AI_H_FILES})
 ENDIF()
-
-FILE(GLOB EXPORTER_CXX_FILES Exporter/*.cpp)
-FILE(GLOB EXPORTER_H_FILES Exporter/*.h)
-
-FILE(GLOB IMPORTER_CXX_FILES Importer/*.cpp)
-FILE(GLOB IMPORTER_H_FILES Importer/*.h)
-
-FILE(GLOB FOUNDATION_CXX_FILES Foundation/*.cpp)
-FILE(GLOB FOUNDATION_H_FILES Foundation/*.h)
-
-SET( GRAPHICS_CXX_FILES
-    GraphicsDevice/aiGraphicsDevice.cpp
-    GraphicsDevice/aiGraphicsDeviceOpenGL.cpp
+TARGET_INCLUDE_DIRECTORIES(AlembicExporter PUBLIC ./Foundation)
+TARGET_LINK_LIBRARIES(AlembicExporter
+    ${OPENEXR_Half_LIBRARY}
+    ${OPENEXR_Iex_LIBRARY}
+    ${OPENEXR_IexMath_LIBRARY}
+    ${HDF5_C_LIBRARIES}
+    ${HDF5_HL_LIBRARIES}
+    ${ALEMBIC_LIBRARY}
 )
-SET( GRAPHICS_H_FILES
-    GraphicsDevice/aiGraphicsDevice.h
-)
-IF(WIN32)
-    SET( GRAPHICS_CXX_FILES
-      ${GRAPHICS_CXX_FILES}
-      GraphicsDevice/aiGraphicsDeviceD3D11.cpp
-    )
-ENDIF()
 
 
-SET( EXPORTER_SOURCE_FILES
-    pch.cpp pch.h
-    ${EXPORTER_CXX_FILES} ${EXPORTER_H_FILES}
-)
-ADD_LIBRARY( AlembicExporter ${EXPORTER_SOURCE_FILES} )
-
-SET( IMPORTER_SOURCE_FILES
-    pch.cpp pch.h
-    ${IMPORTER_CXX_FILES} ${IMPORTER_H_FILES}
-    ${FOUNDATION_CXX_FILES} ${FOUNDATION_H_FILES}
-)
-IF(USE_GRAPHICS_DEVICE)
-    SET( IMPORTER_SOURCE_FILES
-        ${IMPORTER_SOURCE_FILES}
-        ${GRAPHICS_CXX_FILES} ${GRAPHICS_H_FILES}
-    )
+IF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    IF(ABCI_ENABLE_OSX_BUNDLE)
+        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES BUNDLE ON)
+    ELSE()
+        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES PREFIX "")
+        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES SUFFIX ".bundle")
+    ENDIF()
 ENDIF()
 
-ADD_LIBRARY( AlembicImporter ${IMPORTER_SOURCE_FILES} )
+IF(NOT ABCI_ENABLE_OSX_BUNDLE)
+    # deploy
+    ADD_CUSTOM_TARGET(deploy ALL
+        COMMAND rm -rf ${PLUGINS_DIR}/$<TARGET_FILE_NAME:AlembicImporter>
+        COMMAND rm -rf ${PLUGINS_DIR}/$<TARGET_FILE_NAME:AlembicExporter>
+        COMMAND cp $<TARGET_FILE:AlembicImporter> ${PLUGINS_DIR}
+        COMMAND cp $<TARGET_FILE:AlembicExporter> ${PLUGINS_DIR}
+        DEPENDS AlembicImporter
+        DEPENDS AlembicExporter
+    )
+ENDIF()
