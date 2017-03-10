@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "AlembicImporter.h"
+#include "abci.h"
 #include "aiLogger.h"
 #include "aiContext.h"
 #include "aiProperty.h"
@@ -56,7 +56,7 @@ public:
     aiTScalarProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
@@ -121,7 +121,7 @@ public:
     aiTArrayProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }

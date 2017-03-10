@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "AlembicExporter.h"
+#include "abci.h"
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aeXForm.h"
@@ -17,123 +17,123 @@
 #endif
 
 
-aeCLinkage aeExport aeContext* aeCreateContext()
+abciAPI aeContext* aeCreateContext()
 {
     return new aeContext();
 }
 
-aeCLinkage aeExport void aeDestroyContext(aeContext* ctx)
+abciAPI void aeDestroyContext(aeContext* ctx)
 {
     delete ctx;
 }
 
-aeCLinkage aeExport void aeSetConfig(aeContext* ctx, const aeConfig *conf)
+abciAPI void aeSetConfig(aeContext* ctx, const aeConfig *conf)
 {
     return ctx->setConfig(*conf);
 }
 
-aeCLinkage aeExport bool aeOpenArchive(aeContext* ctx, const char *path)
+abciAPI bool aeOpenArchive(aeContext* ctx, const char *path)
 {
     return ctx->openArchive(path);
 }
 
 
-aeCLinkage aeExport aeObject* aeGetTopObject(aeContext* ctx)
+abciAPI aeObject* aeGetTopObject(aeContext* ctx)
 {
     return ctx->getTopObject();
 }
 
-aeCLinkage aeExport int aeAddTimeSampling(aeContext* ctx, float start_time)
+abciAPI int aeAddTimeSampling(aeContext* ctx, float start_time)
 {
     return ctx->addTimeSampling(start_time);
 }
 
-aeCLinkage aeExport void aeAddTime(aeContext* ctx, float time, int tsi)
+abciAPI void aeAddTime(aeContext* ctx, float time, int tsi)
 {
     ctx->addTime(time, tsi);
 }
 
 
-aeCLinkage aeExport void aeDeleteObject(aeObject *obj)
+abciAPI void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-aeCLinkage aeExport aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
+abciAPI aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
 {
     return parent->newChild<aeXForm>(name, tsi);
 }
-aeCLinkage aeExport aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
+abciAPI aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
 {
     return parent->newChild<aePoints>(name, tsi);
 }
-aeCLinkage aeExport aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi)
+abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi)
 {
     return parent->newChild<aePolyMesh>(name, tsi);
 }
-aeCLinkage aeExport aeCamera* aeNewCamera(aeObject *parent, const char *name, int tsi)
+abciAPI aeCamera* aeNewCamera(aeObject *parent, const char *name, int tsi)
 {
     return parent->newChild<aeCamera>(name, tsi);
 }
 
-aeCLinkage aeExport int aeGetNumChildren(aeObject *obj)
+abciAPI int aeGetNumChildren(aeObject *obj)
 {
     return (int)obj->getNumChildren();
 }
-aeCLinkage aeExport aeObject* aeGetChild(aeObject *obj, int i)
+abciAPI aeObject* aeGetChild(aeObject *obj, int i)
 {
     return obj->getChild(i);
 }
 
-aeCLinkage aeExport aeObject* aeGetParent(aeObject *obj)
+abciAPI aeObject* aeGetParent(aeObject *obj)
 {
     return obj->getParent();
 }
 
-aeCLinkage aeExport aeXForm* aeAsXForm(aeObject *obj)
+abciAPI aeXForm* aeAsXForm(aeObject *obj)
 {
     return dynamic_cast<aeXForm*>(obj);
 }
-aeCLinkage aeExport aePoints* aeAsPoints(aeObject *obj)
+abciAPI aePoints* aeAsPoints(aeObject *obj)
 {
     return dynamic_cast<aePoints*>(obj);
 }
-aeCLinkage aeExport aePolyMesh* aeAsPolyMesh(aeObject *obj)
+abciAPI aePolyMesh* aeAsPolyMesh(aeObject *obj)
 {
     return dynamic_cast<aePolyMesh*>(obj);
 }
-aeCLinkage aeExport aeCamera* aeAsCamera(aeObject *obj)
+abciAPI aeCamera* aeAsCamera(aeObject *obj)
 {
     return dynamic_cast<aeCamera*>(obj);
 }
 
 
-aeCLinkage aeExport int aeGetNumSamples(aeObject *obj)
+abciAPI int aeGetNumSamples(aeObject *obj)
 {
     return (int)obj->getNumSamples();
 }
-aeCLinkage aeExport void aeSetFromPrevious(aeObject *obj)
+abciAPI void aeSetFromPrevious(aeObject *obj)
 {
     obj->setFromPrevious();
 }
 
-aeCLinkage aeExport void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
+abciAPI void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aePointsWriteSample(aePoints *obj, const aePointsData *data)
+abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
+abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
     obj->writeSample(*data);
 }
-aeCLinkage aeExport void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
+abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
     obj->writeSample(*data);
 }
 
-aeCLinkage aeExport aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
+abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
 {
     switch (type) {
         // scalar properties
@@ -156,23 +156,23 @@ aeCLinkage aeExport aeProperty* aeNewProperty(aeObject *parent, const char *name
     case aePropertyType_Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
     case aePropertyType_Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
-    aeDebugLog("aeNewProperty(): unknown type");
+    abciDebugLog("aeNewProperty(): unknown type");
     return nullptr;
 }
 
-aeCLinkage aeExport void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
+abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
 {
     if (!prop->isArray()) {
-        aeDebugLog("aePropertyWriteArraySample(): property is scalar!");
+        abciDebugLog("aePropertyWriteArraySample(): property is scalar!");
         return;
     }
     prop->writeSample(data, num_data);
 }
 
-aeCLinkage aeExport void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
+abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 {
     if (prop->isArray()) {
-        aeDebugLog("aePropertyWriteScalarSample(): property is array!");
+        abciDebugLog("aePropertyWriteScalarSample(): property is array!");
         return;
     }
     prop->writeSample(data, 1);

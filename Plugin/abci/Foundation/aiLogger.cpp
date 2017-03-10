@@ -25,7 +25,7 @@ aiLogger::~aiLogger()
 
 void aiLogger::_openDebug()
 {
-#if defined(aiDebug) || defined(aiDebugLog)
+#if defined(abciDebug) || defined(abciDebugLog)
    mFile = fopen(gDebugLogPath, "a");   
    mPath = (mFile != 0 ? gDebugLogPath : "");
 #endif
@@ -82,7 +82,7 @@ void aiLogger::unindent(int level)
 
 void aiLogger::close()
 {
-#if defined(aiDebug) || defined(aiDebugLog)
+#if defined(abciDebug) || defined(abciDebugLog)
    // do not close the debug log file
    if (mFile && mPath != gDebugLogPath)
    {

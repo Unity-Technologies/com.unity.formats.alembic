@@ -49,6 +49,11 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="TextureWriter\TextureWriter.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\abci.vcxproj">
+      <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

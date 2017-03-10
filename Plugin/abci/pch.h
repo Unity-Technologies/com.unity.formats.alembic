@@ -17,22 +17,19 @@
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
 
-#define aiImpl
-#define aeImpl
-#define aeDebugLog(...) 
+#define abciImpl
+#define abciDebugLog(...) 
 
-
-
-#if defined(aiDebug) || defined(aiDebugLog)
+#if defined(abciDebug) || defined(abciDebugLog)
     #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
 #else
     #define DebugLog(...)
 #endif
 
 #ifdef _WIN32
-#define NOMINMAX
-#include <windows.h>
-#pragma warning(disable: 4996)
+    #define NOMINMAX
+    #include <windows.h>
+    #pragma warning(disable: 4996)
 #endif // _WIN32
 
 using namespace Alembic;

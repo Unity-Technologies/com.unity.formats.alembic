@@ -46,10 +46,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AlembicExporter.vcxproj">
-      <Project>{35e1c482-1aee-4aae-bbe9-0309cb84f321}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\AlembicImporter.vcxproj">
+    <ProjectReference Include="..\abci.vcxproj">
       <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
     </ProjectReference>
   </ItemGroup>

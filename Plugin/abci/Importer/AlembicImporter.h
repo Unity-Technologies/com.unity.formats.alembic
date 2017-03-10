@@ -2,75 +2,6 @@
 
 #include <cstdint>
 
-#ifdef _WIN32
-    #define aiWindows
-#endif // _WIN32
-
-#ifdef _MSC_VER
-    #define aiSTDCall __stdcall
-    #pragma warning(disable: 4190)
-#else // _MSC_VER
-    #define aiSTDCall __attribute__((stdcall))
-#endif // _MSC_VER
-
-#define aiCLinkage extern "C"
-
-#ifdef aiImpl
-    #ifndef aiStaticLink
-        #ifdef _MSC_VER
-            #define aiExport __declspec(dllexport)
-        #else
-            #define aiExport __attribute__((visibility("default")))
-        #endif
-    #else
-        #define aiExport 
-    #endif
-#else
-    #ifdef _MSC_VER
-        #ifndef aiStaticLink
-            #define aiExport __declspec(dllimport)
-            #pragma comment(lib, "AlembicImporter.lib")
-        #else
-            #define aiExport 
-            #pragma comment(lib, "AlembicImporter_s.lib")
-        #endif
-    #else
-    #endif
-
-#ifndef AlembicExporter_h
-    struct abcV2
-    {
-        float x, y;
-
-        abcV2() {}
-        abcV2(float _x, float _y) : x(_x), y(_y) {}
-    };
-
-    struct abcV3
-    {
-        float x, y, z;
-
-        abcV3() {}
-        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-    };
-
-    struct abcV4
-    {
-        float x, y, z, w;
-
-        abcV4() {}
-        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
-    };
-
-    struct abcSampleSelector
-    {
-        uint64_t m_requestedIndex;
-        double m_requestedTime;
-        int m_requestedTimeIndexType;
-    };
-#endif // AlembicExporter_h
-#endif // aiImpl
-
 enum aiTextureFormat;
 
 struct  aiConfig;
@@ -85,7 +16,7 @@ struct  aiFacesets;
 
 class   aiContext;
 class   aiObject;
-#ifdef aeImpl
+#ifdef abciImpl
     class aiSchemaBase;
     class aiSampleBase;
     class aiXFormSample;    // : aiSampleBase
@@ -452,87 +383,87 @@ struct aiPropertyData
 };
 
 
-typedef void (aiSTDCall *aiNodeEnumerator)(aiObject *node, void *userData);
-typedef void (aiSTDCall *aiConfigCallback)(void *csObj, aiConfig *config);
-typedef void (aiSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
+typedef void (abciSTDCall *aiNodeEnumerator)(aiObject *node, void *userData);
+typedef void (abciSTDCall *aiConfigCallback)(void *csObj, aiConfig *config);
+typedef void (abciSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
 
 
-aiCLinkage aiExport abcSampleSelector aiTimeToSampleSelector(float time);
-aiCLinkage aiExport abcSampleSelector aiIndexToSampleSelector(int index);
+abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
+abciAPI abcSampleSelector aiIndexToSampleSelector(int index);
 
-aiCLinkage aiExport void            aiEnableFileLog(bool on, const char *path);
+abciAPI void            aiEnableFileLog(bool on, const char *path);
 
-aiCLinkage aiExport void            aiCleanup();
-aiCLinkage aiExport aiContext*      aiCreateContext(int uid);
-aiCLinkage aiExport void            aiDestroyContext(aiContext* ctx);
+abciAPI void            aiCleanup();
+abciAPI aiContext*      aiCreateContext(int uid);
+abciAPI void            aiDestroyContext(aiContext* ctx);
 
-aiCLinkage aiExport bool            aiLoad(aiContext* ctx, const char *path);
-aiCLinkage aiExport void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
-aiCLinkage aiExport float           aiGetStartTime(aiContext* ctx);
-aiCLinkage aiExport float           aiGetEndTime(aiContext* ctx);
-aiCLinkage aiExport aiObject*       aiGetTopObject(aiContext* ctx);
-aiCLinkage aiExport void            aiDestroyObject(aiContext* ctx, aiObject* obj);
+abciAPI bool            aiLoad(aiContext* ctx, const char *path);
+abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
+abciAPI float           aiGetStartTime(aiContext* ctx);
+abciAPI float           aiGetEndTime(aiContext* ctx);
+abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
+abciAPI void            aiDestroyObject(aiContext* ctx, aiObject* obj);
 
-aiCLinkage aiExport int             aiGetNumTimeSamplings(aiContext* ctx);
-aiCLinkage aiExport void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
+abciAPI int             aiGetNumTimeSamplings(aiContext* ctx);
+abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 // deep copy to dst->times. if time sampling type is not Acyclic (which have no times), do exact same thing as aiGetTimeSampling()
-aiCLinkage aiExport void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
+abciAPI void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 
-aiCLinkage aiExport void            aiUpdateSamples(aiContext* ctx, float time);
-aiCLinkage aiExport void            aiUpdateSamplesBegin(aiContext* ctx, float time);   // async version
-aiCLinkage aiExport void            aiUpdateSamplesEnd(aiContext* ctx);                 // async version
+abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
+abciAPI void            aiUpdateSamplesBegin(aiContext* ctx, float time);   // async version
+abciAPI void            aiUpdateSamplesEnd(aiContext* ctx);                 // async version
 
-aiCLinkage aiExport void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
-aiCLinkage aiExport const char*     aiGetNameS(aiObject* obj);
-aiCLinkage aiExport const char*     aiGetFullNameS(aiObject* obj);
-aiCLinkage aiExport int             aiGetNumChildren(aiObject* obj);
-aiCLinkage aiExport aiObject*       aiGetChild(aiObject* obj, int i);
-aiCLinkage aiExport aiObject*       aiGetParent(aiObject* obj);
+abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
+abciAPI const char*     aiGetNameS(aiObject* obj);
+abciAPI const char*     aiGetFullNameS(aiObject* obj);
+abciAPI int             aiGetNumChildren(aiObject* obj);
+abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
+abciAPI aiObject*       aiGetParent(aiObject* obj);
 
-aiCLinkage aiExport void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
-aiCLinkage aiExport void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-aiCLinkage aiExport aiObject*       aiSchemaGetObject(aiSchemaBase* schema);
-aiCLinkage aiExport int             aiSchemaGetNumSamples(aiSchemaBase* schema);
-aiCLinkage aiExport aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport int             aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport float           aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
-aiCLinkage aiExport int             aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema);
+abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
+abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
+abciAPI aiObject*       aiSchemaGetObject(aiSchemaBase* schema);
+abciAPI int             aiSchemaGetNumSamples(aiSchemaBase* schema);
+abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+abciAPI int             aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
+abciAPI float           aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
+abciAPI int             aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema);
 
-aiCLinkage aiExport aiXForm*        aiGetXForm(aiObject* obj);
-aiCLinkage aiExport void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
+abciAPI aiXForm*        aiGetXForm(aiObject* obj);
+abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
 
-aiCLinkage aiExport aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
-aiCLinkage aiExport void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-aiCLinkage aiExport void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
+abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
+abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
-aiCLinkage aiExport void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
+abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // copy mesh data without splitting. swap handedness / faces are applied.
 // if triangulate is true, triangulation is applied. in this case:
 // - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
 // - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-aiCLinkage aiExport void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate = false, bool always_expand_indices = false);
+abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate = false, bool always_expand_indices = false);
 // all these below aiPolyMesh* are mesh splitting functions
-aiCLinkage aiExport int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
-aiCLinkage aiExport void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
-aiCLinkage aiExport int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
-aiCLinkage aiExport int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
-aiCLinkage aiExport bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
-aiCLinkage aiExport void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
+abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
+abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
+abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
+abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
+abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
+abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
 
-aiCLinkage aiExport aiCamera*       aiGetCamera(aiObject* obj);
-aiCLinkage aiExport void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
+abciAPI aiCamera*       aiGetCamera(aiObject* obj);
+abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
 
-aiCLinkage aiExport aiPoints*       aiGetPoints(aiObject* obj);
-aiCLinkage aiExport void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
-aiCLinkage aiExport void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
-aiCLinkage aiExport void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
+abciAPI aiPoints*       aiGetPoints(aiObject* obj);
+abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
+abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
+abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
 
-aiCLinkage aiExport int             aiSchemaGetNumProperties(aiSchemaBase* schema);
-aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
-aiCLinkage aiExport aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
-aiCLinkage aiExport const char*     aiPropertyGetNameS(aiProperty* prop);
-aiCLinkage aiExport aiPropertyType  aiPropertyGetType(aiProperty* prop);
-aiCLinkage aiExport int             aiPropertyGetTimeSamplingIndex(aiProperty* prop);
-aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
-aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
+abciAPI int             aiSchemaGetNumProperties(aiSchemaBase* schema);
+abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
+abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
+abciAPI const char*     aiPropertyGetNameS(aiProperty* prop);
+abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
+abciAPI int             aiPropertyGetTimeSamplingIndex(aiProperty* prop);
+abciAPI void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
+abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);

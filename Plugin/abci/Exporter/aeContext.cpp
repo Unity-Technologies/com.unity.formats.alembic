@@ -1,16 +1,16 @@
 #include "pch.h"
-#include "AlembicExporter.h"
+#include "abci.h"
 #include "aeContext.h"
 #include "aeObject.h"
 
 aeContext::aeContext()
 {
-    aeDebugLog("aeContext::aeContext()");
+    abciDebugLog("aeContext::aeContext()");
 }
 
 aeContext::~aeContext()
 {
-    aeDebugLog("aeContext::~aeContext()");
+    abciDebugLog("aeContext::~aeContext()");
     reset();
 }
 
@@ -54,7 +54,7 @@ bool aeContext::openArchive(const char *path)
 {
     reset();
 
-    aeDebugLog("aeContext::openArchive() %s", path);
+    abciDebugLog("aeContext::openArchive() %s", path);
     try {
         if (m_config.archiveType == aeArchiveType_HDF5) {
             m_archive = Abc::OArchive(Alembic::AbcCoreHDF5::WriteArchive(), path);
@@ -67,7 +67,7 @@ bool aeContext::openArchive(const char *path)
         }
     }
     catch (Alembic::Util::Exception e) {
-        aeDebugLog("Failed (%s)", e.what());
+        abciDebugLog("Failed (%s)", e.what());
         return false;
     }
 

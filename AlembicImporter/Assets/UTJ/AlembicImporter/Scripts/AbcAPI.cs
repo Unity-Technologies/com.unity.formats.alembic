@@ -313,63 +313,63 @@ namespace UTJ.Alembic
         }
     
     
-        [DllImport ("AlembicImporter")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
-        [DllImport ("AlembicImporter")] public static extern            aiSampleSelector aiIndexToSampleSelector(int index);
+        [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
+        [DllImport("abci")] public static extern            aiSampleSelector aiIndexToSampleSelector(int index);
     
-        [DllImport ("AlembicImporter")] public static extern void       aiEnableFileLog(bool on, string path);
+        [DllImport("abci")] public static extern void       aiEnableFileLog(bool on, string path);
     
-        [DllImport ("AlembicImporter")] public static extern void       aiCleanup();
-        [DllImport ("AlembicImporter")] public static extern aiContext  aiCreateContext(int uid);
-        [DllImport ("AlembicImporter")] public static extern void       aiDestroyContext(aiContext ctx);
+        [DllImport("abci")] public static extern void       aiCleanup();
+        [DllImport("abci")] public static extern aiContext  aiCreateContext(int uid);
+        [DllImport("abci")] public static extern void       aiDestroyContext(aiContext ctx);
         
-        [DllImport ("AlembicImporter")] public static extern bool       aiLoad(aiContext ctx, string path);
-        [DllImport ("AlembicImporter")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
-        [DllImport ("AlembicImporter")] public static extern float      aiGetStartTime(aiContext ctx);
-        [DllImport ("AlembicImporter")] public static extern float      aiGetEndTime(aiContext ctx);
-        [DllImport ("AlembicImporter")] public static extern aiObject   aiGetTopObject(aiContext ctx);
-        [DllImport ("AlembicImporter")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
+        [DllImport("abci")] public static extern bool       aiLoad(aiContext ctx, string path);
+        [DllImport("abci")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
+        [DllImport("abci")] public static extern float      aiGetStartTime(aiContext ctx);
+        [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
+        [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
+        [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
     
-        [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-        [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
-        [DllImport ("AlembicImporter")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
+        [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
+        [DllImport("abci")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
+        [DllImport("abci")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
     
-        [DllImport ("AlembicImporter")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
-        [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetNameS(aiObject obj);
-        [DllImport ("AlembicImporter")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
+        [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
+        [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
+        [DllImport("abci")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
         public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
         public static string aiGetFullName(aiObject obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
         
-        [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
-        [DllImport ("AlembicImporter")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
-        [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
-        [DllImport ("AlembicImporter")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
+        [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
+        [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
+        [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
+        [DllImport("abci")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
     
-        [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetXForm(aiObject obj);
-        [DllImport ("AlembicImporter")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
+        [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);
+        [DllImport("abci")] public static extern bool       aiXFormGetData(aiSample sample, ref aiXFormData data);
     
-        [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
-        [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
-        [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, bool forceRefresh);
-        [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
-        [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
-        [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
-        [DllImport ("AlembicImporter")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
-        [DllImport ("AlembicImporter")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
-        [DllImport ("AlembicImporter")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
+        [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
+        [DllImport("abci")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
+        [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, bool forceRefresh);
+        [DllImport("abci")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
+        [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
+        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
+        [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
+        [DllImport("abci")] public static extern bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
+        [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
     
-        [DllImport ("AlembicImporter")] public static extern aiSchema   aiGetCamera(aiObject obj);
-        [DllImport ("AlembicImporter")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
+        [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
+        [DllImport("abci")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
     
-        [DllImport("AlembicImporter")] public static extern aiSchema    aiGetPoints(aiObject obj);
-        [DllImport("AlembicImporter")] public static extern void        aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
-        [DllImport("AlembicImporter")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsData data);
+        [DllImport("abci")] public static extern aiSchema    aiGetPoints(aiObject obj);
+        [DllImport("abci")] public static extern void        aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
+        [DllImport("abci")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsData data);
     
-        [DllImport("AlembicImporter")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
-        [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
-        [DllImport("AlembicImporter")] public static extern aiProperty      aiSchemaGetPropertyByName(aiSchema schema, string name);
-        [DllImport("AlembicImporter")] public static extern IntPtr          aiPropertyGetNameS(aiProperty prop);
-        [DllImport("AlembicImporter")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
-        [DllImport("AlembicImporter")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData o_data);
+        [DllImport("abci")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
+        [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
+        [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByName(aiSchema schema, string name);
+        [DllImport("abci")] public static extern IntPtr          aiPropertyGetNameS(aiProperty prop);
+        [DllImport("abci")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
+        [DllImport("abci")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData o_data);
 
 
 

@@ -27,18 +27,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Foundation\aiLogger.cpp" />
-    <ClCompile Include="Foundation\aiThreadPool.cpp" />
-    <ClCompile Include="Importer\aiCamera.cpp" />
-    <ClCompile Include="Importer\aiContext.cpp" />
-    <ClCompile Include="Importer\aiObject.cpp" />
-    <ClCompile Include="Importer\aiPoints.cpp" />
-    <ClCompile Include="Importer\aiPolyMesh.cpp" />
-    <ClCompile Include="Importer\aiProperty.cpp" />
-    <ClCompile Include="Importer\aiSchema.cpp" />
-    <ClCompile Include="Importer\aiXForm.cpp" />
-    <ClCompile Include="Importer\AlembicImporter.cpp" />
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="abci\Exporter\aeCamera.cpp" />
+    <ClCompile Include="abci\Exporter\aeContext.cpp" />
+    <ClCompile Include="abci\Exporter\aeObject.cpp" />
+    <ClCompile Include="abci\Exporter\aePoints.cpp" />
+    <ClCompile Include="abci\Exporter\aePolyMesh.cpp" />
+    <ClCompile Include="abci\Exporter\aeXForm.cpp" />
+    <ClCompile Include="abci\Exporter\AlembicExporter.cpp" />
+    <ClCompile Include="abci\Foundation\aiLogger.cpp" />
+    <ClCompile Include="abci\Foundation\aiThreadPool.cpp" />
+    <ClCompile Include="abci\Importer\aiCamera.cpp" />
+    <ClCompile Include="abci\Importer\aiContext.cpp" />
+    <ClCompile Include="abci\Importer\aiObject.cpp" />
+    <ClCompile Include="abci\Importer\aiPoints.cpp" />
+    <ClCompile Include="abci\Importer\aiPolyMesh.cpp" />
+    <ClCompile Include="abci\Importer\aiProperty.cpp" />
+    <ClCompile Include="abci\Importer\aiSchema.cpp" />
+    <ClCompile Include="abci\Importer\aiXForm.cpp" />
+    <ClCompile Include="abci\Importer\AlembicImporter.cpp" />
+    <ClCompile Include="abci\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
@@ -48,19 +55,27 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Foundation\aiLogger.h" />
-    <ClInclude Include="Foundation\aiMisc.h" />
-    <ClInclude Include="Foundation\aiThreadPool.h" />
-    <ClInclude Include="Importer\aiCamera.h" />
-    <ClInclude Include="Importer\aiContext.h" />
-    <ClInclude Include="Importer\aiObject.h" />
-    <ClInclude Include="Importer\aiPoints.h" />
-    <ClInclude Include="Importer\aiPolyMesh.h" />
-    <ClInclude Include="Importer\aiProperty.h" />
-    <ClInclude Include="Importer\aiSchema.h" />
-    <ClInclude Include="Importer\aiXForm.h" />
-    <ClInclude Include="Importer\AlembicImporter.h" />
-    <ClInclude Include="pch.h" />
+    <ClInclude Include="abci\abci.h" />
+    <ClInclude Include="abci\Exporter\aeCamera.h" />
+    <ClInclude Include="abci\Exporter\aeContext.h" />
+    <ClInclude Include="abci\Exporter\aeObject.h" />
+    <ClInclude Include="abci\Exporter\aePoints.h" />
+    <ClInclude Include="abci\Exporter\aePolyMesh.h" />
+    <ClInclude Include="abci\Exporter\aeXForm.h" />
+    <ClInclude Include="abci\Exporter\AlembicExporter.h" />
+    <ClInclude Include="abci\Foundation\aiLogger.h" />
+    <ClInclude Include="abci\Foundation\aiMisc.h" />
+    <ClInclude Include="abci\Foundation\aiThreadPool.h" />
+    <ClInclude Include="abci\Importer\aiCamera.h" />
+    <ClInclude Include="abci\Importer\aiContext.h" />
+    <ClInclude Include="abci\Importer\aiObject.h" />
+    <ClInclude Include="abci\Importer\aiPoints.h" />
+    <ClInclude Include="abci\Importer\aiPolyMesh.h" />
+    <ClInclude Include="abci\Importer\aiProperty.h" />
+    <ClInclude Include="abci\Importer\aiSchema.h" />
+    <ClInclude Include="abci\Importer\aiXForm.h" />
+    <ClInclude Include="abci\Importer\AlembicImporter.h" />
+    <ClInclude Include="abci\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="setup.vcxproj">
@@ -106,39 +121,39 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_s</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_s</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir);Importer;Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>

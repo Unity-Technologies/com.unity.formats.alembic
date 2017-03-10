@@ -2,66 +2,8 @@
 
 #include <cstdint>
 
-#define aeCLinkage extern "C"
-
-#ifdef aeImpl
-    #ifndef aeStaticLink
-        #ifdef _MSC_VER
-            #define aeExport __declspec(dllexport)
-        #else
-            #define aeExport __attribute__((visibility("default")))
-        #endif
-    #else
-        #define aeExport 
-    #endif
-#else
-    #ifdef _MSC_VER
-        #ifndef aeStaticLink
-            #define aeExport __declspec(dllimport)
-            #pragma comment(lib, "AlembicExporter.lib")
-        #else
-            #define aeExport 
-            #pragma comment(lib, "AlembicExporter_s.lib")
-        #endif
-    #else
-    #endif
-
-#ifndef AlembicImporter_h
-    struct abcV2
-    {
-        float x, y;
-
-        abcV2() {}
-        abcV2(float _x, float _y) : x(_x), y(_y) {}
-    };
-
-    struct abcV3
-    {
-        float x, y, z;
-
-        abcV3() {}
-        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-    };
-
-    struct abcV4
-    {
-        float x, y, z, w;
-
-        abcV4() {}
-        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
-    };
-
-    struct abcSampleSelector
-    {
-        uint64_t m_requestedIndex;
-        double m_requestedTime;
-        int m_requestedTimeIndexType;
-    };
-#endif // AlembicImporter_h
-#endif // aeImpl
-
 class aeContext;
-#ifdef aeImpl
+#ifdef abciImpl
     class aeObject;
 #else
     typedef void aeObject; // force make upper-castable
@@ -239,38 +181,38 @@ struct aeCameraData
 
 
 
-aeCLinkage aeExport aeContext*      aeCreateContext();
-aeCLinkage aeExport void            aeDestroyContext(aeContext* ctx);
+abciAPI aeContext*  aeCreateContext();
+abciAPI void        aeDestroyContext(aeContext* ctx);
 
-aeCLinkage aeExport void            aeSetConfig(aeContext* ctx, const aeConfig *conf);
-aeCLinkage aeExport bool            aeOpenArchive(aeContext* ctx, const char *path);
-aeCLinkage aeExport aeObject*       aeGetTopObject(aeContext* ctx);
-aeCLinkage aeExport int             aeAddTimeSampling(aeContext* ctx, float start_time);
+abciAPI void        aeSetConfig(aeContext* ctx, const aeConfig *conf);
+abciAPI bool        aeOpenArchive(aeContext* ctx, const char *path);
+abciAPI aeObject*   aeGetTopObject(aeContext* ctx);
+abciAPI int         aeAddTimeSampling(aeContext* ctx, float start_time);
 // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
-aeCLinkage aeExport void            aeAddTime(aeContext* ctx, float time, int tsi = -1);
+abciAPI void        aeAddTime(aeContext* ctx, float time, int tsi = -1);
 
-aeCLinkage aeExport void            aeDeleteObject(aeObject *obj);
-aeCLinkage aeExport aeXForm*        aeNewXForm(aeObject *parent, const char *name, int tsi = 1);
-aeCLinkage aeExport aePoints*       aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
-aeCLinkage aeExport aePolyMesh*     aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
-aeCLinkage aeExport aeCamera*       aeNewCamera(aeObject *parent, const char *name, int tsi = 1);
+abciAPI void        aeDeleteObject(aeObject *obj);
+abciAPI aeXForm*    aeNewXForm(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aePoints*   aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aeCamera*   aeNewCamera(aeObject *parent, const char *name, int tsi = 1);
 
-aeCLinkage aeExport int             aeGetNumChildren(aeObject *obj);
-aeCLinkage aeExport aeObject*       aeGetChild(aeObject *obj, int i);
-aeCLinkage aeExport aeObject*       aeGetParent(aeObject *obj);
-aeCLinkage aeExport aeXForm*        aeAsXForm(aeObject *obj);
-aeCLinkage aeExport aePoints*       aeAsPoints(aeObject *obj);
-aeCLinkage aeExport aePolyMesh*     aeAsPolyMesh(aeObject *obj);
-aeCLinkage aeExport aeCamera*       aeAsCamera(aeObject *obj);
+abciAPI int         aeGetNumChildren(aeObject *obj);
+abciAPI aeObject*   aeGetChild(aeObject *obj, int i);
+abciAPI aeObject*   aeGetParent(aeObject *obj);
+abciAPI aeXForm*    aeAsXForm(aeObject *obj);
+abciAPI aePoints*   aeAsPoints(aeObject *obj);
+abciAPI aePolyMesh* aeAsPolyMesh(aeObject *obj);
+abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 
-aeCLinkage aeExport int             aeGetNumSamples(aeObject *obj);
-aeCLinkage aeExport void            aeSetFromPrevious(aeObject *obj);
+abciAPI int         aeGetNumSamples(aeObject *obj);
+abciAPI void        aeSetFromPrevious(aeObject *obj);
 
-aeCLinkage aeExport void            aeXFormWriteSample(aeXForm *obj, const aeXFormData *data);
-aeCLinkage aeExport void            aePointsWriteSample(aePoints *obj, const aePointsData *data);
-aeCLinkage aeExport void            aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
-aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
+abciAPI void        aeXFormWriteSample(aeXForm *obj, const aeXFormData *data);
+abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
+abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
+abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
 
-aeCLinkage aeExport aeProperty*     aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
-aeCLinkage aeExport void            aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
-aeCLinkage aeExport void            aePropertyWriteScalarSample(aeProperty *prop, const void *data);
+abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
+abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
+abciAPI void        aePropertyWriteScalarSample(aeProperty *prop, const void *data);

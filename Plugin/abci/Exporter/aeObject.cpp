@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "AlembicExporter.h"
+#include "abci.h"
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aeXForm.h"
@@ -31,7 +31,7 @@ public:
     aeTArrayProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        aeDebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
+        abciDebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return true; }
@@ -67,7 +67,7 @@ public:
     aeTScalarProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        aeDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return false; }
@@ -96,12 +96,12 @@ aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t ts
     , m_abc(abc)
     , m_tsi(tsi)
 {
-    aeDebugLog("aeObject::aeObject() %s", getName());
+    abciDebugLog("aeObject::aeObject() %s", getName());
 }
 
 aeObject::~aeObject()
 {
-    aeDebugLog("aeObject::~aeObject() %s", getName());
+    abciDebugLog("aeObject::~aeObject() %s", getName());
 
     while (!m_children.empty()) {
         delete m_children.back();
@@ -174,7 +174,7 @@ aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
 {
     auto cprop = getAbcProperties();
     if (!cprop.valid()) {
-        aeDebugLog("aeObject::newProperty() %s failed!", name);
+        abciDebugLog("aeObject::newProperty() %s failed!", name);
         return nullptr;
     }
 
@@ -185,13 +185,13 @@ aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
 
 size_t aeObject::getNumSamples()
 {
-    aeDebugLog("aeObject::getNumSamples(): this should not be called!");
+    abciDebugLog("aeObject::getNumSamples(): this should not be called!");
     return 0;
 }
 
 void aeObject::setFromPrevious()
 {
-    aeDebugLog("aeObject::setFromPrevious(): this should not be called!");
+    abciDebugLog("aeObject::setFromPrevious(): this should not be called!");
 }
 
 template aeProperty*    aeObject::newProperty<abcBoolProperty >(const char *name, uint32_t tsi);

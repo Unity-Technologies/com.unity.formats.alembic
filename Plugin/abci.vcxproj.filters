@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="abci\Foundation\aiLogger.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Foundation\aiThreadPool.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiPolyMesh.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiSchema.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiXForm.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\AlembicImporter.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiCamera.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiContext.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiObject.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiPoints.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiProperty.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aeCamera.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aeContext.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aeObject.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aePoints.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aePolyMesh.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\aeXForm.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Exporter\AlembicExporter.cpp">
+      <Filter>abci\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\pch.cpp">
+      <Filter>abci</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="abci\Foundation\aiThreadPool.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiLogger.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiPolyMesh.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiSchema.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiXForm.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\AlembicImporter.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiCamera.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiContext.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiObject.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiPoints.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiProperty.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiMisc.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aeCamera.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aeContext.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aeObject.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aePoints.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aePolyMesh.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aeXForm.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\AlembicExporter.h">
+      <Filter>abci\Exporter</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\pch.h">
+      <Filter>abci</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\abci.h">
+      <Filter>abci</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="abci">
+      <UniqueIdentifier>{8462422f-58ee-4c28-8227-63ccc429797e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="abci\Exporter">
+      <UniqueIdentifier>{1c2da62c-582f-4ff8-9d99-a7ae3808bb13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="abci\Foundation">
+      <UniqueIdentifier>{4845b8b3-6627-4eb1-a91d-c170ecd9afaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="abci\Importer">
+      <UniqueIdentifier>{c94f82d9-acb1-49f5-85b5-aed90514a514}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

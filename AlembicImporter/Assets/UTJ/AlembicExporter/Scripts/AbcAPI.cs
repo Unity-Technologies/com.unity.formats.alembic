@@ -186,37 +186,37 @@ namespace UTJ
         }
     
     
-        [DllImport("AlembicExporter")] public static extern aeContext   aeCreateContext();
-        [DllImport("AlembicExporter")] public static extern void        aeDestroyContext(aeContext ctx);
+        [DllImport("abci")] public static extern aeContext   aeCreateContext();
+        [DllImport("abci")] public static extern void        aeDestroyContext(aeContext ctx);
     
-        [DllImport("AlembicExporter")] public static extern void        aeSetConfig(aeContext ctx, ref aeConfig conf);
-        [DllImport("AlembicExporter")] public static extern bool        aeOpenArchive(aeContext ctx, string path);
-        [DllImport("AlembicExporter")] public static extern aeObject    aeGetTopObject(aeContext ctx);
-        [DllImport("AlembicExporter")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
+        [DllImport("abci")] public static extern void        aeSetConfig(aeContext ctx, ref aeConfig conf);
+        [DllImport("abci")] public static extern bool        aeOpenArchive(aeContext ctx, string path);
+        [DllImport("abci")] public static extern aeObject    aeGetTopObject(aeContext ctx);
+        [DllImport("abci")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
         // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
-        [DllImport("AlembicExporter")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = -1);
+        [DllImport("abci")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = -1);
     
-        [DllImport("AlembicExporter")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 1);
-        [DllImport("AlembicExporter")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 1);
-        [DllImport("AlembicExporter")] public static extern aeObject    aeNewPoints(aeObject parent, string name, int tsi = 1);
-        [DllImport("AlembicExporter")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name, int tsi = 1);
-        [DllImport("AlembicExporter")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
-        [DllImport("AlembicExporter")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
-        [DllImport("AlembicExporter")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);
-        [DllImport("AlembicExporter")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraData data);
+        [DllImport("abci")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 1);
+        [DllImport("abci")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 1);
+        [DllImport("abci")] public static extern aeObject    aeNewPoints(aeObject parent, string name, int tsi = 1);
+        [DllImport("abci")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name, int tsi = 1);
+        [DllImport("abci")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
+        [DllImport("abci")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
+        [DllImport("abci")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);
+        [DllImport("abci")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraData data);
     
-        [DllImport("AlembicExporter")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteArraySample(aeProperty prop, IntPtr data, int num_data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, IntPtr data);
+        [DllImport("abci")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
+        [DllImport("abci")] public static extern void        aePropertyWriteArraySample(aeProperty prop, IntPtr data, int num_data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, IntPtr data);
     
         // all of these are same as IntPtr version. just for convenience.
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref float data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref int data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref bool data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector2 data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector3 data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector4 data);
-        [DllImport("AlembicExporter")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Matrix4x4 data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref float data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref int data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref bool data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector2 data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector3 data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector4 data);
+        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Matrix4x4 data);
     
         public static void aeWait(float wt)
         {
