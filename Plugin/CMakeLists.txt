@@ -32,8 +32,8 @@ INCLUDE_DIRECTORIES(
 
 
 # abci
-FILE(GLOB ABCI_CXX_FILES abci/Importer/*.cpp abci/Exporter/*.cpp Foundation/*.cpp)
-FILE(GLOB ABCI_H_FILES abci/Importer/*.h abci/Exporter/*.h Foundation/*.h)
+FILE(GLOB ABCI_CXX_FILES abci/Importer/*.cpp abci/Exporter/*.cpp abci/Foundation/*.cpp)
+FILE(GLOB ABCI_H_FILES abci/Importer/*.h abci/Exporter/*.h abci/Foundation/*.h)
 IF(ABCI_ENABLE_OSX_BUNDLE)
     ADD_LIBRARY(abci MODULE ${ABCI_CXX_FILES} ${ABCI_H_FILES})
 ELSE()
