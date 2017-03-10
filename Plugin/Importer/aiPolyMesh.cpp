@@ -1520,7 +1520,7 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     auto uvs = m_schema.getUVsParam();
     if (uvs.valid())
     {
-        auto scope = normals.getScope();
+        auto scope = uvs.getScope();
         if (scope != AbcGeom::kUnknownScope)
         {
             if (!uvs.isConstant())
