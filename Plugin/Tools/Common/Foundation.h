@@ -1,5 +1,4 @@
-#ifndef tFoundation_h
-#define tFoundation_h
+#pragma once
 
 #define tCLinkage extern "C"
 #ifdef tStaticLink
@@ -171,6 +170,3 @@ inline void CopyWithBGRA2RGBA(RGBA<T> *dst, const RGBA<T> *src, size_t num_pixel
         d.a = s.a;
     }
 }
-
-
-#endif // tFoundation_h

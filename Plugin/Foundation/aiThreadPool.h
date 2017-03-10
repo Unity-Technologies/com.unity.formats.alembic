@@ -1,5 +1,4 @@
-#ifndef aiThreadPool_h
-#define aiThreadPool_h
+#pragma once
 
 #ifndef aiWithTBB
 
@@ -75,5 +74,3 @@ void aiTaskGroup::run(const F &f)
 typedef tbb::task_group aiTaskGroup;
 
 #endif // aiWithTBB
-
-#endif // aiThreadPool_h

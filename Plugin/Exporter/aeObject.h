@@ -1,5 +1,4 @@
-#ifndef aeObject_h
-#define aeObject_h
+#pragma once
 
 class aeProperty
 {
@@ -50,5 +49,3 @@ protected:
     std::vector<aePropertyPtr>  m_properties;
     std::vector<aeObject*>      m_children;
 };
-
-#endif // aeObject_h

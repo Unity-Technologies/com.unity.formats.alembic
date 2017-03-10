@@ -1,5 +1,4 @@
-#ifndef aiObject_h
-#define aiObject_h
+#pragma once
 
 class aiContext;
 class aiSchemaBase;
@@ -63,6 +62,3 @@ private:
     std::unique_ptr<aiCamera>   m_camera;
     std::unique_ptr<aiPoints>   m_points;
 };
-
-
-#endif // aObject_h

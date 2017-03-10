@@ -1,5 +1,4 @@
-#ifndef aiCamera_h
-#define aiCamera_h
+#pragma once
 
 class aiCameraSample : public aiSampleBase
 {
@@ -32,5 +31,3 @@ public:
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
 };
-
-#endif

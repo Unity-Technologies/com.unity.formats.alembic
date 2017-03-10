@@ -1,6 +1,4 @@
-#ifndef aiPoints_h
-#define aiPoints_h
-
+#pragma once
 
 class aiPointsSample : public aiSampleBase
 {
@@ -41,5 +39,3 @@ public:
 private:
     mutable aiPointsSummary m_summary;
 };
-
-#endif

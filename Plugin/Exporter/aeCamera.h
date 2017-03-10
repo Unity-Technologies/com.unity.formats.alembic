@@ -1,5 +1,4 @@
-#ifndef aeCamera_h
-#define aeCamera_h
+#pragma once
 
 class aeCamera : public aeObject
 {
@@ -16,5 +15,3 @@ public:
 private:
     AbcGeom::OCameraSchema m_schema;
 };
-
-#endif // aeCamera_h

@@ -1,5 +1,4 @@
-#ifndef aiXForm_h
-#define aiXForm_h
+#pragma once
 
 class aiXFormSample : public aiSampleBase
 {
@@ -31,5 +30,3 @@ public:
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
 };
-
-#endif

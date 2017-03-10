@@ -1,5 +1,4 @@
-#ifndef __aiLogger_h__
-#define __aiLogger_h__
+#pragma once
 
 #include <string>
 #include <cstdio>
@@ -124,5 +123,3 @@ private:
    
    static aiLogger msInstance;
 };
-
-#endif

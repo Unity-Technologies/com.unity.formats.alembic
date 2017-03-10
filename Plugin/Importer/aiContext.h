@@ -1,5 +1,4 @@
-#ifndef aiContext_h
-#define aiContext_h
+#pragma once
 
 #include "aiThreadPool.h"
 #include "aiMisc.h"
@@ -93,7 +92,3 @@ private:
     int m_uid;
     aiConfig m_config;
 };
-
-
-
-#endif // aiContext_h

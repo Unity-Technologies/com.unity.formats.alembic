@@ -1,5 +1,4 @@
-#ifndef AlembicExporter_h
-#define AlembicExporter_h
+#pragma once
 
 #include <cstdint>
 
@@ -275,5 +274,3 @@ aeCLinkage aeExport void            aeCameraWriteSample(aeCamera *obj, const aeC
 aeCLinkage aeExport aeProperty*     aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
 aeCLinkage aeExport void            aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
 aeCLinkage aeExport void            aePropertyWriteScalarSample(aeProperty *prop, const void *data);
-
-#endif // AlembicExporter_h

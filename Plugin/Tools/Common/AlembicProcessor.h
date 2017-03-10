@@ -1,5 +1,4 @@
-#ifndef AlembicProcessor_h
-#define AlembicProcessor_h
+#pragma once
 
 #include "../../Exporter/AlembicExporter.h"
 #include "../../Importer/AlembicImporter.h"
@@ -97,4 +96,3 @@ private:
     PointsProcessor     m_pointsproc;
     PolyMeshProcessor   m_meshproc;
 };
-#endif // AlembicProcessor_h

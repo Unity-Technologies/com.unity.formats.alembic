@@ -1,6 +1,4 @@
-#ifndef aeXForm_h
-#define aeXForm_h
-
+#pragma once
 
 class aeXForm : public aeObject
 {
@@ -18,5 +16,3 @@ private:
     AbcGeom::OXformSchema m_schema;
     AbcGeom::XformSample m_sample;
 };
-
-#endif // aeXForm_h

@@ -1,5 +1,4 @@
-#ifndef aiPolyMesh_h
-#define aiPolyMesh_h
+#pragma once
 
 typedef std::vector<size_t> Faceset;
 typedef std::vector<Faceset> Facesets;
@@ -253,5 +252,3 @@ private:
     AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
     AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
 };
-
-#endif

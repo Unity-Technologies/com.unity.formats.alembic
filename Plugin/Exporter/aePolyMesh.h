@@ -1,5 +1,4 @@
-#ifndef aePolyMesh_h
-#define aePolyMesh_h
+#pragma once
 
 class aePolyMesh : public aeObject
 {
@@ -24,6 +23,3 @@ private:
     std::vector<int>    m_buf_uv_indices;
     std::vector<int>    m_buf_faces;
 };
-
-
-#endif // aePolyMesh_h

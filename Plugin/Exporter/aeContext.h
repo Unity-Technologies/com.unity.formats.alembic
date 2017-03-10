@@ -1,5 +1,4 @@
-#ifndef aeContext_h
-#define aeContext_h
+#pragma once
 
 typedef AbcGeom::OObject            abcObject;
 typedef AbcGeom::OXform             abcXForm;
@@ -61,5 +60,3 @@ private:
     std::unique_ptr<aeObject> m_node_top;
     std::vector<aeTimeSampling> m_timesamplings;
 };
-
-#endif // aeContext_h

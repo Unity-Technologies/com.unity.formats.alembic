@@ -1,5 +1,4 @@
-#ifndef aePoints_h
-#define aePoints_h
+#pragma once
 
 class aePoints : public aeObject
 {
@@ -20,5 +19,3 @@ private:
     std::vector<abcV3> m_buf_positions;
     std::vector<abcV3> m_buf_velocities;
 };
-
-#endif // aePoints_h

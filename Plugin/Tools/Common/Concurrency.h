@@ -1,5 +1,4 @@
-#ifndef Concurrency_h
-#define Concurrency_h
+#pragma once
 
 #include <vector>
 #include <mutex>
@@ -167,5 +166,3 @@ public:
 #endif // WithTBB
 
 } // namespace ist
-
-#endif // Concurrency_h

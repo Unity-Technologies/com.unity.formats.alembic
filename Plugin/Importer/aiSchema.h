@@ -1,5 +1,4 @@
-#ifndef aiSchema_h
-#define aiSchema_h
+#pragma once
 
 class aiSampleBase;
 class aiSchemaBase;
@@ -335,5 +334,3 @@ protected:
     int64_t m_numSamples;
     int64_t m_lastSampleIndex;
 };
-
-#endif

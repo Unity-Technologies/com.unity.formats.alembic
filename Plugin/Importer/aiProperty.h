@@ -1,5 +1,4 @@
-#ifndef aiProperty_h
-#define aiProperty_h
+#pragma once
 
 class aiProperty
 {
@@ -29,5 +28,3 @@ protected:
 };
 
 aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header);
-
-#endif // aiProperty_h

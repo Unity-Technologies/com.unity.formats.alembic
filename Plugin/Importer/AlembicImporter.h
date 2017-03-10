@@ -1,6 +1,4 @@
-#ifndef AlembicImporter_h
-#define AlembicImporter_h
-
+#pragma once
 
 #include <cstdint>
 
@@ -538,5 +536,3 @@ aiCLinkage aiExport aiPropertyType  aiPropertyGetType(aiProperty* prop);
 aiCLinkage aiExport int             aiPropertyGetTimeSamplingIndex(aiProperty* prop);
 aiCLinkage aiExport void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 aiCLinkage aiExport void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
-
-#endif // AlembicImporter_h
