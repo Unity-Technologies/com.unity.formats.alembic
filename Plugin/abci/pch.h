@@ -30,6 +30,7 @@
     #define NOMINMAX
     #include <windows.h>
     #pragma warning(disable: 4996)
+    #pragma warning(disable: 4190)
 #endif // _WIN32
 
 using namespace Alembic;

@@ -15,7 +15,7 @@ aiObject::aiObject()
 {
 }
 
-aiObject::aiObject(aiContext *ctx, aiObject *parent, abcObject &abc)
+aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     : m_ctx(ctx)
     , m_abc(abc)
     , m_parent(parent)
@@ -60,7 +60,7 @@ aiObject::~aiObject()
     }
 }
 
-aiObject* aiObject::newChild(abcObject &abc)
+aiObject* aiObject::newChild(const abcObject &abc)
 {
     auto *child = new aiObject(getContext(), this, abc);
     m_children.push_back(child);

@@ -31,7 +31,7 @@ inline std::pair<
     typename AbcArrayPropertyType::value_type,
     typename AbcArrayPropertyType::value_type> abcArrayPropertyGetMinMaxValue(AbcArrayPropertyType& prop);
 
-inline abcBoxd abcGetMaxBounds(Abc::IBox3dProperty& prop);
+inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop);
 
 
 
@@ -117,7 +117,7 @@ inline std::pair<
     return ret;
 }
 
-inline abcBoxd abcGetMaxBounds(Abc::IBox3dProperty& prop)
+inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop)
 {
     abcV3 bmin, bmax;
     abcBoxd bounds;

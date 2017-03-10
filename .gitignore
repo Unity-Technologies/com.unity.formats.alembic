@@ -27,6 +27,7 @@ dependencies/
 Plugin/Bin
 Plugin/external/libs
 .build/
+Plugin/build_*
 *.dblite
 excons.cache
 

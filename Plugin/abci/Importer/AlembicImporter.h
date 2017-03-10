@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-enum aiTextureFormat;
-
 struct  aiConfig;
 struct  aiCameraData;
 struct  aiXFormData;

@@ -10,7 +10,7 @@ class aiObject
 {
 public:
     aiObject();
-    aiObject(aiContext *ctx, aiObject *parent, abcObject &abc);
+    aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc);
     ~aiObject();
 
     const char* getName() const;
@@ -47,7 +47,7 @@ public:
     // for internal use
     aiContext*  getContext();
     abcObject&  getAbcObject();
-    aiObject*   newChild(abcObject &abc);
+    aiObject*   newChild(const abcObject &abc);
     void        removeChild(aiObject *c);
 
 private:

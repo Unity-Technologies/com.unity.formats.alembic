@@ -73,10 +73,7 @@ public:
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
     template<class F>
-    void eachNodes(const F &f)
-    {
-        m_top_node->eachChildrenRecursive(f);
-    }
+    void eachNodes(const F &f);
 
 private:
     std::string normalizePath(const char *path) const;
@@ -92,3 +89,12 @@ private:
     int m_uid;
     aiConfig m_config;
 };
+
+
+#include "aiObject.h"
+
+template<class F>
+inline void aiContext::eachNodes(const F &f)
+{
+    m_top_node->eachChildrenRecursive(f);
+}

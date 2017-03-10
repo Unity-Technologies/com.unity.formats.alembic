@@ -31,35 +31,16 @@ INCLUDE_DIRECTORIES(
 )
 
 
-# AlembicImporter
-FILE(GLOB AI_CXX_FILES Importer/*.cpp Foundation/*.cpp)
-FILE(GLOB AI_H_FILES Importer/*.h Foundation/*.h)
+# abci
+FILE(GLOB ABCI_CXX_FILES abci/Importer/*.cpp abci/Exporter/*.cpp Foundation/*.cpp)
+FILE(GLOB ABCI_H_FILES abci/Importer/*.h abci/Exporter/*.h Foundation/*.h)
 IF(ABCI_ENABLE_OSX_BUNDLE)
-    ADD_LIBRARY(AlembicImporter MODULE ${AI_CXX_FILES} ${AI_H_FILES})
+    ADD_LIBRARY(abci MODULE ${ABCI_CXX_FILES} ${ABCI_H_FILES})
 ELSE()
-    ADD_LIBRARY(AlembicImporter SHARED ${AI_CXX_FILES} ${AI_H_FILES})
+    ADD_LIBRARY(abci SHARED ${ABCI_CXX_FILES} ${ABCI_H_FILES})
 ENDIF()
-TARGET_INCLUDE_DIRECTORIES(AlembicImporter PUBLIC ./Foundation)
-TARGET_LINK_LIBRARIES(AlembicImporter
-    ${OPENEXR_Half_LIBRARY}
-    ${OPENEXR_Iex_LIBRARY}
-    ${OPENEXR_IexMath_LIBRARY}
-    ${HDF5_C_LIBRARIES}
-    ${HDF5_HL_LIBRARIES}
-    ${ALEMBIC_LIBRARY}
-)
-
-
-# AlembicExporter
-FILE(GLOB AE_CXX_FILES Exporter/*.cpp Foundation/*.cpp)
-FILE(GLOB AE_H_FILES Exporter/*.h Foundation/*.h)
-IF(ABCI_ENABLE_OSX_BUNDLE)
-    ADD_LIBRARY(AlembicExporter MODULE ${AE_CXX_FILES} ${AI_H_FILES})
-ELSE()
-    ADD_LIBRARY(AlembicExporter SHARED ${AE_CXX_FILES} ${AI_H_FILES})
-ENDIF()
-TARGET_INCLUDE_DIRECTORIES(AlembicExporter PUBLIC ./Foundation)
-TARGET_LINK_LIBRARIES(AlembicExporter
+TARGET_INCLUDE_DIRECTORIES(abci PUBLIC ./abci ./abci/Foundation)
+TARGET_LINK_LIBRARIES(abci
     ${OPENEXR_Half_LIBRARY}
     ${OPENEXR_Iex_LIBRARY}
     ${OPENEXR_IexMath_LIBRARY}
@@ -71,21 +52,18 @@ TARGET_LINK_LIBRARIES(AlembicExporter
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     IF(ABCI_ENABLE_OSX_BUNDLE)
-        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES BUNDLE ON)
+        SET_TARGET_PROPERTIES(abci PROPERTIES BUNDLE ON)
     ELSE()
-        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES PREFIX "")
-        SET_TARGET_PROPERTIES(AlembicImporter AlembicExporter PROPERTIES SUFFIX ".bundle")
+        SET_TARGET_PROPERTIES(abci PROPERTIES PREFIX "")
+        SET_TARGET_PROPERTIES(abci PROPERTIES SUFFIX ".bundle")
     ENDIF()
 ENDIF()
 
 IF(NOT ABCI_ENABLE_OSX_BUNDLE)
     # deploy
     ADD_CUSTOM_TARGET(deploy ALL
-        COMMAND rm -rf ${PLUGINS_DIR}/$<TARGET_FILE_NAME:AlembicImporter>
-        COMMAND rm -rf ${PLUGINS_DIR}/$<TARGET_FILE_NAME:AlembicExporter>
-        COMMAND cp $<TARGET_FILE:AlembicImporter> ${PLUGINS_DIR}
-        COMMAND cp $<TARGET_FILE:AlembicExporter> ${PLUGINS_DIR}
-        DEPENDS AlembicImporter
-        DEPENDS AlembicExporter
+        COMMAND rm -rf ${PLUGINS_DIR}/$<TARGET_FILE_NAME:abci>
+        COMMAND cp $<TARGET_FILE:abci> ${PLUGINS_DIR}
+        DEPENDS abci
     )
 ENDIF()
