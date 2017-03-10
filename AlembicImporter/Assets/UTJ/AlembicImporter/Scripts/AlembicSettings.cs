@@ -25,7 +25,7 @@ namespace UTJ.Alembic
 		[SerializeField][HideInInspector] public string m_pathToAbc;
 
 		[Tooltip("Should 'handedness' be swapped?")]
-		[SerializeField] public bool m_swapHandedness = false;
+		[SerializeField] public bool m_swapHandedness = true;
 		[SerializeField] public bool m_swapFaceWinding = false;
 		[SerializeField] public bool m_submeshPerUVTile = true;
 		[SerializeField] public bool m_importMeshes = true;

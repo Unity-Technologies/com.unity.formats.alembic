@@ -1,44 +1,39 @@
-## This plugin will be superceded by [USD For Unity](https://github.com/unity3d-jp/USDForUnity), which also can import Alembic. 
-
-
 # Alembic Importer / Exporter
 
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
 - [Alembic?](#alembic)
 - [Alembic Importer](#alembic-importer)
 - [Alembic Exporter](#alembic-exporter)
-- [History](#history)
 
 ## Alembic?
 Alembic は主に映像業界で使われているデータフォーマットで、巨大な頂点キャッシュデータを格納するのに用いられます。  映像業界では、スキニングやダイナミクスなどのシミュレーション結果を全フレームベイクして頂点キャッシュに変換し、それを Alembic に格納してレンダラやコンポジットのソフトウェアに受け渡す、というような使い方がなされます。  
 Alembic 本家: http://www.alembic.io/
 
 近年の DCC ツールの多くは Alembic をサポートしており、Alembic のインポートやエクスポートができれば、Unity をレンダリングやコンポジットのツールとして使ったり、Unity で各種シミュレーションを行ってその結果を他の DCC ツールに渡したりといったことができるようになります。ゲームの 3D 録画のような新たな使い方も考えられます。  
-
 本プラグインは Unity で Alembic のインポートとエクスポートを実現します。
-現状 Windows 専用で、Unity 5.2 以降で動作を確認済みです。(ソースレベルでは Mac, Linux などでもコンパイルできて動くはずですが、未確認です)  
+
+
+Windows (32bit & 64bit)、Mac、Linux と Unity 5.2 以降で動作を確認済みです。
+使用するにはまずこのパッケージをプロジェクトに import してください。  
+[AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170310/AlembicImporter.unitypackage)  
+(Linux の場合はこれに加えてプラグインをソースからビルドする必要があります。このリポジトリを clone し、Plugin/ に移動して CMake を用いてビルドしてください)
 
 ## Alembic Importer
-![example](Screenshots/alembic_example.gif)  
-パッケージ: [AlembicImporter.unitypackage](Packages/AlembicImporter.unitypackage?raw=true)
+![example](Screenshots/alembic_example.gif)   
+Alembic ファイルに含まれるノード群を Unity 側で GameObject として再構築、PolyMesh を含むノードは MeshFilter や MeshRenderer も生成し、ファイルからデータをストリーミングして再生します。現在 Camera、PolyMesh、Points の再生に対応しています。   
+注意すべき点として、Standalone でビルドする場合は **.abc ファイルは Assets/StreamingAssets 以下に置く必要があります**。これはファイルからデータをストリーミングする都合上、ビルド後も .abc ファイルがそのまま残っている必要があるためです。
 
-Alembic ファイルのジオメトリを Unity 上で再生するプラグインです。現在 Camera、PolyMesh、Points の再生に対応しています。  
-Alembic ファイルに含まれるノード群を Unity 側で GameObject として再構築、PolyMesh を含むノードは MeshFilter や MeshRenderer も生成し、データをファイルからストリーミングして再生します。  
-注意すべき点として、**Alembic ファイルは Assets/StreamingAssets 以下に置く必要があります**。これはストリーミングでデータ読み込む都合上、ビルド後も .abc ファイルがそのまま残っている必要があるためです。
-
-上記パッケージをプロジェクトにインポート後、下記スクリーンショットのメニューより Alembic のインポートを行うことができます。  
+パッケージをプロジェクトにインポート後、Assests メニューに Alembic インポートの項目が追加されます。  
 ![example](Screenshots/menu.png)  
-
 
 ## Alembic Exporter
 ![example](Screenshots/AlembicExporter.gif)  
-パッケージ: [AlembicExporter.unitypackage](Packages/AlembicExporter.unitypackage?raw=true)
 
-Unity のシーン内のジオメトリを Alembic に書き出すプラグインです。
+Unity のシーン内のジオメトリを Alembic に書き出します。
 MeshRenderer, SkinnedMeshRenderer, ParticleSystem (point cache として出力), Camera の書き出しに対応しており、カスタムハンドラを書けば独自のデータも出力できるようになっています。  
 
 
-エクスポートを行うには、上記パッケージをインポート後、AlembicExporter  コンポーネントを適当なオブジェクトに追加します。
+エクスポートを行うには、AlembicExporter  コンポーネントを適当なオブジェクトに追加します。
 注意すべき点として、**AlembicExporter コンポーネントは追加時に自動的に Batching を無効化します。** 有効なままだと Batching された後の Mesh 群が書き出されてしまい、場合によってはデータが数倍に膨れ上がる上に結果も変わってしまうためです。  
 Batching の設定を変えたい場合、設定項目は Edit -> Project Settings -> Player の Rendering 項目の中にあります。  
 
@@ -92,31 +87,3 @@ Batching の設定を変えたい場合、設定項目は Edit -> Project Settin
 
 Alembic 側のノードには名前に "(0000283C)" のような ID が付与されます。これは名前の衝突を避けるための処置です。(Alembic は一つの階層に名前が同じノードが複数あってはいけないルールになっています)  
 また、マテリアルは現在全くの未サポートです。
-
-
-## History
-- 2016/04/20
-  - [Exporter] Cloth 対応
-  - [Importer/Exporter] 色々細かい改良
-- 2016/01/07
-  - [Importer/Exporter] x86 版プラグインを追加
-- 2015/12/28
-  - [Importer/Exporter] VisualStudio ランタイムへの依存を除去
-- 2015/12/25
-  - Alembic Exporter 公開
-- 2015/06/30
-  - Alembic Importer 公開
-
-
-## Thanks
-- Alembic およびそれに付随するライブラリ群 (HDF5, ILMBase) を使用しています。  
-  http://www.alembic.io/
-
-## License
-MIT-License:
-
-Copyright (C) 2015-2016 Unity Technologies Japan, G.K.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
