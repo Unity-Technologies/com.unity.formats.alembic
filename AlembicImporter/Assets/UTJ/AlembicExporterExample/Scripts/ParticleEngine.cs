@@ -81,7 +81,7 @@ namespace UTJ
                 m_csparams = new CSParams[1];
             }
             {
-                UnityEngine.Random.seed = 0;
+                UnityEngine.Random.InitState(0);
                 var tmp = new peParticle[m_particle_count];
                 for (int i = 0; i < tmp.Length; ++i)
                 {

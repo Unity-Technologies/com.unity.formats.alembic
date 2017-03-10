@@ -4,7 +4,6 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
 	[ExecuteInEditMode]
-	[RequireComponent(typeof(AlembicPointsRenderer))]
 	public class AlembicPointsCloud : MonoBehaviour
 	{
 		// members
@@ -31,13 +30,6 @@ namespace UTJ.Alembic
 
 		void Reset()
 		{
-			// add renderer
-			var c = gameObject.GetComponent<AlembicPointsRenderer>();
-			if (c == null)
-			{
-				c = gameObject.AddComponent<AlembicPointsRenderer>();
-			}
-
 		}
 
 	}

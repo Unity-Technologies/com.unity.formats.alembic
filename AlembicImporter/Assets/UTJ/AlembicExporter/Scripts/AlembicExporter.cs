@@ -273,7 +273,7 @@ namespace UTJ
                 if (m_target == null) { return; }
     
                 // create buffer
-                int count_max = m_target.maxParticles;
+                int count_max = m_target.main.maxParticles;
                 if (m_buf_particles == null)
                 {
                     m_buf_particles = new ParticleSystem.Particle[count_max];
