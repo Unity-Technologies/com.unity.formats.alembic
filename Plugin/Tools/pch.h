@@ -17,9 +17,6 @@
 
 #pragma warning(disable: 4996)
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
-#ifdef max
-    #undef max
-    #undef min
-#endif
 #endif

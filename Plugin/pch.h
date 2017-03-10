@@ -30,31 +30,9 @@
 #endif
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
-#ifdef max
-    #undef max
-    #undef min
-#endif
 #pragma warning(disable: 4996)
-
-#ifndef aiNoAutoLink
-#pragma comment(lib, "AlembicAbc.lib")
-#pragma comment(lib, "AlembicAbcCollection.lib")
-#pragma comment(lib, "AlembicAbcCoreAbstract.lib")
-#pragma comment(lib, "AlembicAbcCoreFactory.lib")
-#pragma comment(lib, "AlembicAbcCoreHDF5.lib")
-#pragma comment(lib, "AlembicAbcCoreOgawa.lib")
-#pragma comment(lib, "AlembicAbcGeom.lib")
-#pragma comment(lib, "AlembicAbcMaterial.lib")
-#pragma comment(lib, "AlembicOgawa.lib")
-#pragma comment(lib, "AlembicUtil.lib")
-#pragma comment(lib, "libhdf5.lib")
-#pragma comment(lib, "libhdf5_hl.lib")
-#pragma comment(lib, "Half.lib")
-#pragma comment(lib, "Iex-2_2.lib")
-#pragma comment(lib, "IexMath-2_2.lib")
-#endif // aiNoAutoLink
-
 #endif // _WIN32
 
 using namespace Alembic;

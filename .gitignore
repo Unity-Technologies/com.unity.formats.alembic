@@ -1,3 +1,26 @@
+*.o
+*.obj
+*.pch
+*.lib
+*.exe
+*.exp
+*.ilk
+*.ipch
+*.pdb
+*.suo
+*.sdf
+*.opensdf
+*.user
+*.log
+*.tlog
+*.db
+*.opendb
+
+*.exe
+*.dll
+*.so
+*.dylib
+
 release/
 debug/
 dependencies/
@@ -9,14 +32,12 @@ excons.cache
 
 AlembicImporter/*.csproj
 AlembicImporter/*.sln
-*.sdf
-*.opendb
-*.vcxproj.user
 .vs/
 Library/
 Temp/
 _tmp/
 _out/
+external/
 ipch/
 
 *.abc
