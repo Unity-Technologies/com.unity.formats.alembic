@@ -39,7 +39,6 @@ namespace UTJ.Alembic
 
 	}
 
-
 	[System.Serializable]
 	public class AlembicPlaybackSettings
 	{
@@ -50,6 +49,8 @@ namespace UTJ.Alembic
 			Reverse,
 			Bounce
 		};
+        
+		[HideInInspector][SerializeField] public float m_duration = 0.0f;
 
 		[Tooltip("Specifies the lower time bound to use in the stream")]
 		[SerializeField] public float m_startTime = 0.0f;
@@ -69,6 +70,8 @@ namespace UTJ.Alembic
 		[Tooltip("Controls how playback cycles throught the stream.")]
 		[SerializeField] public CycleType m_cycle = CycleType.Hold;
 
+	    [SerializeField] public float m_Time = 0f;
+	    [SerializeField] public bool m_OverrideTime = false;
 	}
 }
 

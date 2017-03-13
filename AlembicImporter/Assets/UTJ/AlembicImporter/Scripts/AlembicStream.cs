@@ -353,13 +353,13 @@ namespace UTJ.Alembic
 
 		public void ProcessUpdateEvent()
         {
-            if (Application.isPlaying)
+            if (Application.isPlaying && !m_playbackSettings.m_OverrideTime)
             {
                 AbcUpdateBegin(Time.time);
             }
             else
             {
-                AbcUpdateBegin(m_time);
+                AbcUpdateBegin(m_playbackSettings.m_Time);
             }
         }
     

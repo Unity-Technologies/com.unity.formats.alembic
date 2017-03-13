@@ -29,7 +29,8 @@ namespace UTJ.Alembic
 					dynStream.m_PlaybackSettings = new AlembicPlaybackSettings()
 					{
 						m_startTime = abcStream.AbcStartTime,
-						m_endTime = abcStream.AbcEndTime
+						m_endTime = abcStream.AbcEndTime,
+                        m_duration = abcStream.AbcEndTime
 					};
 					dynStream.m_StreamDescriptor = streamDescr;
 					dynStream.enabled = true;
