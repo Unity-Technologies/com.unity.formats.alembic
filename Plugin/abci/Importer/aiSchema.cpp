@@ -122,7 +122,7 @@ aiProperty* aiSchemaBase::getPropertyByIndex(int i)
 aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
 {
     auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
-        [](aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
+        [](const aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
     if (i != m_properties.end()) {
         (*i)->setActive(true);
         return i->get();
@@ -144,7 +144,7 @@ void aiSchemaBase::setupProperties()
         }
     }
     std::sort(m_properties.begin(), m_properties.end(),
-        [](aiPropertyPtr& a, aiPropertyPtr& b) { return a->getName() < b->getName(); });
+        [](const aiPropertyPtr& a, const aiPropertyPtr& b) { return a->getName() < b->getName(); });
 }
 
 void aiSchemaBase::updateProperties(const abcSampleSelector& ss)
