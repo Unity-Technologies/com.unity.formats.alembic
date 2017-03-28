@@ -10,16 +10,16 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public abstract class AlembicElement : AlembicDisposable 
     {
-	    public AlembicTreeNode AlembicTreeNode { get; set; }
+        public AlembicTreeNode AlembicTreeNode { get; set; }
 
-	    protected AbcAPI.aiObject m_abcObj;
-		protected AbcAPI.aiSchema m_abcSchema;
-		protected GCHandle m_thisHandle;
+        protected AbcAPI.aiObject m_abcObj;
+        protected AbcAPI.aiSchema m_abcSchema;
+        protected GCHandle m_thisHandle;
 
         private bool m_verbose;
         private bool m_pendingUpdate;
 
-		static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
+        static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
             _this.AbcGetConfig(ref config);
@@ -41,18 +41,18 @@ namespace UTJ.Alembic
             return c;
         }
 
-		protected override void Dispose(bool disposing)
-		{
+        protected override void Dispose(bool disposing)
+        {
             m_thisHandle.Free();
 
-			if (disposing)
-			{
-				if (AlembicTreeNode != null )
-					AlembicTreeNode.RemoveAlembicObject(this);
-			}
+            if (disposing)
+            {
+                if (AlembicTreeNode != null )
+                    AlembicTreeNode.RemoveAlembicObject(this);
+            }
 
-			base.Dispose( disposing );
-		}
+            base.Dispose( disposing );
+        }
 
         public virtual void AbcSetup(AbcAPI.aiObject abcObj,
                                      AbcAPI.aiSchema abcSchema)

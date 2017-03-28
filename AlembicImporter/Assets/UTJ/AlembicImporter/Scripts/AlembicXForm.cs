@@ -22,15 +22,15 @@ namespace UTJ.Alembic
             {
                 if (m_abcData.inherits)
                 {
-					AlembicTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
-					AlembicTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
-					AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                    AlembicTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
+                    AlembicTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
+                    AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
                 }
                 else
                 {
-					AlembicTreeNode.linkedGameObj.transform.position = m_abcData.translation;
-					AlembicTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
-					AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                    AlembicTreeNode.linkedGameObj.transform.position = m_abcData.translation;
+                    AlembicTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
+                    AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
                 }
 
                 AbcClean();

@@ -39,7 +39,7 @@ namespace UTJ.Alembic
         {
             if (AbcIsDirty() || m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
             {
-				AlembicTreeNode.linkedGameObj.transform.forward = -AlembicTreeNode.linkedGameObj.transform.parent.forward;
+                AlembicTreeNode.linkedGameObj.transform.forward = -AlembicTreeNode.linkedGameObj.transform.parent.forward;
                 m_camera.fieldOfView = m_abcData.fieldOfView;
 
                 if (!m_ignoreClippingPlanes)

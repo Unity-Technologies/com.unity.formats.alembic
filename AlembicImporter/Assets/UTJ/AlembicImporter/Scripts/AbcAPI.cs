@@ -375,10 +375,10 @@ namespace UTJ.Alembic
 
 
 
-		class ImportContext
+        class ImportContext
         {
-	        public AlembicTreeNode alembicTreeNode;
-			public aiSampleSelector ss;
+            public AlembicTreeNode alembicTreeNode;
+            public aiSampleSelector ss;
             public bool createMissingNodes;
             public List<aiObject> objectsToDelete;
         }
@@ -442,14 +442,14 @@ namespace UTJ.Alembic
                 ++index;
             }
 
-	        var root = new GameObject {name = name};
-	        var abcStream = new AlembicStream( root )
-	        {
-		        m_pathToAbc = path,
-		        m_swapHandedness = p.swapHandedness,
-		        m_swapFaceWinding = p.swapFaceWinding
-	        };
-	        abcStream.AbcLoad(true);
+            var root = new GameObject {name = name};
+            var abcStream = new AlembicStream( root )
+            {
+                m_pathToAbc = path,
+                m_swapHandedness = p.swapHandedness,
+                m_swapFaceWinding = p.swapFaceWinding
+            };
+            abcStream.AbcLoad(true);
     
             return root;
         }
@@ -458,15 +458,15 @@ namespace UTJ.Alembic
         
         public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=false)
         {
-	        var ic = new ImportContext
-	        {
-				alembicTreeNode = node,
-		        ss = aiTimeToSampleSelector(time),
-		        createMissingNodes = createMissingNodes,
-		        objectsToDelete = new List<aiObject>()
-	        };
+            var ic = new ImportContext
+            {
+                alembicTreeNode = node,
+                ss = aiTimeToSampleSelector(time),
+                createMissingNodes = createMissingNodes,
+                objectsToDelete = new List<aiObject>()
+            };
 
-	        GCHandle hdl = GCHandle.Alloc(ic);
+            GCHandle hdl = GCHandle.Alloc(ic);
     
             aiObject top = aiGetTopObject(ctx);
     
@@ -484,40 +484,40 @@ namespace UTJ.Alembic
         static void ImportEnumerator(aiObject obj, IntPtr userData)
         {
             var ic = GCHandle.FromIntPtr(userData).Target as ImportContext;
-			AlembicTreeNode treeNode = ic.alembicTreeNode;
+            AlembicTreeNode treeNode = ic.alembicTreeNode;
     
-			// Get child. create if needed and allowed.
+            // Get child. create if needed and allowed.
             string childName = aiGetName(obj);
 
-			// Find targetted child GameObj
-	        AlembicTreeNode childTreeNode = null;
-	        GameObject childGO = null;
-			var childTransf = treeNode.linkedGameObj.transform.FindChild(childName);
-	        if (childTransf == null)
-	        {
-		        if (!ic.createMissingNodes)
-		        {
-			        ic.objectsToDelete.Add(obj);
-			        return;
-		        }
-
-		        childGO = new GameObject {name = childName};
-		        var trans = childGO.GetComponent<Transform>();
-		        trans.parent = treeNode.linkedGameObj.transform;
-		        trans.localPosition = Vector3.zero;
-		        trans.localEulerAngles = Vector3.zero;
-		        trans.localScale = Vector3.one;
-	        }
-	        else
-		        childGO = childTransf.gameObject;
-
-			if (childTreeNode == null )
+            // Find targetted child GameObj
+            AlembicTreeNode childTreeNode = null;
+            GameObject childGO = null;
+            var childTransf = treeNode.linkedGameObj.transform.FindChild(childName);
+            if (childTransf == null)
             {
-				childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
-				treeNode.children.Add(childTreeNode);
+                if (!ic.createMissingNodes)
+                {
+                    ic.objectsToDelete.Add(obj);
+                    return;
+                }
+
+                childGO = new GameObject {name = childName};
+                var trans = childGO.GetComponent<Transform>();
+                trans.parent = treeNode.linkedGameObj.transform;
+                trans.localPosition = Vector3.zero;
+                trans.localEulerAngles = Vector3.zero;
+                trans.localScale = Vector3.one;
+            }
+            else
+                childGO = childTransf.gameObject;
+
+            if (childTreeNode == null )
+            {
+                childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
+                treeNode.children.Add(childTreeNode);
             }
     
-			// Update
+            // Update
             AlembicElement elem = null;
             aiSchema schema = default(aiSchema);
     

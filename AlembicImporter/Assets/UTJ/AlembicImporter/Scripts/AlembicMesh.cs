@@ -455,14 +455,14 @@ namespace UTJ.Alembic
             
             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
 
-	        bool hasMesh = meshFilter != null
-	                       && meshFilter.sharedMesh != null
-	                       && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+            bool hasMesh = meshFilter != null
+                           && meshFilter.sharedMesh != null
+                           && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
-			if( !hasMesh)
+            if( !hasMesh)
             {
-	            mesh = new Mesh {name = "dyn: " + gameObject.name};
-	            mesh.MarkDynamic();
+                mesh = new Mesh {name = "dyn: " + gameObject.name};
+                mesh.MarkDynamic();
     
                 if (meshFilter == null)
                 {

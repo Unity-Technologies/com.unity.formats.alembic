@@ -4,36 +4,36 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
     public class AlembicStream : AlembicDisposable
-	{
-		private AlembicTreeNode _alembicTreeRoot;
+    {
+        private AlembicTreeNode _alembicTreeRoot;
 
 
-		public AlembicImportSettings ImportSettings { get; set; }
+        public AlembicImportSettings ImportSettings { get; set; }
 
 
-		public AlembicPlaybackSettings m_playbackSettings;
-	    public AlembicDiagnosticSettings m_diagSettings;
+        public AlembicPlaybackSettings m_playbackSettings;
+        public AlembicDiagnosticSettings m_diagSettings;
 
-		private float m_time;
+        private float m_time;
         private AbcAPI.aiConfig m_config;
         private bool m_loaded;
-		private AlembicImportSettings m_LastImportSettings = new AlembicImportSettings();
-		private float m_lastAbcTime;
+        private AlembicImportSettings m_LastImportSettings = new AlembicImportSettings();
+        private float m_lastAbcTime;
         private float m_lastAspectRatio = -1.0f;
 
         private float m_timeEps = 0.001f;
         private AbcAPI.aiContext m_abc;
         private bool m_updateBegan = false;
-	    public bool m_forceRefresh;
+        public bool m_forceRefresh;
 
 
-		public AlembicTreeNode AlembicTreeRoot { get { return _alembicTreeRoot; } }
+        public AlembicTreeNode AlembicTreeRoot { get { return _alembicTreeRoot; } }
 
 
 
-		// --- For internal use ---
+        // --- For internal use ---
 
-		private bool AbcIsValid()
+        private bool AbcIsValid()
         {
             return (m_abc.ptr != (IntPtr)0);
         }
@@ -127,16 +127,16 @@ namespace UTJ.Alembic
     
         private bool AbcUpdateRequired(float abcTime, float aspectRatio)
         {
-			if (m_forceRefresh ||
-				ImportSettings.m_swapHandedness != m_LastImportSettings.m_swapHandedness ||
-				ImportSettings.m_swapFaceWinding != m_LastImportSettings.m_swapFaceWinding ||
-				ImportSettings.m_submeshPerUVTile != m_LastImportSettings.m_submeshPerUVTile ||
-				ImportSettings.m_normalsMode != m_LastImportSettings.m_normalsMode ||
-				ImportSettings.m_tangentsMode != m_LastImportSettings.m_tangentsMode ||
-				Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
-				aspectRatio != m_lastAspectRatio ||
-				ImportSettings.m_pathToAbc != m_LastImportSettings.m_pathToAbc)
-			{
+            if (m_forceRefresh ||
+                ImportSettings.m_swapHandedness != m_LastImportSettings.m_swapHandedness ||
+                ImportSettings.m_swapFaceWinding != m_LastImportSettings.m_swapFaceWinding ||
+                ImportSettings.m_submeshPerUVTile != m_LastImportSettings.m_submeshPerUVTile ||
+                ImportSettings.m_normalsMode != m_LastImportSettings.m_normalsMode ||
+                ImportSettings.m_tangentsMode != m_LastImportSettings.m_tangentsMode ||
+                Math.Abs(abcTime - m_lastAbcTime) > m_timeEps ||
+                aspectRatio != m_lastAspectRatio ||
+                ImportSettings.m_pathToAbc != m_LastImportSettings.m_pathToAbc)
+            {
                 return true;
             }
             else
@@ -149,55 +149,55 @@ namespace UTJ.Alembic
         {
             m_lastAbcTime = abcTime;
             m_lastAspectRatio = aspectRatio;
-			m_forceRefresh = false;
+            m_forceRefresh = false;
 
-			m_LastImportSettings.m_swapHandedness = ImportSettings.m_swapHandedness;
-			m_LastImportSettings.m_swapFaceWinding = ImportSettings.m_swapFaceWinding;
-			m_LastImportSettings.m_submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
-			m_LastImportSettings.m_normalsMode = ImportSettings.m_normalsMode;
-			m_LastImportSettings.m_tangentsMode = ImportSettings.m_tangentsMode;
+            m_LastImportSettings.m_swapHandedness = ImportSettings.m_swapHandedness;
+            m_LastImportSettings.m_swapFaceWinding = ImportSettings.m_swapFaceWinding;
+            m_LastImportSettings.m_submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
+            m_LastImportSettings.m_normalsMode = ImportSettings.m_normalsMode;
+            m_LastImportSettings.m_tangentsMode = ImportSettings.m_tangentsMode;
         }
 
-		public void AbcUpdateElements( AlembicTreeNode node = null )
-		{
-			if (node == null)
-				node = _alembicTreeRoot;
+        public void AbcUpdateElements( AlembicTreeNode node = null )
+        {
+            if (node == null)
+                node = _alembicTreeRoot;
 
-			foreach (var o in node.alembicObjects)
-			{
-				var e = (AlembicElement)o.Value;
-				e.AbcUpdate();
-			}
+            foreach (var o in node.alembicObjects)
+            {
+                var e = (AlembicElement)o.Value;
+                e.AbcUpdate();
+            }
 
-			foreach (var c in node.children)
-				AbcUpdateElements( c );
-		}
-
-
-		public float AbcStartTime
-		{
-			get
-			{
-				if (AbcIsValid())
-					return AbcAPI.aiGetStartTime(m_abc);
-				else
-					return 0;
-			}
-		}
-
-		public float AbcEndTime
-		{
-			get
-			{
-				if (AbcIsValid())
-					return AbcAPI.aiGetEndTime(m_abc);
-				else
-					return 0;
-			}
-		}
+            foreach (var c in node.children)
+                AbcUpdateElements( c );
+        }
 
 
-		private bool AbcRecoverContext()
+        public float AbcStartTime
+        {
+            get
+            {
+                if (AbcIsValid())
+                    return AbcAPI.aiGetStartTime(m_abc);
+                else
+                    return 0;
+            }
+        }
+
+        public float AbcEndTime
+        {
+            get
+            {
+                if (AbcIsValid())
+                    return AbcAPI.aiGetEndTime(m_abc);
+                else
+                    return 0;
+            }
+        }
+
+
+        private bool AbcRecoverContext()
         {
             if (!AbcIsValid())
             {
@@ -205,15 +205,15 @@ namespace UTJ.Alembic
                 {
                     Debug.Log("AlembicStream.AbcRecoverContext: Try to recover alembic context");
                 }
-				
-				m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
+                
+                m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
     
                 if (AbcIsValid())
                 {
-					m_forceRefresh = true;
-					_alembicTreeRoot.ResetTree();
+                    m_forceRefresh = true;
+                    _alembicTreeRoot.ResetTree();
 
-					AbcSyncConfig();
+                    AbcSyncConfig();
     
                     AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), false);
     
@@ -237,8 +237,8 @@ namespace UTJ.Alembic
     
         private void AbcUpdateBegin(float time)
         {
-	        if (ImportSettings == null)
-		        return;
+            if (ImportSettings == null)
+                return;
 
             if (!m_loaded && ImportSettings != null && ImportSettings.m_pathToAbc != null)
             {
@@ -275,14 +275,14 @@ namespace UTJ.Alembic
                     AbcSyncConfig();
     
                     if(ImportSettings.m_useThreads)
-					{
+                    {
                         AbcAPI.aiUpdateSamplesBegin(m_abc, abcTime);
                         m_updateBegan = true;
                     }
                     else
-					{
+                    {
                         AbcAPI.aiUpdateSamples(m_abc, abcTime);
-						AbcUpdateElements();
+                        AbcUpdateElements();
                     }
                     
                     AbcSetLastUpdateState(abcTime, aspectRatio);
@@ -300,58 +300,58 @@ namespace UTJ.Alembic
                 return;
             }
 
-			m_time = 0.0f;
-			m_forceRefresh = true;
+            m_time = 0.0f;
+            m_forceRefresh = true;
 
-			m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
+            m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
             m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc);
 
-			if (m_loaded)
+            if (m_loaded)
             {
-				m_forceRefresh = true;
+                m_forceRefresh = true;
     
                 AbcSyncConfig();
     
                 AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), createMissingNodes);
             }
-			AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode));
-		}
+            AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode));
+        }
 
-		public AlembicStream(GameObject rootGo, AlembicImportSettings importSettings, AlembicPlaybackSettings playSettings, AlembicDiagnosticSettings diagSettings)
-		{
-			_alembicTreeRoot = new AlembicTreeNode() { stream = this, linkedGameObj = rootGo };
-			ImportSettings = importSettings;
-			m_playbackSettings = playSettings;
-			m_diagSettings = diagSettings ?? new AlembicDiagnosticSettings();
+        public AlembicStream(GameObject rootGo, AlembicImportSettings importSettings, AlembicPlaybackSettings playSettings, AlembicDiagnosticSettings diagSettings)
+        {
+            _alembicTreeRoot = new AlembicTreeNode() { stream = this, linkedGameObj = rootGo };
+            ImportSettings = importSettings;
+            m_playbackSettings = playSettings;
+            m_diagSettings = diagSettings ?? new AlembicDiagnosticSettings();
 
-			AbcAPI.aiEnableFileLog(m_diagSettings.m_logToFile, m_diagSettings.m_logPath);
-		}
+            AbcAPI.aiEnableFileLog(m_diagSettings.m_logToFile, m_diagSettings.m_logPath);
+        }
 
-		// --- method overrides ---
+        // --- method overrides ---
 
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				if (_alembicTreeRoot != null)
-				{
-					_alembicTreeRoot.Dispose();
-					_alembicTreeRoot = null;
-				}
-			}
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_alembicTreeRoot != null)
+                {
+                    _alembicTreeRoot.Dispose();
+                    _alembicTreeRoot = null;
+                }
+            }
 
-			if (AbcIsValid())
-			{
-				if (m_updateBegan )
-					AbcAPI.aiUpdateSamplesEnd(m_abc);
-				AbcAPI.aiDestroyContext(m_abc);
-				m_abc = default(AbcAPI.aiContext);
-			}
+            if (AbcIsValid())
+            {
+                if (m_updateBegan )
+                    AbcAPI.aiUpdateSamplesEnd(m_abc);
+                AbcAPI.aiDestroyContext(m_abc);
+                m_abc = default(AbcAPI.aiContext);
+            }
 
-			base.Dispose(disposing);
-		}
+            base.Dispose(disposing);
+        }
 
-		public void ProcessUpdateEvent()
+        public void ProcessUpdateEvent()
         {
             if (Application.isPlaying && !m_playbackSettings.m_OverrideTime)
             {
@@ -365,17 +365,17 @@ namespace UTJ.Alembic
     
         public void ProcessLateUpdateEvent()
         {
-			if (m_updateBegan && _alembicTreeRoot != null)
-			{
-				AbcAPI.aiUpdateSamplesEnd(m_abc);
-				AbcUpdateElements();
-			}
-		}
+            if (m_updateBegan && _alembicTreeRoot != null)
+            {
+                AbcAPI.aiUpdateSamplesEnd(m_abc);
+                AbcUpdateElements();
+            }
+        }
 
-		public void ForcedRefresh()
-		{
-			m_forceRefresh = true;
-			AbcUpdateElements();
-		}
-	}
+        public void ForcedRefresh()
+        {
+            m_forceRefresh = true;
+            AbcUpdateElements();
+        }
+    }
 }
