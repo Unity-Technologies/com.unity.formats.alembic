@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "abci.h"
-#include "aiLogger.h"
+#include "aiInternal.h"
 #include "aiContext.h"
 #include "aiProperty.h"
 #include "aiObject.h"

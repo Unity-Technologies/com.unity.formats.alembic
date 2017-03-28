@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "abci.h"
-#include "aiLogger.h"
+#include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
@@ -10,7 +9,7 @@
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
     : m_schema(schema)
 {
-	m_config = schema->getConfig();
+    m_config = schema->getConfig();
 }
 
 aiSampleBase::~aiSampleBase()
@@ -64,16 +63,16 @@ void aiSchemaBase::invokeConfigCallback(aiConfig *config)
 {
     if (m_configCb)
     {
-    	m_configCb(m_configCbArg, config);
+        m_configCb(m_configCbArg, config);
     }
 }
 
 void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged)
 {
-	if (m_sampleCb)
-	{
-		m_sampleCb(m_sampleCbArg, sample, topologyChanged);
-	}
+    if (m_sampleCb)
+    {
+        m_sampleCb(m_sampleCbArg, sample, topologyChanged);
+    }
 }
 
 void aiSchemaBase::readConfig()

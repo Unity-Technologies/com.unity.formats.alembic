@@ -58,6 +58,9 @@
     <ClCompile Include="abci\pch.cpp">
       <Filter>abci</Filter>
     </ClCompile>
+    <ClCompile Include="abci\Foundation\Allocator.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abci\Foundation\aiThreadPool.h">
@@ -122,6 +125,18 @@
     </ClInclude>
     <ClInclude Include="abci\abci.h">
       <Filter>abci</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\RawVector.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\Allocator.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiInternal.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Exporter\aeInternal.h">
+      <Filter>abci\Exporter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

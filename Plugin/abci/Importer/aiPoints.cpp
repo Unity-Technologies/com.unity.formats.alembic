@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "abci.h"
-#include "aiLogger.h"
+#include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
@@ -56,7 +55,6 @@ void aiPointsSample::copyData(aiPointsData &data)
     int v_count = 0;
     if (m_velocities) {
         v_count = (int)m_velocities->size();
-        // somehow v_count != count usually happens...
         v_count = std::min<int>(count, v_count);
     }
 

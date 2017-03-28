@@ -1,20 +1,11 @@
 #include "pch.h"
-#include "abci.h"
+#include "aeInternal.h"
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aeXForm.h"
 #include "aePoints.h"
 #include "aePolyMesh.h"
 #include "aeCamera.h"
-
-#ifdef _WIN32
-#pragma comment(lib, "Alembic.lib")
-#pragma comment(lib, "libhdf5.lib")
-#pragma comment(lib, "libhdf5_hl.lib")
-#pragma comment(lib, "Half.lib")
-#pragma comment(lib, "Iex-2_2.lib")
-#pragma comment(lib, "IexMath-2_2.lib")
-#endif
 
 
 abciAPI aeContext* aeCreateContext()
