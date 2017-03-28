@@ -30,17 +30,45 @@ void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
 
 void aiPointsSample::getDataPointer(aiPointsData &data)
 {
-    if (m_positions) {
-        data.count = (int)m_positions->size();
-        data.positions = (abcV3*)m_positions->get();
-    }
+    int count = (int)m_positions->size();
+    data.count = count;
 
-    if (m_velocities) {
-        data.velocities = (abcV3*)m_velocities->get();
+    if (m_sort) {
+        createSortData();
+        if (m_positions) {
+            m_tmp_positions.resize(count);
+            for (int i = 0; i < count; ++i) {
+                m_tmp_positions[i] = (*m_positions)[m_sort_data[i].second];
+            }
+            data.positions = m_tmp_positions.data();
+        }
+        if (m_velocities) {
+            m_tmp_velocities.resize(count);
+            int v_count = std::min<int>(count, (int)m_velocities->size());
+            for (int i = 0; i < count; ++i) {
+                m_tmp_velocities[i] = (*m_velocities)[m_sort_data[i].second];
+            }
+            data.velocities = m_tmp_positions.data();
+        }
+        if (m_ids) {
+            m_tmp_ids.resize(count);
+            int v_count = std::min<int>(count, (int)m_ids->size());
+            for (int i = 0; i < count; ++i) {
+                m_tmp_ids[i] = (*m_ids)[m_sort_data[i].second];
+            }
+            data.ids = m_tmp_ids.data();
+        }
     }
-
-    if (m_ids) {
-        data.ids = (uint64_t*)m_ids->get();
+    else {
+        if (m_positions) {
+            data.positions = (abcV3*)m_positions->get();
+        }
+        if (m_velocities) {
+            data.velocities = (abcV3*)m_velocities->get();
+        }
+        if (m_ids) {
+            data.ids = (uint64_t*)m_ids->get();
+        }
     }
 
     data.center = m_bounds.center();
@@ -52,17 +80,23 @@ void aiPointsSample::copyData(aiPointsData &data)
     int count = (int)m_positions->size();
     data.count = count;
 
-    int v_count = 0;
-    if (m_velocities) {
-        v_count = (int)m_velocities->size();
-        v_count = std::min<int>(count, v_count);
+    if (m_sort) {
+        createSortData();
     }
 
     // copy positions
     if (m_positions && data.positions) {
-        for (int i = 0; i < count; ++i) {
-            data.positions[i] = (*m_positions)[i];
+        if (m_sort) {
+            for (int i = 0; i < count; ++i) {
+                data.positions[i] = (*m_positions)[m_sort_data[i].second];
+            }
         }
+        else {
+            for (int i = 0; i < count; ++i) {
+                data.positions[i] = (*m_positions)[i];
+            }
+        }
+
         if (m_config.swapHandedness) {
             for (int i = 0; i < count; ++i) {
                 data.positions[i].x *= -1.0f;
@@ -72,20 +106,62 @@ void aiPointsSample::copyData(aiPointsData &data)
 
     // copy velocities
     if (m_velocities && data.velocities) {
-        for (int i = 0; i < v_count; ++i) {
-            data.velocities[i] = (*m_velocities)[i];
+        int v_count = std::min<int>(count, (int)m_velocities->size());
+
+        if (m_sort) {
+            for (int i = 0; i < v_count; ++i) {
+                data.velocities[i] = (*m_velocities)[m_sort_data[i].second];
+            }
+        }
+        else {
+            for (int i = 0; i < v_count; ++i) {
+                data.velocities[i] = (*m_velocities)[i];
+            }
+        }
+
+        if (m_config.swapHandedness) {
+            for (int i = 0; i < v_count; ++i) {
+                data.velocities[i].x *= -1.0f;
+            }
         }
     }
 
     // copy ids
     if (m_ids && data.ids) {
-        for (int i = 0; i < count; ++i) {
-            data.ids[i] = (*m_ids)[i];
+        int v_count = std::min<int>(count, (int)m_ids->size());
+
+        if (m_sort) {
+            for (int i = 0; i < v_count; ++i) {
+                data.ids[i] = (*m_ids)[m_sort_data[i].second];
+            }
+        }
+        else {
+            for (int i = 0; i < v_count; ++i) {
+                data.ids[i] = (*m_ids)[i];
+            }
         }
     }
 
     data.center = m_bounds.center();
     data.size = m_bounds.size();
+}
+
+void aiPointsSample::createSortData()
+{
+    m_sort_data.resize(m_positions->size());
+    int count = (int)m_positions->size();
+    for (int i = 0; i < count; ++i) {
+        m_sort_data[i].first = ((*m_positions)[i] - m_sort_position).length();
+        m_sort_data[i].second = i;
+    }
+
+#ifdef _WIN32
+    concurrency::parallel_sort
+#else
+    std::sort
+#endif
+        (m_sort_data.begin(), m_sort_data.end(),
+            [](const std::pair<float, int>& a, const std::pair<float, int>& b) { return a.first > b.first; });
 }
 
 // ---

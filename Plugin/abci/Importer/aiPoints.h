@@ -12,10 +12,19 @@ public:
     void copyData(aiPointsData &data);
 
 public:
+    void createSortData();
+
     Abc::P3fArraySamplePtr m_positions;
     Abc::V3fArraySamplePtr m_velocities;
     Abc::UInt64ArraySamplePtr m_ids;
     Abc::Box3d m_bounds;
+
+    bool m_sort = false;
+    abcV3 m_sort_position;
+    RawVector<std::pair<float, int>> m_sort_data;
+    RawVector<abcV3> m_tmp_positions;
+    RawVector<abcV3> m_tmp_velocities;
+    RawVector<uint64_t> m_tmp_ids;
 };
 
 
