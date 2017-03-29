@@ -25,10 +25,21 @@ namespace UTJ.Alembic
                 return m_summary.peakCount;
             }
         }
-    
-    
+
+        public override void AbcUpdateConfig()
+        {
+            var cloud = AlembicTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            if(cloud != null)
+            {
+                AbcAPI.aiPointsSetSort(m_abcSchema, cloud.m_sort);
+                if(cloud.m_sortFrom != null)
+                {
+                    AbcAPI.aiPointsSetSortBasePosition(m_abcSchema, cloud.m_sortFrom.position);
+                }
+            }
+        }
+
         // No config overrides on AlembicPoints
-    
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
             // get points cloud component

@@ -51,9 +51,9 @@ public:
     void        removeChild(aiObject *c);
 
 private:
-    aiContext   *m_ctx;
+    aiContext   *m_ctx = nullptr;
     abcObject   m_abc;
-    aiObject    *m_parent;
+    aiObject    *m_parent = nullptr;
     std::vector<aiObject*> m_children;
 
     std::vector<aiSchemaBase*>  m_schemas;

@@ -9,8 +9,6 @@
 #include "aiPoints.h"
 
 aiObject::aiObject()
-    : m_ctx(nullptr)
-    , m_parent(nullptr)
 {
 }
 

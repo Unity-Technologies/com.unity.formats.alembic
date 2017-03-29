@@ -360,9 +360,11 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
         [DllImport("abci")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
     
-        [DllImport("abci")] public static extern aiSchema    aiGetPoints(aiObject obj);
-        [DllImport("abci")] public static extern void        aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
-        [DllImport("abci")] public static extern void        aiPointsCopyData(aiSample sample, ref aiPointsData data);
+        [DllImport("abci")] public static extern aiSchema   aiGetPoints(aiObject obj);
+        [DllImport("abci")] public static extern void       aiPointsSetSort(aiSchema schema, bool v);
+        [DllImport("abci")] public static extern void       aiPointsSetSortBasePosition(aiSchema schema, Vector3 v);
+        [DllImport("abci")] public static extern void       aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
+        [DllImport("abci")] public static extern void       aiPointsCopyData(aiSample sample, ref aiPointsData data);
     
         [DllImport("abci")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
         [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);

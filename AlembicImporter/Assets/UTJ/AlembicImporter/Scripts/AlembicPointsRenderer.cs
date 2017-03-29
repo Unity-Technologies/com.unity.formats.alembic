@@ -109,9 +109,9 @@ namespace UTJ.Alembic
 #endif
             {
                 var matrix = Matrix4x4.identity;
+                matrix.m00 = matrix.m11 = matrix.m22 = m_size;
                 for (int i = 0; i < num_instances; ++i)
                 {
-                    matrix.m00 = matrix.m11 = matrix.m22 = m_size;
                     matrix.m03 = positions[i].x;
                     matrix.m13 = positions[i].y;
                     matrix.m23 = positions[i].z;

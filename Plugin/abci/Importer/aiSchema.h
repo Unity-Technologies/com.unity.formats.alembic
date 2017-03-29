@@ -59,16 +59,16 @@ protected:
     void updateProperties(const abcSampleSelector& ss);
 
 protected:
-    aiObject *m_obj;
-    aiConfigCallback m_configCb;
-    void *m_configCbArg;
-    aiSampleCallback m_sampleCb;
-    void *m_sampleCbArg;
+    aiObject *m_obj = nullptr;
+    aiConfigCallback m_configCb = nullptr;
+    void *m_configCbArg = nullptr;
+    aiSampleCallback m_sampleCb = nullptr;
+    void *m_sampleCbArg = nullptr;
     aiConfig m_config;
-    bool m_constant;
-    bool m_varyingTopology;
-    aiSampleBase *m_pendingSample;
-    bool m_pendingTopologyChanged;
+    bool m_constant = false;
+    bool m_varyingTopology = false;
+    aiSampleBase *m_pendingSample = nullptr;
+    bool m_pendingTopologyChanged = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -86,9 +86,6 @@ public:
 
     aiTSchema(aiObject *obj)
         : aiSchemaBase(obj)
-        , m_theSample(0)
-        , m_numSamples(0)
-        , m_lastSampleIndex(-1)
     {
         AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
@@ -329,8 +326,8 @@ protected:
 protected:
     AbcSchema m_schema;
     SampleCont m_samples;
-    Sample* m_theSample;
+    Sample* m_theSample = nullptr;
     Abc::TimeSamplingPtr m_timeSampling;
-    int64_t m_numSamples;
-    int64_t m_lastSampleIndex;
+    int64_t m_numSamples = 0;
+    int64_t m_lastSampleIndex = -1;
 };

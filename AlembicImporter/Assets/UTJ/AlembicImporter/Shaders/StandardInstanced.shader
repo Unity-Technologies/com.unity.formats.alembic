@@ -15,7 +15,8 @@
         #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.0
         #pragma multi_compile_instancing
-        // #pragma instancing_options
+        #pragma instancing_options assumeuniformscaling maxcount:1024
+        #include "UnityCG.cginc"
 
         fixed4 _Color;
         sampler2D _MainTex;
@@ -27,12 +28,21 @@
         half _Glossiness;
         half _Metallic;
 
+#ifdef UNITY_SUPPORT_INSTANCING
         UNITY_INSTANCING_CBUFFER_START(Props)
             UNITY_DEFINE_INSTANCED_PROP(float, _AlembicID)
         UNITY_INSTANCING_CBUFFER_END
+#else
+        float _AlembicID;
+#endif
 
-        void surf (Input IN, inout SurfaceOutputStandard o) {
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+#ifdef UNITY_SUPPORT_INSTANCING
             float abcID = UNITY_ACCESS_INSTANCED_PROP(_AlembicID);
+#else
+            float abcID = _AlembicID;
+#endif
 
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
             c.r *= fmod(abcID, 64.0) / 64.0;

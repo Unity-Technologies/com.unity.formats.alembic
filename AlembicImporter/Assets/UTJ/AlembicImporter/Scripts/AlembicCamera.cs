@@ -28,6 +28,11 @@ namespace UTJ.Alembic
             }
         }
 
+        public override void AbcUpdateConfig()
+        {
+            // nothing to do
+        }
+
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
             AbcAPI.aiCameraGetData(sample, ref m_abcData);

@@ -16,6 +16,11 @@ namespace UTJ.Alembic
             AbcDirty();
         }
 
+        public override void AbcUpdateConfig()
+        {
+            // nothing to do
+        }
+
         public override void AbcUpdate()
         {
             if (AbcIsDirty())

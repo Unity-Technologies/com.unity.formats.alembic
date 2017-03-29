@@ -33,7 +33,8 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
     int count = (int)m_positions->size();
     data.count = count;
 
-    if (m_sort) {
+    auto& schema = static_cast<aiPoints&>(*m_schema);
+    if (schema.getSort()) {
         createSortData();
         if (m_positions) {
             m_tmp_positions.resize(count);
@@ -80,13 +81,15 @@ void aiPointsSample::copyData(aiPointsData &data)
     int count = (int)m_positions->size();
     data.count = count;
 
-    if (m_sort) {
+    auto& schema = static_cast<aiPoints&>(*m_schema);
+    bool sort = schema.getSort();
+    if (sort) {
         createSortData();
     }
 
     // copy positions
     if (m_positions && data.positions) {
-        if (m_sort) {
+        if (sort) {
             for (int i = 0; i < count; ++i) {
                 data.positions[i] = (*m_positions)[m_sort_data[i].second];
             }
@@ -108,7 +111,7 @@ void aiPointsSample::copyData(aiPointsData &data)
     if (m_velocities && data.velocities) {
         int v_count = std::min<int>(count, (int)m_velocities->size());
 
-        if (m_sort) {
+        if (sort) {
             for (int i = 0; i < v_count; ++i) {
                 data.velocities[i] = (*m_velocities)[m_sort_data[i].second];
             }
@@ -130,7 +133,7 @@ void aiPointsSample::copyData(aiPointsData &data)
     if (m_ids && data.ids) {
         int v_count = std::min<int>(count, (int)m_ids->size());
 
-        if (m_sort) {
+        if (sort) {
             for (int i = 0; i < v_count; ++i) {
                 data.ids[i] = (*m_ids)[m_sort_data[i].second];
             }
@@ -148,10 +151,12 @@ void aiPointsSample::copyData(aiPointsData &data)
 
 void aiPointsSample::createSortData()
 {
+    auto& schema = static_cast<aiPoints&>(*m_schema);
+
     m_sort_data.resize(m_positions->size());
     int count = (int)m_positions->size();
     for (int i = 0; i < count; ++i) {
-        m_sort_data[i].first = ((*m_positions)[i] - m_sort_position).length();
+        m_sort_data[i].first = ((*m_positions)[i] - schema.getSortPosition()).length();
         m_sort_data[i].second = i;
     }
 
@@ -248,3 +253,8 @@ const aiPointsSummary& aiPoints::getSummary() const
 
     return m_summary;
 }
+
+void aiPoints::setSort(bool v) { m_sort = v; }
+bool aiPoints::getSort() const { return m_sort; }
+void aiPoints::setSortPosition(const abcV3& v) { m_sort_position = v; }
+const abcV3& aiPoints::getSortPosition() const { return m_sort_position; }

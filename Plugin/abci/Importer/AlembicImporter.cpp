@@ -20,9 +20,9 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int index)
 }
 
 
-abciAPI void aiEnableFileLog(bool on, const char *path)
+abciAPI void aiEnableFileLog(int on, const char *path)
 {
-    aiLogger::Enable(on, path);
+    aiLogger::Enable(on != 0, path);
 }
 
 abciAPI void aiCleanup()
@@ -48,7 +48,7 @@ abciAPI void aiDestroyContext(aiContext* ctx)
 }
 
 
-abciAPI bool aiLoad(aiContext* ctx, const char *path)
+abciAPI int aiLoad(aiContext* ctx, const char *path)
 {
     return (ctx ? ctx->load(path) : false);
 }
@@ -253,11 +253,11 @@ abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
     }
 }
 
-abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh)
+abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, int forceRefresh)
 {
     if (sample)
     {
-        sample->getSummary(forceRefresh, *summary);
+        sample->getSummary(forceRefresh != 0, *summary);
     }
 }
 
@@ -269,12 +269,12 @@ abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* 
     }
 }
 
-abciAPI void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate, bool always_expand_indices)
+abciAPI void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, int triangulate, int always_expand_indices)
 {
     if (sample)
     {
-        if (triangulate) {
-            sample->copyDataWithTriangulation(*data, always_expand_indices);
+        if (triangulate != 0) {
+            sample->copyDataWithTriangulation(*data, always_expand_indices != 0);
         }
         else {
             sample->copyData(*data);
@@ -306,9 +306,9 @@ abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIn
     return (sample ? sample->getSplitSubmeshCount(splitIndex) : 0);
 }
 
-abciAPI bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
+abciAPI int aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
 {
-    return (sample ? sample->getNextSubmesh(*summary) : false);
+    return sample ? sample->getNextSubmesh(*summary) : false;
 }
 
 abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data)
@@ -352,6 +352,16 @@ abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary)
 {
     if (schema == nullptr) { return; }
     *summary = schema->getSummary();
+}
+abciAPI void aiPointsSetSort(aiPoints* schema, int v)
+{
+    if (schema == nullptr) { return; }
+    schema->setSort(v != 0);
+}
+abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
+{
+    if (schema == nullptr) { return; }
+    schema->setSortPosition(v);
 }
 
 abciAPI void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData)

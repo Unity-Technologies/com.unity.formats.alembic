@@ -25,6 +25,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
+            #pragma instancing_options assumeuniformscaling maxcount:1024
             #include "UnityCG.cginc"
 
             fixed4 _Color;
@@ -43,16 +44,19 @@
                 float4 texcoord : TEXCOORD0;
             };
 
+#ifdef UNITY_SUPPORT_INSTANCING
             UNITY_INSTANCING_CBUFFER_START (Props)
                 UNITY_DEFINE_INSTANCED_PROP (float, _AlembicID)
             UNITY_INSTANCING_CBUFFER_END
+#endif
            
             v2f vert (appdata v)
             {
+#ifdef UNITY_SUPPORT_INSTANCING
+                UNITY_SETUP_INSTANCE_ID(v);
+#endif
+
                 v2f o;
-
-                UNITY_SETUP_INSTANCE_ID (v);
-
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.texcoord = v.texcoord;
                 return o;

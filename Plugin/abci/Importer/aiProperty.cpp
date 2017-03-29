@@ -7,7 +7,6 @@
 
 
 aiProperty::aiProperty()
-    : m_active(false)
 {
 }
 

@@ -158,16 +158,25 @@ namespace UTJ.Alembic
             m_LastImportSettings.m_tangentsMode = ImportSettings.m_tangentsMode;
         }
 
+        public void AbcUpdateConfigElements(AlembicTreeNode node = null)
+        {
+            if (node == null)
+                node = _alembicTreeRoot;
+
+            foreach (var o in node.alembicObjects)
+                o.Value.AbcUpdateConfig();
+
+            foreach (var c in node.children)
+                AbcUpdateConfigElements(c);
+        }
+
         public void AbcUpdateElements( AlembicTreeNode node = null )
         {
             if (node == null)
                 node = _alembicTreeRoot;
 
             foreach (var o in node.alembicObjects)
-            {
-                var e = (AlembicElement)o.Value;
-                e.AbcUpdate();
-            }
+                o.Value.AbcUpdate();
 
             foreach (var c in node.children)
                 AbcUpdateElements( c );
@@ -273,6 +282,7 @@ namespace UTJ.Alembic
                     }
                     
                     AbcSyncConfig();
+                    AbcUpdateConfigElements();
     
                     if(ImportSettings.m_useThreads)
                     {
@@ -375,6 +385,7 @@ namespace UTJ.Alembic
         public void ForcedRefresh()
         {
             m_forceRefresh = true;
+            AbcUpdateConfigElements();
             AbcUpdateElements();
         }
     }

@@ -19,14 +19,6 @@ aiSampleBase::~aiSampleBase()
 
 aiSchemaBase::aiSchemaBase(aiObject *obj)
     : m_obj(obj)
-    , m_configCb(nullptr)
-    , m_configCbArg(nullptr)
-    , m_sampleCb(nullptr)
-    , m_sampleCbArg(nullptr)
-    , m_constant(false)
-    , m_varyingTopology(false)
-    , m_pendingSample(0)
-    , m_pendingTopologyChanged(false)
 {
     // start with base config
     m_config = obj->getContext()->getConfig();

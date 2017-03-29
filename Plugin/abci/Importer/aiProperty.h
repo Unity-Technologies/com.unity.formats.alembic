@@ -24,7 +24,7 @@ public:
     void setActive(bool v);
 
 protected:
-    bool m_active;
+    bool m_active = false;
 };
 
 aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header);

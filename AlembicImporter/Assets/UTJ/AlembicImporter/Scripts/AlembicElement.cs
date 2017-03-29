@@ -73,10 +73,13 @@ namespace UTJ.Alembic
             // Overrides aiConfig options here if needed
         }
 
+        // Called in main thread before update sample. 
+        public abstract void AbcUpdateConfig();
+
         // Called by loading thread (not necessarily the main thread)
         public abstract void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged);
 
-        // Called in main thread
+        // Called in main thread after update sample.
         public abstract void AbcUpdate();
 
 

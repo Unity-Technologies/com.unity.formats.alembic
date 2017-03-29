@@ -17,6 +17,10 @@ namespace UTJ.Alembic
         [ReadOnly] public int m_peakVertexCount;
         [ReadOnly] public int m_count;
 
+        AlembicPoints m_abc;
+        public bool m_sort = false;
+        public Transform m_sortFrom;
+
         // properties
         public Vector3[] abcPositions
         {
@@ -31,7 +35,11 @@ namespace UTJ.Alembic
 
         void Reset()
         {
+            var cam = Camera.main;
+            if(cam != null)
+            {
+                m_sortFrom = cam.GetComponent<Transform>();
+            }
         }
-
     }
 }

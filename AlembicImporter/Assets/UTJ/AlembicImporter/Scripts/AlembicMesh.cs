@@ -153,7 +153,12 @@ namespace UTJ.Alembic
     
             config.forceUpdate = m_freshSetup || (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
         }
-    
+
+        public override void AbcUpdateConfig()
+        {
+            // nothing to do
+        }
+
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
             var abcMaterials = AlembicTreeNode.linkedGameObj.GetComponent<AlembicMaterial>();

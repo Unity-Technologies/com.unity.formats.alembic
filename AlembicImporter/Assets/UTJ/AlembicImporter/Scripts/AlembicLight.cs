@@ -18,6 +18,11 @@ namespace UTJ.Alembic
             light.enabled = false;
         }
 
+        public override void AbcUpdateConfig()
+        {
+            // nothing to do
+        }
+
         // No config override
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)

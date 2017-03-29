@@ -19,8 +19,6 @@ public:
     Abc::UInt64ArraySamplePtr m_ids;
     Abc::Box3d m_bounds;
 
-    bool m_sort = false;
-    abcV3 m_sort_position;
     RawVector<std::pair<float, int>> m_sort_data;
     RawVector<abcV3> m_tmp_positions;
     RawVector<abcV3> m_tmp_velocities;
@@ -45,6 +43,13 @@ public:
 
     const aiPointsSummary& getSummary() const;
 
+    void setSort(bool v);
+    bool getSort() const;
+    void setSortPosition(const abcV3& v);
+    const abcV3& getSortPosition() const;
+
 private:
     mutable aiPointsSummary m_summary;
+    bool m_sort = false;
+    abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
 };

@@ -53,10 +53,10 @@ inline abcV3 aiExtractTranslation(const AbcGeom::XformSample &sample, bool swapH
 // return rotation in quaternion
 inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHandedness)
 {
-    // XformSample は内部的にトランスフォームを行列で保持しており、getAxis(), getScale() などはその行列から値を復元しようとする。
-    // このため回転とスケールが同時にかかっている場合返ってくる値は正確ではなくなってしまう。
-    // これをなんとかするため、保持されている XformOp を見て kRotateOperation が 1 個だけあった場合はその axis angle を返し、
-    // それ以外の場合 getAxis() に fallback する。
+    // XformSample store TRS as matrix, so XformSample::getAxis()/getAngle() may not match with original data.
+    // to workaround this problem, I try to extract rotation data from XformOp:
+    // enumerate XformOp and get rotation data if there is only one kRotateOperation.
+    // if this is not the case, fallback to XformSample::getAxis()/getAngle().
 
     const float Deg2Rad = (aiPI / 180.0f);
 
@@ -89,6 +89,7 @@ inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHand
         angle *= -1.0f;
     }
 
+    // axis/angle -> quaternion
     float rs = std::sin(angle * 0.5f);
     float rc = std::cos(angle * 0.5f);
     return abcV4(axis.x*rs, axis.y*rs, axis.z*rs, rc);

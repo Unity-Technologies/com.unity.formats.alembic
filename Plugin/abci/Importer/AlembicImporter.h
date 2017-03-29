@@ -383,19 +383,19 @@ struct aiPropertyData
 
 typedef void (abciSTDCall *aiNodeEnumerator)(aiObject *node, void *userData);
 typedef void (abciSTDCall *aiConfigCallback)(void *csObj, aiConfig *config);
-typedef void (abciSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, bool topologyChanged);
+typedef void (abciSTDCall *aiSampleCallback)(void *csObj, aiSampleBase *sample, int topologyChanged);
 
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int index);
 
-abciAPI void            aiEnableFileLog(bool on, const char *path);
+abciAPI void            aiEnableFileLog(int on, const char *path);
 
 abciAPI void            aiCleanup();
 abciAPI aiContext*      aiCreateContext(int uid);
 abciAPI void            aiDestroyContext(aiContext* ctx);
 
-abciAPI bool            aiLoad(aiContext* ctx, const char *path);
+abciAPI int             aiLoad(aiContext* ctx, const char *path);
 abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI float           aiGetStartTime(aiContext* ctx);
 abciAPI float           aiGetEndTime(aiContext* ctx);
@@ -433,20 +433,20 @@ abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outDa
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, int forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // copy mesh data without splitting. swap handedness / faces are applied.
 // if triangulate is true, triangulation is applied. in this case:
 // - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
 // - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, bool triangulate = false, bool always_expand_indices = false);
+abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, int triangulate = false, int always_expand_indices = false);
 // all these below aiPolyMesh* are mesh splitting functions
 abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
 abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
 abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
-abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
+abciAPI int             aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);
@@ -454,6 +454,8 @@ abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *ou
 
 abciAPI aiPoints*       aiGetPoints(aiObject* obj);
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
+abciAPI void            aiPointsSetSort(aiPoints* schema, int v);
+abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
 abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
 
