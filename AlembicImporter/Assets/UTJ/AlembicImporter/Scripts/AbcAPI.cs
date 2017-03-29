@@ -547,6 +547,7 @@ namespace UTJ.Alembic
             if (elem != null)
             {
                 elem.AbcSetup(obj, schema);
+                elem.AbcUpdateConfig();
                 aiSchemaUpdateSample(schema, ref ic.ss);
                 elem.AbcUpdate();
             }
