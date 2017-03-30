@@ -85,8 +85,8 @@ private:
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
     aiTaskGroup m_tasks;
-    double m_timeRange[2];
-    int m_uid;
+    double m_timeRange[2] = {-0.0, -0.0};
+    int m_uid = 0;
     aiConfig m_config;
 };
 

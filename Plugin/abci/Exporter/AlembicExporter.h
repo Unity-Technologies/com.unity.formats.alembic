@@ -20,163 +20,117 @@ struct aePolyMeshData;
 struct aeCameraData;
 
 
-enum aeArchiveType
+enum class aeArchiveType
 {
-    aeArchiveType_HDF5,
-    aeArchiveType_Ogawa,
+    HDF5,
+    Ogawa,
 };
 
-enum aeTimeSamplingType
+enum class aeTimeSamplingType
 {
-    aeTimeSamplingType_Uniform,
-    aeTimeSamplingType_Cyclic,
-    aeTimeSamplingType_Acyclic,
+    Uniform,
+    Cyclic,
+    Acyclic,
 };
 
-enum aeXFromType
+enum class aeXFromType
 {
-    aeXFromType_Matrix,
-    aeXFromType_TRS,
+    Matrix,
+    TRS,
 };
 
-enum aePropertyType
+enum class aePropertyType
 {
-    aePropertyType_Unknown,
+    Unknown,
 
     // scalar types
-    aePropertyType_Bool,
-    aePropertyType_Int,
-    aePropertyType_UInt,
-    aePropertyType_Float,
-    aePropertyType_Float2,
-    aePropertyType_Float3,
-    aePropertyType_Float4,
-    aePropertyType_Float4x4,
+    Bool,
+    Int,
+    UInt,
+    Float,
+    Float2,
+    Float3,
+    Float4,
+    Float4x4,
 
     // array types
-    aePropertyType_BoolArray,
-    aePropertyType_IntArray,
-    aePropertyType_UIntArray,
-    aePropertyType_FloatArray,
-    aePropertyType_Float2Array,
-    aePropertyType_Float3Array,
-    aePropertyType_Float4Array,
-    aePropertyType_Float4x4Array,
+    BoolArray,
+    IntArray,
+    UIntArray,
+    FloatArray,
+    Float2Array,
+    Float3Array,
+    Float4Array,
+    Float4x4Array,
 
-    aePropertyType_ScalarTypeBegin = aePropertyType_Bool,
-    aePropertyType_ScalarTypeEnd = aePropertyType_Float4x4,
+    ScalarTypeBegin = Bool,
+    ScalarTypeEnd = Float4x4,
 
-    aePropertyType_ArrayTypeBegin = aePropertyType_BoolArray,
-    aePropertyType_ArrayTypeEnd = aePropertyType_Float4x4Array,
+    ArrayTypeBegin = BoolArray,
+    ArrayTypeEnd = Float4x4Array,
 };
 
 struct aeConfig
 {
-    aeArchiveType archiveType;
-    aeTimeSamplingType timeSamplingType;
-    float startTime;    // start time on Alembic.
-    float frameRate;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
-    aeXFromType xformType;
-    bool swapHandedness; // swap rhs <-> lhs
-    bool swapFaces; // swap triangle indices
-    float scale;
-
-    aeConfig()
-        : archiveType(aeArchiveType_Ogawa)
-        , timeSamplingType(aeTimeSamplingType_Uniform)
-        , startTime(0.0f)
-        , frameRate(30.0f)
-        , xformType(aeXFromType_TRS)
-        , swapHandedness(false)
-        , swapFaces(false)
-        , scale(1.0f)
-    {
-    }
+    aeArchiveType archiveType = aeArchiveType::Ogawa;
+    aeTimeSamplingType timeSamplingType = aeTimeSamplingType::Uniform;
+    float startTime = 0.0f;    // start time on Alembic.
+    float frameRate = 30.0f;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
+    aeXFromType xformType = aeXFromType::TRS;
+    bool swapHandedness = true; // swap rhs <-> lhs
+    bool swapFaces = false; // swap triangle indices
+    float scale = 1.0f;
 };
 
 
 struct aeXFormData
 {
-    abcV3 translation;
-    abcV4 rotation; // quaternion
-    abcV3 scale;
-    bool inherits;
-
-    inline aeXFormData()
-        : translation(0.0f, 0.0f, 0.0f)
-        , rotation(0.0f, 0.0f, 0.0f, 1.0f)
-        , scale(1.0f, 1.0f, 1.0f)
-        , inherits(true)
-    {
-    }
+    abcV3 translation = { 0.0f, 0.0f, 0.0f };
+    abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
+    abcV3 scale = { 1.0f, 1.0f, 1.0f };
+    bool inherits = true;
 };
 
 struct aePolyMeshData
 {
-    const abcV3 *positions;
-    const abcV3 *velocities;    // can be null. if not null, must be same size of positions
-    const abcV3 *normals;       // can be null
-    const abcV2 *uvs;           // can be null
+    const abcV3 *positions = nullptr;
+    const abcV3 *velocities = nullptr;  // can be null. if not null, must be same size of positions
+    const abcV3 *normals = nullptr;     // can be null
+    const abcV2 *uvs = nullptr;         // can be null
 
-    const int *indices;
-    const int *normalIndices;   // if null, assume same as indices
-    const int *uvIndices;       // if null, assume same as indices
-    const int *faces;           // if null, assume all faces are triangles
+    const int *indices = nullptr;
+    const int *normalIndices = nullptr; // if null, assume same as indices
+    const int *uvIndices = nullptr;     // if null, assume same as indices
+    const int *faces = nullptr;         // if null, assume all faces are triangles
 
-    int positionCount;
-    int normalCount;            // if 0, assume same as positionCount
-    int uvCount;                // if 0, assume same as positionCount
+    int positionCount = 0;
+    int normalCount = 0;        // if 0, assume same as positionCount
+    int uvCount = 0;            // if 0, assume same as positionCount
 
-    int indexCount;
-    int normalIndexCount;       // if 0, assume same as indexCount
-    int uvIndexCount;           // if 0, assume same as indexCount
-    int faceCount;              // only relevant if faces is not null
-
-    aePolyMeshData()
-        : positions(nullptr), velocities(nullptr), normals(nullptr), uvs(nullptr)
-        , indices(nullptr), normalIndices(nullptr), uvIndices(nullptr), faces(nullptr)
-        , positionCount(0), normalCount(0), uvCount(0)
-        , indexCount(0), normalIndexCount(0), uvIndexCount(0), faceCount(0)
-    {}
+    int indexCount = 0;
+    int normalIndexCount = 0;   // if 0, assume same as indexCount
+    int uvIndexCount = 0;       // if 0, assume same as indexCount
+    int faceCount = 0;          // only relevant if faces is not null
 };
 
 struct aePointsData
 {
-    const abcV3 *positions;
-    const abcV3 *velocities;    // can be null
-    const uint64_t *ids;        // can be null
-    int count;
-
-    inline aePointsData()
-        : positions(nullptr)
-        , velocities(nullptr)
-        , ids(nullptr)
-        , count(0)
-    {
-    }
+    const abcV3 *positions = nullptr;
+    const abcV3 *velocities = nullptr;  // can be null
+    const uint64_t *ids = nullptr;      // can be null
+    int count = 0;
 };
 
 struct aeCameraData
 {
-    float nearClippingPlane;
-    float farClippingPlane;
-    float fieldOfView;      // in degree. vertical one. relevant only if focalLength==0.0
-    float aspectRatio;
+    float nearClippingPlane = 0.3f;
+    float farClippingPlane = 1000.0f;
+    float fieldOfView = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
+    float aspectRatio = 16.0f / 9.0f;
 
-    float focusDistance;    // in cm
-    float focalLength;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
-    float aperture;         // in cm. vertical one
-
-    inline aeCameraData()
-        : nearClippingPlane(0.3f)
-        , farClippingPlane(1000.0f)
-        , fieldOfView(60.0f)
-        , aspectRatio(16.0f / 9.0f)
-        , focusDistance(5.0f)
-        , focalLength(0.0f)
-        , aperture(2.4f)
-    {
-    }
+    float focusDistance = 5.0f;    // in cm
+    float focalLength = 0.0f;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
+    float aperture = 2.4f;         // in cm. vertical one
 };
 
 

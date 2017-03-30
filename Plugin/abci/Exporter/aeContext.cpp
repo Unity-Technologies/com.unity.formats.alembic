@@ -17,12 +17,12 @@ aeContext::~aeContext()
 void aeContext::reset()
 {
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTimeSamplingType_Uniform) {
+        if (m_config.timeSamplingType == aeTimeSamplingType::Uniform) {
             // start time in default timeline maybe changed.
             Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), m_config.startTime);
             *m_archive.getTimeSampling(1) = ts;
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType_Cyclic) {
+        else if (m_config.timeSamplingType == aeTimeSamplingType::Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 if (!t.times.empty()) {
@@ -31,7 +31,7 @@ void aeContext::reset()
                 }
             }
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType_Acyclic) {
+        else if (m_config.timeSamplingType == aeTimeSamplingType::Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
@@ -56,10 +56,10 @@ bool aeContext::openArchive(const char *path)
 
     abciDebugLog("aeContext::openArchive() %s", path);
     try {
-        if (m_config.archiveType == aeArchiveType_HDF5) {
+        if (m_config.archiveType == aeArchiveType::HDF5) {
             m_archive = Abc::OArchive(Alembic::AbcCoreHDF5::WriteArchive(), path);
         }
-        else if (m_config.archiveType == aeArchiveType_Ogawa) {
+        else if (m_config.archiveType == aeArchiveType::Ogawa) {
             m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
         }
         else {

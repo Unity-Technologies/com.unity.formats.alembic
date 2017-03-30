@@ -343,10 +343,10 @@ bool aiPolyMeshSample::hasNormals() const
 {
     switch (m_config.normalsMode)
     {
-    case NM_ReadFromFile:
+    case aiNormalsMode::ReadFromFile:
         return m_normals.valid();
         break;
-    case NM_Ignore:
+    case aiNormalsMode::Ignore:
         return false;
         break;
     default:
@@ -361,19 +361,19 @@ bool aiPolyMeshSample::hasUVs() const
 
 bool aiPolyMeshSample::hasTangents() const
 {
-    return (m_config.tangentsMode != TM_None && hasUVs() && !m_tangents.empty() && !m_topology->m_tangentIndices.empty());
+    return (m_config.tangentsMode != aiTangentsMode::None && hasUVs() && !m_tangents.empty() && !m_topology->m_tangentIndices.empty());
 }
 
 bool aiPolyMeshSample::smoothNormalsRequired() const
 {
-    return (m_config.normalsMode == NM_AlwaysCompute ||
-            m_config.tangentsMode == TM_Smooth ||
-            (!m_normals.valid() && m_config.normalsMode == NM_ComputeIfMissing));
+    return (m_config.normalsMode == aiNormalsMode::AlwaysCompute ||
+            m_config.tangentsMode == aiTangentsMode::Smooth ||
+            (!m_normals.valid() && m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
 }
 
 bool aiPolyMeshSample::tangentsRequired() const
 {
-    return (m_config.tangentsMode != TM_None);
+    return (m_config.tangentsMode != aiTangentsMode::None);
 }
 
 void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
@@ -451,7 +451,7 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
     size_t tangentIndicesCount = indices.size();
     m_topology->m_tangentIndices.resize(tangentIndicesCount);
     
-    if (config.tangentsMode == TM_Smooth)
+    if (config.tangentsMode == aiTangentsMode::Smooth)
     {
         for (size_t i=0; i<tangentIndicesCount; ++i)
         {
@@ -499,7 +499,7 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
 
 void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN, bool indexedNormals)
 {
-    aiLogger::Info("%s: Compute %stangents", getSchema()->getObject()->getFullName(), (config.tangentsMode == TM_Smooth ? "smooth " : ""));
+    aiLogger::Info("%s: Compute %stangents", getSchema()->getObject()->getFullName(), (config.tangentsMode == aiTangentsMode::Smooth ? "smooth " : ""));
 
     const auto &counts = *(m_topology->m_counts);
     const auto &indices = *(m_topology->m_indices);
@@ -627,9 +627,9 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding || config.submeshPerUVTile != m_config.submeshPerUVTile);
     dataChanged = (config.swapHandedness != m_config.swapHandedness);
 
-    bool smoothNormalsRequired = (config.normalsMode == NM_AlwaysCompute ||
-                                  config.tangentsMode == TM_Smooth ||
-                                  (!m_normals.valid() && config.normalsMode == NM_ComputeIfMissing));
+    bool smoothNormalsRequired = (config.normalsMode == aiNormalsMode::AlwaysCompute ||
+                                  config.tangentsMode == aiTangentsMode::Smooth ||
+                                  (!m_normals.valid() && config.normalsMode == aiNormalsMode::ComputeIfMissing));
     
     if (smoothNormalsRequired)
     {
@@ -649,7 +649,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
         }
     }
 
-    bool tangentsRequired = (m_uvs.valid() && config.tangentsMode != TM_None);
+    bool tangentsRequired = (m_uvs.valid() && config.tangentsMode != aiTangentsMode::None);
 
     if (tangentsRequired)
     {
@@ -1053,7 +1053,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     bool copyUvs = (hasUVs() && data.uvs);
     bool copyTangents = (hasTangents() && data.tangents);
     
-    bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == NM_ReadFromFile || m_config.normalsMode == NM_ComputeIfMissing));
+    bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];

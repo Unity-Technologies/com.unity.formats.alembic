@@ -18,7 +18,7 @@ public:
     bool isArray() const
     {
         auto t = getPropertyType();
-        return t >= aiPropertyType_ArrayTypeBegin && t <= aiPropertyType_ArrayTypeEnd;
+        return t >= aiPropertyType::ArrayTypeBegin && t <= aiPropertyType::ArrayTypeEnd;
     }
 
     void setActive(bool v);

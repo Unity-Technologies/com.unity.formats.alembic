@@ -42,9 +42,9 @@ public:
 
 protected:
     typedef std::unique_ptr<aeProperty> aePropertyPtr;
-    aeContext                   *m_ctx;
-    aeObject                    *m_parent;
-    uint32_t                    m_tsi;
+    aeContext                   *m_ctx = nullptr;
+    aeObject                    *m_parent = nullptr;
+    uint32_t                    m_tsi = 0;
     std::unique_ptr<abcObject>  m_abc;
     std::vector<aePropertyPtr>  m_properties;
     std::vector<aeObject*>      m_children;

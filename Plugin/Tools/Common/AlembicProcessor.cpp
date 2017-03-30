@@ -294,18 +294,18 @@ void tContext::doExport()
     int tsi = aiGetNumTimeSamplings(m_ictx) > 1 ? 1 : 0;
     aiGetTimeSampling(m_ictx, tsi, &tsd);
 
-    if (tsd.type == aiTimeSamplingType_Uniform) {
-        m_econf.timeSamplingType = aeTimeSamplingType_Uniform;
+    if (tsd.type == aiTimeSamplingType::Uniform) {
+        m_econf.timeSamplingType = aeTimeSamplingType::Uniform;
         m_econf.startTime = tsd.startTime;
         m_econf.frameRate = 1.0f / tsd.interval;
     }
-    else if (tsd.type == aiTimeSamplingType_Cyclic) {
-        m_econf.timeSamplingType = aeTimeSamplingType_Cyclic;
+    else if (tsd.type == aiTimeSamplingType::Cyclic) {
+        m_econf.timeSamplingType = aeTimeSamplingType::Cyclic;
         m_econf.startTime = tsd.startTime;
         m_econf.frameRate = 1.0f / tsd.interval;
     }
-    else if (tsd.type == aiTimeSamplingType_Acyclic) {
-        m_econf.timeSamplingType = aeTimeSamplingType_Acyclic;
+    else if (tsd.type == aiTimeSamplingType::Acyclic) {
+        m_econf.timeSamplingType = aeTimeSamplingType::Acyclic;
         m_econf.startTime = tsd.startTime;
         m_econf.frameRate = 1.0f / tsd.interval;
     }

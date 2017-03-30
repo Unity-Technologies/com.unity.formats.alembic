@@ -16,16 +16,16 @@ std::string ToString(const aiConfig &v)
     oss << "{swapHandedness: " << (v.swapHandedness ? "true" : "false");
     oss << ", swapFaceWinding: " << (v.swapFaceWinding ? "true" : "false");
     oss << ", submeshPerUVTile: " << (v.submeshPerUVTile ? "true" : "false");
-    oss << ", normalsMode: " << (v.normalsMode == NM_ReadFromFile
+    oss << ", normalsMode: " << (v.normalsMode == aiNormalsMode::ReadFromFile
         ? "read_from_file"
-        : (v.normalsMode == NM_ComputeIfMissing
+        : (v.normalsMode == aiNormalsMode::ComputeIfMissing
             ? "compute_if_missing"
-            : (v.normalsMode == NM_AlwaysCompute
+            : (v.normalsMode == aiNormalsMode::AlwaysCompute
                 ? "always_compute"
                 : "ignore")));
-    oss << ", tangentsMode: " << (v.tangentsMode == TM_None
+    oss << ", tangentsMode: " << (v.tangentsMode == aiTangentsMode::None
         ? "none"
-        : (v.tangentsMode == TM_Smooth
+        : (v.tangentsMode == aiTangentsMode::Smooth
             ? "smooth"
             : "split"));
     oss << ", cacheTangentsSplits: " << (v.cacheTangentsSplits ? "true" : "false");
@@ -221,11 +221,8 @@ void aiContext::destroy(aiContext* ctx)
 }
 
 aiContext::aiContext(int uid)
-    : m_path("")
-    , m_uid(uid)
+    : m_uid(uid)
 {
-    m_timeRange[0] = 0;
-    m_timeRange[1] = 0;
 }
 
 aiContext::~aiContext()
@@ -260,7 +257,7 @@ void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
     if (tst.isUniform() || tst.isCyclic()) {
         int numCycles = int(m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
 
-        dst.type = tst.isUniform() ? aiTimeSamplingType_Uniform : aiTimeSamplingType_Cyclic;
+        dst.type = tst.isUniform() ? aiTimeSamplingType::Uniform : aiTimeSamplingType::Cyclic;
         dst.interval = (float)tst.getTimePerCycle();
         dst.startTime = (float)ts->getStoredTimes()[0];
         dst.endTime = dst.startTime + dst.interval * (numCycles - 1);
@@ -268,7 +265,7 @@ void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
         dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
     }
     else if (tst.isAcyclic()) {
-        dst.type = aiTimeSamplingType_Acyclic;
+        dst.type = aiTimeSamplingType::Acyclic;
         dst.startTime = (float)ts->getSampleTime(0);
         dst.endTime = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
         dst.numTimes = (int)ts->getNumStoredTimes();
@@ -283,7 +280,7 @@ void aiContext::copyTimeSampling(int i, aiTimeSamplingData& dst)
 
     getTimeSampling(i, dst);
 
-    if (dst.type == aiTimeSamplingType_Acyclic) {
+    if (dst.type == aiTimeSamplingType::Acyclic) {
         const auto& times = m_archive.getTimeSampling(i)->getStoredTimes();
         if (dst_samples && dst_numSamples >= (int)times.size()) {
             // memcpy() is way faster than std::copy() on VC...

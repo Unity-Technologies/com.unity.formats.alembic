@@ -128,24 +128,24 @@ abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aeProperty
 {
     switch (type) {
         // scalar properties
-    case aePropertyType_Bool:           return parent->newProperty<abcBoolProperty>(name); break;
-    case aePropertyType_Int:            return parent->newProperty<abcIntProperty>(name); break;
-    case aePropertyType_UInt:           return parent->newProperty<abcUIntProperty>(name); break;
-    case aePropertyType_Float:          return parent->newProperty<abcFloatProperty>(name); break;
-    case aePropertyType_Float2:         return parent->newProperty<abcFloat2Property>(name); break;
-    case aePropertyType_Float3:         return parent->newProperty<abcFloat3Property>(name); break;
-    case aePropertyType_Float4:         return parent->newProperty<abcFloat4Property>(name); break;
-    case aePropertyType_Float4x4:       return parent->newProperty<abcFloat4x4Property>(name); break;
+    case aePropertyType::Bool:           return parent->newProperty<abcBoolProperty>(name); break;
+    case aePropertyType::Int:            return parent->newProperty<abcIntProperty>(name); break;
+    case aePropertyType::UInt:           return parent->newProperty<abcUIntProperty>(name); break;
+    case aePropertyType::Float:          return parent->newProperty<abcFloatProperty>(name); break;
+    case aePropertyType::Float2:         return parent->newProperty<abcFloat2Property>(name); break;
+    case aePropertyType::Float3:         return parent->newProperty<abcFloat3Property>(name); break;
+    case aePropertyType::Float4:         return parent->newProperty<abcFloat4Property>(name); break;
+    case aePropertyType::Float4x4:       return parent->newProperty<abcFloat4x4Property>(name); break;
 
         // array properties
-    case aePropertyType_BoolArray:      return parent->newProperty<abcBoolArrayProperty >(name); break;
-    case aePropertyType_IntArray:       return parent->newProperty<abcIntArrayProperty>(name); break;
-    case aePropertyType_UIntArray:      return parent->newProperty<abcUIntArrayProperty>(name); break;
-    case aePropertyType_FloatArray:     return parent->newProperty<abcFloatArrayProperty>(name); break;
-    case aePropertyType_Float2Array:    return parent->newProperty<abcFloat2ArrayProperty>(name); break;
-    case aePropertyType_Float3Array:    return parent->newProperty<abcFloat3ArrayProperty>(name); break;
-    case aePropertyType_Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
-    case aePropertyType_Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
+    case aePropertyType::BoolArray:      return parent->newProperty<abcBoolArrayProperty >(name); break;
+    case aePropertyType::IntArray:       return parent->newProperty<abcIntArrayProperty>(name); break;
+    case aePropertyType::UIntArray:      return parent->newProperty<abcUIntArrayProperty>(name); break;
+    case aePropertyType::FloatArray:     return parent->newProperty<abcFloatArrayProperty>(name); break;
+    case aePropertyType::Float2Array:    return parent->newProperty<abcFloat2ArrayProperty>(name); break;
+    case aePropertyType::Float3Array:    return parent->newProperty<abcFloat3ArrayProperty>(name); break;
+    case aePropertyType::Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
+    case aePropertyType::Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
     abciDebugLog("aeNewProperty(): unknown type");
     return nullptr;
