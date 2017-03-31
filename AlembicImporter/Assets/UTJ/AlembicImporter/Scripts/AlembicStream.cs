@@ -319,10 +319,12 @@ namespace UTJ.Alembic
             if (m_loaded)
             {
                 m_forceRefresh = true;
-    
                 AbcSyncConfig();
-    
                 AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), createMissingNodes);
+            }
+            else
+            {
+                Debug.LogError("failed to load alembic: " + ImportSettings.m_pathToAbc);
             }
             AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode));
         }
