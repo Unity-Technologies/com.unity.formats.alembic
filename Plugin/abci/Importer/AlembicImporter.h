@@ -249,19 +249,19 @@ struct aiPropertyData
 
 using aiNodeEnumerator = void (abciSTDCall*)(aiObject *node, void *userData);
 using aiConfigCallback =  void (abciSTDCall*)(void *csObj, aiConfig *config);
-using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, int topologyChanged);
+using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, bool topologyChanged);
 
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int index);
 
-abciAPI void            aiEnableFileLog(int on, const char *path);
+abciAPI void            aiEnableFileLog(bool on, const char *path);
 
 abciAPI void            aiCleanup();
 abciAPI aiContext*      aiCreateContext(int uid);
 abciAPI void            aiDestroyContext(aiContext* ctx);
 
-abciAPI int             aiLoad(aiContext* ctx, const char *path);
+abciAPI bool            aiLoad(aiContext* ctx, const char *path);
 abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI float           aiGetStartTime(aiContext* ctx);
 abciAPI float           aiGetEndTime(aiContext* ctx);
@@ -299,7 +299,7 @@ abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outDa
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, int forceRefresh=false);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // copy mesh data without splitting. swap handedness / faces are applied.
@@ -312,7 +312,7 @@ abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
 abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
 abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
-abciAPI int             aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
+abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);
@@ -320,7 +320,7 @@ abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *ou
 
 abciAPI aiPoints*       aiGetPoints(aiObject* obj);
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
-abciAPI void            aiPointsSetSort(aiPoints* schema, int v);
+abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
 abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);

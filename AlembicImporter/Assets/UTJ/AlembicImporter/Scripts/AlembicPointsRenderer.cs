@@ -17,7 +17,7 @@ namespace UTJ.Alembic
         public Material m_material;
         public ShadowCastingMode m_shadow = ShadowCastingMode.Off;
         public bool m_receiveShadows = false;
-        public int m_layer = 0;
+        public LayerSelector m_layer = 0;
         public float m_pointSize = 0.1f;
 
         Matrix4x4[] m_matrices;

@@ -20,9 +20,9 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int index)
 }
 
 
-abciAPI void aiEnableFileLog(int on, const char *path)
+abciAPI void aiEnableFileLog(bool on, const char *path)
 {
-    aiLogger::Enable(on != 0, path);
+    aiLogger::Enable(on, path);
 }
 
 abciAPI void aiCleanup()
@@ -48,9 +48,9 @@ abciAPI void aiDestroyContext(aiContext* ctx)
 }
 
 
-abciAPI int aiLoad(aiContext* ctx, const char *path)
+abciAPI bool aiLoad(aiContext* ctx, const char *path)
 {
-    return (ctx ? ctx->load(path) : false);
+    return ctx ? ctx->load(path) : false;
 }
 
 abciAPI void aiSetConfig(aiContext* ctx, const aiConfig* conf)
@@ -253,11 +253,11 @@ abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
     }
 }
 
-abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, int forceRefresh)
+abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh)
 {
     if (sample)
     {
-        sample->getSummary(forceRefresh != 0, *summary);
+        sample->getSummary(forceRefresh, *summary);
     }
 }
 
@@ -306,7 +306,7 @@ abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIn
     return (sample ? sample->getSplitSubmeshCount(splitIndex) : 0);
 }
 
-abciAPI int aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
+abciAPI bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
 {
     return sample ? sample->getNextSubmesh(*summary) : false;
 }
@@ -353,10 +353,10 @@ abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary)
     if (schema == nullptr) { return; }
     *summary = schema->getSummary();
 }
-abciAPI void aiPointsSetSort(aiPoints* schema, int v)
+abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
     if (schema == nullptr) { return; }
-    schema->setSort(v != 0);
+    schema->setSort(v);
 }
 abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
 {
