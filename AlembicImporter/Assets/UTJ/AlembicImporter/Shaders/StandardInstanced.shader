@@ -45,8 +45,8 @@
 #endif
 
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-            c.r *= fmod(abcID, 64.0) / 64.0;
-            c.g *= fmod(floor(abcID / 64.0), 64.0) / 64.0;
+            //c.r *= fmod(abcID, 64.0) / 64.0;
+            //c.g *= fmod(floor(abcID / 64.0), 64.0) / 64.0;
 
             o.Albedo = c.rgb;
             o.Metallic = _Metallic;

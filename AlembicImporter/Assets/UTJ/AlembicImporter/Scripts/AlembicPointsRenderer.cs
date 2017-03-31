@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 
 namespace UTJ.Alembic
@@ -15,7 +18,7 @@ namespace UTJ.Alembic
         public ShadowCastingMode m_shadow = ShadowCastingMode.Off;
         public bool m_receiveShadows = false;
         public int m_layer = 0;
-        public float m_size = 0.1f;
+        public float m_pointSize = 0.1f;
 
         Matrix4x4[] m_matrices;
         float[] m_ids;
@@ -39,7 +42,7 @@ namespace UTJ.Alembic
             if(SystemInfo.supportsInstancing)
             {
                 // current Graphics.DrawMeshInstanced() can draw only up to 1023 instances.
-                // multiple drawcalls may needed.
+                // multiple drawcalls maybe required.
                 int num_batches = (num_instances + MaxInstancesParDraw - 1) / MaxInstancesParDraw;
 
                 if (m_matrices == null)
@@ -84,7 +87,7 @@ namespace UTJ.Alembic
                     // build matrices
                     for (int i = 0; i < n; ++i)
                     {
-                        m_matrices[i].m00 = m_matrices[i].m11 = m_matrices[i].m22 = m_size;
+                        m_matrices[i].m00 = m_matrices[i].m11 = m_matrices[i].m22 = m_pointSize;
                         m_matrices[i].m03 = positions[ibegin + i].x;
                         m_matrices[i].m13 = positions[ibegin + i].y;
                         m_matrices[i].m23 = positions[ibegin + i].z;
@@ -109,7 +112,7 @@ namespace UTJ.Alembic
 #endif
             {
                 var matrix = Matrix4x4.identity;
-                matrix.m00 = matrix.m11 = matrix.m22 = m_size;
+                matrix.m00 = matrix.m11 = matrix.m22 = m_pointSize;
                 for (int i = 0; i < num_instances; ++i)
                 {
                     matrix.m03 = positions[i].x;

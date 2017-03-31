@@ -7,7 +7,7 @@ namespace UTJ.Alembic
     {
         internal static GameObject Import(AlembicImportMode importMode, AlembicImportSettings importSettings, AlembicDiagnosticSettings diagSettings, Action<AlembicStream, GameObject, AlembicStreamDescriptor> customAction)
         {
-            var fileName = System.IO.Path.GetFileNameWithoutExtension(importSettings.m_pathToAbc);
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(importSettings.m_pathToAbc.leaf);
             var go = new GameObject(fileName);
 
             using (var abcStream = new AlembicStream(go, importSettings, new AlembicPlaybackSettings(), diagSettings))

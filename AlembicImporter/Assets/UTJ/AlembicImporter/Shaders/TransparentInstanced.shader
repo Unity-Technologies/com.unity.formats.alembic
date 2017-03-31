@@ -1,4 +1,4 @@
-﻿Shader "Alembic/Billboard Instanced" {
+﻿Shader "Alembic/Transparent Instanced" {
     Properties {
         //_AlembicID("AlembicID", Float) = 0.0
 

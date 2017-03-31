@@ -70,7 +70,7 @@ namespace UTJ.Alembic
             float playTime = m_playbackSettings.m_endTime - m_playbackSettings.m_startTime;
     
             // apply speed and offset
-            float outTime = m_playbackSettings.m_timeScale * (inTime - m_playbackSettings.m_timeOffset) - extraOffset;
+            float outTime = m_playbackSettings.m_timeScale * (inTime + m_playbackSettings.m_timeOffset) + extraOffset;
     
             if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Hold)
             {
@@ -314,7 +314,7 @@ namespace UTJ.Alembic
             m_forceRefresh = true;
 
             m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
-            m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc);
+            m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc.GetFullPath());
 
             if (m_loaded)
             {

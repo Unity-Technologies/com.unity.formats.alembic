@@ -22,7 +22,7 @@ namespace UTJ.Alembic
     [System.Serializable]
     public class AlembicImportSettings
     {
-        [SerializeField][HideInInspector] public string m_pathToAbc;
+        [SerializeField][ReadOnly] public DataPath m_pathToAbc = new DataPath();
 
         [Tooltip("Should 'handedness' be swapped?")]
         [SerializeField] public bool m_swapHandedness = true;

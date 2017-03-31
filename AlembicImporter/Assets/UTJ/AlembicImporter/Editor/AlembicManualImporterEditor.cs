@@ -43,11 +43,11 @@ namespace UTJ.Alembic
             AlembicUI.AddHorzLine(() =>
             {
                 EditorGUILayout.PrefixLabel("Alembic File:");
-                m_ImportSettings.m_pathToAbc = EditorGUILayout.TextField(m_ImportSettings.m_pathToAbc);
+                m_ImportSettings.m_pathToAbc = new DataPath(EditorGUILayout.TextField(m_ImportSettings.m_pathToAbc.GetFullPath()));
                 if (GUILayout.Button("..."))
                 {
-                    m_ImportSettings.m_pathToAbc = EditorUtility.OpenFilePanel("Select Alembic File", m_ImportSettings.m_pathToAbc,
-                        "abc");
+                    m_ImportSettings.m_pathToAbc = new DataPath(
+                        EditorUtility.OpenFilePanel("Select Alembic File", m_ImportSettings.m_pathToAbc.GetFullPath(), "abc"));
                 }
             });
 
@@ -127,7 +127,7 @@ namespace UTJ.Alembic
             });
 
 
-            GUI.enabled = m_ImportSettings.m_pathToAbc != "";
+            GUI.enabled = m_ImportSettings.m_pathToAbc.leaf != "";
 
             if (GUILayout.Button("Import"))
             {
@@ -141,18 +141,18 @@ namespace UTJ.Alembic
             if (m_CopyIntoStreamingAssets)
             {
                 var newFile = Path.Combine(Application.streamingAssetsPath, "AlembicData");
-                newFile = Path.Combine(newFile, System.IO.Path.GetFileName(m_ImportSettings.m_pathToAbc));
+                newFile = Path.Combine(newFile, System.IO.Path.GetFileName(m_ImportSettings.m_pathToAbc.leaf));
                 try
                 {
                     if (!Directory.Exists(Path.GetDirectoryName(newFile)))
                         Directory.CreateDirectory(Path.GetDirectoryName(newFile));
 
-                    File.Copy(m_ImportSettings.m_pathToAbc, newFile, true);
+                    File.Copy(m_ImportSettings.m_pathToAbc.GetFullPath(), newFile, true);
                 }
                 catch
                 {
                 }
-                m_ImportSettings.m_pathToAbc = newFile;
+                m_ImportSettings.m_pathToAbc = new DataPath(newFile);
             }
 
             var rootGO = AlembicImportTasker.Import(m_ImportMode, m_ImportSettings, m_DiagSettings, FinalizeImport );
