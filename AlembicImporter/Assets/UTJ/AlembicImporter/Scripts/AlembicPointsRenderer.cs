@@ -11,6 +11,17 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicPointsRenderer : MonoBehaviour
     {
+        public enum InstancingMode
+        {
+            NoInstancing,
+#if UNITY_5_5_OR_NEWER
+            Instancing,
+#endif
+#if UNITY_5_6_OR_NEWER
+            Procedural,
+#endif
+        }
+
         public const int MaxInstancesParDraw = 1023;
 
         public Mesh m_mesh;
@@ -19,13 +30,11 @@ namespace UTJ.Alembic
         public bool m_receiveShadows = false;
         public LayerSelector m_layer = 0;
         public float m_pointSize = 0.1f;
+        public InstancingMode m_instancingMode =
 #if UNITY_5_5_OR_NEWER
-        public bool m_enableInstancing = true;
-#endif
-#if UNITY_5_6_OR_NEWER
-        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
-        private int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
-        public bool m_enableProceduralInstancing = false;
+            InstancingMode.Instancing;
+#else
+            InstancingMode.NoInstancing;
 #endif
 
         Matrix4x4[] m_matrices;
@@ -35,6 +44,11 @@ namespace UTJ.Alembic
         ComputeBuffer m_cbPoints;
         ComputeBuffer m_cbIDs;
         ComputeBuffer m_cbArgs;
+        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
+        private int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
+#endif
+#if UNITY_EDITOR
+        bool m_dirty = false;
 #endif
 
         public void Flush()
@@ -55,7 +69,7 @@ namespace UTJ.Alembic
             int pidAlembicID = Shader.PropertyToID("_AlembicID");
 
 #if UNITY_5_6_OR_NEWER
-            if (supportsInstancing && m_enableProceduralInstancing)
+            if (supportsInstancing && m_instancingMode == InstancingMode.Procedural)
             {
                 m_material.EnableKeyword(m_kwAlembicProceduralInstancing);
                 m_material.SetFloat(pidPointSize, m_pointSize);
@@ -107,6 +121,7 @@ namespace UTJ.Alembic
                     m_material.SetBuffer(pidAlembicIDs, m_cbIDs);
                 }
 
+                // issue drawcall
                 var bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + m_mesh.bounds.extents);
                 Graphics.DrawMeshInstancedIndirect(m_mesh, 0, m_material,
                     bounds, m_cbArgs, 0, null, m_shadow, m_receiveShadows, m_layer);
@@ -114,7 +129,7 @@ namespace UTJ.Alembic
             else
 #endif
 #if UNITY_5_5_OR_NEWER
-            if (supportsInstancing && m_enableInstancing)
+            if (supportsInstancing && m_instancingMode == InstancingMode.Instancing)
             {
                 if(m_material.IsKeywordEnabled(m_kwAlembicProceduralInstancing))
                 {
@@ -177,6 +192,7 @@ namespace UTJ.Alembic
                         mpb.SetFloatArray(pidAlembicIDs, m_ids);
                     }
 
+                    // issue drawcall
                     Graphics.DrawMeshInstanced(m_mesh, 0, m_material, m_matrices, n, mpb, m_shadow, m_receiveShadows, m_layer);
                 }
             }
@@ -198,9 +214,9 @@ namespace UTJ.Alembic
         public void Release()
         {
 #if UNITY_5_6_OR_NEWER
-            if (m_cbArgs != null) { m_cbArgs.Release(); }
-            if (m_cbPoints != null) { m_cbPoints.Release(); }
-            if (m_cbIDs != null) { m_cbIDs.Release(); }
+            if (m_cbArgs != null) { m_cbArgs.Release(); m_cbArgs = null; }
+            if (m_cbPoints != null) { m_cbPoints.Release(); m_cbPoints = null; }
+            if (m_cbIDs != null) { m_cbIDs.Release(); m_cbIDs = null; }
 #endif
         }
 
@@ -213,6 +229,9 @@ namespace UTJ.Alembic
         void LateUpdate()
         {
             Flush();
+#if UNITY_EDITOR
+            m_dirty = true;
+#endif
         }
 
 #if UNITY_EDITOR
@@ -232,10 +251,11 @@ namespace UTJ.Alembic
         void OnDrawGizmos()
         {
             // force draw particles while paused.
-            // using OnDrawGizmos() is dirty workaround but I couldn't find better way.
-            if (EditorApplication.isPaused)
+            // using OnDrawGizmos() is dirty workaround but I couldn't find better way...
+            if (EditorApplication.isPaused && m_dirty)
             {
                 Flush();
+                m_dirty = false;
             }
         }
 #endif
