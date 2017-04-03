@@ -19,62 +19,134 @@ namespace UTJ.Alembic
         public bool m_receiveShadows = false;
         public LayerSelector m_layer = 0;
         public float m_pointSize = 0.1f;
+#if UNITY_5_5_OR_NEWER
+        public bool m_enableInstancing = true;
+#endif
+#if UNITY_5_6_OR_NEWER
+        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
+        private int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
+        public bool m_enableProceduralInstancing = false;
+#endif
 
         Matrix4x4[] m_matrices;
         float[] m_ids;
-        List<MaterialPropertyBlock> m_mpb;
-
+        List<MaterialPropertyBlock> m_mpbs;
+#if UNITY_5_6_OR_NEWER
+        ComputeBuffer m_cbPoints;
+        ComputeBuffer m_cbIDs;
+        ComputeBuffer m_cbArgs;
+#endif
 
         public void Flush()
         {
             if(m_mesh == null || m_material == null) { return; }
 
             var apc = GetComponent<AlembicPointsCloud>();
-            var positions = apc.abcPositions;
-            if(positions == null) { return; }
+            var points = apc.abcPositions;
+            if(points == null) { return; }
 
-            int num_instances = positions.Length;
+            int num_instances = points.Length;
             if(num_instances == 0) { return; }
 
-            int ids_pid = Shader.PropertyToID("_AlembicID");
+            bool supportsInstancing = SystemInfo.supportsInstancing;
+            int pidPointSize = Shader.PropertyToID("_PointSize");
+            int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
+            int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
+            int pidAlembicID = Shader.PropertyToID("_AlembicID");
 
-#if UNITY_5_5_OR_NEWER
-            if(SystemInfo.supportsInstancing)
+#if UNITY_5_6_OR_NEWER
+            if (supportsInstancing && m_enableProceduralInstancing)
             {
+                m_material.EnableKeyword(m_kwAlembicProceduralInstancing);
+                m_material.SetFloat(pidPointSize, m_pointSize);
+
+                // update argument buffer
+                if(m_cbArgs == null)
+                {
+                    m_cbArgs = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+                }
+                m_args[0] = (int)m_mesh.GetIndexCount(0);
+                m_args[1] = num_instances;
+                m_cbArgs.SetData(m_args);
+
+                // update points buffer
+                if (m_cbPoints != null && m_cbPoints.count != num_instances)
+                {
+                    m_cbPoints.Release();
+                    m_cbPoints = null;
+                }
+                if (m_cbPoints == null)
+                {
+                    m_cbPoints = new ComputeBuffer(num_instances, 12);
+                }
+                m_cbPoints.SetData(points);
+                m_material.SetBuffer(pidAlembicPoints, m_cbPoints);
+
+                // update ID buffer
+                if (m_cbIDs != null && m_cbIDs.count != num_instances)
+                {
+                    m_cbIDs.Release();
+                    m_cbIDs = null;
+                }
+                if (m_cbIDs == null)
+                {
+                    m_cbIDs = new ComputeBuffer(num_instances, 4);
+                }
+                ulong[] ids = apc.abcIDs;
+                if (ids != null && ids.Length == num_instances)
+                {
+                    if (m_ids == null || m_ids.Length != num_instances)
+                    {
+                        m_ids = new float[num_instances];
+                    }
+                    for (int i = 0; i < num_instances; ++i)
+                    {
+                        m_ids[i] = ids[i];
+                    }
+                    m_cbIDs.SetData(m_ids);
+                    m_material.SetBuffer(pidAlembicIDs, m_cbIDs);
+                }
+
+                var bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + m_mesh.bounds.extents);
+                Graphics.DrawMeshInstancedIndirect(m_mesh, 0, m_material,
+                    bounds, m_cbArgs, 0, null, m_shadow, m_receiveShadows, m_layer);
+            }
+            else
+#endif
+#if UNITY_5_5_OR_NEWER
+            if (supportsInstancing && m_enableInstancing)
+            {
+                if(m_material.IsKeywordEnabled(m_kwAlembicProceduralInstancing))
+                {
+                    m_material.DisableKeyword(m_kwAlembicProceduralInstancing);
+                }
+
                 // current Graphics.DrawMeshInstanced() can draw only up to 1023 instances.
                 // multiple drawcalls maybe required.
                 int num_batches = (num_instances + MaxInstancesParDraw - 1) / MaxInstancesParDraw;
 
-                if (m_matrices == null)
+                if (m_matrices == null || m_matrices.Length != MaxInstancesParDraw)
                 {
                     m_matrices = new Matrix4x4[MaxInstancesParDraw];
                     for (int i = 0; i < MaxInstancesParDraw; ++i) { m_matrices[i] = Matrix4x4.identity; }
                 }
 
-                // if material require alembic points ID, pass it via MaterialPropertyBlock
-                ulong[] ids = null;
-                bool alembicIDsRequired = m_material.HasProperty(ids_pid);
-                if (alembicIDsRequired)
+                // setup alembic point IDs
+                ulong[] ids = apc.abcIDs;
+                bool alembicIDsAvailable = ids != null && ids.Length == num_instances;
+                if (alembicIDsAvailable)
                 {
-                    ids = apc.abcIDs;
-                    if (ids == null && ids.Length != num_instances)
+                    if (m_ids == null || m_ids.Length != MaxInstancesParDraw)
                     {
-                        alembicIDsRequired = false;
+                        m_ids = new float[MaxInstancesParDraw];
                     }
-                    else
+                    if (m_mpbs == null)
                     {
-                        if (m_ids == null)
-                        {
-                            m_ids = new float[MaxInstancesParDraw];
-                        }
-                        if (m_mpb == null)
-                        {
-                            m_mpb = new List<MaterialPropertyBlock>();
-                        }
-                        while (m_mpb.Count < num_batches)
-                        {
-                            m_mpb.Add(new MaterialPropertyBlock());
-                        }
+                        m_mpbs = new List<MaterialPropertyBlock>();
+                    }
+                    while (m_mpbs.Count < num_batches)
+                    {
+                        m_mpbs.Add(new MaterialPropertyBlock());
                     }
                 }
 
@@ -88,21 +160,21 @@ namespace UTJ.Alembic
                     for (int i = 0; i < n; ++i)
                     {
                         m_matrices[i].m00 = m_matrices[i].m11 = m_matrices[i].m22 = m_pointSize;
-                        m_matrices[i].m03 = positions[ibegin + i].x;
-                        m_matrices[i].m13 = positions[ibegin + i].y;
-                        m_matrices[i].m23 = positions[ibegin + i].z;
+                        m_matrices[i].m03 = points[ibegin + i].x;
+                        m_matrices[i].m13 = points[ibegin + i].y;
+                        m_matrices[i].m23 = points[ibegin + i].z;
                     }
 
                     // send alembic points IDs to shader if needed
                     MaterialPropertyBlock mpb = null;
-                    if (alembicIDsRequired)
+                    if (alembicIDsAvailable)
                     {
                         for (int i = 0; i < n; ++i)
                         {
                             m_ids[i] = ids[ibegin + i];
                         }
-                        mpb = m_mpb[ib];
-                        mpb.SetFloatArray(ids_pid, m_ids);
+                        mpb = m_mpbs[ib];
+                        mpb.SetFloatArray(pidAlembicIDs, m_ids);
                     }
 
                     Graphics.DrawMeshInstanced(m_mesh, 0, m_material, m_matrices, n, mpb, m_shadow, m_receiveShadows, m_layer);
@@ -115,32 +187,57 @@ namespace UTJ.Alembic
                 matrix.m00 = matrix.m11 = matrix.m22 = m_pointSize;
                 for (int i = 0; i < num_instances; ++i)
                 {
-                    matrix.m03 = positions[i].x;
-                    matrix.m13 = positions[i].y;
-                    matrix.m23 = positions[i].z;
-                    Graphics.DrawMesh(m_mesh, matrix, m_material, m_layer);
+                    matrix.m03 = points[i].x;
+                    matrix.m13 = points[i].y;
+                    matrix.m23 = points[i].z;
+                    Graphics.DrawMesh(m_mesh, matrix, m_material, m_layer, null, 0, null, m_shadow, m_receiveShadows);
                 }
             }
         }
 
-        void Reset()
+        public void Release()
         {
-#if UNITY_EDITOR
-            if(m_material == null)
-            {
-                m_material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-                m_material.name = "Material_0";
-            }
-            if(m_mesh == null)
-            {
-                // todo
-            }
+#if UNITY_5_6_OR_NEWER
+            if (m_cbArgs != null) { m_cbArgs.Release(); }
+            if (m_cbPoints != null) { m_cbPoints.Release(); }
+            if (m_cbIDs != null) { m_cbIDs.Release(); }
 #endif
+        }
+
+
+        void OnDisable()
+        {
+            Release();
         }
 
         void LateUpdate()
         {
             Flush();
         }
+
+#if UNITY_EDITOR
+        void Reset()
+        {
+            if (m_material == null)
+            {
+                m_material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+                m_material.name = "Material_0";
+            }
+            if (m_mesh == null)
+            {
+                // todo
+            }
+        }
+
+        void OnDrawGizmos()
+        {
+            // force draw particles while paused.
+            // using OnDrawGizmos() is dirty workaround but I couldn't find better way.
+            if (EditorApplication.isPaused)
+            {
+                Flush();
+            }
+        }
+#endif
     }
 }

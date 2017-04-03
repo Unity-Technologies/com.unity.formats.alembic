@@ -11,6 +11,7 @@
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
 
         [Toggle(_VIEW_PLANE_PROJECTION)] _ViewPlaneProjection("View Plane Projection", Float) = 0
+        [Toggle(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED)] _ProceduralInstancingEnabled("Enable Procedural Instancing", Float) = 0
     }
 
     SubShader
@@ -29,7 +30,10 @@
             #pragma multi_compile_instancing
             #pragma instancing_options assumeuniformscaling maxcount:1024
             #pragma multi_compile ___ _VIEW_PLANE_PROJECTION
-            #include "UnityCG.cginc"
+            #pragma multi_compile ___ ALEMBIC_PROCEDURAL_INSTANCING_ENABLED
+            #pragma target 4.5
+            #include "PointRenderer.cginc"
+
 
             fixed4 _Color;
             sampler2D _MainTex;
@@ -38,9 +42,7 @@
             {
                 float4 vertex : POSITION;
                 float4 texcoord : TEXCOORD0;
-#ifdef UNITY_SUPPORT_INSTANCING
                 UNITY_VERTEX_INPUT_INSTANCE_ID
-#endif
             };
 
             struct v2f
@@ -48,26 +50,6 @@
                 float4 vertex : SV_POSITION;
                 float4 texcoord : TEXCOORD0;
             };
-
-#ifdef UNITY_SUPPORT_INSTANCING
-            UNITY_INSTANCING_CBUFFER_START (Props)
-                UNITY_DEFINE_INSTANCED_PROP (float, _AlembicID)
-            UNITY_INSTANCING_CBUFFER_END
-#endif
-
-            float3 GetObjectPosition()
-            {
-                return float3(unity_ObjectToWorld[0][3], unity_ObjectToWorld[1][3], unity_ObjectToWorld[2][3]);
-            }
-
-            float3x3 ToF33(float4x4 v)
-            {
-                // (float3x3)v don't compile on some platforms
-                return float3x3(
-                    v[0][0], v[0][1], v[0][2],
-                    v[1][0], v[1][1], v[1][2],
-                    v[2][0], v[2][1], v[2][2]);
-            }
 
             float3x3 Look33(float3 dir, float3 up)
             {
@@ -100,20 +82,20 @@
 
             void ApplyBillboardTransform(inout float4 vertex)
             {
-                float3 pos = GetObjectPosition();
+                float3 pos = GetAlembicPoint();
                 float3 camera_pos = _WorldSpaceCameraPos.xyz;
                 float3 look = normalize(pos - camera_pos);
                 float3 up = float3(0.0, 1.0, 0.0);
 
                 vertex.xyz = mul(Look33(look, up), vertex.xyz);
-                vertex.xyz = mul(ToF33(unity_ObjectToWorld), vertex.xyz);
+                vertex.xyz *= GetPointSize();
                 vertex.xyz += pos;
                 vertex = mul(UNITY_MATRIX_VP, vertex);
             }
 
             bool ApplyViewPlaneBillboardTransform(inout float4 vertex)
             {
-                float3 pos = GetObjectPosition();
+                float3 pos = GetAlembicPoint();
                 float4 vp = mul(UNITY_MATRIX_VP, float4(pos, 1.0));
                 if (vp.z < 0.0) {
                     // object is opposite side of camera
@@ -126,7 +108,7 @@
                 float3 look = normalize(camera_pos - pos);
                 Plane view_plane = { look, 1.0 };
                 pos = camera_pos + ProjectToPlane(pos - camera_pos, view_plane);
-                vertex.xyz = mul(ToF33(unity_ObjectToWorld), vertex.xyz);
+                vertex.xyz *= GetPointSize();
                 vertex.y *= -aspect;
                 vertex.xy += vp.xy / vp.w;
                 vertex.zw = float2(0.0, 1.0);
@@ -136,9 +118,7 @@
 
             v2f vert (appdata v)
             {
-#ifdef UNITY_SUPPORT_INSTANCING
                 UNITY_SETUP_INSTANCE_ID(v);
-#endif
 
                 v2f o;
                 float4 vert = v.vertex;

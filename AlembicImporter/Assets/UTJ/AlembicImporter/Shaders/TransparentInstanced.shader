@@ -9,6 +9,8 @@
 
         _Color("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+
+        [Toggle(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED)] _ProceduralInstancingEnabled("Enable Procedural Instancing", Float) = 0
     }
 
     SubShader
@@ -26,7 +28,9 @@
             #pragma fragment frag
             #pragma multi_compile_instancing
             #pragma instancing_options assumeuniformscaling maxcount:1024
-            #include "UnityCG.cginc"
+            #pragma multi_compile ___ ALEMBIC_PROCEDURAL_INSTANCING_ENABLED
+            #pragma target 4.5
+            #include "PointRenderer.cginc"
 
             fixed4 _Color;
             sampler2D _MainTex;
@@ -44,20 +48,17 @@
                 float4 texcoord : TEXCOORD0;
             };
 
-#ifdef UNITY_SUPPORT_INSTANCING
-            UNITY_INSTANCING_CBUFFER_START (Props)
-                UNITY_DEFINE_INSTANCED_PROP (float, _AlembicID)
-            UNITY_INSTANCING_CBUFFER_END
-#endif
-           
             v2f vert (appdata v)
             {
-#ifdef UNITY_SUPPORT_INSTANCING
                 UNITY_SETUP_INSTANCE_ID(v);
-#endif
+
+                float4 vertex = v.vertex;
+                vertex.xyz *= GetPointSize();
+                vertex.xyz += GetAlembicPoint();
+                vertex = mul(UNITY_MATRIX_VP, vertex);
 
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = vertex;
                 o.texcoord = v.texcoord;
                 return o;
             }
