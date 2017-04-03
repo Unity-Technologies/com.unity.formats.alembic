@@ -186,13 +186,14 @@ namespace UTJ.Alembic
                 AssetDatabase.SaveAssets();
 
                 SetDefaultMaterial(prefab, prefab.transform);
+                SetDefaultPointsAssets(prefab, prefab.transform);
 
                 AssetDatabase.SaveAssets();
             }
         }
 
 
-        private void SetDefaultMaterial( GameObject prefab, Transform goNode, Material defaultMat = null )
+        private void SetDefaultMaterial( GameObject prefab, Transform goNode, Material defaultMat = null)
         {
             if (defaultMat == null)
             {
@@ -207,6 +208,38 @@ namespace UTJ.Alembic
 
             for ( int i = 0; i < goNode.childCount; i++)
                 SetDefaultMaterial(prefab, goNode.GetChild(i), defaultMat);
+        }
+
+        private void SetDefaultPointsAssets(GameObject prefab, Transform goNode, Material defaultMat = null, Mesh defaultMesh = null)
+        {
+            // Set new mat
+            var renderer = goNode.GetComponent<AlembicPointsRenderer>();
+            if (renderer != null)
+            {
+                if (defaultMat == null)
+                {
+                    defaultMat = new Material(Shader.Find("Alembic/Standard Instanced"));
+                    defaultMat.name = "Points";
+#if UNITY_5_6_OR_NEWER
+                    defaultMat.enableInstancing = true;
+#endif
+                    AssetDatabase.AddObjectToAsset(defaultMat, prefab);
+                }
+                if(defaultMesh == null)
+                {
+                    defaultMesh = IcoSphereGenerator.Generate();
+                    defaultMesh.name = "Points";
+                    if (defaultMesh != null)
+                    {
+                        AssetDatabase.AddObjectToAsset(defaultMesh, prefab);
+                    }
+                }
+                renderer.material = defaultMat;
+                renderer.sharedMesh = defaultMesh;
+            }
+
+            for (int i = 0; i < goNode.childCount; i++)
+                SetDefaultPointsAssets(prefab, goNode.GetChild(i), defaultMat, defaultMesh);
         }
 
     }

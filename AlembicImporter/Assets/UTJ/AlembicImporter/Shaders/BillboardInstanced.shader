@@ -11,7 +11,6 @@
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
 
         [Toggle(_VIEW_PLANE_PROJECTION)] _ViewPlaneProjection("View Plane Projection", Float) = 0
-        [Toggle(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED)] _ProceduralInstancingEnabled("Enable Procedural Instancing", Float) = 0
     }
 
     SubShader

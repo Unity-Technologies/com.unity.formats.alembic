@@ -9,8 +9,6 @@
 
         _Color("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-
-        [Toggle(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED)] _ProceduralInstancingEnabled("Enable Procedural Instancing", Float) = 0
     }
 
     SubShader
