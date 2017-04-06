@@ -14,7 +14,7 @@
         #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.0
         #pragma multi_compile_instancing
-        #pragma instancing_options assumeuniformscaling maxcount:1024 procedural:setup
+        #pragma instancing_options assumeuniformscaling maxcount:1023 procedural:setup
         #include "PointRenderer.cginc"
 
         fixed4 _Color;

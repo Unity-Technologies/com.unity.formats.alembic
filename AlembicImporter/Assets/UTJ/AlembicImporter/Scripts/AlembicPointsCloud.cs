@@ -18,6 +18,8 @@ namespace UTJ.Alembic
         [ReadOnly] public int m_count;
 
         AlembicPoints m_abc;
+
+        [Tooltip("Sort points by distance from sortFrom object")]
         public bool m_sort = false;
         public Transform m_sortFrom;
 

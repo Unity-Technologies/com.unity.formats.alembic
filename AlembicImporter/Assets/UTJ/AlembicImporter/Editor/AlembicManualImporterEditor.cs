@@ -185,62 +185,68 @@ namespace UTJ.Alembic
                 }
                 AssetDatabase.SaveAssets();
 
-                SetDefaultMaterial(prefab, prefab.transform);
-                SetDefaultPointsAssets(prefab, prefab.transform);
-
+                SetDefaultAssets(prefab, prefab.transform);
                 AssetDatabase.SaveAssets();
             }
         }
 
 
-        private void SetDefaultMaterial( GameObject prefab, Transform goNode, Material defaultMat = null)
+        class SetDefaultAssetsContext
         {
-            if (defaultMat == null)
-            {
-                defaultMat = new Material(Shader.Find("Standard")) { };
-                AssetDatabase.AddObjectToAsset(defaultMat, prefab);
-            }
-
-            // Set new mat
-            var renderer = goNode.GetComponent<MeshRenderer>();
-            if (renderer != null)
-                renderer.material = defaultMat;
-
-            for ( int i = 0; i < goNode.childCount; i++)
-                SetDefaultMaterial(prefab, goNode.GetChild(i), defaultMat);
+            public Material defaultMat = null;
+            public Material defaultPointsMat = null;
+            public Mesh defaultPointsMesh = null;
         }
 
-        private void SetDefaultPointsAssets(GameObject prefab, Transform goNode, Material defaultMat = null, Mesh defaultMesh = null)
+        private void SetDefaultAssets( GameObject prefab, Transform goNode, SetDefaultAssetsContext ctx = null)
         {
-            // Set new mat
-            var renderer = goNode.GetComponent<AlembicPointsRenderer>();
-            if (renderer != null)
+            if(ctx == null)
             {
-                if (defaultMat == null)
+                ctx = new SetDefaultAssetsContext();
+            }
+
+            // set default material for MeshRenderer
+            var mrenderer = goNode.GetComponent<MeshRenderer>();
+            if (mrenderer != null)
+            {
+                if (ctx.defaultMat == null)
                 {
-                    defaultMat = new Material(Shader.Find("Alembic/Standard Instanced"));
-                    defaultMat.name = "Points";
-#if UNITY_5_6_OR_NEWER
-                    defaultMat.enableInstancing = true;
-#endif
-                    AssetDatabase.AddObjectToAsset(defaultMat, prefab);
+                    ctx.defaultMat = new Material(Shader.Find("Standard")) { };
+                    AssetDatabase.AddObjectToAsset(ctx.defaultMat, prefab);
                 }
-                if(defaultMesh == null)
+                mrenderer.material = ctx.defaultMat;
+            }
+
+            // set default material and mesh for AlembicPointsRenderer
+            var prenderer = goNode.GetComponent<AlembicPointsRenderer>();
+            if (prenderer != null)
+            {
+                if (ctx.defaultPointsMat == null)
                 {
-                    defaultMesh = IcoSphereGenerator.Generate();
-                    defaultMesh.name = "Points";
-                    if (defaultMesh != null)
+                    ctx.defaultPointsMat = new Material(Shader.Find("Alembic/Standard Instanced"));
+                    ctx.defaultPointsMat.name = "Points";
+#if UNITY_5_6_OR_NEWER
+                    ctx.defaultPointsMat.enableInstancing = true;
+#endif
+                    AssetDatabase.AddObjectToAsset(ctx.defaultPointsMat, prefab);
+                }
+                if (ctx.defaultPointsMesh == null)
+                {
+                    ctx.defaultPointsMesh = IcoSphereGenerator.Generate();
+                    ctx.defaultPointsMesh.name = "Points";
+                    if (ctx.defaultPointsMesh != null)
                     {
-                        AssetDatabase.AddObjectToAsset(defaultMesh, prefab);
+                        AssetDatabase.AddObjectToAsset(ctx.defaultPointsMesh, prefab);
                     }
                 }
-                renderer.material = defaultMat;
-                renderer.sharedMesh = defaultMesh;
+                prenderer.material = ctx.defaultPointsMat;
+                prenderer.sharedMesh = ctx.defaultPointsMesh;
             }
 
-            for (int i = 0; i < goNode.childCount; i++)
-                SetDefaultPointsAssets(prefab, goNode.GetChild(i), defaultMat, defaultMesh);
+            for ( int i = 0; i < goNode.childCount; i++)
+            {
+                SetDefaultAssets(prefab, goNode.GetChild(i), ctx);
+            }
         }
-
     }
 }

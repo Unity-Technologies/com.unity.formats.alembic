@@ -25,7 +25,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #pragma instancing_options assumeuniformscaling maxcount:1024
+            #pragma instancing_options assumeuniformscaling maxcount:1023
             #pragma multi_compile ___ ALEMBIC_PROCEDURAL_INSTANCING_ENABLED
             #pragma target 4.5
             #include "PointRenderer.cginc"

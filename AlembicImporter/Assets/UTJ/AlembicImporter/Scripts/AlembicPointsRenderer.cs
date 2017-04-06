@@ -29,23 +29,27 @@ namespace UTJ.Alembic
         public ShadowCastingMode m_shadow = ShadowCastingMode.Off;
         public bool m_receiveShadows = false;
         public LayerSelector m_layer = 0;
-        public float m_pointSize = 0.1f;
+        public float m_pointSize = 0.2f;
         public InstancingMode m_instancingMode =
 #if UNITY_5_5_OR_NEWER
             InstancingMode.Instancing;
 #else
             InstancingMode.NoInstancing;
 #endif
+        [Tooltip("Use Alembic Points IDs as shader input")]
+        public bool m_useAlembicIDs = false;
 
+#if UNITY_5_5_OR_NEWER
         Matrix4x4[] m_matrices;
         float[] m_ids;
         List<MaterialPropertyBlock> m_mpbs;
+#endif
 #if UNITY_5_6_OR_NEWER
+        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
         ComputeBuffer m_cbPoints;
         ComputeBuffer m_cbIDs;
-        ComputeBuffer m_cbArgs;
-        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
-        private int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
+        ComputeBuffer[] m_cbArgs;
+        int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
 #endif
 #if UNITY_EDITOR
         bool m_dirty = false;
@@ -86,7 +90,6 @@ namespace UTJ.Alembic
             int pidPointSize = Shader.PropertyToID("_PointSize");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
             int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
-            int pidAlembicID = Shader.PropertyToID("_AlembicID");
 
 #if UNITY_5_6_OR_NEWER
             if (supportsInstancing && m_instancingMode == InstancingMode.Procedural)
@@ -94,13 +97,15 @@ namespace UTJ.Alembic
                 // Graphics.DrawMeshInstancedIndirect() route
 
                 // update argument buffer
-                if (m_cbArgs == null)
+                if (m_cbArgs == null || m_cbArgs.Length != num_submeshes)
                 {
-                    m_cbArgs = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+                    Release();
+                    m_cbArgs = new ComputeBuffer[num_submeshes];
+                    for (int i = 0; i < num_submeshes; ++i)
+                    {
+                        m_cbArgs[i] = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+                    }
                 }
-                m_args[0] = (int)m_mesh.GetIndexCount(0);
-                m_args[1] = num_instances;
-                m_cbArgs.SetData(m_args);
 
                 // update points buffer
                 if (m_cbPoints != null && m_cbPoints.count != num_instances)
@@ -115,27 +120,32 @@ namespace UTJ.Alembic
                 m_cbPoints.SetData(points);
 
                 // update ID buffer
-                if (m_cbIDs != null && m_cbIDs.count != num_instances)
+                bool alembicIDsAvailable = false;
+                if (m_useAlembicIDs)
                 {
-                    m_cbIDs.Release();
-                    m_cbIDs = null;
-                }
-                if (m_cbIDs == null)
-                {
-                    m_cbIDs = new ComputeBuffer(num_instances, 4);
-                }
-                ulong[] ids = apc.abcIDs;
-                if (ids != null && ids.Length == num_instances)
-                {
-                    if (m_ids == null || m_ids.Length != num_instances)
+                    if (m_cbIDs != null && m_cbIDs.count != num_instances)
                     {
-                        m_ids = new float[num_instances];
+                        m_cbIDs.Release();
+                        m_cbIDs = null;
                     }
-                    for (int i = 0; i < num_instances; ++i)
+                    if (m_cbIDs == null)
                     {
-                        m_ids[i] = ids[i];
+                        m_cbIDs = new ComputeBuffer(num_instances, 4);
                     }
-                    m_cbIDs.SetData(m_ids);
+                    ulong[] ids = apc.abcIDs;
+                    if (ids != null && ids.Length == num_instances)
+                    {
+                        if (m_ids == null || m_ids.Length != num_instances)
+                        {
+                            m_ids = new float[num_instances];
+                        }
+                        for (int i = 0; i < num_instances; ++i)
+                        {
+                            m_ids[i] = ids[i];
+                        }
+                        m_cbIDs.SetData(m_ids);
+                        alembicIDsAvailable = true;
+                    }
                 }
 
                 // build bounds
@@ -144,13 +154,18 @@ namespace UTJ.Alembic
                 // issue drawcalls
                 for (int si = 0; si < num_submeshes; ++si)
                 {
+                    var args = m_cbArgs[si];
+                    m_args[0] = (int)m_mesh.GetIndexCount(0);
+                    m_args[1] = num_instances;
+                    args.SetData(m_args);
+
                     var material = m_materials[si];
                     material.EnableKeyword(m_kwAlembicProceduralInstancing);
                     material.SetFloat(pidPointSize, m_pointSize);
                     material.SetBuffer(pidAlembicPoints, m_cbPoints);
-                    material.SetBuffer(pidAlembicIDs, m_cbIDs);
+                    if (alembicIDsAvailable) { material.SetBuffer(pidAlembicIDs, m_cbIDs); }
                     Graphics.DrawMeshInstancedIndirect(m_mesh, si, material,
-                        bounds, m_cbArgs, 0, null, m_shadow, m_receiveShadows, m_layer);
+                        bounds, args, 0, null, m_shadow, m_receiveShadows, m_layer);
                 }
             }
             else
@@ -180,21 +195,26 @@ namespace UTJ.Alembic
                 }
 
                 // setup alembic point IDs
-                ulong[] ids = apc.abcIDs;
-                bool alembicIDsAvailable = ids != null && ids.Length == num_instances;
-                if (alembicIDsAvailable)
+                bool alembicIDsAvailable = false;
+                ulong[] ids = null;
+                if (m_useAlembicIDs)
                 {
-                    if (m_ids == null || m_ids.Length != MaxInstancesParDraw)
+                    ids = apc.abcIDs;
+                    alembicIDsAvailable = ids != null && ids.Length == num_instances;
+                    if (alembicIDsAvailable)
                     {
-                        m_ids = new float[MaxInstancesParDraw];
-                    }
-                    if (m_mpbs == null)
-                    {
-                        m_mpbs = new List<MaterialPropertyBlock>();
-                    }
-                    while (m_mpbs.Count < num_batches)
-                    {
-                        m_mpbs.Add(new MaterialPropertyBlock());
+                        if (m_ids == null || m_ids.Length != MaxInstancesParDraw)
+                        {
+                            m_ids = new float[MaxInstancesParDraw];
+                        }
+                        if (m_mpbs == null)
+                        {
+                            m_mpbs = new List<MaterialPropertyBlock>();
+                        }
+                        while (m_mpbs.Count < num_batches)
+                        {
+                            m_mpbs.Add(new MaterialPropertyBlock());
+                        }
                     }
                 }
 
@@ -236,6 +256,7 @@ namespace UTJ.Alembic
 #endif
             {
                 // Graphics.DrawMesh() route
+                // not use IDs in this case because it's too expensive...
 
                 var matrix = Matrix4x4.identity;
                 matrix.m00 = matrix.m11 = matrix.m22 = m_pointSize;
@@ -258,7 +279,10 @@ namespace UTJ.Alembic
         public void Release()
         {
 #if UNITY_5_6_OR_NEWER
-            if (m_cbArgs != null) { m_cbArgs.Release(); m_cbArgs = null; }
+            if (m_cbArgs != null) {
+                foreach(var cb in m_cbArgs) { cb.Release(); }
+                m_cbArgs = null;
+            }
             if (m_cbPoints != null) { m_cbPoints.Release(); m_cbPoints = null; }
             if (m_cbIDs != null) { m_cbIDs.Release(); m_cbIDs = null; }
 #endif
@@ -279,14 +303,6 @@ namespace UTJ.Alembic
         }
 
 #if UNITY_EDITOR
-        void Reset()
-        {
-            //m_materials = new Material[] {
-            //        new Material(Shader.Find("Alembic/Standard Instanced"))
-            //    };
-            //m_materials[0].name = "Points";
-        }
-
         void OnDrawGizmos()
         {
             // force draw particles while paused.
