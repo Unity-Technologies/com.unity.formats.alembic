@@ -271,9 +271,13 @@ namespace UTJ
             public override void Capture()
             {
                 if (m_target == null) { return; }
-    
+
                 // create buffer
+#if UNITY_5_5_OR_NEWER
                 int count_max = m_target.main.maxParticles;
+#else
+                int count_max = m_target.maxParticles;
+#endif
                 if (m_buf_particles == null)
                 {
                     m_buf_particles = new ParticleSystem.Particle[count_max];

@@ -86,10 +86,12 @@ namespace UTJ.Alembic
             if(num_instances == 0) { return; }
             int num_submeshes = System.Math.Min(m_mesh.subMeshCount, m_materials.Length);
 
+#if UNITY_5_5_OR_NEWER
             bool supportsInstancing = SystemInfo.supportsInstancing;
             int pidPointSize = Shader.PropertyToID("_PointSize");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
             int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
+#endif
 
 #if UNITY_5_6_OR_NEWER
             if (supportsInstancing && m_instancingMode == InstancingMode.Procedural)
