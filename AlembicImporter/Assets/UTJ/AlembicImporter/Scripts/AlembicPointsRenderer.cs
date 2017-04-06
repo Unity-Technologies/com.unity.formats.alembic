@@ -87,28 +87,27 @@ namespace UTJ.Alembic
             int num_submeshes = System.Math.Min(m_mesh.subMeshCount, m_materials.Length);
 
             bool supportsInstancing = SystemInfo.supportsInstancing;
-            if (!supportsInstancing && m_instancingMode != InstancingMode.NoInstancing)
-            {
-                Debug.LogWarning("AlembicPointsRenderer: Instancing is not supported on this system. fallback to InstancingMode.NoInstancing.");
-                m_instancingMode = InstancingMode.Instancing;
-            }
-
 #if UNITY_5_5_OR_NEWER
             int pidPointSize = Shader.PropertyToID("_PointSize");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
             int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
 #endif
 
+            if (!supportsInstancing && m_instancingMode != InstancingMode.NoInstancing)
+            {
+                Debug.LogWarning("AlembicPointsRenderer: Instancing is not supported on this system. fallback to InstancingMode.NoInstancing.");
+                m_instancingMode = InstancingMode.NoInstancing;
+            }
+
 #if UNITY_5_6_OR_NEWER
+            if (m_instancingMode == InstancingMode.Procedural && !SystemInfo.supportsComputeShaders)
+            {
+                Debug.LogWarning("AlembicPointsRenderer: InstancingMode.Procedural is not supported on this system. fallback to InstancingMode.Instancing.");
+                m_instancingMode = InstancingMode.Instancing;
+            }
+
             if (supportsInstancing && m_instancingMode == InstancingMode.Procedural)
             {
-                if(!SystemInfo.supportsComputeShaders)
-                {
-                    Debug.LogWarning("AlembicPointsRenderer: InstancingMode.Procedural is not supported on this system. fallback to InstancingMode.Instancing.");
-                    m_instancingMode = InstancingMode.Instancing;
-                    return;
-                }
-
                 // Graphics.DrawMeshInstancedIndirect() route
 
                 // update argument buffer
