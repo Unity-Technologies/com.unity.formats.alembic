@@ -40,12 +40,12 @@ namespace UTJ.Alembic
         public bool m_useAlembicIDs = false;
 
 #if UNITY_5_5_OR_NEWER
+        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
         Matrix4x4[] m_matrices;
         float[] m_ids;
         List<MaterialPropertyBlock> m_mpbs;
 #endif
 #if UNITY_5_6_OR_NEWER
-        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
         ComputeBuffer m_cbPoints;
         ComputeBuffer m_cbIDs;
         ComputeBuffer[] m_cbArgs;
@@ -87,9 +87,11 @@ namespace UTJ.Alembic
             int num_submeshes = System.Math.Min(m_mesh.subMeshCount, m_materials.Length);
 
             bool supportsInstancing = SystemInfo.supportsInstancing;
-#if UNITY_5_5_OR_NEWER
+#if UNITY_5_6_OR_NEWER
             int pidPointSize = Shader.PropertyToID("_PointSize");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
+#endif
+#if UNITY_5_5_OR_NEWER
             int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
 #endif
 
