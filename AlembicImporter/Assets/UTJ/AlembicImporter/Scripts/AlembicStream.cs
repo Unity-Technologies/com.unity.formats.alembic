@@ -37,7 +37,7 @@ namespace UTJ.Alembic
         {
             return (m_abc.ptr != (IntPtr)0);
         }
-    
+
         private void AbcSyncConfig()
         {
             m_config.swapHandedness = ImportSettings.m_swapHandedness;
@@ -50,28 +50,28 @@ namespace UTJ.Alembic
             m_config.useThreads = ImportSettings.m_useThreads;
             m_config.cacheSamples = ImportSettings.m_sampleCacheSize;
             m_config.submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
-    
+
             if (AbcIsValid())
             {
                 AbcAPI.aiSetConfig(m_abc, ref m_config);
             }
         }
-    
+
         private float AbcTime(float inTime)
         {
             float extraOffset = 0.0f;
-    
+
             // compute extra time offset to counter-balance effect of m_timeScale on m_startTime
             if (m_playbackSettings.m_preserveStartTime)
             {
                 extraOffset = m_playbackSettings.m_startTime * (m_playbackSettings.m_timeScale - 1.0f);
             }
-    
+
             float playTime = m_playbackSettings.m_endTime - m_playbackSettings.m_startTime;
-    
+
             // apply speed and offset
             float outTime = m_playbackSettings.m_timeScale * (inTime + m_playbackSettings.m_timeOffset) + extraOffset;
-    
+
             if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Hold)
             {
                 if (outTime < (m_playbackSettings.m_startTime - m_timeEps))
@@ -121,10 +121,10 @@ namespace UTJ.Alembic
                     }
                 }
             }
-    
+
             return outTime;
         }
-    
+
         private bool AbcUpdateRequired(float abcTime, float aspectRatio)
         {
             if (m_forceRefresh ||
@@ -144,7 +144,7 @@ namespace UTJ.Alembic
                 return false;
             }
         }
-    
+
         private void AbcSetLastUpdateState(float abcTime, float aspectRatio)
         {
             m_lastAbcTime = abcTime;
@@ -216,21 +216,21 @@ namespace UTJ.Alembic
                 }
                 
                 m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
-    
+
                 if (AbcIsValid())
                 {
                     m_forceRefresh = true;
                     _alembicTreeRoot.ResetTree();
 
                     AbcSyncConfig();
-    
+
                     AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), false);
-    
+
                     if (m_diagSettings.m_verbose)
                     {
                         Debug.Log("AlembicStream.AbcRecoverContext: Succeeded.");
                     }
-    
+
                     return true;
                 }
                 else
@@ -243,7 +243,7 @@ namespace UTJ.Alembic
                 return true;
             }
         }
-    
+
         private void AbcUpdateBegin(float time)
         {
             if (ImportSettings == null)
@@ -254,7 +254,7 @@ namespace UTJ.Alembic
                 // We have lost the alembic context, try to recover it
                 m_loaded = AbcRecoverContext();
             }
-    
+
             if (m_loaded)
             {
                 if (!AbcIsValid())
@@ -268,12 +268,12 @@ namespace UTJ.Alembic
                         return;
                     }
                 }
-    
+
                 m_time = time;
-    
+
                 float abcTime = AbcTime(m_time);
                 float aspectRatio = AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode);
-    
+
                 if (AbcUpdateRequired(abcTime, aspectRatio))
                 {
                     if (m_diagSettings.m_verbose)
@@ -283,7 +283,7 @@ namespace UTJ.Alembic
                     
                     AbcSyncConfig();
                     AbcUpdateConfigElements();
-    
+
                     if(ImportSettings.m_useThreads)
                     {
                         AbcAPI.aiUpdateSamplesBegin(m_abc, abcTime);
@@ -300,7 +300,7 @@ namespace UTJ.Alembic
             }
         }
    
-    
+
         // --- public api ---
    
         public void AbcLoad(bool createMissingNodes=false)
@@ -374,7 +374,7 @@ namespace UTJ.Alembic
                 AbcUpdateBegin(m_playbackSettings.m_Time);
             }
         }
-    
+
         public void ProcessLateUpdateEvent()
         {
             if (m_updateBegan && _alembicTreeRoot != null)

@@ -1,8 +1,7 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [CustomEditor(typeof(AlembicExporter))]
     public class AlembicExporterEditor : Editor
@@ -10,12 +9,12 @@ namespace UTJ
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-    
+
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-    
+
             var t = target as AlembicExporter;
-    
+
             if (t.isRecording)
             {
                 if (GUILayout.Button("End Capture"))
@@ -29,7 +28,7 @@ namespace UTJ
                 {
                     t.BeginCapture();
                 }
-    
+
                 if (GUILayout.Button("One Shot"))
                 {
                     t.OneShot();

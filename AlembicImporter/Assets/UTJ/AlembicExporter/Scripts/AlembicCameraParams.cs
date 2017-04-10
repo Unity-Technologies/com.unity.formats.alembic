@@ -1,12 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [AddComponentMenu("UTJ/Alembic/Camera Params")]
     [RequireComponent(typeof(Camera))]
@@ -19,18 +13,18 @@ namespace UTJ
             Ratio_4_3,
             WidthPerHeight,
         };
-    
+
         public AspectRatioMode m_aspectRatioMode = AspectRatioMode.Ratio_16_9;
-    
+
         [Tooltip("in cm")]
         public float m_focusDistance = 5.0f;
-    
+
         [Tooltip("in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0")]
         public float m_focalLength = 0.0f;
-    
+
         [Tooltip("in cm")]
         public float m_aperture = 2.4f;
-    
+
         public float GetAspectRatio()
         {
             switch (m_aspectRatioMode)
@@ -39,7 +33,7 @@ namespace UTJ
                 case AspectRatioMode.Ratio_16_10: return 16.0f / 10.0f;
                 case AspectRatioMode.Ratio_4_3:   return 4.0f / 3.0f;
             }
-    
+
             var cam = GetComponent<Camera>();
             return (float)cam.pixelWidth / (float)cam.pixelHeight;
         }

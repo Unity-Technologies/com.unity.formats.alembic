@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEditor;
-using System.Collections;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [CustomPropertyDrawer(typeof(DataPath))]
     class DataPathDrawer : PropertyDrawer

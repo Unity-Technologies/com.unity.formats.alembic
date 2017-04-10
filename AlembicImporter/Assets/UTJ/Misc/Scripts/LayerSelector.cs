@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     [Serializable]
     public struct LayerSelector

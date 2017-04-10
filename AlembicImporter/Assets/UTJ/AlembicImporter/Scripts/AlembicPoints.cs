@@ -12,7 +12,7 @@ namespace UTJ.Alembic
         // members
         AbcAPI.aiPointsData m_abcData;
         AbcAPI.aiPointsSummary m_summary;
-    
+
         // properties
         public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
         public int abcPeakVertexCount
@@ -74,7 +74,7 @@ namespace UTJ.Alembic
 
             AbcDirty();
         }
-    
+
         public override void AbcUpdate()
         {
             if (AbcIsDirty())
@@ -83,6 +83,6 @@ namespace UTJ.Alembic
                 AbcClean();
             }
         }
-    
+
     }
 }

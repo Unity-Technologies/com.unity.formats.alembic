@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UTJ
+namespace UTJ.Alembic
 {
     public static class IcoSphereGenerator
     {
