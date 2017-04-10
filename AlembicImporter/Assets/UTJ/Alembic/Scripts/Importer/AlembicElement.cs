@@ -1,9 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
-#if UNITY_EDITOR
-
-#endif
 
 namespace UTJ.Alembic
 {
