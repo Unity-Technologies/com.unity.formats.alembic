@@ -43,3 +43,5 @@ ipch/
 
 *.abc
 *.abc.meta
+abci.bundle/
+build/
