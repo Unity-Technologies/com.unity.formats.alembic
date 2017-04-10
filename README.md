@@ -1,6 +1,6 @@
 # Alembic Importer / Exporter
 
-**latest package: [AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170406/AlembicImporter.unitypackage)**  
+**latest package: [AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170410/AlembicImporter.unitypackage)**  
 **Do not clone this repository unless you are trying to build plugin from source.**
 
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
@@ -18,7 +18,7 @@ Alembic 本家: http://www.alembic.io/
 
 Windows (32bit & 64bit)、Mac、Linux と Unity 5.2 以降で動作を確認済みです。
 使用するにはまずこのパッケージをプロジェクトに import してください。  
-[AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170406/AlembicImporter.unitypackage)  
+[AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170410/AlembicImporter.unitypackage)  
 (Linux の場合はこれに加えてプラグインをソースからビルドする必要があります。このリポジトリを clone し、Plugin/ に移動して CMake を用いてビルドしてください)
 
 ## Alembic Importer
