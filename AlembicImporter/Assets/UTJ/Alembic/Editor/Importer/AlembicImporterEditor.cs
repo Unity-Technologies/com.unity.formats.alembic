@@ -1,13 +1,14 @@
-#if ENABLE_SCRIPTED_IMPORTERS
+#if UNITY_2017_1_OR_NEWER
 
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
     [CustomEditor(typeof(AlembicImporter))]
-    public class AlembicImporterEditor : UnityEditor.Experimental.ScriptedImporterEditor
+    public class AlembicImporterEditor : ScriptedImporterEditor
     {
 
         public override void OnInspectorGUI()

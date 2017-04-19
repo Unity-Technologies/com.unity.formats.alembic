@@ -1,38 +1,39 @@
-#if ENABLE_SCRIPTED_IMPORTERS
+#if UNITY_2017_1_OR_NEWER
 
 using UnityEditor;
 using UnityEngine;
+using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
-    [UnityEditor.Experimental.ScriptedImporter(1, "abc")]
-    public class AlembicImporter : UnityEditor.Experimental.ScriptedImporter
+    [ScriptedImporter(1, "abc")]
+    public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicImportSettings m_ImportSettings = new AlembicImportSettings();
         [HideInInspector][SerializeField] public AlembicDiagnosticSettings m_diagSettings = new AlembicDiagnosticSettings();
         [HideInInspector][SerializeField] public AlembicImportMode m_importMode = AlembicImportMode.AutomaticStreamingSetup;
 
-        public override void OnImportAsset()
+        public override void OnImportAsset(AssetImportContext ctx)
         {
-            m_ImportSettings.m_pathToAbc = assetSourcePath;
+            m_ImportSettings.m_pathToAbc =  new DataPath() {root = DataPath.Root.Absolute, leaf = ctx.assetPath };
             var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
             {
-                GenerateSubAssets(mainGO, stream);
+                GenerateSubAssets(ctx, mainGO, stream);
                 if(streamDescr != null)
-                    AddSubAsset( mainGO.name, streamDescr);
+                    ctx.AddSubAsset( mainGO.name, streamDescr);
             });
-            SetMainAsset(mainObject.name, mainObject);
+            ctx.SetMainAsset(mainObject.name, mainObject);
         }
 
-        private void GenerateSubAssets( GameObject go, AlembicStream stream)
+        private void GenerateSubAssets( AssetImportContext ctx, GameObject go, AlembicStream stream)
         {
             var material = new Material(Shader.Find("Standard")) { };
-            AddSubAsset("Default Material", material);
+            ctx.AddSubAsset("Default Material", material);
 
-            CollectSubAssets(stream.AlembicTreeRoot, material);
+            CollectSubAssets(ctx, stream.AlembicTreeRoot, material);
         }
 
-        private void CollectSubAssets(AlembicTreeNode node,  Material mat)
+        private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
         {
             if (m_ImportSettings.m_importMeshes)
             {
@@ -41,7 +42,7 @@ namespace UTJ.Alembic
                 {
                     var m = meshFilter.sharedMesh;
                     m.name = node.linkedGameObj.name;
-                    AddSubAsset(m.name, m);
+                    ctx.AddSubAsset(m.name, m);
                 }
             }
 
@@ -50,7 +51,7 @@ namespace UTJ.Alembic
                 renderer.material = mat;
 
             foreach( var child in node.children )
-                CollectSubAssets(child, mat);
+                CollectSubAssets(ctx, child, mat);
         }
 
     }
