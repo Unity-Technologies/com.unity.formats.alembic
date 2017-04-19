@@ -1,6 +1,6 @@
 # Alembic Importer / Exporter
 
-**latest package: [AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170410/AlembicImporter.unitypackage)**  
+**latest package: [AlembicImporter.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20170419/AlembicImporter.unitypackage)**  
 **Do not clone this repository unless you are trying to build plugin from source.**
 
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
