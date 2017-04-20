@@ -241,12 +241,12 @@ namespace UTJ.Alembic
                     int n = iend - ibegin;
 
                     // build matrices
+
                     for (int ii = 0; ii < n; ++ii)
                     {
-                        m_matrices[ii].m00 = m_matrices[ii].m11 = m_matrices[ii].m22 = m_pointSize;
-                        m_matrices[ii].m03 = points[ibegin + ii].x;
-                        m_matrices[ii].m13 = points[ibegin + ii].y;
-                        m_matrices[ii].m23 = points[ibegin + ii].z;
+                        Vector3 rotatedPosition = apc.transform.rotation* new Vector3(points[ibegin + ii].x,points[ibegin + ii].y,points[ibegin + ii].z);
+                        Vector3 finalPosition = new Vector3(rotatedPosition.x + apc.transform.position.x,rotatedPosition.y + apc.transform.position.y,rotatedPosition.z + apc.transform.position.z);
+                        m_matrices[ii].SetTRS(finalPosition,Quaternion.identity,new Vector3(m_pointSize,m_pointSize,m_pointSize));
                     }
 
                     MaterialPropertyBlock mpb = null;
