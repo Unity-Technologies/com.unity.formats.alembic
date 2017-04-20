@@ -15,7 +15,7 @@ namespace UTJ.Alembic
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            m_ImportSettings.m_pathToAbc =  new DataPath() {root = DataPath.Root.Absolute, leaf = ctx.assetPath };
+            m_ImportSettings.m_pathToAbc =  new DataPath(ctx.assetPath);
             var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
             {
                 GenerateSubAssets(ctx, mainGO, stream);
