@@ -24,23 +24,22 @@ namespace UTJ.Alembic
 
         public const int MaxInstancesParDraw = 1023;
 
-        public Mesh m_mesh;
-        public Material[] m_materials;
-        public ShadowCastingMode m_shadow = ShadowCastingMode.Off;
-        public bool m_receiveShadows = false;
-        public LayerSelector m_layer = 0;
-        public float m_pointSize = 0.2f;
-        public InstancingMode m_instancingMode =
+        [SerializeField] Mesh m_mesh;
+        [SerializeField] Material[] m_materials;
+        [SerializeField] ShadowCastingMode m_castShadows = ShadowCastingMode.Off;
+        [SerializeField] bool m_receiveShadows = false;
+        [SerializeField] float m_pointSize = 0.2f;
+        [SerializeField] InstancingMode m_instancingMode =
 #if UNITY_5_5_OR_NEWER
             InstancingMode.Instancing;
 #else
             InstancingMode.NoInstancing;
 #endif
         [Tooltip("Use Alembic Points IDs as shader input")]
-        public bool m_useAlembicIDs = false;
+        [SerializeField] bool m_useAlembicIDs = false;
 
 #if UNITY_5_5_OR_NEWER
-        const string m_kwAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
+        const string kAlembicProceduralInstancing = "ALEMBIC_PROCEDURAL_INSTANCING_ENABLED";
         Matrix4x4[] m_matrices;
         float[] m_ids;
         List<MaterialPropertyBlock> m_mpbs;
@@ -54,6 +53,7 @@ namespace UTJ.Alembic
 #if UNITY_EDITOR
         bool m_dirty = false;
 #endif
+        Material[] m_materialsInternal;
 
 
         public Mesh sharedMesh
@@ -64,27 +64,76 @@ namespace UTJ.Alembic
 
         public Material material
         {
-            get { return m_materials != null && m_materials.Length > 0 ? m_materials[0] : null; }
-            set { m_materials = new Material[] { value }; }
+            get {
+                return m_materialsInternal != null && m_materialsInternal.Length > 0 ? m_materialsInternal[0] : null;
+            }
+            set {
+                m_materialsInternal = null;
+                m_materials = new Material[] { value };
+            }
         }
         public Material[] materials
         {
+            get { return m_materialsInternal; }
+            set {
+                m_materialsInternal = null;
+                m_materials = value;
+            }
+        }
+
+        public Material sharedMaterial
+        {
+            get
+            {
+                return m_materials != null && m_materials.Length > 0 ? m_materials[0] : null;
+            }
+            set
+            {
+                m_materialsInternal = m_materials = new Material[] { value };
+            }
+        }
+        public Material[] sharedMaterials
+        {
             get { return m_materials; }
-            set { m_materials = value; }
+            set
+            {
+                m_materialsInternal = m_materials = value;
+            }
         }
 
 
+        Material[] SetupMaterials()
+        {
+            if (m_materials == null || m_materials.Length == 0)
+            {
+                m_materialsInternal = null;
+            }
+            else if (m_materialsInternal == null)
+            {
+                m_materialsInternal = new Material[m_materials.Length];
+                for (int i = 0; i < m_materials.Length; ++i)
+                {
+                    m_materialsInternal[i] = new Material(m_materials[i]);
+                }
+            }
+            return m_materialsInternal;
+        }
+
         public void Flush()
         {
-            if(m_mesh == null || m_materials == null || m_materials.Length == 0) { return; }
-
             var apc = GetComponent<AlembicPointsCloud>();
             var points = apc.abcPositions;
             if(points == null) { return; }
 
             int num_instances = points.Length;
             if(num_instances == 0) { return; }
-            int num_submeshes = System.Math.Min(m_mesh.subMeshCount, m_materials.Length);
+
+            var materials = SetupMaterials();
+            var mesh = m_mesh;
+            if (mesh == null || materials == null) { return; }
+
+            int num_submeshes = System.Math.Min(mesh.subMeshCount, materials.Length);
+            int layer = gameObject.layer;
 
             bool supportsInstancing = SystemInfo.supportsInstancing;
 #if UNITY_5_6_OR_NEWER
@@ -165,23 +214,23 @@ namespace UTJ.Alembic
                 }
 
                 // build bounds
-                var bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + m_mesh.bounds.extents);
+                var bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + mesh.bounds.extents);
 
                 // issue drawcalls
                 for (int si = 0; si < num_submeshes; ++si)
                 {
                     var args = m_cbArgs[si];
-                    m_args[0] = (int)m_mesh.GetIndexCount(0);
+                    m_args[0] = (int)mesh.GetIndexCount(0);
                     m_args[1] = num_instances;
                     args.SetData(m_args);
 
-                    var material = m_materials[si];
-                    material.EnableKeyword(m_kwAlembicProceduralInstancing);
+                    var material = materials[si];
+                    material.EnableKeyword(kAlembicProceduralInstancing);
                     material.SetFloat(pidPointSize, m_pointSize);
                     material.SetBuffer(pidAlembicPoints, m_cbPoints);
                     if (alembicIDsAvailable) { material.SetBuffer(pidAlembicIDs, m_cbIDs); }
-                    Graphics.DrawMeshInstancedIndirect(m_mesh, si, material,
-                        bounds, args, 0, null, m_shadow, m_receiveShadows, m_layer);
+                    Graphics.DrawMeshInstancedIndirect(mesh, si, material,
+                        bounds, args, 0, null, m_castShadows, m_receiveShadows, layer);
                 }
             }
             else
@@ -203,10 +252,10 @@ namespace UTJ.Alembic
 
                 for (int si = 0; si < num_submeshes; ++si)
                 {
-                    var material = m_materials[si];
-                    if (material.IsKeywordEnabled(m_kwAlembicProceduralInstancing))
+                    var material = materials[si];
+                    if (material.IsKeywordEnabled(kAlembicProceduralInstancing))
                     {
-                        material.DisableKeyword(m_kwAlembicProceduralInstancing);
+                        material.DisableKeyword(kAlembicProceduralInstancing);
                     }
                 }
 
@@ -263,8 +312,8 @@ namespace UTJ.Alembic
                     // issue drawcalls
                     for (int si = 0; si < num_submeshes; ++si)
                     {
-                        var material = m_materials[si];
-                        Graphics.DrawMeshInstanced(m_mesh, si, material, m_matrices, n, mpb, m_shadow, m_receiveShadows, m_layer);
+                        var material = materials[si];
+                        Graphics.DrawMeshInstanced(mesh, si, material, m_matrices, n, mpb, m_castShadows, m_receiveShadows, layer);
                     }
                 }
             }
@@ -285,8 +334,8 @@ namespace UTJ.Alembic
                     // issue drawcalls
                     for (int si = 0; si < num_submeshes; ++si)
                     {
-                        var material = m_materials[si];
-                        Graphics.DrawMesh(m_mesh, matrix, material, m_layer, null, si, null, m_shadow, m_receiveShadows);
+                        var material = materials[si];
+                        Graphics.DrawMesh(mesh, matrix, material, layer, null, si, null, m_castShadows, m_receiveShadows);
                     }
                 }
             }
@@ -327,6 +376,12 @@ namespace UTJ.Alembic
             {
                 Flush();
                 m_dirty = false;
+            }
+
+            if(!EditorApplication.isPlaying || EditorApplication.isPaused)
+            {
+                // force update internal materials to apply material parameter changes immediately
+                m_materialsInternal = null;
             }
         }
 #endif
