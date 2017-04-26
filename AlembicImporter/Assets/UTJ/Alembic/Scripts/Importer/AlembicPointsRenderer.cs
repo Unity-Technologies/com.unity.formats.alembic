@@ -108,7 +108,7 @@ namespace UTJ.Alembic
             {
                 m_materialsInternal = null;
             }
-            else if (m_materialsInternal == null)
+            else if (m_materialsInternal == null || m_materialsInternal.Length == 0)
             {
                 m_materialsInternal = new Material[m_materials.Length];
                 for (int i = 0; i < m_materials.Length; ++i)
@@ -135,9 +135,18 @@ namespace UTJ.Alembic
             int num_submeshes = System.Math.Min(mesh.subMeshCount, materials.Length);
             int layer = gameObject.layer;
 
+            var trans = GetComponent<Transform>();
+            var pos = trans.position;
+            var rot = trans.rotation;
+            var scale = trans.lossyScale;
+            var pscale = scale * m_pointSize;
+
             bool supportsInstancing = SystemInfo.supportsInstancing;
 #if UNITY_5_6_OR_NEWER
             int pidPointSize = Shader.PropertyToID("_PointSize");
+            int pidTranslate = Shader.PropertyToID("_Translate");
+            int pidRotate = Shader.PropertyToID("_Rotate");
+            int pidScale = Shader.PropertyToID("_Scale");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
 #endif
 #if UNITY_5_5_OR_NEWER
@@ -292,10 +301,12 @@ namespace UTJ.Alembic
                     // build matrices
                     for (int ii = 0; ii < n; ++ii)
                     {
-                        m_matrices[ii].m00 = m_matrices[ii].m11 = m_matrices[ii].m22 = m_pointSize;
-                        m_matrices[ii].m03 = points[ibegin + ii].x;
-                        m_matrices[ii].m13 = points[ibegin + ii].y;
-                        m_matrices[ii].m23 = points[ibegin + ii].z;
+                        var ppos = points[ibegin + ii];
+                        ppos.x *= scale.x;
+                        ppos.y *= scale.y;
+                        ppos.z *= scale.z;
+                        ppos = (rot * ppos) + pos;
+                        m_matrices[ii].SetTRS(ppos, rot, pscale);
                     }
 
                     MaterialPropertyBlock mpb = null;
@@ -324,12 +335,14 @@ namespace UTJ.Alembic
                 // not use IDs in this case because it's too expensive...
 
                 var matrix = Matrix4x4.identity;
-                matrix.m00 = matrix.m11 = matrix.m22 = m_pointSize;
                 for (int ii = 0; ii < num_instances; ++ii)
                 {
-                    matrix.m03 = points[ii].x;
-                    matrix.m13 = points[ii].y;
-                    matrix.m23 = points[ii].z;
+                    var ppos = points[ii];
+                    ppos.x *= scale.x;
+                    ppos.y *= scale.y;
+                    ppos.z *= scale.z;
+                    ppos = (rot * ppos) + pos;
+                    matrix.SetTRS(ppos, rot, pscale);
 
                     // issue drawcalls
                     for (int si = 0; si < num_submeshes; ++si)
