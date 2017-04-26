@@ -30,13 +30,7 @@
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
         void setup()
         {
-            float size = GetPointSize();
-            float3 pos = GetAlembicPoint();
-
-            unity_ObjectToWorld._11_21_31_41 = float4(size, 0, 0, 0);
-            unity_ObjectToWorld._12_22_32_42 = float4(0, size, 0, 0);
-            unity_ObjectToWorld._13_23_33_43 = float4(0, 0, size, 0);
-            unity_ObjectToWorld._14_24_34_44 = float4(pos, 1);
+            unity_ObjectToWorld = GetPointMatrix();
             unity_WorldToObject = unity_ObjectToWorld;
             unity_WorldToObject._14_24_34 *= -1;
             unity_WorldToObject._11_22_33 = 1.0f / unity_WorldToObject._11_22_33;

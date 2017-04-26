@@ -143,20 +143,29 @@ namespace UTJ.Alembic
 
             bool supportsInstancing = SystemInfo.supportsInstancing;
 #if UNITY_5_6_OR_NEWER
-            int pidPointSize = Shader.PropertyToID("_PointSize");
-            int pidTranslate = Shader.PropertyToID("_Translate");
-            int pidRotate = Shader.PropertyToID("_Rotate");
-            int pidScale = Shader.PropertyToID("_Scale");
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
 #endif
 #if UNITY_5_5_OR_NEWER
             int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
 #endif
+            int pidTranslate = Shader.PropertyToID("_Translate");
+            int pidRotate = Shader.PropertyToID("_Rotate");
+            int pidScale = Shader.PropertyToID("_Scale");
+            int pidPointSize = Shader.PropertyToID("_PointSize");
 
             if (!supportsInstancing && m_instancingMode != InstancingMode.NoInstancing)
             {
                 Debug.LogWarning("AlembicPointsRenderer: Instancing is not supported on this system. fallback to InstancingMode.NoInstancing.");
                 m_instancingMode = InstancingMode.NoInstancing;
+            }
+
+            for (int si = 0; si < num_submeshes; ++si)
+            {
+                var material = materials[si];
+                material.SetVector(pidTranslate, pos);
+                material.SetVector(pidRotate, new Vector4(rot.x, rot.y, rot.z, rot.w));
+                material.SetVector(pidScale, scale);
+                material.SetFloat(pidPointSize, m_pointSize);
             }
 
 #if UNITY_5_6_OR_NEWER
@@ -235,7 +244,6 @@ namespace UTJ.Alembic
 
                     var material = materials[si];
                     material.EnableKeyword(kAlembicProceduralInstancing);
-                    material.SetFloat(pidPointSize, m_pointSize);
                     material.SetBuffer(pidAlembicPoints, m_cbPoints);
                     if (alembicIDsAvailable) { material.SetBuffer(pidAlembicIDs, m_cbIDs); }
                     Graphics.DrawMeshInstancedIndirect(mesh, si, material,

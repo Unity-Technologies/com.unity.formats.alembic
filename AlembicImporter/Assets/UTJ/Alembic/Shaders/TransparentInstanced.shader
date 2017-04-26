@@ -51,9 +51,7 @@
                 UNITY_SETUP_INSTANCE_ID(v);
 
                 float4 vertex = v.vertex;
-                vertex.xyz *= GetPointSize();
-                vertex.xyz += GetAlembicPoint();
-                vertex = mul(UNITY_MATRIX_VP, vertex);
+                vertex = mul(mul(UNITY_MATRIX_VP, GetPointMatrix()), vertex);
 
                 v2f o;
                 o.vertex = vertex;
