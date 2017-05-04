@@ -490,7 +490,7 @@ namespace UTJ.Alembic
             // Find targetted child GameObj
             AlembicTreeNode childTreeNode = null;
             GameObject childGO = null;
-            var childTransf = treeNode.linkedGameObj.transform.FindChild(childName);
+            var childTransf = treeNode.linkedGameObj.transform.Find(childName);
             if (childTransf == null)
             {
                 if (!ic.createMissingNodes)

@@ -31,18 +31,17 @@ namespace UTJ.Alembic
 
         public ClipCaps clipCaps { get { return ClipCaps.None;  } }
 
-        public override PlayableHandle CreatePlayable(PlayableGraph graph, GameObject owner)
+        public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
-            var handle = graph.CreateScriptPlayable<AlembicShotPlayable>();
-
-            var playable = handle.GetObject<AlembicShotPlayable>();
-            m_Stream = m_StreamPlayer.Resolve(graph.resolver);
-            playable.streamPlayer = m_Stream;
-            playable.m_StartTimeOffset = m_StartOffset;
-            playable.m_EndTimeClipOff = m_EndOffset;
-            playable.m_TimeScale = m_TimeScale;
-            playable.m_Cycle = m_Cycle;
-            return handle;
+            var playable = ScriptPlayable<AlembicShotPlayable>.Create(graph);
+            var behaviour = playable.GetBehaviour();
+            m_Stream = m_StreamPlayer.Resolve(graph.GetResolver());
+            behaviour.streamPlayer = m_Stream;
+            behaviour.m_StartTimeOffset = m_StartOffset;
+            behaviour.m_EndTimeClipOff = m_EndOffset;
+            behaviour.m_TimeScale = m_TimeScale;
+            behaviour.m_Cycle = m_Cycle;
+            return playable;
         }
 
         public override double duration

@@ -68,7 +68,7 @@ namespace UTJ.Alembic
 
                         MeshRenderer splitRenderer = null;
 
-                        Transform split = gameObject.transform.FindChild(gameObject.name + "_split_" + submesh.splitIndex);
+                        Transform split = gameObject.transform.Find(gameObject.name + "_split_" + submesh.splitIndex);
 
                         if (split == null)
                         {
@@ -213,7 +213,7 @@ namespace UTJ.Alembic
 
         static GameObject SearchNodeInstance(Transform parent, string name, int instNum, ref int curInst)
         {
-            Transform node = parent.FindChild(name);
+            Transform node = parent.Find(name);
 
             if (node != null)
             {
@@ -264,7 +264,7 @@ namespace UTJ.Alembic
 
                 while (curNode != null && curPath < paths.Length)
                 {
-                    Transform child = curNode.FindChild(paths[curPath]);
+                    Transform child = curNode.Find(paths[curPath]);
 
                     if (child == null)
                     {

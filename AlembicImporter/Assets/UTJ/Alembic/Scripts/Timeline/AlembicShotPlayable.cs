@@ -5,7 +5,7 @@ using UnityEngine.Playables;
 
 namespace UTJ.Alembic
 {
-    public class AlembicShotPlayable : ScriptPlayable
+    public class AlembicShotPlayable : PlayableBehaviour
     {
         public AlembicStreamPlayer streamPlayer { get; set; }
 
@@ -16,9 +16,9 @@ namespace UTJ.Alembic
         public float m_TimeScale;
         public AlembicPlaybackSettings.CycleType m_Cycle = AlembicPlaybackSettings.CycleType.Hold;
 
-        public override void ProcessFrame(FrameData info, object playerData)
+        public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
-            base.ProcessFrame(info, playerData);
+            base.ProcessFrame(playable, info, playerData);
 
             if (streamPlayer == null)
                 return;
@@ -28,7 +28,7 @@ namespace UTJ.Alembic
             streamPlayer.m_PlaybackSettings.m_timeOffset = (float)m_StartTimeOffset;
             streamPlayer.m_PlaybackSettings.m_endTime = (float)streamPlayer.m_PlaybackSettings.m_duration - m_EndTimeClipOff;
             streamPlayer.m_PlaybackSettings.m_timeScale = (float)m_TimeScale;
-            streamPlayer.m_PlaybackSettings.m_Time = (float)handle.time;
+            streamPlayer.m_PlaybackSettings.m_Time = (float)playable.GetTime();
 			streamPlayer.m_PlaybackSettings.m_OverrideTime = true;
             streamPlayer.m_PlaybackSettings.m_preserveStartTime = true;
         }

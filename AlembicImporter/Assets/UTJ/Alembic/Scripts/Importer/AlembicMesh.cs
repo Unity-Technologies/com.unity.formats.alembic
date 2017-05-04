@@ -345,7 +345,7 @@ namespace UTJ.Alembic
                         {
                             string name = AlembicTreeNode.linkedGameObj.name + "_split_" + s;
 
-                            Transform trans = AlembicTreeNode.linkedGameObj.transform.FindChild(name);
+                            Transform trans = AlembicTreeNode.linkedGameObj.transform.Find(name);
 
                             if (trans == null)
                             {
