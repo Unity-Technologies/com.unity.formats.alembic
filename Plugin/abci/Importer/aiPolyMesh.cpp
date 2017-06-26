@@ -4,6 +4,7 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
+#include <unordered_map>
 
 // ---
 
@@ -57,13 +58,13 @@ int Topology::getSplitCount() const
     return (int) m_splits.size();
 }
 
-int Topology::getSplitCount(bool forceRefresh)
+int Topology::getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh)
 {
     if (m_counts && m_indices)
     {
         if (m_faceSplitIndices.size() != m_counts->size() || forceRefresh)
         {
-            updateSplits();
+            updateSplits(meshSample);
         }
     }
     else
@@ -75,7 +76,7 @@ int Topology::getSplitCount(bool forceRefresh)
     return (int) m_splits.size();
 }
 
-void Topology::updateSplits()
+void Topology::updateSplits(aiPolyMeshSample * meshSample)
 {
     DebugLog("Topology::updateSplits()");
     
@@ -83,33 +84,49 @@ void Topology::updateSplits()
     size_t indexOffset = 0;
     size_t ncounts = m_counts->size();
 
-    m_faceSplitIndices.resize(ncounts);
+    m_faceSplitIndices.resize(ncounts); // number of faces
 
     m_splits.clear();
-    m_splits.reserve(1 + m_indices->size() / 65000);
-    m_splits.push_back(SplitInfo());
 
-    SplitInfo *curSplit = &(m_splits.back());
-    
-    for (size_t i=0; i<ncounts; ++i)
+    if (m_vertexSharingEnabled && meshSample != NULL && !meshSample->m_ownTopology) // only fixed topologies get this execution path
     {
-        size_t nv = (size_t) m_counts->get()[i];
+        m_splits.push_back(SplitInfo());
 
-        if (curSplit->vertexCount + nv > 65000)
+        SplitInfo *curSplit = &(m_splits.back());
+
+        for (size_t i = 0; i<ncounts; ++i)
+            m_faceSplitIndices[i] = 0;
+
+        curSplit->lastFace = ncounts-1;
+        curSplit->vertexCount = m_FixedTopoPositionsIndexes.size();
+    }
+    else
+    {
+        m_splits.reserve(1 + m_indices->size() / 65000);
+        m_splits.push_back(SplitInfo());
+
+        SplitInfo *curSplit = &(m_splits.back());
+
+        for (size_t i = 0; i<ncounts; ++i)
         {
-            m_splits.push_back(SplitInfo(i, indexOffset));
-            
-            ++splitIndex;
+            size_t nv = (size_t)m_counts->get()[i];
 
-            curSplit = &(m_splits.back());
+            if (curSplit->vertexCount + nv > 65000)
+            {
+                m_splits.push_back(SplitInfo(i, indexOffset));
+
+                ++splitIndex;
+
+                curSplit = &(m_splits.back());
+            }
+
+            m_faceSplitIndices[i] = splitIndex; // assign a split ID/index to each face
+
+            curSplit->lastFace = i;
+            curSplit->vertexCount += nv;
+
+            indexOffset += nv;
         }
-        
-        m_faceSplitIndices[i] = splitIndex;
-
-        curSplit->lastFace = i;
-        curSplit->vertexCount += nv;
-
-        indexOffset += nv;
     }
 }
 
@@ -127,7 +144,8 @@ int Topology::getVertexBufferLength(int splitIndex) const
 
 int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
                                const aiFacesets &inFacesets,
-                               bool submeshPerUVTile)
+                               bool submeshPerUVTile,
+                               aiPolyMeshSample* sample)
 {
     DebugLog("Topology::prepareSubmeshes()");
     
@@ -208,7 +226,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         }
     }
 
-    int nsplits = getSplitCount(false);
+    int nsplits = getSplitCount(sample, false);
 
     if (facesets.empty() && nsplits == 1)
     {
@@ -283,7 +301,11 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
                 curMesh = &(m_submeshes.back());
 
                 curMesh->index = splitSubmeshIndices[splitIndex]++;
-                curMesh->vertexIndices.reserve(m_indices->size());
+
+                if(m_vertexSharingEnabled)
+                    curMesh->vertexIndices.reserve(m_FixedTopoPositionsIndexes.size());
+                else
+                    curMesh->vertexIndices.reserve(m_indices->size());
 
                 split.submeshCount = splitSubmeshIndices[splitIndex];
             }
@@ -295,9 +317,19 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
             curMesh->faces.push_back(i);
             curMesh->triangleCount += (nv - 2);
 
-            for (int j=0; j<nv; ++j, ++vertexIndex)
+            if (m_vertexSharingEnabled)
             {
-                curMesh->vertexIndices.push_back(vertexIndex - int(split.indexOffset));
+                for (int j = 0; j<nv; ++j, ++vertexIndex)
+                {
+                    curMesh->vertexIndices.push_back( (int)( m_FaceIndexingReindexed[vertexIndex] - split.indexOffset) );
+                }
+            }
+            else
+            {
+                for (int j=0; j<nv; ++j, ++vertexIndex)
+                {
+                    curMesh->vertexIndices.push_back(vertexIndex - int(split.indexOffset));
+                }
             }
         }
 
@@ -324,10 +356,11 @@ int Topology::getSplitSubmeshCount(int splitIndex) const
 
 // ---
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo)
+aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo, bool  vertexSharingEnabled)
     : super(schema)
     , m_topology(topo)
     , m_ownTopology(ownTopo)
+    , m_vertexSharingEnabled(vertexSharingEnabled)
 {
 }
 
@@ -718,11 +751,11 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
     m_config = config;   
 }
 
-void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const
+void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const
 {
     DebugLog("aiPolyMeshSample::getSummary(forceRefresh=%s)", forceRefresh ? "true" : "false");
     
-    summary.splitCount = m_topology->getSplitCount(forceRefresh);
+    summary.splitCount = m_topology->getSplitCount(sample, forceRefresh);
 
     summary.hasNormals = hasNormals();
 
@@ -1123,12 +1156,27 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                data.normals[k] = normals[nIndices[o]];
-                                data.normals[k].x *= xScale;
-                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[k].x *= xScale;
-                                data.uvs[k] = uvs[uvIndices[o]];
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                                {
+                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                    data.normals[dstNdx] = normals[nIndices[o]];
+                                    data.normals[dstNdx].x *= xScale;
+                                    data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                                    data.tangents[dstNdx].x *= xScale;
+                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
+                                }
+                                else
+                                {
+                                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                                    data.normals[k] = normals[nIndices[o]];
+                                    data.normals[k].x *= xScale;
+                                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                                    data.tangents[k].x *= xScale;
+                                    data.uvs[k] = uvs[uvIndices[o]];
+                                }
                             }
                         }
                     }
@@ -1139,10 +1187,23 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                data.normals[k] = normals[nIndices[o]];
-                                data.normals[k].x *= xScale;
-                                data.uvs[k] = uvs[uvIndices[o]];
+                                if( m_topology->m_FixedTopoPositionsIndexes.size())
+                                {
+                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                    data.normals[dstNdx] = normals[nIndices[o]];
+                                    data.normals[dstNdx].x *= xScale;
+                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
+                                }
+                                else
+                                {
+                                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                                    data.normals[k] = normals[nIndices[o]];
+                                    data.normals[k].x *= xScale;
+                                    data.uvs[k] = uvs[uvIndices[o]];
+                                }
                             }
                         }
                     }
@@ -1154,11 +1215,25 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                            data.normals[k] = normals[nIndices[o]];
-                            data.normals[k].x *= xScale;
-                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                            data.tangents[k].x *= xScale;
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = normals[nIndices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                                data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[dstNdx].x *= xScale;
+                            }
+                            else
+                            {
+                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                                data.normals[k] = normals[nIndices[o]];
+                                data.normals[k].x *= xScale;
+                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[k].x *= xScale;
+                            }
                         }
                     }
                 }
@@ -1169,9 +1244,21 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                            data.normals[k] = normals[nIndices[o]];
-                            data.normals[k].x *= xScale;
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = normals[nIndices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                            }
+                            else
+                            {
+                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                                data.normals[k] = normals[nIndices[o]];
+                                data.normals[k].x *= xScale;
+                            }
                         }
                     }
                 }
@@ -1190,13 +1277,28 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                int v = indices[o];
-                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                data.normals[k] = normals[v];
-                                data.normals[k].x *= xScale;
-                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[k].x *= xScale;
-                                data.uvs[k] = uvs[uvIndices[o]];
+                                if (m_topology->m_FixedTopoPositionsIndexes.size())
+                                {
+                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                    data.normals[dstNdx] = normals[indices[o]];
+                                    data.normals[dstNdx].x *= xScale;
+                                    data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                                    data.tangents[dstNdx].x *= xScale;
+                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
+                                }
+                                else
+                                {
+                                    int v = indices[o];
+                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                    data.normals[k] = normals[v];
+                                    data.normals[k].x *= xScale;
+                                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                                    data.tangents[k].x *= xScale;
+                                    data.uvs[k] = uvs[uvIndices[o]];
+                                }
                             }
                         }
                     }
@@ -1207,11 +1309,24 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             int nv = counts[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k)
                             {
-                                int v = indices[o];
-                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                data.normals[k] = normals[v];
-                                data.normals[k].x *= xScale;
-                                data.uvs[k] = uvs[uvIndices[o]];
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                                {
+                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                    data.normals[dstNdx] = normals[indices[o]];
+                                    data.normals[dstNdx].x *= xScale;
+                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
+                                }
+                                else
+                                {
+                                    int v = indices[o];
+                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                    data.normals[k] = normals[v];
+                                    data.normals[k].x *= xScale;
+                                    data.uvs[k] = uvs[uvIndices[o]];
+                                }
                             }
                         }
                     }
@@ -1223,12 +1338,26 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            int v = indices[o];
-                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                            data.normals[k] = normals[v];
-                            data.normals[k].x *= xScale;
-                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                            data.tangents[k].x *= xScale;
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = normals[indices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                                data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[dstNdx].x *= xScale;
+                            }
+                            else
+                            {
+                                int v = indices[o];
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                data.normals[k] = normals[v];
+                                data.normals[k].x *= xScale;
+                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[k].x *= xScale;
+                            }
                         }
                     }
                 }
@@ -1239,10 +1368,22 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            int v = indices[o];
-                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                            data.normals[k] = normals[v];
-                            data.normals[k].x *= xScale;
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = normals[indices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                            }
+                            else
+                            {
+                                int v = indices[o];
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                data.normals[k] = normals[v];
+                                data.normals[k].x *= xScale;
+                            }
                         }
                     }
                 }
@@ -1262,13 +1403,29 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            int v = indices[o];
-                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                            data.normals[k] = m_smoothNormals[v];
-                            data.normals[k].x *= xScale;
-                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                            data.tangents[k].x *= xScale;
-                            data.uvs[k] = uvs[uvIndices[o]];
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = m_smoothNormals[indices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                                data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[dstNdx].x *= xScale;
+                                data.uvs[dstNdx] = uvs[uvIndices[o]];
+                            }
+                            else
+                            {
+                                int v = indices[o];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                data.normals[k] = m_smoothNormals[v];
+                                data.normals[k].x *= xScale;
+                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                                data.tangents[k].x *= xScale;
+                                data.uvs[k] = uvs[uvIndices[o]];
+                            }
                         }
                     }
                 }
@@ -1279,11 +1436,24 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         int nv = counts[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k)
                         {
-                            int v = indices[o];
-                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                            data.normals[k] = m_smoothNormals[v];
-                            data.normals[k].x *= xScale;
-                            data.uvs[k] = uvs[uvIndices[o]];
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                            {
+                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                                data.normals[dstNdx] = m_smoothNormals[indices[o]];
+                                data.normals[dstNdx].x *= xScale;
+                                data.uvs[dstNdx] = uvs[uvIndices[o]];
+                            }
+                            else
+                            {
+                                int v = indices[o];
+                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                                data.normals[k] = m_smoothNormals[v];
+                                data.normals[k].x *= xScale;
+                                data.uvs[k] = uvs[uvIndices[o]];
+                            }
                         }
                     }
                 }
@@ -1295,12 +1465,26 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        int v = indices[o];
-                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                        data.normals[k] = m_smoothNormals[v];
-                        data.normals[k].x *= xScale;
-                        data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                        data.tangents[k].x *= xScale;
+                        if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                        {
+                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                            data.normals[dstNdx] = m_smoothNormals[indices[o]];
+                            data.normals[dstNdx].x *= xScale;
+                            data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                            data.tangents[dstNdx].x *= xScale;
+                        }
+                        else
+                        {
+                            int v = indices[o];
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                            data.normals[k] = m_smoothNormals[v];
+                            data.normals[k].x *= xScale;
+                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                            data.tangents[k].x *= xScale;
+                        }
                     }
                 }
             }
@@ -1311,10 +1495,22 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        int v = indices[o];
-                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                        data.normals[k] = m_smoothNormals[v];
-                        data.normals[k].x *= xScale;
+                        if ( m_topology->m_FixedTopoPositionsIndexes.size())
+                        {
+                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                            data.normals[dstNdx] = m_smoothNormals[indices[o]];
+                            data.normals[dstNdx].x *= xScale;
+                        }
+                        else
+                        {
+                            int v = indices[o];
+                            UPDATE_POSITIONS_AND_BOUNDS(v, k);
+                            data.normals[k] = m_smoothNormals[v];
+                            data.normals[k].x *= xScale;
+                        }
                     }
                 }
             }
@@ -1334,10 +1530,23 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                        data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                        data.tangents[k].x *= xScale;
-                        data.uvs[k] = uvs[uvIndices[o]];
+                        if (m_topology->m_FixedTopoPositionsIndexes.size())
+                        {
+                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                            data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                            data.tangents[dstNdx].x *= xScale;
+                            data.uvs[dstNdx] = uvs[uvIndices[o]];
+                        }
+                        else
+                        {
+                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                            data.tangents[k].x *= xScale;
+                            data.uvs[k] = uvs[uvIndices[o]];
+                        }
                     }
                 }
             }
@@ -1348,8 +1557,19 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     int nv = counts[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k)
                     {
-                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                        data.uvs[k] = uvs[uvIndices[o]];
+                        if (m_topology->m_FixedTopoPositionsIndexes.size())
+                        {
+                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                            data.uvs[dstNdx] = uvs[uvIndices[o]];
+                        }
+                        else
+                        {
+                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                            data.uvs[k] = uvs[uvIndices[o]];
+                        }
                     }
                 }
             }
@@ -1361,9 +1581,21 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
-                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                    data.tangents[k].x *= xScale;
+                    if (m_topology->m_FixedTopoPositionsIndexes.size())
+                    {
+                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                        data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
+                        data.tangents[dstNdx].x *= xScale;
+                    }
+                    else
+                    {
+                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                        data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
+                        data.tangents[k].x *= xScale;
+                    }
                 }
             }
         }
@@ -1374,7 +1606,17 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                 int nv = counts[i];
                 for (int j = 0; j < nv; ++j, ++o, ++k)
                 {
-                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                    if (m_topology->m_FixedTopoPositionsIndexes.size())
+                    {
+                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
+                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
+
+                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
+                    }
+                    else
+                    {
+                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
+                    }
                 }
             }
         }
@@ -1386,11 +1628,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     data.size = bbmax - bbmin;
 }
 
-int aiPolyMeshSample::prepareSubmeshes(const aiFacesets &inFacesets)
+int aiPolyMeshSample::prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets)
 {
     DebugLog("aiPolyMeshSample::prepateSubmeshes()");
     
-    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, m_config.submeshPerUVTile);
+    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, m_config.submeshPerUVTile, sample);
 
     m_curSubmesh = m_topology->submeshBegin();
 
@@ -1548,11 +1790,11 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     {
         if (dontUseCache() || !m_varyingTopology)
         {
-            sample = new Sample(this, &m_sharedTopology, false);
+            sample = new Sample(this, &m_sharedTopology, false, m_config.shareVertices && !m_varyingTopology);
         }
         else
         {
-            sample = new Sample(this, new Topology(), true);
+            sample = new Sample(this, new Topology(), true, m_config.shareVertices && !m_varyingTopology);
         }
     }
     else
@@ -1573,6 +1815,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     Sample *ret = newSample();
 
     topologyChanged = m_varyingTopology;
+    ret->m_topology->EnableVertexSharing(m_config.shareVertices && !m_varyingTopology);
 
     if (!ret->m_topology->m_counts || m_varyingTopology)
     {
@@ -1681,7 +1924,92 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
         }
     }
 
+
+    if (m_config.shareVertices && ret != NULL && !ret->m_ownTopology && topologyChanged)
+        GenerateVerticesToFacesLookup(ret);
+
     return ret;
+}
+
+// generates two lookup tables:
+//  m_FaceIndexingReindexed         : for each face in the abc sample, hold an index value to lookup in m_FixedTopoPositionsIndexes, that will give final position index.
+//  m_FixedTopoPositionsIndexes     : list of resulting positions. value is index into the abc "position" vector. size is greter than or equal to "position" array.
+void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
+{
+    auto  faces = sample->m_topology->m_counts;
+    auto * facesIndices = sample->m_topology->m_indices->get();
+    size_t totalFaces = faces->size();
+
+    // 1st, figure out which face uses wich vertices (for sharing identification)
+    std::unordered_map< size_t, std::vector<size_t>> indexesOfFacesValues;
+    size_t facesIndicesCursor = 0;
+    for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+    {
+        size_t faceSize = (size_t)(faces->get()[faceIndex]);
+        for (size_t i = 0; i < faceSize; ++i, ++facesIndicesCursor)
+            indexesOfFacesValues[ facesIndices[facesIndicesCursor] ].push_back(facesIndicesCursor);
+    }
+
+    // 2nd, figure out which vertex can be merged, which cannot.
+    // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
+    std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
+
+    const abcV3 * normals = sample->m_normals.getVals()->get();
+    bool normalsIndexed = (sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
+    const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : NULL;
+
+    const auto &uvVals = *(sample->m_uvs.getVals());
+    const auto &uvIdxs = *(sample->m_uvs.getIndices());
+
+    sample->m_topology->m_FixedTopoPositionsIndexes.clear();
+    sample->m_topology->m_FaceIndexingReindexed.clear();
+    sample->m_topology->m_FaceIndexingReindexed.resize( sample->m_topology->m_indices->size() );
+    sample->m_topology->m_FixedTopoPositionsIndexes.reserve(sample->m_positions->size());
+
+    while (itr != indexesOfFacesValues.end())
+    {
+        size_t faceValueIndex = itr->first;
+        std::vector<size_t>::iterator indexItr = itr->second.begin();
+        const Abc::V2f * prevUV = NULL;
+        const abcV3 * prevN = NULL;
+        bool share = true;
+        do
+        {
+            size_t index = facesIndices[faceValueIndex];
+            // same Normal?
+            const abcV3 & N = normals[Nidxs ? Nidxs[index] : index];
+            if (prevN == NULL)
+                prevN = &N;
+            else
+                share = N == *prevN;
+
+            // Same UV?
+            const Abc::V2f & uv = uvVals[uvIdxs[index]];
+            if (prevUV == NULL)
+                prevUV = &uv;
+            else
+                share = uv == *prevUV;
+        }
+        while (share && ++indexItr != itr->second.end());
+
+        // Verdict is in for this vertex.
+        if (share)
+            sample->m_topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
+
+        indexItr = itr->second.begin();
+        while( indexItr != itr->second.end() )
+        {
+            if (!share)
+                sample->m_topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
+
+            sample->m_topology->m_FaceIndexingReindexed[*indexItr] = sample->m_topology->m_FixedTopoPositionsIndexes.size() - 1;
+
+            ++indexItr;
+        }
+        ++itr;
+    }
+
+    // We now have a lookup for face value indexes that re-routes to shared indexes when possible!
 }
 
 int aiPolyMesh::getTopologyVariance() const

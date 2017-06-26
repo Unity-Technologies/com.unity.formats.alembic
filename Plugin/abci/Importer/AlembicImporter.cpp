@@ -257,7 +257,7 @@ abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSu
 {
     if (sample)
     {
-        sample->getSummary(forceRefresh, *summary);
+        sample->getSummary(forceRefresh, *summary, sample);
     }
 }
 
@@ -298,7 +298,7 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex
 
 abciAPI int aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets)
 {
-    return (sample ? sample->prepareSubmeshes(*facesets) : 0);
+    return (sample ? sample->prepareSubmeshes(sample, *facesets) : 0);
 }
 
 abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex)

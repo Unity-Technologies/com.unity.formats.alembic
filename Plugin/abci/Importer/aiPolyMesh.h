@@ -43,6 +43,8 @@ struct SplitInfo
     size_t indexOffset;
     size_t vertexCount;
     size_t submeshCount;
+    std::unordered_map<size_t, size_t> verticiesXRefs; // org face index (not it's refred value), index in position vector
+    size_t uniqueValues;
 
     inline SplitInfo(size_t ff=0, size_t io=0)
         : firstFace(ff)
@@ -136,13 +138,13 @@ public:
 
     int getTriangulatedIndexCount() const;
     int getSplitCount() const;
-    int getSplitCount(bool forceRefresh);
+    int getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh);
 
     
-    void updateSplits();
+    void updateSplits(aiPolyMeshSample * meshSample);
 
     int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile);
+    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile, aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
@@ -150,6 +152,8 @@ public:
 
     inline Submeshes::const_iterator submeshBegin() const { return m_submeshes.begin(); }
     inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
+
+    inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
 
 public:
     Abc::Int32ArraySamplePtr m_indices;
@@ -162,6 +166,11 @@ public:
 
     std::vector<int> m_tangentIndices;
     size_t m_tangentsCount;
+
+    std::vector<size_t> m_FixedTopoPositionsIndexes;
+    std::vector<size_t> m_FaceIndexingReindexed;
+
+    bool m_vertexSharingEnabled;
 };
 
 // ---
@@ -170,7 +179,7 @@ class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo);
+    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo, bool vertexSharingEnabled );
     virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
@@ -181,7 +190,7 @@ public:
     bool smoothNormalsRequired() const;
     bool tangentsRequired() const;
 
-    void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
+    void getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
     void getDataPointer(aiPolyMeshData &data);
     void copyData(aiPolyMeshData &data);
     void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
@@ -193,7 +202,7 @@ public:
     int getVertexBufferLength(int splitIndex) const;
     void fillVertexBuffer(int splitIndex, aiPolyMeshData &data);
 
-    int prepareSubmeshes(const aiFacesets &inFacesets);
+    int prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets);
     int getSplitSubmeshCount(int splitIndex) const;
     bool getNextSubmesh(aiSubmeshSummary &summary);
     void fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const;
@@ -212,6 +221,7 @@ public:
     std::vector<abcV4> m_tangents;
 
     Submeshes::iterator m_curSubmesh;
+    bool m_vertexSharingEnabled;
 };
 
 
@@ -239,6 +249,7 @@ public:
 
 private:
     void updatePeakIndexCount() const;
+    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample);
 
 private:
     mutable int m_peakIndexCount;
