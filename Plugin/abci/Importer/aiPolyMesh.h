@@ -154,6 +154,7 @@ public:
     inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
     inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
+    inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
 
 public:
     Abc::Int32ArraySamplePtr m_indices;
@@ -171,6 +172,8 @@ public:
     std::vector<size_t> m_FaceIndexingReindexed;
 
     bool m_vertexSharingEnabled;
+    bool m_FreshlyReadTopologyData;
+    bool m_TreatVertexExtraDataAsStatic;
 };
 
 // ---

@@ -114,6 +114,7 @@ struct aiConfig
     int32_t cacheSamples = 0;
     bool submeshPerUVTile = true;
     bool shareVertices = false;
+    bool treatVertexExtraDataAsStatic = false;
 };
 
 struct aiTimeSamplingData
