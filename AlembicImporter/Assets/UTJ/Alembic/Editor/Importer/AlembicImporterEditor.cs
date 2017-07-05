@@ -22,6 +22,8 @@ namespace UTJ.Alembic
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_swapHandedness), "Swap handedness", "");
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_swapFaceWinding), "Swap face winding", "");
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_submeshPerUVTile), "Submesh per UV tile", "");
+            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_shareVertices), "Merge Vertices (experimental)", "Allow vertex sharing between faces when possible.");
+            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_treatVertexExtraDataAsStatics), "Vertex extra data is static (exp.)", "When set, UV's/normals/tangents are fetched from file only on topology change event.");
 
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_normalsMode), "Normals mode", "", settings.m_normalsMode.GetType());
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_tangentsMode), "Tangent mode", "", settings.m_tangentsMode.GetType());

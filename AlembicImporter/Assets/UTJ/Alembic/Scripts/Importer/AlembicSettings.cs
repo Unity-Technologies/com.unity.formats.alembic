@@ -28,6 +28,8 @@ namespace UTJ.Alembic
         [SerializeField] public bool m_swapHandedness = true;
         [SerializeField] public bool m_swapFaceWinding = false;
         [SerializeField] public bool m_submeshPerUVTile = false;
+        [SerializeField] public bool m_shareVertices = true;
+        [SerializeField] public bool m_treatVertexExtraDataAsStatics = true;
         [SerializeField] public bool m_importMeshes = true;
         [SerializeField] public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
         [SerializeField] public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;

@@ -86,9 +86,19 @@ namespace UTJ.Alembic
             });
             AlembicUI.AddHorzLine(() =>
             {
-                m_ImportSettings.m_submeshPerUVTile = EditorGUILayout.Toggle("Submesh per UV tile",
-                    m_ImportSettings.m_submeshPerUVTile);
+                m_ImportSettings.m_submeshPerUVTile = EditorGUILayout.Toggle("Submesh per UV tile", m_ImportSettings.m_submeshPerUVTile);
             });
+
+            AlembicUI.AddHorzLine(() =>
+            {
+                m_ImportSettings.m_shareVertices = EditorGUILayout.Toggle("Merge Vertices (experimental)", m_ImportSettings.m_shareVertices);
+            });
+
+            AlembicUI.AddHorzLine(() =>
+            {
+                m_ImportSettings.m_treatVertexExtraDataAsStatics = EditorGUILayout.Toggle("Vertex extra data is static (experimental)", m_ImportSettings.m_treatVertexExtraDataAsStatics);
+            });
+
             AlembicUI.AddHorzLine(() =>
             {
                 string[] enumNamesList = System.Enum.GetNames(typeof(AbcAPI.aiNormalsMode));

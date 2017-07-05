@@ -41,6 +41,7 @@ namespace UTJ.Alembic
         private void AbcSyncConfig()
         {
             m_config.swapHandedness = ImportSettings.m_swapHandedness;
+            m_config.shareVertices = ImportSettings.m_shareVertices;
             m_config.swapFaceWinding = ImportSettings.m_swapFaceWinding;
             m_config.normalsMode = ImportSettings.m_normalsMode;
             m_config.tangentsMode = ImportSettings.m_tangentsMode;
@@ -50,6 +51,7 @@ namespace UTJ.Alembic
             m_config.useThreads = ImportSettings.m_useThreads;
             m_config.cacheSamples = ImportSettings.m_sampleCacheSize;
             m_config.submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
+            m_config.treatVertexExtraDataAsStatics = ImportSettings.m_treatVertexExtraDataAsStatics;
 
             if (AbcIsValid())
             {

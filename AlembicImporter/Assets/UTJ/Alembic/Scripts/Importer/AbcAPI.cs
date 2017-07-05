@@ -136,6 +136,8 @@ namespace UTJ.Alembic
             public Bool useThreads;
             public int cacheSamples;
             public Bool submeshPerUVTile;
+            public Bool shareVertices;
+            public Bool treatVertexExtraDataAsStatics;
 
             public void SetDefaults()
             {
@@ -149,6 +151,8 @@ namespace UTJ.Alembic
                 useThreads = true;
                 cacheSamples = 0;
                 submeshPerUVTile = false;
+                shareVertices = true;
+                treatVertexExtraDataAsStatics = true;
             }
         }
 
