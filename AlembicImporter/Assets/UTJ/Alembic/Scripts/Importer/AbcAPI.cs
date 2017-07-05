@@ -148,7 +148,7 @@ namespace UTJ.Alembic
                 forceUpdate = false;
                 useThreads = true;
                 cacheSamples = 0;
-                submeshPerUVTile = true;
+                submeshPerUVTile = false;
             }
         }
 

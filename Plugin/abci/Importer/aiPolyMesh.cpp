@@ -1706,12 +1706,25 @@ void aiPolyMeshSample::fillSubmeshIndices(const aiSubmeshSummary &summary, aiSub
                 int nv = counts[i];
                 
                 int nt = nv - 2;
-                for (int ti=0; ti<nt; ++ti)
+                if (m_topology->m_FixedTopoPositionsIndexes.size() > 0)
                 {
-                    data.indices[offset + 0] = index;
-                    data.indices[offset + 1] = index + ti + i1;
-                    data.indices[offset + 2] = index + ti + i2;
-                    offset += 3;
+                    for (int ti = 0; ti<nt; ++ti)
+                    {
+                        data.indices[offset + 0] = m_topology->m_FaceIndexingReindexed[index];
+                        data.indices[offset + 1] = m_topology->m_FaceIndexingReindexed[index + ti + i1];
+                        data.indices[offset + 2] = m_topology->m_FaceIndexingReindexed[index + ti + i2];
+                        offset += 3;
+                    }
+                }
+                else
+                {
+                    for (int ti = 0; ti<nt; ++ti)
+                    {
+                        data.indices[offset + 0] = index;
+                        data.indices[offset + 1] = index + ti + i1;
+                        data.indices[offset + 2] = index + ti + i2;
+                        offset += 3;
+                    }
                 }
 
                 index += nv;
@@ -1950,7 +1963,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     auto * facesIndices = sample->m_topology->m_indices->get();
     size_t totalFaces = faces->size();
 
-    // 1st, figure out which face uses wich vertices (for sharing identification)
+    // 1st, figure out which face uses which vertices (for sharing identification)
     std::unordered_map< size_t, std::vector<size_t>> indexesOfFacesValues;
     size_t facesIndicesCursor = 0;
     for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
@@ -1962,8 +1975,6 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
 
     // 2nd, figure out which vertex can be merged, which cannot.
     // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
-    std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
-
     const abcV3 * normals = sample->m_normals.getVals()->get();
     bool normalsIndexed = (sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
     const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : NULL;
@@ -1977,6 +1988,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     sample->m_topology->m_FixedTopoPositionsIndexes.reserve(sample->m_positions->size());
     sample->m_topology->m_FreshlyReadTopologyData = true;
 
+    std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
     while (itr != indexesOfFacesValues.end())
     {
         size_t faceValueIndex = itr->first;
