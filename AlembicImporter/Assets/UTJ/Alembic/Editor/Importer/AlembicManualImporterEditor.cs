@@ -15,7 +15,7 @@ namespace UTJ.Alembic
         private bool m_GeneratePrefab = true;
 
 
-#if !UNITY_5_7_OR_NEWER && !ENABLE_SCRIPTED_IMPORTERS
+#if !UNITY_2017_1_OR_NEWER && !ENABLE_SCRIPTED_IMPORTERS
 
         [MenuItem("Assets/Alembic/Import asset...")]
 #endif
