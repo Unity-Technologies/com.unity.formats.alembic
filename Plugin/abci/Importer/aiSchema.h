@@ -134,7 +134,7 @@ public:
             readConfig();
         }
 
-        Sample *sample = 0;
+        Sample *sample = NULL;
         bool topologyChanged = false;
         int64_t sampleIndex = getSampleIndex(ss);
         

@@ -1975,8 +1975,8 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
 
     // 2nd, figure out which vertex can be merged, which cannot.
     // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
-    const abcV3 * normals = sample->m_normals.getVals()->get();
-    bool normalsIndexed = (sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
+    const abcV3 * normals = sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : NULL;  
+    bool normalsIndexed = normals && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
     const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : NULL;
 
     const auto &uvVals = *(sample->m_uvs.getVals());
@@ -2000,11 +2000,14 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
         {
             size_t index = facesIndices[faceValueIndex];
             // same Normal?
-            const abcV3 & N = normals[Nidxs ? Nidxs[index] : index];
-            if (prevN == NULL)
-                prevN = &N;
-            else
-                share = N == *prevN;
+            if( normals )
+            {
+                const abcV3 & N = normals[Nidxs ? Nidxs[index] : index];
+                if (prevN == NULL)
+                    prevN = &N;
+                else
+                    share = N == *prevN;
+            }
 
             // Same UV?
             const Abc::V2f & uv = uvVals[uvIdxs[index]];
