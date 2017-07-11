@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextureWriter", "Tools\Text
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "setup", "setup.vcxproj", "{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshUtils", "MeshUtils.vcxproj", "{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -46,6 +48,14 @@ Global
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|Win32.ActiveCfg = Master|Win32
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|x64.ActiveCfg = Master|x64
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|x64.Build.0 = Master|x64
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Debug|Win32.Build.0 = Debug|Win32
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Debug|x64.ActiveCfg = Debug|x64
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Debug|x64.Build.0 = Debug|x64
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Master|Win32.ActiveCfg = Master|Win32
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Master|Win32.Build.0 = Master|Win32
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Master|x64.ActiveCfg = Master|x64
+		{FD3FE1FF-ABE5-40DB-B867-144E9DD9B23C}.Master|x64.Build.0 = Master|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -72,28 +72,16 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\include;external\include\OpenEXR;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\win64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
-    <IncludePath>$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
-    <IncludePath>$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)external\glew\include;$(SolutionDir)external\ilmbase\include\OpenEXR;$(ProjectDir)Common;$(ProjectDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\include;external\include\OpenEXR;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\win32;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

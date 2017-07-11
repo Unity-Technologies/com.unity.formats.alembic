@@ -73,6 +73,9 @@
     <ClInclude Include="abci\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="MeshUtils.vcxproj">
+      <Project>{fd3fe1ff-abe5-40db-b867-144e9dd9b23c}</Project>
+    </ProjectReference>
     <ProjectReference Include="setup.vcxproj">
       <Project>{1c5de91b-7ae9-4304-9fa1-0de1aba8c02d}</Project>
     </ProjectReference>
@@ -105,27 +108,15 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\include;external\include\OpenEXR;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\win64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\include;external\include\OpenEXR;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\libs\win32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
