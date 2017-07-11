@@ -18,11 +18,6 @@ namespace UTJ.Alembic
     {
         #region impl
 
-        public static IntPtr GetArrayPtr(Array v)
-        {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(v, 0);
-        }
-
         public static void CaptureTransform(
             AbcAPI.aeObject abc, Transform trans,
             bool inherits, bool invertForward, bool scale)
@@ -66,34 +61,44 @@ namespace UTJ.Alembic
 
         public class MeshBuffer
         {
-            public int[] indices;
-            public Vector3[] vertices;
-            public Vector3[] normals;
-            public Vector2[] uvs;
+            public PinnedList<int> indices = new PinnedList<int>();
+            public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
+            public PinnedList<Vector3> normals = new PinnedList<Vector3>();
+            public PinnedList<Vector2> uvs = new PinnedList<Vector2>();
+
+            public void Clear()
+            {
+                indices.Clear();
+                vertices.Clear();
+                normals.Clear();
+                uvs.Clear();
+            }
         }
 
         public static void CaptureMesh(AbcAPI.aeObject abc, Mesh mesh, Cloth cloth, MeshBuffer dst_buf)
         {
-            dst_buf.indices = mesh.triangles;
-            dst_buf.uvs = mesh.uv;
+            dst_buf.Clear();
+            dst_buf.indices.LockList(ls => mesh.GetTriangles(ls, 0));
+            dst_buf.uvs.LockList(ls => mesh.GetUVs(0, ls));
+
             if (cloth == null)
             {
-                dst_buf.vertices = mesh.vertices;
-                dst_buf.normals = mesh.normals;
+                dst_buf.vertices.LockList(ls => mesh.GetVertices(ls));
+                dst_buf.normals.LockList(ls => mesh.GetNormals(ls));
             }
             else
             {
-                dst_buf.vertices = cloth.vertices;
-                dst_buf.normals = cloth.normals;
+                dst_buf.vertices.Assign(cloth.vertices);
+                dst_buf.normals.Assign(cloth.normals);
             }
 
             var data = new AbcAPI.aePolyMeshData();
-            data.indices = GetArrayPtr(dst_buf.indices);
-            data.positions = GetArrayPtr(dst_buf.vertices);
-            if(dst_buf.normals != null) { data.normals = GetArrayPtr(dst_buf.normals); }
-            if(dst_buf.uvs != null)     { data.uvs = GetArrayPtr(dst_buf.uvs); }
-            data.positionCount = dst_buf.vertices.Length;
-            data.indexCount = dst_buf.indices.Length;
+            data.indices = dst_buf.indices;
+            data.positions = dst_buf.vertices;
+            data.normals = dst_buf.normals;
+            data.uvs = dst_buf.uvs;
+            data.positionCount = dst_buf.vertices.Count;
+            data.indexCount = dst_buf.indices.Count;
 
             AbcAPI.aePolyMeshWriteSample(abc, ref data);
         }
@@ -254,8 +259,8 @@ namespace UTJ.Alembic
             AbcAPI.aeProperty m_prop_rotatrions;
 
             ParticleSystem.Particle[] m_buf_particles;
-            Vector3[] m_buf_positions;
-            Vector4[] m_buf_rotations;
+            PinnedList<Vector3> m_buf_positions = new PinnedList<Vector3>();
+            PinnedList<Vector4> m_buf_rotations = new PinnedList<Vector4>();
 
             public ParticleCapturer(ComponentCapturer parent, ParticleSystem target)
                 : base(parent)
@@ -280,14 +285,14 @@ namespace UTJ.Alembic
                 if (m_buf_particles == null)
                 {
                     m_buf_particles = new ParticleSystem.Particle[count_max];
-                    m_buf_positions = new Vector3[count_max];
-                    m_buf_rotations = new Vector4[count_max];
+                    m_buf_positions.Resize(count_max);
+                    m_buf_rotations.Resize(count_max);
                 }
                 else if (m_buf_particles.Length != count_max)
                 {
                     Array.Resize(ref m_buf_particles, count_max);
-                    Array.Resize(ref m_buf_positions, count_max);
-                    Array.Resize(ref m_buf_rotations, count_max);
+                    m_buf_positions.Resize(count_max);
+                    m_buf_rotations.Resize(count_max);
                 }
 
                 // copy particle positions & rotations to buffer
@@ -298,16 +303,16 @@ namespace UTJ.Alembic
                 }
                 for (int i = 0; i < count; ++i)
                 {
-                    m_buf_rotations[i] = m_buf_particles[i].axisOfRotation;
-                    m_buf_rotations[i].w = m_buf_particles[i].rotation;
+                    var a = m_buf_particles[i].axisOfRotation;
+                    m_buf_rotations[i].Set(a.x, a.y, a.z, m_buf_particles[i].rotation);
                 }
 
                 // write!
                 var data = new AbcAPI.aePointsData();
-                data.positions = GetArrayPtr(m_buf_positions);
+                data.positions = m_buf_positions;
                 data.count = count;
                 AbcAPI.aePointsWriteSample(m_abc, ref data);
-                AbcAPI.aePropertyWriteArraySample(m_prop_rotatrions, GetArrayPtr(m_buf_rotations), count);
+                AbcAPI.aePropertyWriteArraySample(m_prop_rotatrions, m_buf_rotations, count);
             }
         }
 

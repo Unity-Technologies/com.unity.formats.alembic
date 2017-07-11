@@ -151,7 +151,7 @@ namespace UTJ.Alembic
         #endregion
 
 
-        public PinnedList(int size)
+        public PinnedList(int size = 0)
         {
             m_data = new T[size];
             m_list = ListCreateIntrusive(m_data);
@@ -171,7 +171,8 @@ namespace UTJ.Alembic
         }
 
 
-        public int Length { get { return m_data.Length; } }
+        public int Capacity { get { return m_data.Length; } }
+        public int Count { get { return m_list.Count; } }
         public T this[int i]
         {
             get { return m_data[i]; }
@@ -179,7 +180,7 @@ namespace UTJ.Alembic
         }
         public T[] Array { get { return m_data; } }
         public List<T> List { get { return m_list; } }
-        public IntPtr Pointer { get { return m_data.Length == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
+        public IntPtr Pointer { get { return Count == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
 
         public void LockList(Action<List<T>> body)
         {
@@ -192,8 +193,6 @@ namespace UTJ.Alembic
 
         public void Resize(int size)
         {
-            if (size == m_data.Length) return;
-
             if(size > m_data.Length)
             {
                 LockList(l => {
@@ -205,8 +204,6 @@ namespace UTJ.Alembic
 
         public void ResizeDiscard(int size)
         {
-            if (size == m_data.Length) return;
-
             if (size > m_data.Length)
             {
                 if (m_gch.IsAllocated)
@@ -227,15 +224,22 @@ namespace UTJ.Alembic
                 ListSetCount(m_list, 0);
         }
 
-        public PinnedList<T> Clone() { return new PinnedList<T>(m_list, true); }
-        public bool Assign(T[] source)
+        public PinnedList<T> Clone()
         {
-            if (source != null && m_data.Length == source.Length)
-            {
-                System.Array.Copy(source, m_data, m_data.Length);
-                return true;
-            }
-            return false;
+            return new PinnedList<T>(m_list, true);
+        }
+
+        public void Assign(T[] source)
+        {
+            ResizeDiscard(source.Length);
+            System.Array.Copy(source, m_data, source.Length);
+        }
+        public void Assign(List<T> sourceList)
+        {
+            var sourceData = ListGetInternalArray(sourceList);
+            var count = sourceList.Count;
+            ResizeDiscard(count);
+            System.Array.Copy(sourceData, m_data, count);
         }
 
         public void Dispose()
