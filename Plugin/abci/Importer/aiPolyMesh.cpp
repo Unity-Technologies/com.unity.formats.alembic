@@ -553,6 +553,7 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN,
 
 
     abcV3 *tan1 = new Abc::V3f[2 * tangentsCount];
+    memset(tan1, 0, sizeof(Abc::V3f)* 2 * tangentsCount);
     abcV3 *tan2 = tan1 + tangentsCount;
     int *tanNidxs = new int[tangentsCount];
     abcV3 T, B, dP1, dP2, tmp;
