@@ -6,6 +6,8 @@
 #include "aiPolyMesh.h"
 #include <unordered_map>
 
+
+#define MAX_VERTEX_SPLIT_COUNT 65000
 // ---
 
 static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
@@ -102,7 +104,7 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
     }
     else
     {
-        m_splits.reserve(1 + m_indices->size() / 65000);
+        m_splits.reserve(1 + m_indices->size() / MAX_VERTEX_SPLIT_COUNT);
         m_splits.push_back(SplitInfo());
 
         SplitInfo *curSplit = &(m_splits.back());
@@ -111,7 +113,7 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
         {
             size_t nv = (size_t)m_counts->get()[i];
 
-            if (curSplit->vertexCount + nv > 65000)
+            if (curSplit->vertexCount + nv > MAX_VERTEX_SPLIT_COUNT)
             {
                 m_splits.push_back(SplitInfo(i, indexOffset));
 
@@ -1980,6 +1982,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     bool normalsIndexed = normals && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
     const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : NULL;
 
+    bool hasUVs = sample->m_uvs.valid();
     const auto &uvVals = *(sample->m_uvs.getVals());
     const auto &uvIdxs = *(sample->m_uvs.getIndices());
 
@@ -1992,14 +1995,16 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
     while (itr != indexesOfFacesValues.end())
     {
-        size_t faceValueIndex = itr->first;
-        std::vector<size_t>::iterator indexItr = itr->second.begin();
+        size_t faceValueIndex = itr->first;  
+        std::vector<size_t>& vertexUsages = itr->second;
+        size_t vertexUsageIndex = 0;
+        size_t vertexUsageMaxIndex = itr->second.size();
         const Abc::V2f * prevUV = NULL;
         const abcV3 * prevN = NULL;
         bool share = true;
         do
         {
-            size_t index = facesIndices[faceValueIndex];
+            size_t index = vertexUsages[vertexUsageIndex];
             // same Normal?
             if( normals )
             {
@@ -2009,21 +2014,23 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
                 else
                     share = N == *prevN;
             }
-
             // Same UV?
-            const Abc::V2f & uv = uvVals[uvIdxs[index]];
-            if (prevUV == NULL)
-                prevUV = &uv;
-            else
-                share = uv == *prevUV;
+            if (hasUVs)
+            {
+                const Abc::V2f & uv = uvVals[uvIdxs[index]];
+                if (prevUV == NULL)
+                    prevUV = &uv;
+                else
+                    share = uv == *prevUV;
+            }
         }
-        while (share && ++indexItr != itr->second.end());
+        while (share && ++vertexUsageIndex < vertexUsageMaxIndex);
 
         // Verdict is in for this vertex.
         if (share)
             sample->m_topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
 
-        indexItr = itr->second.begin();
+        std::vector<size_t>::iterator indexItr = itr->second.begin();
         while( indexItr != itr->second.end() )
         {
             if (!share)
