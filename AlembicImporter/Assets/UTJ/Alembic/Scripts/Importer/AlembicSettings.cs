@@ -31,6 +31,7 @@ namespace UTJ.Alembic
         [SerializeField] public bool m_shareVertices = true;
         [SerializeField] public bool m_treatVertexExtraDataAsStatics = true;
         [SerializeField] public bool m_importMeshes = true;
+        [SerializeField] public float m_scaleFactor = 0.01f;
         [SerializeField] public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
         [SerializeField] public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
         [SerializeField] public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;

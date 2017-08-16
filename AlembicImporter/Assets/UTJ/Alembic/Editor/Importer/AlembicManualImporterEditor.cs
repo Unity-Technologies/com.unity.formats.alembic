@@ -98,6 +98,10 @@ namespace UTJ.Alembic
             {
                 m_ImportSettings.m_treatVertexExtraDataAsStatics = EditorGUILayout.Toggle("Vertex extra data is static (experimental)", m_ImportSettings.m_treatVertexExtraDataAsStatics);
             });
+            AlembicUI.AddHorzLine(() =>
+            {
+                m_ImportSettings.m_scaleFactor = EditorGUILayout.FloatField("m_scaleFactor", m_ImportSettings.m_scaleFactor);
+            });
 
             AlembicUI.AddHorzLine(() =>
             {

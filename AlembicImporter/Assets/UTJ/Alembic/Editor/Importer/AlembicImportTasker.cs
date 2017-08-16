@@ -9,6 +9,7 @@ namespace UTJ.Alembic
         {
             var fileName = System.IO.Path.GetFileNameWithoutExtension(importSettings.m_pathToAbc.leaf);
             var go = new GameObject(fileName);
+            go.transform.localScale *= importSettings.m_scaleFactor;
 
             using (var abcStream = new AlembicStream(go, importSettings, new AlembicPlaybackSettings(), diagSettings))
             {

@@ -24,6 +24,7 @@ namespace UTJ.Alembic
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_submeshPerUVTile), "Submesh per UV tile", "");
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_shareVertices), "Merge Vertices (experimental)", "Allow vertex sharing between faces when possible.");
             AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_treatVertexExtraDataAsStatics), "Vertex extra data is static (exp.)", "When set, UV's/normals/tangents are fetched from file only on topology change event.");
+            AddFloatProperty(serSettings.FindPropertyRelative(() => settings.m_scaleFactor), "Scale factor", "Yo!");
 
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_normalsMode), "Normals mode", "", settings.m_normalsMode.GetType());
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_tangentsMode), "Tangent mode", "", settings.m_tangentsMode.GetType());
@@ -62,6 +63,12 @@ namespace UTJ.Alembic
             porperty.intValue = newValue;
         }
 
+        void AddFloatProperty(SerializedProperty porperty, string text, string tooltip)
+        {
+            var orgValue = porperty.floatValue;
+            var newValue = EditorGUILayout.FloatField(new GUIContent(text, tooltip), orgValue);
+            porperty.floatValue = newValue;
+        }
     }
 }
 
