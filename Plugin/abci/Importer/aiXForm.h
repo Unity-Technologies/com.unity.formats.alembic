@@ -12,6 +12,8 @@ public:
 
 public:
     AbcGeom::XformSample m_sample;
+private:
+    void decomposeXForm(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };
 
 
