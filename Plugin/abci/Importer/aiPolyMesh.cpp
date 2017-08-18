@@ -1870,6 +1870,8 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
         velocitiesProp.get(ret->m_velocities, ss);
     }
 
+    bool smoothNormalsRequired = ret->smoothNormalsRequired();
+
     ret->m_normals.reset();
     auto normalsParam = m_schema.getNormalsParam();
     if (!m_ignoreNormals && normalsParam.valid())
@@ -1883,6 +1885,11 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
             }
 
             ret->m_normals = m_sharedNormals;
+        }
+        else if (m_config.shareVertices && normalsParam.getArrayExtent() != ret->m_positions->size())
+        {
+            aiLogger::Error("Normal count differs from vertex count. Normals will be recomputed");
+            smoothNormalsRequired = true;
         }
         else
         {
@@ -1916,8 +1923,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     if (boundsParam) {
         boundsParam.get(ret->m_bounds, ss);
     }
-
-    bool smoothNormalsRequired = ret->smoothNormalsRequired();
 
     if (smoothNormalsRequired)
     {
