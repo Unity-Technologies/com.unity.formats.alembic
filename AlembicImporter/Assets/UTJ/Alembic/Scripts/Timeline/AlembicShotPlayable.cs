@@ -17,7 +17,8 @@ namespace UTJ.Alembic
             set
             {
                 m_StreamPlayer = value;
-                m_StreamPlayer.m_ManualUpdateMode = true;
+                if( m_StreamPlayer != null )
+                    m_StreamPlayer.m_ManualUpdateMode = true;
             }
         }
 
