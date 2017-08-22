@@ -6,6 +6,7 @@ namespace UTJ.Alembic
     public class AlembicStreamPlayer : MonoBehaviour
     {
         private AlembicStream _stream = null;
+        public bool m_ManualUpdateMode = false;
 
         [HideInInspector]
         public AlembicStream Stream
@@ -49,9 +50,15 @@ namespace UTJ.Alembic
 
         }
 
+        public void ManualUpdate()
+        {
+            if (Stream != null && m_ManualUpdateMode == true)
+                Stream.ProcessUpdateEvent();
+        }
+
         public void Update()
         {
-            if (Stream != null)
+            if (Stream != null && m_ManualUpdateMode == false)
                 Stream.ProcessUpdateEvent();
         }
 

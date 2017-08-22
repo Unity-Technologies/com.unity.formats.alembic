@@ -7,9 +7,19 @@ namespace UTJ.Alembic
 {
     public class AlembicShotPlayable : PlayableBehaviour
     {
-        public AlembicStreamPlayer streamPlayer { get; set; }
-
-        public float m_StartTimeOffsetsdfs;
+        AlembicStreamPlayer m_StreamPlayer;
+        public AlembicStreamPlayer streamPlayer
+        {
+            get
+            {
+                return m_StreamPlayer;
+            }
+            set
+            {
+                m_StreamPlayer = value;
+                m_StreamPlayer.m_ManualUpdateMode = true;
+            }
+        }
 
         public float m_StartTimeOffset;
         public float m_EndTimeClipOff;
@@ -22,7 +32,6 @@ namespace UTJ.Alembic
 
             if (streamPlayer == null)
                 return;
-
             streamPlayer.m_PlaybackSettings.m_startTime = 0f;
             streamPlayer.m_PlaybackSettings.m_cycle = m_Cycle;
             streamPlayer.m_PlaybackSettings.m_timeOffset = (float)m_StartTimeOffset;
@@ -31,6 +40,8 @@ namespace UTJ.Alembic
             streamPlayer.m_PlaybackSettings.m_Time = (float)playable.GetTime();
 			streamPlayer.m_PlaybackSettings.m_OverrideTime = true;
             streamPlayer.m_PlaybackSettings.m_preserveStartTime = true;
+
+            streamPlayer.ManualUpdate();
         }
     }
 }
