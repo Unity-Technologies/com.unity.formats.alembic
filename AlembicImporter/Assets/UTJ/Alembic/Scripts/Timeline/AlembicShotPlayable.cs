@@ -22,9 +22,12 @@ namespace UTJ.Alembic
             }
         }
 
+        bool m_RestoreState = false;
+        bool m_OrgState;
         public float m_StartTimeOffset;
         public float m_EndTimeClipOff;
         public float m_TimeScale;
+        public bool m_AutoActivateTarget;
         public AlembicPlaybackSettings.CycleType m_Cycle = AlembicPlaybackSettings.CycleType.Hold;
 
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
@@ -43,6 +46,33 @@ namespace UTJ.Alembic
             streamPlayer.m_PlaybackSettings.m_preserveStartTime = true;
 
             streamPlayer.ManualUpdate();
+        }
+
+        public override void OnBehaviourPlay(Playable playable, FrameData info)
+        {
+            base.OnBehaviourPlay(playable, info);
+
+            if (streamPlayer == null)
+                return;
+
+            if (m_AutoActivateTarget)
+            {
+                m_RestoreState = true;
+                m_OrgState = streamPlayer.gameObject.activeInHierarchy;
+                streamPlayer.gameObject.SetActive(true);
+            }
+        }
+
+        public override void OnBehaviourPause(Playable playable, FrameData info)
+        {
+            base.OnBehaviourPause(playable, info);
+
+            if (streamPlayer == null)
+                return;
+
+            if( m_AutoActivateTarget && m_RestoreState )
+                streamPlayer.gameObject.SetActive(m_OrgState);
+
         }
     }
 }
