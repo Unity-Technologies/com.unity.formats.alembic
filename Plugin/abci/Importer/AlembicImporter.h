@@ -115,6 +115,7 @@ struct aiConfig
     bool submeshPerUVTile = true;
     bool shareVertices = false;
     bool treatVertexExtraDataAsStatic = false;
+    bool interpolateSamples = true;
 };
 
 struct aiTimeSamplingData
@@ -162,6 +163,7 @@ struct aiMeshSampleSummary
     bool hasNormals = false;
     bool hasUVs = false;
     bool hasTangents = false;
+    bool hasVelocities = false;
 };
 
 struct aiPolyMeshData

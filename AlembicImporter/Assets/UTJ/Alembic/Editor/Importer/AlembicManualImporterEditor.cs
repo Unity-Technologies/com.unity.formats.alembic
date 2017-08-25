@@ -102,6 +102,11 @@ namespace UTJ.Alembic
             {
                 m_ImportSettings.m_scaleFactor = EditorGUILayout.FloatField("m_scaleFactor", m_ImportSettings.m_scaleFactor);
             });
+            AlembicUI.AddHorzLine(() =>
+            {
+                m_ImportSettings.m_interpolateSamples = EditorGUILayout.Toggle("Interpolate samples", m_ImportSettings.m_interpolateSamples);
+            });
+            
 
             AlembicUI.AddHorzLine(() =>
             {

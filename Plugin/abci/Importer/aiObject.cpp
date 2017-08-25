@@ -87,10 +87,10 @@ void aiObject::readConfig()
 void aiObject::updateSample(float time)
 {
     DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), time);
-
+    const abcSampleSelector ss = aiTimeToSampleSelector(time);
     for (auto s : m_schemas)
     {
-        s->updateSample(aiTimeToSampleSelector(time));
+        s->updateSample(ss);
     }
 }
 

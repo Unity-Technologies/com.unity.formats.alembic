@@ -52,6 +52,7 @@ namespace UTJ.Alembic
             m_config.cacheSamples = ImportSettings.m_sampleCacheSize;
             m_config.submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
             m_config.treatVertexExtraDataAsStatics = ImportSettings.m_treatVertexExtraDataAsStatics;
+            m_config.interpolateSamples = ImportSettings.m_interpolateSamples;
 
             if (AbcIsValid())
             {

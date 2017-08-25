@@ -394,6 +394,11 @@ bool aiPolyMeshSample::hasUVs() const
     return m_uvs.valid();
 }
 
+bool aiPolyMeshSample::hasVelocities() const
+{
+    return m_config.interpolateSamples || !m_velocities->emptySample();
+}
+
 bool aiPolyMeshSample::hasTangents() const
 {
     return (m_config.tangentsMode != aiTangentsMode::None && hasUVs() && !m_tangents.empty() && !m_topology->m_tangentIndices.empty());
@@ -765,6 +770,8 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
     summary.hasUVs = hasUVs();
     
     summary.hasTangents = hasTangents();
+
+    summary.hasVelocities = hasVelocities();
 }
 
 
@@ -1091,11 +1098,14 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     
     bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
+    bool interpolatePositions = !m_schema->hasVaryingTopology() && m_config.interpolateSamples;
+    float timeOffset = static_cast<float>(m_currentTimeOffset);
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];
     const auto &counts = *(m_topology->m_counts);
     const auto &indices = *(m_topology->m_indices);
     const auto &positions = *m_positions;
+    const auto &nextPositions = *m_nextPositions;
 
     size_t k = 0;
     size_t o = split.indexOffset;
@@ -1126,6 +1136,12 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
 #define UPDATE_POSITIONS_AND_BOUNDS(srcIdx, dstIdx) \
     abcV3 &cP = data.positions[dstIdx]; \
     cP = positions[srcIdx]; \
+    if (interpolatePositions) \
+    {\
+        abcV3 velocity = nextPositions[srcIdx] - positions[srcIdx]; \
+        cP+= velocity * timeOffset; \
+        data.velocities[dstIdx] = velocity; \
+    }\
     cP.x *= xScale; \
     if (cP.x < bbmin.x) bbmin.x = cP.x; \
     else if (cP.x > bbmax.x) bbmax.x = cP.x; \
@@ -1834,6 +1850,22 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
+bool aiPolyMesh::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime,Sample& sample) const
+{
+    Abc::ISampleSelector ssCeil = abcSampleSelector(requestedTime, Abc::ISampleSelector::kCeilIndex);
+    DebugLog("  Read next positions");
+    bool dataChanged = requestedTime != sample.m_lastSampleTime;
+    sample.m_lastSampleTime = requestedTime;
+    if (dataChanged)
+    {
+        AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
+        AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
+        sample.m_currentTimeOffset = floor_offset / interval;
+        m_schema.getPositionsProperty().get(sample.m_nextPositions, ssCeil);
+    }
+    return dataChanged;
+}
+
 aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
     DebugLog("aiPolyMesh::readSample(t=%f)", (float)ss.getRequestedTime());
@@ -1861,6 +1893,12 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
 
     DebugLog("  Read positions");
     m_schema.getPositionsProperty().get(ret->m_positions, ss);
+
+    if (!m_varyingTopology && m_config.interpolateSamples)
+    {
+        DebugLog("  Read last positions");
+        updateInterpolatedValues(ss.getRequestedTime(), *ret);
+    }
 
     ret->m_velocities.reset();
     auto velocitiesProp = m_schema.getVelocitiesProperty();

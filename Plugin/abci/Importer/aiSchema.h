@@ -15,6 +15,9 @@ public:
     // Note: dataChanged MUST be true if topologyChanged is
     virtual void updateConfig(const aiConfig &config, bool &topologyChanged, bool &dataChanged) = 0;
 
+public:
+    AbcCoreAbstract::chrono_t m_lastSampleTime;
+    AbcCoreAbstract::chrono_t m_currentTimeOffset;
 protected:
     aiSchemaBase *m_schema;
     aiConfig m_config;
@@ -48,6 +51,7 @@ public:
     // for multithreaded updates, don't invoke C# callbacks from work threads
     void readConfig();
     void notifyUpdate();
+    bool hasVaryingTopology() const { return m_varyingTopology; }
 
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
@@ -165,6 +169,10 @@ public:
                 sample = m_theSample;
                 
                 sample->updateConfig(m_config, topologyChanged, dataChanged);
+                if (!m_varyingTopology && m_config.interpolateSamples)
+                {
+                    dataChanged = updateInterpolatedValues(ss.getRequestedTime(), *sample);
+                }
                 
                 if (!m_config.forceUpdate && !dataChanged)
                 {
@@ -195,6 +203,10 @@ public:
                 sample = sp.get();
                 
                 sample->updateConfig(m_config, topologyChanged, dataChanged);
+                if (!m_varyingTopology && m_config.interpolateSamples)
+                {
+                    dataChanged = updateInterpolatedValues(ss.getRequestedTime(), *sample);
+                }
 
                 // force update if sample has changed from previously queried one
                 if (sampleIndex != m_lastSampleIndex)
@@ -281,6 +293,7 @@ protected:
     }
 
     virtual Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) = 0;
+    virtual bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const { return false; };
 
     void erasePastSamples()
     {

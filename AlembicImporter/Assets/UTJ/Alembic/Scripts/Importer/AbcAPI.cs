@@ -138,6 +138,7 @@ namespace UTJ.Alembic
             public Bool submeshPerUVTile;
             public Bool shareVertices;
             public Bool treatVertexExtraDataAsStatics;
+            public Bool interpolateSamples;
 
             public void SetDefaults()
             {
@@ -153,6 +154,7 @@ namespace UTJ.Alembic
                 submeshPerUVTile = false;
                 shareVertices = true;
                 treatVertexExtraDataAsStatics = true;
+                interpolateSamples = true;
             }
         }
 
@@ -183,6 +185,7 @@ namespace UTJ.Alembic
         {
             public int splitCount;
             public Bool hasNormals;
+            public Bool hasVelocities;
             public Bool hasUVs;
             public Bool hasTangents;
         }

@@ -12,6 +12,7 @@ public:
 
 public:
     AbcGeom::XformSample m_sample;
+    AbcGeom::XformSample m_nextSample;
 private:
     void decomposeXForm(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };
@@ -31,4 +32,5 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const override;
 };

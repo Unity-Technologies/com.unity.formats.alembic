@@ -189,6 +189,7 @@ public:
     
     bool hasNormals() const;
     bool hasUVs() const;
+    bool hasVelocities() const;
     bool hasTangents() const;
     bool smoothNormalsRequired() const;
     bool tangentsRequired() const;
@@ -213,8 +214,8 @@ public:
 public:
     Topology *m_topology;
     bool m_ownTopology;
-
     Abc::P3fArraySamplePtr m_positions;
+    Abc::P3fArraySamplePtr m_nextPositions;
     Abc::V3fArraySamplePtr m_velocities;
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
@@ -242,6 +243,7 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const override;
 
     int getTopologyVariance() const;
     int getPeakIndexCount() const;

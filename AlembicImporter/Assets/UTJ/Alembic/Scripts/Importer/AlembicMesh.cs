@@ -11,6 +11,7 @@ namespace UTJ.Alembic
         {
             public Vector3[] positionCache;
             public Vector3[] normalCache;
+            public Vector3[] velocitiesCache;
             public Vector2[] uvCache;
             public Vector4[] tangentCache;
             public Mesh mesh;
@@ -204,6 +205,12 @@ namespace UTJ.Alembic
 
                 Array.Resize(ref split.positionCache, vertexCount);
                 vertexData.positions = GetArrayPtr(split.positionCache);
+
+                if (m_sampleSummary.hasVelocities)
+                {
+                    Array.Resize(ref split.velocitiesCache, vertexCount);
+                    vertexData.velocities = GetArrayPtr(split.velocitiesCache);    
+                }
 
                 if (m_sampleSummary.hasNormals)
                 {

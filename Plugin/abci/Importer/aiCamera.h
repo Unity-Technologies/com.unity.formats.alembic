@@ -12,6 +12,7 @@ public:
     
 public:
     AbcGeom::CameraSample m_sample;
+    AbcGeom::CameraSample m_nextSample;
 };
 
 
@@ -30,4 +31,5 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const override;
 };
