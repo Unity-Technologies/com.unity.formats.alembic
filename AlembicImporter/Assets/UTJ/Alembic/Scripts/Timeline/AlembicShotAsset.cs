@@ -29,6 +29,9 @@ namespace UTJ.Alembic
         [Tooltip("Portion, in seconds, of the alembic stream used by the shot.")]
         [ReadOnly] public float m_AlembicLength = 0;
 
+        [Tooltip("Auto active/deactivate GameObject on Play/Pause")]
+        [SerializeField] public bool m_AutoActivateTarget = true;
+
         public ClipCaps clipCaps { get { return ClipCaps.None;  } }
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
@@ -41,6 +44,7 @@ namespace UTJ.Alembic
             behaviour.m_EndTimeClipOff = m_EndOffset;
             behaviour.m_TimeScale = m_TimeScale;
             behaviour.m_Cycle = m_Cycle;
+            behaviour.m_AutoActivateTarget = m_AutoActivateTarget;
             return playable;
         }
 
