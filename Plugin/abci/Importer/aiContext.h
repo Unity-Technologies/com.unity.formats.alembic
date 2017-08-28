@@ -56,8 +56,8 @@ public:
     float getStartTime() const;
     float getEndTime() const;
 
-    void updateSamples(float time);
-    void updateSamplesBegin(float time);
+    void updateSamples(float time, bool isPlayingForward);
+    void updateSamplesBegin(float time, bool isPlayingForward);
     void updateSamplesEnd();
 
     void enqueueTask(const task_t &task);

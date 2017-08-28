@@ -243,7 +243,7 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
-    bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const override;
+    bool updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const override;
 
     int getTopologyVariance() const;
     int getPeakIndexCount() const;

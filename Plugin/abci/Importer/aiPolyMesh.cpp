@@ -1850,9 +1850,10 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
-bool aiPolyMesh::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime,Sample& sample) const
+bool aiPolyMesh::updateInterpolatedValues(const Abc::ISampleSelector& ss,Sample& sample) const
 {
-    Abc::ISampleSelector ssCeil = abcSampleSelector(requestedTime, Abc::ISampleSelector::kCeilIndex);
+    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
+    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
     DebugLog("  Read next positions");
     bool dataChanged = requestedTime != sample.m_lastSampleTime;
     sample.m_lastSampleTime = requestedTime;
@@ -1861,6 +1862,8 @@ bool aiPolyMesh::updateInterpolatedValues(const AbcCoreAbstract::chrono_t reques
         AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
         AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
         sample.m_currentTimeOffset = floor_offset / interval;
+        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
+            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
         m_schema.getPositionsProperty().get(sample.m_nextPositions, ssCeil);
     }
     return dataChanged;
@@ -1897,7 +1900,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     if (!m_varyingTopology && m_config.interpolateSamples)
     {
         DebugLog("  Read last positions");
-        updateInterpolatedValues(ss.getRequestedTime(), *ret);
+        updateInterpolatedValues(ss, *ret);
     }
 
     ret->m_velocities.reset();

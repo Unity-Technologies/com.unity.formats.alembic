@@ -84,10 +84,9 @@ void aiObject::readConfig()
     }
 }
 
-void aiObject::updateSample(float time)
+void aiObject::updateSample(const abcSampleSelector& ss)
 {
-    DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), time);
-    const abcSampleSelector ss = aiTimeToSampleSelector(time);
+    DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), ss.getRequestedTime());
     for (auto s : m_schemas)
     {
         s->updateSample(ss);

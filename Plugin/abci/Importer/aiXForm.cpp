@@ -101,9 +101,10 @@ aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topology
     return ret;
 }
 
-bool aiXForm::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const
+bool aiXForm::updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const
 {
-    Abc::ISampleSelector ssCeil = abcSampleSelector(requestedTime, Abc::ISampleSelector::kCeilIndex);
+    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
+    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
     bool dataChanged = requestedTime != sample.m_lastSampleTime;
     sample.m_lastSampleTime = requestedTime;
     if (dataChanged)
@@ -111,6 +112,8 @@ bool aiXForm::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requested
         AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
         AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
         sample.m_currentTimeOffset = floor_offset / interval;
+        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
+            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
         m_schema.get(sample.m_nextSample, ssCeil);
     }
     return dataChanged;

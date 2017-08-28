@@ -2,10 +2,6 @@
 #include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include "aiSchema.h"
-#include "aiXForm.h"
-#include "aiPolyMesh.h"
-#include "aiCamera.h"
 #include <limits>
 
 
@@ -520,8 +516,10 @@ void aiContext::destroyObject(aiObject *obj)
     }
 }
 
-void aiContext::updateSamples(float time)
+void aiContext::updateSamples(float time,bool isPlayingForward)
 {
+    const abcSampleSelector ss = aiTimeToSampleSelector(time, isPlayingForward);
+
     if (m_config.useThreads)
     {
         DebugLog("aiContext::updateSamples() [threaded]");
@@ -529,9 +527,9 @@ void aiContext::updateSamples(float time)
         eachNodes([](aiObject *o) {
             o->readConfig();
         });
-        eachNodes([this, time](aiObject *o) {
-            enqueueTask([o, time]() {
-                o->updateSample(time);
+        eachNodes([this, ss](aiObject *o) {
+            enqueueTask([o, ss]() {
+                o->updateSample(ss);
             });
         });
         waitTasks();
@@ -543,19 +541,21 @@ void aiContext::updateSamples(float time)
     {
         DebugLog("aiContext::updateSamples()");
         
-        eachNodes([time](aiObject *o) {
-            o->updateSample(time);
+        eachNodes([ss](aiObject *o) {
+            o->updateSample(ss);
         });
     }
 }
-void aiContext::updateSamplesBegin(float time)
+void aiContext::updateSamplesBegin(float time, bool isPlayingForward)
 {
+    const abcSampleSelector ss = aiTimeToSampleSelector(time, isPlayingForward);
+
     eachNodes([](aiObject *o) {
         o->readConfig();
     });
-    enqueueTask([this, time](){
-        eachNodes([time](aiObject *o) {
-            o->updateSample(time);
+    enqueueTask([this, ss](){
+        eachNodes([ss](aiObject *o) {
+            o->updateSample(ss);
         });
     });
 }

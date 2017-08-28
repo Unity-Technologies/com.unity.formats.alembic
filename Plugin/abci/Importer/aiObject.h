@@ -20,7 +20,7 @@ public:
     aiObject*   getParent();
 
     void        readConfig();
-    void        updateSample(float time);
+    void        updateSample(const abcSampleSelector& ss);
     void        notifyUpdate();
  
     aiXForm*    getXForm();

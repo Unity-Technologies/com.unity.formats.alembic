@@ -171,7 +171,7 @@ public:
                 sample->updateConfig(m_config, topologyChanged, dataChanged);
                 if (!m_varyingTopology && m_config.interpolateSamples)
                 {
-                    dataChanged = updateInterpolatedValues(ss.getRequestedTime(), *sample);
+                    dataChanged = updateInterpolatedValues(ss, *sample);
                 }
                 
                 if (!m_config.forceUpdate && !dataChanged)
@@ -205,7 +205,7 @@ public:
                 sample->updateConfig(m_config, topologyChanged, dataChanged);
                 if (!m_varyingTopology && m_config.interpolateSamples)
                 {
-                    dataChanged = updateInterpolatedValues(ss.getRequestedTime(), *sample);
+                    dataChanged = updateInterpolatedValues(ss, *sample);
                 }
 
                 // force update if sample has changed from previously queried one
@@ -293,7 +293,7 @@ protected:
     }
 
     virtual Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) = 0;
-    virtual bool updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const { return false; };
+    virtual bool updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const { return false; };
 
     void erasePastSamples()
     {

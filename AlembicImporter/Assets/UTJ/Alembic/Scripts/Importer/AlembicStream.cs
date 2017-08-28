@@ -275,6 +275,7 @@ namespace UTJ.Alembic
                 m_time = time;
 
                 float abcTime = AbcTime(m_time);
+                bool isPlayingForward = abcTime >= m_lastAbcTime;
                 float aspectRatio = AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode);
 
                 if (AbcUpdateRequired(abcTime, aspectRatio))
@@ -289,12 +290,12 @@ namespace UTJ.Alembic
 
                     if(ImportSettings.m_useThreads)
                     {
-                        AbcAPI.aiUpdateSamplesBegin(m_abc, abcTime);
+                        AbcAPI.aiUpdateSamplesBegin(m_abc, abcTime,isPlayingForward);
                         m_updateBegan = true;
                     }
                     else
                     {
-                        AbcAPI.aiUpdateSamples(m_abc, abcTime);
+                        AbcAPI.aiUpdateSamples(m_abc, abcTime,isPlayingForward);
                         AbcUpdateElements();
                     }
                     

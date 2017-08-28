@@ -44,6 +44,7 @@ void aiCameraSample::getData(aiCameraData &outData)
 
     if (m_config.interpolateSamples && m_currentTimeOffset != 0)
     {
+        float timeOffset = (float)m_currentTimeOffset;
         float focalLength2 = (float)m_nextSample.getFocalLength();
         float verticalAperture2 = (float)m_nextSample.getVerticalAperture();
         if (m_config.aspectRatio > 0.0f)
@@ -52,14 +53,14 @@ void aiCameraSample::getData(aiCameraData &outData)
         }
         
         float fov2 = 2.0f * atanf(verticalAperture2 * 10.0f / (2.0f * focalLength2)) * sRad2Deg;
-        outData.nearClippingPlane += m_currentTimeOffset * (float)(m_nextSample.getNearClippingPlane() - m_sample.getNearClippingPlane());
-        outData.farClippingPlane += m_currentTimeOffset * (float)(m_nextSample.getFarClippingPlane() - m_sample.getFarClippingPlane());
-        outData.fieldOfView += m_currentTimeOffset * (fov2 - outData.fieldOfView);
+        outData.nearClippingPlane += timeOffset * (float)(m_nextSample.getNearClippingPlane() - m_sample.getNearClippingPlane());
+        outData.farClippingPlane += timeOffset * (float)(m_nextSample.getFarClippingPlane() - m_sample.getFarClippingPlane());
+        outData.fieldOfView += timeOffset * (fov2 - outData.fieldOfView);
 
-        outData.focusDistance += m_currentTimeOffset * (float)(m_nextSample.getFocusDistance() - m_sample.getFocusDistance());
-        outData.focalLength += m_currentTimeOffset * (focalLength2 - focalLength);
-        outData.aperture += m_currentTimeOffset * (verticalAperture2 - verticalAperture);
-        outData.aspectRatio += m_currentTimeOffset * (float(m_nextSample.getHorizontalAperture() / verticalAperture2) - outData.aspectRatio);
+        outData.focusDistance += timeOffset * (float)(m_nextSample.getFocusDistance() - m_sample.getFocusDistance());
+        outData.focalLength += timeOffset * (focalLength2 - focalLength);
+        outData.aperture += timeOffset * (verticalAperture2 - verticalAperture);
+        outData.aspectRatio += timeOffset * (float(m_nextSample.getHorizontalAperture() / verticalAperture2) - outData.aspectRatio);
     }
     if (outData.nearClippingPlane==.0f)
     {
@@ -98,9 +99,10 @@ aiCamera::Sample* aiCamera::readSample(const abcSampleSelector& ss, bool &topolo
     return ret;
 }
 
-bool aiCamera::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requestedTime, Sample& sample) const
+bool aiCamera::updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const
 {
-    Abc::ISampleSelector ssCeil = abcSampleSelector(requestedTime, Abc::ISampleSelector::kCeilIndex);
+    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
+    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
     bool dataChanged = requestedTime != sample.m_lastSampleTime;
     sample.m_lastSampleTime = requestedTime;
     if (dataChanged)
@@ -108,6 +110,8 @@ bool aiCamera::updateInterpolatedValues(const AbcCoreAbstract::chrono_t requeste
         AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
         AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
         sample.m_currentTimeOffset = floor_offset / interval;
+        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
+            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
         m_schema.get(sample.m_nextSample, ssCeil);
     }
     return dataChanged;

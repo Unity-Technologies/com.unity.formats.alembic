@@ -316,7 +316,7 @@ namespace UTJ.Alembic
         }
 
 
-        [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
+        [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time,bool playForward = true);
         [DllImport("abci")] public static extern            aiSampleSelector aiIndexToSampleSelector(int index);
 
         [DllImport("abci")] public static extern void       aiEnableFileLog(Bool on, string path);
@@ -332,8 +332,8 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
         [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
-        [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-        [DllImport("abci")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
+        [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time,bool playingForward);
+        [DllImport("abci")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time,bool playingForward);
         [DllImport("abci")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
 
         [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
