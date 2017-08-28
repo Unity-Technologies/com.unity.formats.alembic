@@ -31,7 +31,6 @@ namespace UTJ.Alembic
         [SerializeField] public bool m_shareVertices = true;
         [SerializeField] public bool m_treatVertexExtraDataAsStatics = true;
         [SerializeField] public bool m_importMeshes = true;
-        [SerializeField] public bool m_interpolateSamples = true;
         [SerializeField] public float m_scaleFactor = 0.01f;
         [SerializeField] public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
         [SerializeField] public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
@@ -76,6 +75,7 @@ namespace UTJ.Alembic
 
         [SerializeField] public float m_Time = 0f;
         [SerializeField] public bool m_OverrideTime = false;
+        [SerializeField] public bool m_InterpolateSamples = true;
     }
 }
 
