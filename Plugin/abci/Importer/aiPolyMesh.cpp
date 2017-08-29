@@ -944,6 +944,17 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
         memcpy(dst.velocities, src.velocities, src.positionCount * sizeof(*dst.velocities));
     }
 
+    if (src.interpolatedVelocitiesXY && dst.interpolatedVelocitiesXY && dst.positionCount >= src.positionCount)
+    {
+        memcpy(dst.interpolatedVelocitiesXY, src.interpolatedVelocitiesXY, src.positionCount * sizeof(*dst.interpolatedVelocitiesXY));
+    }
+
+    if (src.interpolatedVelocitiesZ && dst.interpolatedVelocitiesZ && dst.positionCount >= src.positionCount)
+    {
+        memcpy(dst.interpolatedVelocitiesZ, src.interpolatedVelocitiesZ, src.positionCount * sizeof(*dst.interpolatedVelocitiesZ));
+    }
+    
+
     if (src.normals && dst.normals && dst.normalCount >= src.normalCount) {
         memcpy(dst.normals, src.normals, src.normalCount * sizeof(*dst.normals));
         dst.normalCount = src.normalCount;
@@ -1140,7 +1151,9 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     {\
         abcV3 velocity = nextPositions[srcIdx] - positions[srcIdx]; \
         cP+= velocity * timeOffset; \
-        data.velocities[dstIdx] = velocity; \
+        data.interpolatedVelocitiesXY[dstIdx].x = velocity.x*xScale; \
+        data.interpolatedVelocitiesXY[dstIdx].y = velocity.y; \
+        data.interpolatedVelocitiesZ[dstIdx].x = velocity.z; \
     }\
     cP.x *= xScale; \
     if (cP.x < bbmin.x) bbmin.x = cP.x; \

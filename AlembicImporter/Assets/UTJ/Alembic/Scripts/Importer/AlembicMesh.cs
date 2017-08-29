@@ -12,6 +12,8 @@ namespace UTJ.Alembic
             public Vector3[] positionCache;
             public Vector3[] normalCache;
             public Vector3[] velocitiesCache;
+            public Vector2[] velocitiesXYCache;
+            public Vector2[] velocitiesZCache;
             public Vector2[] uvCache;
             public Vector4[] tangentCache;
             public Mesh mesh;
@@ -209,7 +211,13 @@ namespace UTJ.Alembic
                 if (m_sampleSummary.hasVelocities)
                 {
                     Array.Resize(ref split.velocitiesCache, vertexCount);
-                    vertexData.velocities = GetArrayPtr(split.velocitiesCache);    
+                    vertexData.velocities = GetArrayPtr(split.velocitiesCache);
+
+                    Array.Resize(ref split.velocitiesXYCache, vertexCount);
+                    vertexData.interpolatedVelocitiesXY = GetArrayPtr(split.velocitiesXYCache);
+                    
+                    Array.Resize(ref split.velocitiesZCache, vertexCount);
+                    vertexData.interpolatedVelocitiesZ = GetArrayPtr(split.velocitiesZCache);    
                 }
 
                 if (m_sampleSummary.hasNormals)
@@ -389,6 +397,8 @@ namespace UTJ.Alembic
                     split.mesh.vertices = split.positionCache;
                     split.mesh.normals = split.normalCache;
                     split.mesh.tangents = split.tangentCache;
+                    split.mesh.uv3 = split.velocitiesXYCache;
+                    split.mesh.uv4 = split.velocitiesZCache;
                     split.mesh.uv = split.uvCache;
                     // update the bounds
                     split.mesh.bounds = new Bounds(split.center, split.size);

@@ -197,6 +197,8 @@ namespace UTJ.Alembic
 
             public IntPtr positions;
             public IntPtr velocities;
+            public IntPtr interpolatedVelocitiesXY;
+            public IntPtr interpolatedVelocitiesZ;
             public IntPtr normals;
             public IntPtr uvs;
             public IntPtr tangents;
