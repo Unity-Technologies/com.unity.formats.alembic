@@ -508,7 +508,8 @@ namespace UTJ.Alembic
             }
             else
             {
-                mesh = meshFilter.sharedMesh;
+                mesh = UnityEngine.Object.Instantiate(meshFilter.sharedMesh);
+                meshFilter.sharedMesh = mesh;
             }
 
             return mesh;
