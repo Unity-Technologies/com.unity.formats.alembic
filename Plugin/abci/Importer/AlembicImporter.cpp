@@ -42,6 +42,11 @@ abciAPI void aiCleanup()
 #endif
 }
 
+abciAPI void clearContextsWithPath(const char *path)
+{
+    aiContext::clearContextsWithPath(path);
+}
+
 abciAPI aiContext* aiCreateContext(int uid)
 {
     auto ctx = aiContext::create(uid);

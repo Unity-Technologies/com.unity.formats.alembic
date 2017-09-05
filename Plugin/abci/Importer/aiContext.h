@@ -39,6 +39,7 @@ public:
     typedef std::function<void ()> task_t;
 
     static aiContext* create(int uid);
+    static void clearContextsWithPath(const char *path);
     static void destroy(aiContext* ctx);
 
 public:
@@ -75,10 +76,10 @@ public:
     template<class F>
     void eachNodes(const F &f);
 
+    static std::string normalizePath(const char *path);
 private:
-    std::string normalizePath(const char *path) const;
     void reset();
-    void gatherNodesRecursive(aiObject *n);
+    void gatherNodesRecursive(aiObject *n) const;
 
 private:
     std::string m_path;

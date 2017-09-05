@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public abstract class AlembicElement : AlembicDisposable 
     {
         public AlembicTreeNode AlembicTreeNode { get; set; }

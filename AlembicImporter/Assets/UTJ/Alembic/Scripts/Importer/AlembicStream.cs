@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UTJ.Alembic
@@ -7,6 +8,7 @@ namespace UTJ.Alembic
     {
         private AlembicTreeNode _alembicTreeRoot;
 
+        public bool streamInterupted = false;
 
         public AlembicImportSettings ImportSettings { get; set; }
 
@@ -29,11 +31,33 @@ namespace UTJ.Alembic
 
         public AlembicTreeNode AlembicTreeRoot { get { return _alembicTreeRoot; } }
 
+        static List<AlembicStream> s_Streams = new List<AlembicStream>();
+        public static void DisconnectStreamsWithPath(string path)
+        {
+            AbcAPI.clearContextsWithPath(path);
+            s_Streams.ForEach(s => {
+                if (s.ImportSettings.m_pathToAbc.GetFullPath() == path)
+                {
+                    s.streamInterupted = true;
+                    s.m_abc = default(AbcAPI.aiContext);
+                    s.m_loaded = false;   
+                }
+            });
+        } 
 
 
+        public static void ReconnectStreamsWithPath(string path)
+        {
+            s_Streams.ForEach(s =>
+            {
+                if (s.ImportSettings.m_pathToAbc.GetFullPath() == path)
+                    s.streamInterupted = false;
+            } );
+        } 
+        
         // --- For internal use ---
 
-        private bool AbcIsValid()
+        public bool AbcIsValid()
         {
             return (m_abc.ptr != (IntPtr)0);
         }
@@ -220,6 +244,7 @@ namespace UTJ.Alembic
                 
                 m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
 
+                m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc.GetFullPath());
                 if (AbcIsValid())
                 {
                     m_forceRefresh = true;
@@ -227,7 +252,7 @@ namespace UTJ.Alembic
 
                     AbcSyncConfig();
 
-                    AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), false);
+                    AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), true);
 
                     if (m_diagSettings.m_verbose)
                     {
@@ -252,6 +277,10 @@ namespace UTJ.Alembic
             if (ImportSettings == null)
                 return;
 
+            if (streamInterupted)
+            {
+                return;
+            }
             if (!m_loaded && ImportSettings != null && ImportSettings.m_pathToAbc != null)
             {
                 // We have lost the alembic context, try to recover it
@@ -325,6 +354,7 @@ namespace UTJ.Alembic
                 m_forceRefresh = true;
                 AbcSyncConfig();
                 AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), createMissingNodes);
+                AlembicStream.s_Streams.Add(this);
             }
             else
             {
@@ -349,6 +379,7 @@ namespace UTJ.Alembic
         {
             if (disposing)
             {
+                AlembicStream.s_Streams.Remove(this);
                 if (_alembicTreeRoot != null)
                 {
                     _alembicTreeRoot.Dispose();

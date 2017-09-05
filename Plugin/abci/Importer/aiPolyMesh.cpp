@@ -1940,11 +1940,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
 
             ret->m_normals = m_sharedNormals;
         }
-        else if (m_config.shareVertices && normalsParam.getArrayExtent() != ret->m_positions->size())
-        {
-            aiLogger::Error("Normal count differs from vertex count. Normals will be recomputed");
-            smoothNormalsRequired = true;
-        }
         else
         {
             DebugLog("  Read normals");
@@ -2037,9 +2032,9 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
 
     // 2nd, figure out which vertex can be merged, which cannot.
     // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
-    const abcV3 * normals = sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : NULL;  
-    bool normalsIndexed = normals && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
-    const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : NULL;
+    const abcV3 * normals = sample->m_smoothNormals.empty() && sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : sample->m_smoothNormals.data();
+    bool normalsIndexed = sample->m_normals.valid() && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
+    const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : sample->m_topology->m_indices->get();
 
     bool hasUVs = sample->m_uvs.valid();
     const auto &uvVals = *(sample->m_uvs.getVals());
@@ -2054,7 +2049,6 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
     while (itr != indexesOfFacesValues.end())
     {
-        size_t faceValueIndex = itr->first;  
         std::vector<size_t>& vertexUsages = itr->second;
         size_t vertexUsageIndex = 0;
         size_t vertexUsageMaxIndex = itr->second.size();
@@ -2076,7 +2070,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
             // Same UV?
             if (hasUVs)
             {
-                const Abc::V2f & uv = uvVals[uvIdxs[index]];
+                const Abc::V2f & uv = uvVals[uvIdxs[Nidxs ? Nidxs[index] : index]];
                 if (prevUV == NULL)
                     prevUV = &uv;
                 else

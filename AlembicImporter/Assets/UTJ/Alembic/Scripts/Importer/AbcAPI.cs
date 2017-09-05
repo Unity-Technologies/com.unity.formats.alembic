@@ -324,6 +324,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiEnableFileLog(Bool on, string path);
 
         [DllImport("abci")] public static extern void       aiCleanup();
+        [DllImport("abci")] public static extern void       clearContextsWithPath(string path);
         [DllImport("abci")] public static extern aiContext  aiCreateContext(int uid);
         [DllImport("abci")] public static extern void       aiDestroyContext(aiContext ctx);
         

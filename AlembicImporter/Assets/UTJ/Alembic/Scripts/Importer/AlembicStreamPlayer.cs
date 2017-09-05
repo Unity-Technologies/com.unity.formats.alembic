@@ -45,7 +45,7 @@ namespace UTJ.Alembic
             }
 
             // Re-importing the asset will create a new import settings asset and the stream will be holding on to an old one...
-            if (Stream.ImportSettings != m_StreamDescriptor.m_ImportSettings)
+            if (_stream!=null && Stream.ImportSettings != m_StreamDescriptor.m_ImportSettings)
                 Stream.ImportSettings = m_StreamDescriptor.m_ImportSettings;
 
         }

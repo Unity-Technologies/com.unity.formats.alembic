@@ -157,7 +157,7 @@ public:
     inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
 
 public:
-    Abc::Int32ArraySamplePtr m_indices;
+    Abc::UInt32ArraySamplePtr m_indices;
     Abc::Int32ArraySamplePtr m_counts;
     int m_triangulatedIndexCount;
 

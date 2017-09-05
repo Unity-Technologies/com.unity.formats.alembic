@@ -264,6 +264,7 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int index);
 abciAPI void            aiEnableFileLog(bool on, const char *path);
 
 abciAPI void            aiCleanup();
+abciAPI void            clearContextsWithPath(const char *path);
 abciAPI aiContext*      aiCreateContext(int uid);
 abciAPI void            aiDestroyContext(aiContext* ctx);
 

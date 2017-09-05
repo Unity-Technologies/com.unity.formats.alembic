@@ -6,6 +6,16 @@ using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
+    [InitializeOnLoad]
+    public class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
+    {
+        public static AssetDeleteResult OnWillDeleteAsset(string AssetPath, RemoveAssetOptions rao)
+        {
+            AlembicStream.DisconnectStreamsWithPath(AssetPath);
+            return AssetDeleteResult.DidNotDelete;
+        }
+    }
+
     [ScriptedImporter(1, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
@@ -15,6 +25,7 @@ namespace UTJ.Alembic
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
+            AlembicStream.DisconnectStreamsWithPath(ctx.assetPath);
             m_ImportSettings.m_pathToAbc =  new DataPath(ctx.assetPath);
             var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
             {
@@ -23,6 +34,7 @@ namespace UTJ.Alembic
                     ctx.AddSubAsset( mainGO.name, streamDescr);
             });
             ctx.SetMainAsset(mainObject.name, mainObject);
+            AlembicStream.ReconnectStreamsWithPath(ctx.assetPath);
         }
 
         private void GenerateSubAssets( AssetImportContext ctx, GameObject go, AlembicStream stream)

@@ -76,11 +76,6 @@ public:
 
             ms_instance.m_contexts[uid] = ctx;
 
-            if (!RefArchive(ctx->getPath()))
-            {
-                AddArchive(ctx->getPath(), ctx->getArchive());
-            }
-
             return true;
         }
     }
@@ -91,72 +86,22 @@ public:
         
         if (it != ms_instance.m_contexts.end())
         {
-            UnrefArchive(it->second->getPath());
-
             aiLogger::Info("Unregister context for gameObject with ID %d", uid);
 
             ms_instance.m_contexts.erase(it);
         }
     }
 
-    static bool AddArchive(const std::string &path, Abc::IArchive archive)
+    static void clearContextsWithPath(const char* assetPath)
     {
-        if (!archive.valid())
+        std::string path = aiContext::normalizePath(assetPath);
+        for (ContextMap::iterator it = ms_instance.m_contexts.begin(); it != ms_instance.m_contexts.end(); ++it)
         {
-            return false;
-        }
-
-        ArchiveMap::iterator it = ms_instance.m_archives.find(path);
-        
-        if (it != ms_instance.m_archives.end())
-        {
-            return false;
-        }
-        else
-        {
-            aiLogger::Info("Add new alembic archive '%s'", path.c_str());
-               
-            ArchiveItem &item = ms_instance.m_archives[path];
-            
-            item.refcount = 1;
-            item.archive = archive;
-
-            return true;
-        }
-    }
-
-    static Abc::IArchive RefArchive(const std::string &path)
-    {
-        ArchiveMap::iterator it = ms_instance.m_archives.find(path);
-        
-        if (it != ms_instance.m_archives.end())
-        {
-            aiLogger::Info("Reference alembic archive '%s'", path.c_str());
-
-            it->second.refcount += 1;
-            return it->second.archive;
-        }
-        else
-        {
-            return Abc::IArchive();
-        }
-    }
-
-    static void UnrefArchive(const std::string &path)
-    {
-        ArchiveMap::iterator it = ms_instance.m_archives.find(path);
-        
-        if (it != ms_instance.m_archives.end())
-        {
-            aiLogger::Info("Unreference alembic archive '%s'", path.c_str());
-
-            it->second.refcount -= 1;
-
-            if (it->second.refcount <= 0)
+            if (it->second->getPath() == path)
             {
-                aiLogger::Info("Remove alembic archive '%s'", path.c_str());
-
-                ms_instance.m_archives.erase(it);
+                aiLogger::Info("Unregister context for gameObject with ID %d", it->second->getPath());
+                delete it->second;
+                ms_instance.m_contexts.erase(it);
             }
         }
     }
@@ -180,13 +125,11 @@ private:
         }
         
         m_contexts.clear();
-        m_archives.clear();
     }
 
 private:
 
     ContextMap m_contexts;
-    ArchiveMap m_archives;
 
     static GlobalCache ms_instance;
 };
@@ -207,6 +150,11 @@ aiContext* aiContext::create(int uid)
     }
 
     return ctx;
+}
+
+void aiContext::clearContextsWithPath(const char* path)
+{
+    GlobalCache::clearContextsWithPath(path);
 }
 
 void aiContext::destroy(aiContext* ctx)
@@ -313,7 +261,7 @@ void aiContext::setConfig(const aiConfig &config)
     m_config = config;
 }
 
-void aiContext::gatherNodesRecursive(aiObject *n)
+void aiContext::gatherNodesRecursive(aiObject *n) const
 {
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
@@ -333,8 +281,6 @@ void aiContext::reset()
     waitTasks();
 
     m_top_node.reset();
-
-    GlobalCache::UnrefArchive(m_path);
     
     m_path = "";
     m_archive.reset();
@@ -343,7 +289,7 @@ void aiContext::reset()
     m_timeRange[1] = 0.0f;
 }
 
-std::string aiContext::normalizePath(const char *inPath) const
+std::string aiContext::normalizePath(const char *inPath)
 {
     std::string path;
 
@@ -398,7 +344,7 @@ bool aiContext::load(const char *inPath)
     }
 
     m_path = path;
-    m_archive = GlobalCache::RefArchive(m_path);
+    m_archive = Abc::IArchive();;
     
     if (!m_archive.valid())
     {
@@ -467,8 +413,6 @@ bool aiContext::load(const char *inPath)
         }
 
         DebugLog("Succeeded");
-
-        GlobalCache::AddArchive(m_path, m_archive);
 
         aiLogger::Unindent(1);
 

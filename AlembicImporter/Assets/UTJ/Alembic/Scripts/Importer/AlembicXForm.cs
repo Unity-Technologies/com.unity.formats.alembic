@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public class AlembicXForm : AlembicElement
     {
         AbcAPI.aiXFormData m_abcData;

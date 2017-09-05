@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public class AlembicPoints : AlembicElement
     {
         // members
