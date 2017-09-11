@@ -358,7 +358,7 @@ namespace UTJ.Alembic
             }
             else
             {
-                Debug.LogError("failed to load alembic: " + ImportSettings.m_pathToAbc);
+                Debug.LogError("failed to load alembic: " + ImportSettings.m_pathToAbc.GetFullPath());
             }
             AbcSetLastUpdateState(AbcTime(0.0f), AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode));
         }
