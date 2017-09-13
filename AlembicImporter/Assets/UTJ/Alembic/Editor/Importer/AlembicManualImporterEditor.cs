@@ -132,12 +132,8 @@ namespace UTJ.Alembic
 
             AlembicUI.AddHorzLine(() =>
             {
-                m_ImportSettings.m_useThreads = EditorGUILayout.Toggle("Use ABC threads", m_ImportSettings.m_useThreads);
-            });
-            AlembicUI.AddHorzLine(() =>
-            {
-                m_ImportSettings.m_sampleCacheSize = EditorGUILayout.IntField("Sample cache size",
-                    m_ImportSettings.m_sampleCacheSize);
+                m_ImportSettings.m_cacheSamples = EditorGUILayout.Toggle("Cache samples",
+                    m_ImportSettings.m_cacheSamples);
             });
 
 

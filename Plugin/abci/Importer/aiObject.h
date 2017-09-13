@@ -18,10 +18,10 @@ public:
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
     aiObject*   getParent();
-
+    void        cacheAllSamples();
+    void        cacheSamples(int64_t startIndex, int64_t endIndex);
     void        readConfig();
     void        updateSample(const abcSampleSelector& ss);
-    void        notifyUpdate();
  
     aiXForm*    getXForm();
     aiPolyMesh* getPolyMesh();

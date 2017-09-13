@@ -133,8 +133,7 @@ namespace UTJ.Alembic
             public Bool cacheTangentsSplits;
             public float aspectRatio;
             public Bool forceUpdate;
-            public Bool useThreads;
-            public int cacheSamples;
+            public Bool cacheSamples;
             public Bool submeshPerUVTile;
             public Bool shareVertices;
             public Bool treatVertexExtraDataAsStatics;
@@ -149,8 +148,7 @@ namespace UTJ.Alembic
                 cacheTangentsSplits = true;
                 aspectRatio = -1.0f;
                 forceUpdate = false;
-                useThreads = true;
-                cacheSamples = 0;
+                cacheSamples = false;
                 submeshPerUVTile = false;
                 shareVertices = true;
                 treatVertexExtraDataAsStatics = true;
@@ -336,9 +334,6 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
 
         [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time,bool playingForward);
-        [DllImport("abci")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time,bool playingForward);
-        [DllImport("abci")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
-
         [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
         [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
         [DllImport("abci")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
@@ -517,13 +512,10 @@ namespace UTJ.Alembic
                 trans.localScale = Vector3.one;
             }
             else
-                childGO = childTransf.gameObject;
-
-            if (childTreeNode == null )
-            {
-                childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
-                treeNode.children.Add(childTreeNode);
-            }
+                childGO = childTransf.gameObject;            
+            
+            childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
+            treeNode.children.Add(childTreeNode);
 
             // Update
             AlembicElement elem = null;

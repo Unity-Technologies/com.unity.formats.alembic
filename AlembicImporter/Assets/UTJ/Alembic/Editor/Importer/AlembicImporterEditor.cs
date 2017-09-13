@@ -29,8 +29,7 @@ namespace UTJ.Alembic
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_normalsMode), "Normals mode", "", settings.m_normalsMode.GetType());
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_tangentsMode), "Tangent mode", "", settings.m_tangentsMode.GetType());
             AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_aspectRatioMode), "Aspect ratio mode", "", settings.m_aspectRatioMode.GetType());
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_useThreads), "Use threads", "");
-            AddIntProperty(serSettings.FindPropertyRelative(() => settings.m_sampleCacheSize), "Sample cache size", "");
+            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_cacheSamples), "Cache samples", "");
             
             base.ApplyRevertGUI();
         }

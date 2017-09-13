@@ -122,20 +122,6 @@ abciAPI void aiUpdateSamples(aiContext* ctx, float time, bool isPlayingForward)
         ctx->updateSamples(time,isPlayingForward);
     }
 }
-abciAPI void aiUpdateSamplesBegin(aiContext* ctx, float time, bool isPlayingForward)
-{
-    if (ctx)
-    {
-        ctx->updateSamplesBegin(time,isPlayingForward);
-    }
-}
-abciAPI void aiUpdateSamplesEnd(aiContext* ctx)
-{
-    if (ctx)
-    {
-        ctx->updateSamplesEnd();
-    }
-}
 
 abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 {

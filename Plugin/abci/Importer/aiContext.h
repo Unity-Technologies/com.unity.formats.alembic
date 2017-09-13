@@ -56,10 +56,9 @@ public:
 
     float getStartTime() const;
     float getEndTime() const;
-
+    void cacheAllSamples();
+    void cacheSamples(int64_t startIndex, int64_t endIndex);
     void updateSamples(float time, bool isPlayingForward);
-    void updateSamplesBegin(float time, bool isPlayingForward);
-    void updateSamplesEnd();
 
     void enqueueTask(const task_t &task);
     void waitTasks();
@@ -87,6 +86,7 @@ private:
     std::unique_ptr<aiObject> m_top_node;
     aiTaskGroup m_tasks;
     double m_timeRange[2] = {-0.0, -0.0};
+    uint64_t m_numFrames = 0;
     int m_uid = 0;
     aiConfig m_config;
 };

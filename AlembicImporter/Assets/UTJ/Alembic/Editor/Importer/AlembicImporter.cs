@@ -1,21 +1,62 @@
 #if UNITY_2017_1_OR_NEWER
 
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
-    [InitializeOnLoad]
     public class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
     {
-        public static AssetDeleteResult OnWillDeleteAsset(string AssetPath, RemoveAssetOptions rao)
+        public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
         {
-            AlembicStream.DisconnectStreamsWithPath(AssetPath);
+            if (Path.GetExtension(assetPath.ToLower()) != ".abc")
+                return AssetDeleteResult.DidNotDelete;
+            var streamingAssetPath = assetPath.Replace("Assets","");
+            AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
+
+            var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
+            System.IO.File.Delete(fullStreamingAssetPath);
+            System.IO.File.Delete(fullStreamingAssetPath + ".meta");
+
+
             return AssetDeleteResult.DidNotDelete;
         }
-    }
 
+        public static AssetMoveResult OnWillMoveAsset(string from, string to)
+        {
+            if (Path.GetExtension(from.ToLower()) != ".abc")
+                return AssetMoveResult.DidNotMove;
+            var streamDestPath = to.Replace("Assets" , "");
+            var streamSourcePath = from.Replace("Assets" , "");
+            AlembicStream.DisconnectStreamsWithPath(streamSourcePath);
+            AlembicStream.RemapStreamsWithPath(streamSourcePath,streamDestPath);
+
+            var destPath = Application.streamingAssetsPath + streamDestPath;
+            var sourcePath = Application.streamingAssetsPath + streamSourcePath;
+
+            var directoryPath = Path.GetDirectoryName(destPath);
+            if (System.IO.File.Exists(destPath))
+            {
+                System.IO.File.Delete(destPath);    
+            }
+            else if (!System.IO.Directory.Exists(directoryPath))
+            {
+                System.IO.Directory.CreateDirectory(directoryPath);
+            }
+            System.IO.File.Move(sourcePath, destPath);
+            if (System.IO.File.Exists(sourcePath + ".meta"))
+            {
+                System.IO.File.Move(sourcePath + ".meta", destPath+ ".meta");    
+            }
+            AssetDatabase.Refresh(ImportAssetOptions.Default);
+            AlembicStream.ReconnectStreamsWithPath(streamDestPath);        
+
+            return AssetMoveResult.DidNotMove;
+        } 
+    }
+        
     [ScriptedImporter(1, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
@@ -25,16 +66,27 @@ namespace UTJ.Alembic
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            AlembicStream.DisconnectStreamsWithPath(ctx.assetPath);
-            m_ImportSettings.m_pathToAbc =  new DataPath(ctx.assetPath);
+            var shortAssetPath = ctx.assetPath.Replace("Assets", "");
+            AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
+            var sourcePath = Application.dataPath + shortAssetPath;
+            var destPath = Application.streamingAssetsPath + shortAssetPath;
+            var directoryPath = Path.GetDirectoryName(destPath);
+            if (!System.IO.Directory.Exists(directoryPath))
+            {
+                System.IO.Directory.CreateDirectory(directoryPath);
+            }
+            System.IO.File.Copy(sourcePath, destPath ,true);
+            m_ImportSettings.m_pathToAbc =  new DataPath(destPath);
+
             var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
             {
                 GenerateSubAssets(ctx, mainGO, stream);
                 if(streamDescr != null)
                     ctx.AddSubAsset( mainGO.name, streamDescr);
+
+                AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
             });
-            ctx.SetMainAsset(mainObject.name, mainObject);
-            AlembicStream.ReconnectStreamsWithPath(ctx.assetPath);
+            ctx.SetMainAsset(mainObject.name, mainObject);            
         }
 
         private void GenerateSubAssets( AssetImportContext ctx, GameObject go, AlembicStream stream)

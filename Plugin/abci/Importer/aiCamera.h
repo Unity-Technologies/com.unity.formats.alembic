@@ -8,7 +8,7 @@ public:
     
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
-    void getData(aiCameraData &outData);
+    void getData(aiCameraData &outData) const;
     
 public:
     AbcGeom::CameraSample m_sample;
@@ -31,5 +31,4 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
-    bool updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const override;
 };

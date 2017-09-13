@@ -11,8 +11,9 @@ public:
     void getData(aiXFormData &outData) const;
 
 public:
-    AbcGeom::XformSample m_sample;
-    AbcGeom::XformSample m_nextSample;
+    AbcGeom::M44d m_matrix;
+    AbcGeom::M44d m_nextMatrix;
+    bool inherits;
 private:
     void decomposeXForm(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };
@@ -32,5 +33,4 @@ public:
 
     Sample* newSample();
     Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
-    bool updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const override;
 };

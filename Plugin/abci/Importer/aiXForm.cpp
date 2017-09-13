@@ -44,14 +44,14 @@ void aiXFormSample::getData(aiXFormData &outData) const
     Imath::V3d shear;
     Imath::Quatd rot;
     Imath::V3d trans;
-    decomposeXForm(m_sample.getMatrix(), scale, shear, rot, trans);
+    decomposeXForm(m_matrix, scale, shear, rot, trans);
 
     if (m_config.interpolateSamples && m_currentTimeOffset!=0)
     {
         Imath::V3d scale2;
         Imath::Quatd rot2;
         Imath::V3d trans2;
-        decomposeXForm(m_nextSample.getMatrix(), scale2, shear, rot2, trans2);
+        decomposeXForm(m_nextMatrix, scale2, shear, rot2, trans2);
         scale += (scale2 - scale)* m_currentTimeOffset;
         trans += (trans2 - trans)* m_currentTimeOffset;
         rot = slerpShortestArc(rot, rot2, m_currentTimeOffset);
@@ -60,12 +60,12 @@ void aiXFormSample::getData(aiXFormData &outData) const
     abcV4 rotFinal = abcV4(rot.v[0], rot.v[1], rot.v[2], rot.r);
 
     if (m_config.swapHandedness)
-    {        trans.x *= -1.0f;
+    {
+        trans.x *= -1.0f;
         rotFinal.x = -rotFinal.x;
         rotFinal.w = -rotFinal.w;
     }
-
-    outData.inherits = m_sample.getInheritsXforms();
+    outData.inherits = inherits;
     outData.translation = trans;
     outData.rotation = rotFinal;
     outData.scale = scale;
@@ -90,32 +90,18 @@ aiXForm::Sample* aiXForm::newSample()
 
 aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
-    DebugLog("aiXForm::readSample(t=%f)", time);
+    DebugLog("aiXForm::readSample(t=%f)", ss.getRequestedTime());
+    Sample *ret = new Sample(this);
+    AbcGeom::XformSample matSample;
+    m_schema.get(matSample, ss);
+    ret->m_matrix = matSample.getMatrix();
     
-    Sample *ret = newSample();
+    ret->inherits = matSample.getInheritsXforms();
 
-    m_schema.get(ret->m_sample, ss);
-
+    AbcGeom::XformSample nextMatSample;
+    m_schema.get(nextMatSample, getSampleSelectorComplement(ss));
+    ret->m_nextMatrix = nextMatSample.getMatrix();
+    
     topologyChanged = false;
-
     return ret;
 }
-
-bool aiXForm::updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const
-{
-    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
-    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
-    bool dataChanged = requestedTime != sample.m_lastSampleTime;
-    sample.m_lastSampleTime = requestedTime;
-    if (dataChanged)
-    {
-        AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-        AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
-        sample.m_currentTimeOffset = floor_offset / interval;
-        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
-            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
-        m_schema.get(sample.m_nextSample, ssCeil);
-    }
-    return dataChanged;
-}
-

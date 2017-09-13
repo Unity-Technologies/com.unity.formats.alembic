@@ -61,13 +61,7 @@ namespace UTJ.Alembic
             if (Stream != null && m_ManualUpdateMode == false)
                 Stream.ProcessUpdateEvent();
         }
-
-        public void LateUpdate()
-        {
-            if (Stream != null)
-                Stream.ProcessLateUpdateEvent();
-        }
-
+        
         public void OnDestroy()
         {
             if (Stream != null)

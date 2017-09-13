@@ -1109,7 +1109,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     
     bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
-    bool interpolatePositions = !m_schema->hasVaryingTopology() && m_config.interpolateSamples;
+    bool interpolatePositions = !m_schema->hasVaryingTopology() && m_config.interpolateSamples && m_nextPositions!=nullptr;
     float timeOffset = static_cast<float>(m_currentTimeOffset);
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];
@@ -1863,25 +1863,6 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
-bool aiPolyMesh::updateInterpolatedValues(const Abc::ISampleSelector& ss,Sample& sample) const
-{
-    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
-    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
-    DebugLog("  Read next positions");
-    bool dataChanged = requestedTime != sample.m_lastSampleTime;
-    sample.m_lastSampleTime = requestedTime;
-    if (dataChanged)
-    {
-        AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-        AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
-        sample.m_currentTimeOffset = floor_offset / interval;
-        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
-            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
-        m_schema.getPositionsProperty().get(sample.m_nextPositions, ssCeil);
-    }
-    return dataChanged;
-}
-
 aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
     DebugLog("aiPolyMesh::readSample(t=%f)", (float)ss.getRequestedTime());
@@ -1913,7 +1894,9 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     if (!m_varyingTopology && m_config.interpolateSamples)
     {
         DebugLog("  Read last positions");
-        updateInterpolatedValues(ss, *ret);
+        
+        Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
+        m_schema.getPositionsProperty().get(ret->m_nextPositions, ssCeil);
     }
 
     ret->m_velocities.reset();
@@ -2033,7 +2016,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     // 2nd, figure out which vertex can be merged, which cannot.
     // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
     const abcV3 * normals = sample->m_smoothNormals.empty() && sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : sample->m_smoothNormals.data();
-    bool normalsIndexed = sample->m_normals.valid() && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
+    bool normalsIndexed = !sample->m_smoothNormals.empty() ? false : sample->m_normals.valid() && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
     const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : sample->m_topology->m_indices->get();
 
     bool hasUVs = sample->m_uvs.valid();
@@ -2070,7 +2053,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
             // Same UV?
             if (hasUVs)
             {
-                const Abc::V2f & uv = uvVals[uvIdxs[Nidxs ? Nidxs[index] : index]];
+                const Abc::V2f & uv = uvVals[uvIdxs[index]];
                 if (prevUV == NULL)
                     prevUV = &uv;
                 else

@@ -37,8 +37,7 @@ namespace UTJ.Alembic
         [SerializeField] public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
 
         [Header("Advanced")]
-        [SerializeField] public bool m_useThreads = false;
-        [SerializeField] public int m_sampleCacheSize = 0;
+        [SerializeField] public bool m_cacheSamples = false;
 
     }
 
@@ -71,7 +70,7 @@ namespace UTJ.Alembic
         public bool m_preserveStartTime = true;
 
         [Tooltip("Controls how playback cycles throught the stream.")]
-        [SerializeField] public CycleType m_cycle = CycleType.Hold;
+        [SerializeField] public CycleType m_cycle = CycleType.Loop;
 
         [SerializeField] public float m_Time = 0f;
         [SerializeField] public bool m_OverrideTime = false;

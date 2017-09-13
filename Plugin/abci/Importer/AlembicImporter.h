@@ -110,8 +110,7 @@ struct aiConfig
     bool cacheTangentsSplits = true;
     float aspectRatio = -1.0f;
     bool forceUpdate = false;
-    bool useThreads = true;
-    int32_t cacheSamples = 0;
+    bool cacheSamples = false;
     bool submeshPerUVTile = true;
     bool shareVertices = false;
     bool treatVertexExtraDataAsStatic = false;
@@ -281,8 +280,6 @@ abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingD
 abciAPI void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 
 abciAPI void            aiUpdateSamples(aiContext* ctx, float time, bool isPlayingForward);
-abciAPI void            aiUpdateSamplesBegin(aiContext* ctx, float time, bool isPlayingForward);   // async version
-abciAPI void            aiUpdateSamplesEnd(aiContext* ctx);                 // async version
 
 abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 abciAPI const char*     aiGetNameS(aiObject* obj);

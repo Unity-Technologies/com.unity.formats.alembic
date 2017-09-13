@@ -21,7 +21,7 @@ void aiCameraSample::updateConfig(const aiConfig &config, bool &topoChanged, boo
     m_config = config;
 }
 
-void aiCameraSample::getData(aiCameraData &outData)
+void aiCameraSample::getData(aiCameraData &outData) const
 {
     // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
     DebugLog("aiCameraSample::getData()");
@@ -88,31 +88,13 @@ aiCamera::Sample* aiCamera::newSample()
 
 aiCamera::Sample* aiCamera::readSample(const abcSampleSelector& ss, bool &topologyChanged)
 {
-    DebugLog("aiCamera::readSample(t=%f)", time);
+    DebugLog("aiCamera::readSample(t=%f)", ss.getRequestedTime());
     
     Sample *ret = newSample();
     
     m_schema.get(ret->m_sample, ss);
-
+    m_schema.get(ret->m_nextSample, getSampleSelectorComplement(ss));
     topologyChanged = false;
 
     return ret;
-}
-
-bool aiCamera::updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const
-{
-    AbcCoreAbstract::chrono_t requestedTime = ss.getRequestedTime();
-    Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
-    bool dataChanged = requestedTime != sample.m_lastSampleTime;
-    sample.m_lastSampleTime = requestedTime;
-    if (dataChanged)
-    {
-        AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-        AbcCoreAbstract::chrono_t floor_offset = fmod(requestedTime, interval);
-        sample.m_currentTimeOffset = floor_offset / interval;
-        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
-            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
-        m_schema.get(sample.m_nextSample, ssCeil);
-    }
-    return dataChanged;
 }

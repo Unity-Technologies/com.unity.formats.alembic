@@ -398,6 +398,8 @@ bool aiContext::load(const char *inPath)
 
                 m_timeRange[0] = ts->getStoredTimes()[0];
                 m_timeRange[1] = m_timeRange[0] + (numCycles - 1) * tst.getTimePerCycle();
+
+                if (numCycles > m_numFrames) m_numFrames = numCycles;
             }
             else if (tst.isAcyclic())
             {
@@ -416,6 +418,8 @@ bool aiContext::load(const char *inPath)
 
         aiLogger::Unindent(1);
 
+        if (m_config.cacheSamples)
+            cacheAllSamples();
         return true;
     }
     else
@@ -460,54 +464,51 @@ void aiContext::destroyObject(aiObject *obj)
     }
 }
 
+void aiContext::cacheAllSamples()
+{
+    const int64_t numFramesPerBlock = 10;
+    const int64_t lastBlockSize = m_numFrames % numFramesPerBlock;
+    const int64_t numBlocks = m_numFrames / numFramesPerBlock + (lastBlockSize == 0 ? 0 : 1);
+    eachNodes([this, numBlocks, numFramesPerBlock, lastBlockSize](aiObject *o)
+    {
+        o->cacheSamples(0, 1);
+    });
+    
+    for (int64_t i=0; i< numBlocks; i++)
+    {
+        const int64_t startIndex = (i == 0) ? 1 : i*numFramesPerBlock;
+        const int64_t endIndex = i*numFramesPerBlock + (i == numBlocks - 1 ? lastBlockSize : numFramesPerBlock);
+        enqueueTask([this, startIndex, endIndex]()
+        {
+            eachNodes([this, startIndex, endIndex](aiObject *o)
+            {
+                o->cacheSamples(startIndex, endIndex);
+            });
+        });   
+    }
+    waitTasks();
+}
+
+void aiContext::cacheSamples(int64_t startIndex, int64_t endIndex)
+{
+    eachNodes([this, startIndex, endIndex](aiObject *o)
+    {
+        enqueueTask([o, startIndex, endIndex]()
+        {
+            o->cacheSamples(startIndex,endIndex);
+        });
+    });
+    waitTasks();
+}
+
 void aiContext::updateSamples(float time,bool isPlayingForward)
 {
     const abcSampleSelector ss = aiTimeToSampleSelector(time, isPlayingForward);
 
-    if (m_config.useThreads)
-    {
-        DebugLog("aiContext::updateSamples() [threaded]");
+    DebugLog("aiContext::updateSamples()");
         
-        eachNodes([](aiObject *o) {
-            o->readConfig();
-        });
-        eachNodes([this, ss](aiObject *o) {
-            enqueueTask([o, ss]() {
-                o->updateSample(ss);
-            });
-        });
-        waitTasks();
-        eachNodes([](aiObject *o) {
-            o->notifyUpdate();
-        });
-    }
-    else
-    {
-        DebugLog("aiContext::updateSamples()");
-        
-        eachNodes([ss](aiObject *o) {
-            o->updateSample(ss);
-        });
-    }
-}
-void aiContext::updateSamplesBegin(float time, bool isPlayingForward)
-{
-    const abcSampleSelector ss = aiTimeToSampleSelector(time, isPlayingForward);
-
-    eachNodes([](aiObject *o) {
-        o->readConfig();
-    });
-    enqueueTask([this, ss](){
-        eachNodes([ss](aiObject *o) {
-            o->updateSample(ss);
-        });
-    });
-}
-void aiContext::updateSamplesEnd()
-{
-    waitTasks();
-    eachNodes([](aiObject *o) {
-        o->notifyUpdate();
+    eachNodes([ss](aiObject *o) {
+        o->updateSample(ss);
     });
 }
 

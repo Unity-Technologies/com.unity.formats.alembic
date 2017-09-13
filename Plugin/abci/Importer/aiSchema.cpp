@@ -8,7 +8,6 @@
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
     : m_schema(schema)
-    , m_lastSampleTime(-1)
     , m_currentTimeOffset(0)
 {
     m_config = schema->getConfig();
@@ -75,30 +74,13 @@ void aiSchemaBase::readConfig()
 
     m_config = m_obj->getContext()->getConfig();
 
-    bool useThreads = m_config.useThreads;
-
     DebugLog("  Original config: %s", ToString(m_config).c_str());
 
     // get object config overrides (if any)
     invokeConfigCallback(&m_config);
 
-    // don't allow override of useThreads option
-    m_config.useThreads = useThreads;
-
     DebugLog("  Override config: %s", ToString(m_config).c_str());
 }
-
-void aiSchemaBase::notifyUpdate()
-{
-    if (m_pendingSample)
-    {
-        invokeSampleCallback(m_pendingSample, m_pendingTopologyChanged);
-
-        m_pendingSample = 0;
-        m_pendingTopologyChanged = false;
-    }
-}
-
 
 int aiSchemaBase::getNumProperties() const
 {
