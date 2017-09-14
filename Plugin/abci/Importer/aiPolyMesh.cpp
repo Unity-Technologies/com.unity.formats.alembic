@@ -396,7 +396,7 @@ bool aiPolyMeshSample::hasUVs() const
 
 bool aiPolyMeshSample::hasVelocities() const
 {
-    return m_config.interpolateSamples || !m_velocities->emptySample();
+    return !m_schema->hasVaryingTopology() && m_config.interpolateSamples;
 }
 
 bool aiPolyMeshSample::hasTangents() const
@@ -1109,7 +1109,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     
     bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
-    bool interpolatePositions = !m_schema->hasVaryingTopology() && m_config.interpolateSamples && m_nextPositions!=nullptr;
+    bool interpolatePositions = hasVelocities() && m_nextPositions!=nullptr;
     float timeOffset = static_cast<float>(m_currentTimeOffset);
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];

@@ -183,9 +183,9 @@ namespace UTJ.Alembic
         {
             public int splitCount;
             public Bool hasNormals;
-            public Bool hasVelocities;
             public Bool hasUVs;
             public Bool hasTangents;
+            public Bool hasVelocities;
         }
 
         public struct aiPolyMeshData
