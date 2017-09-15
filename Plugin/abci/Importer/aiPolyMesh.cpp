@@ -1988,7 +1988,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
         }
     }
 
-    if (m_config.shareVertices && ret != NULL && !ret->m_ownTopology && topologyChanged)
+    if (m_config.shareVertices && !m_varyingTopology && ret != NULL && !ret->m_ownTopology && topologyChanged)
         GenerateVerticesToFacesLookup(ret);
 
     return ret;
