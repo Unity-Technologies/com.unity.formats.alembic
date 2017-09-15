@@ -17,7 +17,9 @@ namespace UTJ.Alembic
             AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
 
             var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
+            File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
             System.IO.File.Delete(fullStreamingAssetPath);
+            File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
             System.IO.File.Delete(fullStreamingAssetPath + ".meta");
 
 
@@ -39,15 +41,19 @@ namespace UTJ.Alembic
             var directoryPath = Path.GetDirectoryName(destPath);
             if (System.IO.File.Exists(destPath))
             {
+                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
                 System.IO.File.Delete(destPath);    
             }
             else if (!System.IO.Directory.Exists(directoryPath))
             {
                 System.IO.Directory.CreateDirectory(directoryPath);
             }
+            if (System.IO.File.Exists(destPath))
+                File.SetAttributes(destPath, FileAttributes.Normal);
             System.IO.File.Move(sourcePath, destPath);
-            if (System.IO.File.Exists(sourcePath + ".meta"))
+            if (System.IO.File.Exists(destPath + ".meta"))
             {
+                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
                 System.IO.File.Move(sourcePath + ".meta", destPath+ ".meta");    
             }
             AssetDatabase.Refresh(ImportAssetOptions.Default);
@@ -75,6 +81,8 @@ namespace UTJ.Alembic
             {
                 System.IO.Directory.CreateDirectory(directoryPath);
             }
+            if (System.IO.File.Exists(destPath))
+                File.SetAttributes(destPath, FileAttributes.Normal);
             System.IO.File.Copy(sourcePath, destPath ,true);
             m_ImportSettings.m_pathToAbc =  new DataPath(destPath);
 
