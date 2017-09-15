@@ -246,72 +246,56 @@ namespace UTJ.Alembic
         }
 
 
-        private bool AbcRecoverContext()
+        public bool AbcRecoverContext(GameObject go)
         {
-            if (!AbcIsValid())
+            if (m_diagSettings.m_verbose)
             {
+                Debug.Log("AlembicStream.AbcRecoverContext: Try to recover alembic context");
+            }
+            if (go != _alembicTreeRoot.linkedGameObj)
+            {
+                _alembicTreeRoot = new AlembicTreeNode() { stream = this, linkedGameObj = go };
+            }
+            m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
+            AbcSyncConfig();
+            m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc.GetFullPath());
+            if (AbcIsValid())
+            {
+                m_forceRefresh = true;
+                _alembicTreeRoot.ResetTree();
+
+                AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), false);
+
                 if (m_diagSettings.m_verbose)
                 {
-                    Debug.Log("AlembicStream.AbcRecoverContext: Try to recover alembic context");
+                    Debug.Log("AlembicStream.AbcRecoverContext: Succeeded.");
                 }
-                
-                m_abc = AbcAPI.aiCreateContext(_alembicTreeRoot.linkedGameObj.GetInstanceID());
-                AbcSyncConfig();
-                m_loaded = AbcAPI.aiLoad(m_abc, ImportSettings.m_pathToAbc.GetFullPath());
-                if (AbcIsValid())
-                {
-                    m_forceRefresh = true;
-                    _alembicTreeRoot.ResetTree();
 
-                    AbcAPI.UpdateAbcTree(m_abc, _alembicTreeRoot, AbcTime(m_time), true);
-
-                    if (m_diagSettings.m_verbose)
-                    {
-                        Debug.Log("AlembicStream.AbcRecoverContext: Succeeded.");
-                    }
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
+
         }
 
-        private void AbcUpdateBegin(float time)
+        private bool AbcUpdateBegin(float time)
         {
             if (ImportSettings == null)
-                return;
+                return true;
 
             if (streamInterupted)
             {
-                return;
+                return true;
             }
-            if (!m_loaded && ImportSettings != null && ImportSettings.m_pathToAbc != null)
+            if (!AbcIsValid() || (!m_loaded && ImportSettings != null && ImportSettings.m_pathToAbc != null))
             {
+                return false;
                 // We have lost the alembic context, try to recover it
-                m_loaded = AbcRecoverContext();
             }
-
-            if (m_loaded)
+            else 
             {
-                if (!AbcIsValid())
-                {
-                    // We have lost the alembic context, try to recover
-                    m_loaded = AbcRecoverContext();
-                    if (!m_loaded)
-                    {
-                        Debug.LogWarning("AlembicStream.AbcUpdate: Lost alembic context");
-                        
-                        return;
-                    }
-                }
-
                 m_time = time;
 
                 float abcTime = AbcTime(m_time);
@@ -333,6 +317,7 @@ namespace UTJ.Alembic
                     
                     AbcSetLastUpdateState(abcTime, aspectRatio);
                 }
+                return true;
             }
         }
    
@@ -399,15 +384,16 @@ namespace UTJ.Alembic
             base.Dispose(disposing);
         }
 
-        public void ProcessUpdateEvent()
+        // return false if context needs to be recovered
+        public bool ProcessUpdateEvent()
         {
             if (Application.isPlaying && !m_playbackSettings.m_OverrideTime)
             {
-                AbcUpdateBegin(Time.time);
+                return AbcUpdateBegin(Time.time);
             }
             else
             {
-                AbcUpdateBegin(m_playbackSettings.m_Time);
+                return AbcUpdateBegin(m_playbackSettings.m_Time);
             }
         }
 

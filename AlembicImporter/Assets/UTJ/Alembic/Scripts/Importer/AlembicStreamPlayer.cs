@@ -45,7 +45,7 @@ namespace UTJ.Alembic
             }
 
             // Re-importing the asset will create a new import settings asset and the stream will be holding on to an old one...
-            if (_stream!=null && Stream.ImportSettings != m_StreamDescriptor.m_ImportSettings)
+            if (_stream!=null && m_StreamDescriptor!= null && Stream.ImportSettings != m_StreamDescriptor.m_ImportSettings)
                 Stream.ImportSettings = m_StreamDescriptor.m_ImportSettings;
 
         }
@@ -53,13 +53,15 @@ namespace UTJ.Alembic
         public void ManualUpdate()
         {
             if (Stream != null && m_ManualUpdateMode == true)
-                Stream.ProcessUpdateEvent();
+               if (!Stream.ProcessUpdateEvent())
+                    Stream.AbcRecoverContext(gameObject);
         }
 
         public void Update()
         {
             if (Stream != null && m_ManualUpdateMode == false)
-                Stream.ProcessUpdateEvent();
+                if (!Stream.ProcessUpdateEvent())
+                    Stream.AbcRecoverContext(gameObject);
         }
         
         public void OnDestroy()
