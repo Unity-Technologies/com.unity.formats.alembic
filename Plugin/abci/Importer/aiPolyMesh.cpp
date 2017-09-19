@@ -1109,7 +1109,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     
     bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
-    bool interpolatePositions = hasVelocities() && m_nextPositions!=nullptr;
+    bool interpolatePositions = hasVelocities() && m_nextPositions != nullptr;
     float timeOffset = static_cast<float>(m_currentTimeOffset);
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];
@@ -1863,8 +1863,10 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &topologyChanged)
+aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyChanged)
 {
+    auto ss = aiIndexToSampleSelector(idx);
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
     DebugLog("aiPolyMesh::readSample(t=%f)", (float)ss.getRequestedTime());
     
     Sample *ret = newSample();
@@ -1895,8 +1897,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const abcSampleSelector& ss, bool &to
     {
         DebugLog("  Read last positions");
         
-        Abc::ISampleSelector ssCeil = getSampleSelectorComplement(ss);
-        m_schema.getPositionsProperty().get(ret->m_nextPositions, ssCeil);
+        m_schema.getPositionsProperty().get(ret->m_nextPositions, ss2);
     }
 
     ret->m_velocities.reset();

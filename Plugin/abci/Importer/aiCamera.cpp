@@ -86,14 +86,16 @@ aiCamera::Sample* aiCamera::newSample()
     return sample;
 }
 
-aiCamera::Sample* aiCamera::readSample(const abcSampleSelector& ss, bool &topologyChanged)
+aiCamera::Sample* aiCamera::readSample(const uint64_t idx, bool &topologyChanged)
 {
-    DebugLog("aiCamera::readSample(t=%f)", ss.getRequestedTime());
+    auto ss = aiIndexToSampleSelector(idx);
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
+    DebugLog("aiCamera::readSample(t=%f)", ss.getRequestedIndex());
     
     Sample *ret = newSample();
     
     m_schema.get(ret->m_sample, ss);
-    m_schema.get(ret->m_nextSample, getSampleSelectorComplement(ss));
+    m_schema.get(ret->m_nextSample, ss2);
     topologyChanged = false;
 
     return ret;

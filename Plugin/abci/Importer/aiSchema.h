@@ -131,11 +131,9 @@ public:
         readConfig();
         for (int64_t i=0; i< m_numSamples ; i++)
         {
-            auto sampleTime = m_timeSampling->getSampleTime(i);
             auto &sp = m_samples[i];
-            auto ss = abcSampleSelector(sampleTime, Abc::ISampleSelector::kFloorIndex);
             bool unused = i == 0;
-            sp.reset(readSample(ss, unused));
+            sp.reset(readSample(i, unused));
         }
     }
 
@@ -146,11 +144,9 @@ public:
         if (startIndex==0) readConfig();
         for (int64_t i = startIndex; i< endIndex; i++)
         {
-            auto sampleTime = m_timeSampling->getSampleTime(i);
-            auto &sp = m_samples[i];
-            auto ss = abcSampleSelector(sampleTime, Abc::ISampleSelector::kFloorIndex);
+            auto &sp = m_samples[i];   
             bool unused = i == 0;
-            sp.reset(readSample(ss, unused));
+            sp.reset(readSample(i, unused));
         }
     }
 
@@ -197,16 +193,7 @@ protected:
        }
     }
 
-    virtual Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) = 0;
-    virtual void updateInterpolatedValues(const Abc::ISampleSelector& ss, Sample& sample) const
-    {
-        AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-        AbcCoreAbstract::chrono_t floor_offset = fmod(ss.getRequestedTime(), interval);
-        sample.m_currentTimeOffset = floor_offset / interval;
-        if (ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kCeilIndex)
-            sample.m_currentTimeOffset = 1.0 - sample.m_currentTimeOffset;
-    };
-
+    virtual Sample* readSample(const uint64_t idx, bool &topologyChanged) = 0;
 protected:
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
@@ -247,7 +234,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
         {
             DebugLog("  Read sample");
 
-            sample = readSample(ss, topologyChanged);
+            sample = readSample(sampleIndex, topologyChanged);
 
             m_theSample = sample;
         }
@@ -278,7 +265,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
         {
             DebugLog("  Create new cache sample");
 
-            sp.reset(readSample(ss, topologyChanged));
+            sp.reset(readSample(sampleIndex, topologyChanged));
 
             sample = sp.get();
         }
@@ -314,8 +301,10 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
     if (sample)
     {
         if (!m_varyingTopology && m_config.interpolateSamples)
-        {
-            updateInterpolatedValues(ss, *sample);
+        {   
+            AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
+            auto indexTime = m_timeSampling->getSampleTime(sampleIndex);
+            sample->m_currentTimeOffset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));
         }
         invokeSampleCallback(sample, topologyChanged);
     }

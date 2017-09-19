@@ -88,8 +88,11 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topologyChanged)
+aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
 {
+    auto ss = aiIndexToSampleSelector(idx);
+    auto ss2 = aiIndexToSampleSelector(idx+1);
+
     DebugLog("aiXForm::readSample(t=%f)", ss.getRequestedTime());
     Sample *ret = new Sample(this);
     AbcGeom::XformSample matSample;
@@ -99,7 +102,7 @@ aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topology
     ret->inherits = matSample.getInheritsXforms();
 
     AbcGeom::XformSample nextMatSample;
-    m_schema.get(nextMatSample, getSampleSelectorComplement(ss));
+    m_schema.get(nextMatSample, ss2 );
     ret->m_nextMatrix = nextMatSample.getMatrix();
     
     topologyChanged = false;

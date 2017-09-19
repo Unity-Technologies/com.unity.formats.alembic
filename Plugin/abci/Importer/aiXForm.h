@@ -32,5 +32,5 @@ public:
     aiXForm(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
 };

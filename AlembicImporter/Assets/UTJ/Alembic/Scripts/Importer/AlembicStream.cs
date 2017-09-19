@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    public class AlembicStream : AlembicDisposable
+    public class AlembicStream : IDisposable
     {
         private AlembicTreeNode _alembicTreeRoot;
 
@@ -202,24 +202,34 @@ namespace UTJ.Alembic
         {
             if (node == null)
                 node = _alembicTreeRoot;
+            var o = node.alembicObjects.GetEnumerator();
+            while (o.MoveNext())
+            {
+                o.Current.Value.AbcUpdateConfig();
+            }
 
-            foreach (var o in node.alembicObjects)
-                o.Value.AbcUpdateConfig();
-
-            foreach (var c in node.children)
-                AbcUpdateConfigElements(c);
+            var c = node.children.GetEnumerator();
+            while (c.MoveNext())
+            {
+                AbcUpdateConfigElements(c.Current);
+            }
         }
 
         public void AbcUpdateElements( AlembicTreeNode node = null )
         {
             if (node == null)
                 node = _alembicTreeRoot;
+            var o = node.alembicObjects.GetEnumerator();
+            while (o.MoveNext())
+            {
+                o.Current.Value.AbcUpdate();
+            }
 
-            foreach (var o in node.alembicObjects)
-                o.Value.AbcUpdate();
-
-            foreach (var c in node.children)
-                AbcUpdateElements( c );
+            var c = node.children.GetEnumerator();
+            while (c.MoveNext())
+            {
+                AbcUpdateElements(c.Current);
+            }
         }
 
 
@@ -299,7 +309,6 @@ namespace UTJ.Alembic
                 m_time = time;
 
                 float abcTime = AbcTime(m_time);
-                bool isPlayingForward = abcTime >= m_lastAbcTime;
                 float aspectRatio = AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode);
 
                 if (AbcUpdateRequired(abcTime, aspectRatio))
@@ -312,7 +321,7 @@ namespace UTJ.Alembic
                     AbcSyncConfig();
                     AbcUpdateConfigElements();
                    
-                    AbcAPI.aiUpdateSamples(m_abc, abcTime,isPlayingForward);
+                    AbcAPI.aiUpdateSamples(m_abc, abcTime);
                     AbcUpdateElements();
                     
                     AbcSetLastUpdateState(abcTime, aspectRatio);
@@ -363,16 +372,13 @@ namespace UTJ.Alembic
 
         // --- method overrides ---
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
+            AlembicStream.s_Streams.Remove(this);
+            if (_alembicTreeRoot != null)
             {
-                AlembicStream.s_Streams.Remove(this);
-                if (_alembicTreeRoot != null)
-                {
-                    _alembicTreeRoot.Dispose();
-                    _alembicTreeRoot = null;
-                }
+                _alembicTreeRoot.Dispose();
+                _alembicTreeRoot = null;
             }
 
             if (AbcIsValid())
@@ -380,8 +386,6 @@ namespace UTJ.Alembic
                 AbcAPI.aiDestroyContext(m_abc);
                 m_abc = default(AbcAPI.aiContext);
             }
-
-            base.Dispose(disposing);
         }
 
         // return false if context needs to be recovered

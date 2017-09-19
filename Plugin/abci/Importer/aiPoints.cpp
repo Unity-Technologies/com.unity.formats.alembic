@@ -187,9 +187,11 @@ aiPoints::Sample* aiPoints::newSample()
     return sample;
 }
 
-aiPoints::Sample* aiPoints::readSample(const abcSampleSelector& ss, bool &topologyChanged)
+aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged)
 {
-    DebugLog("aiPoints::readSample(t=%f)", (float)ss.getRequestedTime());
+    auto ss = aiIndexToSampleSelector(idx);
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
+    DebugLog("aiPoints::readSample(t=%f)", (float)ss.getRequestedIndex());
 
     Sample *ret = newSample();
 

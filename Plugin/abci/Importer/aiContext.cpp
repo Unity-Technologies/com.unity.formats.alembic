@@ -501,9 +501,9 @@ void aiContext::cacheSamples(int64_t startIndex, int64_t endIndex)
     waitTasks();
 }
 
-void aiContext::updateSamples(float time,bool isPlayingForward)
+void aiContext::updateSamples(float time)
 {
-    const abcSampleSelector ss = aiTimeToSampleSelector(time, isPlayingForward);
+    const abcSampleSelector ss = aiTimeToSampleSelector(time);
 
     DebugLog("aiContext::updateSamples()");
         

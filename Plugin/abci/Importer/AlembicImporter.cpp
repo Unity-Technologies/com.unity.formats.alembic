@@ -9,23 +9,14 @@
 #include "aiPoints.h"
 #include "aiProperty.h"
 
-
-abcSampleSelector getSampleSelectorComplement(const abcSampleSelector& ss)
+abciAPI abcSampleSelector aiTimeToSampleSelector(float time)
 {
-    return abcSampleSelector(ss.getRequestedTime(), 
-        ss.getRequestedTimeIndexType() == Abc::ISampleSelector::TimeIndexType::kFloorIndex ? 
-        Abc::ISampleSelector::TimeIndexType::kCeilIndex : Abc::ISampleSelector::TimeIndexType::kFloorIndex);
+    return abcSampleSelector(static_cast<AbcCoreAbstract::chrono_t>(time), Abc::ISampleSelector::kFloorIndex);
 }
 
-
-abciAPI abcSampleSelector aiTimeToSampleSelector(float time,bool playForward)
+abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index)
 {
-    return abcSampleSelector(double(time), playForward ? Abc::ISampleSelector::kFloorIndex : Abc::ISampleSelector::kCeilIndex);
-}
-
-abciAPI abcSampleSelector aiIndexToSampleSelector(int index)
-{
-    return abcSampleSelector(int64_t(index));
+    return abcSampleSelector(index);
 }
 
 
@@ -115,11 +106,11 @@ abciAPI void aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
     return ctx->copyTimeSampling(i, *dst);
 }
 
-abciAPI void aiUpdateSamples(aiContext* ctx, float time, bool isPlayingForward)
+abciAPI void aiUpdateSamples(aiContext* ctx, float time)
 {
     if (ctx)
     {
-        ctx->updateSamples(time,isPlayingForward);
+        ctx->updateSamples(time);
     }
 }
 

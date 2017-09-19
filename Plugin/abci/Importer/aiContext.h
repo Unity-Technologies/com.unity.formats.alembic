@@ -58,7 +58,7 @@ public:
     float getEndTime() const;
     void cacheAllSamples();
     void cacheSamples(int64_t startIndex, int64_t endIndex);
-    void updateSamples(float time, bool isPlayingForward);
+    void updateSamples(float time);
 
     void enqueueTask(const task_t &task);
     void waitTasks();

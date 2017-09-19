@@ -256,9 +256,8 @@ using aiNodeEnumerator = void (abciSTDCall*)(aiObject *node, void *userData);
 using aiConfigCallback =  void (abciSTDCall*)(void *csObj, aiConfig *config);
 using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, bool topologyChanged);
 
-abcSampleSelector getSampleSelectorComplement(const abcSampleSelector& ss);
-abciAPI abcSampleSelector aiTimeToSampleSelector(float time, bool playForward = true);
-abciAPI abcSampleSelector aiIndexToSampleSelector(int index);
+abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
+abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 
 abciAPI void            aiEnableFileLog(bool on, const char *path);
 
@@ -279,7 +278,7 @@ abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingD
 // deep copy to dst->times. if time sampling type is not Acyclic (which have no times), do exact same thing as aiGetTimeSampling()
 abciAPI void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 
-abciAPI void            aiUpdateSamples(aiContext* ctx, float time, bool isPlayingForward);
+abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
 
 abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 abciAPI const char*     aiGetNameS(aiObject* obj);

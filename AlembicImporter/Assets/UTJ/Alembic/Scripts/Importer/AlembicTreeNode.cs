@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,22 +6,17 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
 
-    public class AlembicTreeNode : AlembicDisposable
+    public class AlembicTreeNode : IDisposable
     {
         public AlembicStream stream;
         public GameObject linkedGameObj;
-        public SortedDictionary<string, AlembicElement> alembicObjects = new SortedDictionary<string, AlembicElement>();
+        public Dictionary<string, AlembicElement> alembicObjects = new Dictionary<string, AlembicElement>();
         public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                ResetTree();
-                linkedGameObj = null;
-            }
-
-            base.Dispose(disposing);
+            ResetTree();
+            linkedGameObj = null;
         }
 
 
