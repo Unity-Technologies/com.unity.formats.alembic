@@ -114,7 +114,8 @@ struct aiConfig
     bool submeshPerUVTile = true;
     bool shareVertices = false;
     bool treatVertexExtraDataAsStatic = false;
-    bool interpolateSamples = false;
+    bool interpolateSamples = true;
+    bool turnQuadEdges = false;
 };
 
 struct aiTimeSamplingData

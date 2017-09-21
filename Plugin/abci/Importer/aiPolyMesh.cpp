@@ -1114,7 +1114,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
 
     const SplitInfo &split = m_topology->m_splits[splitIndex];
     const auto &counts = *(m_topology->m_counts);
-    const auto &indices = *(m_topology->m_indices);
+    const auto &indices = m_config.turnQuadEdges ? m_topology->m_indicesSwapedFaceWinding.data() : m_topology->m_indices->get();
     const auto &positions = *m_positions;
     const auto &nextPositions = *m_nextPositions;
 
@@ -1188,7 +1188,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     if (copyUvs)
                     {
                         const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = *(m_uvs.getIndices());
+                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
                     
                         if (copyTangents)
                         {
@@ -1309,7 +1309,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     if (copyUvs)
                     {
                         const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = *(m_uvs.getIndices());
+                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
                     
                         if (copyTangents)
                         {
@@ -1435,7 +1435,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                 if (copyUvs)
                 {
                     const auto &uvs = *(m_uvs.getVals());
-                    const auto &uvIndices = *(m_uvs.getIndices());
+                    const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
                 
                     if (copyTangents)
                     {
@@ -1562,7 +1562,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
             if (copyUvs)
             {
                 const auto &uvs = *(m_uvs.getVals());
-                const auto &uvIndices = *(m_uvs.getIndices());
+                const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
             
                 if (copyTangents)
                 {
@@ -1989,6 +1989,75 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
         }
     }
 
+    if (m_config.turnQuadEdges)
+    {
+        if (ret->m_topology->m_indicesSwapedFaceWinding.size() == 0 || m_varyingTopology)
+        {
+            auto  faces = ret->m_topology->m_counts;
+            size_t totalFaces = faces->size();
+            auto * facesIndices = ret->m_topology->m_indices->get();
+            ret->m_topology->m_indicesSwapedFaceWinding.reserve(ret->m_topology->m_indices->size());
+            size_t index = 0;
+
+            for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+            {
+                size_t faceSize = (size_t)(faces->get()[faceIndex]);
+                if (faceSize == 4)
+                {
+                    auto v0 = facesIndices[index++];
+                    auto v1 = facesIndices[index++];
+                    auto v2 = facesIndices[index++];
+                    auto v3 = facesIndices[index++];
+                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v3);
+                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v0);
+                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v1);
+                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v2);
+                }
+                else
+                {
+                    for (size_t i = 0; i < faceSize; i++)
+                    {
+                        ret->m_topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index++]);
+                    }
+                }
+            }
+
+            if (ret->m_uvs.valid())
+            {
+                index = 0;
+                uint32_t* uvIndices = (uint32_t*)ret->m_uvs.getIndices().get()->getData();
+                ret->m_topology->m_UvIndicesSwapedFaceWinding.reserve(ret->m_uvs.getIndices()->size());
+
+                for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+                {
+                    size_t faceSize = (size_t)(faces->get()[faceIndex]);
+                    if (faceSize == 4)
+                    {
+                        auto uv0 = uvIndices[index++];
+                        auto uv1 = uvIndices[index++];
+                        auto uv2 = uvIndices[index++];
+                        auto uv3 = uvIndices[index++];
+                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv3);
+                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv0);
+                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv1);
+                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv2);
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < faceSize; i++)
+                        {
+                            ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index++]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (ret->m_topology->m_indicesSwapedFaceWinding.size()>0)
+    {
+        ret->m_topology->m_indicesSwapedFaceWinding.clear();
+    }
+
     if (m_config.shareVertices && !m_varyingTopology && ret != NULL && !ret->m_ownTopology && topologyChanged)
         GenerateVerticesToFacesLookup(ret);
 
@@ -2001,11 +2070,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
 {
     auto  faces = sample->m_topology->m_counts;
-    auto * facesIndices = sample->m_topology->m_indices->get();
+
+    auto * facesIndices = m_config.turnQuadEdges ?
+        sample->m_topology->m_indicesSwapedFaceWinding.data() : sample->m_topology->m_indices->get();
     size_t totalFaces = faces->size();
 
     // 1st, figure out which face uses which vertices (for sharing identification)
-    std::unordered_map< size_t, std::vector<size_t>> indexesOfFacesValues;
+    std::unordered_map< size_t, std::vector<size_t>> indexesOfFacesValues; 
     size_t facesIndicesCursor = 0;
     for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
     {
@@ -2021,8 +2092,8 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
     const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : sample->m_topology->m_indices->get();
 
     bool hasUVs = sample->m_uvs.valid();
-    const auto &uvVals = *(sample->m_uvs.getVals());
-    const auto &uvIdxs = *(sample->m_uvs.getIndices());
+    const auto &uvVals = *(sample->m_uvs.getVals()); 
+    const auto &uvIdxs = m_config.turnQuadEdges || !hasUVs ? sample->m_topology->m_UvIndicesSwapedFaceWinding : *sample->m_uvs.getIndices();
 
     sample->m_topology->m_FixedTopoPositionsIndexes.clear();
     sample->m_topology->m_FaceIndexingReindexed.clear();

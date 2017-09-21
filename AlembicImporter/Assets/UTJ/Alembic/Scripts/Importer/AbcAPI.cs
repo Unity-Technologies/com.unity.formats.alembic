@@ -138,6 +138,7 @@ namespace UTJ.Alembic
             public Bool shareVertices;
             public Bool treatVertexExtraDataAsStatics;
             public Bool interpolateSamples;
+            public Bool turnQuadEdges;
 
             public void SetDefaults()
             {
@@ -153,6 +154,7 @@ namespace UTJ.Alembic
                 shareVertices = true;
                 treatVertexExtraDataAsStatics = true;
                 interpolateSamples = true;
+                turnQuadEdges = false;
             }
         }
 

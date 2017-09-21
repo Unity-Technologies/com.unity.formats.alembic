@@ -158,6 +158,8 @@ public:
 
 public:
     Abc::UInt32ArraySamplePtr m_indices;
+    std::vector<uint32_t> m_indicesSwapedFaceWinding;
+    std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
     Abc::Int32ArraySamplePtr m_counts;
     int m_triangulatedIndexCount;
 

@@ -27,13 +27,14 @@ namespace UTJ.Alembic
         [Tooltip("Should 'handedness' be swapped?")]
         [SerializeField] public bool m_swapHandedness = true;
         [SerializeField] public bool m_swapFaceWinding = false;
+        [SerializeField] public bool m_TurnQuadEdges = false;
         [SerializeField] public bool m_submeshPerUVTile = false;
         [SerializeField] public bool m_shareVertices = true;
-        [SerializeField] public bool m_treatVertexExtraDataAsStatics = true;
+        [SerializeField] public bool m_treatVertexExtraDataAsStatics = false;
         [SerializeField] public bool m_importMeshes = true;
         [SerializeField] public float m_scaleFactor = 0.01f;
         [SerializeField] public AbcAPI.aiNormalsMode m_normalsMode = AbcAPI.aiNormalsMode.ComputeIfMissing;
-        [SerializeField] public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.None;
+        [SerializeField] public AbcAPI.aiTangentsMode m_tangentsMode = AbcAPI.aiTangentsMode.Smooth;
         [SerializeField] public AbcAPI.aiAspectRatioMode m_aspectRatioMode = AbcAPI.aiAspectRatioMode.CurrentResolution;
 
         [Header("Advanced")]

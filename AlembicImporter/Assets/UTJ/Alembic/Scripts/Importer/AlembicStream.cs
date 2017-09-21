@@ -90,6 +90,7 @@ namespace UTJ.Alembic
             m_config.submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
             m_config.treatVertexExtraDataAsStatics = ImportSettings.m_treatVertexExtraDataAsStatics;
             m_config.interpolateSamples = m_playbackSettings.m_InterpolateSamples;
+            m_config.turnQuadEdges = ImportSettings.m_TurnQuadEdges;
 
             if (AbcIsValid())
             {
