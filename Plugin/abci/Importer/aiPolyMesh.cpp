@@ -27,13 +27,12 @@ static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
 Topology::Topology()
     : m_triangulatedIndexCount(0)
     , m_tangentsCount(0)
+    , m_vertexSharingEnabled(false)
+    , m_FreshlyReadTopologyData(false)
+    , m_TreatVertexExtraDataAsStatic(false)
 {
     m_indices.reset();
     m_counts.reset();
-}
-
-Topology::~Topology()
-{
 }
 
 void Topology::clear()
@@ -48,6 +47,8 @@ void Topology::clear()
     m_submeshes.clear();
     m_faceSplitIndices.clear();
     m_splits.clear();
+    m_indicesSwapedFaceWinding.clear();
+    m_UvIndicesSwapedFaceWinding.clear();
 }
 
 int Topology::getTriangulatedIndexCount() const
@@ -380,10 +381,8 @@ bool aiPolyMeshSample::hasNormals() const
     {
     case aiNormalsMode::ReadFromFile:
         return m_normals.valid();
-        break;
     case aiNormalsMode::Ignore:
         return false;
-        break;
     default:
         return (m_normals.valid() || !m_smoothNormals.empty());
     }
@@ -1111,7 +1110,9 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
     bool interpolatePositions = hasVelocities() && m_nextPositions != nullptr;
     float timeOffset = static_cast<float>(m_currentTimeOffset);
-
+    float timeInterval = static_cast<float>(m_currentTimeInterval);
+    float timeScale = static_cast<float>(m_config.timeScale);
+    
     const SplitInfo &split = m_topology->m_splits[splitIndex];
     const auto &counts = *(m_topology->m_counts);
     const auto &indices = m_config.turnQuadEdges ? m_topology->m_indicesSwapedFaceWinding.data() : m_topology->m_indices->get();
@@ -1149,8 +1150,9 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     cP = positions[srcIdx]; \
     if (interpolatePositions) \
     {\
-        abcV3 velocity = nextPositions[srcIdx] - positions[srcIdx]; \
-        cP+= velocity * timeOffset; \
+        abcV3 distance = nextPositions[srcIdx] - positions[srcIdx]; \
+        abcV3 velocity = (distance / timeInterval) * timeScale; \
+        cP+= distance * timeOffset; \
         data.interpolatedVelocitiesXY[dstIdx].x = velocity.x*xScale; \
         data.interpolatedVelocitiesXY[dstIdx].y = velocity.y; \
         data.interpolatedVelocitiesZ[dstIdx].x = velocity.z; \
@@ -1867,7 +1869,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiPolyMesh::readSample(t=%f)", (float)ss.getRequestedTime());
+    DebugLog("aiPolyMesh::readSample(t=%d)", idx);
     
     Sample *ret = newSample();
 
@@ -1991,64 +1993,60 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 
     if (m_config.turnQuadEdges)
     {
-        if (ret->m_topology->m_indicesSwapedFaceWinding.size() == 0 || m_varyingTopology)
+        if (m_varyingTopology || ret->m_topology->m_indicesSwapedFaceWinding.size() == 0)
         {
             auto  faces = ret->m_topology->m_counts;
-            size_t totalFaces = faces->size();
+            auto totalFaces = faces->size();
+            
             auto * facesIndices = ret->m_topology->m_indices->get();
             ret->m_topology->m_indicesSwapedFaceWinding.reserve(ret->m_topology->m_indices->size());
-            size_t index = 0;
-
-            for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+            
+            auto index = 0;
+            const uint32_t indexRemap[4] = {3,0,1,2};
+            for (uint32_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
             {
-                size_t faceSize = (size_t)(faces->get()[faceIndex]);
+                auto faceSize = faces->get()[faceIndex];
                 if (faceSize == 4)
                 {
-                    auto v0 = facesIndices[index++];
-                    auto v1 = facesIndices[index++];
-                    auto v2 = facesIndices[index++];
-                    auto v3 = facesIndices[index++];
-                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v3);
-                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v0);
-                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v1);
-                    ret->m_topology->m_indicesSwapedFaceWinding.push_back(v2);
+                    for (auto i = 0; i < faceSize; i++)
+                    {
+                        ret->m_topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index + indexRemap[i]]);
+                    }
                 }
                 else
                 {
-                    for (size_t i = 0; i < faceSize; i++)
+                    for (auto i = 0; i < faceSize; i++)
                     {
-                        ret->m_topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index++]);
+                        ret->m_topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index + i]);
                     }
                 }
+                index += faceSize;
             }
 
             if (ret->m_uvs.valid())
             {
                 index = 0;
-                uint32_t* uvIndices = (uint32_t*)ret->m_uvs.getIndices().get()->getData();
+                const auto& uvIndices = *ret->m_uvs.getIndices();
                 ret->m_topology->m_UvIndicesSwapedFaceWinding.reserve(ret->m_uvs.getIndices()->size());
 
-                for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+                for (auto faceIndex = 0; faceIndex < totalFaces; faceIndex++)
                 {
-                    size_t faceSize = (size_t)(faces->get()[faceIndex]);
+                    auto faceSize = faces->get()[faceIndex];
                     if (faceSize == 4)
                     {
-                        auto uv0 = uvIndices[index++];
-                        auto uv1 = uvIndices[index++];
-                        auto uv2 = uvIndices[index++];
-                        auto uv3 = uvIndices[index++];
-                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv3);
-                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv0);
-                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv1);
-                        ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uv2);
+                        for (auto i = 0; i < faceSize; i++)
+                        {
+                            ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index + indexRemap[i]]);
+                        }
                     }
                     else
                     {
-                        for (size_t i = 0; i < faceSize; i++)
+                        for (auto i = 0; i < faceSize; i++)
                         {
-                            ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index++]);
+                            ret->m_topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index+i]);
                         }
                     }
+                    index += faceSize;
                 }
             }
         }
@@ -2067,7 +2065,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 // generates two lookup tables:
 //  m_FaceIndexingReindexed         : for each face in the abc sample, hold an index value to lookup in m_FixedTopoPositionsIndexes, that will give final position index.
 //  m_FixedTopoPositionsIndexes     : list of resulting positions. value is index into the abc "position" vector. size is greter than or equal to "position" array.
-void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
+void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
 {
     auto  faces = sample->m_topology->m_counts;
 
@@ -2153,12 +2151,6 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample)
 
     // We now have a lookup for face value indexes that re-routes to shared indexes when possible!
 }
-
-int aiPolyMesh::getTopologyVariance() const
-{
-    return (int) m_schema.getTopologyVariance();
-}
-
 
 void aiPolyMesh::updatePeakIndexCount() const
 {
@@ -2268,7 +2260,7 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
 {
     DebugLog("aiPolyMesh::getSummary()");
     
-    summary.topologyVariance = getTopologyVariance();
+    summary.topologyVariance = static_cast<int>(m_schema.getTopologyVariance());
     summary.peakVertexCount = getPeakVertexCount();
     summary.peakIndexCount = getPeakIndexCount();
     summary.peakTriangulatedIndexCount = getPeakTriangulatedIndexCount();

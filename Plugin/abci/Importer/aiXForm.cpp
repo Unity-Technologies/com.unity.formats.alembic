@@ -7,7 +7,7 @@
 
 
 aiXFormSample::aiXFormSample(aiXForm *schema)
-    : super(schema)
+    : super(schema), inherits(true)
 {
 }
 
@@ -57,7 +57,12 @@ void aiXFormSample::getData(aiXFormData &outData) const
         rot = slerpShortestArc(rot, rot2, m_currentTimeOffset);
     }
 
-    abcV4 rotFinal = abcV4(rot.v[0], rot.v[1], rot.v[2], rot.r);
+    auto rotFinal = abcV4(
+        static_cast<float>(rot.v[0]),
+        static_cast<float>(rot.v[1]),
+        static_cast<float>(rot.v[2]),
+        static_cast<float>(rot.r)
+    );
 
     if (m_config.swapHandedness)
     {
@@ -90,21 +95,20 @@ aiXForm::Sample* aiXForm::newSample()
 
 aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
 {
-    auto ss = aiIndexToSampleSelector(idx);
-    auto ss2 = aiIndexToSampleSelector(idx+1);
+    DebugLog("aiXForm::readSample(t=%d)", idx);
+    Sample *ret = newSample();
 
-    DebugLog("aiXForm::readSample(t=%f)", ss.getRequestedTime());
-    Sample *ret = new Sample(this);
+    auto ss = aiIndexToSampleSelector(idx);
     AbcGeom::XformSample matSample;
     m_schema.get(matSample, ss);
     ret->m_matrix = matSample.getMatrix();
     
-    ret->inherits = matSample.getInheritsXforms();
+    ret->inherits = matSample.getInheritsXforms();
 
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
     AbcGeom::XformSample nextMatSample;
     m_schema.get(nextMatSample, ss2 );
     ret->m_nextMatrix = nextMatSample.getMatrix();
     
-    topologyChanged = false;
     return ret;
 }

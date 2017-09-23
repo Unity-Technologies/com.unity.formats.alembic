@@ -1,5 +1,4 @@
 #pragma once
-
 class aiContext;
 class aiSchemaBase;
 class aiXForm;
@@ -17,8 +16,7 @@ public:
     const char* getFullName() const;
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
-    aiObject*   getParent();
-    void        cacheAllSamples();
+    aiObject*   getParent() const;
     void        cacheSamples(int64_t startIndex, int64_t endIndex);
     void        readConfig();
     void        updateSample(const abcSampleSelector& ss);
@@ -45,7 +43,7 @@ public:
 
 public:
     // for internal use
-    aiContext*  getContext();
+    aiContext*  getContext() const;
     abcObject&  getAbcObject();
     aiObject*   newChild(const abcObject &abc);
     void        removeChild(aiObject *c);

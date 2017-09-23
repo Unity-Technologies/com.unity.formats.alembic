@@ -17,6 +17,7 @@ public:
 
 public:
     AbcCoreAbstract::chrono_t m_currentTimeOffset;
+    AbcCoreAbstract::chrono_t m_currentTimeInterval;
 protected:
     aiSchemaBase *m_schema;
     aiConfig m_config;
@@ -31,7 +32,7 @@ public:
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
 
-    aiObject* getObject();
+    aiObject* getObject() const;
     // config at last update time
     const aiConfig& getConfig() const;
 
@@ -91,7 +92,7 @@ public:
         m_schema = abcObj.getSchema();
         m_constant = m_schema.isConstant();
         m_timeSampling = m_schema.getTimeSampling();
-        m_numSamples = (int64_t) m_schema.getNumSamples();
+        m_numSamples = static_cast<int64_t>(m_schema.getNumSamples());
         setupProperties();
     }
 
@@ -111,17 +112,17 @@ public:
 
     int getSampleIndex(const abcSampleSelector& ss) const override
     {
-        return (int)ss.getIndex(m_timeSampling, m_numSamples);
+        return static_cast<int>(ss.getIndex(m_timeSampling, m_numSamples));
     }
 
     float getSampleTime(const abcSampleSelector& ss) const override
     {
-        return (float)m_timeSampling->getSampleTime(ss.getRequestedIndex());
+        return static_cast<float>(m_timeSampling->getSampleTime(ss.getRequestedIndex()));
     }
 
     int getNumSamples() const override
     {
-        return (int)m_numSamples;
+        return static_cast<int>(m_numSamples);
     }
 
     void cacheAllSamples() override
@@ -189,7 +190,7 @@ protected:
        }
        else
        {
-          return 0;
+          return nullptr;
        }
     }
 
@@ -305,6 +306,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
             AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
             auto indexTime = m_timeSampling->getSampleTime(sampleIndex);
             sample->m_currentTimeOffset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));
+            sample->m_currentTimeInterval = interval;
         }
         invokeSampleCallback(sample, topologyChanged);
     }

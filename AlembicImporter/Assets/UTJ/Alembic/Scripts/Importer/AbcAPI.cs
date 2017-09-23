@@ -139,6 +139,7 @@ namespace UTJ.Alembic
             public Bool treatVertexExtraDataAsStatics;
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
+            public float timeScale;
 
             public void SetDefaults()
             {

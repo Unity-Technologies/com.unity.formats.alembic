@@ -91,6 +91,7 @@ namespace UTJ.Alembic
             m_config.treatVertexExtraDataAsStatics = ImportSettings.m_treatVertexExtraDataAsStatics;
             m_config.interpolateSamples = m_playbackSettings.m_InterpolateSamples;
             m_config.turnQuadEdges = ImportSettings.m_TurnQuadEdges;
+            m_config.timeScale = m_playbackSettings.m_timeScale;
 
             if (AbcIsValid())
             {

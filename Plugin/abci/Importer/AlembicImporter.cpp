@@ -35,20 +35,19 @@ abciAPI void aiCleanup()
 
 abciAPI void clearContextsWithPath(const char *path)
 {
-    aiContext::clearContextsWithPath(path);
+    aiContextManager::clearContextsWithPath(path);
 }
 
 abciAPI aiContext* aiCreateContext(int uid)
 {
-    auto ctx = aiContext::create(uid);
-    return ctx;
+    return aiContextManager::GetContext(uid);
 }
 
 abciAPI void aiDestroyContext(aiContext* ctx)
 {
     if (ctx)
     {
-        aiContext::destroy(ctx);
+        aiContextManager::DestroyContext(ctx->getUid());
     }
 }
 
@@ -122,9 +121,9 @@ abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
     {
         obj->eachChildren([&](aiObject *child) { e(child, userData); });
     }
-    catch (Alembic::Util::Exception e)
+    catch (Alembic::Util::Exception ex)
     {
-        DebugLog("aiEnumerateChlid: %s", e.what());
+        DebugLog("aiEnumerateChlid: %s", ex.what());
     }
 }
 

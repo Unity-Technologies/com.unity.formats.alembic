@@ -31,138 +31,65 @@ std::string ToString(const aiConfig &v)
     return oss.str();
 }
 
-class GlobalCache
+aiContextManager aiContextManager::ms_instance;
+
+aiContext* aiContextManager::GetContext(int uid)
 {
-public:
+    auto it = ms_instance.m_contexts.find(uid);
 
-    struct ArchiveItem
+    if (it != ms_instance.m_contexts.end())
     {
-        Abc::IArchive archive;
-        int refcount;
-    };
+        aiLogger::Info("Using already created context for gameObject with ID %d", uid);
 
-    typedef std::map<int, aiContext*> ContextMap;
-    typedef std::map<std::string, ArchiveItem> ArchiveMap;
-
-public:
-
-    static aiContext* GetContext(int uid)
-    {
-        ContextMap::iterator it = ms_instance.m_contexts.find(uid);
-
-        if (it != ms_instance.m_contexts.end())
-        {
-            aiLogger::Info("Using already created context for gameObject with ID %d", uid);
-
-            return it->second;
-        }
-        else
-        {
-            return 0;
-        }
+        return it->second;
     }
-
-    static bool RegisterContext(int uid, aiContext *ctx)
-    {
-        ContextMap::iterator it = ms_instance.m_contexts.find(uid);
-        
-        if (it != ms_instance.m_contexts.end())
-        {
-            return false;
-        }
-        else
-        {
-            aiLogger::Info("Register context for gameObject with ID %d", uid);
-
-            ms_instance.m_contexts[uid] = ctx;
-
-            return true;
-        }
-    }
-
-    static void UnregisterContext(int uid)
-    {
-        ContextMap::iterator it = ms_instance.m_contexts.find(uid);
-        
-        if (it != ms_instance.m_contexts.end())
-        {
-            aiLogger::Info("Unregister context for gameObject with ID %d", uid);
-
-            ms_instance.m_contexts.erase(it);
-        }
-    }
-
-    static void clearContextsWithPath(const char* assetPath)
-    {
-        std::string path = aiContext::normalizePath(assetPath);
-        for (ContextMap::iterator it = ms_instance.m_contexts.begin(); it != ms_instance.m_contexts.end(); ++it)
-        {
-            if (it->second->getPath() == path)
-            {
-                aiLogger::Info("Unregister context for gameObject with ID %d", it->second->getPath());
-                delete it->second;
-                ms_instance.m_contexts.erase(it);
-            }
-        }
-    }
-
-private:
-
-    GlobalCache()
-    {
-    }
-
-    ~GlobalCache()
-    {
-        if (m_contexts.size())
-        {
-            aiLogger::Warning("%lu remaining context(s) registered", m_contexts.size());
-        }
-
-        for (ContextMap::iterator it=m_contexts.begin(); it!=m_contexts.end(); ++it)
-        {
-            delete it->second;
-        }
-        
-        m_contexts.clear();
-    }
-
-private:
-
-    ContextMap m_contexts;
-
-    static GlobalCache ms_instance;
-};
-
-GlobalCache GlobalCache::ms_instance;
-
-// ---
-
-aiContext* aiContext::create(int uid)
-{
-    aiContext *ctx = GlobalCache::GetContext(uid);
-
-    if (!ctx)
-    {
-        ctx = new aiContext(uid);
-        
-        GlobalCache::RegisterContext(uid, ctx);
-    }
-
+    auto ctx = new aiContext(uid);
+    ms_instance.m_contexts[uid] = ctx;
+    aiLogger::Info("Register context for gameObject with ID %d", uid);
     return ctx;
 }
 
-void aiContext::clearContextsWithPath(const char* path)
+void aiContextManager::DestroyContext(int uid)
 {
-    GlobalCache::clearContextsWithPath(path);
+    auto it = ms_instance.m_contexts.find(uid);
+        
+    if (it != ms_instance.m_contexts.end())
+    {
+        aiLogger::Info("Unregister context for gameObject with ID %d", uid);
+        ms_instance.m_contexts.erase(it);
+        delete it->second;
+    }
 }
 
-void aiContext::destroy(aiContext* ctx)
+void aiContextManager::clearContextsWithPath(const char* assetPath)
 {
-    GlobalCache::UnregisterContext(ctx->getUid());
-
-    delete ctx;
+    std::string path = aiContext::normalizePath(assetPath);
+    for (auto it = ms_instance.m_contexts.begin(); it != ms_instance.m_contexts.end(); ++it)
+    {
+        if (it->second->getPath() == path)
+        {
+            aiLogger::Info("Unregister context for gameObject with ID %d", it->second->getPath());
+            delete it->second;
+            ms_instance.m_contexts.erase(it);
+        }
+    }
 }
+
+aiContextManager::~aiContextManager()
+{
+    if (m_contexts.size())
+    {
+        aiLogger::Warning("%lu remaining context(s) registered", m_contexts.size());
+    }
+
+    for (auto it=m_contexts.begin(); it!=m_contexts.end(); ++it)
+    {
+        delete it->second;
+    }
+        
+    m_contexts.clear();
+}
+// ---
 
 aiContext::aiContext(int uid)
     : m_uid(uid)
@@ -171,7 +98,7 @@ aiContext::aiContext(int uid)
 
 aiContext::~aiContext()
 {
-    waitTasks();
+    m_tasks.wait();
     m_top_node.reset();
     m_archive.reset();
 }
@@ -278,7 +205,7 @@ void aiContext::reset()
     DebugLog("aiContext::reset()");
     
     // just in case
-    waitTasks();
+    m_tasks.wait();
 
     m_top_node.reset();
     
@@ -344,7 +271,6 @@ bool aiContext::load(const char *inPath)
     }
 
     m_path = path;
-    m_archive = Abc::IArchive();;
     
     if (!m_archive.valid())
     {
@@ -364,9 +290,9 @@ bool aiContext::load(const char *inPath)
                 DebugLog("Trying to open AbcCoreHDF5::ReadArchive...");
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
             }
-            catch (Alembic::Util::Exception e)
+            catch (Alembic::Util::Exception e2)
             {
-                DebugLog("Failed (%s)", e.what());
+                DebugLog("Failed (%s)", e2.what());
             }
         }
     }
@@ -425,15 +351,8 @@ bool aiContext::load(const char *inPath)
     else
     {
         aiLogger::Error("Invalid archive '%s'", inPath);
-
-        m_path = "";
-        m_archive.reset();
-
-        m_timeRange[0] = 0.0;
-        m_timeRange[1] = 0.0;
-
         aiLogger::Unindent(1);
-
+        reset();
         return false;
     }
 }
@@ -448,7 +367,7 @@ float aiContext::getEndTime() const
     return float(m_timeRange[1]);
 }
 
-aiObject* aiContext::getTopObject()
+aiObject* aiContext::getTopObject() const
 {
     return m_top_node.get();
 }
@@ -478,7 +397,7 @@ void aiContext::cacheAllSamples()
     {
         const int64_t startIndex = (i == 0) ? 1 : i*numFramesPerBlock;
         const int64_t endIndex = i*numFramesPerBlock + (i == numBlocks - 1 ? lastBlockSize : numFramesPerBlock);
-        enqueueTask([this, startIndex, endIndex]()
+        m_tasks.run([this, startIndex, endIndex]()
         {
             eachNodes([this, startIndex, endIndex](aiObject *o)
             {
@@ -486,38 +405,15 @@ void aiContext::cacheAllSamples()
             });
         });   
     }
-    waitTasks();
-}
-
-void aiContext::cacheSamples(int64_t startIndex, int64_t endIndex)
-{
-    eachNodes([this, startIndex, endIndex](aiObject *o)
-    {
-        enqueueTask([o, startIndex, endIndex]()
-        {
-            o->cacheSamples(startIndex,endIndex);
-        });
-    });
-    waitTasks();
+    m_tasks.wait();
 }
 
 void aiContext::updateSamples(float time)
 {
+    DebugLog("aiContext::updateSamples()");
     const abcSampleSelector ss = aiTimeToSampleSelector(time);
 
-    DebugLog("aiContext::updateSamples()");
-        
     eachNodes([ss](aiObject *o) {
         o->updateSample(ss);
     });
-}
-
-void aiContext::enqueueTask(const std::function<void()> &task)
-{
-    m_tasks.run(task);
-}
-
-void aiContext::waitTasks()
-{
-    m_tasks.wait();
 }

@@ -90,13 +90,12 @@ aiCamera::Sample* aiCamera::readSample(const uint64_t idx, bool &topologyChanged
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiCamera::readSample(t=%f)", ss.getRequestedIndex());
+    DebugLog("aiCamera::readSample(t=%d)", idx);
     
     Sample *ret = newSample();
     
     m_schema.get(ret->m_sample, ss);
     m_schema.get(ret->m_nextSample, ss2);
-    topologyChanged = false;
 
     return ret;
 }

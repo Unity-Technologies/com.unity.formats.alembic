@@ -7,8 +7,9 @@
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
-    : m_schema(schema)
-    , m_currentTimeOffset(0)
+    : m_currentTimeOffset(0)
+    , m_currentTimeInterval(0)
+    , m_schema(schema)
 {
     m_config = schema->getConfig();
 }
@@ -30,7 +31,7 @@ aiSchemaBase::~aiSchemaBase()
     m_properties.clear();
 }
 
-aiObject* aiSchemaBase::getObject()
+aiObject* aiSchemaBase::getObject() const
 {
     return m_obj;
 }

@@ -133,14 +133,11 @@ class Topology
 {
 public:
     Topology();
-    ~Topology();
     void clear();
 
     int getTriangulatedIndexCount() const;
     int getSplitCount() const;
     int getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh);
-
-    
     void updateSplits(aiPolyMeshSample * meshSample);
 
     int getVertexBufferLength(int splitIndex) const;
@@ -242,11 +239,9 @@ class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 typedef aiTSchema<aiPolyMeshTraits> super;
 public:
     aiPolyMesh(aiObject *obj);
-
     Sample* newSample();
     Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
 
-    int getTopologyVariance() const;
     int getPeakIndexCount() const;
     int getPeakTriangulatedIndexCount() const;
     int getPeakVertexCount() const;
@@ -255,7 +250,7 @@ public:
 
 private:
     void updatePeakIndexCount() const;
-    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample);
+    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const;
 
 private:
     mutable int m_peakIndexCount;

@@ -116,6 +116,7 @@ struct aiConfig
     bool treatVertexExtraDataAsStatic = false;
     bool interpolateSamples = true;
     bool turnQuadEdges = false;
+    float timeScale = 1.0f;
 };
 
 struct aiTimeSamplingData

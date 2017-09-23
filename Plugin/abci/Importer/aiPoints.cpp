@@ -191,7 +191,7 @@ aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiPoints::readSample(t=%f)", (float)ss.getRequestedIndex());
+    DebugLog("aiPoints::readSample(t=%d)", idx);
 
     Sample *ret = newSample();
 
