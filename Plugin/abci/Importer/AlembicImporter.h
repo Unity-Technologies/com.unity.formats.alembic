@@ -111,12 +111,11 @@ struct aiConfig
     float aspectRatio = -1.0f;
     bool forceUpdate = false;
     bool cacheSamples = false;
-    bool submeshPerUVTile = true;
     bool shareVertices = false;
     bool treatVertexExtraDataAsStatic = false;
     bool interpolateSamples = true;
     bool turnQuadEdges = false;
-    float timeScale = 1.0f;
+    float vertexMotionScale = 1.0f;
 };
 
 struct aiTimeSamplingData

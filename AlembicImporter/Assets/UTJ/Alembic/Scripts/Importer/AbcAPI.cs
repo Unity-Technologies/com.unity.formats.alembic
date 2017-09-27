@@ -134,12 +134,11 @@ namespace UTJ.Alembic
             public float aspectRatio;
             public Bool forceUpdate;
             public Bool cacheSamples;
-            public Bool submeshPerUVTile;
             public Bool shareVertices;
             public Bool treatVertexExtraDataAsStatics;
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
-            public float timeScale;
+            public float vertexMotionScale;
 
             public void SetDefaults()
             {
@@ -151,7 +150,6 @@ namespace UTJ.Alembic
                 aspectRatio = -1.0f;
                 forceUpdate = false;
                 cacheSamples = false;
-                submeshPerUVTile = false;
                 shareVertices = true;
                 treatVertexExtraDataAsStatics = true;
                 interpolateSamples = true;
@@ -423,43 +421,6 @@ namespace UTJ.Alembic
             Uri pathToAssets = new Uri(Application.streamingAssetsPath + "/");
             return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
         }
-    /*
-        public static GameObject ImportAbc(string path)
-        {
-            var relPath = MakeRelativePath(path);
-            ImportParams p = new ImportParams();
-            return ImportImpl(relPath, p);
-        }
-
-        private static GameObject ImportImpl(string path, ImportParams p)
-        {
-            if (path == null || path == "")
-            {
-                return null;
-            }
-
-            string baseName = System.IO.Path.GetFileNameWithoutExtension(path);
-            string name = baseName;
-            int index = 1;
-            
-            while (GameObject.Find("/" + name) != null)
-            {
-                name = baseName + index;
-                ++index;
-            }
-
-            var root = new GameObject {name = name};
-            var abcStream = new AlembicStream( root )
-            {
-                m_pathToAbc = path,
-                m_swapHandedness = p.swapHandedness,
-                m_swapFaceWinding = p.swapFaceWinding
-            };
-            abcStream.AbcLoad(true);
-
-            return root;
-        }
-    */
     #endif
         
         public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=false)

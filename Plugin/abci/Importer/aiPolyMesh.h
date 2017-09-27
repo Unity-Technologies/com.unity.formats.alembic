@@ -141,7 +141,7 @@ public:
     void updateSplits(aiPolyMeshSample * meshSample);
 
     int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile, aiPolyMeshSample* sample);
+    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }

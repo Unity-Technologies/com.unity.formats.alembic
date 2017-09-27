@@ -15,24 +15,23 @@ namespace UTJ.Alembic
             {
                 abcStream.AbcLoad(true);
 
-                AlembicStreamDescriptor streamDescr = null;
-                if (importMode > AlembicImportMode.NoSupportForStreaming)
-                {
-                    streamDescr = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
-                    streamDescr.name = "AlembicStream: " + go.name;
-                    streamDescr.m_ImportSettings = importSettings;
-                    streamDescr.m_importMode = importMode;
-                }
+                importSettings.m_minTime = abcStream.AbcStartTime;
+                importSettings.m_maxTime = abcStream.AbcEndTime;
+                
+                importSettings.m_startTime = importSettings.m_startTime ==-1.0f ? abcStream.AbcStartTime : importSettings.m_startTime;
+                importSettings.m_endTime = importSettings.m_endTime ==-1.0f ? abcStream.AbcEndTime : importSettings.m_endTime;
 
+                AlembicStreamDescriptor streamDescr = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+                streamDescr.name = "AlembicStream: " + go.name;
+                streamDescr.m_ImportSettings = importSettings;
+                streamDescr.m_importMode = importMode;
+                
                 if (importMode == AlembicImportMode.AutomaticStreamingSetup)
                 {
                     var dynStream = go.AddComponent<AlembicStreamPlayer>();
-                    dynStream.m_PlaybackSettings = new AlembicPlaybackSettings()
-                    {
-                        m_startTime = abcStream.AbcStartTime,
-                        m_endTime = abcStream.AbcEndTime,
-                        m_duration = abcStream.AbcEndTime
-                    };
+                    dynStream.m_PlaybackSettings = new AlembicPlaybackSettings();
+                    dynStream.m_PlaybackSettings.m_startTime = importSettings.m_startTime;
+                    dynStream.m_PlaybackSettings.m_endTime = importSettings.m_endTime;
                     dynStream.m_StreamDescriptor = streamDescr;
                     dynStream.enabled = true;
                 }

@@ -33,9 +33,9 @@ std::string ToString(const aiConfig &conf);
 class aiContextManager
 {
 public:
-    static aiContext* GetContext(int uid);
-    static void DestroyContext(int uid);
-    static void clearContextsWithPath(const char* assetPath);
+    static aiContext* getContext(int uid);
+    static void destroyContext(int uid);
+    static void destroyContextsWithPath(const char* assetPath);
 private:
     ~aiContextManager();
     std::map<int, aiContext*> m_contexts;

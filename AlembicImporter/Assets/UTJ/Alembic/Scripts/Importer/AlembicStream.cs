@@ -12,7 +12,6 @@ namespace UTJ.Alembic
 
         public AlembicImportSettings ImportSettings { get; set; }
 
-
         public AlembicPlaybackSettings m_playbackSettings;
         public AlembicDiagnosticSettings m_diagSettings;
 
@@ -23,7 +22,6 @@ namespace UTJ.Alembic
         private float m_lastAbcTime;
         private float m_lastAspectRatio = -1.0f;
 
-        private float m_timeEps = 0.001f;
         private AbcAPI.aiContext m_abc;
         public bool m_forceRefresh;
 
@@ -87,11 +85,10 @@ namespace UTJ.Alembic
             m_config.aspectRatio = AbcAPI.GetAspectRatio(ImportSettings.m_aspectRatioMode);
             m_config.forceUpdate = false; 
             m_config.cacheSamples = ImportSettings.m_cacheSamples;
-            m_config.submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
             m_config.treatVertexExtraDataAsStatics = ImportSettings.m_treatVertexExtraDataAsStatics;
             m_config.interpolateSamples = m_playbackSettings.m_InterpolateSamples;
             m_config.turnQuadEdges = ImportSettings.m_TurnQuadEdges;
-            m_config.timeScale = m_playbackSettings.m_timeScale;
+            m_config.vertexMotionScale = m_playbackSettings.m_vertexMotionScale;
 
             if (AbcIsValid())
             {
@@ -101,70 +98,41 @@ namespace UTJ.Alembic
 
         private float AbcTime(float inTime)
         {
-            float extraOffset = 0.0f;
-
-            // compute extra time offset to counter-balance effect of m_timeScale on m_startTime
-            if (m_playbackSettings.m_preserveStartTime)
+            float duration = m_playbackSettings.m_endTime - m_playbackSettings.m_startTime;
+            if (duration == 0.0f)
             {
-                extraOffset = m_playbackSettings.m_startTime * (m_playbackSettings.m_timeScale - 1.0f);
+                return 0;
             }
 
-            float playTime = m_playbackSettings.m_endTime - m_playbackSettings.m_startTime;
-
-            // apply speed and offset
-            float outTime = m_playbackSettings.m_timeScale * (inTime + m_playbackSettings.m_timeOffset) + extraOffset;
-
+            float outTime = inTime;
+            
             if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Hold)
             {
-                if (outTime < (m_playbackSettings.m_startTime - m_timeEps))
-                {
-                    outTime = m_playbackSettings.m_startTime;
-                }
-                else if (outTime > (m_playbackSettings.m_endTime + m_timeEps))
-                {
-                    outTime = m_playbackSettings.m_endTime;
-                }
+                if (outTime < 0)
+                    outTime = 0;
+                else if (outTime > duration)
+                    outTime = duration;
             }
-            else
+            else if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Reverse)
             {
-                float normalizedTime = (outTime - m_playbackSettings.m_startTime) / playTime;
-                float playRepeat = (float)Math.Floor(normalizedTime);
-                float fraction = Math.Abs(normalizedTime - playRepeat);
-                
-                if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Reverse)
-                {
-                    if (outTime > (m_playbackSettings.m_startTime + m_timeEps) && outTime < (m_playbackSettings.m_endTime - m_timeEps))
-                    {
-                        // inside alembic sample range
-                        outTime = m_playbackSettings.m_endTime - fraction * playTime;
-                    }
-                    else if (outTime < (m_playbackSettings.m_startTime + m_timeEps))
-                    {
-                        outTime = m_playbackSettings.m_endTime;
-                    }
-                    else
-                    {
-                        outTime = m_playbackSettings.m_startTime;
-                    }
-                }
+                if (outTime < 0)
+                    outTime = duration;
+                else if (outTime >= duration)
+                    outTime = 0;
                 else
-                {
-                    if (outTime < (m_playbackSettings.m_startTime - m_timeEps) || outTime > (m_playbackSettings.m_endTime + m_timeEps))
-                    {
-                        // outside alembic sample range
-                        if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Loop || ((int)playRepeat % 2) == 0)
-                        {
-                            outTime = m_playbackSettings.m_startTime + fraction * playTime;
-                        }
-                        else
-                        {
-                            outTime = m_playbackSettings.m_endTime - fraction * playTime;
-                        }
-                    }
-                }
+                    outTime = duration - outTime % duration;
+            }
+            else if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Loop)
+            {
+                outTime = outTime == duration ? duration : outTime % duration;
+            }
+            else if (m_playbackSettings.m_cycle == AlembicPlaybackSettings.CycleType.Bounce)
+            {
+                bool isReversed = ((int)(outTime / duration)) % 2 == 1;
+                outTime = isReversed ? duration - outTime % duration : outTime % duration;
             }
 
-            return outTime;
+            return outTime + m_playbackSettings.m_startTime;
         }
 
         private bool AbcUpdateRequired(float abcTime, float aspectRatio)
@@ -172,7 +140,6 @@ namespace UTJ.Alembic
             if (m_forceRefresh ||
                 ImportSettings.m_swapHandedness != m_LastImportSettings.m_swapHandedness ||
                 ImportSettings.m_swapFaceWinding != m_LastImportSettings.m_swapFaceWinding ||
-                ImportSettings.m_submeshPerUVTile != m_LastImportSettings.m_submeshPerUVTile ||
                 ImportSettings.m_normalsMode != m_LastImportSettings.m_normalsMode ||
                 ImportSettings.m_tangentsMode != m_LastImportSettings.m_tangentsMode ||
                 Math.Abs(abcTime - m_lastAbcTime) > 0 ||
@@ -195,9 +162,9 @@ namespace UTJ.Alembic
 
             m_LastImportSettings.m_swapHandedness = ImportSettings.m_swapHandedness;
             m_LastImportSettings.m_swapFaceWinding = ImportSettings.m_swapFaceWinding;
-            m_LastImportSettings.m_submeshPerUVTile = ImportSettings.m_submeshPerUVTile;
             m_LastImportSettings.m_normalsMode = ImportSettings.m_normalsMode;
             m_LastImportSettings.m_tangentsMode = ImportSettings.m_tangentsMode;
+            m_LastImportSettings.m_pathToAbc = ImportSettings.m_pathToAbc;
         }
 
         public void AbcUpdateConfigElements(AlembicTreeNode node = null)
@@ -292,7 +259,7 @@ namespace UTJ.Alembic
 
         }
 
-        private bool AbcUpdateBegin(float time)
+        public bool AbcUpdate(float time)
         {
             if (ImportSettings == null)
                 return true;
@@ -391,17 +358,6 @@ namespace UTJ.Alembic
         }
 
         // return false if context needs to be recovered
-        public bool ProcessUpdateEvent()
-        {
-            if (Application.isPlaying && !m_playbackSettings.m_OverrideTime)
-            {
-                return AbcUpdateBegin(Time.time);
-            }
-            else
-            {
-                return AbcUpdateBegin(m_playbackSettings.m_Time);
-            }
-        }
 
         public void ForcedRefresh()
         {

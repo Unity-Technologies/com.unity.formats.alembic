@@ -38,8 +38,8 @@ public:
 
     void setConfigCallback(aiConfigCallback cb, void *arg);
     void setSampleCallback(aiSampleCallback cb, void *arg);
-    void invokeConfigCallback(aiConfig *config);
-    void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
+    void invokeConfigCallback(aiConfig *config) const;
+    void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const;
     virtual void            cacheAllSamples() =0;
     virtual void cacheSamples(int64_t startIndex, int64_t endIndex)=0;
     virtual int             getTimeSamplingIndex() const = 0;

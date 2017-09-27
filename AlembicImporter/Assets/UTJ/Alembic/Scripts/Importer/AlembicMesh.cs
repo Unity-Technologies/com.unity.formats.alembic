@@ -386,7 +386,6 @@ namespace UTJ.Alembic
                     if (split.mesh == null)
                     {
                         split.mesh = AddMeshComponents(m_abcObj, split.host);
-//                        split.mesh.name = ""split.host.name;
                     }
 
                     if (split.clear)
@@ -510,6 +509,7 @@ namespace UTJ.Alembic
             {
                 mesh = UnityEngine.Object.Instantiate(meshFilter.sharedMesh);
                 meshFilter.sharedMesh = mesh;
+                mesh.name = "dyn: " + gameObject.name;
             }
 
             return mesh;

@@ -19,7 +19,6 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index)
     return abcSampleSelector(index);
 }
 
-
 abciAPI void aiEnableFileLog(bool on, const char *path)
 {
     aiLogger::Enable(on, path);
@@ -35,19 +34,19 @@ abciAPI void aiCleanup()
 
 abciAPI void clearContextsWithPath(const char *path)
 {
-    aiContextManager::clearContextsWithPath(path);
+    aiContextManager::destroyContextsWithPath(path);
 }
 
 abciAPI aiContext* aiCreateContext(int uid)
 {
-    return aiContextManager::GetContext(uid);
+    return aiContextManager::getContext(uid);
 }
 
 abciAPI void aiDestroyContext(aiContext* ctx)
 {
     if (ctx)
     {
-        aiContextManager::DestroyContext(ctx->getUid());
+        aiContextManager::destroyContext(ctx->getUid());
     }
 }
 
@@ -152,7 +151,6 @@ abciAPI aiObject* aiGetParent(aiObject* obj)
     return (obj ? obj->getParent() : nullptr);
 }
 
-
 abciAPI void aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg)
 {
     if (schema)
@@ -168,7 +166,6 @@ abciAPI void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb
         schema->setConfigCallback(cb, arg);
     }
 }
-
 
 abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
 {
@@ -224,7 +221,6 @@ abciAPI void aiXFormGetData(aiXFormSample* sample, aiXFormData *outData)
     }
 }
 
-
 abciAPI bool aiHasPolyMesh(aiObject* obj)
 {
     return obj && obj->getPolyMesh();
@@ -272,7 +268,6 @@ abciAPI void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, 
     }
 }
 
-
 abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
     return (sample ? sample->getVertexBufferLength(splitIndex) : 0);
@@ -308,7 +303,6 @@ abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubm
         sample->fillSubmeshIndices(*summary, *data);
     }
 }
-
 
 abciAPI bool aiHasCamera(aiObject* obj)
 {

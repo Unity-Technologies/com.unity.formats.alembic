@@ -11,7 +11,6 @@ std::string ToString(const aiConfig &v)
 
     oss << "{swapHandedness: " << (v.swapHandedness ? "true" : "false");
     oss << ", swapFaceWinding: " << (v.swapFaceWinding ? "true" : "false");
-    oss << ", submeshPerUVTile: " << (v.submeshPerUVTile ? "true" : "false");
     oss << ", normalsMode: " << (v.normalsMode == aiNormalsMode::ReadFromFile
         ? "read_from_file"
         : (v.normalsMode == aiNormalsMode::ComputeIfMissing
@@ -33,7 +32,7 @@ std::string ToString(const aiConfig &v)
 
 aiContextManager aiContextManager::ms_instance;
 
-aiContext* aiContextManager::GetContext(int uid)
+aiContext* aiContextManager::getContext(int uid)
 {
     auto it = ms_instance.m_contexts.find(uid);
 
@@ -49,7 +48,7 @@ aiContext* aiContextManager::GetContext(int uid)
     return ctx;
 }
 
-void aiContextManager::DestroyContext(int uid)
+void aiContextManager::destroyContext(int uid)
 {
     auto it = ms_instance.m_contexts.find(uid);
         
@@ -61,7 +60,7 @@ void aiContextManager::DestroyContext(int uid)
     }
 }
 
-void aiContextManager::clearContextsWithPath(const char* assetPath)
+void aiContextManager::destroyContextsWithPath(const char* assetPath)
 {
     std::string path = aiContext::normalizePath(assetPath);
     for (auto it = ms_instance.m_contexts.begin(); it != ms_instance.m_contexts.end(); ++it)

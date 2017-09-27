@@ -53,7 +53,7 @@ void aiSchemaBase::setSampleCallback(aiSampleCallback cb, void *arg)
     m_sampleCbArg = arg;
 }
 
-void aiSchemaBase::invokeConfigCallback(aiConfig *config)
+void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
 {
     if (m_configCb)
     {
@@ -61,7 +61,7 @@ void aiSchemaBase::invokeConfigCallback(aiConfig *config)
     }
 }
 
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged)
+void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const
 {
     if (m_sampleCb)
     {
@@ -85,7 +85,7 @@ void aiSchemaBase::readConfig()
 
 int aiSchemaBase::getNumProperties() const
 {
-    return (int)m_properties.size();
+    return static_cast<int>(m_properties.size());
 }
 
 aiProperty* aiSchemaBase::getPropertyByIndex(int i)

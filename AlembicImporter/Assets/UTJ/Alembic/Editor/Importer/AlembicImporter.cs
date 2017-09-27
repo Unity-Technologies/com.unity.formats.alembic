@@ -22,7 +22,6 @@ namespace UTJ.Alembic
             File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
             System.IO.File.Delete(fullStreamingAssetPath + ".meta");
 
-
             return AssetDeleteResult.DidNotDelete;
         }
 
@@ -67,8 +66,8 @@ namespace UTJ.Alembic
     public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicImportSettings m_ImportSettings = new AlembicImportSettings();
-        [HideInInspector][SerializeField] public AlembicDiagnosticSettings m_diagSettings = new AlembicDiagnosticSettings();
-        [HideInInspector][SerializeField] public AlembicImportMode m_importMode = AlembicImportMode.AutomaticStreamingSetup;
+        [SerializeField] public AlembicDiagnosticSettings m_diagSettings = new AlembicDiagnosticSettings();
+        [SerializeField] public AlembicImportMode m_importMode = AlembicImportMode.AutomaticStreamingSetup;
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -102,20 +101,42 @@ namespace UTJ.Alembic
             var material = new Material(Shader.Find("Standard")) { };
             ctx.AddSubAsset("Default Material", material);
 
+            var duration = m_ImportSettings.m_endTime - m_ImportSettings.m_startTime;
+            if (m_importMode == AlembicImportMode.AutomaticStreamingSetup && duration>0)
+            {
+                Keyframe[] frames = new Keyframe[2];
+                frames[0].value = m_ImportSettings.m_startTime;
+                frames[0].time = 0.0f;
+                frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
+                frames[0].outTangent = 1.0f;
+                frames[1].value = m_ImportSettings.m_endTime;
+                frames[1].time = duration;
+                frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
+                frames[1].inTangent = 1.0f;
+                AnimationCurve curve = new AnimationCurve(frames); 
+                var animationClip = new AnimationClip();
+                animationClip.SetCurve("",typeof(AlembicStreamPlayer),"m_time",curve);
+                animationClip.name = "Default Animation";
+                ctx.AddSubAsset("Default Animation", animationClip);
+            }
+
             CollectSubAssets(ctx, stream.AlembicTreeRoot, material);
         }
 
-        private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
+        private static float CalculateLinearTangent(AnimationCurve curve, int index, int toIndex)
         {
-            if (m_ImportSettings.m_importMeshes)
+             return (float) (((double) curve[index].value - (double) curve[toIndex].value) / ((double) curve[index].time - (double) curve[toIndex].time));
+        }
+
+        private static void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
+        {
+           
+            var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
+            if (meshFilter != null)
             {
-                var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
-                if (meshFilter != null)
-                {
-                    var m = meshFilter.sharedMesh;
-                    m.name = node.linkedGameObj.name;
-                    ctx.AddSubAsset(m.name, m);
-                }
+                var m = meshFilter.sharedMesh;
+                m.name = node.linkedGameObj.name;
+                ctx.AddSubAsset(m.name, m);
             }
 
             var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();

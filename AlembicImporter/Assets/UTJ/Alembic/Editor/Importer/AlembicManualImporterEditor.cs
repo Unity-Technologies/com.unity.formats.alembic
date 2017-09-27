@@ -84,10 +84,6 @@ namespace UTJ.Alembic
             {
                 m_ImportSettings.m_swapFaceWinding = EditorGUILayout.Toggle("Swap face winding", m_ImportSettings.m_swapFaceWinding);
             });
-            AlembicUI.AddHorzLine(() =>
-            {
-                m_ImportSettings.m_submeshPerUVTile = EditorGUILayout.Toggle("Submesh per UV tile", m_ImportSettings.m_submeshPerUVTile);
-            });
 
             AlembicUI.AddHorzLine(() =>
             {

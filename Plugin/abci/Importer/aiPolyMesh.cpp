@@ -147,7 +147,6 @@ int Topology::getVertexBufferLength(int splitIndex) const
 
 int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
                                const aiFacesets &inFacesets,
-                               bool submeshPerUVTile,
                                aiPolyMeshSample* sample)
 {
     DebugLog("Topology::prepareSubmeshes()");
@@ -215,18 +214,6 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
     else
     {
         facesetIndices.resize(m_counts->size(), -1);
-
-        // don't even fill faceset if we have no UVs to tile split the mesh
-        if (uvs.valid() && submeshPerUVTile)
-        {
-            facesets.resize(1);
-            Faceset &faceset = facesets.front();
-
-            for (size_t i=0; i<m_counts->size(); ++i)
-            {
-                faceset.push_back(i);
-            }
-        }
     }
 
     int nsplits = getSplitCount(sample, false);
@@ -251,13 +238,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
         Submesh *curMesh = 0;
         const Util::uint32_t *uvIndices = 0;
         const abcV2 *uvValues = 0;
-
-        if (uvs.valid() && submeshPerUVTile)
-        {
-            uvValues = uvs.getVals()->get();
-            uvIndices = uvs.getIndices()->get();
-        }
-
+        
         std::map<SubmeshKey, size_t> submeshIndices;
 
         std::vector<int> splitSubmeshIndices(nsplits, 0);
@@ -664,7 +645,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 {
     DebugLog("aiPolyMeshSample::updateConfig()");
     
-    topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding || config.submeshPerUVTile != m_config.submeshPerUVTile);
+    topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding);
     dataChanged = (config.swapHandedness != m_config.swapHandedness);
 
     bool smoothNormalsRequired = (config.normalsMode == aiNormalsMode::AlwaysCompute ||
@@ -1111,7 +1092,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     bool interpolatePositions = hasVelocities() && m_nextPositions != nullptr;
     float timeOffset = static_cast<float>(m_currentTimeOffset);
     float timeInterval = static_cast<float>(m_currentTimeInterval);
-    float timeScale = static_cast<float>(m_config.timeScale);
+    float vertexMotionScale = static_cast<float>(m_config.vertexMotionScale);
     
     const SplitInfo &split = m_topology->m_splits[splitIndex];
     const auto &counts = *(m_topology->m_counts);
@@ -1151,7 +1132,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     if (interpolatePositions) \
     {\
         abcV3 distance = nextPositions[srcIdx] - positions[srcIdx]; \
-        abcV3 velocity = (distance / timeInterval) * timeScale; \
+        abcV3 velocity = (distance / timeInterval) * vertexMotionScale; \
         cP+= distance * timeOffset; \
         data.interpolatedVelocitiesXY[dstIdx].x = velocity.x*xScale; \
         data.interpolatedVelocitiesXY[dstIdx].y = velocity.y; \
@@ -1676,7 +1657,7 @@ int aiPolyMeshSample::prepareSubmeshes(aiPolyMeshSample* sample, const aiFaceset
 {
     DebugLog("aiPolyMeshSample::prepateSubmeshes()");
     
-    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, m_config.submeshPerUVTile, sample);
+    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, sample);
 
     m_curSubmesh = m_topology->submeshBegin();
 
