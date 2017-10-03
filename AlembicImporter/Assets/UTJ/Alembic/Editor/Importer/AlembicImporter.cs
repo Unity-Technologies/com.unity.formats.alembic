@@ -105,11 +105,11 @@ namespace UTJ.Alembic
             if (m_importMode == AlembicImportMode.AutomaticStreamingSetup && duration>0)
             {
                 Keyframe[] frames = new Keyframe[2];
-                frames[0].value = m_ImportSettings.m_startTime;
+                frames[0].value = 0.0f;
                 frames[0].time = 0.0f;
                 frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[0].outTangent = 1.0f;
-                frames[1].value = m_ImportSettings.m_endTime;
+                frames[1].value = duration;
                 frames[1].time = duration;
                 frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[1].inTangent = 1.0f;

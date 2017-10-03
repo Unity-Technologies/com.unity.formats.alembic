@@ -499,11 +499,16 @@ namespace UTJ.Alembic
                     renderer = gameObject.AddComponent<MeshRenderer>();
                 }
 
+                var mat = gameObject.transform.parent.GetComponentInChildren<MeshRenderer>().sharedMaterial;
     #if UNITY_EDITOR
-                Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-                material.name = "Material_0";
-                renderer.sharedMaterial = material;
+                if (mat == null)
+                {
+                    mat = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
+                    mat.name = "Material_0";    
+                }
     #endif
+                renderer.sharedMaterial = mat;
+
             }
             else
             {
