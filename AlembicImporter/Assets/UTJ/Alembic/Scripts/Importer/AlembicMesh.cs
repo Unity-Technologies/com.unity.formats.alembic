@@ -8,14 +8,14 @@ namespace UTJ.Alembic
     public class AlembicMesh : AlembicElement
     {
         public class Split
-        {
+        {\
             public Vector3[] positionCache;
             public Vector3[] normalCache;
             public Vector3[] velocitiesCache;
             public Vector2[] velocitiesXYCache;
             public Vector2[] velocitiesZCache;
             public Vector2[] uvCache;
-            public Vector4[] tangentCache;
+            public Vector4[] tangentCache;\
             public Mesh mesh;
             public GameObject host;
 
@@ -29,7 +29,7 @@ namespace UTJ.Alembic
 
         public class Submesh
         {
-            public int[] indexCache;
+            public PinnedList<int> indexCache = new PinnedList<int>();
             public int facesetIndex;
             public int splitIndex;
             public int index;
@@ -50,11 +50,6 @@ namespace UTJ.Alembic
         AbcAPI.aiMeshSampleSummary m_sampleSummary;
         bool m_freshSetup = false;
 
-        public static IntPtr GetArrayPtr(Array a)
-        {
-            return Marshal.UnsafeAddrOfPinnedArrayElement(a, 0);
-        }
-
         void UpdateSplits(int numSplits)
         {
             Split split = null;
@@ -67,17 +62,8 @@ namespace UTJ.Alembic
                     {
                         split = new Split
                         {
-                            positionCache = new Vector3[0],
-                            normalCache = new Vector3[0],
-                            uvCache = new Vector2[0],
-                            tangentCache = new Vector4[0],
-                            mesh = null,
-                            host = null,
                             clear = true,
-                            submeshCount = 0,
                             active = true,
-                            center = Vector3.zero,
-                            size = Vector3.zero
                         };
 
                         m_splits.Add(split);
@@ -94,17 +80,9 @@ namespace UTJ.Alembic
                 {
                     split = new Split
                     {
-                        positionCache = new Vector3[0],
-                        normalCache = new Vector3[0],
-                        uvCache = new Vector2[0],
-                        tangentCache = new Vector4[0],
-                        mesh = null,
                         host = AlembicTreeNode.linkedGameObj,
                         clear = true,
-                        submeshCount = 0,
                         active = true,
-                        center = Vector3.zero,
-                        size = Vector3.zero
                     };
 
                     m_splits.Add(split);
@@ -192,7 +170,6 @@ namespace UTJ.Alembic
 
             AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary, topologyChanged);
 
-            AbcAPI.aiPolyMeshData vertexData = default(AbcAPI.aiPolyMeshData);
 
             UpdateSplits(m_sampleSummary.splitCount);
 
@@ -253,6 +230,11 @@ namespace UTJ.Alembic
                     vertexData.tangents = IntPtr.Zero;
                 }
 
+                var vertexData = new AbcAPI.aiPolyMeshData();
+                vertexData.positions = split.positionCache;
+                vertexData.normals = split.normalCache;
+                vertexData.uvs = split.uvCache;
+                vertexData.tangents = split.tangentCache;
                 AbcAPI.aiPolyMeshFillVertexBuffer(sample, s, ref vertexData);
 
                 split.center = vertexData.center;
@@ -300,7 +282,6 @@ namespace UTJ.Alembic
                     {
                         submesh = new Submesh
                         {
-                            indexCache = new int[0],
                             facesetIndex = -1,
                             splitIndex = -1,
                             index = -1,
@@ -315,9 +296,8 @@ namespace UTJ.Alembic
                     submesh.index = submeshSummary.splitSubmeshIndex;
                     submesh.update = true;
 
-                    Array.Resize(ref submesh.indexCache, 3 * submeshSummary.triangleCount);
-
-                    submeshData.indices = GetArrayPtr(submesh.indexCache);
+                    submesh.indexCache.ResizeDiscard(3 * submeshSummary.triangleCount);
+                    submeshData.indices = submesh.indexCache;
 
                     AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
                 }
