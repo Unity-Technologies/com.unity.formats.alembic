@@ -2068,7 +2068,10 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
     // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
     const abcV3 * normals = sample->m_smoothNormals.empty() && sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : sample->m_smoothNormals.data();
     bool normalsIndexed = !sample->m_smoothNormals.empty() ? false : sample->m_normals.valid() && ( sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
-    const Util::uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : sample->m_topology->m_indices->get();
+    const int32_t *Vidxs = sample->m_topology->m_indices->get();
+    const uint32_t *Nidxs;
+    if (normalsIndexed)
+        Nidxs = sample->m_normals.getIndices()->get();
 
     bool hasUVs = sample->m_uvs.valid();
     const auto &uvVals = *(sample->m_uvs.getVals()); 
@@ -2095,7 +2098,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
             // same Normal?
             if( normals )
             {
-                const abcV3 & N = normals[Nidxs ? Nidxs[index] : index];
+                const abcV3 & N = normals[Nidxs ? (normalsIndexed ? Nidxs[index] : Vidxs[index]) : index];
                 if (prevN == NULL)
                     prevN = &N;
                 else

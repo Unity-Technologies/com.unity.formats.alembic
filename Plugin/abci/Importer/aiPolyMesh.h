@@ -154,8 +154,8 @@ public:
     inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
 
 public:
-    Abc::UInt32ArraySamplePtr m_indices;
-    std::vector<uint32_t> m_indicesSwapedFaceWinding;
+    Abc::Int32ArraySamplePtr m_indices;
+    std::vector<int32_t> m_indicesSwapedFaceWinding;
     std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
     Abc::Int32ArraySamplePtr m_counts;
     int m_triangulatedIndexCount;
