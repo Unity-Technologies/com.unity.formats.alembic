@@ -66,17 +66,22 @@ abciAPI void aiSetConfig(aiContext* ctx, const aiConfig* conf)
 
 abciAPI float aiGetStartTime(aiContext* ctx)
 {
-    return (ctx ? ctx->getStartTime() : 0.0f);
+    return ctx ? ctx->getStartTime() : 0.0f;
 }
 
 abciAPI float aiGetEndTime(aiContext* ctx)
 {
-    return (ctx ? ctx->getEndTime() : 0.0f);
+    return ctx ? ctx->getEndTime() : 0.0f;
+}
+
+abciAPI int getFrameCount(aiContext* ctx)
+{
+    return ctx ? ctx->getFrameCount() : 0;
 }
 
 abciAPI aiObject* aiGetTopObject(aiContext* ctx)
 {
-    return (ctx ? ctx->getTopObject() : 0);
+    return ctx ? ctx->getTopObject() : 0;
 }
 
 abciAPI void aiDestroyObject(aiContext* ctx, aiObject* obj)
@@ -89,11 +94,7 @@ abciAPI void aiDestroyObject(aiContext* ctx, aiObject* obj)
 
 abciAPI int aiGetNumTimeSamplings(aiContext* ctx)
 {
-    if (ctx)
-    {
-        return ctx->getNumTimeSamplings();
-    }
-    return 0;
+    return ctx ? ctx->getNumTimeSamplings() : 0;
 }
 abciAPI void aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
 {
@@ -128,27 +129,27 @@ abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
 
 abciAPI const char* aiGetNameS(aiObject* obj)
 {
-    return (obj ? obj->getName() : "");
+    return obj ? obj->getName() : "";
 }
 
 abciAPI const char* aiGetFullNameS(aiObject* obj)
 {
-    return (obj ? obj->getFullName() : "");
+    return obj ? obj->getFullName() : "";
 }
 
 abciAPI int aiGetNumChildren(aiObject* obj)
 {
-    return (obj ? obj->getNumChildren() : 0);
+    return obj ? obj->getNumChildren() : 0;
 }
 
 abciAPI aiObject* aiGetChild(aiObject* obj, int i)
 {
-    return (obj ? obj->getChild(i) : nullptr);
+    return obj ? obj->getChild(i) : nullptr;
 }
 
 abciAPI aiObject* aiGetParent(aiObject* obj)
 {
-    return (obj ? obj->getParent() : nullptr);
+    return obj ? obj->getParent() : nullptr;
 }
 
 abciAPI void aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg)
@@ -169,22 +170,22 @@ abciAPI void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb
 
 abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
 {
-    return (schema ? schema->getObject() : nullptr);
+    return schema ? schema->getObject() : nullptr;
 }
 
 abciAPI int aiSchemaGetNumSamples(aiSchemaBase* schema)
 {
-    return (schema ? schema->getNumSamples() : 0);
+    return schema ? schema->getNumSamples() : 0;
 }
 
 abciAPI aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {    
-    return (schema ? schema->updateSample(*ss) : 0);
+    return schema ? schema->updateSample(*ss) : 0;
 }
 
 abciAPI aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {
-    return (schema ? schema->getSample(*ss) : 0);
+    return schema ? schema->getSample(*ss) : 0;
 }
 
 abciAPI int aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss)
@@ -270,7 +271,7 @@ abciAPI void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, 
 
 abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
-    return (sample ? sample->getVertexBufferLength(splitIndex) : 0);
+    return sample ? sample->getVertexBufferLength(splitIndex) : 0;
 }
 
 abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data)
@@ -283,12 +284,12 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex
 
 abciAPI int aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets)
 {
-    return (sample ? sample->prepareSubmeshes(sample, *facesets) : 0);
+    return sample ? sample->prepareSubmeshes(sample, *facesets) : 0;
 }
 
 abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex)
 {
-    return (sample ? sample->getSplitSubmeshCount(splitIndex) : 0);
+    return sample ? sample->getSplitSubmeshCount(splitIndex) : 0;
 }
 
 abciAPI bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)

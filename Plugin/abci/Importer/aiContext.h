@@ -59,6 +59,7 @@ public:
 
     float getStartTime() const;
     float getEndTime() const;
+    unsigned int getFrameCount() const;
     void cacheAllSamples();
     void updateSamples(float time);
 

@@ -7,8 +7,8 @@
 #include <unordered_map>
 
 
-#define MAX_VERTEX_SPLIT_COUNT 65000
-// ---
+#define MAX_VERTEX_SPLIT_COUNT_16 65000
+#define MAX_VERTEX_SPLIT_COUNT_32 2000000000
 
 static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
 {
@@ -22,14 +22,13 @@ static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
     return r;
 }
 
-// ---
-
 Topology::Topology()
     : m_triangulatedIndexCount(0)
     , m_tangentsCount(0)
     , m_vertexSharingEnabled(false)
     , m_FreshlyReadTopologyData(false)
     , m_TreatVertexExtraDataAsStatic(false)
+    , m_use32BitsIndexBuffer(false)
 {
     m_indices.reset();
     m_counts.reset();
@@ -105,7 +104,8 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
     }
     else
     {
-        m_splits.reserve(1 + m_indices->size() / MAX_VERTEX_SPLIT_COUNT);
+        const int maxVertexSplitCount = m_use32BitsIndexBuffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
+        m_splits.reserve(1 + m_indices->size() / maxVertexSplitCount);
         m_splits.push_back(SplitInfo());
 
         SplitInfo *curSplit = &(m_splits.back());
@@ -114,7 +114,7 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
         {
             size_t nv = (size_t)m_counts->get()[i];
 
-            if (curSplit->vertexCount + nv > MAX_VERTEX_SPLIT_COUNT)
+            if (curSplit->vertexCount + nv > maxVertexSplitCount)
             {
                 m_splits.push_back(SplitInfo(i, indexOffset));
 
@@ -1856,6 +1856,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 
     topologyChanged = m_varyingTopology;
     ret->m_topology->EnableVertexSharing(m_config.shareVertices && !m_varyingTopology);
+    ret->m_topology->Enable32BitsIndexbuffers(m_config.use32BitsIndexBuffer);
     ret->m_topology->TreatVertexExtraDataAsStatic(m_config.treatVertexExtraDataAsStatic && !m_varyingTopology);
 
     if (!ret->m_topology->m_counts || m_varyingTopology)
@@ -2052,15 +2053,15 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
 
     auto * facesIndices = m_config.turnQuadEdges ?
         sample->m_topology->m_indicesSwapedFaceWinding.data() : sample->m_topology->m_indices->get();
-    size_t totalFaces = faces->size();
+    uint32_t totalFaces = faces->size();
 
     // 1st, figure out which face uses which vertices (for sharing identification)
-    std::unordered_map< size_t, std::vector<size_t>> indexesOfFacesValues; 
-    size_t facesIndicesCursor = 0;
-    for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+    std::unordered_map< uint32_t, std::vector<uint32_t>> indexesOfFacesValues;
+    uint32_t facesIndicesCursor = 0;
+    for (uint32_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
     {
-        size_t faceSize = (size_t)(faces->get()[faceIndex]);
-        for (size_t i = 0; i < faceSize; ++i, ++facesIndicesCursor)
+        uint32_t faceSize = (uint32_t)(faces->get()[faceIndex]);
+        for (uint32_t i = 0; i < faceSize; ++i, ++facesIndicesCursor)
             indexesOfFacesValues[ facesIndices[facesIndicesCursor] ].push_back(facesIndicesCursor);
     }
 
@@ -2083,18 +2084,18 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
     sample->m_topology->m_FixedTopoPositionsIndexes.reserve(sample->m_positions->size());
     sample->m_topology->m_FreshlyReadTopologyData = true;
 
-    std::unordered_map< size_t, std::vector<size_t>>::iterator itr = indexesOfFacesValues.begin();
+    std::unordered_map< uint32_t, std::vector<uint32_t>>::iterator itr = indexesOfFacesValues.begin();
     while (itr != indexesOfFacesValues.end())
     {
-        std::vector<size_t>& vertexUsages = itr->second;
-        size_t vertexUsageIndex = 0;
-        size_t vertexUsageMaxIndex = itr->second.size();
+        std::vector<uint32_t>& vertexUsages = itr->second;
+        uint32_t vertexUsageIndex = 0;
+        uint32_t vertexUsageMaxIndex = itr->second.size();
         const Abc::V2f * prevUV = NULL;
         const abcV3 * prevN = NULL;
         bool share = true;
         do
         {
-            size_t index = vertexUsages[vertexUsageIndex];
+            uint32_t index = vertexUsages[vertexUsageIndex];
             // same Normal?
             if( normals )
             {
@@ -2120,7 +2121,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
         if (share)
             sample->m_topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
 
-        std::vector<size_t>::iterator indexItr = itr->second.begin();
+        std::vector<uint32_t>::iterator indexItr = itr->second.begin();
         while( indexItr != itr->second.end() )
         {
             if (!share)

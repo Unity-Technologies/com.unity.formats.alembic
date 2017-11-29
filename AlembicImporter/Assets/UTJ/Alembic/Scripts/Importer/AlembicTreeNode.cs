@@ -8,7 +8,7 @@ namespace UTJ.Alembic
 
     public class AlembicTreeNode : IDisposable
     {
-        public AlembicStream stream;
+        public AlembicStreamDescriptor streamDescriptor;
         public GameObject linkedGameObj;
         public Dictionary<string, AlembicElement> alembicObjects = new Dictionary<string, AlembicElement>();
         public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
@@ -29,11 +29,6 @@ namespace UTJ.Alembic
             foreach (var o in alembicObjects.ToArray())  // elements.dispose removes itself from list
                 o.Value.Dispose();
             alembicObjects.Clear();
-        }
-
-        public AlembicTreeNode FindChild(string name)
-        {
-            return children.FirstOrDefault(x => x.linkedGameObj.name == name);
         }
 
         public T GetOrAddAlembicObj<T>() where T : AlembicElement, new()

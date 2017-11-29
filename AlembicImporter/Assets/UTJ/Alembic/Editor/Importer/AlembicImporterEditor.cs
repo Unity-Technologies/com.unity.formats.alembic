@@ -1,95 +1,135 @@
 #if UNITY_2017_1_OR_NEWER
 
 using System;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
-    [CustomEditor(typeof(AlembicImporter))]
+    [CustomEditor(typeof(AlembicImporter)),CanEditMultipleObjects]
     public class AlembicImporterEditor : ScriptedImporterEditor
     {
-
+        private bool m_OtherSettings;
         public override void OnInspectorGUI()
         {
             var importer = serializedObject.targetObject as AlembicImporter;
-            var settings = importer.m_ImportSettings;
-            var serSettings = serializedObject.FindProperty(() => importer.m_ImportSettings);
 
-            AddEnumProperty(serializedObject.FindProperty(() => importer.m_importMode), "Import Mode", "", typeof(AlembicImportMode));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normalsMode"),Enum.GetNames(typeof(AbcAPI.aiNormalsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangentsMode"),Enum.GetNames(typeof(AbcAPI.aiTangentsMode)));
+            
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
 
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_swapHandedness), "Swap handedness", "");
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_swapFaceWinding), "Swap face winding", "");
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_TurnQuadEdges), "Turn Quad Edges", "");
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_shareVertices), "Merge Vertices (experimental)", "Allow vertex sharing between faces when possible.");
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_treatVertexExtraDataAsStatics), "Vertex extra data is static (exp.)", "When set, UV's/normals/tangents are fetched from file only on topology change event.");
-            AddFloatProperty(serSettings.FindPropertyRelative(() => settings.m_scaleFactor), "Scale factor", "Apply a uniform scale to the root node of the model");
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.shareVertices"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.treatVertexExtraDataAsStatics"));
+            var varyingTopologyMeshes = serializedObject.FindProperty("varyingTopologyMeshNames");
+            if (varyingTopologyMeshes.arraySize>0)
+            {
+                string message = "'Merge vertices' and 'Vertex extra data is static' do not apply to meshes with varying topology.";
+                if (!varyingTopologyMeshes.hasMultipleDifferentValues)
+                {
+                    message = "The following meshes won't be affected : \n" + string.Join(",", importer.varyingTopologyMeshNames.ToArray()) + ".";
+                }
+                EditorGUILayout.HelpBox(message,MessageType.Info);
+            }
 
-            AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_normalsMode), "Normals mode", "", settings.m_normalsMode.GetType());
-            AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_tangentsMode), "Tangent mode", "", settings.m_tangentsMode.GetType());
-            AddEnumProperty(serSettings.FindPropertyRelative(() => settings.m_aspectRatioMode), "Aspect ratio mode", "", settings.m_aspectRatioMode.GetType());
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer"));
+#if !UNITY_2017_3_OR_NEWER
+            if (serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer").boolValue)
+                EditorGUILayout.HelpBox("32Bits index buffers are not supported on this version of Unity, this setting will be ignored.",MessageType.Warning);
+#endif
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleFactor"));
 
             EditorGUILayout.Separator();
-            var min = serSettings.FindPropertyRelative(() => settings.m_minTime).floatValue;
-            var max = serSettings.FindPropertyRelative(() => settings.m_maxTime).floatValue;
-            var startVal = serSettings.FindPropertyRelative(() => settings.m_startTime);
-            var endVal = serSettings.FindPropertyRelative(() => settings.m_endTime);
-            var startFloat = startVal.floatValue;
-            var endFloat = endVal.floatValue;
-            
-            EditorGUILayout.MinMaxSlider("Time range",ref startFloat,ref endFloat,min,max);
+            var abcStartTime = serializedObject.FindProperty("AbcStartTime");
+            var abcEndTime = serializedObject.FindProperty("AbcEndTime");
+            var abcFrameCount = serializedObject.FindProperty("AbcFrameCount");
+            var startFrame = serializedObject.FindProperty("startFrame");
+            var endFrame = serializedObject.FindProperty("endFrame");
+            var frameLength =  (abcFrameCount.intValue == 0) ? 0 : (abcEndTime.floatValue - abcStartTime.floatValue) / abcFrameCount.intValue;
+            var frameRate = (abcFrameCount.intValue == 0) ? 0 : (int)(1.0f/ frameLength);
+
+            float startFrameVal = startFrame.intValue;
+            float endFrameVal = endFrame.intValue;
+            EditorGUI.BeginDisabledGroup(abcStartTime.hasMultipleDifferentValues || abcEndTime.hasMultipleDifferentValues || abcFrameCount.hasMultipleDifferentValues);
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.MinMaxSlider("Time range",ref startFrameVal,ref endFrameVal,0,abcFrameCount.intValue);
+
+            startFrameVal = (float)Math.Floor(startFrameVal);
+            endFrameVal = (float)Math.Floor(endFrameVal);
+
+            var startTime = startFrameVal * frameLength + abcStartTime.floatValue;
+            var endTime = endFrameVal * frameLength + abcStartTime.floatValue;
+
             EditorGUILayout.BeginHorizontal();
-            startVal.floatValue = EditorGUILayout.FloatField(new GUIContent(" ","Start time"),startFloat,GUILayout.MinWidth(90.0f));
-            endVal.floatValue = EditorGUILayout.FloatField(new GUIContent(" ","End time"),endFloat,GUILayout.MinWidth(90.0f));
+            
+            EditorGUI.showMixedValue = startFrame.hasMultipleDifferentValues;
+            var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ","Start time"),startTime,GUILayout.MinWidth(90.0f));
+            EditorGUI.showMixedValue = endFrame.hasMultipleDifferentValues;
+            var newEndTime = EditorGUILayout.FloatField(new GUIContent(" ","End time"),endTime,GUILayout.MinWidth(90.0f));
+            EditorGUI.showMixedValue = false;
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (endTime != newEndTime)
+                {
+                    if (newEndTime < startTime) newEndTime = endTime;
+                    if (newEndTime > abcEndTime.floatValue) newEndTime = abcEndTime.floatValue;
+                    endFrameVal = (float)Math.Round((newEndTime - abcStartTime.floatValue) * frameRate);
+                }
+                if (startTime != newStartTime)
+                {
+                    if (newStartTime > endTime) newStartTime = startTime;
+                    if (newStartTime < abcStartTime.floatValue) newStartTime = abcStartTime.floatValue;
+                    startFrameVal = (float)Math.Round((newStartTime - abcStartTime.floatValue) * frameRate);
+                }
+                startFrame.intValue = (int)startFrameVal;
+                endFrame.intValue = (int)endFrameVal;
+            }
+            EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
 
-            if (startVal.floatValue < min)
-                startVal.floatValue = min;
-            if (endVal.floatValue > max)
-                endVal.floatValue = max;
-            if (startVal.floatValue > endVal.floatValue)
-                startVal.floatValue = min;
+            int frameCount = (int)(endFrameVal - startFrameVal);
+            float duration = frameCount * frameLength;
 
+            GUIStyle style = new GUIStyle();
+            style.alignment = TextAnchor.LowerRight;
+            if (!endFrame.hasMultipleDifferentValues && !startFrame.hasMultipleDifferentValues && !abcFrameCount.hasMultipleDifferentValues)
+            {
+                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.00") +"s at " + frameRate + "fps (" + (frameCount+1) + " frames)"),style);
+                EditorGUILayout.LabelField(new GUIContent("frame " + startFrameVal.ToString("0") + " to " + endFrameVal.ToString("0")),style);
+            }
+            else
+            {
+                EditorGUILayout.LabelField(new GUIContent("the selected assets have different time ranges or framerates"), style);
+            }
             EditorGUILayout.Separator();
-            AddBoolProperty(serSettings.FindPropertyRelative(() => settings.m_cacheSamples), "Cache samples", "Cache all samples upfront");
             
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.cacheSamples"));
+            m_OtherSettings = EditorGUILayout.Foldout(m_OtherSettings, new GUIContent("Other settings"));
+            if (m_OtherSettings)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapHandedness"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapFaceWinding"));
+                DisplayEnumProperty(serializedObject.FindProperty("streamSettings.aspectRatioMode"),Enum.GetNames(typeof(AbcAPI.aiAspectRatioMode)));    
+            }
+
             base.ApplyRevertGUI();
         }
 
-        private void AddBoolProperty(SerializedProperty porperty, string text, string tooltip)
+        static void DisplayEnumProperty(SerializedProperty normalsMode,string[] displayNames)
         {
-            var orgValue = porperty.boolValue;
-            var newValue = EditorGUILayout.Toggle(new GUIContent(text, tooltip), orgValue);
-            porperty.boolValue = newValue;
-        }
-
-
-        void AddEnumProperty(SerializedProperty porperty, string text, string tooltip, Type typeOfEnum)
-        {
-            Rect ourRect = EditorGUILayout.BeginHorizontal();
-            EditorGUI.BeginProperty(ourRect, GUIContent.none, porperty);
-
-            int selectionFromInspector = porperty.intValue;
-            string[] enumNamesList = System.Enum.GetNames(typeOfEnum);
-            var actualSelected = EditorGUILayout.Popup(text, selectionFromInspector, enumNamesList);
-            porperty.intValue = actualSelected;
+            var rect = EditorGUILayout.GetControlRect();
+            EditorGUI.BeginProperty(rect, new GUIContent(normalsMode.displayName), normalsMode);
+            EditorGUI.showMixedValue = normalsMode.hasMultipleDifferentValues;
+            EditorGUI.BeginChangeCheck();
+            var normalsModeNew = EditorGUI.Popup(rect, normalsMode.displayName, normalsMode.intValue, displayNames.Select(ObjectNames.NicifyVariableName).ToArray());
+            if (EditorGUI.EndChangeCheck())
+            {
+                normalsMode.intValue = normalsModeNew;
+            }
+            EditorGUI.showMixedValue = false;
             EditorGUI.EndProperty();
-            EditorGUILayout.EndHorizontal();
-        }
-
-        void AddIntProperty(SerializedProperty porperty, string text, string tooltip)
-        {
-            var orgValue = porperty.intValue;
-            var newValue = EditorGUILayout.IntField(new GUIContent(text, tooltip), orgValue);
-            porperty.intValue = newValue;
-        }
-
-        void AddFloatProperty(SerializedProperty porperty, string text, string tooltip)
-        {
-            var orgValue = porperty.floatValue;
-            var newValue = EditorGUILayout.FloatField(new GUIContent(text, tooltip), orgValue);
-            porperty.floatValue = newValue;
         }
     }
 }

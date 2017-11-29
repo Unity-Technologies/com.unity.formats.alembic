@@ -11,22 +11,13 @@ namespace UTJ.Alembic
     {
         AlembicStreamPlayer m_Stream;
 
-        [Tooltip("Alambic asset to play")]
+        [Tooltip("Alembic asset to play")]
         public ExposedReference<AlembicStreamPlayer> streamPlayer;
-
-        [Tooltip("Amount of time to clip off the start of the alembic asset from playback.")]
-        [SerializeField] public float startOffset;
 
         [Tooltip("Amount of time to clip off the end of the alembic asset from playback.")]
         [SerializeField] public float endOffset;
-
-        [Tooltip("Use to compress/dilute time play back.")]
-        [SerializeField] public float timeScale = 1f;
-
-		[Tooltip("Controls how playback cycles throught the stream.")]
-		[SerializeField] public AlembicPlaybackSettings.CycleType m_Cycle = AlembicPlaybackSettings.CycleType.Hold;
-
-        public ClipCaps clipCaps { get { return ClipCaps.None;  } }
+		
+        public ClipCaps clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
@@ -34,10 +25,6 @@ namespace UTJ.Alembic
             var behaviour = playable.GetBehaviour();
             m_Stream = streamPlayer.Resolve(graph.GetResolver());
             behaviour.streamPlayer = m_Stream;
-            behaviour.startTimeOffset = startOffset;
-            behaviour.endTimeClipOff = endOffset;
-            behaviour.timeScale = timeScale;
-            behaviour.cycle = m_Cycle;
             return playable;
         }
 
@@ -46,7 +33,7 @@ namespace UTJ.Alembic
             get
             {   
                 return m_Stream == null ?
-                    0 : ((m_Stream.m_PlaybackSettings.m_endTime - endOffset) - (m_Stream.m_PlaybackSettings.m_startTime + startOffset)) / timeScale;
+                    0 : m_Stream.streamDescriptor.Duration;
             }
         }
 

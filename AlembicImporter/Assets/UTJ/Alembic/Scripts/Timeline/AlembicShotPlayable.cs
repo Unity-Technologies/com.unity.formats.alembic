@@ -8,11 +8,6 @@ namespace UTJ.Alembic
     {
         public AlembicStreamPlayer streamPlayer { get; set; }
 
-        public float startTimeOffset;
-        public float endTimeClipOff;
-        public float timeScale;
-        public AlembicPlaybackSettings.CycleType cycle = AlembicPlaybackSettings.CycleType.Hold;
-
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
             base.ProcessFrame(playable, info, playerData);
@@ -20,10 +15,9 @@ namespace UTJ.Alembic
             if (streamPlayer == null)
                 return;
 
-            streamPlayer.m_PlaybackSettings.m_cycle = cycle;
-            var time = playable.GetTime()* timeScale + startTimeOffset - endTimeClipOff;
-            if (time < 0) time = 0;
-            streamPlayer.CurrentTime = (float)time;
+            var duration = streamPlayer.streamDescriptor.Duration;
+            var time = (float)playable.GetTime();
+            streamPlayer.currentTime = time == duration ? duration : time % duration;
         }
     }
 }

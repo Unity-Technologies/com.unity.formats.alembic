@@ -42,7 +42,7 @@ namespace UTJ.Alembic
 
             if (materials.Count > 0)
             {
-                var alembicTreeNode = stream.AlembicTreeRoot.FindNodeRecursive(gameObject);
+                var alembicTreeNode = stream.alembicTreeRoot.FindNodeRecursive(gameObject);
 
                 var abcmesh = alembicTreeNode.GetAlembicObj<AlembicMesh>();
                 if (abcmesh != null)
@@ -50,16 +50,16 @@ namespace UTJ.Alembic
                     int splitIndex = 0;
                     int submeshIndex = 0;
 
-                    if (abcmesh.m_submeshes.Count < materials.Count)
+                    if (abcmesh.submeshes.Count < materials.Count)
                     {
                         // should have at least materials.Count submeshes
-                        Debug.Log("\"" + alembicTreeNode.linkedGameObj.name + "\": Not enough submeshes for all assigned materials. (" + materials.Count + " material(s) for " + abcmesh.m_submeshes.Count + " submesh(es))");
+                        Debug.Log("\"" + alembicTreeNode.linkedGameObj.name + "\": Not enough submeshes for all assigned materials. (" + materials.Count + " material(s) for " + abcmesh.submeshes.Count + " submesh(es))");
                         return;
                     }
 
                     var renderer = gameObject.GetComponent<MeshRenderer>();
 
-                    foreach (AlembicMesh.Submesh submesh in abcmesh.m_submeshes)
+                    foreach (AlembicMesh.Submesh submesh in abcmesh.submeshes)
                     {
                         if (submesh.splitIndex != splitIndex)
                         {

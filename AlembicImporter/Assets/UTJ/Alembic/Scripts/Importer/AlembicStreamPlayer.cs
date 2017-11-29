@@ -5,49 +5,78 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
-        private AlembicStream _stream = null;
+        public AlembicStream Stream;
+        public AlembicStreamDescriptor streamDescriptor;
+        [SerializeField] public float currentTime;
+        [SerializeField] public int startFrame;
+        [SerializeField] public int endFrame;
+        [SerializeField] public float vertexMotionScale = 1.0f;
+        [SerializeField] public bool interpolateSamples = true;
+        float m_LastUpdateTime;
+        bool m_ForceUpdate = false;
 
-        [HideInInspector]
-        public AlembicStream Stream
+        public float Duration
         {
-            get { return _stream; }
-        }
-
-        public AlembicPlaybackSettings m_PlaybackSettings;
-        [HideInInspector] public AlembicDiagnosticSettings m_Diagnotics;
-        [ReadOnly] public AlembicStreamDescriptor m_StreamDescriptor;
-        [SerializeField] private float m_time;
-
-        public float CurrentTime
-        {
-            get { return m_time; }
-            set
+            get
             {
-                m_time = value;
+               return (endFrame- startFrame) * streamDescriptor.FrameLength;
             }
         }
 
+        void OnValidate()
+        {
+            if (streamDescriptor == null) return;
+            if (startFrame < streamDescriptor.minFrame) startFrame = streamDescriptor.minFrame;
+            if (startFrame > streamDescriptor.maxFrame) startFrame = streamDescriptor.maxFrame;
+            if (endFrame < startFrame) endFrame = startFrame; 
+            if (endFrame > streamDescriptor.maxFrame) endFrame = streamDescriptor.maxFrame;    
+            ClampTime();
+            m_ForceUpdate = true;
+        } 
+
         void LateUpdate()
         {
-            if (Stream != null)
-                if (!Stream.AbcUpdate(m_time))
-                    Stream.AbcRecoverContext(gameObject);
+            if (Stream != null && streamDescriptor != null)
+            {
+                ClampTime();
+                if (m_LastUpdateTime != currentTime || m_ForceUpdate)
+                {
+                    if (Stream.AbcUpdate(currentTime + startFrame * streamDescriptor.FrameLength + streamDescriptor.abcStartTime, vertexMotionScale, interpolateSamples))
+                    {
+                        m_LastUpdateTime = currentTime;
+                        m_ForceUpdate = false;    
+                    }
+                    else
+                    {
+                        Stream.Dispose();
+                        LoadStream();
+                    }
+                }
+            }
+        }
+
+        private void ClampTime()
+        {
+            float duration = Duration;
+            if (duration == .0f || currentTime < .0f)
+                currentTime = .0f;
+            else if (currentTime > duration)
+                currentTime = duration;
+        }
+
+        public void LoadStream()
+        {
+            if (streamDescriptor == null) return;
+            Stream = new AlembicStream(gameObject, streamDescriptor);
+            Stream.AbcLoad(true);
+            m_ForceUpdate = true;
         }
 
         void OnEnable()
         {
-            if (_stream == null)
+            if (Stream == null)
             {
-                if (m_PlaybackSettings == null)
-                {
-                    m_PlaybackSettings = new AlembicPlaybackSettings();
-                }
-
-                if (m_StreamDescriptor == null)
-                    return;
-
-                _stream = new AlembicStream(gameObject, m_StreamDescriptor.m_ImportSettings, m_PlaybackSettings, m_Diagnotics);
-                Stream.AbcLoad(false);
+                LoadStream();
             }
         }
 
@@ -60,12 +89,6 @@ namespace UTJ.Alembic
         public void OnApplicationQuit()
         {
             AbcAPI.aiCleanup();
-        }
-
-        public void ForceRefresh()
-        {
-            if (Stream != null)
-                Stream.ForcedRefresh();
         }
     }
 }

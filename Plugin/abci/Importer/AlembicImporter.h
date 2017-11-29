@@ -111,11 +111,12 @@ struct aiConfig
     float aspectRatio = -1.0f;
     bool forceUpdate = false;
     bool cacheSamples = false;
-    bool shareVertices = false;
+    bool shareVertices = true;
     bool treatVertexExtraDataAsStatic = false;
     bool interpolateSamples = true;
     bool turnQuadEdges = false;
     float vertexMotionScale = 1.0f;
+    bool use32BitsIndexBuffer = false;
 };
 
 struct aiTimeSamplingData
@@ -259,9 +260,6 @@ using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, 
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
-
-abciAPI void            aiEnableFileLog(bool on, const char *path);
-
 abciAPI void            aiCleanup();
 abciAPI void            clearContextsWithPath(const char *path);
 abciAPI aiContext*      aiCreateContext(int uid);
@@ -271,33 +269,23 @@ abciAPI bool            aiLoad(aiContext* ctx, const char *path);
 abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI float           aiGetStartTime(aiContext* ctx);
 abciAPI float           aiGetEndTime(aiContext* ctx);
+abciAPI int             getFrameCount(aiContext* ctx);
 abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
 abciAPI void            aiDestroyObject(aiContext* ctx, aiObject* obj);
-
 abciAPI int             aiGetNumTimeSamplings(aiContext* ctx);
-abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
-// deep copy to dst->times. if time sampling type is not Acyclic (which have no times), do exact same thing as aiGetTimeSampling()
-abciAPI void            aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
-
+abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
 abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
 
 abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
 abciAPI const char*     aiGetNameS(aiObject* obj);
-abciAPI const char*     aiGetFullNameS(aiObject* obj);
 abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
-abciAPI aiObject*       aiGetParent(aiObject* obj);
 
 abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-abciAPI aiObject*       aiSchemaGetObject(aiSchemaBase* schema);
-abciAPI int             aiSchemaGetNumSamples(aiSchemaBase* schema);
 abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI int             aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI float           aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI int             aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema);
-
+abciAPI int             aiSchemaGetNumSamples(aiSchemaBase* schema);
 abciAPI aiXForm*        aiGetXForm(aiObject* obj);
 abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
 
@@ -334,6 +322,4 @@ abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
 abciAPI const char*     aiPropertyGetNameS(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
-abciAPI int             aiPropertyGetTimeSamplingIndex(aiProperty* prop);
-abciAPI void            aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
 abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);

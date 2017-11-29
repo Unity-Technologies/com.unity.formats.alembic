@@ -151,6 +151,7 @@ public:
     inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
     inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
+    inline void Enable32BitsIndexbuffers(bool value) { m_use32BitsIndexBuffer = value; }
     inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
 
 public:
@@ -167,12 +168,13 @@ public:
     std::vector<int> m_tangentIndices;
     size_t m_tangentsCount;
 
-    std::vector<size_t> m_FixedTopoPositionsIndexes;
-    std::vector<size_t> m_FaceIndexingReindexed;
+    std::vector<uint32_t> m_FixedTopoPositionsIndexes;
+    std::vector<uint32_t> m_FaceIndexingReindexed;
 
     bool m_vertexSharingEnabled;
     bool m_FreshlyReadTopologyData;
     bool m_TreatVertexExtraDataAsStatic;
+    bool m_use32BitsIndexBuffer;
 };
 
 // ---

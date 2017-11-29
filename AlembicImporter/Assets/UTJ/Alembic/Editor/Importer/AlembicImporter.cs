@@ -1,9 +1,12 @@
 #if UNITY_2017_1_OR_NEWER
 
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
+using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace UTJ.Alembic
 {
@@ -18,9 +21,9 @@ namespace UTJ.Alembic
 
             var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
             File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
-            System.IO.File.Delete(fullStreamingAssetPath);
+            File.Delete(fullStreamingAssetPath);
             File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
-            System.IO.File.Delete(fullStreamingAssetPath + ".meta");
+            File.Delete(fullStreamingAssetPath + ".meta");
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -38,22 +41,22 @@ namespace UTJ.Alembic
             var sourcePath = Application.streamingAssetsPath + streamSourcePath;
 
             var directoryPath = Path.GetDirectoryName(destPath);
-            if (System.IO.File.Exists(destPath))
+            if (File.Exists(destPath))
             {
                 File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                System.IO.File.Delete(destPath);    
+                File.Delete(destPath);    
             }
-            else if (!System.IO.Directory.Exists(directoryPath))
+            else if (!Directory.Exists(directoryPath))
             {
-                System.IO.Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(directoryPath);
             }
-            if (System.IO.File.Exists(destPath))
+            if (File.Exists(destPath))
                 File.SetAttributes(destPath, FileAttributes.Normal);
-            System.IO.File.Move(sourcePath, destPath);
-            if (System.IO.File.Exists(destPath + ".meta"))
+            File.Move(sourcePath, destPath);
+            if (File.Exists(destPath + ".meta"))
             {
                 File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                System.IO.File.Move(sourcePath + ".meta", destPath+ ".meta");    
+                File.Move(sourcePath + ".meta", destPath+ ".meta");    
             }
             AssetDatabase.Refresh(ImportAssetOptions.Default);
             AlembicStream.ReconnectStreamsWithPath(streamDestPath);        
@@ -65,9 +68,15 @@ namespace UTJ.Alembic
     [ScriptedImporter(1, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
-        [SerializeField] public AlembicImportSettings m_ImportSettings = new AlembicImportSettings();
-        [SerializeField] public AlembicDiagnosticSettings m_diagSettings = new AlembicDiagnosticSettings();
-        [SerializeField] public AlembicImportMode m_importMode = AlembicImportMode.AutomaticStreamingSetup;
+        [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
+        [SerializeField] public float scaleFactor = 0.01f;
+        [SerializeField] public int startFrame;
+        [SerializeField] public int endFrame;        
+        [SerializeField] public float AbcStartTime;
+        [SerializeField] public float AbcEndTime;
+        [SerializeField] public int AbcFrameCount;
+        [SerializeField] public string importWarning;
+        [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -76,77 +85,119 @@ namespace UTJ.Alembic
             var sourcePath = Application.dataPath + shortAssetPath;
             var destPath = Application.streamingAssetsPath + shortAssetPath;
             var directoryPath = Path.GetDirectoryName(destPath);
-            if (!System.IO.Directory.Exists(directoryPath))
+            if (!Directory.Exists(directoryPath))
             {
-                System.IO.Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(directoryPath);
             }
-            if (System.IO.File.Exists(destPath))
+            if (File.Exists(destPath))
                 File.SetAttributes(destPath, FileAttributes.Normal);
-            System.IO.File.Copy(sourcePath, destPath ,true);
-            m_ImportSettings.m_pathToAbc =  new DataPath(destPath);
+            File.Copy(sourcePath, destPath ,true);
 
-            var mainObject = AlembicImportTasker.Import(m_importMode, m_ImportSettings, m_diagSettings, (stream, mainGO, streamDescr) =>
+            var fileName = Path.GetFileNameWithoutExtension(destPath);
+            var go = new GameObject(fileName);
+            go.transform.localScale *= scaleFactor;
+            
+            AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+            streamDescriptor.name = go.name + "ABCDesc";
+            streamDescriptor.pathToAbc = destPath;
+            streamDescriptor.minFrame = startFrame;
+            streamDescriptor.maxFrame = endFrame;
+            streamDescriptor.settings = streamSettings;
+
+            using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
-                GenerateSubAssets(ctx, mainGO, stream);
-                if(streamDescr != null)
-                    ctx.AddSubAsset( mainGO.name, streamDescr);
+                abcStream.AbcLoad(true);
+                AbcStartTime = abcStream.AbcStartTime;
+                AbcEndTime = abcStream.AbcEndTime;
+                AbcFrameCount = abcStream.AbcFrameCount;
+
+                streamDescriptor.abcFrameCount = AbcFrameCount;
+                streamDescriptor.abcDuration = AbcEndTime - AbcStartTime;
+                streamDescriptor.abcStartTime = AbcStartTime;
+
+                var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
+                streamPlayer.streamDescriptor = streamDescriptor;
+                streamPlayer.startFrame = startFrame;
+                streamPlayer.endFrame = endFrame;
+
+                AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
+                GenerateSubAssets(ctx, abcStream.alembicTreeRoot,streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
-            });
-            ctx.SetMainAsset(mainObject.name, mainObject);            
+           
+#if UNITY_2017_3_OR_NEWER
+                ctx.AddObjectToAsset(go.name, go);
+                ctx.SetMainObject(go);
+#else
+                ctx.SetMainAsset(go.name, go);
+#endif
+            }  
         }
 
-        private void GenerateSubAssets( AssetImportContext ctx, GameObject go, AlembicStream stream)
+        private void GenerateSubAssets( AssetImportContext ctx,AlembicTreeNode root,AlembicStreamDescriptor streamDescr)
         {
-            var material = new Material(Shader.Find("Standard")) { };
-            ctx.AddSubAsset("Default Material", material);
+            var material = new Material(Shader.Find("Standard"));
+            AddObjectToAsset(ctx,"Default Material", material);
 
-            var duration = m_ImportSettings.m_endTime - m_ImportSettings.m_startTime;
-            if (m_importMode == AlembicImportMode.AutomaticStreamingSetup && duration>0)
+            if (streamDescr.Duration>0)
             {
                 Keyframe[] frames = new Keyframe[2];
                 frames[0].value = 0.0f;
                 frames[0].time = 0.0f;
                 frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[0].outTangent = 1.0f;
-                frames[1].value = duration;
-                frames[1].time = duration;
+                frames[1].value = streamDescr.Duration;
+                frames[1].time = streamDescr.Duration;
                 frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[1].inTangent = 1.0f;
                 AnimationCurve curve = new AnimationCurve(frames); 
                 var animationClip = new AnimationClip();
-                animationClip.SetCurve("",typeof(AlembicStreamPlayer),"m_time",curve);
+                animationClip.SetCurve("",typeof(AlembicStreamPlayer),"currentTime",curve);
                 animationClip.name = "Default Animation";
-                ctx.AddSubAsset("Default Animation", animationClip);
+
+                AddObjectToAsset(ctx,"Default Animation", animationClip);
+            }
+            CollectSubAssets(ctx, root, material);
+            
+            streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
+        }
+
+        private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
+        {
+            AlembicMesh mesh = node.GetAlembicObj<AlembicMesh>();
+            if (mesh!=null)
+            {
+                if ((streamSettings.shareVertices || streamSettings.treatVertexExtraDataAsStatics) && 
+                    mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
+                {
+                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);   
+                }
             }
 
-            CollectSubAssets(ctx, stream.AlembicTreeRoot, material);
-        }
-
-        private static float CalculateLinearTangent(AnimationCurve curve, int index, int toIndex)
-        {
-             return (float) (((double) curve[index].value - (double) curve[toIndex].value) / ((double) curve[index].time - (double) curve[toIndex].time));
-        }
-
-        private static void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
-        {
-           
             var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
             if (meshFilter != null)
             {
                 var m = meshFilter.sharedMesh;
                 m.name = node.linkedGameObj.name;
-                ctx.AddSubAsset(m.name, m);
+                AddObjectToAsset(ctx,m.name, m);
             }
 
             var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();
             if (renderer != null)
-                renderer.material = mat;
+                renderer.sharedMaterial = mat;
 
             foreach( var child in node.children )
                 CollectSubAssets(ctx, child, mat);
         }
 
+        private static void AddObjectToAsset(AssetImportContext ctx,string identifier, Object asset)
+        {
+#if UNITY_2017_3_OR_NEWER
+            ctx.AddObjectToAsset(identifier, asset);
+#else
+            ctx.AddSubAsset(identifier, asset);
+#endif
+        }
     }
 }
 

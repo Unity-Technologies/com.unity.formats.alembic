@@ -1,11 +1,35 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UTJ.Alembic
 {
     public class AlembicStreamDescriptor : ScriptableObject
     {
-        public AlembicImportSettings m_ImportSettings;
-        [Header("Overview")] [ReadOnly] [SerializeField] public AlembicImportMode m_importMode;
-    }
+        [SerializeField] public string pathToAbc;
+        [SerializeField] public AlembicStreamSettings settings = new AlembicStreamSettings();
+        [SerializeField] public bool hasVaryingTopology = false;
+        [SerializeField] public bool hasAcyclicFramerate = false;
+        [SerializeField] public int minFrame = 0;
+        [SerializeField] public int maxFrame = 0;
+        [SerializeField] public float abcDuration = 0.0f;
+        [SerializeField] public float abcStartTime = 0.0f;
+        [SerializeField] public int abcFrameCount = 1;
 
+        public float Duration
+        {
+            get
+            {
+               return abcFrameCount * FrameLength;
+            }
+        }
+
+        public float FrameLength
+        {
+            get
+            {
+               if (abcFrameCount == 0) return 0;
+               return abcDuration / abcFrameCount;
+            }
+        }
+    }
 }
