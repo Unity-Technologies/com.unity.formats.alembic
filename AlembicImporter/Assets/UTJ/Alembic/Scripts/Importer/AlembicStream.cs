@@ -156,8 +156,6 @@ namespace UTJ.Alembic
             m_Context = AbcAPI.aiCreateContext(alembicTreeRoot.linkedGameObj.GetInstanceID());
             m_Loaded = AbcAPI.aiLoad(m_Context,m_StreamDesc.pathToAbc);
 
-            
-
             if (m_Loaded)
             {
                 var settings = m_StreamDesc.settings;
