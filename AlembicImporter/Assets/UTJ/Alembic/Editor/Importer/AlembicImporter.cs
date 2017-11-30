@@ -70,8 +70,8 @@ namespace UTJ.Alembic
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         [SerializeField] public float scaleFactor = 0.01f;
-        [SerializeField] public int startFrame;
-        [SerializeField] public int endFrame;        
+        [SerializeField] public int startFrame =-1;
+        [SerializeField] public int endFrame =-1;        
         [SerializeField] public float AbcStartTime;
         [SerializeField] public float AbcEndTime;
         [SerializeField] public int AbcFrameCount;
@@ -100,8 +100,6 @@ namespace UTJ.Alembic
             AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "ABCDesc";
             streamDescriptor.pathToAbc = destPath;
-            streamDescriptor.minFrame = startFrame;
-            streamDescriptor.maxFrame = endFrame;
             streamDescriptor.settings = streamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
@@ -111,6 +109,11 @@ namespace UTJ.Alembic
                 AbcEndTime = abcStream.AbcEndTime;
                 AbcFrameCount = abcStream.AbcFrameCount;
 
+                startFrame = startFrame ==-1 ? 0 : startFrame;
+                endFrame = endFrame ==-1 ? AbcFrameCount : endFrame;
+
+                streamDescriptor.minFrame = startFrame;
+                streamDescriptor.maxFrame = endFrame;
                 streamDescriptor.abcFrameCount = AbcFrameCount;
                 streamDescriptor.abcDuration = AbcEndTime - AbcStartTime;
                 streamDescriptor.abcStartTime = AbcStartTime;
