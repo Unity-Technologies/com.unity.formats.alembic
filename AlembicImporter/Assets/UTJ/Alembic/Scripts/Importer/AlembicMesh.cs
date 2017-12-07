@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,13 +10,13 @@ namespace UTJ.Alembic
     {
         public class Split
         {
-            public PinnedList<Vector3> positionCache = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
-            public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
-            public PinnedList<Vector2> velocitiesXYCache = new PinnedList<Vector2>();
-            public PinnedList<Vector2> velocitiesZCache = new PinnedList<Vector2>();
-            public PinnedList<Vector2> uvCache = new PinnedList<Vector2>();
-            public PinnedList<Vector4> tangentCache = new PinnedList<Vector4>();
+            public Vector3[] positionCache;
+            public Vector3[] normalCache;
+            public Vector3[] velocitiesCache;
+            public Vector2[] velocitiesXYCache;
+            public Vector2[] velocitiesZCache;
+            public Vector2[] uvCache;
+            public Vector4[] tangentCache;
             public Mesh mesh;
             public GameObject host;
 
@@ -29,7 +30,7 @@ namespace UTJ.Alembic
 
         public class Submesh
         {
-            public PinnedList<int> indexCache = new PinnedList<int>();
+            public int[] indexCache;
             public int facesetIndex;
             public int splitIndex;
             public int index;
@@ -44,8 +45,13 @@ namespace UTJ.Alembic
         public List<Split> splits = new List<Split>();
 
         public AbcAPI.aiMeshSummary summary;
-        AbcAPI.aiMeshSampleSummary m_SampleSummary;
+        public AbcAPI.aiMeshSampleSummary sampleSummary;
         bool m_FreshSetup = false;
+
+        public static IntPtr GetArrayPtr(Array a)
+        {
+            return Marshal.UnsafeAddrOfPinnedArrayElement(a, 0);
+        }
 
         void UpdateSplits(int numSplits)
         {
@@ -59,8 +65,17 @@ namespace UTJ.Alembic
                     {
                         split = new Split
                         {
+                            positionCache = new Vector3[0],
+                            normalCache = new Vector3[0],
+                            uvCache = new Vector2[0],
+                            tangentCache = new Vector4[0],
+                            mesh = null,
+                            host = null,
                             clear = true,
+                            submeshCount = 0,
                             active = true,
+                            center = Vector3.zero,
+                            size = Vector3.zero
                         };
 
                         splits.Add(split);
@@ -77,9 +92,17 @@ namespace UTJ.Alembic
                 {
                     split = new Split
                     {
+                        positionCache = new Vector3[0],
+                        normalCache = new Vector3[0],
+                        uvCache = new Vector2[0],
+                        tangentCache = new Vector4[0],
+                        mesh = null,
                         host = AlembicTreeNode.linkedGameObj,
                         clear = true,
+                        submeshCount = 0,
                         active = true,
+                        center = Vector3.zero,
+                        size = Vector3.zero
                     };
 
                     splits.Add(split);
@@ -148,13 +171,13 @@ namespace UTJ.Alembic
                 m_FreshSetup = false;
             }
 
-            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_SampleSummary, topologyChanged);
+            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary, topologyChanged);
 
             AbcAPI.aiPolyMeshData vertexData = default(AbcAPI.aiPolyMeshData);
 
-            UpdateSplits(m_SampleSummary.splitCount);
+            UpdateSplits(sampleSummary.splitCount);
 
-            for (int s = 0; s < m_SampleSummary.splitCount; ++s)
+            for (int s=0; s<sampleSummary.splitCount; ++s)
             {
                 Split split = splits[s];
 
@@ -163,51 +186,51 @@ namespace UTJ.Alembic
 
                 int vertexCount = AbcAPI.aiPolyMeshGetVertexBufferLength(sample, s);
 
-                split.positionCache.ResizeDiscard(vertexCount);
-                vertexData.positions = split.positionCache;
+                Array.Resize(ref split.positionCache, vertexCount);
+                vertexData.positions = GetArrayPtr(split.positionCache);
 
-                if (m_SampleSummary.hasVelocities)
+                if (sampleSummary.hasVelocities)
                 {
-                    split.velocitiesCache.ResizeDiscard(vertexCount);
-                    vertexData.velocities = split.velocitiesCache;
+                    Array.Resize(ref split.velocitiesCache, vertexCount);
+                    vertexData.velocities = GetArrayPtr(split.velocitiesCache);
 
-                    split.velocitiesXYCache.ResizeDiscard(vertexCount);
-                    vertexData.interpolatedVelocitiesXY = split.velocitiesXYCache;
-
-                    split.velocitiesZCache.ResizeDiscard(vertexCount);
-                    vertexData.interpolatedVelocitiesZ = split.velocitiesZCache;
+                    Array.Resize(ref split.velocitiesXYCache, vertexCount);
+                    vertexData.interpolatedVelocitiesXY = GetArrayPtr(split.velocitiesXYCache);
+                    
+                    Array.Resize(ref split.velocitiesZCache, vertexCount);
+                    vertexData.interpolatedVelocitiesZ = GetArrayPtr(split.velocitiesZCache);    
                 }
 
-                if (m_SampleSummary.hasNormals)
+                if (sampleSummary.hasNormals)
                 {
-                    split.normalCache.ResizeDiscard(vertexCount);
-                    vertexData.normals = split.normalCache;
+                    Array.Resize(ref split.normalCache, vertexCount);
+                    vertexData.normals = GetArrayPtr(split.normalCache);
                 }
                 else
                 {
-                    split.normalCache.ResizeDiscard(0);
+                    Array.Resize(ref split.normalCache, 0);
                     vertexData.normals = IntPtr.Zero;
                 }
 
-                if (m_SampleSummary.hasUVs)
+                if (sampleSummary.hasUVs)
                 {
-                    split.uvCache.ResizeDiscard(vertexCount);
-                    vertexData.uvs = split.uvCache;
+                    Array.Resize(ref split.uvCache, vertexCount);
+                    vertexData.uvs = GetArrayPtr(split.uvCache);
                 }
                 else
                 {
-                    split.uvCache.ResizeDiscard(0);
+                    Array.Resize(ref split.uvCache, 0);
                     vertexData.uvs = IntPtr.Zero;
                 }
 
-                if (m_SampleSummary.hasTangents)
+                if (sampleSummary.hasTangents)
                 {
-                    split.tangentCache.ResizeDiscard(vertexCount);
-                    vertexData.tangents = split.tangentCache;
+                    Array.Resize(ref split.tangentCache, vertexCount);
+                    vertexData.tangents = GetArrayPtr(split.tangentCache);
                 }
                 else
                 {
-                    split.tangentCache.ResizeDiscard(0);
+                    Array.Resize(ref split.tangentCache, 0);
                     vertexData.tangents = IntPtr.Zero;
                 }
 
@@ -235,7 +258,7 @@ namespace UTJ.Alembic
                     submeshes.RemoveRange(numSubmeshes, submeshes.Count - numSubmeshes);
                 }
                 
-                for (int s=0; s<m_SampleSummary.splitCount; ++s)
+                for (int s=0; s<sampleSummary.splitCount; ++s)
                 {
                     splits[s].submeshCount = AbcAPI.aiPolyMeshGetSplitSubmeshCount(sample, s);
                 }
@@ -258,6 +281,7 @@ namespace UTJ.Alembic
                     {
                         submesh = new Submesh
                         {
+                            indexCache = new int[0],
                             facesetIndex = -1,
                             splitIndex = -1,
                             index = -1,
@@ -272,8 +296,9 @@ namespace UTJ.Alembic
                     submesh.index = submeshSummary.splitSubmeshIndex;
                     submesh.update = true;
 
-                    submesh.indexCache.ResizeDiscard(3 * submeshSummary.triangleCount);
-                    submeshData.indices = submesh.indexCache;
+                    Array.Resize(ref submesh.indexCache, 3 * submeshSummary.triangleCount);
+
+                    submeshData.indices = GetArrayPtr(submesh.indexCache);
 
                     AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
                 }
@@ -301,7 +326,7 @@ namespace UTJ.Alembic
                 return;
             }
 
-            bool useSubObjects = (summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_SampleSummary.splitCount > 1);
+            bool useSubObjects = (summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || sampleSummary.splitCount > 1);
 
             for (int s=0; s<splits.Count; ++s)
             {
@@ -349,13 +374,12 @@ namespace UTJ.Alembic
                         split.mesh.Clear();
                     }
 
-                    split.mesh.SetVertices(split.positionCache);
-                    if (split.normalCache.Count > 0) split.mesh.SetNormals(split.normalCache);
-                    if (split.tangentCache.Count > 0) split.mesh.SetTangents(split.tangentCache);
-                    if (split.uvCache.Count > 0) split.mesh.SetUVs(0, split.uvCache);
-                    if (split.velocitiesXYCache.Count > 0) split.mesh.SetUVs(2, split.velocitiesXYCache);
-                    if (split.velocitiesZCache.Count > 0) split.mesh.SetUVs(3, split.velocitiesZCache);
-
+                    split.mesh.vertices = split.positionCache;
+                    split.mesh.normals = split.normalCache;
+                    split.mesh.tangents = split.tangentCache;
+                    split.mesh.uv3 = split.velocitiesXYCache;
+                    split.mesh.uv4 = split.velocitiesZCache;
+                    split.mesh.uv = split.uvCache;
                     // update the bounds
                     split.mesh.bounds = new Bounds(split.center, split.size);
 
@@ -416,9 +440,9 @@ namespace UTJ.Alembic
                 }
             }
 
-            if (!m_SampleSummary.hasNormals && !m_SampleSummary.hasTangents)
+            if (!sampleSummary.hasNormals && !sampleSummary.hasTangents)
             {
-                for (int s=0; s<m_SampleSummary.splitCount; ++s)
+                for (int s=0; s<sampleSummary.splitCount; ++s)
                 {
                     splits[s].mesh.RecalculateNormals();
                 }
