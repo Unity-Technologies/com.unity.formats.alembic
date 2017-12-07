@@ -341,12 +341,12 @@ namespace UTJ.Alembic
             }
         }
         
-        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=false)
+        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=true)
         {
             var ic = new ImportContext
             {
                 alembicTreeNode = node,
-                //ss = aiTimeToSampleSelector(time),
+                ss = aiTimeToSampleSelector(time),
                 createMissingNodes = createMissingNodes,
                 objectsToDelete = new List<aiObject>()
             };

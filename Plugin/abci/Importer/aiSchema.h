@@ -40,7 +40,6 @@ public:
     void setSampleCallback(aiSampleCallback cb, void *arg);
     void invokeConfigCallback(aiConfig *config) const;
     void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const;
-    virtual void            cacheAllSamples() =0;
     virtual void cacheSamples(int64_t startIndex, int64_t endIndex)=0;
     virtual int             getTimeSamplingIndex() const = 0;
     virtual int             getNumSamples() const = 0;
@@ -123,19 +122,6 @@ public:
     int getNumSamples() const override
     {
         return static_cast<int>(m_numSamples);
-    }
-
-    void cacheAllSamples() override
-    {
-        if (m_constant)
-            return;
-        readConfig();
-        for (int64_t i=0; i< m_numSamples ; i++)
-        {
-            auto &sp = m_samples[i];
-            bool unused = i == 0;
-            sp.reset(readSample(i, unused));
-        }
     }
 
     void cacheSamples(int64_t startIndex, int64_t endIndex) override

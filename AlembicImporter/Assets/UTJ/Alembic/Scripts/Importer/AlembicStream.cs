@@ -149,36 +149,35 @@ namespace UTJ.Alembic
             return true;
         }
    
-        public void AbcLoad(bool createMissingNodes=false)
+        public void AbcLoad()
         {
             m_Time = 0.0f;
 
             m_Context = AbcAPI.aiCreateContext(alembicTreeRoot.linkedGameObj.GetInstanceID());
-            m_Loaded = AbcAPI.aiLoad(m_Context,m_StreamDesc.pathToAbc);
 
-            
-
-            if (m_Loaded)
-            {
-                var settings = m_StreamDesc.settings;
-                m_Config.swapHandedness = settings.swapHandedness;
-                m_Config.shareVertices = settings.shareVertices;
-                m_Config.swapFaceWinding = settings.swapFaceWinding;
-                m_Config.normalsMode = settings.normalsMode;
-                m_Config.tangentsMode = settings.tangentsMode;
-                m_Config.cacheSamples = settings.cacheSamples;
-                m_Config.treatVertexExtraDataAsStatics = settings.treatVertexExtraDataAsStatics;
-                m_Config.turnQuadEdges = settings.turnQuadEdges;
-                m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
-                m_Config.cacheTangentsSplits = true;
+            var settings = m_StreamDesc.settings;
+            m_Config.swapHandedness = settings.swapHandedness;
+            m_Config.shareVertices = settings.shareVertices;
+            m_Config.swapFaceWinding = settings.swapFaceWinding;
+            m_Config.normalsMode = settings.normalsMode;
+            m_Config.tangentsMode = settings.tangentsMode;
+            m_Config.cacheSamples = settings.cacheSamples;
+            m_Config.treatVertexExtraDataAsStatics = settings.treatVertexExtraDataAsStatics;
+            m_Config.turnQuadEdges = settings.turnQuadEdges;
+            m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
+            m_Config.cacheTangentsSplits = true;
 #if !UNITY_2017_3_OR_NEWER
-                m_Config.use32BitsIndexBuffer = settings.use32BitsIndexBuffer;
+            m_Config.use32BitsIndexBuffer = settings.use32BitsIndexBuffer;
 #else 
-                m_Config.use32BitsIndexBuffer = false;
+            m_Config.use32BitsIndexBuffer = false;
 #endif
                 AbcAPI.aiSetConfig(m_Context, ref m_Config);
 
-                AbcAPI.UpdateAbcTree(m_Context, alembicTreeRoot, m_Time, createMissingNodes);
+            m_Loaded = AbcAPI.aiLoad(m_Context,m_StreamDesc.pathToAbc);
+
+            if (m_Loaded)
+            {
+                AbcAPI.UpdateAbcTree(m_Context, alembicTreeRoot, m_Time);
                 AlembicStream.s_Streams.Add(this);
             }
             else

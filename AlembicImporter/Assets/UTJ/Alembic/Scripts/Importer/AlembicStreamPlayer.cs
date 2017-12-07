@@ -68,7 +68,7 @@ namespace UTJ.Alembic
         {
             if (streamDescriptor == null) return;
             Stream = new AlembicStream(gameObject, streamDescriptor);
-            Stream.AbcLoad(true);
+            Stream.AbcLoad();
             m_ForceUpdate = true;
         }
 
