@@ -4,6 +4,7 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPoints.h"
+#include "aiMisc.h"
 
 // ---
 
@@ -43,7 +44,6 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
         }
         if (m_velocities) {
             m_tmp_velocities.resize(count);
-            int v_count = std::min<int>(count, (int)m_velocities->size());
             for (int i = 0; i < count; ++i) {
                 m_tmp_velocities[i] = (*m_velocities)[m_sort_data[i].second];
             }
@@ -51,7 +51,6 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
         }
         if (m_ids) {
             m_tmp_ids.resize(count);
-            int v_count = std::min<int>(count, (int)m_ids->size());
             for (int i = 0; i < count; ++i) {
                 m_tmp_ids[i] = (*m_ids)[m_sort_data[i].second];
             }
@@ -190,7 +189,6 @@ aiPoints::Sample* aiPoints::newSample()
 aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged)
 {
     auto ss = aiIndexToSampleSelector(idx);
-    auto ss2 = aiIndexToSampleSelector(idx + 1);
     DebugLog("aiPoints::readSample(t=%d)", idx);
 
     Sample *ret = newSample();

@@ -1,6 +1,5 @@
 #pragma once
 #include "aiThreadPool.h"
-#include "aiMisc.h"
 
 typedef AbcGeom::IObject            abcObject;
 typedef AbcGeom::IXform             abcXForm;
@@ -77,8 +76,8 @@ public:
 
     static std::string normalizePath(const char *path);
 private:
+    static void gatherNodesRecursive(aiObject *n);
     void reset();
-    void gatherNodesRecursive(aiObject *n) const;
 
     std::string m_path;
     Abc::IArchive m_archive;

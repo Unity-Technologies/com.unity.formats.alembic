@@ -217,7 +217,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
 
     readConfig();
 
-    Sample* sample = NULL;
+    Sample* sample;
     bool topologyChanged = false;
     int64_t sampleIndex = getSampleIndex(ss);
 

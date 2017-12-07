@@ -22,17 +22,29 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.shareVertices"));
+            var splittingMeshes = serializedObject.FindProperty("splittingMeshNames");
+            if (splittingMeshes.arraySize>0)
+            {
+                string message = "Meshes with shared vertices cannot be split.";
+                if (!splittingMeshes.hasMultipleDifferentValues)
+                {
+                    message += "The following meshes won't be affected : \n" + string.Join(",", importer.splittingMeshNames.ToArray()) + ".";
+                }
+                EditorGUILayout.HelpBox(message,MessageType.Info);
+            }
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.treatVertexExtraDataAsStatics"));
             var varyingTopologyMeshes = serializedObject.FindProperty("varyingTopologyMeshNames");
             if (varyingTopologyMeshes.arraySize>0)
             {
-                string message = "'Merge vertices' and 'Vertex extra data is static' do not apply to meshes with varying topology.";
+                string message = "'Share vertices' and 'Vertex extra data is static' do not apply to meshes with varying topology.";
                 if (!varyingTopologyMeshes.hasMultipleDifferentValues)
                 {
-                    message = "The following meshes won't be affected : \n" + string.Join(",", importer.varyingTopologyMeshNames.ToArray()) + ".";
+                    message += "The following meshes won't be affected : \n" + string.Join(",", importer.varyingTopologyMeshNames.ToArray()) + ".";
                 }
                 EditorGUILayout.HelpBox(message,MessageType.Info);
             }
+            
+            
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer"));
 #if !UNITY_2017_3_OR_NEWER
@@ -47,14 +59,14 @@ namespace UTJ.Alembic
             var abcFrameCount = serializedObject.FindProperty("AbcFrameCount");
             var startFrame = serializedObject.FindProperty("startFrame");
             var endFrame = serializedObject.FindProperty("endFrame");
-            var frameLength =  (abcFrameCount.intValue == 0) ? 0 : (abcEndTime.floatValue - abcStartTime.floatValue) / abcFrameCount.intValue;
-            var frameRate = (abcFrameCount.intValue == 0) ? 0 : (int)(1.0f/ frameLength);
+            var frameLength =  (abcFrameCount.intValue == 1) ? 0 : (abcEndTime.floatValue - abcStartTime.floatValue) / (abcFrameCount.intValue-1);
+            var frameRate = (abcFrameCount.intValue == 1) ? 0 : (int)(1.0f/ frameLength);
 
             float startFrameVal = startFrame.intValue;
             float endFrameVal = endFrame.intValue;
             EditorGUI.BeginDisabledGroup(abcStartTime.hasMultipleDifferentValues || abcEndTime.hasMultipleDifferentValues || abcFrameCount.hasMultipleDifferentValues);
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider("Time range",ref startFrameVal,ref endFrameVal,0,abcFrameCount.intValue);
+            EditorGUILayout.MinMaxSlider("Time range",ref startFrameVal,ref endFrameVal,0,abcFrameCount.intValue-1);
 
             startFrameVal = (float)Math.Floor(startFrameVal);
             endFrameVal = (float)Math.Floor(endFrameVal);
@@ -96,7 +108,7 @@ namespace UTJ.Alembic
             style.alignment = TextAnchor.LowerRight;
             if (!endFrame.hasMultipleDifferentValues && !startFrame.hasMultipleDifferentValues && !abcFrameCount.hasMultipleDifferentValues)
             {
-                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.00") +"s at " + frameRate + "fps (" + (frameCount+1) + " frames)"),style);
+                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") +"s at " + frameRate + "fps (" + (frameCount+1) + " frames)"),style);
                 EditorGUILayout.LabelField(new GUIContent("frame " + startFrameVal.ToString("0") + " to " + endFrameVal.ToString("0")),style);
             }
             else

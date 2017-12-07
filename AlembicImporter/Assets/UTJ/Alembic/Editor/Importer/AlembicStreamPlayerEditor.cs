@@ -20,7 +20,7 @@ namespace UTJ.Alembic
             var minFrame = targetStreamDesc.minFrame;
             var maxFrame = targetStreamDesc.maxFrame;
             var frameLength = targetStreamDesc.FrameLength;
-            var frameRate = 1.0f / frameLength;
+            var frameRate = frameLength==0.0f ? 0.0f : 1.0f / frameLength;
             var hasVaryingTopology= false;
             var hasAcyclicFramerate = false;
             var multipleFramerates = false;
@@ -99,7 +99,7 @@ namespace UTJ.Alembic
             {
                 int numFrames = (int)(endFrameVal - startFrameVal);
                 float duration = numFrames * frameLength;
-                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.00") + "s at " + frameRate + "fps (" + (numFrames + 1) + " frames).", "Frame rate"), style);
+                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") + "s at " + frameRate + "fps (" + (numFrames+1) + " frames).", "Frame rate"), style);
             }
             else
             {

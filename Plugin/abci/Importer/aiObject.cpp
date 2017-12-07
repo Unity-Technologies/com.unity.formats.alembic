@@ -71,7 +71,7 @@ void aiObject::removeChild(aiObject *c)
     auto it = std::find(m_children.begin(), m_children.end(), c);
     if (it != m_children.end())
     {
-        c->m_parent = 0;
+        c->m_parent = nullptr;
         m_children.erase(it);
     }
 }
@@ -109,9 +109,9 @@ void aiObject::cacheSamples(int64_t startIndex, int64_t endIndex)
     }
 }
 
-aiXForm*    aiObject::getXForm()      { return m_xform.get(); }
-aiPolyMesh* aiObject::getPolyMesh()   { return m_polymesh.get(); }
-aiCamera*   aiObject::getCamera()     { return m_camera.get(); }
-aiPoints*   aiObject::getPoints()     { return m_points.get(); }
+aiXForm*    aiObject::getXForm() const { return m_xform.get(); }
+aiPolyMesh* aiObject::getPolyMesh() const { return m_polymesh.get(); }
+aiCamera*   aiObject::getCamera() const { return m_camera.get(); }
+aiPoints*   aiObject::getPoints() const { return m_points.get(); }
 
 

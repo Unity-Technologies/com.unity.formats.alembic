@@ -70,13 +70,14 @@ namespace UTJ.Alembic
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         [SerializeField] public float scaleFactor = 0.01f;
-        [SerializeField] public int startFrame =-1;
-        [SerializeField] public int endFrame =-1;        
+        [SerializeField] public int startFrame = int.MinValue;
+        [SerializeField] public int endFrame = int.MaxValue;        
         [SerializeField] public float AbcStartTime;
         [SerializeField] public float AbcEndTime;
         [SerializeField] public int AbcFrameCount;
         [SerializeField] public string importWarning;
         [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
+        [SerializeField] public List<string> splittingMeshNames = new List<string>();
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -98,7 +99,7 @@ namespace UTJ.Alembic
             go.transform.localScale *= scaleFactor;
             
             AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
-            streamDescriptor.name = go.name + "ABCDesc";
+            streamDescriptor.name = go.name + "_ABCDesc";
             streamDescriptor.pathToAbc = destPath;
             streamDescriptor.settings = streamSettings;
 
@@ -109,8 +110,8 @@ namespace UTJ.Alembic
                 AbcEndTime = abcStream.AbcEndTime;
                 AbcFrameCount = abcStream.AbcFrameCount;
 
-                startFrame = startFrame ==-1 ? 0 : startFrame;
-                endFrame = endFrame ==-1 ? AbcFrameCount : endFrame;
+                startFrame = startFrame < 0 ? 0 : startFrame;
+                endFrame = endFrame > AbcFrameCount-1 ? AbcFrameCount-1 : endFrame;
 
                 streamDescriptor.minFrame = startFrame;
                 streamDescriptor.maxFrame = endFrame;
@@ -156,10 +157,13 @@ namespace UTJ.Alembic
                 AnimationCurve curve = new AnimationCurve(frames); 
                 var animationClip = new AnimationClip();
                 animationClip.SetCurve("",typeof(AlembicStreamPlayer),"currentTime",curve);
-                animationClip.name = "Default Animation";
+                animationClip.name = root.linkedGameObj.name + "_Clip";
 
                 AddObjectToAsset(ctx,"Default Animation", animationClip);
             }
+            varyingTopologyMeshNames = new List<string>();
+            splittingMeshNames = new List<string>();
+
             CollectSubAssets(ctx, root, material);
             
             streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
@@ -174,6 +178,10 @@ namespace UTJ.Alembic
                     mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
                 {
                     varyingTopologyMeshNames.Add(node.linkedGameObj.name);   
+                }
+                else if (streamSettings.shareVertices && mesh.sampleSummary.splitCount > 1)
+                {
+                    splittingMeshNames.Add(node.linkedGameObj.name);
                 }
             }
 

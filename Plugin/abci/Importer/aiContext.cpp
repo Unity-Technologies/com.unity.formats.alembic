@@ -187,7 +187,7 @@ void aiContext::setConfig(const aiConfig &config)
     m_config = config;
 }
 
-void aiContext::gatherNodesRecursive(aiObject *n) const
+void aiContext::gatherNodesRecursive(aiObject *n)
 {
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
@@ -368,7 +368,7 @@ float aiContext::getEndTime() const
 
 unsigned int aiContext::getFrameCount() const
 {
-    return m_numFrames -1;
+    return m_numFrames;
 }
 
 aiObject* aiContext::getTopObject() const

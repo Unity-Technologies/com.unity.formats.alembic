@@ -8,7 +8,7 @@ class aiWorkerThread
 {
 public:
     aiWorkerThread(aiThreadPool *pool);
-    void operator()();
+    void operator()() const;
 
 private:
     aiThreadPool *m_pool;
@@ -20,7 +20,7 @@ aiWorkerThread::aiWorkerThread(aiThreadPool *pool)
 {
 }
 
-void aiWorkerThread::operator()()
+void aiWorkerThread::operator()() const
 {
     std::function<void()> task;
 

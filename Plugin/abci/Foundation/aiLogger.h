@@ -1,7 +1,4 @@
 #pragma once
-
-#include <string>
-#include <cstdio>
 #include <cstdarg>
 
 class aiLogger
@@ -103,10 +100,10 @@ private:
    void indent(int level);
    void unindent(int level);
 
-   void warning(const char *fmt, va_list args);
-   void error(const char *fmt, va_list args);
-   void info(const char *fmt, va_list args);
-   void debug(const char *fmt, va_list args);
+   void warning(const char *fmt, va_list args) const;
+   void error(const char *fmt, va_list args) const;
+   void info(const char *fmt, va_list args) const;
+   void debug(const char *fmt, va_list args) const;
 
 private:
    

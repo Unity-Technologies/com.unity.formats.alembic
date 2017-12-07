@@ -27,8 +27,8 @@ namespace UTJ.Alembic
         {
             get
             {
-               if (abcFrameCount == 0) return 0;
-               return abcDuration / abcFrameCount;
+               if (abcFrameCount == 1) return 0;
+               return abcDuration / (abcFrameCount-1);
             }
         }
     }

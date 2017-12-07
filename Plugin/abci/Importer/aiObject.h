@@ -21,10 +21,10 @@ public:
     void        readConfig();
     void        updateSample(const abcSampleSelector& ss);
  
-    aiXForm*    getXForm();
-    aiPolyMesh* getPolyMesh();
-    aiCamera*   getCamera();
-    aiPoints*   getPoints();
+    aiXForm*    getXForm() const;
+    aiPolyMesh* getPolyMesh() const;
+    aiCamera*   getCamera() const;
+    aiPoints*   getPoints() const;
 
     template<class F>
     void eachChildren(const F &f)

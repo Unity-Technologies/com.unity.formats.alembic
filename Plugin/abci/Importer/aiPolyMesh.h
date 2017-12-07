@@ -43,8 +43,6 @@ struct SplitInfo
     size_t indexOffset;
     size_t vertexCount;
     size_t submeshCount;
-    std::unordered_map<size_t, size_t> verticiesXRefs; // org face index (not it's refred value), index in position vector
-    size_t uniqueValues;
 
     inline SplitInfo(size_t ff=0, size_t io=0)
         : firstFace(ff)
@@ -155,10 +153,10 @@ public:
     inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
 
 public:
-    Abc::Int32ArraySamplePtr m_indices;
+    Abc::Int32ArraySamplePtr m_faceIndices;
     std::vector<int32_t> m_indicesSwapedFaceWinding;
     std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
-    Abc::Int32ArraySamplePtr m_counts;
+    Abc::Int32ArraySamplePtr m_vertexCountPerFace;
     int m_triangulatedIndexCount;
 
     Submeshes m_submeshes;
@@ -183,7 +181,7 @@ class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo, bool vertexSharingEnabled );
+    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo );
     virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
@@ -196,11 +194,11 @@ public:
     bool tangentsRequired() const;
 
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
-    void getDataPointer(aiPolyMeshData &data);
+    void getDataPointer(aiPolyMeshData &data) const;
     void copyData(aiPolyMeshData &data);
     void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
 
-    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
+    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed) const;
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeSmoothNormals(const aiConfig &config);
 
@@ -226,7 +224,6 @@ public:
     std::vector<abcV4> m_tangents;
 
     Submeshes::iterator m_curSubmesh;
-    bool m_vertexSharingEnabled;
 };
 
 

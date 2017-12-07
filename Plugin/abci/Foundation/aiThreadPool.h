@@ -6,8 +6,6 @@
 #include <deque>
 #include <thread>
 #include <mutex>
-#include <condition_variable>
-#include <atomic>
 
 class aiWorkerThread;
 class aiThreadPool;
