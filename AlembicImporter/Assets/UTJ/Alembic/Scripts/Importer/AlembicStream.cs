@@ -166,7 +166,7 @@ namespace UTJ.Alembic
             m_Config.turnQuadEdges = settings.turnQuadEdges;
             m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
             m_Config.cacheTangentsSplits = true;
-#if !UNITY_2017_3_OR_NEWER
+#if UNITY_2017_3_OR_NEWER
             m_Config.use32BitsIndexBuffer = settings.use32BitsIndexBuffer;
 #else 
             m_Config.use32BitsIndexBuffer = false;
