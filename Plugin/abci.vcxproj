@@ -9,20 +9,12 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="MasterLib|Win32">
-      <Configuration>MasterLib</Configuration>
+    <ProjectConfiguration Include="Master|Win32">
+      <Configuration>Master</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="MasterLib|x64">
-      <Configuration>MasterLib</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="MasterDLL|Win32">
-      <Configuration>MasterDLL</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="MasterDLL|x64">
-      <Configuration>MasterDLL</Configuration>
+    <ProjectConfiguration Include="Master|x64">
+      <Configuration>Master</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -48,11 +40,9 @@
     <ClCompile Include="abci\Importer\AlembicImporter.cpp" />
     <ClCompile Include="abci\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,25 +87,15 @@
     <PlatformToolset>v140</PlatformToolset>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'" Label="Configuration">
     <PlatformToolset>v140</PlatformToolset>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'" Label="Configuration">
-    <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'" Label="Configuration">
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PlatformToolset>v140</PlatformToolset>
@@ -128,39 +108,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
     <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_s</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_s</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(ProjectName)_$(Platform)_$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -183,7 +149,7 @@
       <Command>$(SolutionDir)setup.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
     <PostBuildEvent>
       <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Alembic\Plugins\x86_64\</Command>
     </PostBuildEvent>
@@ -210,35 +176,7 @@
       <Command>$(SolutionDir)setup.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>aiMaster;aiStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Optimization>Full</Optimization>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>false</OmitFramePointers>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-    </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)setup.bat</Command>
-    </PreBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -260,34 +198,6 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Alembic\Plugins\x86\</Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)setup.bat</Command>
-    </PreBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'">
-    <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <StringPooling>true</StringPooling>
-      <PreprocessorDefinitions>aiMaster;aiStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
-    <Link>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Link>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-    </Link>
-    <PostBuildEvent>
-      <Command>
-      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>$(SolutionDir)setup.bat</Command>

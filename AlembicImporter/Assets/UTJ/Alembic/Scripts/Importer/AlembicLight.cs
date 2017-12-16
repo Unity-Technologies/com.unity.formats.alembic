@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public class AlembicLight : AlembicElement
     {
         public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)

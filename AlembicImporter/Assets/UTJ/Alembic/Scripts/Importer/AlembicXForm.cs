@@ -2,16 +2,15 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
     public class AlembicXForm : AlembicElement
     {
-        AbcAPI.aiXFormData m_abcData;
+        private AbcAPI.aiXFormData m_AbcData;
 
         // No config overrides on AlembicXForm
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
-            AbcAPI.aiXFormGetData(sample, ref m_abcData);
+            AbcAPI.aiXFormGetData(sample, ref m_AbcData);
 
             AbcDirty();
         }
@@ -25,17 +24,17 @@ namespace UTJ.Alembic
         {
             if (AbcIsDirty())
             {
-                if (m_abcData.inherits)
+                if (m_AbcData.inherits)
                 {
-                    AlembicTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
-                    AlembicTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
-                    AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                    AlembicTreeNode.linkedGameObj.transform.localPosition = m_AbcData.translation;
+                    AlembicTreeNode.linkedGameObj.transform.localRotation = m_AbcData.rotation;
+                    AlembicTreeNode.linkedGameObj.transform.localScale = m_AbcData.scale;
                 }
                 else
                 {
-                    AlembicTreeNode.linkedGameObj.transform.position = m_abcData.translation;
-                    AlembicTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
-                    AlembicTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                    AlembicTreeNode.linkedGameObj.transform.position = m_AbcData.translation;
+                    AlembicTreeNode.linkedGameObj.transform.rotation = m_AbcData.rotation;
+                    AlembicTreeNode.linkedGameObj.transform.localScale = m_AbcData.scale;
                 }
 
                 AbcClean();

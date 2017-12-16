@@ -5,60 +5,79 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
-        private AlembicStream _stream = null;
+        public AlembicStream Stream;
+        public AlembicStreamDescriptor streamDescriptor;
+        [SerializeField] public float currentTime;
+        [SerializeField] public int startFrame;
+        [SerializeField] public int endFrame;
+        [SerializeField] public float vertexMotionScale = 1.0f;
+        [SerializeField] public bool interpolateSamples = true;
+        float m_LastUpdateTime;
+        bool m_ForceUpdate = false;
 
-        [HideInInspector]
-        public AlembicStream Stream
+        public float Duration
         {
-            get { return _stream; }
+            get
+            {
+               return (endFrame- startFrame) * streamDescriptor.FrameLength;
+            }
         }
 
-        public AlembicPlaybackSettings m_PlaybackSettings;
-        [HideInInspector] public AlembicDiagnosticSettings m_Diagnotics;
-        [ReadOnly] public AlembicStreamDescriptor m_StreamDescriptor;
+        void OnValidate()
+        {
+            if (streamDescriptor == null) return;
+            if (startFrame < streamDescriptor.minFrame) startFrame = streamDescriptor.minFrame;
+            if (startFrame > streamDescriptor.maxFrame) startFrame = streamDescriptor.maxFrame;
+            if (endFrame < startFrame) endFrame = startFrame; 
+            if (endFrame > streamDescriptor.maxFrame) endFrame = streamDescriptor.maxFrame;    
+            ClampTime();
+            m_ForceUpdate = true;
+        } 
+
+        void LateUpdate()
+        {
+            if (Stream != null && streamDescriptor != null)
+            {
+                ClampTime();
+                if (m_LastUpdateTime != currentTime || m_ForceUpdate)
+                {
+                    if (Stream.AbcUpdate(currentTime + startFrame * streamDescriptor.FrameLength + streamDescriptor.abcStartTime, vertexMotionScale, interpolateSamples))
+                    {
+                        m_LastUpdateTime = currentTime;
+                        m_ForceUpdate = false;    
+                    }
+                    else
+                    {
+                        Stream.Dispose();
+                        LoadStream();
+                    }
+                }
+            }
+        }
+
+        private void ClampTime()
+        {
+            float duration = Duration;
+            if (duration == .0f || currentTime < .0f)
+                currentTime = .0f;
+            else if (currentTime > duration)
+                currentTime = duration;
+        }
+
+        public void LoadStream()
+        {
+            if (streamDescriptor == null) return;
+            Stream = new AlembicStream(gameObject, streamDescriptor);
+            Stream.AbcLoad();
+            m_ForceUpdate = true;
+        }
 
         void OnEnable()
         {
-            // Should not be needed...
-            bool newPlayerSettings = false;
-            if (m_PlaybackSettings == null)
+            if (Stream == null)
             {
-                m_PlaybackSettings = new AlembicPlaybackSettings();
-                newPlayerSettings = true;
+                LoadStream();
             }
-
-            if (_stream == null)
-            {
-                if (m_StreamDescriptor == null)
-                    return;
-
-                _stream = new AlembicStream(gameObject, m_StreamDescriptor.m_ImportSettings, m_PlaybackSettings, m_Diagnotics);
-                Stream.AbcLoad(false);
-
-                // Safety net...
-                if (newPlayerSettings)
-                {
-                    m_PlaybackSettings.m_startTime = Stream.AbcStartTime;
-                    m_PlaybackSettings.m_endTime = Stream.AbcEndTime;
-                }
-            }
-
-            // Re-importing the asset will create a new import settings asset and the stream will be holding on to an old one...
-            if (Stream.ImportSettings != m_StreamDescriptor.m_ImportSettings)
-                Stream.ImportSettings = m_StreamDescriptor.m_ImportSettings;
-
-        }
-
-        public void Update()
-        {
-            if (Stream != null)
-                Stream.ProcessUpdateEvent();
-        }
-
-        public void LateUpdate()
-        {
-            if (Stream != null)
-                Stream.ProcessLateUpdateEvent();
         }
 
         public void OnDestroy()
@@ -70,12 +89,6 @@ namespace UTJ.Alembic
         public void OnApplicationQuit()
         {
             AbcAPI.aiCleanup();
-        }
-
-        public void ForceRefresh()
-        {
-            if (Stream != null)
-                Stream.ForcedRefresh();
         }
     }
 }

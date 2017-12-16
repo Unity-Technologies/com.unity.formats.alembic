@@ -1,3 +1,6 @@
+// Upgrade NOTE: upgraded instancing buffer 'A' to new syntax.
+// Upgrade NOTE: upgraded instancing buffer 'Props' to new syntax.
+
 #include "UnityCG.cginc"
 
 #if defined(UNITY_SUPPORT_INSTANCING) && !defined(UNITY_INSTANCING_ENABLED) && !defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) && (SHADER_TARGET >= 45 && defined(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED))
@@ -21,17 +24,19 @@ float _AlembicID;
             StructuredBuffer<float3> _AlembicPoints;
             StructuredBuffer<float> _AlembicIDs;
     #else
-            UNITY_INSTANCING_CBUFFER_START (Props)
+            UNITY_INSTANCING_BUFFER_START (Props)
                 UNITY_DEFINE_INSTANCED_PROP (float, _AlembicIDs)
-            UNITY_INSTANCING_CBUFFER_END
+#define _AlembicIDs_arr Props
+            UNITY_INSTANCING_BUFFER_END(Props)
     #endif
 #elif !defined(UNITY_VERTEX_INPUT_INSTANCE_ID)
     // for pre-5.5
     #define UNITY_VERTEX_INPUT_INSTANCE_ID
-    #define UNITY_INSTANCING_CBUFFER_START(A, B)
+    #define UNITY_INSTANCING_BUFFER_START(A, B)
     #define UNITY_DEFINE_INSTANCED_PROP(A, B)
-    #define UNITY_ACCESS_INSTANCED_PROP(A)
-    #define UNITY_INSTANCING_CBUFFER_END
+#define B_arr A
+    #define UNITY_ACCESS_INSTANCED_PROP(A_arr, A)
+    #define UNITY_INSTANCING_BUFFER_END(A)
     #define UNITY_SETUP_INSTANCE_ID(A)
     #define UNITY_TRANSFER_INSTANCE_ID(A, B)
 #endif

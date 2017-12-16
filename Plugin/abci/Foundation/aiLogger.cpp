@@ -115,7 +115,7 @@ void aiLogger::_indent()
    }
 }
 
-void aiLogger::warning(const char *fmt, va_list args)
+void aiLogger::warning(const char *fmt, va_list args) const
 {
    if (isOpened())
    {
@@ -126,7 +126,7 @@ void aiLogger::warning(const char *fmt, va_list args)
    }
 }
 
-void aiLogger::error(const char *fmt, va_list args)
+void aiLogger::error(const char *fmt, va_list args) const
 {
    if (isOpened())
    {
@@ -137,7 +137,7 @@ void aiLogger::error(const char *fmt, va_list args)
    }
 }
 
-void aiLogger::info(const char *fmt, va_list args)
+void aiLogger::info(const char *fmt, va_list args) const
 {
    if (isOpened())
    {
@@ -148,7 +148,7 @@ void aiLogger::info(const char *fmt, va_list args)
    }
 }
 
-void aiLogger::debug(const char *fmt, va_list args)
+void aiLogger::debug(const char *fmt, va_list args) const
 {
    if (isOpened())
    {

@@ -7,7 +7,7 @@
 
 
 aiXFormSample::aiXFormSample(aiXForm *schema)
-    : super(schema)
+    : super(schema), inherits(true)
 {
 }
 
@@ -20,120 +20,61 @@ void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool
     m_config = config;
 }
 
-
-inline abcV3 aiExtractTranslation(const AbcGeom::XformSample &sample, bool swapHandedness)
+void aiXFormSample::decomposeXForm(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3d &shear,Imath::Quatd &rotation,Imath::V3d &translation) const
 {
-    abcV3 ret;
+    Imath::M44d mat_remainder(mat);
 
-    size_t n = sample.getNumOps();
-    size_t n_trans_op = 0;
-    for (size_t i = 0; i < n; ++i) {
-        const auto &op = sample.getOp(i);
-        if (op.getType() == AbcGeom::kTranslateOperation) {
-            if (++n_trans_op == 1) {
-                ret = op.getVector();
-            }
-        }
-        else if (op.getType() == AbcGeom::kMatrixOperation) {
-            n_trans_op = 2;
-        }
-    }
+    // Extract Scale, Shear
+    Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear);
 
-    if (n_trans_op != 1) {
-        ret = sample.getTranslation();
-    }
+    // Extract translation
+    translation.x = mat_remainder[3][0];
+    translation.y = mat_remainder[3][1];
+    translation.z = mat_remainder[3][2];
 
-    if (swapHandedness)
-    {
-        ret.x *= -1.0f;
-    }
-    return ret;
-}
-
-// return rotation in quaternion
-inline abcV4 aiExtractRotation(const AbcGeom::XformSample &sample, bool swapHandedness)
-{
-    // XformSample store TRS as matrix, so XformSample::getAxis()/getAngle() may not match with original data.
-    // to workaround this problem, I try to extract rotation data from XformOp:
-    // enumerate XformOp and get rotation data if there is only one kRotateOperation.
-    // if this is not the case, fallback to XformSample::getAxis()/getAngle().
-
-    const float Deg2Rad = (aiPI / 180.0f);
-
-    abcV3 axis;
-    float angle;
-
-    size_t n = sample.getNumOps();
-    size_t n_rot_op = 0;
-    for (size_t i = 0; i < n; ++i) {
-        const auto &op = sample.getOp(i);
-        if (op.getType() == AbcGeom::kRotateOperation) {
-            if (++n_rot_op == 1) {
-                axis = op.getAxis();
-                angle = (float)op.getAngle()* Deg2Rad;
-            }
-        }
-        else if (op.getType() == AbcGeom::kMatrixOperation) {
-            n_rot_op = 2;
-        }
-    }
-
-    if (n_rot_op != 1) {
-        axis = sample.getAxis();
-        angle = (float)sample.getAngle()* Deg2Rad;
-    }
-
-    if (swapHandedness)
-    {
-        axis.x *= -1.0f;
-        angle *= -1.0f;
-    }
-
-    // axis/angle -> quaternion
-    float rs = std::sin(angle * 0.5f);
-    float rc = std::cos(angle * 0.5f);
-    return abcV4(axis.x*rs, axis.y*rs, axis.z*rs, rc);
-}
-
-inline abcV3 aiExtractScale(const AbcGeom::XformSample &sample)
-{
-    abcV3 ret;
-
-    size_t n = sample.getNumOps();
-    size_t n_scale_op = 0;
-    for (size_t i = 0; i < n; ++i) {
-        const auto &op = sample.getOp(i);
-        if (op.getType() == AbcGeom::kScaleOperation) {
-            if (++n_scale_op == 1) {
-                ret = op.getVector();
-            }
-        }
-        else if (op.getType() == AbcGeom::kMatrixOperation) {
-            n_scale_op = 2;
-        }
-    }
-
-    if (n_scale_op != 1) {
-        ret = sample.getScale();
-    }
-    return ret;
+    // Extract rotation
+    rotation = extractQuat(mat_remainder);
 }
 
 void aiXFormSample::getData(aiXFormData &outData) const
 {
     DebugLog("aiXFormSample::getData()");
 
-    abcV3 trans = aiExtractTranslation(m_sample, m_config.swapHandedness);
-    abcV4 rot = aiExtractRotation(m_sample, m_config.swapHandedness);
-    abcV3 scale = aiExtractScale(m_sample);
+    Imath::V3d scale;
+    Imath::V3d shear;
+    Imath::Quatd rot;
+    Imath::V3d trans;
+    decomposeXForm(m_matrix, scale, shear, rot, trans);
 
-    outData.inherits = m_sample.getInheritsXforms();
+    if (m_config.interpolateSamples && m_currentTimeOffset!=0)
+    {
+        Imath::V3d scale2;
+        Imath::Quatd rot2;
+        Imath::V3d trans2;
+        decomposeXForm(m_nextMatrix, scale2, shear, rot2, trans2);
+        scale += (scale2 - scale)* m_currentTimeOffset;
+        trans += (trans2 - trans)* m_currentTimeOffset;
+        rot = slerpShortestArc(rot, rot2, m_currentTimeOffset);
+    }
+
+    auto rotFinal = abcV4(
+        static_cast<float>(rot.v[0]),
+        static_cast<float>(rot.v[1]),
+        static_cast<float>(rot.v[2]),
+        static_cast<float>(rot.r)
+    );
+
+    if (m_config.swapHandedness)
+    {
+        trans.x *= -1.0f;
+        rotFinal.x = -rotFinal.x;
+        rotFinal.w = -rotFinal.w;
+    }
+    outData.inherits = inherits;
     outData.translation = trans;
-    outData.rotation = rot;
+    outData.rotation = rotFinal;
     outData.scale = scale;
 }
-
-
 
 aiXForm::aiXForm(aiObject *obj)
     : super(obj)
@@ -152,16 +93,22 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(const abcSampleSelector& ss, bool &topologyChanged)
+aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
 {
-    DebugLog("aiXForm::readSample(t=%f)", time);
-    
+    DebugLog("aiXForm::readSample(t=%d)", idx);
     Sample *ret = newSample();
 
-    m_schema.get(ret->m_sample, ss);
+    auto ss = aiIndexToSampleSelector(idx);
+    AbcGeom::XformSample matSample;
+    m_schema.get(matSample, ss);
+    ret->m_matrix = matSample.getMatrix();
+    
+    ret->inherits = matSample.getInheritsXforms();
 
-    topologyChanged = false;
-
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
+    AbcGeom::XformSample nextMatSample;
+    m_schema.get(nextMatSample, ss2 );
+    ret->m_nextMatrix = nextMatSample.getMatrix();
+    
     return ret;
 }
-

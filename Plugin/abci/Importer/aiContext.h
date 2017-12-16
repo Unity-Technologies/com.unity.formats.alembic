@@ -1,7 +1,5 @@
 #pragma once
-
 #include "aiThreadPool.h"
-#include "aiMisc.h"
 
 typedef AbcGeom::IObject            abcObject;
 typedef AbcGeom::IXform             abcXForm;
@@ -28,21 +26,26 @@ typedef Abc::IV3fArrayProperty      abcFloat3ArrayProperty;
 typedef Abc::IC4fArrayProperty      abcFloat4ArrayProperty;
 typedef Abc::IM44fArrayProperty     abcFloat4x4ArrayProperty;
 
-
 class aiObject;
 std::string ToString(const aiConfig &conf);
+
+class aiContextManager
+{
+public:
+    static aiContext* getContext(int uid);
+    static void destroyContext(int uid);
+    static void destroyContextsWithPath(const char* assetPath);
+private:
+    ~aiContextManager();
+    std::map<int, aiContext*> m_contexts;
+    static aiContextManager ms_instance;
+};
 
 
 class aiContext
 {
 public:
-    typedef std::function<void ()> task_t;
-
-    static aiContext* create(int uid);
-    static void destroy(aiContext* ctx);
-
-public:
-    aiContext(int uid=-1);
+    explicit aiContext(int uid=-1);
     ~aiContext();
     
     bool load(const char *path);
@@ -50,18 +53,14 @@ public:
     const aiConfig& getConfig() const;
     void setConfig(const aiConfig &config);
 
-    aiObject* getTopObject();
+    aiObject* getTopObject() const;
     void destroyObject(aiObject *obj);
 
     float getStartTime() const;
     float getEndTime() const;
-
+    unsigned int getFrameCount() const;
+    void cacheAllSamples();
     void updateSamples(float time);
-    void updateSamplesBegin(float time);
-    void updateSamplesEnd();
-
-    void enqueueTask(const task_t &task);
-    void waitTasks();
 
     Abc::IArchive getArchive() const;
     const std::string& getPath() const;
@@ -75,21 +74,20 @@ public:
     template<class F>
     void eachNodes(const F &f);
 
+    static std::string normalizePath(const char *path);
 private:
-    std::string normalizePath(const char *path) const;
+    static void gatherNodesRecursive(aiObject *n);
     void reset();
-    void gatherNodesRecursive(aiObject *n);
 
-private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
     aiTaskGroup m_tasks;
     double m_timeRange[2] = {-0.0, -0.0};
+    uint64_t m_numFrames = 0;
     int m_uid = 0;
     aiConfig m_config;
 };
-
 
 #include "aiObject.h"
 

@@ -15,6 +15,9 @@ public:
     // Note: dataChanged MUST be true if topologyChanged is
     virtual void updateConfig(const aiConfig &config, bool &topologyChanged, bool &dataChanged) = 0;
 
+public:
+    AbcCoreAbstract::chrono_t m_currentTimeOffset;
+    AbcCoreAbstract::chrono_t m_currentTimeInterval;
 protected:
     aiSchemaBase *m_schema;
     aiConfig m_config;
@@ -29,15 +32,15 @@ public:
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
 
-    aiObject* getObject();
+    aiObject* getObject() const;
     // config at last update time
     const aiConfig& getConfig() const;
 
     void setConfigCallback(aiConfigCallback cb, void *arg);
     void setSampleCallback(aiSampleCallback cb, void *arg);
-    void invokeConfigCallback(aiConfig *config);
-    void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged);
-
+    void invokeConfigCallback(aiConfig *config) const;
+    void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const;
+    virtual void cacheSamples(int64_t startIndex, int64_t endIndex)=0;
     virtual int             getTimeSamplingIndex() const = 0;
     virtual int             getNumSamples() const = 0;
     virtual aiSampleBase*   updateSample(const abcSampleSelector& ss) = 0;
@@ -45,9 +48,8 @@ public:
     virtual int             getSampleIndex(const abcSampleSelector& ss) const = 0;
     virtual float           getSampleTime(const abcSampleSelector& ss) const = 0;
 
-    // for multithreaded updates, don't invoke C# callbacks from work threads
     void readConfig();
-    void notifyUpdate();
+    bool hasVaryingTopology() const { return m_varyingTopology; }
 
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
@@ -67,8 +69,6 @@ protected:
     aiConfig m_config;
     bool m_constant = false;
     bool m_varyingTopology = false;
-    aiSampleBase *m_pendingSample = nullptr;
-    bool m_pendingTopologyChanged = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -91,16 +91,17 @@ public:
         m_schema = abcObj.getSchema();
         m_constant = m_schema.isConstant();
         m_timeSampling = m_schema.getTimeSampling();
-        m_numSamples = (int64_t) m_schema.getNumSamples();
+        m_numSamples = static_cast<int64_t>(m_schema.getNumSamples());
         setupProperties();
     }
 
     virtual ~aiTSchema()
     {
-        if (m_theSample)
+        if (dontUseCache() && m_theSample)
         {
             delete m_theSample;
         }
+        m_samples.clear();
     }
 
     int getTimeSamplingIndex() const override
@@ -110,134 +111,33 @@ public:
 
     int getSampleIndex(const abcSampleSelector& ss) const override
     {
-        return (int)ss.getIndex(m_timeSampling, m_numSamples);
+        return static_cast<int>(ss.getIndex(m_timeSampling, m_numSamples));
     }
 
     float getSampleTime(const abcSampleSelector& ss) const override
     {
-        return (float)m_timeSampling->getSampleTime(ss.getRequestedIndex());
+        return static_cast<float>(m_timeSampling->getSampleTime(ss.getRequestedIndex()));
     }
 
     int getNumSamples() const override
     {
-        return (int)m_numSamples;
+        return static_cast<int>(m_numSamples);
     }
 
-    aiSampleBase* updateSample(const abcSampleSelector& ss) override
+    void cacheSamples(int64_t startIndex, int64_t endIndex) override
     {
-        DebugLog("aiTSchema::updateSample()");
-        
-        bool useThreads = m_obj->getContext()->getConfig().useThreads;
-
-        if (!useThreads)
+        if (m_constant) 
+            return;
+        if (startIndex==0) readConfig();
+        for (int64_t i = startIndex; i< endIndex; i++)
         {
-            readConfig();
+            auto &sp = m_samples[i];   
+            bool unused = i == 0;
+            sp.reset(readSample(i, unused));
         }
-
-        Sample *sample = 0;
-        bool topologyChanged = false;
-        int64_t sampleIndex = getSampleIndex(ss);
-        
-        if (dontUseCache())
-        {
-            if (m_samples.size() > 0)
-            {
-                DebugLog("  Clear cached samples");
-                
-                m_samples.clear();
-            }
-            
-            // don't need to check m_constant here, sampleIndex wouldn't change
-            if (m_theSample == 0 || sampleIndex != m_lastSampleIndex)
-            {
-                DebugLog("  Read sample");
-                
-                sample = readSample(ss, topologyChanged);
-                
-                m_theSample = sample;
-            }
-            else
-            {
-                DebugLog("  Update sample");
-
-                bool dataChanged = false;
-
-                sample = m_theSample;
-                
-                sample->updateConfig(m_config, topologyChanged, dataChanged);
-                
-                if (!m_config.forceUpdate && !dataChanged)
-                {
-                    DebugLog("  Data didn't change, nor update is forced");
-
-                    sample = 0;
-                }
-            }
-        }
-        else
-        {
-            auto &sp = m_samples[sampleIndex];
-            
-            if (!sp)
-            {
-                DebugLog("  Create new cache sample");
-                
-                sp.reset(readSample(ss, topologyChanged));
-
-                sample = sp.get();
-            }
-            else
-            {
-                DebugLog("  Update cached sample");
-                
-                bool dataChanged = false;
-
-                sample = sp.get();
-                
-                sample->updateConfig(m_config, topologyChanged, dataChanged);
-
-                // force update if sample has changed from previously queried one
-                if (sampleIndex != m_lastSampleIndex)
-                {
-                    if (m_varyingTopology)
-                    {
-                        topologyChanged = true;
-                    }
-                    dataChanged = true;
-                }
-                else if (!dataChanged && !m_config.forceUpdate)
-                {
-                    DebugLog("  Data didn't change, nor update is forced");
-                    
-                    sample = 0;
-                }
-            }
-        }
-
-        m_lastSampleIndex = sampleIndex;
-
-        if (!useThreads)
-        {
-            if (sample)
-            {
-                invokeSampleCallback(sample, topologyChanged);
-            }
-        }
-        else
-        {
-            m_pendingSample = sample;
-            m_pendingTopologyChanged = topologyChanged;
-        }
-
-        if (useCache() && m_samples.size() > size_t(m_config.cacheSamples))
-        {
-            erasePastSamples();
-        }
-
-        updateProperties(ss);
-
-        return sample;
     }
+
+    aiSampleBase* updateSample(const abcSampleSelector& ss) override;
 
     Sample* getSample(const abcSampleSelector& ss) const override
     {
@@ -260,12 +160,12 @@ protected:
 
     inline bool useCache() const
     {
-        return (!m_constant && m_config.cacheSamples > 1);
+        return (!m_constant && m_config.cacheSamples);
     }
 
     inline bool dontUseCache() const
     {
-        return (m_constant || m_config.cacheSamples <= 1);
+        return (m_constant || !m_config.cacheSamples);
     }
 
     inline Sample* getSample()
@@ -276,47 +176,11 @@ protected:
        }
        else
        {
-          return 0;
+          return nullptr;
        }
     }
 
-    virtual Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) = 0;
-
-    void erasePastSamples()
-    {
-        DebugLog("aiTSchema::erasePastSamples()");
-        
-        size_t maxSamples = (size_t) m_config.cacheSamples;
-
-        auto first = m_samples.begin();
-        auto last = m_samples.end();
-        --last;
-
-        while (m_samples.size() > maxSamples)
-        {
-            int64_t diff0 = m_lastSampleIndex - first->first;
-            int64_t diff1 = last->first - m_lastSampleIndex;
-
-            if (diff1 > diff0)
-            {
-                m_samples.erase(last);
-                last = m_samples.end();
-                --last;
-            }
-            else if (diff0 != 0)
-            {
-                m_samples.erase(first);
-                first = m_samples.begin();
-            }
-            else
-            {
-                // first == last == current
-                // note: should never each here as we required at least 2 samples cache
-                break;
-            }
-        }
-    }
-
+    virtual Sample* readSample(const uint64_t idx, bool &topologyChanged) = 0;
 protected:
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
@@ -331,3 +195,109 @@ protected:
     int64_t m_numSamples = 0;
     int64_t m_lastSampleIndex = -1;
 };
+
+template<class Traits>
+aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
+{
+    DebugLog("aiTSchema::updateSample()");
+
+    readConfig();
+
+    Sample* sample;
+    bool topologyChanged = false;
+    int64_t sampleIndex = getSampleIndex(ss);
+
+    if (dontUseCache())
+    {
+        if (m_samples.size() > 0)
+        {
+            DebugLog("  Clear cached samples");
+
+            m_samples.clear();
+        }
+
+        // don't need to check m_constant here, sampleIndex wouldn't change
+        if (m_theSample == 0 || sampleIndex != m_lastSampleIndex)
+        {
+            DebugLog("  Read sample");
+
+            sample = readSample(sampleIndex, topologyChanged);
+
+            m_theSample = sample;
+        }
+        else
+        {
+            DebugLog("  Update sample");
+
+            bool dataChanged = false;
+
+            sample = m_theSample;
+
+            sample->updateConfig(m_config, topologyChanged, dataChanged);
+            
+
+            if (!m_config.forceUpdate && !dataChanged && !m_config.interpolateSamples)
+            {
+                DebugLog("  Data didn't change, nor update is forced");
+
+                sample = 0;
+            }
+        }
+    }
+    else
+    {
+        auto& sp = m_samples[sampleIndex];
+
+        if (!sp)
+        {
+            DebugLog("  Create new cache sample");
+
+            sp.reset(readSample(sampleIndex, topologyChanged));
+
+            sample = sp.get();
+        }
+        else
+        {
+            DebugLog("  Update cached sample");
+
+            bool dataChanged = false;
+
+            sample = sp.get();
+
+            sample->updateConfig(m_config, topologyChanged, dataChanged);
+
+            // force update if sample has changed from previously queried one
+            if (sampleIndex != m_lastSampleIndex)
+            {
+                if (m_varyingTopology)
+                {
+                    topologyChanged = true;
+                }
+            }
+            else if (!dataChanged && !m_config.forceUpdate && !m_config.interpolateSamples)
+            {
+                DebugLog("  Data didn't change, nor update is forced");
+
+                sample = 0;
+            }
+        }
+    }
+
+    m_lastSampleIndex = sampleIndex;
+
+    if (sample)
+    {
+        if (!m_varyingTopology && m_config.interpolateSamples)
+        {   
+            AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
+            auto indexTime = m_timeSampling->getSampleTime(sampleIndex);
+            sample->m_currentTimeOffset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));
+            sample->m_currentTimeInterval = interval;
+        }
+        invokeSampleCallback(sample, topologyChanged);
+    }
+
+    updateProperties(ss);
+
+    return sample;
+}

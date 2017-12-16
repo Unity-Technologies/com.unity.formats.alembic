@@ -131,18 +131,15 @@ class Topology
 {
 public:
     Topology();
-    ~Topology();
     void clear();
 
     int getTriangulatedIndexCount() const;
     int getSplitCount() const;
-    int getSplitCount(bool forceRefresh);
-
-    
-    void updateSplits();
+    int getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh);
+    void updateSplits(aiPolyMeshSample * meshSample);
 
     int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, bool submeshPerUVTile);
+    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
@@ -151,9 +148,15 @@ public:
     inline Submeshes::const_iterator submeshBegin() const { return m_submeshes.begin(); }
     inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
+    inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
+    inline void Enable32BitsIndexbuffers(bool value) { m_use32BitsIndexBuffer = value; }
+    inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
+
 public:
-    Abc::Int32ArraySamplePtr m_indices;
-    Abc::Int32ArraySamplePtr m_counts;
+    Abc::Int32ArraySamplePtr m_faceIndices;
+    std::vector<int32_t> m_indicesSwapedFaceWinding;
+    std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
+    Abc::Int32ArraySamplePtr m_vertexCountPerFace;
     int m_triangulatedIndexCount;
 
     Submeshes m_submeshes;
@@ -162,6 +165,14 @@ public:
 
     std::vector<int> m_tangentIndices;
     size_t m_tangentsCount;
+
+    std::vector<uint32_t> m_FixedTopoPositionsIndexes;
+    std::vector<uint32_t> m_FaceIndexingReindexed;
+
+    bool m_vertexSharingEnabled;
+    bool m_FreshlyReadTopologyData;
+    bool m_TreatVertexExtraDataAsStatic;
+    bool m_use32BitsIndexBuffer;
 };
 
 // ---
@@ -170,30 +181,31 @@ class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo);
+    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo );
     virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
     
     bool hasNormals() const;
     bool hasUVs() const;
+    bool hasVelocities() const;
     bool hasTangents() const;
     bool smoothNormalsRequired() const;
     bool tangentsRequired() const;
 
-    void getSummary(bool forceRefresh, aiMeshSampleSummary &summary) const;
-    void getDataPointer(aiPolyMeshData &data);
+    void getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
+    void getDataPointer(aiPolyMeshData &data) const;
     void copyData(aiPolyMeshData &data);
     void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
 
-    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed);
+    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed) const;
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
     void computeSmoothNormals(const aiConfig &config);
 
     int getVertexBufferLength(int splitIndex) const;
     void fillVertexBuffer(int splitIndex, aiPolyMeshData &data);
 
-    int prepareSubmeshes(const aiFacesets &inFacesets);
+    int prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets);
     int getSplitSubmeshCount(int splitIndex) const;
     bool getNextSubmesh(aiSubmeshSummary &summary);
     void fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const;
@@ -201,8 +213,8 @@ public:
 public:
     Topology *m_topology;
     bool m_ownTopology;
-
     Abc::P3fArraySamplePtr m_positions;
+    Abc::P3fArraySamplePtr m_nextPositions;
     Abc::V3fArraySamplePtr m_velocities;
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
@@ -226,11 +238,9 @@ class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 typedef aiTSchema<aiPolyMeshTraits> super;
 public:
     aiPolyMesh(aiObject *obj);
-
     Sample* newSample();
-    Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
 
-    int getTopologyVariance() const;
     int getPeakIndexCount() const;
     int getPeakTriangulatedIndexCount() const;
     int getPeakVertexCount() const;
@@ -239,6 +249,7 @@ public:
 
 private:
     void updatePeakIndexCount() const;
+    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const;
 
 private:
     mutable int m_peakIndexCount;

@@ -11,51 +11,29 @@ namespace UTJ.Alembic
     {
         AlembicStreamPlayer m_Stream;
 
-        [Tooltip("Alambic asset to play")]
-        public ExposedReference<AlembicStreamPlayer> m_StreamPlayer;
-
-        [Tooltip("Amount of time to clip off the start of the alembic asset from playback.")]
-        [SerializeField] public float m_StartOffset;
+        [Tooltip("Alembic asset to play")]
+        public ExposedReference<AlembicStreamPlayer> streamPlayer;
 
         [Tooltip("Amount of time to clip off the end of the alembic asset from playback.")]
-        [SerializeField] public float m_EndOffset;
-
-        [Tooltip("Use to compress/dilute time play back.")]
-        [SerializeField] public float m_TimeScale = 1f;
-
-		[Tooltip("Controls how playback cycles throught the stream.")]
-		[SerializeField] public AlembicPlaybackSettings.CycleType m_Cycle = AlembicPlaybackSettings.CycleType.Hold;
-
-        [Tooltip("Portion, in seconds, of the alembic stream used by the shot.")]
-        [ReadOnly] public float m_AlembicLength = 0;
-
-        public ClipCaps clipCaps { get { return ClipCaps.None;  } }
+        [SerializeField] public float endOffset;
+		
+        public ClipCaps clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
             var playable = ScriptPlayable<AlembicShotPlayable>.Create(graph);
             var behaviour = playable.GetBehaviour();
-            m_Stream = m_StreamPlayer.Resolve(graph.GetResolver());
+            m_Stream = streamPlayer.Resolve(graph.GetResolver());
             behaviour.streamPlayer = m_Stream;
-            behaviour.m_StartTimeOffset = m_StartOffset;
-            behaviour.m_EndTimeClipOff = m_EndOffset;
-            behaviour.m_TimeScale = m_TimeScale;
-            behaviour.m_Cycle = m_Cycle;
             return playable;
         }
 
         public override double duration
         {
             get
-            {
-                var t = m_Stream == null ? 0 : m_Stream.m_PlaybackSettings.m_duration;
-                m_AlembicLength = t;
-                if (m_Cycle == AlembicPlaybackSettings.CycleType.Hold || m_Cycle == AlembicPlaybackSettings.CycleType.Reverse)
-                    return (t - m_StartOffset - m_EndOffset) * m_TimeScale;
-                else
-                {
-                    return base.duration;
-                }
+            {   
+                return m_Stream == null ?
+                    0 : m_Stream.streamDescriptor.Duration;
             }
         }
 

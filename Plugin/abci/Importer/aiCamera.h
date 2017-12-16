@@ -8,10 +8,11 @@ public:
     
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
-    void getData(aiCameraData &outData);
+    void getData(aiCameraData &outData) const;
     
 public:
     AbcGeom::CameraSample m_sample;
+    AbcGeom::CameraSample m_nextSample;
 };
 
 
@@ -29,5 +30,5 @@ public:
     aiCamera(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const abcSampleSelector& ss, bool &topologyChanged) override;
+    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
 };

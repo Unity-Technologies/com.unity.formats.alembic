@@ -14,15 +14,7 @@ namespace UTJ.Alembic
         public enum aiAspectRatioMode
         {
             CurrentResolution = 0,
-            DefaultResolution,
-            CameraAperture
-        };
-
-        public enum aiAspectRatioModeOverride
-        {
-            InheritStreamSetting = -1,
-            CurrentResolution,
-            DefaultResolution,
+            DefaultResolution =1,
             CameraAperture
         };
 
@@ -33,36 +25,12 @@ namespace UTJ.Alembic
             AlwaysCompute,
             Ignore
         }
-        
-        public enum aiNormalsModeOverride
-        {
-            InheritStreamSetting = -1,
-            ReadFromFile,
-            ComputeIfMissing,
-            AlwaysCompute,
-            Ignore
-        }
 
         public enum aiTangentsMode
         {
             None = 0,
             Smooth,
             Split
-        }
-
-        public enum aiTangentsModeOverride
-        {
-            InheritStreamSetting = -1,
-            None,
-            Smooth,
-            Split
-        }
-
-        public enum aiFaceWindingOverride
-        {
-            InheritStreamSetting = -1,
-            Preserve,
-            Swap
         }
 
         public enum aiTopologyVariance
@@ -103,23 +71,6 @@ namespace UTJ.Alembic
             ArrayTypeEnd = Float4x4Array,
         };
 
-
-        public enum aiTextureFormat
-        {
-            Unknown,
-            ARGB32,
-            ARGB2101010,
-            RHalf,
-            RGHalf,
-            ARGBHalf,
-            RFloat,
-            RGFloat,
-            ARGBFloat,
-            RInt,
-            RGInt,
-            ARGBInt,
-        }
-
         public delegate void aiNodeEnumerator(aiObject obj, IntPtr userData);
         public delegate void aiConfigCallback(IntPtr _this, ref aiConfig config);
         public delegate void aiSampleCallback(IntPtr _this, aiSample sample, Bool topologyChanged);
@@ -133,9 +84,13 @@ namespace UTJ.Alembic
             public Bool cacheTangentsSplits;
             public float aspectRatio;
             public Bool forceUpdate;
-            public Bool useThreads;
-            public int cacheSamples;
-            public Bool submeshPerUVTile;
+            public Bool cacheSamples;
+            public Bool shareVertices;
+            public Bool treatVertexExtraDataAsStatics;
+            public Bool interpolateSamples;
+            public Bool turnQuadEdges;
+            public float vertexMotionScale;
+            public Bool use32BitsIndexBuffer;
 
             public void SetDefaults()
             {
@@ -146,9 +101,13 @@ namespace UTJ.Alembic
                 cacheTangentsSplits = true;
                 aspectRatio = -1.0f;
                 forceUpdate = false;
-                useThreads = true;
-                cacheSamples = 0;
-                submeshPerUVTile = true;
+                cacheSamples = false;
+                shareVertices = true;
+                treatVertexExtraDataAsStatics = false;
+                interpolateSamples = true;
+                turnQuadEdges = false;
+                vertexMotionScale = 1.0f;
+                use32BitsIndexBuffer = false;
             }
         }
 
@@ -181,15 +140,15 @@ namespace UTJ.Alembic
             public Bool hasNormals;
             public Bool hasUVs;
             public Bool hasTangents;
+            public Bool hasVelocities;
         }
 
         public struct aiPolyMeshData
         {
-            // normalIndices, uvIndices, faces and their counts are
-            // available only when get by aiPolyMeshCopyData() without triangulating
-
             public IntPtr positions;
             public IntPtr velocities;
+            public IntPtr interpolatedVelocitiesXY;
+            public IntPtr interpolatedVelocitiesZ;
             public IntPtr normals;
             public IntPtr uvs;
             public IntPtr tangents;
@@ -310,39 +269,26 @@ namespace UTJ.Alembic
 
 
         [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
-        [DllImport("abci")] public static extern            aiSampleSelector aiIndexToSampleSelector(int index);
-
-        [DllImport("abci")] public static extern void       aiEnableFileLog(Bool on, string path);
-
         [DllImport("abci")] public static extern void       aiCleanup();
+        [DllImport("abci")] public static extern void       clearContextsWithPath(string path);
         [DllImport("abci")] public static extern aiContext  aiCreateContext(int uid);
         [DllImport("abci")] public static extern void       aiDestroyContext(aiContext ctx);
-        
         [DllImport("abci")] public static extern Bool       aiLoad(aiContext ctx, string path);
         [DllImport("abci")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
         [DllImport("abci")] public static extern float      aiGetStartTime(aiContext ctx);
         [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
+        [DllImport("abci")] public static extern int        getFrameCount(aiContext ctx);
         [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
         [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
-
         [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-        [DllImport("abci")] public static extern void       aiUpdateSamplesBegin(aiContext ctx, float time);
-        [DllImport("abci")] public static extern void       aiUpdateSamplesEnd(aiContext ctx);
-
         [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
         [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
-        [DllImport("abci")] private static extern IntPtr    aiGetFullNameS(aiObject obj);
         public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
-        public static string aiGetFullName(aiObject obj)  { return Marshal.PtrToStringAnsi(aiGetFullNameS(obj)); }
-        
         [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
-        [DllImport("abci")] public static extern aiSample   aiSchemaGetSample(aiSchema schema, ref aiSampleSelector ss);
-
         [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);
         [DllImport("abci")] public static extern void       aiXFormGetData(aiSample sample, ref aiXFormData data);
-
         [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
@@ -352,26 +298,19 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
         [DllImport("abci")] public static extern Bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
         [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
-
         [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
         [DllImport("abci")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
-
         [DllImport("abci")] public static extern aiSchema   aiGetPoints(aiObject obj);
         [DllImport("abci")] public static extern void       aiPointsSetSort(aiSchema schema, Bool v);
         [DllImport("abci")] public static extern void       aiPointsSetSortBasePosition(aiSchema schema, Vector3 v);
         [DllImport("abci")] public static extern void       aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
         [DllImport("abci")] public static extern void       aiPointsCopyData(aiSample sample, ref aiPointsData data);
-
         [DllImport("abci")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
         [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
         [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByName(aiSchema schema, string name);
         [DllImport("abci")] public static extern IntPtr          aiPropertyGetNameS(aiProperty prop);
         [DllImport("abci")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
-        [DllImport("abci")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData o_data);
-
-
-
-
+        [DllImport("abci")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData oData);
 
         class ImportContext
         {
@@ -401,60 +340,8 @@ namespace UTJ.Alembic
     #endif
             }
         }
-
-    #if UNITY_EDITOR
-
-        public class ImportParams
-        {
-            public bool swapHandedness = true;
-            public bool swapFaceWinding = false;
-        }
-
-        static string MakeRelativePath(string path)
-        {
-            Uri pathToAssets = new Uri(Application.streamingAssetsPath + "/");
-            return pathToAssets.MakeRelativeUri(new Uri(path)).ToString();
-        }
-    /*
-        public static GameObject ImportAbc(string path)
-        {
-            var relPath = MakeRelativePath(path);
-            ImportParams p = new ImportParams();
-            return ImportImpl(relPath, p);
-        }
-
-        private static GameObject ImportImpl(string path, ImportParams p)
-        {
-            if (path == null || path == "")
-            {
-                return null;
-            }
-
-            string baseName = System.IO.Path.GetFileNameWithoutExtension(path);
-            string name = baseName;
-            int index = 1;
-            
-            while (GameObject.Find("/" + name) != null)
-            {
-                name = baseName + index;
-                ++index;
-            }
-
-            var root = new GameObject {name = name};
-            var abcStream = new AlembicStream( root )
-            {
-                m_pathToAbc = path,
-                m_swapHandedness = p.swapHandedness,
-                m_swapFaceWinding = p.swapFaceWinding
-            };
-            abcStream.AbcLoad(true);
-
-            return root;
-        }
-    */
-    #endif
         
-        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=false)
+        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=true)
         {
             var ic = new ImportContext
             {
@@ -490,7 +377,8 @@ namespace UTJ.Alembic
             // Find targetted child GameObj
             AlembicTreeNode childTreeNode = null;
             GameObject childGO = null;
-            var childTransf = treeNode.linkedGameObj.transform.Find(childName);
+           
+            var childTransf = treeNode.linkedGameObj==null ? null : treeNode.linkedGameObj.transform.Find(childName);
             if (childTransf == null)
             {
                 if (!ic.createMissingNodes)
@@ -507,13 +395,10 @@ namespace UTJ.Alembic
                 trans.localScale = Vector3.one;
             }
             else
-                childGO = childTransf.gameObject;
-
-            if (childTreeNode == null )
-            {
-                childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, stream = treeNode.stream };
-                treeNode.children.Add(childTreeNode);
-            }
+                childGO = childTransf.gameObject;            
+            
+            childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
+            treeNode.children.Add(childTreeNode);
 
             // Update
             AlembicElement elem = null;
@@ -552,16 +437,6 @@ namespace UTJ.Alembic
             aiEnumerateChild(obj, ImportEnumerator, userData);
             ic.alembicTreeNode = treeNode;
         }
-        
-        public static T GetOrAddComponent<T>(GameObject go) where T : Component
-        {
-            var c = go.GetComponent<T>();
-            if (c == null)
-            {
-                c = go.AddComponent<T>();
-            }
-            return c;
-        }
     }
 
     public class AbcUtils
@@ -580,48 +455,6 @@ namespace UTJ.Alembic
             return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
         }
 
-        public static T LoadAsset<T>(string name, string type="") where T : class
-        {
-            string search_string = name;
-
-            if (type.Length > 0)
-            {
-                search_string += " t:" + type;
-            }
-
-            string[] guids = AssetDatabase.FindAssets(search_string);
-
-            if (guids.Length >= 1)
-            {
-                if (guids.Length > 1)
-                {
-                    foreach (string guid in guids)
-                    {
-                        string path = AssetDatabase.GUIDToAssetPath(guid);
-                        
-                        if (path.Contains("AlembicImporter"))
-                        {
-                            return AssetDatabase.LoadAssetAtPath(path, typeof(T)) as T;
-                        }
-                    }
-
-                    Debug.LogWarning("Found several " + (type.Length > 0 ? type : "asset") + " named '" + name + "'. Use first found.");
-                }
-                
-                return AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(T)) as T;
-            }
-            else
-            {
-                Debug.LogWarning("Could not find " + (type.Length > 0 ? type : "asset") + " '" + name + "'");
-                return null;
-            }
-        }
-
     #endif
-
-        public static int CeilDiv(int v, int d)
-        {
-            return v / d + (v % d == 0 ? 0 : 1);
-        }
     }
 }

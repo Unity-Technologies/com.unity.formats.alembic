@@ -7,7 +7,9 @@
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
-    : m_schema(schema)
+    : m_currentTimeOffset(0)
+    , m_currentTimeInterval(0)
+    , m_schema(schema)
 {
     m_config = schema->getConfig();
 }
@@ -29,7 +31,7 @@ aiSchemaBase::~aiSchemaBase()
     m_properties.clear();
 }
 
-aiObject* aiSchemaBase::getObject()
+aiObject* aiSchemaBase::getObject() const
 {
     return m_obj;
 }
@@ -51,7 +53,7 @@ void aiSchemaBase::setSampleCallback(aiSampleCallback cb, void *arg)
     m_sampleCbArg = arg;
 }
 
-void aiSchemaBase::invokeConfigCallback(aiConfig *config)
+void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
 {
     if (m_configCb)
     {
@@ -59,7 +61,7 @@ void aiSchemaBase::invokeConfigCallback(aiConfig *config)
     }
 }
 
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged)
+void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const
 {
     if (m_sampleCb)
     {
@@ -73,34 +75,17 @@ void aiSchemaBase::readConfig()
 
     m_config = m_obj->getContext()->getConfig();
 
-    bool useThreads = m_config.useThreads;
-
     DebugLog("  Original config: %s", ToString(m_config).c_str());
 
     // get object config overrides (if any)
     invokeConfigCallback(&m_config);
 
-    // don't allow override of useThreads option
-    m_config.useThreads = useThreads;
-
     DebugLog("  Override config: %s", ToString(m_config).c_str());
 }
 
-void aiSchemaBase::notifyUpdate()
-{
-    if (m_pendingSample)
-    {
-        invokeSampleCallback(m_pendingSample, m_pendingTopologyChanged);
-
-        m_pendingSample = 0;
-        m_pendingTopologyChanged = false;
-    }
-}
-
-
 int aiSchemaBase::getNumProperties() const
 {
-    return (int)m_properties.size();
+    return static_cast<int>(m_properties.size());
 }
 
 aiProperty* aiSchemaBase::getPropertyByIndex(int i)

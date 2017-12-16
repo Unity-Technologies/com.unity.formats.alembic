@@ -4,17 +4,15 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    [ExecuteInEditMode]
-    public abstract class AlembicElement : AlembicDisposable 
+    public abstract class AlembicElement : IDisposable 
     {
         public AlembicTreeNode AlembicTreeNode { get; set; }
 
-        protected AbcAPI.aiObject m_abcObj;
-        protected AbcAPI.aiSchema m_abcSchema;
-        protected GCHandle m_thisHandle;
+        protected AbcAPI.aiObject m_AbcObj;
+        protected AbcAPI.aiSchema m_AbcSchema;
+        protected GCHandle m_ThisHandle;
 
-        private bool m_verbose;
-        private bool m_pendingUpdate;
+        private bool m_PendingUpdate;
 
         static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
         {
@@ -38,27 +36,22 @@ namespace UTJ.Alembic
             return c;
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            m_thisHandle.Free();
-
-            if (disposing)
-            {
-                if (AlembicTreeNode != null )
-                    AlembicTreeNode.RemoveAlembicObject(this);
-            }
-
-            base.Dispose( disposing );
+            m_ThisHandle.Free();
+           
+            if (AlembicTreeNode != null )
+                AlembicTreeNode.RemoveAlembicObject(this);
         }
 
         public virtual void AbcSetup(AbcAPI.aiObject abcObj,
                                      AbcAPI.aiSchema abcSchema)
         {
-            m_abcObj = abcObj;
-            m_abcSchema = abcSchema;
-            m_thisHandle = GCHandle.Alloc(this);
+            m_AbcObj = abcObj;
+            m_AbcSchema = abcSchema;
+            m_ThisHandle = GCHandle.Alloc(this);
 
-            IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
+            IntPtr ptr = GCHandle.ToIntPtr(m_ThisHandle);
 
             AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
             AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
@@ -79,28 +72,19 @@ namespace UTJ.Alembic
         // Called in main thread after update sample.
         public abstract void AbcUpdate();
 
-
-        protected void AbcVerboseLog(string msg)
-        {
-            if (AlembicTreeNode != null && AlembicTreeNode.stream != null && AlembicTreeNode.stream.m_diagSettings.m_verbose)
-            {
-                Debug.Log(msg);
-            }
-        }
-
         protected void AbcDirty()
         {
-            m_pendingUpdate = true;
+            m_PendingUpdate = true;
         }
 
         protected void AbcClean()
         {
-            m_pendingUpdate = false;
+            m_PendingUpdate = false;
         }
 
         protected bool AbcIsDirty()
         {
-            return m_pendingUpdate;
+            return m_PendingUpdate;
         }
 
 
