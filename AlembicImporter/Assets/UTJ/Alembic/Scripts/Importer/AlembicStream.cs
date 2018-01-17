@@ -24,8 +24,6 @@ namespace UTJ.Alembic
 
         public static void RemapStreamsWithPath(string oldPath , string newPath)
         {
-            var fullOldPath = Application.streamingAssetsPath + oldPath;
-            var fullNewPath = Application.streamingAssetsPath + newPath;
             s_Streams.ForEach(s =>
             {
                 if (s.m_StreamDesc.pathToAbc == oldPath)
@@ -38,7 +36,6 @@ namespace UTJ.Alembic
 
         public static void ReconnectStreamsWithPath(string path)
         {
-            var fullPath = Application.streamingAssetsPath + path;
             s_Streams.ForEach(s =>
             {
                 if (s.m_StreamDesc.pathToAbc == path)
