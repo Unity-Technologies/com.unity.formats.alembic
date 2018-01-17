@@ -100,7 +100,7 @@ namespace UTJ.Alembic
             
             AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.pathToAbc = destPath;
+            streamDescriptor.pathToAbc = shortAssetPath;
             streamDescriptor.settings = streamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
