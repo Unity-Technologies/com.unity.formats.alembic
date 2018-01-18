@@ -13,7 +13,7 @@ namespace UTJ.Alembic
             var fullPath = Application.streamingAssetsPath + path;
             AbcAPI.clearContextsWithPath(fullPath);
             s_Streams.ForEach(s => {
-                if (s.m_StreamDesc.pathToAbc == fullPath)
+                if (s.m_StreamDesc.pathToAbc == path)
                 {
                     s.m_StreamInterupted = true;
                     s.m_Context = default(AbcAPI.aiContext);
@@ -24,24 +24,21 @@ namespace UTJ.Alembic
 
         public static void RemapStreamsWithPath(string oldPath , string newPath)
         {
-            var fullOldPath = Application.streamingAssetsPath + oldPath;
-            var fullNewPath = Application.streamingAssetsPath + newPath;
             s_Streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == fullOldPath)
+                if (s.m_StreamDesc.pathToAbc == oldPath)
                 {
                     s.m_StreamInterupted = true;
-                    s.m_StreamDesc.pathToAbc = fullNewPath;
+                    s.m_StreamDesc.pathToAbc = newPath;
                 }
             } );
         } 
 
         public static void ReconnectStreamsWithPath(string path)
         {
-            var fullPath = Application.streamingAssetsPath + path;
             s_Streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == fullPath)
+                if (s.m_StreamDesc.pathToAbc == path)
                 {
                     s.m_StreamInterupted = false;
                 }
@@ -173,7 +170,7 @@ namespace UTJ.Alembic
 #endif
                 AbcAPI.aiSetConfig(m_Context, ref m_Config);
 
-            m_Loaded = AbcAPI.aiLoad(m_Context,m_StreamDesc.pathToAbc);
+            m_Loaded = AbcAPI.aiLoad(m_Context,Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
 
             if (m_Loaded)
             {
@@ -182,7 +179,7 @@ namespace UTJ.Alembic
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + m_StreamDesc.pathToAbc);
+                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
             }
         }
 
