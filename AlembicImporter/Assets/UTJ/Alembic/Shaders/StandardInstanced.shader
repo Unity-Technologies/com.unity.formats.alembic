@@ -14,7 +14,7 @@
         #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.0
         #pragma multi_compile_instancing
-        #pragma instancing_options assumeuniformscaling maxcount:1023 procedural:setup
+        #pragma instancing_options assumeuniformscaling procedural:setup
         #include "PointRenderer.cginc"
 
         fixed4 _Color;
@@ -30,7 +30,7 @@
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
         void setup()
         {
-            unity_ObjectToWorld = GetPointMatrix();
+            unity_ObjectToWorld = GetPointMatrix(unity_InstanceID);
             unity_WorldToObject = unity_ObjectToWorld;
             unity_WorldToObject._14_24_34 *= -1;
             unity_WorldToObject._11_22_33 = 1.0f / unity_WorldToObject._11_22_33;

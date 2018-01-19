@@ -25,8 +25,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            #pragma instancing_options assumeuniformscaling maxcount:1023
-            #pragma multi_compile ___ ALEMBIC_PROCEDURAL_INSTANCING_ENABLED
+            #pragma instancing_options assumeuniformscaling
             #pragma target 4.5
             #include "PointRenderer.cginc"
 
@@ -51,7 +50,11 @@
                 UNITY_SETUP_INSTANCE_ID(v);
 
                 float4 vertex = v.vertex;
-                vertex = mul(mul(UNITY_MATRIX_VP, GetPointMatrix()), vertex);
+#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
+                vertex = mul(mul(UNITY_MATRIX_VP, GetPointMatrix(unity_InstanceID)), vertex);
+#else
+                vertex = mul(UNITY_MATRIX_VP, vertex);
+#endif
 
                 v2f o;
                 o.vertex = vertex;

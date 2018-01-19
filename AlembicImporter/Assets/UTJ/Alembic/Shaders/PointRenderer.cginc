@@ -1,44 +1,12 @@
-// Upgrade NOTE: upgraded instancing buffer 'A' to new syntax.
-// Upgrade NOTE: upgraded instancing buffer 'Props' to new syntax.
-
 #include "UnityCG.cginc"
-
-#if defined(UNITY_SUPPORT_INSTANCING) && !defined(UNITY_INSTANCING_ENABLED) && !defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) && (SHADER_TARGET >= 45 && defined(ALEMBIC_PROCEDURAL_INSTANCING_ENABLED))
-    #define UNITY_SUPPORT_INSTANCING
-    #define UNITY_PROCEDURAL_INSTANCING_ENABLED
-
-    uint unity_InstanceID;
-    #define UNITY_VERTEX_INPUT_INSTANCE_ID uint instanceID : SV_InstanceID;
-    #define UNITY_SETUP_INSTANCE_ID(v) unity_InstanceID = v.instanceID;
-#endif
-
 
 float3 _Translate;
 float4 _Rotate;
 float3 _Scale;
 float _PointSize;
-float _AlembicID;
-
 #ifdef UNITY_SUPPORT_INSTANCING
-    #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-            StructuredBuffer<float3> _AlembicPoints;
-            StructuredBuffer<float> _AlembicIDs;
-    #else
-            UNITY_INSTANCING_BUFFER_START (Props)
-                UNITY_DEFINE_INSTANCED_PROP (float, _AlembicIDs)
-#define _AlembicIDs_arr Props
-            UNITY_INSTANCING_BUFFER_END(Props)
-    #endif
-#elif !defined(UNITY_VERTEX_INPUT_INSTANCE_ID)
-    // for pre-5.5
-    #define UNITY_VERTEX_INPUT_INSTANCE_ID
-    #define UNITY_INSTANCING_BUFFER_START(A, B)
-    #define UNITY_DEFINE_INSTANCED_PROP(A, B)
-#define B_arr A
-    #define UNITY_ACCESS_INSTANCED_PROP(A_arr, A)
-    #define UNITY_INSTANCING_BUFFER_END(A)
-    #define UNITY_SETUP_INSTANCE_ID(A)
-    #define UNITY_TRANSFER_INSTANCE_ID(A, B)
+StructuredBuffer<float3> _AlembicPoints;
+StructuredBuffer<float> _AlembicIDs;
 #endif
 
 float GetPointSize()
@@ -100,30 +68,30 @@ float3 Rotate(float4 q, float3 p)
     return p + (a * q.w + b) * 2.0;
 }
 
-float3 GetAlembicPoint()
+float3 GetAlembicPoint(int iid)
 {
     return
-#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-        Rotate(_Rotate, _AlembicPoints[unity_InstanceID] * _Scale) + _Translate;
+#ifdef UNITY_SUPPORT_INSTANCING
+        Rotate(_Rotate, _AlembicPoints[iid] * _Scale) + _Translate;
 #else
-        float3(unity_ObjectToWorld[0][3], unity_ObjectToWorld[1][3], unity_ObjectToWorld[2][3]);
+        float3(0,0,0);
 #endif
 }
 
-float GetAlembicID()
+float GetAlembicID(int iid)
 {
     return
-#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
-        _AlembicIDs[unity_InstanceID];
+#ifdef UNITY_SUPPORT_INSTANCING
+        _AlembicIDs[iid];
 #else
-        _AlembicID;
+        0;
 #endif
 }
 
-float4x4 GetPointMatrix()
+float4x4 GetPointMatrix(int iid)
 {
-#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-    float3 ppos = GetAlembicPoint();
+#ifdef UNITY_SUPPORT_INSTANCING
+    float3 ppos = GetAlembicPoint(iid);
     float4 prot = _Rotate;
     float3 pscale = _Scale * _PointSize;
     return mul(mul(Translate44(ppos), Rotate44(prot)), Scale44(pscale));
