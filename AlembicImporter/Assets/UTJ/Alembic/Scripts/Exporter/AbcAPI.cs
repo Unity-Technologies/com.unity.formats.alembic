@@ -12,7 +12,7 @@ namespace UTJ.Alembic
             Ogawa,
         };
 
-        public enum aeTypeSamplingType
+        public enum aeTimeSamplingType
         {
             Uniform = 0,
             // Cyclic = 1,
@@ -64,25 +64,13 @@ namespace UTJ.Alembic
         public struct aeConfig
         {
             public aeArchiveType archiveType;
-            public aeTypeSamplingType timeSamplingType;
-
-            [Tooltip("Start time on Alembic.")]
+            public aeTimeSamplingType timeSamplingType;
             public float startTime;
-
-            [Tooltip("Frame rate on Alembic. Relevant only if timeSamplingType is Uniform")]
             public float frameRate;
-
             public aeXFormType xformType;
-
-            [Tooltip("Swap right-hand space and left-hand space")]
             public Bool swapHandedness;
-
-            [Tooltip("Swap triangle indices")]
             public Bool swapFaces;
-
-            [Tooltip("Global scale for unit conversion.")]
-            public float scale;
-
+            public float scaleFactor;
 
             public static aeConfig default_value
             {
@@ -91,13 +79,13 @@ namespace UTJ.Alembic
                     return new aeConfig
                     {
                         archiveType = aeArchiveType.Ogawa,
-                        timeSamplingType = aeTypeSamplingType.Acyclic,
+                        timeSamplingType = aeTimeSamplingType.Acyclic,
                         startTime = 0.0f,
                         frameRate = 30.0f,
                         xformType = aeXFormType.TRS,
                         swapHandedness = true,
                         swapFaces = false,
-                        scale = 100.0f,
+                        scaleFactor = 100.0f,
                     };
                 }
             }

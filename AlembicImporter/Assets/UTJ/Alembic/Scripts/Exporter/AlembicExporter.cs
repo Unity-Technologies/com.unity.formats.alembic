@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -354,32 +355,18 @@ namespace UTJ.Alembic
             CurrentBranch,
         }
 
-        [Header("Abc")]
-
         public string m_outputPath;
         public AbcAPI.aeConfig m_conf = AbcAPI.aeConfig.default_value;
-
-        [Header("Capture Components")]
-
         public Scope m_scope = Scope.EntireScene;
         public bool m_preserveTreeStructure = true;
         public bool m_ignoreDisabled = true;
-        [Space(8)]
         public bool m_captureMeshRenderer = true;
         public bool m_captureSkinnedMeshRenderer = true;
         public bool m_captureParticleSystem = true;
         public bool m_captureCamera = true;
         public bool m_customCapturer = true;
-
-        [Header("Capture Setting")]
-
-        [Tooltip("Start capture on start.")]
         public bool m_captureOnStart = false;
-        [Tooltip("Automatically end capture when reached Max Capture Frame. 0=Infinite")]
         public int m_maxCaptureFrame = 0;
-
-        [Header("Misc")]
-
         public bool m_detailedLog;
 
         AbcAPI.aeContext m_ctx;
@@ -708,6 +695,22 @@ namespace UTJ.Alembic
                 return false;
             }
 
+            {
+                var dir = Path.GetDirectoryName(m_outputPath);
+                if (!Directory.Exists(dir))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    catch(Exception)
+                    {
+                        Debug.LogWarning("Failed to create directory " + dir);
+                        return false;
+                    }
+                }
+            }
+
             // create context and open archive
             m_ctx = AbcAPI.aeCreateContext();
             if(m_ctx.ptr == IntPtr.Zero) {
@@ -735,7 +738,7 @@ namespace UTJ.Alembic
             m_time = m_conf.startTime;
             m_frameCount = 0;
 
-            if (m_conf.timeSamplingType == AbcAPI.aeTypeSamplingType.Uniform)
+            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
             {
                 Time.maximumDeltaTime = (1.0f / m_conf.frameRate);
             }
@@ -801,7 +804,7 @@ namespace UTJ.Alembic
             ProcessCapture();
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_conf.timeSamplingType == AbcAPI.aeTypeSamplingType.Uniform)
+            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
             {
                 AbcAPI.aeWaitMaxDeltaTime();
             }
@@ -811,7 +814,7 @@ namespace UTJ.Alembic
         {
             if (m_outputPath == null || m_outputPath == "")
             {
-                m_outputPath = "Assets/StreamingAssets/" + gameObject.name + ".abc";
+                m_outputPath = "Output/" + gameObject.name + ".abc";
             }
         }
 

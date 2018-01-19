@@ -46,3 +46,4 @@ ipch/
 abci.bundle/
 build/
 TestLocal*
+StreamingAssets*
