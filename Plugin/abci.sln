@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "abci", "abci.vcxproj", "{08361722-5520-47AC-A0C2-31E8A062B73F}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AAFAB54A-D125-4047-AC51-0B688A56BD96}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextureWriter", "Tools\TextureWriter.vcxproj", "{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "setup", "setup.vcxproj", "{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}"
 EndProject
@@ -29,16 +25,6 @@ Global
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.ActiveCfg = Master|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.Build.0 = Master|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.Deploy.0 = Master|x64
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Debug|Win32.Build.0 = Debug|Win32
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Debug|x64.ActiveCfg = Debug|x64
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Debug|x64.Build.0 = Debug|x64
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|Win32.ActiveCfg = Master|Win32
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|Win32.Build.0 = Master|Win32
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|Win32.Deploy.0 = Master|Win32
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|x64.ActiveCfg = Master|x64
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|x64.Build.0 = Master|x64
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF}.Master|x64.Deploy.0 = Master|x64
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.Build.0 = Debug|Win32
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|x64.ActiveCfg = Debug|x64
@@ -50,7 +36,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{BC63E69C-7A04-4D9E-BEA0-8E28F86466EF} = {AAFAB54A-D125-4047-AC51-0B688A56BD96}
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4ECFD9A2-D956-437E-8532-D22EC9E5662D}
 	EndGlobalSection
 EndGlobal

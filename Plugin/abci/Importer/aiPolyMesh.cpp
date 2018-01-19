@@ -5,7 +5,7 @@
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
 #include <unordered_map>
-#include "../../Tools/Common/Foundation.h"
+#include "../Foundation/aiMisc.h"
 
 
 #define MAX_VERTEX_SPLIT_COUNT_16 65000
