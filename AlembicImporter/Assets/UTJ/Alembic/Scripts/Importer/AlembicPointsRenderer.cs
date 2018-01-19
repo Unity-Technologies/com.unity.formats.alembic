@@ -278,7 +278,7 @@ namespace UTJ.Alembic
             }
             if (m_materials == null)
             {
-                var mat = new Material(AssetDatabase.LoadAssetAtPath<Shader>("Assets/UTJ/Alembic/Shaders/StandardInstanced.shader"));
+                var mat = new Material(AssetDatabase.LoadAssetAtPath<Shader>(AssetDatabase.GUIDToAssetPath("a002496809b1b604c8a724108e6add6e")));
                 mat.name = "Default Alembic Points";
                 m_materials = new Material[] { mat };
             }
