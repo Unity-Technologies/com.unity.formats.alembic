@@ -330,6 +330,8 @@ bool aiContext::load(const char *inPath)
             {
                 m_timeRange[0] = ts->getSampleTime(0);
                 m_timeRange[1] = ts->getSampleTime(ts->getNumStoredTimes() - 1);
+
+                if (ts->getNumStoredTimes() > m_numFrames) m_numFrames = ts->getNumStoredTimes();
             }
         }
 
