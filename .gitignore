@@ -45,3 +45,4 @@ ipch/
 *.abc.meta
 abci.bundle/
 build/
+TestLocal*

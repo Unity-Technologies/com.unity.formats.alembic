@@ -97,7 +97,7 @@ namespace UTJ.Alembic
                         xformType = aeXFormType.TRS,
                         swapHandedness = true,
                         swapFaces = false,
-                        scale = 1.0f,
+                        scale = 100.0f,
                     };
                 }
             }
