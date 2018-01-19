@@ -366,9 +366,9 @@ float aiContext::getEndTime() const
     return float(m_timeRange[1]);
 }
 
-unsigned int aiContext::getFrameCount() const
+int aiContext::getFrameCount() const
 {
-    return m_numFrames;
+    return (int)m_numFrames;
 }
 
 aiObject* aiContext::getTopObject() const

@@ -105,7 +105,7 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
     }
     else
     {
-        const int maxVertexSplitCount = m_use32BitsIndexBuffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
+        const size_t maxVertexSplitCount = m_use32BitsIndexBuffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
         m_splits.reserve(1 + m_faceIndices->size() / maxVertexSplitCount);
         m_splits.push_back(SplitInfo());
 
@@ -2013,7 +2013,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
                 const auto& uvIndices = *sample->m_uvs.getIndices();
                 topology->m_UvIndicesSwapedFaceWinding.reserve(sample->m_uvs.getIndices()->size());
 
-                for (auto faceIndex = 0; faceIndex < totalFaces; faceIndex++)
+                for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
                 {
                     auto faceSize = faces->get()[faceIndex];
                     if (faceSize == 4)
@@ -2127,7 +2127,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
             if (!share)
                 topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
 
-            topology->m_FaceIndexingReindexed[*indexItr] = topology->m_FixedTopoPositionsIndexes.size() - 1;
+            topology->m_FaceIndexingReindexed[*indexItr] = (uint32_t)topology->m_FixedTopoPositionsIndexes.size() - 1;
 
             ++indexItr;
         }
