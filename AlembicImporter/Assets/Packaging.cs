@@ -2,17 +2,16 @@
 using UnityEditor;
 
 
-public class AlembicImporterPackaging
+public class AlembicForUnityPackaging
 {
-    [MenuItem("Assets/Make AlembicImporter.unitypackage")]
+    [MenuItem("Assets/Make AlembicForUnity.unitypackage")]
     public static void MakePackage_Alembic()
     {
         string[] files = new string[]
         {
 "Assets/UTJ",
-"Assets/StreamingAssets/UTJ",
         };
-        AssetDatabase.ExportPackage(files, "AlembicImporter.unitypackage", ExportPackageOptions.Recurse);
+        AssetDatabase.ExportPackage(files, "AlembicForUnity.unitypackage", ExportPackageOptions.Recurse);
     }
 }
 #endif // UNITY_EDITOR
