@@ -21,15 +21,15 @@ namespace UTJ.Alembic
         [Serializable]
         public class Facesets
         {
-            public int[] faceCounts;
-            public int[] faceIndices;
+            public PinnedList<int> faceCounts = new PinnedList<int>();
+            public PinnedList<int> faceIndices = new PinnedList<int>();
         }
 
         bool dirty = false;
         List<Material> materials = new List<Material>();
         // Need to keep thess around when scene is serialized
         [HideInInspector]
-        public Facesets facesetsCache = new Facesets { faceCounts = new int[0], faceIndices = new int[0] };
+        public Facesets facesetsCache = new Facesets();
 
         void Start()
         {
@@ -144,14 +144,14 @@ namespace UTJ.Alembic
 
         public int GetFacesetsCount()
         {
-            return facesetsCache.faceCounts.Length;
+            return facesetsCache.faceCounts.Count;
         }
 
         public void GetFacesets(ref AbcAPI.aiFacesets facesets)
         {
-            facesets.count = facesetsCache.faceCounts.Length;
-            facesets.faceCounts = Marshal.UnsafeAddrOfPinnedArrayElement(facesetsCache.faceCounts, 0);
-            facesets.faceIndices = Marshal.UnsafeAddrOfPinnedArrayElement(facesetsCache.faceIndices, 0);
+            facesets.count = facesetsCache.faceCounts.Count;
+            facesets.faceCounts = facesetsCache.faceCounts;
+            facesets.faceIndices = facesetsCache.faceIndices;
         }
 
         public bool HasFacesetsChanged()
@@ -172,9 +172,9 @@ namespace UTJ.Alembic
             // keep list of materials for next update
             materials.Clear();
 
-            if (facesetsCache.faceCounts.Length < assignments.Count)
+            if (facesetsCache.faceCounts.Count < assignments.Count)
             {
-                Array.Resize(ref facesetsCache.faceCounts, assignments.Count);
+                facesetsCache.faceCounts.Resize(assignments.Count);
                 dirty = true;
             }
 
@@ -188,9 +188,9 @@ namespace UTJ.Alembic
 
                 facesetsCache.faceCounts[count++] = face_count;
 
-                if (facesetsCache.faceIndices.Length < (indicesCount + face_count))
+                if (facesetsCache.faceIndices.Count < (indicesCount + face_count))
                 {
-                    Array.Resize(ref facesetsCache.faceIndices, indicesCount + face_count);
+                    facesetsCache.faceIndices.Resize(indicesCount + face_count);
                     dirty = true;
                 }
 

@@ -19,7 +19,7 @@ namespace UTJ.Alembic
         [Tooltip("Use Alembic Points IDs as shader input")]
         [SerializeField] bool m_useAlembicIDs = false;
         
-        float[] m_ids;
+        PinnedList<float> m_ids = new PinnedList<float>();
         ComputeBuffer m_cbPoints;
         ComputeBuffer m_cbIDs;
         ComputeBuffer[] m_cbArgs;
@@ -100,7 +100,7 @@ namespace UTJ.Alembic
             var points = apc.abcPositions;
             if(points == null) { return; }
 
-            int num_instances = points.Length;
+            int num_instances = points.Count;
             if(num_instances == 0) { return; }
 
             var materials = SetupMaterials();
@@ -154,7 +154,7 @@ namespace UTJ.Alembic
                 }
 
                 // update points buffer
-                if (m_cbPoints != null && m_cbPoints.count != num_instances)
+                if (m_cbPoints != null && m_cbPoints.count < num_instances)
                 {
                     m_cbPoints.Release();
                     m_cbPoints = null;
@@ -163,13 +163,13 @@ namespace UTJ.Alembic
                 {
                     m_cbPoints = new ComputeBuffer(num_instances, 12);
                 }
-                m_cbPoints.SetData(points);
+                m_cbPoints.SetData(points.List);
 
                 // update ID buffer
                 bool alembicIDsAvailable = false;
                 if (m_useAlembicIDs)
                 {
-                    if (m_cbIDs != null && m_cbIDs.count != num_instances)
+                    if (m_cbIDs != null && m_cbIDs.count < num_instances)
                     {
                         m_cbIDs.Release();
                         m_cbIDs = null;
@@ -178,18 +178,11 @@ namespace UTJ.Alembic
                     {
                         m_cbIDs = new ComputeBuffer(num_instances, 4);
                     }
-                    ulong[] ids = apc.abcIDs;
-                    if (ids != null && ids.Length == num_instances)
+                    var ids = apc.abcIDs;
+                    if (ids != null && ids.Count == num_instances)
                     {
-                        if (m_ids == null || m_ids.Length != num_instances)
-                        {
-                            m_ids = new float[num_instances];
-                        }
-                        for (int i = 0; i < num_instances; ++i)
-                        {
-                            m_ids[i] = ids[i];
-                        }
-                        m_cbIDs.SetData(m_ids);
+                        m_ids.Resize(num_instances);
+                        m_cbIDs.SetData(m_ids.List);
                         alembicIDsAvailable = true;
                     }
                 }

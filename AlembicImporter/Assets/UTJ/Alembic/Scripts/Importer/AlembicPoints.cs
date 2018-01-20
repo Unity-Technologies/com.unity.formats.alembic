@@ -43,25 +43,25 @@ namespace UTJ.Alembic
                         AlembicTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
 
 
-            if (cloud.abcPositions == null)
+            if (cloud.abcPositions.Count == 0)
             {
                 AbcAPI.aiPointsGetSummary(m_AbcSchema, ref m_Summary);
-                cloud.m_abcPositions = new Vector3[m_Summary.peakCount];
-                cloud.m_abcIDs = new ulong[m_Summary.peakCount];
+                cloud.m_abcPositions.Resize(m_Summary.peakCount);
+                cloud.m_abcIDs.Resize(m_Summary.peakCount);
                 cloud.m_peakVertexCount = m_Summary.peakCount;
-                m_AbcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcPositions, 0);
-                m_AbcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcIDs, 0);
+                m_AbcData.positions = cloud.m_abcPositions;
+                m_AbcData.ids = cloud.m_abcIDs;
                 if (m_Summary.hasVelocity)
                 {
-                    cloud.m_abcVelocities = new Vector3[m_Summary.peakCount];
-                    m_AbcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcVelocities, 0);
+                    cloud.m_abcVelocities.Resize(m_Summary.peakCount);
+                    m_AbcData.velocities = cloud.m_abcVelocities;
                 }
             }
 
-            m_AbcData.positions = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcPositions, 0);
-            m_AbcData.ids = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcIDs, 0);
+            m_AbcData.positions = cloud.m_abcPositions;
+            m_AbcData.ids = cloud.m_abcIDs;
             if (m_Summary.hasVelocity)
-                m_AbcData.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(cloud.m_abcVelocities, 0);
+                m_AbcData.velocities = cloud.m_abcVelocities;
 
             AbcAPI.aiPointsCopyData(sample, ref m_AbcData);
             cloud.m_boundsCenter = m_AbcData.boundsCenter;

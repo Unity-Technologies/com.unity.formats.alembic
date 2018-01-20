@@ -8,9 +8,9 @@ namespace UTJ.Alembic
     public class AlembicPointsCloud : MonoBehaviour
     {
         // members
-        [ReadOnly] public Vector3[] m_abcPositions;
-        [ReadOnly] public Vector3[] m_abcVelocities;
-        [ReadOnly] public ulong[] m_abcIDs;
+        [ReadOnly] public PinnedList<Vector3> m_abcPositions = new PinnedList<Vector3>();
+        [ReadOnly] public PinnedList<Vector3> m_abcVelocities = new PinnedList<Vector3>();
+        [ReadOnly] public PinnedList<ulong> m_abcIDs = new PinnedList<ulong>();
 
         [ReadOnly] public Vector3 m_boundsCenter;
         [ReadOnly] public Vector3 m_boundsExtents;
@@ -24,12 +24,17 @@ namespace UTJ.Alembic
         public Transform m_sortFrom;
 
         // properties
-        public Vector3[] abcPositions
+        public PinnedList<Vector3> abcPositions
         {
             get { return m_abcPositions; }
         }
 
-        public ulong[] abcIDs
+        public PinnedList<Vector3> abcVelocities
+        {
+            get { return m_abcVelocities; }
+        }
+
+        public PinnedList<ulong> abcIDs
         {
             get { return m_abcIDs; }
         }
