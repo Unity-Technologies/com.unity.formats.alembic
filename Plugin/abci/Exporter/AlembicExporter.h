@@ -170,3 +170,5 @@ abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
 abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
 abciAPI void        aePropertyWriteScalarSample(aeProperty *prop, const void *data);
+
+abciAPI void        aeGenerateRemap(int *dst, const abcV3 *points, int vertex_count);

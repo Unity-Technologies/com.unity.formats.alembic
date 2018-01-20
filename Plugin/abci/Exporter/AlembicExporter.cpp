@@ -168,3 +168,56 @@ abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
     }
     prop->writeSample(data, 1);
 }
+
+
+inline uint32_t hash(const abcV3& value)
+{
+    auto* h = (const uint32_t*)(&value);
+    uint32_t f = (h[0] + h[1] * 11 - (h[2] * 17)) & 0x7fffffff;
+    return (f >> 22) ^ (f >> 12) ^ (f);
+}
+inline int next_power_of_two(uint32_t v)
+{
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v + (v == 0);
+}
+abciAPI void aeGenerateRemap(int *remap, const abcV3 *points, int vertex_count)
+{
+    const int NIL = -1;
+    int output_count = 0;
+    int hash_size = next_power_of_two(vertex_count);
+    RawVector<int> hash_table(hash_size + vertex_count);
+    int* next = &hash_table[hash_size];
+
+    memset(hash_table.data(), NIL, (hash_size) * sizeof(int));
+
+    for (int i = 0; i < vertex_count; i++)
+    {
+        auto& v = points[i];
+        uint32_t hash_value = hash(v) & (hash_size - 1);
+        int offset = hash_table[hash_value];
+        while (offset != NIL)
+        {
+            if (points[offset] == v)
+                break;
+            offset = next[offset];
+        }
+
+        if (offset == NIL)
+        {
+            remap[i] = output_count;
+            next[output_count] = hash_table[hash_value];
+            hash_table[hash_value] = output_count++;
+        }
+        else
+        {
+            remap[i] = offset;
+        }
+    }
+}

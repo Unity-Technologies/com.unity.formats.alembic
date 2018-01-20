@@ -74,32 +74,105 @@ namespace UTJ.Alembic
                 normals.Clear();
                 uvs.Clear();
             }
+
+            public void Capture(Mesh mesh)
+            {
+                Clear();
+                indices.Assign(mesh.triangles); // todo: this can be optimized
+                vertices.LockList(ls => mesh.GetVertices(ls));
+                normals.LockList(ls => mesh.GetNormals(ls));
+                uvs.LockList(ls => mesh.GetUVs(0, ls));
+            }
         }
 
-        public static void CaptureMesh(AbcAPI.aeObject abc, Mesh mesh, Cloth cloth, MeshBuffer dst_buf)
+        public class ClothBuffer
         {
-            dst_buf.Clear();
-            dst_buf.indices.LockList(ls => mesh.GetTriangles(ls, 0));
-            dst_buf.uvs.LockList(ls => mesh.GetUVs(0, ls));
+            public PinnedList<int> remap = new PinnedList<int>();
+            public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
+            public PinnedList<Vector3> normals = new PinnedList<Vector3>();
 
-            if (cloth == null)
+            public PinnedList<int> indicesFlattended = new PinnedList<int>();
+            public PinnedList<Vector3> verticesFlattended = new PinnedList<Vector3>();
+            public PinnedList<Vector3> normalsFlattended = new PinnedList<Vector3>();
+            public PinnedList<Vector2> uvsFlattened = new PinnedList<Vector2>();
+
+            public void Clear()
             {
-                dst_buf.vertices.LockList(ls => mesh.GetVertices(ls));
-                dst_buf.normals.LockList(ls => mesh.GetNormals(ls));
+                remap.Clear();
+                vertices.Clear();
+                normals.Clear();
+
+                indicesFlattended.Clear();
+                verticesFlattended.Clear();
+                normalsFlattended.Clear();
+                uvsFlattened.Clear();
             }
-            else
+
+            [DllImport("abci")] public static extern void aeGenerateRemap(IntPtr dst, IntPtr points, int pointCount);
+            public void GenerateRemap(MeshBuffer mbuf)
             {
-                dst_buf.vertices.Assign(cloth.vertices);
-                dst_buf.normals.Assign(cloth.normals);
+                remap.Resize(mbuf.vertices.Count);
+                aeGenerateRemap(remap, mbuf.vertices, mbuf.vertices.Count);
+
+                indicesFlattended.ResizeDiscard(mbuf.indices.Count);
+                for (int ii = 0; ii < indicesFlattended.Count; ++ii)
+                    indicesFlattended[ii] = ii;
             }
+
+            public void Capture(Cloth cloth, MeshBuffer mbuf)
+            {
+                vertices.Assign(cloth.vertices);
+                normals.Assign(cloth.normals);
+
+                // flatten
+                verticesFlattended.ResizeDiscard(mbuf.indices.Count);
+                normalsFlattended.ResizeDiscard(mbuf.indices.Count);
+                for (int ii = 0; ii < mbuf.indices.Count; ++ii)
+                {
+                    int vi = remap[mbuf.indices[ii]];
+                    verticesFlattended[ii] = vertices[vi];
+                    normalsFlattended[ii] = normals[vi];
+                }
+                if (mbuf.uvs.Count > 0)
+                {
+                    uvsFlattened.ResizeDiscard(mbuf.indices.Count);
+                    for (int ii = 0; ii < mbuf.indices.Count; ++ii)
+                        uvsFlattened[ii] = mbuf.uvs[mbuf.indices[ii]];
+                }
+            }
+        }
+
+        public static void CaptureMesh(AbcAPI.aeObject abc, Mesh mesh, MeshBuffer mbuf)
+        {
+            mbuf.Capture(mesh);
 
             var data = new AbcAPI.aePolyMeshData();
-            data.indices = dst_buf.indices;
-            data.positions = dst_buf.vertices;
-            data.normals = dst_buf.normals;
-            data.uvs = dst_buf.uvs;
-            data.positionCount = dst_buf.vertices.Count;
-            data.indexCount = dst_buf.indices.Count;
+            data.indices = mbuf.indices;
+            data.positions = mbuf.vertices;
+            data.normals = mbuf.normals;
+            data.uvs = mbuf.uvs;
+            data.positionCount = mbuf.vertices.Count;
+            data.indexCount = mbuf.indices.Count;
+
+            AbcAPI.aePolyMeshWriteSample(abc, ref data);
+        }
+
+        public static void CaptureCloth(AbcAPI.aeObject abc, Mesh mesh, Cloth cloth, MeshBuffer mbuf, ClothBuffer cbuf)
+        {
+            if (mbuf.indices.Count == 0)
+            {
+                mbuf.Capture(mesh);
+                cbuf.GenerateRemap(mbuf);
+            }
+            cbuf.Capture(cloth, mbuf);
+
+            var data = new AbcAPI.aePolyMeshData();
+            data.indices = cbuf.indicesFlattended;
+            data.positions = cbuf.verticesFlattended;
+            data.normals = cbuf.normalsFlattended;
+            data.uvs = cbuf.uvsFlattened;
+            data.positionCount = cbuf.verticesFlattended.Count;
+            data.indexCount = cbuf.indicesFlattended.Count;
 
             AbcAPI.aePolyMeshWriteSample(abc, ref data);
         }
@@ -216,15 +289,18 @@ namespace UTJ.Alembic
             {
                 if (m_target == null) { return; }
 
-                CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh, null, m_mesh_buffer);
+                CaptureMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh, m_mesh_buffer);
             }
         }
 
         public class SkinnedMeshCapturer : ComponentCapturer
         {
             SkinnedMeshRenderer m_target;
-            Mesh m_mesh;
+            Mesh m_meshSrc;
+            Mesh m_meshBake;
+            Cloth m_cloth;
             MeshBuffer m_mesh_buffer;
+            ClothBuffer m_cloth_buffer;
 
             public SkinnedMeshCapturer(ComponentCapturer parent, SkinnedMeshRenderer target)
                 : base(parent)
@@ -232,15 +308,24 @@ namespace UTJ.Alembic
                 m_obj = target.gameObject;
                 m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
                 m_target = target;
-                m_mesh_buffer = new MeshBuffer();
 
-                if (m_target.GetComponent<Cloth>() != null)
+                if (m_target != null)
                 {
-                    var t = m_parent as TransformCapturer;
-                    if (t != null)
+                    m_mesh_buffer = new MeshBuffer();
+                    m_meshSrc = target.sharedMesh;
+                    m_cloth = m_target.GetComponent<Cloth>();
+                    if (m_cloth != null)
                     {
-                        t.scale = false;
+                        m_cloth_buffer = new ClothBuffer();
+                        var t = m_parent as TransformCapturer;
+                        if (t != null)
+                            t.scale = false;
                     }
+                    else
+                    {
+                        m_meshBake = new Mesh();
+                    }
+
                 }
             }
 
@@ -248,9 +333,15 @@ namespace UTJ.Alembic
             {
                 if (m_target == null) { return; }
 
-                if (m_mesh == null) { m_mesh = new Mesh(); }
-                m_target.BakeMesh(m_mesh);
-                CaptureMesh(m_abc, m_mesh, m_target.GetComponent<Cloth>(), m_mesh_buffer);
+                if (m_cloth != null)
+                {
+                    CaptureCloth(m_abc, m_meshSrc, m_cloth, m_mesh_buffer, m_cloth_buffer);
+                }
+                else
+                {
+                    m_target.BakeMesh(m_meshBake);
+                    CaptureMesh(m_abc, m_meshBake, m_mesh_buffer);
+                }
             }
         }
 

@@ -114,7 +114,6 @@ namespace UTJ.Alembic
             var pos = trans.position;
             var rot = trans.rotation;
             var scale = trans.lossyScale;
-            var pscale = scale * m_pointSize;
 
             bool supportsInstancing = SystemInfo.supportsInstancing && SystemInfo.supportsComputeShaders;
             int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
