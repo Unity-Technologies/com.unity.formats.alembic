@@ -90,6 +90,7 @@ namespace UTJ.Alembic
             public PinnedList<int> remap = new PinnedList<int>();
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
+            public int numRemappedVertices;
 
             public PinnedList<int> indicesFlattended = new PinnedList<int>();
             public PinnedList<Vector3> verticesFlattended = new PinnedList<Vector3>();
@@ -108,11 +109,15 @@ namespace UTJ.Alembic
                 uvsFlattened.Clear();
             }
 
-            [DllImport("abci")] public static extern void aeGenerateRemap(IntPtr dst, IntPtr points, int pointCount);
-            public void GenerateRemap(MeshBuffer mbuf)
+            [DllImport("abci")] public static extern int aeGenerateRemap(IntPtr dst, IntPtr points, IntPtr weights4, int pointCount);
+            public void GenerateRemap(Mesh mesh, MeshBuffer mbuf)
             {
+                mbuf.Capture(mesh);
+                var weights4 = new PinnedList<BoneWeight>();
+                weights4.LockList(l => { mesh.GetBoneWeights(l); });
+
                 remap.Resize(mbuf.vertices.Count);
-                aeGenerateRemap(remap, mbuf.vertices, mbuf.vertices.Count);
+                numRemappedVertices = aeGenerateRemap(remap, mbuf.vertices, weights4, mbuf.vertices.Count);
 
                 indicesFlattended.ResizeDiscard(mbuf.indices.Count);
                 for (int ii = 0; ii < indicesFlattended.Count; ++ii)
@@ -123,6 +128,11 @@ namespace UTJ.Alembic
             {
                 vertices.Assign(cloth.vertices);
                 normals.Assign(cloth.normals);
+                if (numRemappedVertices != vertices.Count)
+                {
+                    Debug.LogWarning("numRemappedVertices != vertices.Count");
+                    return;
+                }
 
                 // flatten
                 verticesFlattended.ResizeDiscard(mbuf.indices.Count);
@@ -161,8 +171,7 @@ namespace UTJ.Alembic
         {
             if (mbuf.indices.Count == 0)
             {
-                mbuf.Capture(mesh);
-                cbuf.GenerateRemap(mbuf);
+                cbuf.GenerateRemap(mesh, mbuf);
             }
             cbuf.Capture(cloth, mbuf);
 

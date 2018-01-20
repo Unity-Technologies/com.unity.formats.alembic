@@ -187,7 +187,7 @@ inline int next_power_of_two(uint32_t v)
     v++;
     return v + (v == 0);
 }
-abciAPI void aeGenerateRemap(int *remap, const abcV3 *points, int vertex_count)
+abciAPI int aeGenerateRemap(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
 {
     const int NIL = -1;
     int output_count = 0;
@@ -205,13 +205,20 @@ abciAPI void aeGenerateRemap(int *remap, const abcV3 *points, int vertex_count)
         while (offset != NIL)
         {
             if (points[offset] == v)
-                break;
+            {
+                if (!weights || weights[i] == weights[offset])
+                    break;
+            }
             offset = next[offset];
         }
 
         if (offset == NIL)
         {
             remap[i] = output_count;
+            points[output_count] = v;
+            if (weights)
+                weights[output_count] = weights[i];
+
             next[output_count] = hash_table[hash_value];
             hash_table[hash_value] = output_count++;
         }
@@ -220,4 +227,5 @@ abciAPI void aeGenerateRemap(int *remap, const abcV3 *points, int vertex_count)
             remap[i] = offset;
         }
     }
+    return output_count;
 }
