@@ -42,6 +42,18 @@ namespace UTJ.Alembic
                 normals.LockList(ls => mesh.GetNormals(ls));
                 uvs.LockList(ls => mesh.GetUVs(0, ls));
             }
+
+            public void WriteSample(AbcAPI.aeObject abc)
+            {
+                var data = new AbcAPI.aePolyMeshData();
+                data.indices = indices;
+                data.positions = vertices;
+                data.normals = normals;
+                data.uvs = uvs;
+                data.positionCount = vertices.Count;
+                data.indexCount = indices.Count;
+                AbcAPI.aePolyMeshWriteSample(abc, ref data);
+            }
         }
 
         public class ClothBuffer
@@ -52,27 +64,17 @@ namespace UTJ.Alembic
             public Transform rootBone;
             public int numRemappedVertices;
 
-            public PinnedList<int> indicesFlattended = new PinnedList<int>();
-            public PinnedList<Vector3> verticesFlattended = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normalsFlattended = new PinnedList<Vector3>();
-            public PinnedList<Vector2> uvsFlattened = new PinnedList<Vector2>();
-
             public void Clear()
             {
                 remap.Clear();
                 vertices.Clear();
                 normals.Clear();
-
-                indicesFlattended.Clear();
-                verticesFlattended.Clear();
-                normalsFlattended.Clear();
-                uvsFlattened.Clear();
             }
 
             [DllImport("abci")] public static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
             [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, Matrix4x4 mat);
             [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, Matrix4x4 mat);
-            public void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
+            void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
                 mbuf.Capture(mesh);
                 var weights4 = new PinnedList<BoneWeight>();
@@ -80,14 +82,15 @@ namespace UTJ.Alembic
 
                 remap.Resize(mbuf.vertices.Count);
                 numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.vertices, weights4, mbuf.vertices.Count);
-
-                indicesFlattended.ResizeDiscard(mbuf.indices.Count);
-                for (int ii = 0; ii < indicesFlattended.Count; ++ii)
-                    indicesFlattended[ii] = ii;
             }
 
-            public void Capture(Cloth cloth, MeshBuffer mbuf)
+            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf)
             {
+                if (mesh == null || cloth == null)
+                    return;
+                if(remap.Count != mesh.vertexCount)
+                    GenerateRemapIndices(mesh, mbuf);
+
                 vertices.Assign(cloth.vertices);
                 normals.Assign(cloth.normals);
                 if (numRemappedVertices != vertices.Count)
@@ -102,20 +105,13 @@ namespace UTJ.Alembic
                     aeApplyMatrixV(normals, normals.Count, imat);
                 }
 
-                // flatten
-                verticesFlattended.ResizeDiscard(mbuf.indices.Count);
-                normalsFlattended.ResizeDiscard(mbuf.indices.Count);
-                for (int ii = 0; ii < mbuf.indices.Count; ++ii)
+                for (int vi = 0; vi < remap.Count; ++vi)
+                    mbuf.vertices[vi] = vertices[remap[vi]];
+                if(normals.Count > 0)
                 {
-                    int vi = remap[mbuf.indices[ii]];
-                    verticesFlattended[ii] = vertices[vi];
-                    normalsFlattended[ii] = normals[vi];
-                }
-                if (mbuf.uvs.Count > 0)
-                {
-                    uvsFlattened.ResizeDiscard(mbuf.indices.Count);
-                    for (int ii = 0; ii < mbuf.indices.Count; ++ii)
-                        uvsFlattened[ii] = mbuf.uvs[mbuf.indices[ii]];
+                    mbuf.normals.ResizeDiscard(remap.Count);
+                    for (int vi = 0; vi < remap.Count; ++vi)
+                        mbuf.normals[vi] = normals[remap[vi]];
                 }
             }
         }
@@ -236,36 +232,26 @@ namespace UTJ.Alembic
         public class MeshCapturer : ComponentCapturer
         {
             MeshRenderer m_target;
-            MeshBuffer m_mesh_buffer;
+            MeshBuffer m_mbuf;
 
             public MeshCapturer(ComponentCapturer parent, MeshRenderer target)
                 : base(parent, target)
             {
                 m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
                 m_target = target;
-                m_mesh_buffer = new MeshBuffer();
+                m_mbuf = new MeshBuffer();
             }
 
             public override void Capture()
             {
                 if (m_target == null) { return; }
 
-                WriteMesh(m_abc, m_target.GetComponent<MeshFilter>().sharedMesh, m_mesh_buffer);
-            }
-            public static void WriteMesh(AbcAPI.aeObject abc, Mesh mesh, MeshBuffer mbuf)
-            {
-                if (mesh == null)
-                    return;
-                mbuf.Capture(mesh);
-
-                var data = new AbcAPI.aePolyMeshData();
-                data.indices = mbuf.indices;
-                data.positions = mbuf.vertices;
-                data.normals = mbuf.normals;
-                data.uvs = mbuf.uvs;
-                data.positionCount = mbuf.vertices.Count;
-                data.indexCount = mbuf.indices.Count;
-                AbcAPI.aePolyMeshWriteSample(abc, ref data);
+                var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                if (mesh != null)
+                {
+                    m_mbuf.Capture(mesh);
+                    m_mbuf.WriteSample(abc);
+                }
             }
         }
 
@@ -293,7 +279,6 @@ namespace UTJ.Alembic
                     {
                         m_cbuf = new ClothBuffer();
                         m_cbuf.rootBone = m_target.rootBone;
-                        m_cbuf.GenerateRemapIndices(m_meshSrc, m_mbuf);
 
                         var t = m_parent as TransformCapturer;
                         if (t != null)
@@ -315,21 +300,14 @@ namespace UTJ.Alembic
 
                 if (m_cloth != null)
                 {
-                    m_cbuf.Capture(m_cloth, m_mbuf);
-
-                    var data = new AbcAPI.aePolyMeshData();
-                    data.indices = m_cbuf.indicesFlattended;
-                    data.positions = m_cbuf.verticesFlattended;
-                    data.normals = m_cbuf.normalsFlattended;
-                    data.uvs = m_cbuf.uvsFlattened;
-                    data.positionCount = m_cbuf.verticesFlattended.Count;
-                    data.indexCount = m_cbuf.indicesFlattended.Count;
-                    AbcAPI.aePolyMeshWriteSample(abc, ref data);
+                    m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf);
+                    m_mbuf.WriteSample(m_abc);
                 }
                 else
                 {
                     m_target.BakeMesh(m_meshBake);
-                    MeshCapturer.WriteMesh(m_abc, m_meshBake, m_mbuf);
+                    m_mbuf.Capture(m_meshBake);
+                    m_mbuf.WriteSample(m_abc);
                 }
             }
         }
