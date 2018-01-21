@@ -816,9 +816,17 @@ namespace UTJ.Alembic
             }
         }
 
+        int m_prevFrame = 0;
+        bool m_firstFrame = true;
         void ProcessCapture()
         {
-            if (!m_recording) { return; }
+            if (!m_recording || Time.frameCount == m_prevFrame) { return; }
+            m_prevFrame = Time.frameCount;
+            if (m_captureOnStart && m_firstFrame)
+            {
+                m_firstFrame = false;
+                return;
+            }
 
             float begin_time = Time.realtimeSinceStartup;
 
