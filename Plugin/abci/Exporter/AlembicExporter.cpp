@@ -187,7 +187,7 @@ inline int next_power_of_two(uint32_t v)
     v++;
     return v + (v == 0);
 }
-abciAPI int aeGenerateRemap(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
+abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
 {
     const int NIL = -1;
     int output_count = 0;
@@ -228,4 +228,20 @@ abciAPI int aeGenerateRemap(int *remap, abcV3 *points, aeWeights4 *weights, int 
         }
     }
     return output_count;
+}
+
+abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, abcM44 mat)
+{
+    for (int i = 0; i < num; i++)
+    {
+        mat.multVecMatrix(dst_points[i], dst_points[i]);
+    }
+}
+
+abciAPI void aeApplyMatrixV(abcV3 *dst_vectors, int num, abcM44 mat)
+{
+    for (int i = 0; i < num; i++)
+    {
+        mat.multDirMatrix(dst_vectors[i], dst_vectors[i]);
+    }
 }

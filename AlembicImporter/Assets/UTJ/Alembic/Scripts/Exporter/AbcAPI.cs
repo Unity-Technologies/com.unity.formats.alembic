@@ -79,7 +79,7 @@ namespace UTJ.Alembic
                     return new aeConfig
                     {
                         archiveType = aeArchiveType.Ogawa,
-                        timeSamplingType = aeTimeSamplingType.Acyclic,
+                        timeSamplingType = aeTimeSamplingType.Uniform,
                         startTime = 0.0f,
                         frameRate = 30.0f,
                         xformType = aeXFormType.TRS,

@@ -179,4 +179,4 @@ abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aeProperty
 abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
 abciAPI void        aePropertyWriteScalarSample(aeProperty *prop, const void *data);
 
-abciAPI int         aeGenerateRemap(int *dst, abcV3 *points, aeWeights4 *weights, int vertex_count);
+abciAPI int         aeGenerateRemapIndices(int *dst, abcV3 *points, aeWeights4 *weights, int vertex_count);
