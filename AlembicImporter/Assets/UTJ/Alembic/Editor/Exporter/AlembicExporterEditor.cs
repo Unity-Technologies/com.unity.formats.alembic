@@ -72,6 +72,8 @@ namespace UTJ.Alembic
                 GUILayout.Space(5);
                 t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
                 t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
+                GUILayout.Space(5);
+                t.m_detailedLog = EditorGUILayout.Toggle("Detailed Log", t.m_detailedLog);
             }
             GUILayout.Space(10);
 
