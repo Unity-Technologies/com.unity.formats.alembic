@@ -233,6 +233,7 @@ namespace UTJ.Alembic
 #endif
         }
 
+#if UNITY_EDITOR
         void OnDrawGizmos()
         {
             // force draw particles while paused.
@@ -249,6 +250,7 @@ namespace UTJ.Alembic
                 m_materialsInternal = null;
             }
         }
+#endif
 
         private void Start()
         {

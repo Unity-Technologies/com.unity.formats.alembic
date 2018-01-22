@@ -37,7 +37,7 @@ namespace UTJ.Alembic
                 }
             }
             EditorGUILayout.EndHorizontal();
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
@@ -62,18 +62,21 @@ namespace UTJ.Alembic
                     t.m_conf = conf;
                 }
             }
-            GUILayout.Space(10);
+            GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
             {
                 t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
                 t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
                 GUILayout.Space(5);
-                t.m_captureMeshRenderer = EditorGUILayout.Toggle("Capture MeshRenderer", t.m_captureMeshRenderer);
-                t.m_captureSkinnedMeshRenderer = EditorGUILayout.Toggle("Capture SkinnedMeshRenderer", t.m_captureSkinnedMeshRenderer);
-                t.m_captureParticleSystem = EditorGUILayout.Toggle("Capture ParticleSystem", t.m_captureParticleSystem);
-                t.m_captureCamera = EditorGUILayout.Toggle("Capture Camera", t.m_captureCamera);
+                EditorGUILayout.LabelField("Capture Components");
+                EditorGUI.indentLevel++;
+                t.m_captureMeshRenderer = EditorGUILayout.Toggle("MeshRenderer", t.m_captureMeshRenderer);
+                t.m_captureSkinnedMeshRenderer = EditorGUILayout.Toggle("SkinnedMeshRenderer", t.m_captureSkinnedMeshRenderer);
+                t.m_captureParticleSystem = EditorGUILayout.Toggle("ParticleSystem", t.m_captureParticleSystem);
+                t.m_captureCamera = EditorGUILayout.Toggle("Camera", t.m_captureCamera);
                 t.m_customCapturer = EditorGUILayout.Toggle("Custom Capturer", t.m_customCapturer);
+                EditorGUI.indentLevel--;
                 GUILayout.Space(5);
                 t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
                 if(t.m_captureOnStart)
@@ -83,9 +86,12 @@ namespace UTJ.Alembic
                     EditorGUI.indentLevel--;
                 }
                 t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
-                GUILayout.Space(5);
-                t.m_detailedLog = EditorGUILayout.Toggle("Detailed Log", t.m_detailedLog);
             }
+            GUILayout.Space(5);
+
+            EditorGUILayout.LabelField("Misc", EditorStyles.boldLabel);
+            t.m_detailedLog = EditorGUILayout.Toggle("Detailed Log", t.m_detailedLog);
+
             GUILayout.Space(10);
 
             if (EditorGUI.EndChangeCheck())
