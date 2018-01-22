@@ -72,8 +72,8 @@ namespace UTJ.Alembic
             }
 
             [DllImport("abci")] public static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
-            [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, Matrix4x4 mat);
-            [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, Matrix4x4 mat);
+            [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
+            [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
                 mbuf.Capture(mesh);
@@ -98,8 +98,8 @@ namespace UTJ.Alembic
                     Debug.LogWarning("numRemappedVertices != vertices.Count");
                     return;
                 }
-                aeApplyMatrixP(vertices, vertices.Count, toRootBoneSpace);
-                aeApplyMatrixV(normals, normals.Count, toRootBoneSpace);
+                aeApplyMatrixP(vertices, vertices.Count, ref toRootBoneSpace);
+                aeApplyMatrixV(normals, normals.Count, ref toRootBoneSpace);
 
                 for (int vi = 0; vi < remap.Count; ++vi)
                     mbuf.vertices[vi] = vertices[remap[vi]];

@@ -230,18 +230,20 @@ abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weight
     return output_count;
 }
 
-abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, abcM44 mat)
+abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, const abcM44 *matrix)
 {
+    auto m = *matrix;
     for (int i = 0; i < num; i++)
     {
-        mat.multVecMatrix(dst_points[i], dst_points[i]);
+        m.multVecMatrix(dst_points[i], dst_points[i]);
     }
 }
 
-abciAPI void aeApplyMatrixV(abcV3 *dst_vectors, int num, abcM44 mat)
+abciAPI void aeApplyMatrixV(abcV3 *dst_vectors, int num, const abcM44 *matrix)
 {
+    auto m = *matrix;
     for (int i = 0; i < num; i++)
     {
-        mat.multDirMatrix(dst_vectors[i], dst_vectors[i]);
+        m.multDirMatrix(dst_vectors[i], dst_vectors[i]);
     }
 }
