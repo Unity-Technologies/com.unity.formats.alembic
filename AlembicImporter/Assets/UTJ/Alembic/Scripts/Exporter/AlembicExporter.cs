@@ -406,7 +406,6 @@ namespace UTJ.Alembic
         public AbcAPI.aeConfig m_conf = AbcAPI.aeConfig.default_value;
         public Scope m_scope = Scope.EntireScene;
         public bool m_fixDeltaTime = true;
-        public bool m_preserveTreeStructure = true;
         public bool m_ignoreDisabled = true;
         public bool m_captureMeshRenderer = true;
         public bool m_captureSkinnedMeshRenderer = true;
@@ -608,7 +607,7 @@ namespace UTJ.Alembic
         }
         #endregion
 
-        void CreateCapturers_Tree()
+        void CreateCapturers()
         {
             m_root = new RootCapturer(AbcAPI.aeGetTopObject(m_ctx));
             m_capture_node = new Dictionary<Transform, CaptureNode>();
@@ -673,72 +672,6 @@ namespace UTJ.Alembic
             m_capture_node = null;
         }
 
-        void CreateCapturers_Flat()
-        {
-            m_root = new RootCapturer(AbcAPI.aeGetTopObject(m_ctx));
-
-            // Camera
-            if (m_captureCamera)
-            {
-                foreach (var target in GetTargets<Camera>())
-                {
-                    if (ShouldBeIgnored(target)) { continue; }
-                    var trans = CreateComponentCapturer(m_root, target.GetComponent<Transform>());
-                    trans.inherits = false;
-                    trans.invertForward = true;
-                    CreateComponentCapturer(trans, target);
-                }
-            }
-
-            // MeshRenderer
-            if (m_captureMeshRenderer)
-            {
-                foreach (var target in GetTargets<MeshRenderer>())
-                {
-                    if (ShouldBeIgnored(target)) { continue; }
-                    var trans = CreateComponentCapturer(m_root, target.GetComponent<Transform>());
-                    trans.inherits = false;
-                    CreateComponentCapturer(trans, target);
-                }
-            }
-
-            // SkinnedMeshRenderer
-            if (m_captureSkinnedMeshRenderer)
-            {
-                foreach (var target in GetTargets<SkinnedMeshRenderer>())
-                {
-                    if (ShouldBeIgnored(target)) { continue; }
-                    var trans = CreateComponentCapturer(m_root, target.GetComponent<Transform>());
-                    trans.inherits = false;
-                    CreateComponentCapturer(trans, target);
-                }
-            }
-
-            // ParticleSystem
-            if (m_captureParticleSystem)
-            {
-                foreach (var target in GetTargets<ParticleSystem>())
-                {
-                    if (ShouldBeIgnored(target)) { continue; }
-                    var trans = CreateComponentCapturer(m_root, target.GetComponent<Transform>());
-                    trans.inherits = false;
-                    CreateComponentCapturer(trans, target);
-                }
-            }
-
-            // handle custom capturers (AlembicCustomComponentCapturer)
-            if (m_customCapturer)
-            {
-                foreach (var target in GetTargets<AlembicCustomComponentCapturer>())
-                {
-                    if (ShouldBeIgnored(target)) { continue; }
-                    var trans = CreateComponentCapturer(m_root, target.GetComponent<Transform>());
-                    trans.inherits = false;
-                    CreateComponentCapturer(trans, target);
-                }
-            }
-        }
-
 
         public bool BeginCapture()
         {
@@ -779,12 +712,7 @@ namespace UTJ.Alembic
             }
 
             // create capturers
-            if(m_preserveTreeStructure) {
-                CreateCapturers_Tree();
-            }
-            else {
-                CreateCapturers_Flat();
-            }
+            CreateCapturers();
 
             m_recording = true;
             m_time = m_conf.startTime;

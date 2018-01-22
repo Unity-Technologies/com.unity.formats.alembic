@@ -67,7 +67,6 @@ namespace UTJ.Alembic
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
             {
                 t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
-                t.m_preserveTreeStructure = EditorGUILayout.Toggle("Preserve Tree Structure", t.m_preserveTreeStructure);
                 t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
                 GUILayout.Space(5);
                 t.m_captureMeshRenderer = EditorGUILayout.Toggle("Capture MeshRenderer", t.m_captureMeshRenderer);
