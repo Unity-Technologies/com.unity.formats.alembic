@@ -61,7 +61,7 @@ namespace UTJ.Alembic
             public PinnedList<int> remap = new PinnedList<int>();
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
-            public Matrix4x4 toRootBoneSpace;
+            public Transform rootBone;
             public int numRemappedVertices;
 
             public void Clear()
@@ -98,8 +98,12 @@ namespace UTJ.Alembic
                     Debug.LogWarning("numRemappedVertices != vertices.Count");
                     return;
                 }
-                aeApplyMatrixP(vertices, vertices.Count, ref toRootBoneSpace);
-                aeApplyMatrixV(normals, normals.Count, ref toRootBoneSpace);
+                if (rootBone != null)
+                {
+                    var mat = Matrix4x4.TRS(rootBone.localPosition, rootBone.localRotation, Vector3.one);
+                    aeApplyMatrixP(vertices, vertices.Count, ref mat);
+                    aeApplyMatrixV(normals, normals.Count, ref mat);
+                }
 
                 for (int vi = 0; vi < remap.Count; ++vi)
                     mbuf.vertices[vi] = vertices[remap[vi]];
@@ -274,8 +278,7 @@ namespace UTJ.Alembic
                     if (m_cloth != null)
                     {
                         m_cbuf = new ClothBuffer();
-                        var rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
-                        m_cbuf.toRootBoneSpace = Matrix4x4.TRS(rootBone.position, rootBone.rotation, Vector3.one);
+                        m_cbuf.rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
 
                         var tc = m_parent as TransformCapturer;
                         if (tc != null)
