@@ -15,5 +15,12 @@ namespace UTJ.Alembic
         [SerializeField] public bool treatVertexExtraDataAsStatics = false;
         [SerializeField] public bool cacheSamples = false;
         [SerializeField] public bool use32BitsIndexBuffer = false;
+
+        public AlembicStreamSettings()
+        {
+#if UNITY_2017_3_OR_NEWER
+            use32BitsIndexBuffer = true;
+#endif
+        }
     }
 }
