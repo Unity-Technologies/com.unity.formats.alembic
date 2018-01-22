@@ -391,18 +391,21 @@ namespace UTJ.Alembic
         }
     #endif
 
-        #endregion
-
-
         public enum Scope
         {
             EntireScene,
             CurrentBranch,
         }
 
+        #endregion
+
+
+        #region fields
+
         public string m_outputPath;
         public AbcAPI.aeConfig m_conf = AbcAPI.aeConfig.default_value;
         public Scope m_scope = Scope.EntireScene;
+        public bool m_fixDeltaTime = true;
         public bool m_preserveTreeStructure = true;
         public bool m_ignoreDisabled = true;
         public bool m_captureMeshRenderer = true;
@@ -411,6 +414,7 @@ namespace UTJ.Alembic
         public bool m_captureCamera = true;
         public bool m_customCapturer = true;
         public bool m_captureOnStart = false;
+        public bool m_ignoreFirstFrame = true;
         public int m_maxCaptureFrame = 0;
         public bool m_detailedLog = true;
         public bool m_debugLog = false;
@@ -422,6 +426,8 @@ namespace UTJ.Alembic
         float m_time;
         float m_elapsed;
         int m_frameCount;
+
+        #endregion
 
 
         public bool isRecording { get { return m_recording; } }
@@ -784,7 +790,7 @@ namespace UTJ.Alembic
             m_time = m_conf.startTime;
             m_frameCount = 0;
 
-            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
+            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform && m_fixDeltaTime)
             {
                 Time.maximumDeltaTime = (1.0f / m_conf.frameRate);
             }
@@ -822,7 +828,7 @@ namespace UTJ.Alembic
         {
             if (!m_recording || Time.frameCount == m_prevFrame) { return; }
             m_prevFrame = Time.frameCount;
-            if (m_captureOnStart && m_firstFrame)
+            if (m_captureOnStart && m_ignoreFirstFrame && m_firstFrame)
             {
                 m_firstFrame = false;
                 return;
@@ -858,7 +864,7 @@ namespace UTJ.Alembic
             ProcessCapture();
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
+            if (m_conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform && m_fixDeltaTime)
             {
                 AbcAPI.aeWaitMaxDeltaTime();
             }

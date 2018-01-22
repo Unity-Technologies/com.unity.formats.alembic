@@ -44,13 +44,19 @@ namespace UTJ.Alembic
                 var conf = t.m_conf;
                 EditorGUI.BeginChangeCheck();
                 conf.archiveType = (AbcAPI.aeArchiveType)EditorGUILayout.EnumPopup("Archive Type", conf.archiveType);
-                conf.timeSamplingType = (AbcAPI.aeTimeSamplingType)EditorGUILayout.EnumPopup("Time Sampling Type", conf.timeSamplingType);
                 conf.xformType = (AbcAPI.aeXFormType)EditorGUILayout.EnumPopup("Xform Type", conf.xformType);
+                conf.timeSamplingType = (AbcAPI.aeTimeSamplingType)EditorGUILayout.EnumPopup("Time Sampling Type", conf.timeSamplingType);
+                if (conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
+                {
+                    EditorGUI.indentLevel++;
+                    conf.frameRate = EditorGUILayout.FloatField("Frame Rate", conf.frameRate);
+                    t.m_fixDeltaTime = EditorGUILayout.Toggle("Fix Delta Time", t.m_fixDeltaTime);
+                    EditorGUI.indentLevel--;
+                }
                 conf.swapHandedness = EditorGUILayout.Toggle("Swap Handedness", conf.swapHandedness);
                 conf.swapFaces = EditorGUILayout.Toggle("Swap Faces", conf.swapFaces);
                 conf.scaleFactor = EditorGUILayout.FloatField("Scale Factor", conf.scaleFactor);
                 conf.startTime = EditorGUILayout.FloatField("Start Time", conf.startTime);
-                conf.frameRate = EditorGUILayout.FloatField("Frame Rate", conf.frameRate);
                 if (EditorGUI.EndChangeCheck())
                 {
                     t.m_conf = conf;
@@ -71,6 +77,12 @@ namespace UTJ.Alembic
                 t.m_customCapturer = EditorGUILayout.Toggle("Custom Capturer", t.m_customCapturer);
                 GUILayout.Space(5);
                 t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
+                if(t.m_captureOnStart)
+                {
+                    EditorGUI.indentLevel++;
+                    t.m_ignoreFirstFrame = EditorGUILayout.Toggle("Ignore First Frame", t.m_ignoreFirstFrame);
+                    EditorGUI.indentLevel--;
+                }
                 t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
                 GUILayout.Space(5);
                 t.m_detailedLog = EditorGUILayout.Toggle("Detailed Log", t.m_detailedLog);
