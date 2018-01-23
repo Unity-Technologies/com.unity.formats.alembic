@@ -49,7 +49,7 @@ void aeXForm::writeSample(const aeXFormData &data_)
             quat.z / std::sqrt(1.0f - qw2));
     }
 
-    if (getConfig().swapHandedness)
+    if (getConfig().swap_handedness)
     {
         data.translation.x *= -1.0f;
         axis.x *= -1.0f;
@@ -58,7 +58,7 @@ void aeXForm::writeSample(const aeXFormData &data_)
     data.translation *= getConfig().scale;
 
     m_sample.setInheritsXforms(data.inherits);
-    if (getConfig().xformType == aeXFromType::Matrix)
+    if (getConfig().xform_type == aeXFromType::Matrix)
     {
         abcM44 trans;
         trans *= abcM44().setScale(data.scale);
@@ -66,7 +66,7 @@ void aeXForm::writeSample(const aeXFormData &data_)
         trans *= abcM44().setTranslation(data.translation);
         m_sample.setMatrix(abcM44d(trans));
     }
-    else if (getConfig().xformType == aeXFromType::TRS)
+    else if (getConfig().xform_type == aeXFromType::TRS)
     {
         const float Rad2Deg = 1.0f / (float(M_PI) / 180.0f);
         m_sample.setTranslation(data.translation);

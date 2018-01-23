@@ -72,13 +72,13 @@ enum class aePropertyType
 
 struct aeConfig
 {
-    aeArchiveType archiveType = aeArchiveType::Ogawa;
-    aeTimeSamplingType timeSamplingType = aeTimeSamplingType::Uniform;
-    float startTime = 0.0f;    // start time on Alembic.
-    float frameRate = 30.0f;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
-    aeXFromType xformType = aeXFromType::TRS;
-    bool swapHandedness = true; // swap rhs <-> lhs
-    bool swapFaces = false; // swap triangle indices
+    aeArchiveType archive_type = aeArchiveType::Ogawa;
+    aeTimeSamplingType time_sampling_type = aeTimeSamplingType::Uniform;
+    float start_time = 0.0f;    // start time on Alembic.
+    float frame_rate = 30.0f;    // frame rate on Alembic. relevant only if timeSamplingType is uniform
+    aeXFromType xform_type = aeXFromType::TRS;
+    bool swap_handedness = true; // swap rhs <-> lhs
+    bool swap_faces = false; // swap triangle indices
     float scale = 1.0f;
 };
 
@@ -99,18 +99,18 @@ struct aePolyMeshData
     const abcV2 *uvs = nullptr;         // can be null
 
     const int *indices = nullptr;
-    const int *normalIndices = nullptr; // if null, assume same as indices
-    const int *uvIndices = nullptr;     // if null, assume same as indices
-    const int *faces = nullptr;         // if null, assume all faces are triangles
+    const int *normal_indices = nullptr; // if null, assume same as indices
+    const int *uv_indices = nullptr;     // if null, assume same as indices
+    const int *faces = nullptr;          // if null, assume all faces are triangles
 
-    int positionCount = 0;
-    int normalCount = 0;        // if 0, assume same as positionCount
-    int uvCount = 0;            // if 0, assume same as positionCount
+    int position_count = 0;
+    int normal_count = 0;        // if 0, assume same as position_count
+    int uv_count = 0;            // if 0, assume same as position_count
 
-    int indexCount = 0;
-    int normalIndexCount = 0;   // if 0, assume same as indexCount
-    int uvIndexCount = 0;       // if 0, assume same as indexCount
-    int faceCount = 0;          // only relevant if faces is not null
+    int index_count = 0;
+    int normal_index_count = 0;
+    int uv_index_count = 0;
+    int face_count = 0;
 };
 
 struct aePointsData
@@ -123,14 +123,14 @@ struct aePointsData
 
 struct aeCameraData
 {
-    float nearClippingPlane = 0.3f;
-    float farClippingPlane = 1000.0f;
-    float fieldOfView = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
-    float aspectRatio = 16.0f / 9.0f;
+    float near_clipping_plane = 0.3f;
+    float far_clipping_plane = 1000.0f;
+    float field_of_view = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
+    float aspect_ratio = 16.0f / 9.0f;
 
-    float focusDistance = 5.0f;    // in cm
-    float focalLength = 0.0f;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
-    float aperture = 2.4f;         // in cm. vertical one
+    float focus_distance = 5.0f;    // in cm
+    float focal_length = 0.0f;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
+    float aperture = 2.4f;          // in cm. vertical one
 };
 
 struct aeWeights4

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 #include <map>
 #include <set>
 #include <vector>

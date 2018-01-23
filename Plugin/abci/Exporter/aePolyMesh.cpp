@@ -3,6 +3,7 @@
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aePolyMesh.h"
+#include "aiMisc.h"
 
 aePolyMesh::aePolyMesh(aeObject *parent, const char *name, uint32_t tsi)
     : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi)
@@ -32,38 +33,17 @@ void aePolyMesh::setFromPrevious()
 
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
-    m_buf_indices.assign(data.indices, data.indices + data.indexCount);
-    m_buf_faces.assign(data.faces, data.faces + data.faceCount);
+    m_buf_indices.assign(data.indices, data.indices + data.index_count);
+    m_buf_faces.assign(data.faces, data.faces + data.face_count);
 
-    m_buf_positions.assign(data.positions, data.positions + data.positionCount);
-    if (data.velocities) {
-        m_buf_velocities.assign(data.velocities, data.velocities + data.positionCount);
-    }
-    else {
-        m_buf_velocities.clear();
-    }
+    m_buf_positions.assign(data.positions, data.positions + data.position_count);
+    m_buf_velocities.assign(data.velocities, data.velocities + data.position_count);
 
-    if (data.normals) {
-        m_buf_normals.assign(data.normals, data.normals + data.normalCount);
-        if (data.normalIndices) {
-            m_buf_normal_indices.assign(data.normalIndices, data.normalIndices + data.normalIndexCount);
-        }
-    }
-    else {
-        m_buf_normals.clear();
-        m_buf_normal_indices.clear();
-    }
+    m_buf_normals.assign(data.normals, data.normals + (data.normal_count ? data.normal_count : data.position_count));
+    m_buf_normal_indices.assign(data.normal_indices, data.normal_indices + data.normal_index_count);
 
-    if (data.uvs) {
-        m_buf_uvs.assign(data.uvs, data.uvs + data.uvCount);
-        if (data.normalIndices) {
-            m_buf_uv_indices.assign(data.uvIndices, data.uvIndices + data.uvIndexCount);
-        }
-    }
-    else {
-        m_buf_uvs.clear();
-        m_buf_uv_indices.clear();
-    }
+    m_buf_uvs.assign(data.uvs, data.uvs + (data.uv_count ? data.uv_count : data.position_count));
+    m_buf_uv_indices.assign(data.uv_indices, data.uv_indices + data.uv_index_count);
 
     m_ctx->addAsyncTask([this]() { doWriteSample(); });
 }
@@ -73,7 +53,7 @@ void aePolyMesh::doWriteSample()
     const auto &conf = getConfig();
 
     // handle swap handedness
-    if (conf.swapHandedness) {
+    if (conf.swap_handedness) {
         for (auto &v : m_buf_positions) { v.x *= -1.0f; }
         for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
         for (auto &v : m_buf_normals) { v.x *= -1.0f; }
@@ -92,7 +72,7 @@ void aePolyMesh::doWriteSample()
     }
 
     // handle swap face option
-    if (conf.swapFaces) {
+    if (conf.swap_faces) {
         RawVector<int> face_indices;
         auto do_swap = [&](RawVector<int>& dst) {
             int i = 0;
@@ -112,6 +92,7 @@ void aePolyMesh::doWriteSample()
         do_swap(m_buf_uv_indices);
     }
 
+
     // write!
     AbcGeom::OPolyMeshSchema::Sample sample;
     AbcGeom::ON3fGeomParam::Sample sample_normals;
@@ -124,14 +105,18 @@ void aePolyMesh::doWriteSample()
     }
     if (!m_buf_normals.empty()) {
         sample_normals.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
-        if(!m_buf_normal_indices.empty())
+        if (!m_buf_normal_indices.empty())
             sample_normals.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
+        else
+            sample_normals.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         sample.setNormals(sample_normals);
     }
     if (!m_buf_uvs.empty()) {
         sample_uvs.setVals(Abc::V2fArraySample(m_buf_uvs.data(), m_buf_uvs.size()));
         if (!m_buf_uv_indices.empty())
             sample_uvs.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv_indices.data(), m_buf_uv_indices.size()));
+        else
+            sample_uvs.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         sample.setUVs(sample_uvs);
     }
     m_schema.set(sample);

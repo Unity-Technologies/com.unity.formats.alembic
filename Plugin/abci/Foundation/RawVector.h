@@ -176,9 +176,15 @@ public:
     }
     void assign(const_pointer first, const_pointer last)
     {
-        resize(std::distance(first, last));
-        // sadly, memcpy() can way faster than std::copy()
-        memcpy(m_data, first, sizeof(value_type) * m_size);
+        if (!first) {
+            clear();
+            return;
+        }
+        else {
+            resize(std::distance(first, last));
+            // sadly, memcpy() can way faster than std::copy()
+            memcpy(m_data, first, sizeof(value_type) * m_size);
+        }
     }
 
     template<class ForwardIter>

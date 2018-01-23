@@ -13,9 +13,10 @@ public:
     void    writeSample(const aePointsData &data);
 
 private:
-    AbcGeom::OPointsSchema m_schema;
+    void    doWriteSample();
 
-    std::vector<uint64_t> m_buf_ids;
-    std::vector<abcV3> m_buf_positions;
-    std::vector<abcV3> m_buf_velocities;
+    AbcGeom::OPointsSchema m_schema;
+    RawVector<uint64_t> m_buf_ids;
+    RawVector<abcV3> m_buf_positions;
+    RawVector<abcV3> m_buf_velocities;
 };

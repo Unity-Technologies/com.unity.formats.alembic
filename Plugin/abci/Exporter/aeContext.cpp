@@ -19,12 +19,12 @@ void aeContext::reset()
     finishAsyncTask();
 
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTimeSamplingType::Uniform) {
+        if (m_config.time_sampling_type == aeTimeSamplingType::Uniform) {
             // start time in default timeline maybe changed.
-            Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), m_config.startTime);
+            Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_config.start_time);
             *m_archive.getTimeSampling(1) = ts;
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType::Cyclic) {
+        else if (m_config.time_sampling_type == aeTimeSamplingType::Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 if (!t.times.empty()) {
@@ -33,7 +33,7 @@ void aeContext::reset()
                 }
             }
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType::Acyclic) {
+        else if (m_config.time_sampling_type == aeTimeSamplingType::Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
@@ -58,10 +58,10 @@ bool aeContext::openArchive(const char *path)
 
     abciDebugLog("aeContext::openArchive() %s", path);
     try {
-        if (m_config.archiveType == aeArchiveType::HDF5) {
+        if (m_config.archive_type == aeArchiveType::HDF5) {
             m_archive = Abc::OArchive(Alembic::AbcCoreHDF5::WriteArchive(), path);
         }
-        else if (m_config.archiveType == aeArchiveType::Ogawa) {
+        else if (m_config.archive_type == aeArchiveType::Ogawa) {
             m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
         }
         else {
@@ -73,7 +73,7 @@ bool aeContext::openArchive(const char *path)
         return false;
     }
 
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(m_config.startTime));
+    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(m_config.start_time));
     auto tsi = m_archive.addTimeSampling(ts);
     m_timesamplings.resize(tsi + 1);
 
@@ -104,7 +104,7 @@ aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
 
 uint32_t aeContext::addTimeSampling(float start_time)
 {
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(start_time));
+    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(start_time));
     uint32_t r = m_archive.addTimeSampling(ts);
     m_timesamplings.resize(r + 1);
     return r;
