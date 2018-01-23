@@ -1,8 +1,5 @@
 #pragma once
 
-typedef std::vector<size_t> Faceset;
-typedef std::vector<Faceset> Facesets;
-
 struct SubmeshKey
 {
     int uTile;
@@ -59,7 +56,7 @@ struct SplitInfo
 
 struct Submesh
 {
-    Faceset faces;
+    std::vector<size_t> faces;
     std::vector<int> vertexIndices;
     size_t triangleCount;
     int facesetIndex;
@@ -262,4 +259,5 @@ private:
     Topology m_sharedTopology;
     AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
     AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
+    std::vector<AbcGeom::IFaceSetSchema> m_facesets;
 };

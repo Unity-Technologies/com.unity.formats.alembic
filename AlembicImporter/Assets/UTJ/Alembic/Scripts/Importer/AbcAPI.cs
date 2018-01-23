@@ -270,14 +270,14 @@ namespace UTJ.Alembic
 
         [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
         [DllImport("abci")] public static extern void       aiCleanup();
-        [DllImport("abci")] public static extern void       clearContextsWithPath(string path);
+        [DllImport("abci")] public static extern void       aiClearContextsWithPath(string path);
         [DllImport("abci")] public static extern aiContext  aiCreateContext(int uid);
         [DllImport("abci")] public static extern void       aiDestroyContext(aiContext ctx);
         [DllImport("abci")] public static extern Bool       aiLoad(aiContext ctx, string path);
         [DllImport("abci")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
         [DllImport("abci")] public static extern float      aiGetStartTime(aiContext ctx);
         [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
-        [DllImport("abci")] public static extern int        getFrameCount(aiContext ctx);
+        [DllImport("abci")] public static extern int        aiGetFrameCount(aiContext ctx);
         [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
         [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
         [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);

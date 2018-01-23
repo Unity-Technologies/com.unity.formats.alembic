@@ -261,7 +261,7 @@ using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, 
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
-abciAPI void            clearContextsWithPath(const char *path);
+abciAPI void            aiClearContextsWithPath(const char *path);
 abciAPI aiContext*      aiCreateContext(int uid);
 abciAPI void            aiDestroyContext(aiContext* ctx);
 
@@ -269,7 +269,7 @@ abciAPI bool            aiLoad(aiContext* ctx, const char *path);
 abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI float           aiGetStartTime(aiContext* ctx);
 abciAPI float           aiGetEndTime(aiContext* ctx);
-abciAPI int             getFrameCount(aiContext* ctx);
+abciAPI int             aiGetFrameCount(aiContext* ctx);
 abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
 abciAPI void            aiDestroyObject(aiContext* ctx, aiObject* obj);
 abciAPI int             aiGetNumTimeSamplings(aiContext* ctx);

@@ -32,7 +32,7 @@ abciAPI void aiCleanup()
 #endif
 }
 
-abciAPI void clearContextsWithPath(const char *path)
+abciAPI void aiClearContextsWithPath(const char *path)
 {
     aiContextManager::destroyContextsWithPath(path);
 }
@@ -74,7 +74,7 @@ abciAPI float aiGetEndTime(aiContext* ctx)
     return ctx ? ctx->getEndTime() : 0.0f;
 }
 
-abciAPI int getFrameCount(aiContext* ctx)
+abciAPI int aiGetFrameCount(aiContext* ctx)
 {
     return ctx ? ctx->getFrameCount() : 0;
 }
@@ -204,11 +204,6 @@ abciAPI int aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema)
 }
 
 
-abciAPI bool aiHasXForm(aiObject* obj)
-{
-    return obj && obj->getXForm();
-}
-
 abciAPI aiXForm* aiGetXForm(aiObject* obj)
 {
     return obj ? obj->getXForm() : nullptr;
@@ -220,11 +215,6 @@ abciAPI void aiXFormGetData(aiXFormSample* sample, aiXFormData *outData)
     {
         sample->getData(*outData);
     }
-}
-
-abciAPI bool aiHasPolyMesh(aiObject* obj)
-{
-    return obj && obj->getPolyMesh();
 }
 
 abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
@@ -305,11 +295,6 @@ abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubm
     }
 }
 
-abciAPI bool aiHasCamera(aiObject* obj)
-{
-    return obj && obj->getCamera();
-}
-
 abciAPI aiCamera* aiGetCamera(aiObject* obj)
 {
     return obj ? obj->getCamera() : nullptr;
@@ -321,11 +306,6 @@ abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *outData)
     {
         sample->getData(*outData);
     }
-}
-
-abciAPI bool aiHasPoints(aiObject* obj)
-{
-    return obj && obj->getPoints();
 }
 
 abciAPI aiPoints* aiGetPoints(aiObject* obj)

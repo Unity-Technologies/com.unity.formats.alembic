@@ -152,7 +152,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
 {
     DebugLog("Topology::prepareSubmeshes()");
     
-    Facesets facesets;
+    std::vector<std::vector<size_t>> facesets;
     std::vector<int> facesetIndices; // index -> face table
 
 
@@ -183,7 +183,7 @@ int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
 
         for (int i=0; i<inFacesets.count; ++i)
         {
-            Faceset &faceset = facesets[i];
+            auto& faceset = facesets[i];
 
             if (inFacesets.faceCounts[i] == 0)
             {
@@ -1813,6 +1813,27 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     }
 
     m_varyingTopology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+
+    // find face sets
+    size_t num_children = m_obj->getAbcObject().getNumChildren();
+    for (size_t i = 0; i < num_children; ++i)
+    {
+        auto& child = m_obj->getAbcObject().getChild(i);
+        if (!child.valid())
+            continue;
+
+        if (AbcGeom::IFaceSetSchema::matches(child.getMetaData()))
+        {
+            auto so = Abc::ISchemaObject<AbcGeom::IFaceSetSchema>(child, Abc::kWrapExisting);
+            auto faceset = so.getSchema();
+            if (faceset.isConstant() == m_schema.isConstant() &&
+                faceset.getTimeSampling() == m_schema.getTimeSampling() &&
+                faceset.getNumSamples() == m_schema.getNumSamples())
+            {
+                m_facesets.push_back(faceset);
+            }
+        }
+    }
 
     DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
              (m_constant ? "true" : "false"),

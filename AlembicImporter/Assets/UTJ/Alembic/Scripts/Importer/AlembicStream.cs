@@ -11,7 +11,7 @@ namespace UTJ.Alembic
         public static void DisconnectStreamsWithPath(string path)
         {
             var fullPath = Application.streamingAssetsPath + path;
-            AbcAPI.clearContextsWithPath(fullPath);
+            AbcAPI.aiClearContextsWithPath(fullPath);
             s_Streams.ForEach(s => {
                 if (s.m_StreamDesc.pathToAbc == path)
                 {
@@ -115,7 +115,7 @@ namespace UTJ.Alembic
         public int AbcFrameCount
         {
             get {
-                return AbcIsValid() ? AbcAPI.getFrameCount(m_Context) : 0;
+                return AbcIsValid() ? AbcAPI.aiGetFrameCount(m_Context) : 0;
             }
         }
 
