@@ -127,6 +127,14 @@ abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
     obj->writeSample(*data);
 }
+abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
+{
+    return obj->addFaceSet(name);
+}
+abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data)
+{
+    obj->writeFaceSetSample(fsi, *data);
+}
 abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
     obj->writeSample(*data);

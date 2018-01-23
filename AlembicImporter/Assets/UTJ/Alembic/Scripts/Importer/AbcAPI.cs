@@ -370,67 +370,62 @@ namespace UTJ.Alembic
         {
             var ic = GCHandle.FromIntPtr(userData).Target as ImportContext;
             AlembicTreeNode treeNode = ic.alembicTreeNode;
-
-            // Get child. create if needed and allowed.
-            string childName = aiGetName(obj);
-
-            // Find targetted child GameObj
             AlembicTreeNode childTreeNode = null;
-            GameObject childGO = null;
-           
-            var childTransf = treeNode.linkedGameObj==null ? null : treeNode.linkedGameObj.transform.Find(childName);
-            if (childTransf == null)
+
+            aiSchema schema = aiGetXForm(obj);
+            if (!schema) schema = aiGetPolyMesh(obj);
+            if (!schema) schema = aiGetCamera(obj);
+            if (!schema) schema = aiGetPoints(obj);
+
+            if (schema)
             {
-                if (!ic.createMissingNodes)
+                // Get child. create if needed and allowed.
+                string childName = aiGetName(obj);
+
+                // Find targetted child GameObj
+                GameObject childGO = null;
+
+                var childTransf = treeNode.linkedGameObj == null ? null : treeNode.linkedGameObj.transform.Find(childName);
+                if (childTransf == null)
                 {
-                    ic.objectsToDelete.Add(obj);
-                    return;
+                    if (!ic.createMissingNodes)
+                    {
+                        ic.objectsToDelete.Add(obj);
+                        return;
+                    }
+
+                    childGO = new GameObject { name = childName };
+                    var trans = childGO.GetComponent<Transform>();
+                    trans.parent = treeNode.linkedGameObj.transform;
+                    trans.localPosition = Vector3.zero;
+                    trans.localEulerAngles = Vector3.zero;
+                    trans.localScale = Vector3.one;
                 }
+                else
+                    childGO = childTransf.gameObject;
 
-                childGO = new GameObject {name = childName};
-                var trans = childGO.GetComponent<Transform>();
-                trans.parent = treeNode.linkedGameObj.transform;
-                trans.localPosition = Vector3.zero;
-                trans.localEulerAngles = Vector3.zero;
-                trans.localScale = Vector3.one;
-            }
-            else
-                childGO = childTransf.gameObject;            
-            
-            childTreeNode = new AlembicTreeNode() {linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
-            treeNode.children.Add(childTreeNode);
+                childTreeNode = new AlembicTreeNode() { linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
+                treeNode.children.Add(childTreeNode);
 
-            // Update
-            AlembicElement elem = null;
-            aiSchema schema = default(aiSchema);
+                // Update
+                AlembicElement elem = null;
 
-            if (aiGetXForm(obj))
-            {
-                elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
-                schema = aiGetXForm(obj);
-            }
-            else if (aiGetPolyMesh(obj))
-            {
-                elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                schema = aiGetPolyMesh(obj);
-            }
-            else if (aiGetCamera(obj))
-            {
-                elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                schema = aiGetCamera(obj);
-            }
-            else if (aiGetPoints(obj))
-            {
-                elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
-                schema = aiGetPoints(obj);
-            }
+                if (aiGetXForm(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
+                else if (aiGetPolyMesh(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (aiGetCamera(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
+                else if (aiGetPoints(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
 
-            if (elem != null)
-            {
-                elem.AbcSetup(obj, schema);
-                elem.AbcUpdateConfig();
-                aiSchemaUpdateSample(schema, ref ic.ss);
-                elem.AbcUpdate();
+                if (elem != null)
+                {
+                    elem.AbcSetup(obj, schema);
+                    elem.AbcUpdateConfig();
+                    aiSchemaUpdateSample(schema, ref ic.ss);
+                    elem.AbcUpdate();
+                }
             }
 
             ic.alembicTreeNode = childTreeNode;

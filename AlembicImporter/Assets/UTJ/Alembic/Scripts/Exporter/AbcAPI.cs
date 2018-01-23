@@ -130,6 +130,11 @@ namespace UTJ.Alembic
 
             public int faceCount;
         }
+        public struct aeFaceSetData
+        {
+            public IntPtr faces;
+            public int faceCount;
+        }
 
         public struct aeCameraData
         {
@@ -180,6 +185,8 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
         [DllImport("abci")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
         [DllImport("abci")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);
+        [DllImport("abci")] public static extern int         aePolyMeshAddFaceSet(aeObject obj, string name);
+        [DllImport("abci")] public static extern void        aePolyMeshWriteFaceSetSample(aeObject obj, int fsi, ref aeFaceSetData data);
         [DllImport("abci")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraData data);
 
         [DllImport("abci")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);

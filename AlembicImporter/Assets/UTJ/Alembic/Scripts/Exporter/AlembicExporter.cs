@@ -25,34 +25,59 @@ namespace UTJ.Alembic
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
             public PinnedList<Vector2> uvs = new PinnedList<Vector2>();
+            public List<PinnedList<int>> facesets = new List<PinnedList<int>>();
 
-            public void Clear()
+            public void SetupSubmeshes(AbcAPI.aeObject abc, Mesh mesh, Material[] materials)
             {
-                indices.Clear();
-                vertices.Clear();
-                normals.Clear();
-                uvs.Clear();
+                if (mesh.subMeshCount > 1)
+                {
+                    for (int smi = 0; smi < mesh.subMeshCount; ++smi)
+                    {
+                        string name;
+                        if (smi < materials.Length && materials[smi] != null)
+                            name = materials[smi].name;
+                        else
+                            name = string.Format("submesh[{0}]", smi);
+                        AbcAPI.aePolyMeshAddFaceSet(abc, name);
+                    }
+                }
             }
 
             public void Capture(Mesh mesh)
             {
-                Clear();
                 indices.Assign(mesh.triangles); // todo: this can be optimized
                 vertices.LockList(ls => mesh.GetVertices(ls));
                 normals.LockList(ls => mesh.GetNormals(ls));
                 uvs.LockList(ls => mesh.GetUVs(0, ls));
+
+                if (mesh.subMeshCount > 1)
+                {
+                    while (facesets.Count < mesh.subMeshCount)
+                        facesets.Add(new PinnedList<int>());
+                    for (int smi = 0; smi < mesh.subMeshCount; ++smi)
+                        mesh.GetIndices(facesets[smi], smi);
+                }
             }
 
             public void WriteSample(AbcAPI.aeObject abc)
             {
-                var data = new AbcAPI.aePolyMeshData();
-                data.indices = indices;
-                data.positions = vertices;
-                data.normals = normals;
-                data.uvs = uvs;
-                data.positionCount = vertices.Count;
-                data.indexCount = indices.Count;
-                AbcAPI.aePolyMeshWriteSample(abc, ref data);
+                {
+                    var data = new AbcAPI.aePolyMeshData();
+                    data.indices = indices;
+                    data.positions = vertices;
+                    data.normals = normals;
+                    data.uvs = uvs;
+                    data.positionCount = vertices.Count;
+                    data.indexCount = indices.Count;
+                    AbcAPI.aePolyMeshWriteSample(abc, ref data);
+                }
+                for (int smi = 0; smi < facesets.Count; ++smi)
+                {
+                    var data = new AbcAPI.aeFaceSetData();
+                    data.faces = facesets[smi];
+                    data.faceCount = facesets[smi].Count;
+                    AbcAPI.aePolyMeshWriteFaceSetSample(abc, smi, ref data);
+                }
             }
         }
 
@@ -63,13 +88,6 @@ namespace UTJ.Alembic
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
             public Transform rootBone;
             public int numRemappedVertices;
-
-            public void Clear()
-            {
-                remap.Clear();
-                vertices.Clear();
-                normals.Clear();
-            }
 
             [DllImport("abci")] public static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
             [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
@@ -237,9 +255,14 @@ namespace UTJ.Alembic
             public MeshCapturer(ComponentCapturer parent, MeshRenderer target)
                 : base(parent, target)
             {
-                m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
                 m_target = target;
+                var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                if (mesh == null)
+                    return;
+
+                m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
                 m_mbuf = new MeshBuffer();
+                m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
             }
 
             public override void Capture()
@@ -267,32 +290,33 @@ namespace UTJ.Alembic
             public SkinnedMeshCapturer(ComponentCapturer parent, SkinnedMeshRenderer target)
                 : base(parent, target)
             {
-                m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
                 m_target = target;
+                var mesh = target.sharedMesh;
+                if (mesh == null)
+                    return;
 
-                if (m_target != null)
+                m_abc = AbcAPI.aeNewPolyMesh(parent.abc, target.name);
+                m_mbuf = new MeshBuffer();
+                m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
+
+                m_meshSrc = target.sharedMesh;
+                m_cloth = m_target.GetComponent<Cloth>();
+                if (m_cloth != null)
                 {
-                    m_mbuf = new MeshBuffer();
-                    m_meshSrc = target.sharedMesh;
-                    m_cloth = m_target.GetComponent<Cloth>();
-                    if (m_cloth != null)
-                    {
-                        m_cbuf = new ClothBuffer();
-                        m_cbuf.rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
+                    m_cbuf = new ClothBuffer();
+                    m_cbuf.rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
 
-                        var tc = m_parent as TransformCapturer;
-                        if (tc != null)
-                        {
-                            tc.capturePosition = false;
-                            tc.captureRotation = false;
-                            tc.captureScale = false;
-                        }
-                    }
-                    else
+                    var tc = m_parent as TransformCapturer;
+                    if (tc != null)
                     {
-                        m_meshBake = new Mesh();
+                        tc.capturePosition = false;
+                        tc.captureRotation = false;
+                        tc.captureScale = false;
                     }
-
+                }
+                else
+                {
+                    m_meshBake = new Mesh();
                 }
             }
 

@@ -113,6 +113,12 @@ struct aePolyMeshData
     int face_count = 0;
 };
 
+struct aeFaceSetData
+{
+    const int *faces = nullptr;
+    int face_count = 0;
+};
+
 struct aePointsData
 {
     const abcV3 *positions = nullptr;
@@ -175,6 +181,8 @@ abciAPI void        aeSetFromPrevious(aeObject *obj);
 abciAPI void        aeXFormWriteSample(aeXForm *obj, const aeXFormData *data);
 abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
 abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
+abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
+abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
 
 abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type);

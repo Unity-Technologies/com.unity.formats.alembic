@@ -5,6 +5,21 @@
 #include "aePolyMesh.h"
 #include "aiMisc.h"
 
+
+aeFaceSet::aeFaceSet(aeObject * parent, const char * name, uint32_t tsi)
+    : m_abc(new abcFaceSet(parent->getAbcObject(), name, tsi))
+    , m_schema(dynamic_cast<abcFaceSet&>(*m_abc).getSchema())
+{
+}
+
+void aeFaceSet::writeSample(const aeFaceSetData & data)
+{
+    AbcGeom::OFaceSetSchema::Sample sample;
+    sample.setFaces(Abc::Int32ArraySample(data.faces, data.face_count));
+    m_schema.set(sample);
+}
+
+
 aePolyMesh::aePolyMesh(aeObject *parent, const char *name, uint32_t tsi)
     : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
@@ -46,6 +61,23 @@ void aePolyMesh::writeSample(const aePolyMeshData &data)
     m_buf_uv_indices.assign(data.uv_indices, data.uv_indices + data.uv_index_count);
 
     m_ctx->addAsyncTask([this]() { doWriteSample(); });
+}
+
+int aePolyMesh::addFaceSet(const char *name)
+{
+    auto fs = new aeFaceSet(this, name, m_tsi);
+    int ret = (int)m_facesets.size();
+    m_facesets.emplace_back(fs);
+    return ret;
+}
+
+void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data)
+{
+    if (faceset_index >= (int)m_facesets.size()) {
+        abciDebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
+        return;
+    }
+    m_facesets[faceset_index]->writeSample(data);
 }
 
 void aePolyMesh::doWriteSample()

@@ -4,6 +4,7 @@ typedef AbcGeom::OObject            abcObject;
 typedef AbcGeom::OXform             abcXForm;
 typedef AbcGeom::OCamera            abcCamera;
 typedef AbcGeom::OPolyMesh          abcPolyMesh;
+typedef AbcGeom::OFaceSet           abcFaceSet;
 typedef AbcGeom::OPoints            abcPoints;
 typedef AbcGeom::OCompoundProperty  abcProperties;
 
