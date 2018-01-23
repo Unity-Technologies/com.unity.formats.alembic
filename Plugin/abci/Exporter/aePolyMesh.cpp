@@ -30,127 +30,108 @@ void aePolyMesh::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aePolyMesh::writeSample(const aePolyMeshData &data_)
+void aePolyMesh::writeSample(const aePolyMeshData &data)
+{
+    m_buf_indices.assign(data.indices, data.indices + data.indexCount);
+    m_buf_faces.assign(data.faces, data.faces + data.faceCount);
+
+    m_buf_positions.assign(data.positions, data.positions + data.positionCount);
+    if (data.velocities) {
+        m_buf_velocities.assign(data.velocities, data.velocities + data.positionCount);
+    }
+    else {
+        m_buf_velocities.clear();
+    }
+
+    if (data.normals) {
+        m_buf_normals.assign(data.normals, data.normals + data.normalCount);
+        if (data.normalIndices) {
+            m_buf_normal_indices.assign(data.normalIndices, data.normalIndices + data.normalIndexCount);
+        }
+    }
+    else {
+        m_buf_normals.clear();
+        m_buf_normal_indices.clear();
+    }
+
+    if (data.uvs) {
+        m_buf_uvs.assign(data.uvs, data.uvs + data.uvCount);
+        if (data.normalIndices) {
+            m_buf_uv_indices.assign(data.uvIndices, data.uvIndices + data.uvIndexCount);
+        }
+    }
+    else {
+        m_buf_uvs.clear();
+        m_buf_uv_indices.clear();
+    }
+
+    m_ctx->addAsyncTask([this]() { doWriteSample(); });
+}
+
+void aePolyMesh::doWriteSample()
 {
     const auto &conf = getConfig();
-    aePolyMeshData data = data_;
 
-    // update normal and uv count
-    if (data.normals != nullptr) {
-        if (data.normalCount == 0) {
-            data.normalCount = data.positionCount;
-            data.normalIndices = data.indices;
-            data.normalIndexCount = data.indexCount;
-        }
-    }
-    if (data.uvs != nullptr) {
-        if (data.uvCount == 0) {
-            data.uvCount = data.positionCount;
-            data.uvIndices = data.indices;
-            data.uvIndexCount = data.indexCount;
-        }
-    }
-
-
-    // handle swapHandedness and scaling for positions, velocities
-    if (conf.swapHandedness || conf.scale != 1.0f) {
-        float scale = conf.scale;
-        {
-            m_buf_positions.resize(data.positionCount);
-            // sadly, memcpy() is way faster than std::copy() on VC
-            memcpy(&m_buf_positions[0], data.positions, sizeof(abcV3) * data.positionCount);
-            if (conf.swapHandedness) {
-                for (auto &v : m_buf_positions) { v.x *= -1.0f; }
-            }
-            if (scale != 1.0f) {
-                for (auto &v : m_buf_positions) { v *= scale; }
-            }
-            data.positions = &m_buf_positions[0];
-        }
-
-        if (data.velocities != nullptr) {
-            m_buf_velocities.resize(data.positionCount);
-            memcpy(&m_buf_velocities[0], data.velocities, sizeof(abcV3) * data.positionCount);
-            if (conf.swapHandedness) {
-                for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
-            }
-            if (scale != 1.0f) {
-                for (auto &v : m_buf_velocities) { v *= scale; }
-            }
-            data.velocities = &m_buf_velocities[0];
-        }
-    }
-
-    // handle swapHandedness for normals
+    // handle swap handedness
     if (conf.swapHandedness) {
-        if (data.normals != nullptr) {
-            m_buf_normals.resize(data.normalCount);
-            memcpy(&m_buf_normals[0], data.normals, sizeof(abcV3)*data.normalCount);
-            for (auto &v : m_buf_normals) { v.x *= -1.0f; }
-            data.normals = &m_buf_normals[0];
-        }
+        for (auto &v : m_buf_positions) { v.x *= -1.0f; }
+        for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
+        for (auto &v : m_buf_normals) { v.x *= -1.0f; }
     }
 
-    if (data.faces == nullptr) {
-        // assume all faces are triangles
-        int vertices_per_primitive = 3;
-        int num_primitives = data.indexCount / vertices_per_primitive;
-        m_buf_faces.resize(num_primitives);
-        for (auto &v : m_buf_faces) { v = vertices_per_primitive; }
-        data.faces = &m_buf_faces[0];
-        data.faceCount = (int)m_buf_faces.size();
+    // handle scale factor
+    float scale = conf.scale;
+    if (scale != 1.0f) {
+        for (auto &v : m_buf_positions) { v *= scale; }
+        for (auto &v : m_buf_velocities) { v *= scale; }
     }
 
-    // handle swapFace option
+    // if face counts are empty, assume all faces are triangles
+    if (m_buf_faces.empty()) {
+        m_buf_faces.resize((int)(m_buf_indices.size() / 3), 3);
+    }
+
+    // handle swap face option
     if (conf.swapFaces) {
-        auto swap_routine = [&](std::vector<int>& dst, const int *src) {
+        RawVector<int> face_indices;
+        auto do_swap = [&](RawVector<int>& dst) {
             int i = 0;
-            for (int fi = 0; fi < data.faceCount; ++fi) {
-                int ngon = data.faces[i];
+            int num_faces = (int)m_buf_faces.size();
+            for (int fi = 0; fi < num_faces; ++fi) {
+                int ngon = m_buf_faces[i];
+                face_indices.assign(&dst[i], &dst[i + ngon]);
                 for (int ni = 0; ni < ngon; ++ni) {
                     int ini = ngon - ni - 1;
-                    dst[i + ni] = src[i + ini];
+                    dst[i + ni] = face_indices[ini];
                 }
                 i += ngon;
             }
         };
-
-        {
-            m_buf_indices.resize(data.indexCount);
-            swap_routine(m_buf_indices, data.indices);
-            data.indices = &m_buf_indices[0];
-        }
-        if (data.normalIndices && data.normalIndexCount) {
-            m_buf_normal_indices.resize(data.normalIndexCount);
-            swap_routine(m_buf_normal_indices, data.normalIndices);
-            data.normalIndices = &m_buf_normal_indices[0];
-        }
-        if (data.uvIndices && data.uvIndexCount) {
-            m_buf_uv_indices.resize(data.uvIndexCount);
-            swap_routine(m_buf_uv_indices, data.uvIndices);
-            data.uvIndices = &m_buf_uv_indices[0];
-        }
+        do_swap(m_buf_indices);
+        do_swap(m_buf_normal_indices);
+        do_swap(m_buf_uv_indices);
     }
-
 
     // write!
     AbcGeom::OPolyMeshSchema::Sample sample;
     AbcGeom::ON3fGeomParam::Sample sample_normals;
     AbcGeom::OV2fGeomParam::Sample sample_uvs;
-    sample.setPositions(Abc::P3fArraySample(data.positions, data.positionCount));
-    sample.setFaceIndices(Abc::Int32ArraySample(data.indices, data.indexCount));
-    sample.setFaceCounts(Abc::Int32ArraySample(data.faces, data.faceCount));
-    if (data.velocities != nullptr) {
-        sample.setVelocities(Abc::V3fArraySample(data.velocities, data.positionCount));
+    sample.setPositions(Abc::P3fArraySample(m_buf_positions.data(), m_buf_positions.size()));
+    sample.setFaceIndices(Abc::Int32ArraySample(m_buf_indices.data(), m_buf_indices.size()));
+    sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces.data(), m_buf_faces.size()));
+    if (!m_buf_velocities.empty()) {
+        sample.setVelocities(Abc::V3fArraySample(m_buf_velocities.data(), m_buf_velocities.size()));
     }
-    if (data.normals != nullptr) {
-        sample_normals.setIndices(Abc::UInt32ArraySample((uint32_t*)data.normalIndices, data.normalIndexCount));
-        sample_normals.setVals(Abc::V3fArraySample(data.normals, data.normalCount));
+    if (!m_buf_normals.empty()) {
+        sample_normals.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
+        if(!m_buf_normal_indices.empty())
+            sample_normals.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
         sample.setNormals(sample_normals);
     }
-    if (data.uvs != nullptr) {
-        sample_uvs.setIndices(Abc::UInt32ArraySample((uint32_t*)data.uvIndices, data.uvIndexCount));
-        sample_uvs.setVals(Abc::V2fArraySample(data.uvs, data.uvCount));
+    if (!m_buf_uvs.empty()) {
+        sample_uvs.setVals(Abc::V2fArraySample(m_buf_uvs.data(), m_buf_uvs.size()));
+        if (!m_buf_uv_indices.empty())
+            sample_uvs.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv_indices.data(), m_buf_uv_indices.size()));
         sample.setUVs(sample_uvs);
     }
     m_schema.set(sample);

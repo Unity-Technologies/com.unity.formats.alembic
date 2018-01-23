@@ -170,6 +170,8 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
         // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
         [DllImport("abci")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = -1);
+        [DllImport("abci")] public static extern void        aeMarkFrameBegin(aeContext ctx);
+        [DllImport("abci")] public static extern void        aeMarkFrameEnd(aeContext ctx);
 
         [DllImport("abci")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 1);
         [DllImport("abci")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 1);

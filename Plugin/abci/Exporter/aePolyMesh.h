@@ -13,13 +13,16 @@ public:
     void    writeSample(const aePolyMeshData &data);
 
 private:
+    void    doWriteSample();
+
     AbcGeom::OPolyMeshSchema m_schema;
 
-    std::vector<abcV3>  m_buf_positions;
-    std::vector<abcV3>  m_buf_velocities;
-    std::vector<abcV3>  m_buf_normals;
-    std::vector<int>    m_buf_indices;
-    std::vector<int>    m_buf_normal_indices;
-    std::vector<int>    m_buf_uv_indices;
-    std::vector<int>    m_buf_faces;
+    RawVector<abcV3> m_buf_positions;
+    RawVector<abcV3> m_buf_velocities;
+    RawVector<abcV3> m_buf_normals;
+    RawVector<abcV2> m_buf_uvs;
+    RawVector<int>   m_buf_indices;
+    RawVector<int>   m_buf_normal_indices;
+    RawVector<int>   m_buf_uv_indices;
+    RawVector<int>   m_buf_faces;
 };

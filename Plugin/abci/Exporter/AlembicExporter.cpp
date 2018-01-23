@@ -44,6 +44,14 @@ abciAPI void aeAddTime(aeContext* ctx, float time, int tsi)
     ctx->addTime(time, tsi);
 }
 
+abciAPI void aeMarkFrameBegin(aeContext* ctx)
+{
+    ctx->markFrameBegin();
+}
+abciAPI void aeMarkFrameEnd(aeContext* ctx)
+{
+    ctx->markFrameEnd();
+}
 
 abciAPI void aeDeleteObject(aeObject *obj)
 {

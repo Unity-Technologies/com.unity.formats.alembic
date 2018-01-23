@@ -152,6 +152,8 @@ abciAPI aeObject*   aeGetTopObject(aeContext* ctx);
 abciAPI int         aeAddTimeSampling(aeContext* ctx, float start_time);
 // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
 abciAPI void        aeAddTime(aeContext* ctx, float time, int tsi = -1);
+abciAPI void        aeMarkFrameBegin(aeContext* ctx);
+abciAPI void        aeMarkFrameEnd(aeContext* ctx);
 
 abciAPI void        aeDeleteObject(aeObject *obj);
 abciAPI aeXForm*    aeNewXForm(aeObject *parent, const char *name, int tsi = 1);

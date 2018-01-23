@@ -16,6 +16,8 @@ aeContext::~aeContext()
 
 void aeContext::reset()
 {
+    finishAsyncTask();
+
     if (m_archive != nullptr) {
         if (m_config.timeSamplingType == aeTimeSamplingType::Uniform) {
             // start time in default timeline maybe changed.
@@ -124,5 +126,33 @@ void aeContext::addTime(float time, uint32_t tsi)
         if (ts.times.empty() || ts.times.back() != time) {
             ts.times.push_back(time);
         }
+    }
+}
+
+void aeContext::markFrameBegin()
+{
+    finishAsyncTask();
+}
+
+void aeContext::markFrameEnd()
+{
+    // kick async tasks
+    m_async_task_future = std::async(std::launch::async, [this]() {
+        for (auto& task : m_async_tasks) {
+            task();
+        }
+        m_async_tasks.clear();
+    });
+}
+
+void aeContext::addAsyncTask(const std::function<void()>& task)
+{
+    m_async_tasks.push_back(task);
+}
+
+void aeContext::finishAsyncTask()
+{
+    if (m_async_task_future.valid()) {
+        m_async_task_future.wait();
     }
 }

@@ -7,6 +7,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 #include <functional>
 #include <limits>
 #include <sstream>

@@ -767,11 +767,13 @@ namespace UTJ.Alembic
 
             float begin_time = Time.realtimeSinceStartup;
 
+            AbcAPI.aeMarkFrameBegin(m_ctx);
             AbcAPI.aeAddTime(m_ctx, m_time);
             foreach (var recorder in m_capturers)
             {
                 recorder.Capture();
             }
+            AbcAPI.aeMarkFrameEnd(m_ctx);
             m_time += Time.deltaTime;
             ++m_frameCount;
 

@@ -54,9 +54,18 @@ public:
     uint32_t addTimeSampling(float start_time);
     void addTime(float time, uint32_t tsi = -1);
 
+    void markFrameBegin();
+    void markFrameEnd();
+
+    void addAsyncTask(const std::function<void()>& task);
+    void finishAsyncTask();
+
 private:
     aeConfig m_config;
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;
     std::vector<aeTimeSampling> m_timesamplings;
+
+    std::vector<std::function<void()>> m_async_tasks;
+    std::future<void> m_async_task_future;
 };
