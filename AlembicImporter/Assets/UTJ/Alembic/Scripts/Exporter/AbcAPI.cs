@@ -193,16 +193,11 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector4 data);
         [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Matrix4x4 data);
 
-        public static void aeWait(float wt)
-        {
-            while (Time.realtimeSinceStartup - Time.unscaledTime < wt) {
-                System.Threading.Thread.Sleep(1);
-            }
-        }
-
         public static void aeWaitMaxDeltaTime()
         {
-            aeWait(Time.maximumDeltaTime);
+            var next = Time.unscaledTime + Time.maximumDeltaTime;
+            while (Time.realtimeSinceStartup < next)
+                System.Threading.Thread.Sleep(1);
         }
     }
 }
