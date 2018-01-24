@@ -246,19 +246,6 @@ abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* 
     }
 }
 
-abciAPI void aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, int triangulate, int always_expand_indices)
-{
-    if (sample)
-    {
-        if (triangulate != 0) {
-            sample->copyDataWithTriangulation(*data, always_expand_indices != 0);
-        }
-        else {
-            sample->copyData(*data);
-        }
-    }
-}
-
 abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
 {
     return sample ? sample->getVertexBufferLength(splitIndex) : 0;

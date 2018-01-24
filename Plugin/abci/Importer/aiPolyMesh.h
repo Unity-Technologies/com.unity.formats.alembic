@@ -119,13 +119,13 @@ public:
     Abc::Int32ArraySamplePtr m_faceIndices;
     Abc::Int32ArraySamplePtr m_vertexCountPerFace;
 
-    std::vector<int32_t> m_indicesSwapedFaceWinding;
-    std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
-    std::vector<int> m_faceSplitIndices;
-    std::vector<int> m_tangentIndices;
+    RawVector<int32_t>  m_indicesSwapedFaceWinding;
+    RawVector<uint32_t> m_UvIndicesSwapedFaceWinding;
+    RawVector<int>      m_faceSplitIndices;
+    RawVector<int>      m_tangentIndices;
+    RawVector<uint32_t> m_FixedTopoPositionsIndexes;
+    RawVector<uint32_t> m_FaceIndexingReindexed;
     std::vector<SplitInfo> m_splits;
-    std::vector<uint32_t> m_FixedTopoPositionsIndexes;
-    std::vector<uint32_t> m_FaceIndexingReindexed;
     Submeshes m_submeshes;
 
     int m_triangulatedIndexCount = 0;
@@ -158,7 +158,6 @@ public:
     void getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
     void getDataPointer(aiPolyMeshData &data) const;
     void copyData(aiPolyMeshData &data);
-    void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
 
     void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed) const;
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);

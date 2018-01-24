@@ -55,15 +55,12 @@ int Topology::getSplitCount() const
 
 int Topology::getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh)
 {
-    if (m_vertexCountPerFace && m_faceIndices)
-    {
-        if (m_faceSplitIndices.size() != m_vertexCountPerFace->size() || forceRefresh)
-        {
+    if (m_vertexCountPerFace && m_faceIndices) {
+        if (m_faceSplitIndices.size() != m_vertexCountPerFace->size() || forceRefresh) {
             updateSplits(meshSample);
         }
     }
-    else
-    {
+    else {
         m_splits.clear();
         m_faceSplitIndices.clear();
     }
@@ -126,12 +123,10 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
 
 int Topology::getVertexBufferLength(int splitIndex) const
 {
-    if (splitIndex < 0 || size_t(splitIndex) >= m_splits.size())
-    {
+    if (splitIndex < 0 || size_t(splitIndex) >= m_splits.size()) {
         return 0;
     }
-    else
-    {
+    else {
         return (int) m_splits[splitIndex].vertexCount;
     }
 }
@@ -529,18 +524,14 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
                                   config.tangentsMode == aiTangentsMode::Smooth ||
                                   (!m_normals.valid() && config.normalsMode == aiNormalsMode::ComputeIfMissing));
     
-    if (smoothNormalsRequired)
-    {
-        if (m_smoothNormals.empty() || topoChanged)
-        {
+    if (smoothNormalsRequired) {
+        if (m_smoothNormals.empty() || topoChanged) {
             computeSmoothNormals(config);
             dataChanged = true;
         }
     }
-    else
-    {
-        if (!m_smoothNormals.empty())
-        {
+    else {
+        if (!m_smoothNormals.empty()) {
             aiLogger::Info("%s: Clear smooth normals", getSchema()->getObject()->getFullName());
             m_smoothNormals.clear();
             dataChanged = true;
@@ -549,25 +540,21 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
 
     bool tangentsRequired = (m_uvs.valid() && config.tangentsMode != aiTangentsMode::None);
 
-    if (tangentsRequired)
-    {
+    if (tangentsRequired) {
         bool tangentsModeChanged = (config.tangentsMode != m_config.tangentsMode);
 
         const abcV3 *N = nullptr;
         bool Nindexed = false;
 
-        if (smoothNormalsRequired)
-        {
+        if (smoothNormalsRequired) {
             N = m_smoothNormals.data();
         }
-        else if (m_normals.valid())
-        {
+        else if (m_normals.valid()) {
             N = m_normals.getVals()->get();
             Nindexed = (m_normals.getScope() == AbcGeom::kFacevaryingScope);
         }
 
-        if (N)
-        {
+        if (N) {
             // do not compute indices if they are cached, constant topology and valid
             if (m_topology->m_tangentIndices.empty() ||
                 !config.cacheTangentsSplits ||
@@ -583,18 +570,15 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
                 dataChanged = true;
             }
         }
-        else
-        {
+        else {
             tangentsRequired = false;
         }
     }
     
-    if (!tangentsRequired)
-    {
-        if (!m_tangents.empty())
-        {
+    if (!tangentsRequired) {
+        if (!m_tangents.empty()) {
             aiLogger::Info("%s: Clear tangents", getSchema()->getObject()->getFullName());
-            
+
             m_tangents.clear();
             dataChanged = true;
         }
@@ -602,7 +586,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, b
         if (!m_topology->m_tangentIndices.empty() && (m_ownTopology || !config.cacheTangentsSplits))
         {
             aiLogger::Info("%s: Clear tangent indices", getSchema()->getObject()->getFullName());
-            
+
             m_topology->m_tangentIndices.clear();
             m_topology->m_tangentsCount = 0;
         }
@@ -621,13 +605,9 @@ void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summar
     DebugLog("aiPolyMeshSample::getSummary(forceRefresh=%s)", forceRefresh ? "true" : "false");
     
     summary.splitCount = m_topology->getSplitCount(sample, forceRefresh);
-
     summary.hasNormals = hasNormals();
-
     summary.hasUVs = hasUVs();
-    
     summary.hasTangents = hasTangents();
-
     summary.hasVelocities = hasVelocities();
 }
 
@@ -675,103 +655,6 @@ void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst) const
 
     dst.center = m_bounds.center();
     dst.size = m_bounds.size();
-}
-
-
-static inline void SwapHandedness(aiPolyMeshData &dst)
-{
-    auto body = [&](abcV3 *v, int n) {
-        if (v) {
-            for (int i = 0; i < n; ++i) { v[i].x *= -1.0f; }
-        }
-    };
-    body(dst.positions, dst.positionCount);
-    body(dst.velocities, dst.positionCount);
-    body(dst.normals, dst.normalCount);
-}
-
-// return true if position and uv / normal indices are deferent
-static inline bool IsIndicesDivergent(const aiPolyMeshData &dst)
-{
-    if ((dst.normalCount != 0 && dst.positionCount != dst.normalCount) ||
-        (dst.uvCount != 0 && dst.positionCount != dst.uvCount))
-    {
-        return true;
-    }
-
-    // maybe more detailed (=very slow) comparison is needed..
-    return false;
-}
-
-static inline void TriangulateIndices(aiPolyMeshData& src, int *dv, const int *indices, bool swap_face)
-{
-    if (!dv) { return; }
-
-    const int i1 = swap_face ? 2 : 1;
-    const int i2 = swap_face ? 1 : 2;
-
-    int n = 0;
-    int i = 0;
-    if (indices) {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = indices[n + 0];
-                dv[i + 1] = indices[n + ni + i1];
-                dv[i + 2] = indices[n + ni + i2];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-    else {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = n + 0;
-                dv[i + 1] = n + ni + i1;
-                dv[i + 2] = n + ni + i2;
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-}
-
-template<class T>
-static inline void ExpandWithTriangulation(aiPolyMeshData& src, T *dv, const T *sv, const int *indices, bool swap_face)
-{
-    if (!dv || !sv) { return; }
-
-    const int i1 = swap_face ? 2 : 1;
-    const int i2 = swap_face ? 1 : 2;
-
-    int n = 0;
-    int i = 0;
-    if (indices) {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = sv[indices[n + 0]];
-                dv[i + 1] = sv[indices[n + ni + i1]];
-                dv[i + 2] = sv[indices[n + ni + i2]];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-    else {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = sv[n + 0];
-                dv[i + 1] = sv[n + ni + i1];
-                dv[i + 2] = sv[n + ni + i2];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
 }
 
 void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
@@ -828,27 +711,8 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
         dst.uvCount = 0;
     }
 
-    if (m_config.swapHandedness) {
-        SwapHandedness(dst);
-    }
-
-
     auto copy_indices = [&](int *d, const int *s, int n) {
-        // swap faces if needed
-        if (m_config.swapFaceWinding) {
-            int i = 0;
-            for (int fi = 0; fi < src.faceCount; ++fi) {
-                int ngon = src.faces[i];
-                for (int ni = 0; ni < ngon; ++ni) {
-                    int ini = ngon - ni - 1;
-                    d[i + ni] = s[i + ini];
-                }
-                i += ngon;
-            }
-        }
-        else {
-            memcpy(d, s, n * sizeof(int));
-        }
+        memcpy(d, s, n * sizeof(int));
     };
 
     if (src.indices && dst.indices && dst.indexCount >= src.indexCount) {
@@ -867,82 +731,6 @@ void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
     dst.center = dst.center;
     dst.size = dst.size;
 }
-
-
-void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool always_expand_indices)
-{
-    aiPolyMeshData src;
-    getDataPointer(src);
-
-    bool needs_expand = IsIndicesDivergent(src) || always_expand_indices;
-
-    // triangulated mesh has one index buffer
-    dst.normalIndices = nullptr;
-    dst.normalIndexCount = 0;
-    dst.uvIndices = nullptr;
-    dst.uvIndexCount = 0;
-
-    // todo: generate normals and tangents if required
-
-    if (needs_expand) {
-        if (src.positions && dst.positions && dst.positionCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
-            dst.positionCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.positionCount = 0;
-        }
-
-        if (src.velocities && dst.velocities && dst.positionCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
-        }
-
-        if (src.normals && dst.normals && dst.normalCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
-            dst.normalCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.normalCount = 0;
-        }
-
-        if (src.uvs && dst.uvs && dst.uvCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
-            dst.uvCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.uvCount = 0;
-        }
-
-        if (dst.indices && dst.indexCount >= src.triangulatedIndexCount) {
-            for (int i = 0; i < src.triangulatedIndexCount; ++i) {
-                dst.indices[i] = i;
-            }
-        }
-    }
-    else {
-        int *indices = dst.indices;
-        dst.indices = nullptr;      // skip needless copy
-        copyData(dst);
-        dst.indices = indices;
-        TriangulateIndices(src, dst.indices, src.indices, m_config.swapFaceWinding);
-    }
-
-    {
-        dst.triangulatedIndexCount = src.triangulatedIndexCount;
-        int num_triangles = src.triangulatedIndexCount / 3;
-        if (dst.faces && dst.faceCount >= num_triangles) {
-            std::fill(dst.faces, dst.faces + num_triangles, 3);
-            dst.faceCount = num_triangles;
-        }
-        else {
-            dst.faceCount = 0;
-        }
-    }
-
-    dst.center = dst.center;
-    dst.size = dst.size;
-}
-
 
 int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
 {
@@ -972,10 +760,10 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     float vertexMotionScale = static_cast<float>(m_config.vertexMotionScale);
     
     const SplitInfo &split = m_topology->m_splits[splitIndex];
-    const auto &faceCount = *(m_topology->m_vertexCountPerFace);
-    const auto &indices = m_config.turnQuadEdges ? m_topology->m_indicesSwapedFaceWinding.data() : m_topology->m_faceIndices->get();
-    const auto &positions = *m_positions;
-    const auto &nextPositions = *m_nextPositions;
+    const auto *faceCount = m_topology->m_vertexCountPerFace->get();
+    const auto *indices = m_config.turnQuadEdges ? m_topology->m_indicesSwapedFaceWinding.data() : m_topology->m_faceIndices->get();
+    const auto *positions = m_positions->get();
+    const auto *nextPositions = m_nextPositions->get();
 
     size_t k = 0;
     size_t o = split.indexOffset;
@@ -1023,7 +811,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     if (cP.z < bbmin.z) bbmin.z = cP.z; \
     else if (cP.z > bbmax.z) bbmax.z = cP.z
 
-    
+
     // fill data arrays
     if ( m_topology->m_vertexSharingEnabled && m_topology->m_TreatVertexExtraDataAsStatic && !m_topology->m_FreshlyReadTopologyData && m_topology->m_FixedTopoPositionsIndexes.size())
     {
@@ -1035,30 +823,22 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     else
     {
         m_topology->m_FreshlyReadTopologyData = false;
-        if (copyNormals)
-        {
-            if (useAbcNormals)
-            {
-                const auto &normals = *(m_normals.getVals());
+        if (copyNormals) {
+            if (useAbcNormals) {
+                const auto *normals = m_normals.getVals()->get();
 
-                if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
-                {
+                if (m_normals.getScope() == AbcGeom::kFacevaryingScope) {
                     const auto &nIndices = *(m_normals.getIndices());
-                
-                    if (copyUvs)
-                    {
-                        const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
-                    
-                        if (copyTangents)
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
+
+                    if (copyUvs) {
+                        const auto *uvs = m_uvs.getVals()->get();
+                        const auto *uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding.data() : m_uvs.getIndices()->get();
+
+                        if (copyTangents) {
+                            for (size_t i = split.firstFace; i <= split.lastFace; ++i) {
                                 int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
+                                for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                    if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                         size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                         size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1069,8 +849,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                         data.tangents[dstNdx].x *= xScale;
                                         data.uvs[dstNdx] = uvs[uvIndices[o]];
                                     }
-                                    else
-                                    {
+                                    else {
                                         UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                         data.normals[k] = normals[nIndices[o]];
                                         data.normals[k].x *= xScale;
@@ -1081,15 +860,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                 }
                             }
                         }
-                        else
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
+                        else {
+                            for (size_t i = split.firstFace; i <= split.lastFace; ++i) {
                                 int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
+                                for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                    if( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                         size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                         size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1098,8 +873,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                         data.normals[dstNdx].x *= xScale;
                                         data.uvs[dstNdx] = uvs[uvIndices[o]];
                                     }
-                                    else
-                                    {
+                                    else {
                                         UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                         data.normals[k] = normals[nIndices[o]];
                                         data.normals[k].x *= xScale;
@@ -1109,15 +883,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    else if (copyTangents) {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                     size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1127,8 +897,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
                                     data.tangents[dstNdx].x *= xScale;
                                 }
-                                else
-                                {
+                                else {
                                     UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                     data.normals[k] = normals[nIndices[o]];
                                     data.normals[k].x *= xScale;
@@ -1138,15 +907,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    else {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                     size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1154,8 +919,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.normals[dstNdx] = normals[nIndices[o]];
                                     data.normals[dstNdx].x *= xScale;
                                 }
-                                else
-                                {
+                                else {
                                     UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                     data.normals[k] = normals[nIndices[o]];
                                     data.normals[k].x *= xScale;
@@ -1164,22 +928,16 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         }
                     }
                 }
-                else
-                {
-                    if (copyUvs)
-                    {
-                        const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
+                else {
+                    if (copyUvs) {
+                        const auto *uvs = m_uvs.getVals()->get();
+                        const auto *uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding.data() : m_uvs.getIndices()->get();
                     
-                        if (copyTangents)
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
+                        if (copyTangents) {
+                            for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                                 int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if (m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
+                                for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                    if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                                         size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                         size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1190,8 +948,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                         data.tangents[dstNdx].x *= xScale;
                                         data.uvs[dstNdx] = uvs[uvIndices[o]];
                                     }
-                                    else
-                                    {
+                                    else {
                                         int v = indices[o];
                                         UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                         data.normals[k] = normals[v];
@@ -1203,15 +960,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                 }
                             }
                         }
-                        else
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
+                        else {
+                            for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                                 int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
+                                for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                    if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                         size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                         size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1220,8 +973,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                         data.normals[dstNdx].x *= xScale;
                                         data.uvs[dstNdx] = uvs[uvIndices[o]];
                                     }
-                                    else
-                                    {
+                                    else {
                                         int v = indices[o];
                                         UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                         data.normals[k] = normals[v];
@@ -1232,15 +984,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    else if (copyTangents) {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                     size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1250,8 +998,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
                                     data.tangents[dstNdx].x *= xScale;
                                 }
-                                else
-                                {
+                                else {
                                     int v = indices[o];
                                     UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                     data.normals[k] = normals[v];
@@ -1262,15 +1009,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    else {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                     size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1278,8 +1021,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.normals[dstNdx] = normals[indices[o]];
                                     data.normals[dstNdx].x *= xScale;
                                 }
-                                else
-                                {
+                                else {
                                     int v = indices[o];
                                     UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                     data.normals[k] = normals[v];
@@ -1290,20 +1032,15 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     }
                 }
             }
-            else
-            {
-                if (copyUvs)
-                {
-                    const auto &uvs = *(m_uvs.getVals());
-                    const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
+            else {
+                if (copyUvs) {
+                    const auto *uvs = m_uvs.getVals()->get();
+                    const auto *uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding.data() : m_uvs.getIndices()->get();
                 
-                    if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    if (copyTangents) {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
                                 if ( m_topology->m_FixedTopoPositionsIndexes.size())
                                 {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
@@ -1316,8 +1053,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.tangents[dstNdx].x *= xScale;
                                     data.uvs[dstNdx] = uvs[uvIndices[o]];
                                 }
-                                else
-                                {
+                                else {
                                     int v = indices[o];
 
                                     UPDATE_POSITIONS_AND_BOUNDS(v, k);
@@ -1330,15 +1066,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
+                    else {
+                        for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                             int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
+                            for (int j = 0; j < nv; ++j, ++o, ++k) {
+                                if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                                     size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                     size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1347,8 +1079,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                     data.normals[dstNdx].x *= xScale;
                                     data.uvs[dstNdx] = uvs[uvIndices[o]];
                                 }
-                                else
-                                {
+                                else {
                                     int v = indices[o];
                                     UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                     data.normals[k] = m_smoothNormals[v];
@@ -1359,15 +1090,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         }
                     }
                 }
-                else if (copyTangents)
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
+                else if (copyTangents) {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                         int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
+                        for (int j = 0; j < nv; ++j, ++o, ++k) {
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                 size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                 size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1377,8 +1104,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                 data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
                                 data.tangents[dstNdx].x *= xScale;
                             }
-                            else
-                            {
+                            else {
                                 int v = indices[o];
                                 UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                 data.normals[k] = m_smoothNormals[v];
@@ -1389,15 +1115,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         }
                     }
                 }
-                else
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
+                else {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                         int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
+                        for (int j = 0; j < nv; ++j, ++o, ++k) {
+                            if ( m_topology->m_FixedTopoPositionsIndexes.size()) {
                                 size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                 size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1405,8 +1127,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                 data.normals[dstNdx] = m_smoothNormals[indices[o]];
                                 data.normals[dstNdx].x *= xScale;
                             }
-                            else
-                            {
+                            else {
                                 int v = indices[o];
                                 UPDATE_POSITIONS_AND_BOUNDS(v, k);
                                 data.normals[k] = m_smoothNormals[v];
@@ -1417,22 +1138,16 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                 }
             }
         }
-        else
-        {
-            if (copyUvs)
-            {
-                const auto &uvs = *(m_uvs.getVals());
-                const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
+        else {
+            if (copyUvs) {
+                const auto *uvs = m_uvs.getVals()->get();
+                const auto *uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding.data() : m_uvs.getIndices()->get();
             
-                if (copyTangents)
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
+                if (copyTangents) {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                         int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if (m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
+                        for (int j = 0; j < nv; ++j, ++o, ++k) {
+                            if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                                 size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                 size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1441,8 +1156,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                                 data.tangents[dstNdx].x *= xScale;
                                 data.uvs[dstNdx] = uvs[uvIndices[o]];
                             }
-                            else
-                            {
+                            else {
                                 UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                 data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
                                 data.tangents[k].x *= xScale;
@@ -1451,23 +1165,18 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                         }
                     }
                 }
-                else
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
+                else {
+                    for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                         int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if (m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
+                        for (int j = 0; j < nv; ++j, ++o, ++k) {
+                            if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                                 size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                                 size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
                                 UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
                                 data.uvs[dstNdx] = uvs[uvIndices[o]];
                             }
-                            else
-                            {
+                            else {
                                 UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                                 data.uvs[k] = uvs[uvIndices[o]];
                             }
@@ -1475,15 +1184,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     }
                 }
             }
-            else if (copyTangents)
-            {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
+            else if (copyTangents) {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                     int nv = faceCount[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        if (m_topology->m_FixedTopoPositionsIndexes.size())
-                        {
+                    for (int j = 0; j < nv; ++j, ++o, ++k) {
+                        if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                             size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                             size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1491,8 +1196,7 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                             data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
                             data.tangents[dstNdx].x *= xScale;
                         }
-                        else
-                        {
+                        else {
                             UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
                             data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
                             data.tangents[k].x *= xScale;
@@ -1500,15 +1204,11 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
                     }
                 }
             }
-            else
-            {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
+            else {
+                for (size_t i=split.firstFace; i<=split.lastFace; ++i) {
                     int nv = faceCount[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        if (m_topology->m_FixedTopoPositionsIndexes.size())
-                        {
+                    for (int j = 0; j < nv; ++j, ++o, ++k) {
+                        if (m_topology->m_FixedTopoPositionsIndexes.size()) {
                             size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
                             size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
 
@@ -1962,8 +1662,8 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
     const uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : (uint32_t*)(topology->m_faceIndices->get());
     
     bool hasUVs = sample->m_uvs.valid();
-    const auto &uvVals = *(sample->m_uvs.getVals()); 
-    const auto &uvIdxs = m_config.turnQuadEdges || !hasUVs ? topology->m_UvIndicesSwapedFaceWinding : *sample->m_uvs.getIndices();
+    const auto *uvVals = sample->m_uvs.getVals()->get(); 
+    const auto *uvIdxs = m_config.turnQuadEdges || !hasUVs ? topology->m_UvIndicesSwapedFaceWinding.data() : sample->m_uvs.getIndices()->get();
 
     topology->m_FixedTopoPositionsIndexes.clear();
     topology->m_FaceIndexingReindexed.clear();
@@ -2008,7 +1708,7 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
         if (share)
             topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
 
-        std::vector<uint32_t>::iterator indexItr = itr->second.begin();
+        auto indexItr = itr->second.begin();
         while( indexItr != itr->second.end() )
         {
             if (!share)

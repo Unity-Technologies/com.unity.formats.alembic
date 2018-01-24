@@ -286,11 +286,6 @@ abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* 
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
-// copy mesh data without splitting. swap handedness / faces are applied.
-// if triangulate is true, triangulation is applied. in this case:
-// - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
-// - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, int triangulate = false, int always_expand_indices = false);
 // all these below aiPolyMesh* are mesh splitting functions
 abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
