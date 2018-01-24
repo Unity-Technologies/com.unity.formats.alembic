@@ -60,7 +60,6 @@ enum class aiTangentsMode
 {
     None,
     Smooth,
-    Split
 };
 
 enum class aiTimeSamplingType

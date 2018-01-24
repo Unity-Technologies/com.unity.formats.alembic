@@ -365,31 +365,6 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
 
         m_topology->m_tangentsCount = (int)m_positions->size();
     }
-    else
-    {
-        TangentIndexMap uniqueIndices;
-        TangentIndexMap::iterator it;
-
-        size_t nf = counts.size();
-        for (size_t f=0, v=0; f<nf; ++f) {
-            int nfv = counts[f];
-            for (int fv=0; fv<nfv; ++fv, ++v) {
-                TangentKey key(inN[Nidxs ? Nidxs[v] : indices[v]], uvVals[uvIdxs[v]]);
-                it = uniqueIndices.find(key);
-                if (it == uniqueIndices.end()) {
-                    int idx = (int) uniqueIndices.size();
-                    m_topology->m_tangentIndices[v] = idx;
-                    uniqueIndices[key] = idx;
-                }
-                else {
-                    m_topology->m_tangentIndices[v] = it->second;
-                }
-            }
-        }
-
-        m_topology->m_tangentsCount = (int)uniqueIndices.size(); 
-    }
-
     DebugLog("%lu unique tangent(s)", m_topology->m_tangentsCount);
 }
 
@@ -413,12 +388,12 @@ void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN,
     size_t tangentsCount = m_topology->m_tangentsCount;
     m_tangents.resize_zeroclear(tangentsCount);
 
-    RawVector<int> tanNidxs(tangentsCount);
-    RawVector<abcV3> tan1(tangentsCount);
-    RawVector<abcV3> tan2(tangentsCount);
-    tanNidxs.zeroclear();
-    tan1.zeroclear();
-    tan2.zeroclear();
+    RawVector<int> tanNidxs;
+    RawVector<abcV3> tan1;
+    RawVector<abcV3> tan2;
+    tanNidxs.resize_zeroclear(tangentsCount);
+    tan1.resize_zeroclear(tangentsCount);
+    tan2.resize_zeroclear(tangentsCount);
 
     abcV3 T, B, dP1, dP2, tmp;
     abcV2 dUV1, dUV2;
@@ -1566,7 +1541,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
     }
 
     if (m_config.shareVertices && !m_varyingTopology && sample != nullptr && !sample->m_ownTopology && topologyChanged)
-        GenerateVerticesToFacesLookup(sample);
+        generateVerticesToFacesLookup(sample);
 
     return sample;
 }
@@ -1574,7 +1549,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
 // generates two lookup tables:
 //  m_FaceIndexingReindexed         : for each face in the abc sample, hold an index value to lookup in m_FixedTopoPositionsIndexes, that will give final position index.
 //  m_FixedTopoPositionsIndexes     : list of resulting positions. value is index into the abc "position" vector. size is greter than or equal to "position" array.
-void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
+void aiPolyMesh::generateVerticesToFacesLookup(aiPolyMeshSample *sample) const
 {
     auto topology = sample->m_topology;
     auto  faces = topology->m_vertexCountPerFace;
@@ -1609,13 +1584,13 @@ void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
     topology->m_FixedTopoPositionsIndexes.reserve(sample->m_positions->size());
     topology->m_FreshlyReadTopologyData = true;
 
-    std::unordered_map< uint32_t, std::vector<uint32_t>>::iterator itr = indexesOfFacesValues.begin();
+    auto itr = indexesOfFacesValues.begin();
     while (itr != indexesOfFacesValues.end())
     {
-        std::vector<uint32_t>& vertexUsages = itr->second;
+        auto& vertexUsages = itr->second;
         uint32_t vertexUsageIndex = 0;
         size_t vertexUsageMaxIndex = itr->second.size();
-        const Abc::V2f * prevUV = nullptr;
+        const abcV2 * prevUV = nullptr;
         const abcV3 * prevN = nullptr;
         bool share = true;
         do
@@ -1728,44 +1703,31 @@ int aiPolyMesh::getPeakTriangulatedIndexCount() const
 
 int aiPolyMesh::getPeakVertexCount() const
 {
-    if (m_peakVertexCount == 0)
-    {
+    if (m_peakVertexCount == 0) {
         DebugLog("aiPolyMesh::getPeakVertexCount()");
         
         Util::Dimensions dim;
-
         auto positionsProp = m_schema.getPositionsProperty();
-
         int numSamples = (int)positionsProp.getNumSamples();
 
-        if (numSamples == 0)
-        {
+        if (numSamples == 0) {
             return 0;
         }
-        else if (positionsProp.isConstant())
-        {
+        else if (positionsProp.isConstant()) {
             positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(0)));
-            
             m_peakVertexCount = (int)dim.numPoints();
         }
-        else
-        {
+        else {
             m_peakVertexCount = 0;
-
-            for (int i = 0; i < numSamples; ++i)
-            {
-                positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
-                
+            for (int i = 0; i < numSamples; ++i) {
+                positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));                
                 size_t numVertices = dim.numPoints();
-
-                if (numVertices > size_t(m_peakVertexCount))
-                {
+                if (numVertices > size_t(m_peakVertexCount)) {
                     m_peakVertexCount = int(numVertices);
                 }
             }
         }
     }
-
     return m_peakVertexCount;
 }
 

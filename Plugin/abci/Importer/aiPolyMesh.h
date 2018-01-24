@@ -35,53 +35,6 @@ struct Submesh
 using SubmeshPtr = std::shared_ptr<Submesh>;
 using SubmeshPtrs = std::vector<SubmeshPtr>;
 
-struct TangentKey
-{
-    Abc::V3f N;
-    Abc::V2f UV;
-    
-    inline TangentKey()
-        : N(0.0f, 0.0f, 0.0f)
-        , UV(0.0f, 0.0f)
-    {
-    }
-    
-    inline TangentKey(const Abc::V3f &iN, const Abc::V2f &iUV)
-        : N(iN)
-        , UV(iUV)
-    {
-    }
-    
-    TangentKey(const TangentKey&) = default;
-    TangentKey& operator=(const TangentKey&) = default;
-    
-    inline bool operator<(const TangentKey &rhs) const
-    {
-        if (N.x < rhs.N.x) return true;
-        if (N.x > rhs.N.x) return false;
-
-        if (N.y < rhs.N.y) return true;
-        if (N.y > rhs.N.y) return false;
-
-        if (N.z < rhs.N.z) return true;
-        if (N.z > rhs.N.z) return false;
-
-        if (UV.x < rhs.UV.x) return true;
-        if (UV.x > rhs.UV.x) return false;
-
-        return (UV.y < rhs.UV.y);
-    }
-
-    std::string toString() const
-    {
-        std::ostringstream oss;
-        oss << "N=" << N << ", UV=" << UV;
-        return oss.str();
-    }
-};
-using TangentIndexMap = std::map<TangentKey, int>;
-
-
 class Topology
 {
 public:
@@ -204,7 +157,7 @@ public:
 
 private:
     void updatePeakIndexCount() const;
-    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const;
+    void generateVerticesToFacesLookup(aiPolyMeshSample *sample) const;
 
 private:
     mutable int m_peakIndexCount;

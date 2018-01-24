@@ -30,7 +30,6 @@ namespace UTJ.Alembic
         {
             None = 0,
             Smooth,
-            Split
         }
 
         public enum aiTopologyVariance
