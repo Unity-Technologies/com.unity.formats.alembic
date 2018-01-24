@@ -11,12 +11,12 @@ aiXFormSample::aiXFormSample(aiXForm *schema)
 {
 }
 
-void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
+void aiXFormSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
 {
     DebugLog("aiXFormSample::updateConfig()");
     
-    topoChanged = false;
-    dataChanged = (config.swapHandedness != m_config.swapHandedness);
+    topology_changed = false;
+    data_changed = (config.swap_handedness != m_config.swap_handedness);
     m_config = config;
 }
 
@@ -36,7 +36,7 @@ void aiXFormSample::decomposeXForm(const Imath::M44d &mat,Imath::V3d &scale,Imat
     rotation = extractQuat(mat_remainder);
 }
 
-void aiXFormSample::getData(aiXFormData &outData) const
+void aiXFormSample::getData(aiXFormData &dst) const
 {
     DebugLog("aiXFormSample::getData()");
 
@@ -46,15 +46,15 @@ void aiXFormSample::getData(aiXFormData &outData) const
     Imath::V3d trans;
     decomposeXForm(m_matrix, scale, shear, rot, trans);
 
-    if (m_config.interpolateSamples && m_currentTimeOffset!=0)
+    if (m_config.interpolate_samples && m_current_time_offset!=0)
     {
         Imath::V3d scale2;
         Imath::Quatd rot2;
         Imath::V3d trans2;
-        decomposeXForm(m_nextMatrix, scale2, shear, rot2, trans2);
-        scale += (scale2 - scale)* m_currentTimeOffset;
-        trans += (trans2 - trans)* m_currentTimeOffset;
-        rot = slerpShortestArc(rot, rot2, m_currentTimeOffset);
+        decomposeXForm(m_next_matrix, scale2, shear, rot2, trans2);
+        scale += (scale2 - scale)* m_current_time_offset;
+        trans += (trans2 - trans)* m_current_time_offset;
+        rot = slerpShortestArc(rot, rot2, m_current_time_offset);
     }
 
     auto rotFinal = abcV4(
@@ -64,16 +64,16 @@ void aiXFormSample::getData(aiXFormData &outData) const
         static_cast<float>(rot.r)
     );
 
-    if (m_config.swapHandedness)
+    if (m_config.swap_handedness)
     {
         trans.x *= -1.0f;
         rotFinal.x = -rotFinal.x;
         rotFinal.w = -rotFinal.w;
     }
-    outData.inherits = inherits;
-    outData.translation = trans;
-    outData.rotation = rotFinal;
-    outData.scale = scale;
+    dst.inherits = inherits;
+    dst.translation = trans;
+    dst.rotation = rotFinal;
+    dst.scale = scale;
 }
 
 aiXForm::aiXForm(aiObject *obj)
@@ -93,7 +93,7 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
+aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topology_changed)
 {
     DebugLog("aiXForm::readSample(t=%d)", idx);
     Sample *ret = newSample();
@@ -108,7 +108,7 @@ aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     AbcGeom::XformSample nextMatSample;
     m_schema.get(nextMatSample, ss2 );
-    ret->m_nextMatrix = nextMatSample.getMatrix();
+    ret->m_next_matrix = nextMatSample.getMatrix();
     
     return ret;
 }

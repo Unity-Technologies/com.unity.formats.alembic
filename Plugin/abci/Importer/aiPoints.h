@@ -7,14 +7,14 @@ public:
     aiPointsSample(aiPoints *schema);
     virtual ~aiPointsSample();
 
-    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
+    void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     void getDataPointer(aiPointsData &data);
     void copyData(aiPointsData &data);
 
 public:
     void createSortData();
 
-    Abc::P3fArraySamplePtr m_positions;
+    Abc::P3fArraySamplePtr m_points;
     Abc::V3fArraySamplePtr m_velocities;
     Abc::UInt64ArraySamplePtr m_ids;
     Abc::Box3d m_bounds;
@@ -39,7 +39,7 @@ public:
     aiPoints(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
+    Sample* readSample(const uint64_t idx, bool &topology_changed) override;
 
     const aiPointsSummary& getSummary() const;
 

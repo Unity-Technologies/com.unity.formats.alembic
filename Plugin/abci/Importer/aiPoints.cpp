@@ -17,30 +17,30 @@ aiPointsSample::~aiPointsSample()
 {
 }
 
-void aiPointsSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
+void aiPointsSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
 {
     DebugLog("aiPointsSample::updateConfig()");
 
-    topoChanged = false;
-    dataChanged = (config.swapHandedness != m_config.swapHandedness);
+    topology_changed = false;
+    data_changed = (config.swap_handedness != m_config.swap_handedness);
     m_config = config;
 }
 
 
 void aiPointsSample::getDataPointer(aiPointsData &data)
 {
-    int count = (int)m_positions->size();
+    int count = (int)m_points->size();
     data.count = count;
 
     auto& schema = static_cast<aiPoints&>(*m_schema);
     if (schema.getSort()) {
         createSortData();
-        if (m_positions) {
+        if (m_points) {
             m_tmp_positions.resize(count);
             for (int i = 0; i < count; ++i) {
-                m_tmp_positions[i] = (*m_positions)[m_sort_data[i].second];
+                m_tmp_positions[i] = (*m_points)[m_sort_data[i].second];
             }
-            data.positions = m_tmp_positions.data();
+            data.points = m_tmp_positions.data();
         }
         if (m_velocities) {
             m_tmp_velocities.resize(count);
@@ -58,8 +58,8 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
         }
     }
     else {
-        if (m_positions) {
-            data.positions = (abcV3*)m_positions->get();
+        if (m_points) {
+            data.points = (abcV3*)m_points->get();
         }
         if (m_velocities) {
             data.velocities = (abcV3*)m_velocities->get();
@@ -75,7 +75,7 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
 
 void aiPointsSample::copyData(aiPointsData &data)
 {
-    int count = (int)m_positions->size();
+    int count = (int)m_points->size();
     data.count = count;
 
     auto& schema = static_cast<aiPoints&>(*m_schema);
@@ -85,21 +85,21 @@ void aiPointsSample::copyData(aiPointsData &data)
     }
 
     // copy positions
-    if (m_positions && data.positions) {
+    if (m_points && data.points) {
         if (sort) {
             for (int i = 0; i < count; ++i) {
-                data.positions[i] = (*m_positions)[m_sort_data[i].second];
+                data.points[i] = (*m_points)[m_sort_data[i].second];
             }
         }
         else {
             for (int i = 0; i < count; ++i) {
-                data.positions[i] = (*m_positions)[i];
+                data.points[i] = (*m_points)[i];
             }
         }
 
-        if (m_config.swapHandedness) {
+        if (m_config.swap_handedness) {
             for (int i = 0; i < count; ++i) {
-                data.positions[i].x *= -1.0f;
+                data.points[i].x *= -1.0f;
             }
         }
     }
@@ -119,7 +119,7 @@ void aiPointsSample::copyData(aiPointsData &data)
             }
         }
 
-        if (m_config.swapHandedness) {
+        if (m_config.swap_handedness) {
             for (int i = 0; i < v_count; ++i) {
                 data.velocities[i].x *= -1.0f;
             }
@@ -150,10 +150,10 @@ void aiPointsSample::createSortData()
 {
     auto& schema = static_cast<aiPoints&>(*m_schema);
 
-    m_sort_data.resize(m_positions->size());
-    int count = (int)m_positions->size();
+    m_sort_data.resize(m_points->size());
+    int count = (int)m_points->size();
     for (int i = 0; i < count; ++i) {
-        m_sort_data[i].first = ((*m_positions)[i] - schema.getSortPosition()).length();
+        m_sort_data[i].first = ((*m_points)[i] - schema.getSortPosition()).length();
         m_sort_data[i].second = i;
     }
 
@@ -186,7 +186,7 @@ aiPoints::Sample* aiPoints::newSample()
     return sample;
 }
 
-aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged)
+aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topology_changed)
 {
     auto ss = aiIndexToSampleSelector(idx);
     DebugLog("aiPoints::readSample(t=%d)", idx);
@@ -194,7 +194,7 @@ aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged
     Sample *ret = newSample();
 
     // read positions
-    m_schema.getPositionsProperty().get(ret->m_positions, ss);
+    m_schema.getPositionsProperty().get(ret->m_points, ss);
 
     // read velocities
     ret->m_velocities.reset();
@@ -228,24 +228,24 @@ aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topologyChanged
 
 const aiPointsSummary& aiPoints::getSummary() const
 {
-    if (m_summary.peakCount == 0) {
+    if (m_summary.peak_count == 0) {
         auto positions = m_schema.getPositionsProperty();
         auto velocities = m_schema.getVelocitiesProperty();
         auto ids = m_schema.getIdsProperty();
 
-        m_summary.hasVelocity = velocities.valid();
-        m_summary.positionIsConstant = positions.isConstant();
-        m_summary.idIsConstant = ids.isConstant();
+        m_summary.has_velocity = velocities.valid();
+        m_summary.positionIs_constant = positions.isConstant();
+        m_summary.id_is_constant = ids.isConstant();
 
-        m_summary.peakCount = (int)abcArrayPropertyGetPeakSize(positions);
+        m_summary.peak_count = (int)abcArrayPropertyGetPeakSize(positions);
 
         auto id_minmax = abcArrayPropertyGetMinMaxValue(ids);
-        m_summary.minID = id_minmax.first;
-        m_summary.maxID = id_minmax.second;
+        m_summary.min_id = id_minmax.first;
+        m_summary.max_id = id_minmax.second;
 
         auto bounds = abcGetMaxBounds(m_schema.getSelfBoundsProperty());
-        m_summary.boundsCenter = bounds.center();
-        m_summary.boundsExtents = bounds.size();
+        m_summary.bounds_center = bounds.center();
+        m_summary.bounds_extents = bounds.size();
 
     }
 

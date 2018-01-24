@@ -9,23 +9,23 @@ std::string ToString(const aiConfig &v)
 {
     std::ostringstream oss;
 
-    oss << "{swapHandedness: " << (v.swapHandedness ? "true" : "false");
-    oss << ", swapFaceWinding: " << (v.swapFaceWinding ? "true" : "false");
-    oss << ", normalsMode: " << (v.normalsMode == aiNormalsMode::ReadFromFile
+    oss << "{swapHandedness: " << (v.swap_handedness ? "true" : "false");
+    oss << ", swapFaceWinding: " << (v.swap_face_winding ? "true" : "false");
+    oss << ", normalsMode: " << (v.normals_mode == aiNormalsMode::ReadFromFile
         ? "read_from_file"
-        : (v.normalsMode == aiNormalsMode::ComputeIfMissing
+        : (v.normals_mode == aiNormalsMode::ComputeIfMissing
             ? "compute_if_missing"
-            : (v.normalsMode == aiNormalsMode::AlwaysCompute
+            : (v.normals_mode == aiNormalsMode::AlwaysCompute
                 ? "always_compute"
                 : "ignore")));
-    oss << ", tangentsMode: " << (v.tangentsMode == aiTangentsMode::None
+    oss << ", tangentsMode: " << (v.tangents_mode == aiTangentsMode::None
         ? "none"
-        : (v.tangentsMode == aiTangentsMode::Smooth
+        : (v.tangents_mode == aiTangentsMode::Smooth
             ? "smooth"
             : "split"));
-    oss << ", cacheTangentsSplits: " << (v.cacheTangentsSplits ? "true" : "false");
-    oss << ", aspectRatio: " << v.aspectRatio;
-    oss << ", forceUpdate: " << (v.forceUpdate ? "true" : "false") << "}";
+    oss << ", cacheTangentsSplits: " << (v.cache_tangents_splits ? "true" : "false");
+    oss << ", aspectRatio: " << v.aspect_ratio;
+    oss << ", forceUpdate: " << (v.force_update ? "true" : "false") << "}";
 
     return oss.str();
 }
@@ -129,15 +129,15 @@ void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
 
         dst.type = tst.isUniform() ? aiTimeSamplingType::Uniform : aiTimeSamplingType::Cyclic;
         dst.interval = (float)tst.getTimePerCycle();
-        dst.startTime = (float)ts->getStoredTimes()[0];
-        dst.endTime = dst.startTime + dst.interval * (numCycles - 1);
+        dst.start_time = (float)ts->getStoredTimes()[0];
+        dst.end_time = dst.start_time + dst.interval * (numCycles - 1);
         dst.numTimes = (int)ts->getNumStoredTimes();
         dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
     }
     else if (tst.isAcyclic()) {
         dst.type = aiTimeSamplingType::Acyclic;
-        dst.startTime = (float)ts->getSampleTime(0);
-        dst.endTime = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
+        dst.start_time = (float)ts->getSampleTime(0);
+        dst.end_time = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
         dst.numTimes = (int)ts->getNumStoredTimes();
         dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
     }
@@ -345,7 +345,7 @@ bool aiContext::load(const char *inPath)
 
         aiLogger::Unindent(1);
 
-        if (m_config.cacheSamples)
+        if (m_config.cache_samples)
             cacheAllSamples();
         return true;
     }

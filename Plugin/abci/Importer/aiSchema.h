@@ -12,12 +12,12 @@ public:
 
     aiSchemaBase* getSchema() const { return m_schema; }
 
-    // Note: dataChanged MUST be true if topologyChanged is
-    virtual void updateConfig(const aiConfig &config, bool &topologyChanged, bool &dataChanged) = 0;
+    // Note: data_changed MUST be true if topology_changed is
+    virtual void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) = 0;
 
 public:
-    AbcCoreAbstract::chrono_t m_currentTimeOffset;
-    AbcCoreAbstract::chrono_t m_currentTimeInterval;
+    AbcCoreAbstract::chrono_t m_current_time_offset;
+    AbcCoreAbstract::chrono_t m_current_time_interval;
 protected:
     aiSchemaBase *m_schema;
     aiConfig m_config;
@@ -39,7 +39,7 @@ public:
     void setConfigCallback(aiConfigCallback cb, void *arg);
     void setSampleCallback(aiSampleCallback cb, void *arg);
     void invokeConfigCallback(aiConfig *config) const;
-    void invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const;
+    void invokeSampleCallback(aiSampleBase *sample, bool topology_changed) const;
     virtual void cacheSamples(int64_t startIndex, int64_t endIndex)=0;
     virtual int             getTimeSamplingIndex() const = 0;
     virtual int             getNumSamples() const = 0;
@@ -49,7 +49,7 @@ public:
     virtual float           getSampleTime(const abcSampleSelector& ss) const = 0;
 
     void readConfig();
-    bool hasVaryingTopology() const { return m_varyingTopology; }
+    bool hasVaryingTopology() const { return m_varying_topology; }
 
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
@@ -68,7 +68,7 @@ protected:
     void *m_sampleCbArg = nullptr;
     aiConfig m_config;
     bool m_constant = false;
-    bool m_varyingTopology = false;
+    bool m_varying_topology = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -90,16 +90,15 @@ public:
         AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
         m_constant = m_schema.isConstant();
-        m_timeSampling = m_schema.getTimeSampling();
-        m_numSamples = static_cast<int64_t>(m_schema.getNumSamples());
+        m_time_sampling = m_schema.getTimeSampling();
+        m_num_samples = static_cast<int64_t>(m_schema.getNumSamples());
         setupProperties();
     }
 
     virtual ~aiTSchema()
     {
-        if (dontUseCache() && m_theSample)
-        {
-            delete m_theSample;
+        if (dontUseCache() && m_the_sample) {
+            delete m_the_sample;
         }
         m_samples.clear();
     }
@@ -111,26 +110,26 @@ public:
 
     int getSampleIndex(const abcSampleSelector& ss) const override
     {
-        return static_cast<int>(ss.getIndex(m_timeSampling, m_numSamples));
+        return static_cast<int>(ss.getIndex(m_time_sampling, m_num_samples));
     }
 
     float getSampleTime(const abcSampleSelector& ss) const override
     {
-        return static_cast<float>(m_timeSampling->getSampleTime(ss.getRequestedIndex()));
+        return static_cast<float>(m_time_sampling->getSampleTime(ss.getRequestedIndex()));
     }
 
     int getNumSamples() const override
     {
-        return static_cast<int>(m_numSamples);
+        return static_cast<int>(m_num_samples);
     }
 
     void cacheSamples(int64_t startIndex, int64_t endIndex) override
     {
         if (m_constant) 
             return;
-        if (startIndex==0) readConfig();
-        for (int64_t i = startIndex; i< endIndex; i++)
-        {
+        if (startIndex == 0)
+            readConfig();
+        for (int64_t i = startIndex; i< endIndex; i++) {
             auto &sp = m_samples[i];   
             bool unused = i == 0;
             sp.reset(readSample(i, unused));
@@ -144,13 +143,10 @@ public:
         DebugLog("aiTSchema::findSample(t=%f)", (float)ss.getRequestedTime());
 
         int sampleIndex = getSampleIndex(ss);
-
-        if (dontUseCache())
-        {
-            return (sampleIndex == m_lastSampleIndex ? m_theSample : nullptr);
+        if (dontUseCache()) {
+            return (sampleIndex == m_last_sample_index ? m_the_sample : nullptr);
         }
-        else
-        {
+        else {
             auto it = m_samples.find(sampleIndex);
             return (it != m_samples.end() ? it->second.get() : nullptr);
         }
@@ -160,27 +156,25 @@ protected:
 
     inline bool useCache() const
     {
-        return (!m_constant && m_config.cacheSamples);
+        return (!m_constant && m_config.cache_samples);
     }
 
     inline bool dontUseCache() const
     {
-        return (m_constant || !m_config.cacheSamples);
+        return (m_constant || !m_config.cache_samples);
     }
 
     inline Sample* getSample()
     {
-       if (dontUseCache() && m_theSample)
-       {
-          return m_theSample;
+       if (dontUseCache() && m_the_sample) {
+          return m_the_sample;
        }
-       else
-       {
+       else {
           return nullptr;
        }
     }
 
-    virtual Sample* readSample(const uint64_t idx, bool &topologyChanged) = 0;
+    virtual Sample* readSample(const uint64_t idx, bool &topology_changed) = 0;
 protected:
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
@@ -190,10 +184,10 @@ protected:
 protected:
     AbcSchema m_schema;
     SampleCont m_samples;
-    Sample* m_theSample = nullptr;
-    Abc::TimeSamplingPtr m_timeSampling;
-    int64_t m_numSamples = 0;
-    int64_t m_lastSampleIndex = -1;
+    Abc::TimeSamplingPtr m_time_sampling;
+    Sample* m_the_sample = nullptr;
+    int64_t m_num_samples = 0;
+    int64_t m_last_sample_index = -1;
 };
 
 template<class Traits>
@@ -204,78 +198,63 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
     readConfig();
 
     Sample* sample;
-    bool topologyChanged = false;
-    int64_t sampleIndex = getSampleIndex(ss);
+    bool topology_changed = false;
+    int64_t sample_index = getSampleIndex(ss);
 
-    if (dontUseCache())
-    {
-        if (m_samples.size() > 0)
-        {
+    if (dontUseCache()) {
+        if (m_samples.size() > 0) {
             DebugLog("  Clear cached samples");
 
             m_samples.clear();
         }
 
         // don't need to check m_constant here, sampleIndex wouldn't change
-        if (m_theSample == 0 || sampleIndex != m_lastSampleIndex)
-        {
+        if (m_the_sample == 0 || sample_index != m_last_sample_index) {
             DebugLog("  Read sample");
 
-            sample = readSample(sampleIndex, topologyChanged);
+            sample = readSample(sample_index, topology_changed);
 
-            m_theSample = sample;
+            m_the_sample = sample;
         }
-        else
-        {
+        else {
             DebugLog("  Update sample");
 
-            bool dataChanged = false;
-
-            sample = m_theSample;
-
-            sample->updateConfig(m_config, topologyChanged, dataChanged);
+            bool data_changed = false;
+            sample = m_the_sample;
+            sample->updateConfig(m_config, topology_changed, data_changed);
             
 
-            if (!m_config.forceUpdate && !dataChanged && !m_config.interpolateSamples)
-            {
+            if (!m_config.force_update && !data_changed && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
 
                 sample = 0;
             }
         }
     }
-    else
-    {
-        auto& sp = m_samples[sampleIndex];
+    else {
+        auto& sp = m_samples[sample_index];
 
-        if (!sp)
-        {
+        if (!sp) {
             DebugLog("  Create new cache sample");
 
-            sp.reset(readSample(sampleIndex, topologyChanged));
+            sp.reset(readSample(sample_index, topology_changed));
 
             sample = sp.get();
         }
-        else
-        {
+        else {
             DebugLog("  Update cached sample");
 
-            bool dataChanged = false;
-
+            bool data_changed = false;
             sample = sp.get();
-
-            sample->updateConfig(m_config, topologyChanged, dataChanged);
+            sample->updateConfig(m_config, topology_changed, data_changed);
 
             // force update if sample has changed from previously queried one
-            if (sampleIndex != m_lastSampleIndex)
-            {
-                if (m_varyingTopology)
-                {
-                    topologyChanged = true;
+            if (sample_index != m_last_sample_index) {
+                if (m_varying_topology) {
+                    topology_changed = true;
                 }
             }
-            else if (!dataChanged && !m_config.forceUpdate && !m_config.interpolateSamples)
-            {
+            else if (!data_changed && !m_config.force_update && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
 
                 sample = 0;
@@ -283,20 +262,17 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
         }
     }
 
-    m_lastSampleIndex = sampleIndex;
+    m_last_sample_index = sample_index;
 
-    if (sample)
-    {
-        if (!m_varyingTopology && m_config.interpolateSamples)
-        {   
+    if (sample) {
+        if (!m_varying_topology && m_config.interpolate_samples) {
             AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-            auto indexTime = m_timeSampling->getSampleTime(sampleIndex);
-            sample->m_currentTimeOffset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));
-            sample->m_currentTimeInterval = interval;
+            auto indexTime = m_time_sampling->getSampleTime(sample_index);
+            sample->m_current_time_offset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));
+            sample->m_current_time_interval = interval;
         }
-        invokeSampleCallback(sample, topologyChanged);
+        invokeSampleCallback(sample, topology_changed);
     }
-
     updateProperties(ss);
 
     return sample;

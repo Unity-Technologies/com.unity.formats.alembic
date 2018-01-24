@@ -7,8 +7,8 @@
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
-    : m_currentTimeOffset(0)
-    , m_currentTimeInterval(0)
+    : m_current_time_offset(0)
+    , m_current_time_interval(0)
     , m_schema(schema)
 {
     m_config = schema->getConfig();
@@ -61,11 +61,11 @@ void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
     }
 }
 
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const
+void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topology_changed) const
 {
     if (m_sampleCb)
     {
-        m_sampleCb(m_sampleCbArg, sample, topologyChanged);
+        m_sampleCb(m_sampleCbArg, sample, topology_changed);
     }
 }
 

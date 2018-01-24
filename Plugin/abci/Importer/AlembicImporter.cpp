@@ -113,13 +113,13 @@ abciAPI void aiUpdateSamples(aiContext* ctx, float time)
     }
 }
 
-abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData)
+abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data)
 {
     if (obj == nullptr) { return; }
 
     try
     {
-        obj->eachChildren([&](aiObject *child) { e(child, userData); });
+        obj->eachChildren([&](aiObject *child) { e(child, user_data); });
     }
     catch (Alembic::Util::Exception ex)
     {
@@ -209,11 +209,11 @@ abciAPI aiXForm* aiGetXForm(aiObject* obj)
     return obj ? obj->getXForm() : nullptr;
 }
 
-abciAPI void aiXFormGetData(aiXFormSample* sample, aiXFormData *outData)
+abciAPI void aiXFormGetData(aiXFormSample* sample, aiXFormData *dst)
 {
     if (sample)
     {
-        sample->getData(*outData);
+        sample->getData(*dst);
     }
 }
 
@@ -230,11 +230,11 @@ abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
     }
 }
 
-abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh)
+abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool force_refresh)
 {
     if (sample)
     {
-        sample->getSummary(forceRefresh, *summary, sample);
+        sample->getSummary(force_refresh, *summary, sample);
     }
 }
 
@@ -246,16 +246,16 @@ abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* 
     }
 }
 
-abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex)
+abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int split_index)
 {
-    return sample ? sample->getVertexBufferLength(splitIndex) : 0;
+    return sample ? sample->getVertexBufferLength(split_index) : 0;
 }
 
-abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data)
+abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data)
 {
     if (sample)
     {
-        sample->fillVertexBuffer(splitIndex, *data);
+        sample->fillVertexBuffer(split_index, *data);
     }
 }
 
@@ -264,9 +264,9 @@ abciAPI int aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample)
     return sample ? sample->prepareSubmeshes(sample) : 0;
 }
 
-abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex)
+abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int split_index)
 {
-    return sample ? sample->getSplitSubmeshCount(splitIndex) : 0;
+    return sample ? sample->getSplitSubmeshCount(split_index) : 0;
 }
 
 abciAPI bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
@@ -287,11 +287,11 @@ abciAPI aiCamera* aiGetCamera(aiObject* obj)
     return obj ? obj->getCamera() : nullptr;
 }
 
-abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *outData)
+abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *dst)
 {
     if (sample)
     {
-        sample->getData(*outData);
+        sample->getData(*dst);
     }
 }
 
@@ -316,16 +316,16 @@ abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
     schema->setSortPosition(v);
 }
 
-abciAPI void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData)
+abciAPI void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *dst)
 {
     if (sample == nullptr) { return; }
-    sample->getDataPointer(*outData);
+    sample->getDataPointer(*dst);
 }
 
-abciAPI void aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData)
+abciAPI void aiPointsCopyData(aiPointsSample* sample, aiPointsData *dst)
 {
     if (sample == nullptr) { return; }
-    sample->copyData(*outData);
+    sample->copyData(*dst);
 }
 
 
