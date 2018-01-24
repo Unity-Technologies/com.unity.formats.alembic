@@ -212,14 +212,6 @@ struct aiSubmeshData
 
 };
 
-struct aiFacesets
-{
-    int32_t count = 0;
-    int32_t *faceCounts = nullptr;
-    int32_t *faceIndices = nullptr;
-};
-
-
 struct aiPointsSummary
 {
     bool hasVelocity = false;
@@ -302,7 +294,7 @@ abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshD
 // all these below aiPolyMesh* are mesh splitting functions
 abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
-abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
+abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample);
 abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
 abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);

@@ -24,15 +24,7 @@ static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
 }
 
 Topology::Topology()
-    : m_triangulatedIndexCount(0)
-    , m_tangentsCount(0)
-    , m_vertexSharingEnabled(false)
-    , m_FreshlyReadTopologyData(false)
-    , m_TreatVertexExtraDataAsStatic(false)
-    , m_use32BitsIndexBuffer(false)
 {
-    m_faceIndices.reset();
-    m_vertexCountPerFace.reset();
 }
 
 void Topology::clear()
@@ -84,8 +76,8 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
     DebugLog("Topology::updateSplits()");
     
     int splitIndex = 0;
-    size_t indexOffset = 0;
-    size_t faceCount = m_vertexCountPerFace->size();
+    int indexOffset = 0;
+    int faceCount = (int)m_vertexCountPerFace->size();
 
     m_faceSplitIndices.resize(faceCount); // number of faces
 
@@ -101,7 +93,7 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
             m_faceSplitIndices[i] = 0;
 
         curSplit->lastFace = faceCount-1;
-        curSplit->vertexCount = m_FixedTopoPositionsIndexes.size();
+        curSplit->vertexCount = (int)m_FixedTopoPositionsIndexes.size();
     }
     else
     {
@@ -111,12 +103,10 @@ void Topology::updateSplits(aiPolyMeshSample * meshSample)
 
         SplitInfo *curSplit = &(m_splits.back());
 
-        for (size_t i = 0; i<faceCount; ++i)
-        {
-            size_t nv = (size_t)m_vertexCountPerFace->get()[i];
+        for (int i = 0; i<faceCount; ++i) {
+            int nv = m_vertexCountPerFace->get()[i];
 
-            if (curSplit->vertexCount + nv > maxVertexSplitCount)
-            {
+            if (curSplit->vertexCount + nv > maxVertexSplitCount) {
                 m_splits.push_back(SplitInfo(i, indexOffset));
 
                 ++splitIndex;
@@ -146,182 +136,70 @@ int Topology::getVertexBufferLength(int splitIndex) const
     }
 }
 
-int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
-                               const aiFacesets &inFacesets,
-                               aiPolyMeshSample* sample)
+int Topology::prepareSubmeshes(abcFaceSetSamples& fs, aiPolyMeshSample* sample)
 {
     DebugLog("Topology::prepareSubmeshes()");
     
-    std::vector<std::vector<size_t>> facesets;
-    std::vector<int> facesetIndices; // index -> face table
+    const auto *counts = m_vertexCountPerFace->get();
+    auto num_counts = m_vertexCountPerFace->size();
+    const auto *indices = m_FaceIndexingReindexed.data();
+    auto num_indices = m_FaceIndexingReindexed.size();
+
+    RawVector<int> offsets(num_counts); // face -> offset of indices
+    auto require_offset_table = [&]() {
+        int total = 0;
+        for (size_t fi = 0; fi < num_counts; ++fi) {
+            offsets[fi] = total;
+            total += counts[fi];
+        }
+    };
 
 
     m_submeshes.clear();
-
-    if (inFacesets.count > 0)
-    {
-        int index_count = 0;
-        int max_index = 0;
-        {
-            int n = inFacesets.count;
-            for (int i = 0; i < n; ++i)
-            {
-                int ngon = inFacesets.faceCounts[i];
-                for (int j = 0; j < ngon; ++j)
-                {
-                    max_index = std::max<int>(max_index, inFacesets.faceIndices[index_count++]);
-                }
-            }
-        }
-        facesetIndices.resize(max_index, -1);
-
-
-        size_t index = 0;
-        int defaultFacesetIndex = -1;
-
-        facesets.resize(inFacesets.count);
-
-        for (int i=0; i<inFacesets.count; ++i)
-        {
-            auto& faceset = facesets[i];
-
-            if (inFacesets.faceCounts[i] == 0)
-            {
-                defaultFacesetIndex = i;
-            }
-            else
-            {
-                for (int j=0; j<inFacesets.faceCounts[i]; ++j)
-                {
-                    size_t f = size_t(inFacesets.faceIndices[index++]);
-
-                    faceset.push_back(f);
-
-                    facesetIndices[f] = i;
-                }
-            }
-        }
-
-        if (defaultFacesetIndex != -1) {
-            facesetIndices.resize(m_vertexCountPerFace->size(), -1);
-            for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-            {
-                if (facesetIndices[i] == -1) {
-                    facesetIndices[i] = defaultFacesetIndex;
-                }
-            }
-        }
-    }
-    else
-    {
-        facesetIndices.resize(m_vertexCountPerFace->size(), -1);
-    }
-
     int nsplits = getSplitCount(sample, false);
-
-    if (facesets.empty() && nsplits == 1)
-    {
-        // no facesets, no uvs, no splits
-        m_submeshes.push_back(Submesh());
-        
-        Submesh &submesh = m_submeshes.back();
-
-        for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-        {
-            submesh.triangleCount += (m_vertexCountPerFace->get()[i] - 2);
+    if (nsplits == 1) {
+        if (fs.empty()) {
+            m_submeshes.push_back(Submesh());
+            auto& submesh = m_submeshes.back();
+            for (int i = 0; i < num_counts; ++i) {
+                submesh.triangleCount += (counts[i] - 2);
+            }
+            m_splits[0].submeshCount = 1;
         }
+        else {
+            require_offset_table();
 
-        m_splits[0].submeshCount = 1;
+            int nsubmeshes = (int)fs.size();
+            m_splits[0].submeshCount = nsubmeshes;
+            for (int smi = 0; smi < nsubmeshes; ++smi) {
+                m_submeshes.push_back(Submesh());
+                auto& submesh = m_submeshes.back();
+                submesh.index = smi;
+
+                auto& smfaces = *fs[smi].getFaces();
+                submesh.faces.assign(smfaces.get(), smfaces.get() + smfaces.size());
+                int total = 0;
+                for (int fii = 0; fii < (int)submesh.faces.size(); ++fii) {
+                    int fi = submesh.faces[fii];
+                    int count = counts[fi];
+                    submesh.triangleCount += (count - 2);
+                    total += count;
+                }
+                submesh.vertexIndices.resize_discard(total);
+                auto *dst_indices = submesh.vertexIndices.data();
+                for (int fii = 0; fii < (int)submesh.faces.size(); ++fii) {
+                    int fi = submesh.faces[fii];
+                    int count = counts[fi];
+                    int offset = offsets[fi];
+                    std::copy(indices + offset, indices + (offset + count), dst_indices);
+                    dst_indices += count;
+                }
+            }
+        }
     }
     else
     {
-        int vertexIndex = 0;
-        Submesh *curMesh;
-        const Util::uint32_t *uvIndices = nullptr;
-        const abcV2 *uvValues = nullptr;
-        
-        std::map<SubmeshKey, size_t> submeshIndices;
 
-        std::vector<int> splitSubmeshIndices(nsplits, 0);
-
-        for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-        {
-            int nv = m_vertexCountPerFace->get()[i];
-            
-            if (nv == 0)
-            {
-                continue;
-            }
-
-            int facesetIndex = facesetIndices[i];
-            int splitIndex = m_faceSplitIndices[i];
-
-            SplitInfo &split = m_splits[splitIndex];
-
-            // Compute submesh ID based on face's average UV coordinate and it faceset index
-            float uAcc = 0.0f;
-            float vAcc = 0.0f;
-            float invNv = 1.0f / float(nv);
-
-            if (uvValues)
-            {
-                for (int j=0; j<nv; ++j)
-                {
-                    abcV2 uv = uvValues[uvIndices[vertexIndex + j]];
-                    uAcc += uv.x;
-                    vAcc += uv.y;
-                }
-            }
-
-            SubmeshKey sid(uAcc * invNv, vAcc * invNv, facesetIndex, splitIndex);
-
-            auto submeshIndexIt = submeshIndices.find(sid);
-
-            if (submeshIndexIt == submeshIndices.end())
-            {
-                submeshIndices[sid] = m_submeshes.size();
-
-                m_submeshes.push_back(Submesh(facesetIndex, splitIndex));
-
-                curMesh = &(m_submeshes.back());
-
-                curMesh->index = splitSubmeshIndices[splitIndex]++;
-
-                if(m_vertexSharingEnabled)
-                    curMesh->vertexIndices.reserve(m_FixedTopoPositionsIndexes.size());
-                else
-                    curMesh->vertexIndices.reserve(m_faceIndices->size());
-
-                split.submeshCount = splitSubmeshIndices[splitIndex];
-            }
-            else
-            {
-                curMesh = &(m_submeshes[submeshIndexIt->second]);
-            }
-
-            curMesh->faces.push_back(i);
-            curMesh->triangleCount += (nv - 2);
-
-            if (m_vertexSharingEnabled)
-            {
-                for (int j = 0; j<nv; ++j, ++vertexIndex)
-                {
-                    curMesh->vertexIndices.push_back( (int)( m_FaceIndexingReindexed[vertexIndex] - split.indexOffset) );
-                }
-            }
-            else
-            {
-                for (int j=0; j<nv; ++j, ++vertexIndex)
-                {
-                    curMesh->vertexIndices.push_back(vertexIndex - int(split.indexOffset));
-                }
-            }
-        }
-
-        for (size_t i=0; i<m_submeshes.size(); ++i)
-        {
-            m_submeshes[i].vertexIndices.shrink_to_fit();
-        }
     }
 
     return (int) m_submeshes.size();
@@ -478,7 +356,7 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
             m_topology->m_tangentIndices[i] = indices[i];
         }
 
-        m_topology->m_tangentsCount = m_positions->size();
+        m_topology->m_tangentsCount = (int)m_positions->size();
     }
     else
     {
@@ -511,7 +389,7 @@ void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3
             }
         }
 
-        m_topology->m_tangentsCount = uniqueIndices.size(); 
+        m_topology->m_tangentsCount = (int)uniqueIndices.size(); 
     }
     
     aiLogger::Info("%lu unique tangent(s)", m_topology->m_tangentsCount);
@@ -1652,14 +1530,12 @@ void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
     data.size = bbmax - bbmin;
 }
 
-int aiPolyMeshSample::prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets)
+int aiPolyMeshSample::prepareSubmeshes(aiPolyMeshSample* sample)
 {
     DebugLog("aiPolyMeshSample::prepateSubmeshes()");
-    
-    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, sample);
 
+    int rv = m_topology->prepareSubmeshes(m_facesets, sample);
     m_curSubmesh = m_topology->submeshBegin();
-
     return rv;
 }
 
@@ -1681,7 +1557,6 @@ bool aiPolyMeshSample::getNextSubmesh(aiSubmeshSummary &summary)
     else
     {
         Submesh &submesh = *m_curSubmesh;
-
         summary.index = int(m_curSubmesh - m_topology->submeshBegin());
         summary.splitIndex = submesh.splitIndex;
         summary.splitSubmeshIndex = submesh.index;
@@ -1689,7 +1564,6 @@ bool aiPolyMeshSample::getNextSubmesh(aiSubmeshSummary &summary)
         summary.triangleCount = int(submesh.triangleCount);
 
         ++m_curSubmesh;
-
         return true;
     }
 }
@@ -1714,52 +1588,38 @@ void aiPolyMeshSample::fillSubmeshIndices(const aiSubmeshSummary &summary, aiSub
         if (submesh.faces.empty() && submesh.vertexIndices.empty())
         {
             // single submesh case, faces and vertexIndices not populated
-
-            for (size_t i=0; i<counts.size(); ++i)
-            {
+            for (size_t i=0; i<counts.size(); ++i) {
                 int nv = counts[i];
-                
                 int nt = nv - 2;
-                if (m_topology->m_FixedTopoPositionsIndexes.size() > 0)
-                {
-                    for (int ti = 0; ti<nt; ++ti)
-                    {
+                if (m_topology->m_FixedTopoPositionsIndexes.size() > 0) {
+                    for (int ti = 0; ti<nt; ++ti) {
                         data.indices[offset + 0] = m_topology->m_FaceIndexingReindexed[index];
                         data.indices[offset + 1] = m_topology->m_FaceIndexingReindexed[index + ti + i1];
                         data.indices[offset + 2] = m_topology->m_FaceIndexingReindexed[index + ti + i2];
                         offset += 3;
                     }
                 }
-                else
-                {
-                    for (int ti = 0; ti<nt; ++ti)
-                    {
+                else {
+                    for (int ti = 0; ti<nt; ++ti) {
                         data.indices[offset + 0] = index;
                         data.indices[offset + 1] = index + ti + i1;
                         data.indices[offset + 2] = index + ti + i2;
                         offset += 3;
                     }
                 }
-
                 index += nv;
             }
         }
-        else
-        {
-            for (const size_t& f : submesh.faces)
-            {
+        else {
+            for (int32_t f : submesh.faces) {
                 int nv = counts[f];
-                
-                // Triangle faning
                 int nt = nv - 2;
-                for (int ti = 0; ti < nt; ++ti)
-                {
+                for (int ti = 0; ti < nt; ++ti) {
                     data.indices[offset + 0] = submesh.vertexIndices[index];
                     data.indices[offset + 1] = submesh.vertexIndices[index + ti + i1];
                     data.indices[offset + 2] = submesh.vertexIndices[index + ti + i2];
                     offset += 3;
                 }
-
                 index += nv;
             }
         }
@@ -1894,6 +1754,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
         DebugLog("  Read face indices");
         m_schema.getFaceIndicesProperty().get(topology->m_faceIndices, ss);
         topologyChanged = true;
+    }
+
+    if (topologyChanged && !m_facesets.empty()) {
+        sample->m_facesets.resize(m_facesets.size());
+        for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
+            m_facesets[fi].get(sample->m_facesets[fi], ss);
+        }
     }
 
     DebugLog("  Read positions");
@@ -2060,7 +1927,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyCha
         topology->m_indicesSwapedFaceWinding.clear();
     }
 
-    if (m_config.shareVertices && !m_varyingTopology && sample != NULL && !sample->m_ownTopology && topologyChanged)
+    if (m_config.shareVertices && !m_varyingTopology && sample != nullptr && !sample->m_ownTopology && topologyChanged)
         GenerateVerticesToFacesLookup(sample);
 
     return sample;
@@ -2279,4 +2146,3 @@ void aiPolyMesh::getSummary(aiMeshSummary &summary) const
     summary.peakTriangulatedIndexCount = getPeakTriangulatedIndexCount();
     summary.peakSubmeshCount = ceildiv(summary.peakIndexCount, 64998);
 }
-

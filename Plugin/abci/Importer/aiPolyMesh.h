@@ -1,52 +1,20 @@
 #pragma once
 
-struct SubmeshKey
-{
-    int uTile;
-    int vTile;
-    int facesetIndex;
-    int splitIndex;
-
-    inline SubmeshKey(float u, float v, int fi=-1, int si=0)
-        : uTile((int)floor(u))
-        , vTile((int)floor(v))
-        , facesetIndex(fi)
-        , splitIndex(si)
-    {
-    }
-
-    SubmeshKey(const SubmeshKey&) = default;
-    SubmeshKey& operator=(const SubmeshKey&) = default;
-
-    inline bool operator<(const SubmeshKey &rhs) const
-    {
-        if (splitIndex < rhs.splitIndex) return true;
-        if (splitIndex > rhs.splitIndex) return false;
-        
-        if (facesetIndex < rhs.facesetIndex) return true;
-        if (facesetIndex > rhs.facesetIndex) return false;
-        
-        if (uTile < rhs.uTile) return true;
-        if (uTile > rhs.uTile) return false;
-
-        return (vTile < rhs.vTile);
-    }
-};
+using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
+using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
 struct SplitInfo
 {
-    size_t firstFace;
-    size_t lastFace;
-    size_t indexOffset;
-    size_t vertexCount;
-    size_t submeshCount;
+    int firstFace = 0;
+    int lastFace = 0;
+    int indexOffset = 0;
+    int vertexCount = 0;
+    int submeshCount = 0;
 
-    inline SplitInfo(size_t ff=0, size_t io=0)
+    inline SplitInfo(int ff=0, int io=0)
         : firstFace(ff)
         , lastFace(ff)
         , indexOffset(io)
-        , vertexCount(0)
-        , submeshCount(0)
     {
     }
 
@@ -56,18 +24,16 @@ struct SplitInfo
 
 struct Submesh
 {
-    std::vector<size_t> faces;
-    std::vector<int> vertexIndices;
-    size_t triangleCount;
-    int facesetIndex;
-    int splitIndex;
-    int index; // submesh index in split
+    RawVector<int> faces;
+    RawVector<int> vertexIndices;
+    int triangleCount = 0;
+    int facesetIndex = 0;
+    int splitIndex = 0;
+    int index = 0; // submesh index in split
 
     inline Submesh(int fsi=-1, int si=0)
-        : triangleCount(0)
-        , facesetIndex(fsi)
+        : facesetIndex(fsi)
         , splitIndex(si)
-        , index(0)
     {
     }
 
@@ -136,7 +102,7 @@ public:
     void updateSplits(aiPolyMeshSample * meshSample);
 
     int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, aiPolyMeshSample* sample);
+    int prepareSubmeshes(abcFaceSetSamples& fs, aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
 
     inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
@@ -151,25 +117,24 @@ public:
 
 public:
     Abc::Int32ArraySamplePtr m_faceIndices;
+    Abc::Int32ArraySamplePtr m_vertexCountPerFace;
+
     std::vector<int32_t> m_indicesSwapedFaceWinding;
     std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
-    Abc::Int32ArraySamplePtr m_vertexCountPerFace;
-    int m_triangulatedIndexCount;
-
-    Submeshes m_submeshes;
     std::vector<int> m_faceSplitIndices;
-    std::vector<SplitInfo> m_splits;
-
     std::vector<int> m_tangentIndices;
-    size_t m_tangentsCount;
-
+    std::vector<SplitInfo> m_splits;
     std::vector<uint32_t> m_FixedTopoPositionsIndexes;
     std::vector<uint32_t> m_FaceIndexingReindexed;
+    Submeshes m_submeshes;
 
-    bool m_vertexSharingEnabled;
-    bool m_FreshlyReadTopologyData;
-    bool m_TreatVertexExtraDataAsStatic;
-    bool m_use32BitsIndexBuffer;
+    int m_triangulatedIndexCount = 0;
+    int m_tangentsCount = 0;
+
+    bool m_vertexSharingEnabled = false;
+    bool m_FreshlyReadTopologyData = false;
+    bool m_TreatVertexExtraDataAsStatic = false;
+    bool m_use32BitsIndexBuffer = false;
 };
 
 // ---
@@ -202,20 +167,22 @@ public:
     int getVertexBufferLength(int splitIndex) const;
     void fillVertexBuffer(int splitIndex, aiPolyMeshData &data);
 
-    int prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets);
+    int prepareSubmeshes(aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
     bool getNextSubmesh(aiSubmeshSummary &summary);
     void fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const;
 
 public:
-    Topology *m_topology;
-    bool m_ownTopology;
     Abc::P3fArraySamplePtr m_positions;
     Abc::P3fArraySamplePtr m_nextPositions;
     Abc::V3fArraySamplePtr m_velocities;
     AbcGeom::IN3fGeomParam::Sample m_normals;
     AbcGeom::IV2fGeomParam::Sample m_uvs;
     Abc::Box3d m_bounds;
+    abcFaceSetSamples m_facesets;
+
+    Topology *m_topology = nullptr;
+    bool m_ownTopology = false;
 
     std::vector<abcV3> m_smoothNormals;
     std::vector<abcV4> m_tangents;
@@ -232,7 +199,7 @@ struct aiPolyMeshTraits
 
 class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 {
-typedef aiTSchema<aiPolyMeshTraits> super;
+using super = aiTSchema<aiPolyMeshTraits>;
 public:
     aiPolyMesh(aiObject *obj);
     Sample* newSample();
@@ -259,5 +226,5 @@ private:
     Topology m_sharedTopology;
     AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
     AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
-    std::vector<AbcGeom::IFaceSetSchema> m_facesets;
+    abcFaceSetSchemas m_facesets;
 };

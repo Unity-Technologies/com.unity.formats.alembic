@@ -117,9 +117,7 @@ namespace UTJ.Alembic
             // if 'forceUpdate' is set true, even if alembic sample data do not change at all
             // AbcSampleUpdated will still be called (topologyChanged will be false)
 
-            var abcMaterials = AlembicTreeNode.linkedGameObj.GetComponent<AlembicMaterial>();
-
-            config.forceUpdate = m_FreshSetup || (abcMaterials != null ? abcMaterials.HasFacesetsChanged() : hasFacesets);
+            config.forceUpdate = m_FreshSetup;
         }
 
         public override void AbcUpdateConfig()
@@ -129,18 +127,7 @@ namespace UTJ.Alembic
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
-            var abcMaterials = AlembicTreeNode.linkedGameObj.GetComponent<AlembicMaterial>();
-
-            if (abcMaterials != null)
-            {
-                if (abcMaterials.HasFacesetsChanged())
-                {
-                    topologyChanged = true;
-                }
-
-                hasFacesets = (abcMaterials.GetFacesetsCount() > 0);
-            }
-            else if (hasFacesets)
+            if (hasFacesets)
             {
                 topologyChanged = true;
                 hasFacesets = false;
@@ -149,7 +136,6 @@ namespace UTJ.Alembic
             if (m_FreshSetup)
             {
                 topologyChanged = true;
-
                 m_FreshSetup = false;
             }
 
@@ -213,11 +199,6 @@ namespace UTJ.Alembic
                 AbcAPI.aiSubmeshSummary submeshSummary = default(AbcAPI.aiSubmeshSummary);
                 AbcAPI.aiSubmeshData submeshData = default(AbcAPI.aiSubmeshData);
 
-                if (abcMaterials != null)
-                {
-                    abcMaterials.GetFacesets(ref facesets);
-                }
-                
                 int numSubmeshes = AbcAPI.aiPolyMeshPrepareSubmeshes(sample, ref facesets);
 
                 if (submeshes.Count > numSubmeshes)
@@ -266,11 +247,6 @@ namespace UTJ.Alembic
                     submeshData.indices = submesh.indexCache;
 
                     AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
-                }
-                
-                if (abcMaterials != null)
-                {
-                    abcMaterials.AknowledgeFacesetsChanges();
                 }
             }
             else
