@@ -31,7 +31,6 @@ namespace UTJ.Alembic
         public class Submesh
         {
             public PinnedList<int> indexCache = new PinnedList<int>();
-            public int facesetIndex;
             public int splitIndex;
             public int index;
 
@@ -195,22 +194,19 @@ namespace UTJ.Alembic
 
             if (topologyChanged)
             {
-                AbcAPI.aiFacesets facesets = default(AbcAPI.aiFacesets);
-                AbcAPI.aiSubmeshSummary submeshSummary = default(AbcAPI.aiSubmeshSummary);
-                AbcAPI.aiSubmeshData submeshData = default(AbcAPI.aiSubmeshData);
-
-                int numSubmeshes = AbcAPI.aiPolyMeshPrepareSubmeshes(sample, ref facesets);
-
+                int numSubmeshes = AbcAPI.aiPolyMeshPrepareSubmeshes(sample);
                 if (submeshes.Count > numSubmeshes)
                 {
                     submeshes.RemoveRange(numSubmeshes, submeshes.Count - numSubmeshes);
                 }
-                
-                for (int s=0; s<sampleSummary.splitCount; ++s)
+
+                for (int s = 0; s < sampleSummary.splitCount; ++s)
                 {
                     splits[s].submeshCount = AbcAPI.aiPolyMeshGetSplitSubmeshCount(sample, s);
                 }
 
+                var submeshSummary = new AbcAPI.aiSubmeshSummary();
+                var submeshData = new AbcAPI.aiSubmeshData();
                 while (AbcAPI.aiPolyMeshGetNextSubmesh(sample, ref submeshSummary))
                 {
                     if (submeshSummary.splitIndex >= splits.Count)
@@ -220,32 +216,25 @@ namespace UTJ.Alembic
                     }
 
                     Submesh submesh = null;
-
                     if (submeshSummary.index < submeshes.Count)
                     {
                         submesh = submeshes[submeshSummary.index];
                     }
                     else
                     {
-                        submesh = new Submesh
-                        {
-                            facesetIndex = -1,
+                        submesh = new Submesh {
                             splitIndex = -1,
                             index = -1,
                             update = true
                         };
-
                         submeshes.Add(submesh);
                     }
 
-                    submesh.facesetIndex = submeshSummary.facesetIndex;
                     submesh.splitIndex = submeshSummary.splitIndex;
                     submesh.index = submeshSummary.splitSubmeshIndex;
                     submesh.update = true;
-
                     submesh.indexCache.Resize(3 * submeshSummary.triangleCount);
                     submeshData.indices = submesh.indexCache;
-
                     AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
                 }
             }
@@ -372,11 +361,9 @@ namespace UTJ.Alembic
             for (int s=0; s<submeshes.Count; ++s)
             {
                 Submesh submesh = submeshes[s];
-
                 if (submesh.update)
                 {
                     splits[submesh.splitIndex].mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, submesh.index);
-
                     submesh.update = false;
                 }
             }

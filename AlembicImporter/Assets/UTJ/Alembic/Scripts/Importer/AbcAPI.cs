@@ -118,13 +118,6 @@ namespace UTJ.Alembic
             public int requestedTimeIndexType;
         }
 
-        public struct aiFacesets
-        {
-            public int count;
-            public IntPtr faceCounts;
-            public IntPtr faceIndices;
-        }
-
         public struct aiMeshSummary
         {
             public aiTopologyVariance topologyVariance;
@@ -209,31 +202,31 @@ namespace UTJ.Alembic
 
         public struct aiContext
         {
-            public System.IntPtr ptr;
+            public IntPtr ptr;
             public static implicit operator bool(aiContext v) { return v.ptr != IntPtr.Zero; }
         }
 
         public struct aiObject
         {
-            public System.IntPtr ptr;
+            public IntPtr ptr;
             public static implicit operator bool(aiObject v) { return v.ptr != IntPtr.Zero; }
         }
 
         public struct aiSchema
         {
-            public System.IntPtr ptr;
+            public IntPtr ptr;
             public static implicit operator bool(aiSchema v) { return v.ptr != IntPtr.Zero; }
         }
 
         public struct aiProperty
         {
-            public System.IntPtr ptr;
+            public IntPtr ptr;
             public static implicit operator bool(aiProperty v) { return v.ptr != IntPtr.Zero; }
         }
 
         public struct aiSample
         {
-            public System.IntPtr ptr;
+            public IntPtr ptr;
             public static implicit operator bool(aiSample v) { return v.ptr != IntPtr.Zero; }
         }
 
@@ -294,7 +287,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
         [DllImport("abci")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
         [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
-        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
+        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample);
         [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
         [DllImport("abci")] public static extern Bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
         [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
@@ -352,13 +345,10 @@ namespace UTJ.Alembic
             };
 
             GCHandle hdl = GCHandle.Alloc(ic);
-
             aiObject top = aiGetTopObject(ctx);
-
             if (top.ptr != (IntPtr)0)
             {
                 aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(hdl));
-
                 foreach (aiObject obj in ic.objectsToDelete)
                 {
                     aiDestroyObject(ctx, obj);

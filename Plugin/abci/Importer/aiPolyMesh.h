@@ -25,23 +25,15 @@ struct SplitInfo
 struct Submesh
 {
     RawVector<int> faces;
-    RawVector<int> vertexIndices;
+    RawVector<uint32_t> vertexIndices;
+    int indexCount = 0;
     int triangleCount = 0;
-    int facesetIndex = 0;
+    int faceCount = 0;
     int splitIndex = 0;
-    int index = 0; // submesh index in split
-
-    inline Submesh(int fsi=-1, int si=0)
-        : facesetIndex(fsi)
-        , splitIndex(si)
-    {
-    }
-
-    Submesh(const Submesh&) = default;
-    Submesh& operator=(const Submesh&) = default;
+    int submeshIndex = 0; // submesh index in split
 };
-
-typedef std::deque<Submesh> Submeshes;
+using SubmeshPtr = std::shared_ptr<Submesh>;
+using SubmeshPtrs = std::vector<SubmeshPtr>;
 
 struct TangentKey
 {
@@ -87,8 +79,8 @@ struct TangentKey
         return oss.str();
     }
 };
+using TangentIndexMap = std::map<TangentKey, int>;
 
-typedef std::map<TangentKey, int> TangentIndexMap;
 
 class Topology
 {
@@ -105,11 +97,11 @@ public:
     int prepareSubmeshes(abcFaceSetSamples& fs, aiPolyMeshSample* sample);
     int getSplitSubmeshCount(int splitIndex) const;
 
-    inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
-    inline Submeshes::iterator submeshEnd() { return m_submeshes.end(); }
+    inline SubmeshPtrs::iterator submeshBegin() { return m_submeshes.begin(); }
+    inline SubmeshPtrs::iterator submeshEnd() { return m_submeshes.end(); }
 
-    inline Submeshes::const_iterator submeshBegin() const { return m_submeshes.begin(); }
-    inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
+    inline SubmeshPtrs::const_iterator submeshBegin() const { return m_submeshes.begin(); }
+    inline SubmeshPtrs::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
     inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
     inline void Enable32BitsIndexbuffers(bool value) { m_use32BitsIndexBuffer = value; }
@@ -126,7 +118,7 @@ public:
     RawVector<uint32_t> m_FixedTopoPositionsIndexes;
     RawVector<uint32_t> m_FaceIndexingReindexed;
     std::vector<SplitInfo> m_splits;
-    Submeshes m_submeshes;
+    SubmeshPtrs m_submeshes;
 
     int m_triangulatedIndexCount = 0;
     int m_tangentsCount = 0;
@@ -136,14 +128,14 @@ public:
     bool m_TreatVertexExtraDataAsStatic = false;
     bool m_use32BitsIndexBuffer = false;
 };
+using TopologyPtr = std::shared_ptr<Topology>;
 
-// ---
 
 class aiPolyMeshSample : public aiSampleBase
 {
 typedef aiSampleBase super;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo );
+    aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo );
     virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
@@ -180,13 +172,13 @@ public:
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
-    Topology *m_topology = nullptr;
+    TopologyPtr m_topology;
     bool m_ownTopology = false;
 
-    std::vector<abcV3> m_smoothNormals;
-    std::vector<abcV4> m_tangents;
+    RawVector<abcV3> m_smoothNormals;
+    RawVector<abcV4> m_tangents;
 
-    Submeshes::iterator m_curSubmesh;
+    SubmeshPtrs::iterator m_curSubmesh;
 };
 
 
@@ -222,7 +214,7 @@ private:
     bool m_ignoreNormals;
     bool m_ignoreUVs;
 
-    Topology m_sharedTopology;
+    TopologyPtr m_sharedTopology;
     AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
     AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
     abcFaceSetSchemas m_facesets;

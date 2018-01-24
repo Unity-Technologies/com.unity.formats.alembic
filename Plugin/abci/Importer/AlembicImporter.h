@@ -25,14 +25,14 @@ class   aiObject;
     class aiSubDSample;     // : aiSampleBase
 #else
     // force make castable
-    typedef void aiSchemaBase;
-    typedef void aiSampleBase;
-    typedef void aiXFormSample;
-    typedef void aiCameraSample;
-    typedef void aiPolyMeshSample;
-    typedef void aiPointsSample;
-    typedef void aiCurvesSample;
-    typedef void aiSubDSample;
+    using aiSchemaBase     = void;
+    using aiSampleBase     = void;
+    using aiXFormSample    = void;
+    using aiCameraSample   = void;
+    using aiPolyMeshSample = void;
+    using aiPointsSample   = void;
+    using aiCurvesSample   = void;
+    using aiSubDSample     = void;
 #endif
 
 class   aiXForm;    // : aiSchemaBase
