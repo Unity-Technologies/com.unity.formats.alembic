@@ -133,7 +133,7 @@ using TopologyPtr = std::shared_ptr<Topology>;
 
 class aiPolyMeshSample : public aiSampleBase
 {
-typedef aiSampleBase super;
+using super = aiSampleBase;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo );
     virtual ~aiPolyMeshSample();
@@ -184,8 +184,8 @@ public:
 
 struct aiPolyMeshTraits
 {
-    typedef aiPolyMeshSample SampleT;
-    typedef AbcGeom::IPolyMeshSchema AbcSchemaT;
+    using SampleT = aiPolyMeshSample;
+    using AbcSchemaT = AbcGeom::IPolyMeshSchema;
 };
 
 class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>

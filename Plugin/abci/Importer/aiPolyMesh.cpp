@@ -165,7 +165,7 @@ int Topology::prepareSubmeshes(abcFaceSetSamples& face_sets, aiPolyMeshSample* s
             // setup table
             face_to_offset.resize_discard(num_counts);
             int total = 0;
-            for (size_t fi = 0; fi < num_counts; ++fi) {
+            for (int fi = 0; fi < num_counts; ++fi) {
                 face_to_offset[fi] = total;
                 total += counts[fi];
             }

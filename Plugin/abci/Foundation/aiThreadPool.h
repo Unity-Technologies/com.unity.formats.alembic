@@ -70,6 +70,6 @@ void aiTaskGroup::run(const F &f)
 #else // aiWithTBB
 
 #include <tbb/tbb.h>
-typedef tbb::task_group aiTaskGroup;
+using aiTaskGroup = tbb::task_group;
 
 #endif // aiWithTBB

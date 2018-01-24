@@ -22,11 +22,11 @@ aeProperty::~aeProperty()
 template<class T>
 class aeTArrayProprty : public aeProperty
 {
-typedef aeProperty super;
+using super = aeProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
-    typedef typename T::sample_type sample_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
+    using sample_type = typename T::sample_type;
 
     aeTArrayProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
@@ -59,10 +59,10 @@ template class aeTArrayProprty<abcFloat4x4ArrayProperty>;
 template<class T>
 class aeTScalarProprty : public aeProperty
 {
-    typedef aeProperty super;
+using super = aeProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
 
     aeTScalarProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))

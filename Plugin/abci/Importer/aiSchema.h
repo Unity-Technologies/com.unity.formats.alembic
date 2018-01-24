@@ -27,7 +27,7 @@ protected:
 class aiSchemaBase
 {
 public:
-    typedef std::unique_ptr<aiProperty> aiPropertyPtr;
+    using aiPropertyPtr = std::unique_ptr<aiProperty>;
 
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
@@ -77,11 +77,11 @@ template <class Traits>
 class aiTSchema : public aiSchemaBase
 {
 public:
-    typedef typename Traits::SampleT Sample;
-    typedef std::unique_ptr<Sample> SamplePtr;
-    typedef std::map<int64_t, SamplePtr> SampleCont;
-    typedef typename Traits::AbcSchemaT AbcSchema;
-    typedef Abc::ISchemaObject<AbcSchema> AbcSchemaObject;
+    using Sample = typename Traits::SampleT;
+    using SamplePtr = std::unique_ptr<Sample>;
+    using SampleCont = std::map<int64_t, SamplePtr>;
+    using AbcSchema = typename Traits::AbcSchemaT;
+    using AbcSchemaObject = Abc::ISchemaObject<AbcSchema>;
 
 
     aiTSchema(aiObject *obj)

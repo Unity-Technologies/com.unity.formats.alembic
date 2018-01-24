@@ -2,7 +2,7 @@
 
 class aiXFormSample : public aiSampleBase
 {
-typedef aiSampleBase super;
+using super = aiSampleBase;
 public:
     aiXFormSample(aiXForm *schema);
 
@@ -21,13 +21,13 @@ private:
 
 struct aiXFormTraits
 {
-    typedef aiXFormSample SampleT;
-    typedef AbcGeom::IXformSchema AbcSchemaT;
+    using SampleT = aiXFormSample;
+    using AbcSchemaT = AbcGeom::IXformSchema;
 };
 
 class aiXForm : public aiTSchema<aiXFormTraits>
 {
-typedef aiTSchema<aiXFormTraits> super;
+using super = aiTSchema<aiXFormTraits>;
 public:
     aiXForm(aiObject *obj);
 

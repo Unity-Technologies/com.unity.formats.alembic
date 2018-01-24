@@ -6,7 +6,7 @@ class aeContext;
 #ifdef abciImpl
     class aeObject;
 #else
-    typedef void aeObject; // force make upper-castable
+    using aeObject = void; // force make upper-castable
 #endif
 class aeXForm;    // : aeObject
 class aePoints;   // : aeObject

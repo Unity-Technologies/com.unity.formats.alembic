@@ -46,10 +46,10 @@ template<> struct aiGetPropertyTypeID<abcFloat4x4ArrayProperty> { static const a
 template<class T>
 class aiTScalarProprty : public aiProperty
 {
-    typedef aiProperty super;
+using super = aiProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
 
     aiTScalarProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))

@@ -2,7 +2,7 @@
 
 class aiCameraSample : public aiSampleBase
 {
-typedef aiSampleBase super;
+using super = aiSampleBase;
 public:
     aiCameraSample(aiCamera *schema);
     
@@ -18,14 +18,14 @@ public:
 
 struct aiCameraTraits
 {
-    typedef aiCameraSample SampleT;
-    typedef AbcGeom::ICameraSchema AbcSchemaT;
+    using SampleT = aiCameraSample;
+    using AbcSchemaT = AbcGeom::ICameraSchema;
 };
 
 
 class aiCamera : public aiTSchema<aiCameraTraits>
 {
-typedef aiTSchema<aiCameraTraits> super;
+using super = aiTSchema<aiCameraTraits>;
 public:
     aiCamera(aiObject *obj);
 

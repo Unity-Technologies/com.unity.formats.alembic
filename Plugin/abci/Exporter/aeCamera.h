@@ -2,7 +2,7 @@
 
 class aeCamera : public aeObject
 {
-typedef aeObject super;
+using super = aeObject;
 public:
     aeCamera(aeObject *parent, const char *name, uint32_t tsi);
     abcCamera& getAbcObject() override;

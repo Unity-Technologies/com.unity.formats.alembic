@@ -2,7 +2,7 @@
 
 class aiPointsSample : public aiSampleBase
 {
-typedef aiSampleBase super;
+using super = aiSampleBase;
 public:
     aiPointsSample(aiPoints *schema);
     virtual ~aiPointsSample();
@@ -28,13 +28,13 @@ public:
 
 struct aiPointsTraits
 {
-    typedef aiPointsSample SampleT;
-    typedef AbcGeom::IPointsSchema AbcSchemaT;
+    using SampleT = aiPointsSample;
+    using AbcSchemaT = AbcGeom::IPointsSchema;
 };
 
 class aiPoints : public aiTSchema<aiPointsTraits>
 {
-typedef aiTSchema<aiPointsTraits> super;
+using super = aiTSchema<aiPointsTraits>;
 public:
     aiPoints(aiObject *obj);
 

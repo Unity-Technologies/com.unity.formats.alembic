@@ -41,7 +41,7 @@ public:
     virtual void    setFromPrevious();
 
 protected:
-    typedef std::unique_ptr<aeProperty> aePropertyPtr;
+    using aePropertyPtr = std::unique_ptr<aeProperty>;
     aeContext                   *m_ctx = nullptr;
     aeObject                    *m_parent = nullptr;
     uint32_t                    m_tsi = 0;
