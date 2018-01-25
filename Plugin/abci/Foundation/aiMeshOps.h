@@ -100,20 +100,20 @@ struct MeshRefiner
 
     // outputs
     RawVector<int> old2new_indices; // old indices to new indices
-    RawVector<int> new2old_vertices; // new indices to old vertices
+    RawVector<int> new2old_points;  // new indices to old vertex data
+    RawVector<int> new2old_normals; // 
+    RawVector<int> new2old_uvs;     // 
     RawVector<int> offsets;
-
+    RawVector<int> new_indices;
+    RawVector<int> new_indices_triangulated;
+    RawVector<int> new_indices_submeshes;
     RawVector<float3> new_points;
     RawVector<float3> new_normals;
     RawVector<float2> new_uv;
-    RawVector<int>    new_indices;
-    RawVector<int>    new_indices_triangulated;
-    RawVector<int>    new_indices_submeshes;
-    int num_indices_triangulated = 0;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
-
     ConnectionData connection;
+    int num_indices_triangulated = 0;
 
 public:
     void refine();
@@ -125,9 +125,10 @@ private:
     void buildConnection();
 
     template<class Body> void doRefine(const Body& body);
-    int findOrAddVertexPNU(int vi, const float3& p, const float3& n, const float2& u);
-    int findOrAddVertexPN(int vi, const float3& p, const float3& n);
-    int findOrAddVertexPU(int vi, const float3& p, const float2& u);
+    template<class Hook> int findOrAddVertexPNU(int vi, const float3& p, const float3& n, const float2& u, const Hook& hook);
+    template<class Hook> int findOrAddVertexPN(int vi, const float3& p, const float3& n, const Hook& hook);
+    template<class Hook> int findOrAddVertexPU(int vi, const float3& p, const float2& u, const Hook& hook);
+    template<class Hook> int findOrAddVertexP(int vi, const float3& p, const Hook& hook);
 };
 
 
