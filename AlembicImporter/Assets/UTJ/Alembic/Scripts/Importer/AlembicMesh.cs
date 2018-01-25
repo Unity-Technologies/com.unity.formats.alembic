@@ -343,7 +343,7 @@ namespace UTJ.Alembic
                 for (int smi = 0; smi < splits[spi].submeshCount; ++smi)
                 {
                     var submesh = split.submeshes[smi];
-                    split.mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, smi);
+                    split.mesh.SetTriangles(submesh.indexCache.List, smi);
                 }
             }
 
