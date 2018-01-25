@@ -174,15 +174,15 @@ static inline void NormalizeSoAToAoS(uniform float3 dst[],
 }
 
 export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
-    uniform const float3 vertices[], uniform const int indices[],
-    uniform const int num_triangles, uniform const int num_vertices)
+    uniform const float3 points[], uniform const int indices[],
+    uniform const int num_points, uniform const int num_triangles)
 {
-    uniform int num_vertices_aligned = (num_vertices + (C - 1)) & ~(C - 1);
-    float * uniform mem_tmp = uniform new float[num_vertices_aligned * 3];
-    zeroclear(mem_tmp, num_vertices_aligned * 3);
-    float * uniform tnx = mem_tmp + num_vertices_aligned * 0;
-    float * uniform tny = mem_tmp + num_vertices_aligned * 1;
-    float * uniform tnz = mem_tmp + num_vertices_aligned * 2;
+    uniform int num_points_aligned = (num_points + (C - 1)) & ~(C - 1);
+    float * uniform mem_tmp = uniform new float[num_points_aligned * 3];
+    zeroclear(mem_tmp, num_points_aligned * 3);
+    float * uniform tnx = mem_tmp + num_points_aligned * 0;
+    float * uniform tny = mem_tmp + num_points_aligned * 1;
+    float * uniform tnz = mem_tmp + num_points_aligned * 2;
 
     uniform int num_triangles_simd = num_triangles & ~(C - 1);
 
@@ -190,9 +190,9 @@ export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
     for(uniform int bi=0; bi < num_triangles_simd; bi += C) {
         int ti = bi+I;
         int ti3 = ti * 3;
-        float3 p0 = vertices[indices[ti3  + 0]];
-        float3 p1 = vertices[indices[ti3  + 1]];
-        float3 p2 = vertices[indices[ti3  + 2]];
+        float3 p0 = points[indices[ti3  + 0]];
+        float3 p1 = points[indices[ti3  + 1]];
+        float3 p2 = points[indices[ti3  + 2]];
         float3 n = cross(p1 - p0, p2 - p0);
 
         for(uniform int ci=0; ci<C; ++ci) {
@@ -212,9 +212,9 @@ export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
         uniform int i0 = indices[ti3 + 0];
         uniform int i1 = indices[ti3 + 1];
         uniform int i2 = indices[ti3 + 2];
-        uniform float3 p0 = vertices[i0];
-        uniform float3 p1 = vertices[i1];
-        uniform float3 p2 = vertices[i2];
+        uniform float3 p0 = points[i0];
+        uniform float3 p1 = points[i1];
+        uniform float3 p2 = points[i2];
         uniform float3 n = cross(p1 - p0, p2 - p0);
 
         for(uniform int i=0; i<3; ++i) {
@@ -225,35 +225,35 @@ export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
         }
     }
 
-    NormalizeSoAToAoS(dst, tnx, tny, tnz, num_vertices);
+    NormalizeSoAToAoS(dst, tnx, tny, tnz, num_points);
     delete[] mem_tmp;
 }
 
 export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
-    uniform const float3 vertices[], uniform const float2 uv[], uniform const float3 normals[], uniform const int indices[],
-    uniform const int num_triangles, uniform const int num_vertices)
+    uniform const float3 points[], uniform const float2 uv[], uniform const float3 normals[], uniform const int indices[],
+    uniform const int num_points, uniform const int num_triangles)
 {
-    uniform int num_vertices_aligned = (num_vertices + (C - 1)) & ~(C - 1);
-    float * uniform mem_tmp = uniform new float[num_vertices_aligned * 6];
-    zeroclear(mem_tmp, num_vertices_aligned * 6);
-    float * uniform ttx = mem_tmp + num_vertices_aligned * 0;
-    float * uniform tty = mem_tmp + num_vertices_aligned * 1;
-    float * uniform ttz = mem_tmp + num_vertices_aligned * 2;
-    float * uniform tbx = mem_tmp + num_vertices_aligned * 3;
-    float * uniform tby = mem_tmp + num_vertices_aligned * 4;
-    float * uniform tbz = mem_tmp + num_vertices_aligned * 5;
+    uniform int num_points_aligned = (num_points + (C - 1)) & ~(C - 1);
+    float * uniform mem_tmp = uniform new float[num_points_aligned * 6];
+    zeroclear(mem_tmp, num_points_aligned * 6);
+    float * uniform ttx = mem_tmp + num_points_aligned * 0;
+    float * uniform tty = mem_tmp + num_points_aligned * 1;
+    float * uniform ttz = mem_tmp + num_points_aligned * 2;
+    float * uniform tbx = mem_tmp + num_points_aligned * 3;
+    float * uniform tby = mem_tmp + num_points_aligned * 4;
+    float * uniform tbz = mem_tmp + num_points_aligned * 5;
 
     uniform int num_triangles_simd = num_triangles & ~(C - 1);
-    uniform int num_vertices_simd = num_vertices & ~(C - 1);
+    uniform int num_points_simd = num_points & ~(C - 1);
 
     // SIMD pass
     for(uniform int bi=0; bi < num_triangles_simd; bi += C) {
         int ti = bi+I;
         int ti3 = ti*3;
         float3 v[3] = {
-             vertices[indices[ti3  + 0]],
-             vertices[indices[ti3  + 1]],
-             vertices[indices[ti3  + 2]],
+             points[indices[ti3  + 0]],
+             points[indices[ti3  + 1]],
+             points[indices[ti3  + 2]],
         };
         float2 u[3] = {
              uv[indices[ti3  + 0]],
@@ -277,9 +277,9 @@ export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
     for(uniform int ti=num_triangles_simd; ti < num_triangles; ++ti) {
         uniform int ti3 = ti*3;
         uniform float3 v[3] = {
-             vertices[indices[ti3  + 0]],
-             vertices[indices[ti3  + 1]],
-             vertices[indices[ti3  + 2]],
+             points[indices[ti3  + 0]],
+             points[indices[ti3  + 1]],
+             points[indices[ti3  + 2]],
         };
         uniform float2 u[3] = {
              uv[indices[ti3  + 0]],
@@ -299,7 +299,7 @@ export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
 
 
     // SIMD pass
-    for(uniform int bi=0; bi < num_vertices_simd; bi += C) {
+    for(uniform int bi=0; bi < num_points_simd; bi += C) {
         int vi = bi+I;
         float3 t = float3_(ttx[vi], tty[vi], ttz[vi]);
         float3 b = float3_(tbx[vi], tby[vi], tbz[vi]);
@@ -310,7 +310,7 @@ export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
     }
 
     // non-SIMD pass
-    for(uniform int vi=num_vertices_simd; vi < num_vertices; ++vi) {
+    for(uniform int vi=num_points_simd; vi < num_points; ++vi) {
         uniform float3 t = float3_(ttx[vi], tty[vi], ttz[vi]);
         uniform float3 b = float3_(tbx[vi], tby[vi], tbz[vi]);
         uniform float3 n = normals[vi];

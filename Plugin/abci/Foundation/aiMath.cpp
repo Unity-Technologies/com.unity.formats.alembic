@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "aiMath.h"
+#include "RawVector.h"
 
 
 // ispc implementation
@@ -28,8 +29,17 @@ void get_bounds_ispc(abcV3 & min, abcV3 & max, const abcV3 * points, int num)
 
 void gen_normals_ispc(abcV3 * dst, const abcV3 * points, const int * indices, int num_points, int num_triangles)
 {
-    ispc::GenerateNormalsTriangleIndexed((ispc::float3*)dst, (const ispc::float3*)points, indices, num_triangles, num_points);
+    ispc::GenerateNormalsTriangleIndexed((ispc::float3*)dst, (const ispc::float3*)points, indices, num_points, num_triangles);
 }
+
+void gen_tangents_ispc(abcV4 *dst,
+    const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
+    int num_points, int num_triangles)
+{
+    ispc::GenerateTangentsTriangleIndexed(
+        (ispc::float4*)dst, (const ispc::float3*)points, (const ispc::float2*)uv, (const ispc::float3*)normals, indices, num_points, num_triangles);
+}
+
 #endif // aiEnableISPC
 
 
@@ -96,6 +106,102 @@ void gen_normals_generic(abcV3 *dst, const abcV3 *points, const int *indices, in
     }
 }
 
+
+inline float angle_between(const abcV3& a, const abcV3& b)
+{
+    return std::acos(a.dot(b));
+}
+
+inline float angle_between2(const abcV3& pos1, const abcV3& pos2, const abcV3& center)
+{
+    return angle_between(
+        (pos1 - center).normalized(),
+        (pos2 - center).normalized());
+}
+
+inline void compute_triangle_tangent(
+    const abcV3(&vertices)[3], const abcV2(&uv)[3], abcV3(&dst_tangent)[3], abcV3(&dst_binormal)[3])
+{
+    auto p = vertices[1] - vertices[0];
+    auto q = vertices[2] - vertices[0];
+    auto s = abcV2{ uv[1].x - uv[0].x, uv[2].x - uv[0].x };
+    auto t = abcV2{ uv[1].y - uv[0].y, uv[2].y - uv[0].y };
+
+    float div = s.x * t.y - s.y * t.x;
+    float area = abs(div);
+    float rdiv = 1.0f / div;
+    s *= rdiv;
+    t *= rdiv;
+
+    auto tangent = abcV3{
+        t.y * p.x - t.x * q.x,
+            t.y * p.y - t.x * q.y,
+            t.y * p.z - t.x * q.z
+    }.normalized() * area;
+    auto binormal = abcV3{
+        s.x * q.x - s.y * p.x,
+            s.x * q.y - s.y * p.y,
+            s.x * q.z - s.y * p.z
+    }.normalized() * area;
+
+    float angles[3] = {
+        angle_between2(vertices[2], vertices[1], vertices[0]),
+        angle_between2(vertices[0], vertices[2], vertices[1]),
+        angle_between2(vertices[1], vertices[0], vertices[2]),
+    };
+    for (int v = 0; v < 3; ++v)
+    {
+        dst_tangent[v] = tangent * angles[v];
+        dst_binormal[v] = binormal * angles[v];
+    }
+}
+
+abcV4 orthogonalize_tangent(abcV3 tangent, abcV3 binormal, abcV3 normal)
+{
+    float NdotT = normal.dot(tangent);
+    tangent -= normal * NdotT;
+    float magT = tangent.length();
+    tangent = tangent / magT;
+
+    float NdotB = normal.dot(binormal);
+    float TdotB = tangent.dot(binormal) * magT;
+    binormal -= normal * NdotB - tangent * TdotB;;
+    float magB = binormal.length();
+    binormal = binormal / magB;
+
+    float sign = normal.cross(tangent).dot(binormal) > 0.0f ? 1.0f : -1.0f;
+    return { tangent.x, tangent.y, tangent.z, sign };
+}
+
+void gen_tangents_generic(abcV4 *dst,
+    const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
+    int num_points, int num_triangles)
+{
+    RawVector<abcV3> tangents, binormals;
+    tangents.resize_zeroclear(num_points);
+    binormals.resize_zeroclear(num_points);
+
+    for (int ti = 0; ti < num_triangles; ++ti) {
+        int ti3 = ti * 3;
+        int idx[3] = { indices[ti3 + 0], indices[ti3 + 1], indices[ti3 + 2] };
+        abcV3 v[3] = { points[idx[0]], points[idx[1]], points[idx[2]] };
+        abcV2 u[3] = { uv[idx[0]], uv[idx[1]], uv[idx[2]] };
+        abcV3 t[3];
+        abcV3 b[3];
+        compute_triangle_tangent(v, u, t, b);
+
+        for (int i = 0; i < 3; ++i) {
+            tangents[idx[i]] += t[i];
+            binormals[idx[i]] += b[i];
+        }
+    }
+
+    for (int vi = 0; vi < num_points; ++vi) {
+        dst[vi] = orthogonalize_tangent(tangents[vi], binormals[vi], normals[vi]);
+    }
+}
+
+
 // > generic implementation
 
 
@@ -129,4 +235,12 @@ void gen_normals(abcV3 *dst, const abcV3 *points, const int *indices, int num_po
 {
     Impl(gen_normals, dst, points, indices, num_points, num_triangles);
 }
+
+void gen_tangents(abcV4 *dst,
+    const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
+    int num_points, int num_triangles)
+{
+    Impl(gen_tangents, dst, points, uv, normals, indices, num_points, num_triangles);
+}
+
 #undef Impl

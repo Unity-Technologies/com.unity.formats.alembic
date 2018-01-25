@@ -21,22 +21,10 @@
   <ItemGroup>
     <CustomBuild Include="setup.bat">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity)</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Master|x64'">%(Identity)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">External\Alembic</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Master|x64'">External\Alembic</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity)</Message>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Master|x64'">%(Identity)</Message>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Master|x64'">false</LinkObjects>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">External\Alembic</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">External\Alembic</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Identity)</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">%(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">%(Identity)</Message>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</LinkObjects>
+      <Command>%(Identity)</Command>
+      <Message>%(Identity)</Message>
+      <LinkObjects>false</LinkObjects>
+      <Outputs>External\External.7z</Outputs>
     </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
