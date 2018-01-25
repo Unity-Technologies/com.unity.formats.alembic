@@ -1,6 +1,7 @@
 #pragma once
 
-void scale(abcV3 *dst, float scale, int num);
+void swap_handedness(abcV3 *dst, int num);
+void apply_scale(abcV3 *dst, int num, float scale);
 void lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
 void gen_velocity(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale);
 void get_bounds(abcV3& min, abcV3& max, const abcV3 *points, int num);
@@ -10,8 +11,8 @@ void gen_tangents(abcV4 *dst,
     int num_points, int num_triangles);
 
 // for test and debug
-void scale_generic(abcV3 *dst, float scale, int num);
-void scale_ispc(abcV3 *dst, float scale, int num);
+void apply_scale_generic(abcV3 *dst, int num, float scale);
+void apply_scale_ispc(abcV3 *dst, int num, float scale);
 void lerp_generic(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
 void lerp_ispc(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
 void gen_velocity_generic(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale);

@@ -4,6 +4,7 @@
 #include "aeObject.h"
 #include "aePolyMesh.h"
 #include "aiMisc.h"
+#include "aiMath.h"
 
 
 aeFaceSet::aeFaceSet(aeObject * parent, const char * name, uint32_t tsi)
@@ -86,16 +87,16 @@ void aePolyMesh::doWriteSample()
 
     // handle swap handedness
     if (conf.swap_handedness) {
-        for (auto &v : m_buf_positions) { v.x *= -1.0f; }
-        for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
-        for (auto &v : m_buf_normals) { v.x *= -1.0f; }
+        swap_handedness(m_buf_positions.data(), (int)m_buf_positions.size());
+        swap_handedness(m_buf_velocities.data(), (int)m_buf_velocities.size());
+        swap_handedness(m_buf_normals.data(), (int)m_buf_normals.size());
     }
 
     // handle scale factor
     float scale = conf.scale;
     if (scale != 1.0f) {
-        for (auto &v : m_buf_positions) { v *= scale; }
-        for (auto &v : m_buf_velocities) { v *= scale; }
+        apply_scale(m_buf_positions.data(), (int)m_buf_positions.size(), scale);
+        apply_scale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
     // if face counts are empty, assume all faces are triangles

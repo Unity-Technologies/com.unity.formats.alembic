@@ -234,7 +234,7 @@ const aiPointsSummary& aiPoints::getSummary() const
         auto ids = m_schema.getIdsProperty();
 
         m_summary.has_velocity = velocities.valid();
-        m_summary.positionIs_constant = positions.isConstant();
+        m_summary.position_is_constant = positions.isConstant();
         m_summary.id_is_constant = ids.isConstant();
 
         m_summary.peak_count = (int)abcArrayPropertyGetPeakSize(positions);

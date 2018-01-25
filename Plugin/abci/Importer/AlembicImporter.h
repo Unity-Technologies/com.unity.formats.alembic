@@ -160,10 +160,10 @@ struct aiMeshSummary
 struct aiMeshSampleSummary
 {
     int32_t splitCount = 0;
-    bool hasNormals = false;
-    bool hasUVs = false;
-    bool hasTangents = false;
-    bool hasVelocities = false;
+    bool has_normals = false;
+    bool has_uvs = false;
+    bool has_tangents = false;
+    bool has_velocities = false;
 };
 
 struct aiPolyMeshData
@@ -214,7 +214,7 @@ struct aiSubmeshData
 struct aiPointsSummary
 {
     bool has_velocity = false;
-    bool positionIs_constant = false;
+    bool position_is_constant = false;
     bool id_is_constant = false;
     int32_t peak_count = 0;
     uint64_t min_id = 0;

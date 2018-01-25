@@ -7,7 +7,7 @@
 #ifdef aiEnableISPC
 #include "aiSIMD.h"
 
-void scale_ispc(abcV3 *dst, float scale, int num)
+void apply_scale_ispc(abcV3 *dst, int num, float scale)
 {
     ispc::Scale((float*)dst, num*3, scale);
 }
@@ -45,7 +45,7 @@ void gen_tangents_ispc(abcV4 *dst,
 
 // < generic implementation
 
-void scale_generic(abcV3 *dst, float scale, int num)
+void apply_scale_generic(abcV3 *dst, int num, float scale)
 {
     for (int i = 0; i < num; ++i) {
         dst[i] *= scale;
@@ -205,15 +205,23 @@ void gen_tangents_generic(abcV4 *dst,
 // > generic implementation
 
 
+// SIMD can't make this faster
+void swap_handedness(abcV3 *dst, int num)
+{
+    for (int i = 0; i < num; ++i) {
+        dst[i].x *= -1.0f;
+    }
+}
+
 #ifdef aiEnableISPC
     #define Impl(Func, ...) Func##_ispc(__VA_ARGS__)
 #else
     #define Impl(Func, ...) Func##_generic(__VA_ARGS__)
 #endif
 
-void scale(abcV3 *dst, float scale, int num)
+void apply_scale(abcV3 *dst, int num, float scale)
 {
-    Impl(scale, dst, scale, num);
+    Impl(apply_scale, dst, num, scale);
 }
 
 void lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
