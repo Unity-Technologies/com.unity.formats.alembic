@@ -151,10 +151,6 @@ struct aiCameraData
 struct aiMeshSummary
 {
     int32_t topology_variance = 0;
-    int32_t peak_vertex_count = 0;
-    int32_t peak_index_count = 0;
-    int32_t peak_triangulated_index_count = 0;
-    int32_t peak_submesh_count = 0;
 };
 
 struct aiMeshSampleSummary
@@ -198,11 +194,7 @@ struct aiPolyMeshData
 
 struct aiSubmeshSummary
 {
-    int32_t index = 0;
-    int32_t split_index = 0;
-    int32_t split_submesh_index = 0;
-    int32_t faceset_index = -1;
-    int32_t triangle_count = 0;
+    int32_t index_count = 0;
 };
 
 struct aiSubmeshData
@@ -288,12 +280,12 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 // return pointers to actual data. no conversions (swap handedness / faces) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // all these below aiPolyMesh* are mesh splitting functions
-abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int split_index);
+abciAPI int             aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
-abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample);
-abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int split_index);
-abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
-abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
+abciAPI int             aiPolyMeshGetAllSubmeshCount(aiPolyMeshSample* sample);
+abciAPI int             aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index);
+abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary);
+abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);
 abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);

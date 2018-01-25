@@ -83,6 +83,7 @@ struct MeshRefiner
         int offset_vertices = 0;
         int offset_indices = 0;
         int offset_faces = 0;
+        int offset_submeshes = 0;
         int num_vertices = 0;
         int num_indices = 0;
         int num_faces = 0;
@@ -94,34 +95,35 @@ struct MeshRefiner
     int split_unit = 0; // 0 == no split
     IArray<int> counts;
     IArray<int> indices;
+    IArray<int> normal_indices;
+    IArray<int> uv_indices;
     IArray<float3> points;
     IArray<float3> normals;
-    IArray<float2> uv;
+    IArray<float2> uvs;
 
     // outputs
     RawVector<int> old2new_indices; // old indices to new indices
     RawVector<int> new2old_points;  // new indices to old vertex data
     RawVector<int> new2old_normals; // 
     RawVector<int> new2old_uvs;     // 
-    RawVector<int> offsets;
     RawVector<int> new_indices;
     RawVector<int> new_indices_triangulated;
     RawVector<int> new_indices_submeshes;
     RawVector<float3> new_points;
     RawVector<float3> new_normals;
-    RawVector<float2> new_uv;
+    RawVector<float2> new_uvs;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
     ConnectionData connection;
-    int num_indices_triangulated = 0;
+    int num_new_indices = 0;
 
 public:
     void refine();
     void triangulate(bool swap_faces);
-    void genSubmesh(IArray<int> materialIDs);
+    void genSubmeshes(IArray<int> materialIDs);
+    void clear();
 
 private:
-    bool refineWithOptimization();
     void buildConnection();
 
     template<class Body> void doRefine(const Body& body);

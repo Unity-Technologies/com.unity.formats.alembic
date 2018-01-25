@@ -225,61 +225,52 @@ abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
 abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
 {
     if (schema)
-    {
         schema->getSummary(*summary);
-    }
 }
 
 abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool force_refresh)
 {
     if (sample)
-    {
         sample->getSummary(force_refresh, *summary, sample);
-    }
 }
 
 abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data)
 {
     if (sample)
-    {
         sample->getDataPointer(*data);
-    }
 }
 
-abciAPI int aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int split_index)
+abciAPI int aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index)
 {
-    return sample ? sample->getVertexBufferLength(split_index) : 0;
+    return sample ? sample->getSplitVertexCount(split_index) : 0;
 }
 
 abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data)
 {
     if (sample)
-    {
-        sample->fillVertexBuffer(split_index, *data);
-    }
+        sample->fillSplitVertices(split_index, *data);
 }
 
-abciAPI int aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample)
+abciAPI int aiPolyMeshGetAllSubmeshCount(aiPolyMeshSample * sample)
 {
-    return sample ? sample->prepareSubmeshes(sample) : 0;
+    return sample ? sample->getAllSubmeshCount() : 0;
 }
 
-abciAPI int aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int split_index)
+abciAPI int aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index)
 {
-    return sample ? sample->getSplitSubmeshCount(split_index) : 0;
+    return sample ? sample->getSubmeshCount(split_index) : 0;
 }
 
-abciAPI bool aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary)
-{
-    return sample ? sample->getNextSubmesh(*summary) : false;
-}
-
-abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data)
+abciAPI void aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary)
 {
     if (sample)
-    {
-        sample->fillSubmeshIndices(*summary, *data);
-    }
+        sample->getSubmeshSummary(split_index, submesh_index, *summary);
+}
+
+abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data)
+{
+    if (sample)
+        sample->fillSubmeshIndices(split_index, submesh_index, *data);
 }
 
 abciAPI aiCamera* aiGetCamera(aiObject* obj)

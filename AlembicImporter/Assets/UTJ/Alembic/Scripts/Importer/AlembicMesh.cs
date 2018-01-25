@@ -17,6 +17,7 @@ namespace UTJ.Alembic
             public PinnedList<Vector2> velocitiesZCache = new PinnedList<Vector2>();
             public PinnedList<Vector2> uvCache = new PinnedList<Vector2>();
             public PinnedList<Vector4> tangentCache = new PinnedList<Vector4>();
+            public List<Submesh> submeshes = new List<Submesh>();
             public Mesh mesh;
             public GameObject host;
 
@@ -31,16 +32,12 @@ namespace UTJ.Alembic
         public class Submesh
         {
             public PinnedList<int> indexCache = new PinnedList<int>();
-            public int splitIndex;
-            public int index;
-
-            public bool update;
+            public bool update = true;
         }
 
         public bool cacheTangentsSplits = true;
         
         public bool hasFacesets = false;
-        public List<Submesh> submeshes = new List<Submesh>();
         public List<Split> splits = new List<Split>();
 
         public AbcAPI.aiMeshSummary summary;
@@ -144,14 +141,14 @@ namespace UTJ.Alembic
 
             UpdateSplits(sampleSummary.splitCount);
 
-            for (int s=0; s<sampleSummary.splitCount; ++s)
+            for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
             {
-                Split split = splits[s];
+                var split = splits[spi];
 
                 split.clear = topologyChanged;
                 split.active = true;
 
-                int vertexCount = AbcAPI.aiPolyMeshGetVertexBufferLength(sample, s);
+                int vertexCount = AbcAPI.aiPolyMeshGetVertexCount(sample, spi);
 
                 split.positionCache.Resize(vertexCount);
                 vertexData.positions = split.positionCache;
@@ -186,7 +183,7 @@ namespace UTJ.Alembic
                     split.tangentCache.Resize(0);
                 vertexData.tangents = split.tangentCache;
 
-                AbcAPI.aiPolyMeshFillVertexBuffer(sample, s, ref vertexData);
+                AbcAPI.aiPolyMeshFillVertexBuffer(sample, spi, ref vertexData);
 
                 split.center = vertexData.center;
                 split.size = vertexData.size;
@@ -194,56 +191,38 @@ namespace UTJ.Alembic
 
             if (topologyChanged)
             {
-                int numSubmeshes = AbcAPI.aiPolyMeshPrepareSubmeshes(sample);
-                if (submeshes.Count > numSubmeshes)
-                {
-                    submeshes.RemoveRange(numSubmeshes, submeshes.Count - numSubmeshes);
-                }
-
                 for (int s = 0; s < sampleSummary.splitCount; ++s)
                 {
-                    splits[s].submeshCount = AbcAPI.aiPolyMeshGetSplitSubmeshCount(sample, s);
+                    splits[s].submeshCount = AbcAPI.aiPolyMeshGetSubmeshCount(sample, s);
                 }
 
                 var submeshSummary = new AbcAPI.aiSubmeshSummary();
                 var submeshData = new AbcAPI.aiSubmeshData();
-                while (AbcAPI.aiPolyMeshGetNextSubmesh(sample, ref submeshSummary))
+                for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
                 {
-                    if (submeshSummary.splitIndex >= splits.Count)
-                    {
-                        Debug.Log("Invalid split index");
-                        continue;
-                    }
+                    var split = splits[spi];
+                    int submeshCount = split.submeshCount;
 
-                    Submesh submesh = null;
-                    if (submeshSummary.index < submeshes.Count)
-                    {
-                        submesh = submeshes[submeshSummary.index];
-                    }
-                    else
-                    {
-                        submesh = new Submesh {
-                            splitIndex = -1,
-                            index = -1,
-                            update = true
-                        };
-                        submeshes.Add(submesh);
-                    }
+                    if (split.submeshes.Count > submeshCount)
+                        split.submeshes.RemoveRange(submeshCount, split.submeshes.Count - submeshCount);
+                    while (split.submeshes.Count < submeshCount)
+                        split.submeshes.Add(new Submesh());
 
-                    submesh.splitIndex = submeshSummary.splitIndex;
-                    submesh.index = submeshSummary.splitSubmeshIndex;
-                    submesh.update = true;
-                    submesh.indexCache.Resize(3 * submeshSummary.triangleCount);
-                    submeshData.indices = submesh.indexCache;
-                    AbcAPI.aiPolyMeshFillSubmeshIndices(sample, ref submeshSummary, ref submeshData);
+                    for (int smi = 0; smi < submeshCount; ++smi)
+                    {
+                        var submesh = split.submeshes[smi];
+                        AbcAPI.aiPolyMeshGetSubmeshSummary(sample, spi, smi, ref submeshSummary);
+                        submesh.indexCache.Resize(submeshSummary.indexCount);
+                        submeshData.indices = submesh.indexCache;
+                        AbcAPI.aiPolyMeshFillSubmeshIndices(sample, spi, smi, ref submeshData);
+                    }
                 }
             }
             else
             {
-                for (int i=0; i<submeshes.Count; ++i)
-                {
-                    submeshes[i].update = false;
-                }
+                for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
+                    for (int smi = 0; smi < splits[spi].submeshCount; ++smi)
+                        splits[spi].submeshes[smi].update = false;
             }
 
             AbcDirty();
@@ -358,13 +337,13 @@ namespace UTJ.Alembic
                 }
             }
 
-            for (int s=0; s<submeshes.Count; ++s)
+            for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
             {
-                Submesh submesh = submeshes[s];
-                if (submesh.update)
+                var split = splits[spi];
+                for (int smi = 0; smi < splits[spi].submeshCount; ++smi)
                 {
-                    splits[submesh.splitIndex].mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, submesh.index);
-                    submesh.update = false;
+                    var submesh = split.submeshes[smi];
+                    split.mesh.SetIndices(submesh.indexCache, MeshTopology.Triangles, smi);
                 }
             }
 
