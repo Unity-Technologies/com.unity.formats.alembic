@@ -56,13 +56,14 @@ public:
     inline SubmeshPtrs::const_iterator submeshBegin() const { return m_submeshes.begin(); }
     inline SubmeshPtrs::const_iterator submeshEnd() const { return m_submeshes.end(); }
 
-    inline void EnableVertexSharing(bool value) { m_vertex_sharing_enabled = value; }
-    inline void Enable32BitsIndexbuffers(bool value) { m_use_32bit_index_buffer = value; }
-    inline void TreatVertexExtraDataAsStatic(bool value) { m_treat_vertex_extra_data_as_static = value; }
+    inline void enableVertexSharing(bool value) { m_vertex_sharing_enabled = value; }
+    inline void enable32BitsIndexbuffers(bool value) { m_use_32bit_index_buffer = value; }
+    inline void treatVertexExtraDataAsStatic(bool value) { m_treat_vertex_extra_data_as_static = value; }
 
 public:
     Abc::Int32ArraySamplePtr m_face_indices;
     Abc::Int32ArraySamplePtr m_counts;
+    RawVector<int>      m_offsets; // face -> index table
 
     RawVector<int32_t>  m_indices_swaped_face_winding;
     RawVector<uint32_t> m_uv_indices_swaped_face_winding;

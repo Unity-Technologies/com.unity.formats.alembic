@@ -64,6 +64,9 @@
     <ClCompile Include="abci\Foundation\aiMath.cpp">
       <Filter>abci\Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="abci\Foundation\aiMeshOps.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abci\Foundation\aiThreadPool.h">
@@ -145,6 +148,9 @@
       <Filter>abci\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="abci\Foundation\ispcmath.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiMeshOps.h">
       <Filter>abci\Foundation</Filter>
     </ClInclude>
   </ItemGroup>
