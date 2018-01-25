@@ -725,41 +725,41 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
         return;
     }
 
-    bool copyNormals = (hasNormals() && data.normals);
-    bool copyUvs = (hasUVs() && data.uvs);
-    bool copyTangents = (hasTangents() && data.tangents);
+    bool copy_normals = (hasNormals() && data.normals);
+    bool copy_uvs = (hasUVs() && data.uvs);
+    bool copy_tangents = (hasTangents() && data.tangents);
     
-    bool useAbcNormals = (m_normals.valid() && (m_config.normals_mode == aiNormalsMode::ReadFromFile || m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
+    bool use_abc_normals = (m_normals.valid() && (m_config.normals_mode == aiNormalsMode::ReadFromFile || m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
     float xScale = (m_config.swap_handedness ? -1.0f : 1.0f);
-    bool interpolatePositions = hasVelocities() && m_next_points != nullptr;
-    float timeOffset = static_cast<float>(m_current_time_offset);
-    float timeInterval = static_cast<float>(m_current_time_interval);
-    float vertexMotionScale = static_cast<float>(m_config.vertex_motion_scale);
+    bool interpolate_points = hasVelocities() && m_next_points != nullptr;
+    float time_offset = static_cast<float>(m_current_time_offset);
+    float time_interval = static_cast<float>(m_current_time_interval);
+    float vertex_motion_scale = static_cast<float>(m_config.vertex_motion_scale);
     
     const SplitInfo &split = m_topology->m_splits[split_index];
     const auto *faceCount = m_topology->m_counts->get();
     const auto *indices = m_config.turn_quad_edges ? m_topology->m_indices_swaped_face_winding.data() : m_topology->m_face_indices->get();
     const auto *points = m_points->get();
-    const auto *nextPositions = m_next_points->get();
+    const auto *next_points = interpolate_points ? m_next_points->get() : nullptr;
 
     size_t k = 0;
     size_t o = split.index_offset;
     
     // reset unused data arrays
 
-    if (data.normals && !copyNormals)
+    if (data.normals && !copy_normals)
     {
         DebugLog("%s: Reset normals", getSchema()->getObject()->getFullName());
         memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
     }
     
-    if (data.uvs && !copyUvs)
+    if (data.uvs && !copy_uvs)
     {
         DebugLog("%s: Reset UVs", getSchema()->getObject()->getFullName());
         memset(data.uvs, 0, split.vertex_count * sizeof(abcV2));
     }
     
-    if (data.tangents && !copyTangents)
+    if (data.tangents && !copy_tangents)
     {
         DebugLog("%s: Reset tangents", getSchema()->getObject()->getFullName());
         memset(data.tangents, 0, split.vertex_count * sizeof(abcV4));
@@ -771,11 +771,11 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
 #define UPDATE_POSITIONS_AND_BOUNDS(srcIdx, dstIdx) \
     abcV3 &cP = data.points[dstIdx]; \
     cP = points[srcIdx]; \
-    if (interpolatePositions) \
+    if (interpolate_points) \
     {\
-        abcV3 distance = nextPositions[srcIdx] - points[srcIdx]; \
-        abcV3 velocity = (distance / timeInterval) * vertexMotionScale; \
-        cP+= distance * timeOffset; \
+        abcV3 distance = next_points[srcIdx] - points[srcIdx]; \
+        abcV3 velocity = (distance / time_interval) * vertex_motion_scale; \
+        cP+= distance * time_offset; \
         data.interpolated_velocities_xy[dstIdx].x = velocity.x*xScale; \
         data.interpolated_velocities_xy[dstIdx].y = velocity.y; \
         data.interpolated_velocities_z[dstIdx].x = velocity.z; \
@@ -800,18 +800,18 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
     else
     {
         m_topology->m_freshly_read_topology_data = false;
-        if (copyNormals) {
-            if (useAbcNormals) {
+        if (copy_normals) {
+            if (use_abc_normals) {
                 const auto *normals = m_normals.getVals()->get();
 
                 if (m_normals.getScope() == AbcGeom::kFacevaryingScope) {
                     const auto &nIndices = *(m_normals.getIndices());
 
-                    if (copyUvs) {
+                    if (copy_uvs) {
                         const auto *uvs = m_uvs.getVals()->get();
                         const auto *uvIndices = m_config.turn_quad_edges ? m_topology->m_uv_indices_swaped_face_winding.data() : m_uvs.getIndices()->get();
 
-                        if (copyTangents) {
+                        if (copy_tangents) {
                             for (size_t i = split.first_face; i <= split.last_face; ++i) {
                                 int nv = faceCount[i];
                                 for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -860,7 +860,7 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else if (copyTangents) {
+                    else if (copy_tangents) {
                         for (size_t i=split.first_face; i<=split.last_face; ++i) {
                             int nv = faceCount[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -906,11 +906,11 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                     }
                 }
                 else {
-                    if (copyUvs) {
+                    if (copy_uvs) {
                         const auto *uvs = m_uvs.getVals()->get();
                         const auto *uvIndices = m_config.turn_quad_edges ? m_topology->m_uv_indices_swaped_face_winding.data() : m_uvs.getIndices()->get();
                     
-                        if (copyTangents) {
+                        if (copy_tangents) {
                             for (size_t i=split.first_face; i<=split.last_face; ++i) {
                                 int nv = faceCount[i];
                                 for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -961,7 +961,7 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                             }
                         }
                     }
-                    else if (copyTangents) {
+                    else if (copy_tangents) {
                         for (size_t i=split.first_face; i<=split.last_face; ++i) {
                             int nv = faceCount[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -1010,11 +1010,11 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                 }
             }
             else {
-                if (copyUvs) {
+                if (copy_uvs) {
                     const auto *uvs = m_uvs.getVals()->get();
                     const auto *uvIndices = m_config.turn_quad_edges ? m_topology->m_uv_indices_swaped_face_winding.data() : m_uvs.getIndices()->get();
                 
-                    if (copyTangents) {
+                    if (copy_tangents) {
                         for (size_t i=split.first_face; i<=split.last_face; ++i) {
                             int nv = faceCount[i];
                             for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -1067,7 +1067,7 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                         }
                     }
                 }
-                else if (copyTangents) {
+                else if (copy_tangents) {
                     for (size_t i=split.first_face; i<=split.last_face; ++i) {
                         int nv = faceCount[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -1116,11 +1116,11 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
             }
         }
         else {
-            if (copyUvs) {
+            if (copy_uvs) {
                 const auto *uvs = m_uvs.getVals()->get();
                 const auto *uvIndices = m_config.turn_quad_edges ? m_topology->m_uv_indices_swaped_face_winding.data() : m_uvs.getIndices()->get();
             
-                if (copyTangents) {
+                if (copy_tangents) {
                     for (size_t i=split.first_face; i<=split.last_face; ++i) {
                         int nv = faceCount[i];
                         for (int j = 0; j < nv; ++j, ++o, ++k) {
@@ -1161,7 +1161,7 @@ void aiPolyMeshSample::fillVertexBuffer(int split_index, aiPolyMeshData &data)
                     }
                 }
             }
-            else if (copyTangents) {
+            else if (copy_tangents) {
                 for (size_t i=split.first_face; i<=split.last_face; ++i) {
                     int nv = faceCount[i];
                     for (int j = 0; j < nv; ++j, ++o, ++k) {

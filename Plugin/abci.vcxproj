@@ -29,6 +29,7 @@
     <ClCompile Include="abci\Foundation\aiLogger.cpp" />
     <ClCompile Include="abci\Foundation\aiThreadPool.cpp" />
     <ClCompile Include="abci\Foundation\Allocator.cpp" />
+    <ClCompile Include="abci\Foundation\aiMath.cpp" />
     <ClCompile Include="abci\Importer\aiCamera.cpp" />
     <ClCompile Include="abci\Importer\aiContext.cpp" />
     <ClCompile Include="abci\Importer\aiObject.cpp" />
@@ -39,10 +40,7 @@
     <ClCompile Include="abci\Importer\aiXForm.cpp" />
     <ClCompile Include="abci\Importer\AlembicImporter.cpp" />
     <ClCompile Include="abci\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +57,8 @@
     <ClInclude Include="abci\Foundation\aiMisc.h" />
     <ClInclude Include="abci\Foundation\aiThreadPool.h" />
     <ClInclude Include="abci\Foundation\Allocator.h" />
+    <ClInclude Include="abci\Foundation\ispcmath.h" />
+    <ClInclude Include="abci\Foundation\aiMath.h" />
     <ClInclude Include="abci\Foundation\RawVector.h" />
     <ClInclude Include="abci\Importer\aiCamera.h" />
     <ClInclude Include="abci\Importer\aiContext.h" />
@@ -76,6 +76,15 @@
     <ProjectReference Include="setup.vcxproj">
       <Project>{1c5de91b-7ae9-4304-9fa1-0de1aba8c02d}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="abci\Foundation\aiSIMD.ispc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Platform)'=='x64'">External\ispc %(FullPath) -o $(IntDir)%(Filename).obj -h $(IntDir)%(Filename).h --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math</Command>
+      <Command Condition="'$(Platform)'=='Win32'">External\ispc %(FullPath) -o $(IntDir)%(Filename).obj -h $(IntDir)%(Filename).h --target=sse4,avx --arch=x86 --opt=fast-masked-vload --opt=fast-math</Command>
+      <Outputs>$(IntDir)%(Filename).obj;$(IntDir)%(Filename)_sse4.obj;$(IntDir)%(Filename)_avx.obj</Outputs>
+      <AdditionalInputs>$(SolutionDir)abci\Foundation\ispcmath.h</AdditionalInputs>
+    </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>
@@ -105,26 +114,14 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
@@ -137,10 +134,11 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>aiDebug;aiVerboseDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>aiEnableISPC;aiDebug;aiVerboseDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -158,7 +156,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>aiMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>aiEnableISPC;aiMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Full</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -166,6 +164,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(IntDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -185,7 +184,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
-      <PreprocessorDefinitions>aiMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>aiEnableISPC;aiMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
@@ -207,7 +206,7 @@
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>aiDebug;aiVerboseDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>aiEnableISPC;aiDebug;aiVerboseDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
