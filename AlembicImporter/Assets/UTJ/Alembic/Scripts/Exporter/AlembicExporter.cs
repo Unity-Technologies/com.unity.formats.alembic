@@ -55,7 +55,7 @@ namespace UTJ.Alembic
                     while (facesets.Count < mesh.subMeshCount)
                         facesets.Add(new PinnedList<int>());
                     for (int smi = 0; smi < mesh.subMeshCount; ++smi)
-                        mesh.GetIndices(facesets[smi], smi);
+                        mesh.GetTriangles(facesets[smi].List, smi);
                 }
             }
 

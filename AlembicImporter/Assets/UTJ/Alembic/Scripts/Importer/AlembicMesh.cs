@@ -283,12 +283,12 @@ namespace UTJ.Alembic
                         split.mesh.Clear();
                     }
 
-                    split.mesh.SetVertices(split.positionCache);
-                    split.mesh.SetNormals(split.normalCache);
-                    split.mesh.SetTangents(split.tangentCache);
-                    split.mesh.SetUVs(0, split.uvCache);
-                    split.mesh.SetUVs(2, split.velocitiesXYCache);
-                    split.mesh.SetUVs(3, split.velocitiesZCache);
+                    split.mesh.SetVertices(split.positionCache.List);
+                    split.mesh.SetNormals(split.normalCache.List);
+                    split.mesh.SetTangents(split.tangentCache.List);
+                    split.mesh.SetUVs(0, split.uvCache.List);
+                    split.mesh.SetUVs(2, split.velocitiesXYCache.List);
+                    split.mesh.SetUVs(3, split.velocitiesZCache.List);
                     // update the bounds
                     split.mesh.bounds = new Bounds(split.center, split.size);
 
