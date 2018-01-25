@@ -153,6 +153,15 @@
     <ClInclude Include="abci\Foundation\aiMeshOps.h">
       <Filter>abci\Foundation</Filter>
     </ClInclude>
+    <ClInclude Include="abci\Foundation\IntrusiveArray.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiIterator.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiIntrusiveArray.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="abci">

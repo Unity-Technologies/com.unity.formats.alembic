@@ -54,11 +54,14 @@
     <ClInclude Include="abci\Exporter\aePolyMesh.h" />
     <ClInclude Include="abci\Exporter\aeXForm.h" />
     <ClInclude Include="abci\Exporter\AlembicExporter.h" />
+    <ClInclude Include="abci\Foundation\aiIntrusiveArray.h" />
+    <ClInclude Include="abci\Foundation\aiIterator.h" />
     <ClInclude Include="abci\Foundation\aiLogger.h" />
     <ClInclude Include="abci\Foundation\aiMeshOps.h" />
     <ClInclude Include="abci\Foundation\aiMisc.h" />
     <ClInclude Include="abci\Foundation\aiThreadPool.h" />
     <ClInclude Include="abci\Foundation\Allocator.h" />
+    <ClInclude Include="abci\Foundation\IntrusiveArray.h" />
     <ClInclude Include="abci\Foundation\ispcmath.h" />
     <ClInclude Include="abci\Foundation\aiMath.h" />
     <ClInclude Include="abci\Foundation\RawVector.h" />

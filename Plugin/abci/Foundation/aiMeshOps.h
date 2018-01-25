@@ -1,5 +1,48 @@
 #pragma once
 #include "RawVector.h"
+#include "aiIntrusiveArray.h"
+#include "aiMath.h"
+
+
+struct ConnectionData
+{
+    RawVector<int> v2f_counts;
+    RawVector<int> v2f_offsets;
+    RawVector<int> v2f_faces;
+    RawVector<int> v2f_indices;
+
+    RawVector<int> weld_map;
+    RawVector<int> weld_counts;
+    RawVector<int> weld_offsets;
+    RawVector<int> weld_indices;
+
+    void clear();
+    void buildConnection(
+        const IArray<int>& indices, const IArray<int>& counts, const IArray<float3>& vertices);
+
+    // Body: [](int face_index, int index_index) -> void
+    template<class Body>
+    void eachConnectedFaces(int vi, const Body& body) const
+    {
+        int count = v2f_counts[vi];
+        int offset = v2f_offsets[vi];
+        for (int i = 0; i < count; ++i) {
+            body(v2f_faces[offset + i], v2f_indices[offset + i]);
+        }
+    }
+
+    // Body: [](int vertex_index) -> void
+    template<class Body>
+    void eachWeldedVertices(int vi, const Body& body) const
+    {
+        int count = weld_counts[vi];
+        int offset = weld_offsets[vi];
+        for (int i = 0; i < count; ++i) {
+            body(weld_indices[offset + i]);
+        }
+    }
+};
+
 
 class MeshWelder
 {
@@ -23,6 +66,74 @@ private:
     void prepare(abcV3 *points, int count);
     static uint32_t hash(const abcV3& v);
 };
+
+
+struct MeshRefiner
+{
+    struct Submesh
+    {
+        int offset_indices = 0;
+        int num_indices = 0; // triangulated
+        int materialID = 0;
+        int* faces_to_write = nullptr;
+    };
+
+    struct Split
+    {
+        int offset_vertices = 0;
+        int offset_indices = 0;
+        int offset_faces = 0;
+        int num_vertices = 0;
+        int num_indices = 0;
+        int num_faces = 0;
+        int num_indices_triangulated = 0;
+        int num_submeshes = 0;
+    };
+
+    // inputs
+    int split_unit = 0; // 0 == no split
+    IArray<int> counts;
+    IArray<int> indices;
+    IArray<float3> points;
+    IArray<float3> normals;
+    IArray<float2> uv;
+
+    // outputs
+    RawVector<int> old2new_indices; // old indices to new indices
+    RawVector<int> new2old_vertices; // new indices to old vertices
+    RawVector<int> offsets;
+
+    RawVector<float3> new_points;
+    RawVector<float3> new_normals;
+    RawVector<float2> new_uv;
+    RawVector<int>    new_indices;
+    RawVector<int>    new_indices_triangulated;
+    RawVector<int>    new_indices_submeshes;
+    int num_indices_triangulated = 0;
+    RawVector<Split> splits;
+    RawVector<Submesh> submeshes;
+
+    ConnectionData connection;
+
+public:
+    void refine();
+    void triangulate(bool swap_faces);
+    void genSubmesh(IArray<int> materialIDs);
+
+private:
+    bool refineWithOptimization();
+    void buildConnection();
+
+    template<class Body> void doRefine(const Body& body);
+    int findOrAddVertexPNU(int vi, const float3& p, const float3& n, const float2& u);
+    int findOrAddVertexPN(int vi, const float3& p, const float3& n);
+    int findOrAddVertexPU(int vi, const float3& p, const float2& u);
+};
+
+
+
+
+
 
 
 inline uint32_t MeshWelder::hash(const abcV3& value)
