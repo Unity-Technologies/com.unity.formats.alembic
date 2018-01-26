@@ -14,7 +14,14 @@ file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importe
 set(plugins_dir "${CMAKE_SOURCE_DIR}/../AlembicImporter/Assets/UTJ/Alembic/Plugins/x86_64")
 add_plugin(abci SOURCES ${sources} PLUGINS_DIR ${plugins_dir})
 
-target_include_directories(abci PUBLIC . ./Foundation ${OPENEXR_INCLUDE_DIR} ${OPENEXR_INCLUDE_DIR}/OpenEXR)
+target_include_directories(abci PUBLIC
+    .
+    ./Foundation
+    ${OPENEXR_INCLUDE_DIR}
+    ${OPENEXR_INCLUDE_DIR}/OpenEXR
+    ${ALEMBIC_INCLUDE_DIR}
+)
+
 target_link_libraries(abci
     ${ALEMBIC_LIBRARY}
     ${OPENEXR_Half_LIBRARY}
