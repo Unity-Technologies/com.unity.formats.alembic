@@ -37,6 +37,17 @@ static inline void GenerateOffsetTable(RawVector<int>& dst, const Container& cou
     }
 }
 
+template<class T, class IndexArray>
+inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
+{
+    if (!dst || !src) { return; }
+    size_t size = indices.size();
+    for (size_t i = 0; i < (int)size; ++i) {
+        dst[i] = src[indices[i]];
+    }
+}
+
+
 Topology::Topology()
 {
 }
@@ -67,6 +78,11 @@ int Topology::getSplitVertexCount(int split_index) const
     return (int)m_refiner.splits[split_index].num_vertices;
 }
 
+int Topology::getSubmeshCount() const
+{
+    return (int)m_refiner.submeshes.size();
+}
+
 int Topology::getSubmeshCount(int split_index) const
 {
     return (int)m_refiner.splits[split_index].num_submeshes;
@@ -74,16 +90,25 @@ int Topology::getSubmeshCount(int split_index) const
 
 void Topology::onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& sample)
 {
+    if (config.turn_quad_edges) {
+        // todo
+    }
+
     auto& refiner = m_refiner;
     refiner.clear();
 
     refiner.split_unit = m_use_32bit_index_buffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
     refiner.counts = { m_counts->get(), m_counts->size() };
     refiner.indices = { m_indices_orig->get(), m_indices_orig->size() };
-    refiner.points = (IArray<float3>&)sample.m_points;
+    refiner.points = { (float3*)sample.m_points_orig->get(), sample.m_points_orig->size() };
 
-    refiner.normals = (IArray<float3>&)sample.m_normals;
-    refiner.normal_indices = sample.m_normal_indices;
+    if (sample.m_normals_orig.valid()) {
+        refiner.normals = { (float3*)sample.m_normals_orig.getVals()->get(), sample.m_normals_orig.getVals()->size() };
+        if (sample.m_normals_orig.isIndexed())
+            refiner.normal_indices = { (int*)sample.m_normals_orig.getIndices()->get(), sample.m_normals_orig.getIndices()->size() };
+        else if (refiner.uvs.size() == refiner.points.size())
+            refiner.normal_indices = refiner.indices;
+    }
 
     if (sample.m_uvs_orig.valid()) {
         refiner.uvs = { (float2*)sample.m_uvs_orig.getVals()->get(), sample.m_uvs_orig.getVals()->size() };
@@ -164,61 +189,46 @@ bool aiPolyMeshSample::computeTangentsRequired() const
     return (m_config.tangents_mode != aiTangentsMode::None);
 }
 
+void aiPolyMeshSample::interpolatePoints()
+{
+}
+
 void aiPolyMeshSample::computeNormals(const aiConfig &config)
 {
     DebugLog("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
 
-    m_normals_generated.resize_zeroclear(m_points_orig->size());
-    const auto &counts = *(m_topology->m_counts);
-    const auto &offsets = m_topology->getOffsets();
-    const auto &indices = *(m_topology->m_indices_orig);
-    const auto &points = *m_points_orig;
+    const auto &indices = m_topology->m_refiner.new_indices_triangulated;
+    m_normals.resize_zeroclear(m_points.size());
+    GenerateNormals(m_normals.data(), m_points.data(), indices.data(), (int)m_points.size(), (int)indices.size() / 3);
+}
 
-    size_t nf = counts.size();
-    size_t off = 0;
-    bool ccw = config.swap_face_winding;
-    int ti1 = ccw ? 2 : 1;
-    int ti2 = ccw ? 1 : 2;
-    abcV3 N, dP1, dP2;
+void aiPolyMeshSample::interpolateNormals()
+{
+    if (!m_normals_orig.valid() || !m_normals_next.valid())
+        return;
 
-    for (size_t f=0; f<nf; ++f) {
-        int nfv = counts[f];
-        if (nfv >= 3) {
-            // Compute average normal for current face
-            N.setValue(0.0f, 0.0f, 0.0f);
-            const abcV3 &P0 = points[indices[off]];
-            for (int fv=0; fv<nfv-2; ++fv) {
-                auto &P1 = points[indices[off + fv + ti1]];
-                auto &P2 = points[indices[off + fv + ti2]];
+    const auto *n1 = m_normals_orig.getVals()->get();
+    const auto *n2 = m_normals_next.getVals()->get();
+    auto& remap = m_topology->m_refiner.new2old_normals;
+    float w = (float)m_current_time_offset;
+    float iw = 1.0f - w;
 
-                dP1 = P1 - P0;
-                dP2 = P2 - P0;
-                
-                N += dP2.cross(dP1).normalize();
-            }
-
-            if (nfv > 3) {
-                N.normalize();
-            }
-
-            // Accumulate for all vertices participating to this face
-            for (int fv=0; fv<nfv; ++fv) {
-                m_normals_generated[indices[off + fv]] += N;
-            }
-        }
-        off += nfv;
+    auto n = remap.size();
+    m_normals.reserve_discard(n);
+    for (size_t i = 0; i < n; ++i) {
+        int ri = remap[i];
+        m_normals[i] = n1[ri] * iw + n2[ri] * w;
     }
-
-    // Normalize normal vectors
-    for (abcV3& v : m_normals_generated) { v.normalize(); }
-    m_normals = { m_normals_generated.data(), m_normals_generated.size() };
-    m_normal_indices = { indices.get(), indices.size() };
 }
 
 
-void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN, bool indexed_normals)
+void aiPolyMeshSample::computeTangents(const aiConfig &config)
 {
     // todo
+}
+
+void aiPolyMeshSample::prepareSplits()
+{
 }
 
 void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
@@ -232,43 +242,32 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
                                   (!m_normals_orig.valid() && config.normals_mode == aiNormalsMode::ComputeIfMissing));
     
     if (compute_normals_required) {
-        if (m_normals_generated.empty() || topology_changed) {
+        if (m_normals.empty() || topology_changed) {
             computeNormals(config);
             data_changed = true;
         }
     }
-    else {
-        if (!m_normals_generated.empty()) {
-            DebugLog("%s: Clear smooth normals", getSchema()->getObject()->getFullName());
-            m_normals_generated.clear();
-            data_changed = true;
+    else if(m_normals_orig.valid()) {
+        auto& remap = m_topology->m_refiner.new2old_normals;
+        auto n = remap.size();
+        m_normals.reserve_discard(n);
+        const auto *n1 = m_normals_orig.getVals()->get();
+        for (size_t i = 0; i < n; ++i) {
+            m_normals[i] = n1[remap[i]];
         }
+    }
+    else {
+        m_normals.clear();
     }
 
     bool tangents_required = (m_uvs_orig.valid() && config.tangents_mode != aiTangentsMode::None);
-
     if (tangents_required) {
-        bool tangents_mode_changed = (config.tangents_mode != m_config.tangents_mode);
-
-        const abcV3 *N = nullptr;
-        bool Nindexed = false;
-
-        if (compute_normals_required) {
-            N = m_normals_generated.data();
-        }
-        else if (m_normals_orig.valid()) {
-            N = m_normals_orig.getVals()->get();
-            Nindexed = (m_normals_orig.getScope() == AbcGeom::kFacevaryingScope);
-        }
-
-        if (N) {
+        if (!m_normals.empty() && !m_uvs.empty()) {
+            bool tangents_mode_changed = (config.tangents_mode != m_config.tangents_mode);
             if (m_tangents.empty() || tangents_mode_changed || topology_changed) {
-                computeTangents(config, N, Nindexed);
+                computeTangents(config);
                 data_changed = true;
             }
-        }
-        else {
-            tangents_required = false;
         }
     }
 
@@ -283,8 +282,9 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
 void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const
 {
     DebugLog("aiPolyMeshSample::getSummary(force_refresh=%s)", force_refresh ? "true" : "false");
-    
-    summary.splitCount = m_topology->getSplitCount();
+
+    summary.split_count = m_topology->getSplitCount();
+    summary.submesh_count = m_topology->getSubmeshCount();
     summary.has_normals = hasNormals();
     summary.has_uvs = hasUVs();
     summary.has_tangents = hasTangents();
@@ -363,36 +363,31 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     auto& split = refiner.splits[split_index];
 
     if (interpolate) {
-        m_points_generated.resize_discard(m_points_orig->size());
-        m_velocity_generated.resize_discard(m_points_orig->size());
-        m_points = { m_points_generated.data(), m_points_generated.size() };
-        m_velocities = { m_velocity_generated.data(), m_velocity_generated.size() };
-        gen_velocity(
-            m_points_generated.data(), m_velocity_generated.data(),
+        m_points.resize_discard(m_points_orig->size());
+        Lerp(m_points.data(), m_points_orig->get(), m_points_next->get(), (int)m_points_orig->size(), (float)m_current_time_offset);
+
+        m_velocities.resize_discard(m_points_orig->size());
+        GenerateVelocities(m_velocities.data(),
             m_points_orig->get(), m_points_next->get(), (int)m_points_orig->size(),
-            (float)m_current_time_offset, (float)m_current_time_interval, m_config.vertex_motion_scale);
+            (float)m_current_time_interval, m_config.vertex_motion_scale);
     }
 
     if (data.points) {
-        IArray<int> remap{ &refiner.new2old_points[split.offset_vertices], (size_t)split.num_vertices };
-        CopyWithIndices(data.points, m_points.data(), remap);
-        if (m_config.swap_handedness) { swap_handedness(data.points, split.num_vertices); }
+        m_points.copy_to(data.points, split.num_vertices, split.offset_vertices);
+        if (m_config.swap_handedness) { SwapHandedness(data.points, split.num_vertices); }
     }
     if (data.normals) {
         if (copy_normals) {
-            IArray<int> remap{ &refiner.new2old_normals[split.offset_vertices], (size_t)split.num_vertices };
-            CopyWithIndices(data.normals, m_normals.data(), remap);
-            //refiner.new_normals.copy_to((float3*)data.normals);
-            if (m_config.swap_handedness) { swap_handedness(data.normals, split.num_vertices); }
+            m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+            if (m_config.swap_handedness) { SwapHandedness(data.normals, split.num_vertices); }
         }
         else {
-            memset(data.normals, 0, split.num_vertices * sizeof(float3));
+            memset(data.normals, 0, split.num_vertices * sizeof(abcV3));
         }
     }
     if (data.uvs) {
         if (copy_uvs) {
-            IArray<int> remap{ &refiner.new2old_uvs[split.offset_vertices], (size_t)split.num_vertices };
-            CopyWithIndices(data.uvs, m_uvs_orig.getVals()->get(), remap);
+            m_uvs.copy_to(data.uvs, split.num_vertices, split.offset_vertices);
         }
         else {
             memset(data.uvs, 0, split.num_vertices * sizeof(abcV2));
@@ -411,7 +406,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 
     {
         abcV3 bbmin, bbmax;
-        get_bounds(bbmin, bbmax, data.points, split.num_vertices);
+        MinMax(bbmin, bbmax, data.points, split.num_vertices);
         data.center = 0.5f * (bbmin + bbmax);
         data.size = bbmax - bbmin;
     }
@@ -556,16 +551,15 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     }
 
     m_schema.getPositionsProperty().get(sample->m_points_orig, ss);
-    sample->m_points = { sample->m_points_orig->get(), sample->m_points_orig->size() };
     if (!m_varying_topology && m_config.interpolate_samples) {
         m_schema.getPositionsProperty().get(sample->m_points_next, ss2);
     }
     else {
+        sample->m_points_next.reset();
         sample->m_velocities_orig.reset();
         auto velocities_prop = m_schema.getVelocitiesProperty();
         if (velocities_prop.valid()) {
             velocities_prop.get(sample->m_velocities_orig, ss);
-            sample->m_velocities = { sample->m_velocities_orig->get(), sample->m_velocities_orig->size() };
         }
     }
 
@@ -586,6 +580,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     }
 
     sample->m_normals_orig.reset();
+    sample->m_normals_next.reset();
     auto normals_param = m_schema.getNormalsParam();
     if (!m_ignore_normals && normals_param.valid()) {
         if (normals_param.isConstant()) {
@@ -598,33 +593,9 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         else {
             DebugLog("  Read normals");
             normals_param.getIndexed(sample->m_normals_orig, ss);
-        }
-        sample->m_normals = { sample->m_normals_orig.getVals()->get(), sample->m_normals_orig.getVals()->size() };
-        if (sample->m_normals_orig.isIndexed())
-            sample->m_normal_indices = { (int*)sample->m_normals_orig.getIndices()->get(), sample->m_normals_orig.getIndices()->size() };
-        else
-            sample->m_normal_indices.reset();
-    }
-
-    bool compute_normals_required = sample->computeNormalsRequired();
-    if (compute_normals_required)
-        sample->computeNormals(m_config);
-
-    bool compute_tangents_required = sample->computeTangentsRequired();
-    if (compute_tangents_required) {
-        const abcV3 *normals = nullptr;
-        bool indexed_normals = false;
-        
-        if (compute_normals_required) {
-            normals = sample->m_normals_generated.data();
-        }
-        else if (sample->m_normals_orig.valid()) {
-            normals = sample->m_normals_orig.getVals()->get();
-            indexed_normals = (sample->m_normals_orig.getScope() == AbcGeom::kFacevaryingScope);
-        }
-
-        if (normals && sample->m_uvs_orig.valid()) {
-            sample->computeTangents(m_config, normals, indexed_normals);
+            if (!m_varying_topology && m_config.interpolate_samples) {
+                normals_param.getIndexed(sample->m_normals_next, ss2);
+            }
         }
     }
 
@@ -632,12 +603,48 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     if (bounds_param)
         bounds_param.get(sample->m_bounds, ss);
 
-    if (m_config.turn_quad_edges) {
-        // todo
+    if (topology_changed) {
+        // update topology!
+        topology.onTopologyUpdate(m_config, *sample);
+        auto& refiner = topology.m_refiner;
+        sample->m_points.swap((RawVector<abcV3>&)refiner.new_points);
+        sample->m_normals.swap((RawVector<abcV3>&)refiner.new_normals);
+        sample->m_uvs.swap((RawVector<abcV2>&)refiner.new_uvs);
+    }
+    else {
+        // make remapped vertex buffer
+        auto& refiner = topology.m_refiner;
+        {
+            auto& remap = refiner.new2old_points;
+            sample->m_points.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_points.data(), sample->m_points_orig->get(), remap);
+        }
+        if (sample->m_normals_orig.valid()) {
+            auto& remap = refiner.new2old_normals;
+            sample->m_normals.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_normals.data(), sample->m_normals_orig.getVals()->get(), remap);
+        }
+        if (sample->m_uvs_orig.valid()) {
+            auto& remap = refiner.new2old_uvs;
+            sample->m_uvs.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_uvs.data(), sample->m_uvs_orig.getVals()->get(), remap);
+        }
     }
 
-    if (topology_changed)
-        topology.onTopologyUpdate(m_config, *sample);
+
+    // compute normals / tangents if needed
+
+    bool compute_normals_required = sample->computeNormalsRequired();
+    if (compute_normals_required)
+        sample->computeNormals(m_config);
+
+    bool compute_tangents_required = sample->computeTangentsRequired();
+    if (compute_tangents_required) {
+        if (!sample->m_normals.empty() && !sample->m_uvs.empty()) {
+            sample->computeTangents(m_config);
+        }
+    }
+
 
     return sample;
 }

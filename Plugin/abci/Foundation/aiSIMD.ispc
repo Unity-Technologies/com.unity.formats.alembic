@@ -1,3 +1,4 @@
+#define ispcmathEstimate
 #include "ispcmath.h"
 
 export void Scale(uniform float dst[], uniform const int num, uniform const float scale)
@@ -20,27 +21,19 @@ export void Scale(uniform float dst[], uniform const int num, uniform const floa
     }
 }
 
-export void InvertX3(uniform float3 dst[], uniform const int num)
+export void Normalize(uniform float3 dst[], uniform const int num)
 {
-    const uniform int num_loops = num / C;
+    uniform int num_simd = num & ~(C - 1);
 
-    {
-        uniform float _c[3][C];
-        _c[0][I] = select((C*0 + I)%3==0, -1.0f, 1.0f);
-        _c[1][I] = select((C*1 + I)%3==0, -1.0f, 1.0f);
-        _c[2][I] = select((C*2 + I)%3==0, -1.0f, 1.0f);
-
-        uniform float * uniform fv = (uniform float * uniform)dst;
-        for(uniform int i=0; i < num_loops; ++i) {
-            uniform int i3 = i*3;
-            fv[C*(i3+0) + I] = fv[C*(i3+0) + I] * _c[0][I];
-            fv[C*(i3+1) + I] = fv[C*(i3+1) + I] * _c[1][I];
-            fv[C*(i3+2) + I] = fv[C*(i3+2) + I] * _c[2][I];
-        }
+    for (uniform int bi = 0; bi < num_simd; bi += C) {
+        float3 n;
+        aos_to_soa3((uniform float*)&dst[bi], &n.x, &n.y, &n.z);
+        n = normalize(n);
+        soa_to_aos3(n.x, n.y, n.z, (uniform float*)&dst[bi]);
     }
 
-    for(uniform int i=num_loops*C; i < num; ++i) {
-        dst[i].x *= -1.0f;
+    for (uniform int i = num_simd; i < num; ++i) {
+        dst[i] = normalize(dst[i]);
     }
 }
 
@@ -105,60 +98,25 @@ export void MinMax3(
     dst_max = rmax;
 }
 
-export void Lerp(
-    uniform float dst[],
-    uniform const float p1[],
-    uniform const float p2[],
-    uniform const int num,
-    uniform float weight)
+export void Lerp(uniform float dst[], uniform const float src1[], uniform const float src2[], uniform const int num, uniform float w)
 {
-    const uniform float inv_weight = 1.0f - weight;
-
-    const uniform int block_size = C;
-    const uniform int num_blocks = num / block_size;
-
-    // SIMD pass
-    for (uniform int bi = 0; bi < num_blocks; ++bi) {
-        const int i = C * bi + I;
-        dst[i] = (p1[i] * inv_weight) + (p2[i] * weight);
-    }
-
-    // non-SIMD pass
-    for (uniform int i = num_blocks * block_size; i < num; ++i) {
-        dst[i] = (p1[i] * inv_weight) + (p2[i] * weight);
+    uniform float iw = 1.0f - w;
+    foreach(i = 0 ... num) {
+        dst[i] = src1[i] * iw + src2[i] * w;
     }
 }
 
-export void GenerateVelocity(
-    uniform float3 dst_pos[],
-    uniform float3 dst_vel[],
+export void GenerateVelocities(
+    uniform float3 dst[],
     uniform const float3 p1[],
     uniform const float3 p2[],
     uniform const int num,
-    uniform float time_offset,
     uniform float time_interval,
     uniform float motion_scale)
 {
-    const uniform float s = rcp(time_interval) * motion_scale;
-
-    const uniform int block_size = C;
-    const uniform int num_blocks = num / block_size;
-
-    // SIMD pass
-    for (uniform int bi = 0; bi < num_blocks; ++bi) {
-        int i = C * bi + I;
-        float3 p = p1[i];
-        float3 distance = p2[i] - p;
-        dst_pos[i] = p + distance * time_offset;
-        dst_vel[i] = distance * s;
-    }
-
-    // non-SIMD pass
-    for (uniform int i = num_blocks * block_size; i < num; ++i) {
-        uniform float3 p = p1[i];
-        uniform float3 distance = p2[i] - p;
-        dst_pos[i] = p + distance * time_offset;
-        dst_vel[i] = distance * s;
+    uniform float s = rcp(time_interval) * motion_scale;
+    foreach(i = 0 ... num) {
+        dst[i] = (p2[i] - p1[i]) * s;
     }
 }
 

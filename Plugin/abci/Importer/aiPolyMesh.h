@@ -14,6 +14,7 @@ public:
     int getSplitCount() const;
 
     int getSplitVertexCount(int split_index) const;
+    int getSubmeshCount() const;
     int getSubmeshCount(int split_index) const;
 
     void onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& sample);
@@ -51,9 +52,12 @@ public:
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
     void getDataPointer(aiPolyMeshData &data) const;
 
+    void interpolatePoints();
     void computeNormals(const aiConfig &config);
-    void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
+    void interpolateNormals();
+    void computeTangents(const aiConfig &config);
 
+    void prepareSplits();
     int getSplitVertexCount(int split_index) const;
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
 
@@ -69,15 +73,11 @@ public:
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
-    RawVector<abcV3> m_points_generated;
-    RawVector<abcV3> m_velocity_generated;
-    RawVector<abcV3> m_normals_generated;
+    RawVector<abcV3> m_points;
+    RawVector<abcV3> m_velocities;
+    RawVector<abcV2> m_uvs;
+    RawVector<abcV3> m_normals;
     RawVector<abcV4> m_tangents;
-
-    IArray<abcV3> m_points;
-    IArray<abcV3> m_velocities;
-    IArray<abcV3> m_normals;
-    IArray<int> m_normal_indices;
 
     TopologyPtr m_topology;
     bool m_own_topology = false;

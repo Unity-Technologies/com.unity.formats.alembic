@@ -6,7 +6,7 @@ namespace impl
 {
     template<class Indices, class Counts>
     inline void BuildConnection(
-        ConnectionData& connection, const Indices& indices, const Counts& counts, const IArray<float3>& vertices)
+        MeshConnectionInfo& connection, const Indices& indices, const Counts& counts, const IArray<float3>& vertices)
     {
         size_t num_points = vertices.size();
         size_t num_faces = counts.size();
@@ -51,7 +51,7 @@ namespace impl
     }
 }
 
-void ConnectionData::clear()
+void MeshConnectionInfo::clear()
 {
     v2f_counts.clear();
     v2f_offsets.clear();
@@ -64,7 +64,7 @@ void ConnectionData::clear()
     weld_indices.clear();
 }
 
-void ConnectionData::buildConnection(
+void MeshConnectionInfo::buildConnection(
     const IArray<int>& indices, const IArray<int>& counts, const IArray<float3>& vertices)
 {
     size_t num_points = vertices.size();
@@ -169,8 +169,8 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
     submeshes.clear();
 
     new_indices_submeshes.resize(new_indices_triangulated.size());
-    const int *faces_to_read = new_indices_triangulated.data();
-    int *faces_to_write = new_indices_submeshes.data();
+    const int *indices_read = new_indices_triangulated.data();
+    int *indices_write = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
@@ -178,10 +178,11 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
 
     for (int spi = 0; spi < num_splits; ++spi) {
         auto& split = splits[spi];
+        int offset_vertices = split.offset_vertices;
 
         // count triangle indices
         for (int fi = 0; fi < split.num_faces; ++fi) {
-            int mid = materialIDs[offset_faces + fi] + 1; // -1 == no material. adjust to it
+            int mid = materialIDs[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
             while (mid >= (int)tmp_submeshes.size()) {
                 int id = (int)tmp_submeshes.size();
                 tmp_submeshes.push_back({});
@@ -192,18 +193,18 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
 
         for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
             auto& sm = tmp_submeshes[mi];
-            sm.faces_to_write = faces_to_write;
-            sm.offset_indices = (int)std::distance(new_indices_submeshes.data(), faces_to_write);
-            faces_to_write += sm.num_indices;
+            sm.indices_write = indices_write;
+            sm.offset_indices = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            indices_write += sm.num_indices;
         }
 
-        // copy triangles
+        // copy indices
         for (int fi = 0; fi < split.num_faces; ++fi) {
             int mid = materialIDs[offset_faces + fi] + 1;
             int count = counts[offset_faces + fi];
             int nidx = (count - 2) * 3;
             for (int i = 0; i < nidx; ++i) {
-                *(tmp_submeshes[mid].faces_to_write++) = *(faces_to_read++);
+                *(tmp_submeshes[mid].indices_write++) = *(indices_read++) - offset_vertices;
             }
         }
 
@@ -316,7 +317,7 @@ void MeshRefiner::doRefine(const Body& body)
             int i = offset + ci;
             int vi = indices[i];
             int ni = body(vi, i);
-            new_indices.push_back(ni - offset_vertices);
+            new_indices.push_back(ni);
         }
         ++num_faces;
         num_indices_triangulated += (count - 2) * 3;

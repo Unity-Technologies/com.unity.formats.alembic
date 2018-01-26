@@ -135,6 +135,7 @@ namespace UTJ.Alembic
                 m_FreshSetup = false;
             }
 
+            AbcAPI.aiPolyMeshPrepareSplits(sample);
             AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary, topologyChanged);
 
             AbcAPI.aiPolyMeshData vertexData = default(AbcAPI.aiPolyMeshData);

@@ -155,7 +155,8 @@ struct aiMeshSummary
 
 struct aiMeshSampleSummary
 {
-    int splitCount = 0;
+    int split_count = 0;
+    int submesh_count = 0;
     bool has_normals = false;
     bool has_uvs = false;
     bool has_tangents = false;
@@ -282,6 +283,7 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 // return pointers to actual data. no conversions (swap handedness, etc) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // all these below aiPolyMesh* are mesh splitting functions
+abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
 abciAPI int             aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
 abciAPI int             aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index);

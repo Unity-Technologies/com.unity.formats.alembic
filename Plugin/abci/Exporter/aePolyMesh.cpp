@@ -87,16 +87,16 @@ void aePolyMesh::doWriteSample()
 
     // handle swap handedness
     if (conf.swap_handedness) {
-        swap_handedness(m_buf_positions.data(), (int)m_buf_positions.size());
-        swap_handedness(m_buf_velocities.data(), (int)m_buf_velocities.size());
-        swap_handedness(m_buf_normals.data(), (int)m_buf_normals.size());
+        SwapHandedness(m_buf_positions.data(), (int)m_buf_positions.size());
+        SwapHandedness(m_buf_velocities.data(), (int)m_buf_velocities.size());
+        SwapHandedness(m_buf_normals.data(), (int)m_buf_normals.size());
     }
 
     // handle scale factor
     float scale = conf.scale;
     if (scale != 1.0f) {
-        apply_scale(m_buf_positions.data(), (int)m_buf_positions.size(), scale);
-        apply_scale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
+        ApplyScale(m_buf_positions.data(), (int)m_buf_positions.size(), scale);
+        ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
     // if face counts are empty, assume all faces are triangles

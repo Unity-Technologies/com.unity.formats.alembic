@@ -125,6 +125,7 @@ namespace UTJ.Alembic
         public struct aiMeshSampleSummary
         {
             public int splitCount;
+            public int submeshCount;
             public Bool hasNormals;
             public Bool hasUVs;
             public Bool hasTangents;
@@ -278,9 +279,9 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
+        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSplits(aiSample sample);
         [DllImport("abci")] public static extern int        aiPolyMeshGetVertexCount(aiSample sample, int splitIndex);
         [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
-        [DllImport("abci")] public static extern int        aiPolyMeshGetAllSubmeshCount(aiSample sample);
         [DllImport("abci")] public static extern int        aiPolyMeshGetSubmeshCount(aiSample sample, int splitIndex);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSubmeshSummary(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshSummary smi);
         [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshData data);

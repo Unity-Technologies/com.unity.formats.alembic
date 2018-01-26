@@ -240,6 +240,12 @@ abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* 
         sample->getDataPointer(*data);
 }
 
+abciAPI void aiPolyMeshPrepareSplits(aiPolyMeshSample * sample)
+{
+    if (sample)
+        sample->prepareSplits();
+}
+
 abciAPI int aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index)
 {
     return sample ? sample->getSplitVertexCount(split_index) : 0;

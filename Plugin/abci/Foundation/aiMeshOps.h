@@ -4,7 +4,7 @@
 #include "aiMath.h"
 
 
-struct ConnectionData
+struct MeshConnectionInfo
 {
     RawVector<int> v2f_counts;
     RawVector<int> v2f_offsets;
@@ -77,7 +77,7 @@ struct MeshRefiner
         int offset_indices = 0;
         int num_indices = 0; // triangulated
         int materialID = 0;
-        int* faces_to_write = nullptr;
+        int* indices_write = nullptr;
     };
 
     struct Split
@@ -116,7 +116,7 @@ struct MeshRefiner
     RawVector<float2> new_uvs;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
-    ConnectionData connection;
+    MeshConnectionInfo connection;
     int num_new_indices = 0;
 
 public:
@@ -135,17 +135,6 @@ private:
     template<class Hook> int findOrAddVertexP(int vi, const float3& p, const Hook& hook);
 };
 
-
-
-template<class T, class IndexArray>
-inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
-{
-    if (!dst || !src) { return; }
-    size_t size = indices.size();
-    for (size_t i = 0; i < (int)size; ++i) {
-        dst[i] = src[indices[i]];
-    }
-}
 
 
 
