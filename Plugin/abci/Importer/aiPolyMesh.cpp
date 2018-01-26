@@ -602,14 +602,14 @@ void aiPolyMesh::generateSplitAndSubmeshes(aiPolyMeshSample *sample) const
     refiner.split_unit = topology.m_use_32bit_index_buffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
     refiner.counts = { topology.m_counts->get(), topology.m_counts->size() };
     refiner.indices = { topology.m_indices_orig->get(), topology.m_indices_orig->size() };
-    refiner.points = { (float3*)sample->m_points_orig->get(), sample->m_points_orig->size() };
-    if (sample->m_normals_orig.valid()) {
-        refiner.normals = { (float3*)sample->m_normals_orig.getVals()->get(), sample->m_normals_orig.getVals()->size() };
-        if (sample->m_normals_orig.getIndices()->valid())
-            refiner.normal_indices = { (int*)sample->m_normals_orig.getIndices()->get(), sample->m_normals_orig.getIndices()->size() };
-        else if (refiner.normals.size() == refiner.points.size())
-            refiner.normal_indices = refiner.indices;
-    }
+    refiner.points = (IArray<float3>&)sample->m_points;
+
+    refiner.normals = (IArray<float3>&)sample->m_normals;
+    if (sample->m_normals_orig.valid() && sample->m_normals_orig.getIndices()->valid())
+        refiner.normal_indices = { (int*)sample->m_normals_orig.getIndices()->get(), sample->m_normals_orig.getIndices()->size() };
+    else if (refiner.normals.size() == refiner.points.size())
+        refiner.normal_indices = refiner.indices;
+
     if (sample->m_uvs_orig.valid()) {
         refiner.uvs = { (float2*)sample->m_uvs_orig.getVals()->get(), sample->m_uvs_orig.getVals()->size() };
         if (sample->m_uvs_orig.getIndices()->valid())

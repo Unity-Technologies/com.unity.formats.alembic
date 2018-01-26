@@ -461,6 +461,7 @@ int MeshRefiner::findOrAddVertexPN(int vi, const float3& p, const float3& n, con
             ni = (int)new_points.size();
             new_points.push_back(p);
             new_normals.push_back(n);
+            hook();
             return ni;
         }
     }
@@ -481,6 +482,7 @@ int MeshRefiner::findOrAddVertexPU(int vi, const float3& p, const float2& u, con
             ni = (int)new_points.size();
             new_points.push_back(p);
             new_uvs.push_back(u);
+            hook();
             return ni;
         }
     }
@@ -500,6 +502,7 @@ int MeshRefiner::findOrAddVertexP(int vi, const float3 & p, const Hook& hook)
         else if (ni == -1) {
             ni = (int)new_points.size();
             new_points.push_back(p);
+            hook();
             return ni;
         }
     }
