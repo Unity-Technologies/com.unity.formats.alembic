@@ -26,6 +26,7 @@ namespace UTJ.Alembic
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
             public PinnedList<Vector2> uvs = new PinnedList<Vector2>();
             public List<PinnedList<int>> facesets = new List<PinnedList<int>>();
+            PinnedList<int> tmpIndices = new PinnedList<int>();
 
             public void SetupSubmeshes(AbcAPI.aeObject abc, Mesh mesh, Material[] materials)
             {
@@ -45,17 +46,32 @@ namespace UTJ.Alembic
 
             public void Capture(Mesh mesh)
             {
-                indices.Assign(mesh.triangles); // todo: this can be optimized
                 vertices.LockList(ls => mesh.GetVertices(ls));
                 normals.LockList(ls => mesh.GetNormals(ls));
                 uvs.LockList(ls => mesh.GetUVs(0, ls));
 
-                if (mesh.subMeshCount > 1)
+                int submeshCount = mesh.subMeshCount;
+                if (submeshCount == 1)
                 {
-                    while (facesets.Count < mesh.subMeshCount)
+                    indices.LockList(ls => mesh.GetTriangles(ls, 0));
+                }
+                else
+                {
+                    indices.Assign(mesh.triangles);
+
+                    while (facesets.Count < submeshCount)
                         facesets.Add(new PinnedList<int>());
-                    for (int smi = 0; smi < mesh.subMeshCount; ++smi)
-                        mesh.GetTriangles(facesets[smi].List, smi);
+
+                    int offsetTriangle = 0;
+                    for (int smi = 0; smi < submeshCount; ++smi)
+                    {
+                        tmpIndices.LockList(ls => { mesh.GetTriangles(ls, smi); });
+                        int numTriangles = tmpIndices.Count / 3;
+                        facesets[smi].ResizeDiscard(numTriangles);
+                        for (int ti = 0; ti < numTriangles; ++ti)
+                            facesets[smi][ti] = ti + offsetTriangle;
+                        offsetTriangle += numTriangles;
+                    }
                 }
             }
 

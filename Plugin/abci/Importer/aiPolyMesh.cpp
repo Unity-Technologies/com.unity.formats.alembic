@@ -138,11 +138,6 @@ bool aiPolyMeshSample::hasNormals() const
     }
 }
 
-bool aiPolyMeshSample::useAbcNormals() const
-{
-    return m_use_abc_normals;
-}
-
 bool aiPolyMeshSample::hasUVs() const
 {
     return m_uvs_orig.valid();

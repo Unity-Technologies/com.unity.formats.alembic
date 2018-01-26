@@ -42,7 +42,6 @@ public:
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
     bool hasNormals() const;
-    bool useAbcNormals() const;
     bool hasUVs() const;
     bool hasVelocities() const;
     bool hasTangents() const;
@@ -79,7 +78,6 @@ public:
     IArray<abcV3> m_velocities;
     IArray<abcV3> m_normals;
     IArray<int> m_normal_indices;
-    bool m_use_abc_normals = false;
 
     TopologyPtr m_topology;
     bool m_own_topology = false;
