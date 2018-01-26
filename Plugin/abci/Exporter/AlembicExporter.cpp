@@ -189,13 +189,21 @@ abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 
 abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
 {
-    auto compare_op = [&](int vi, int ni) { return weights[vi] == weights[ni]; };
-    auto weld_op = [&](int vi, int ni) { weights[ni] = weights[vi]; };
+    int ret = 0;
 
     MeshWelder welder;
-    int new_vertex_count = welder.weld(points, vertex_count, compare_op, weld_op);
+    if (weights) {
+        auto compare_op = [&](int vi, int ni) { return weights[vi] == weights[ni]; };
+        auto weld_op = [&](int vi, int ni) { weights[ni] = weights[vi]; };
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
+    }
+    else {
+        auto compare_op = [&](int vi, int ni) { return true; };
+        auto weld_op = [&](int vi, int ni) {};
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
+    }
     welder.getRemapTable().copy_to(remap);
-    return new_vertex_count;
+    return ret;
 }
 
 abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, const abcM44 *matrix)

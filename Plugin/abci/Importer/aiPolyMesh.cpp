@@ -306,20 +306,28 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     
     auto& splits = m_topology->m_refiner.splits;
     if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].num_vertices == 0)
-    {
         return;
-    }
 
     bool copy_normals = (hasNormals() && data.normals);
     bool copy_uvs = (hasUVs() && data.uvs);
     bool copy_tangents = (hasTangents() && data.tangents);
     
     bool use_abc_normals = (m_normals_orig.valid() && (m_config.normals_mode == aiNormalsMode::ReadFromFile || m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
-    float xScale = (m_config.swap_handedness ? -1.0f : 1.0f);
-    bool interpolate_points = hasVelocities() && m_points_next != nullptr;
-    
+    bool interpolate = hasVelocities() && m_points_next != nullptr;
+
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
+
+    if (interpolate) {
+        m_points_generated.resize_discard(m_points_orig->size());
+        m_velocity_generated.resize_discard(m_points_orig->size());
+        m_points = { m_points_generated.data(), m_points_generated.size() };
+        m_velocities = { m_velocity_generated.data(), m_velocity_generated.size() };
+        gen_velocity(
+            m_points_generated.data(), m_velocity_generated.data(),
+            m_points_orig->get(), m_points_next->get(), (int)m_points_orig->size(),
+            (float)m_current_time_offset, (float)m_current_time_interval, m_config.vertex_motion_scale);
+    }
 
     if (data.points) {
         IArray<int> remap{ &refiner.new2old_points[split.offset_vertices], (size_t)split.num_vertices };
@@ -502,15 +510,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     m_schema.getPositionsProperty().get(sample->m_points_orig, ss);
     if (!m_varying_topology && m_config.interpolate_samples) {
         m_schema.getPositionsProperty().get(sample->m_points_next, ss2);
-
-        sample->m_points_generated.resize_discard(sample->m_points_orig->size());
-        sample->m_velocity_generated.resize_discard(sample->m_points_orig->size());
-        sample->m_points = { sample->m_points_generated.data(), sample->m_points_generated.size() };
-        sample->m_velocities = { sample->m_velocity_generated.data(), sample->m_velocity_generated.size() };
-        gen_velocity(
-            sample->m_points_generated.data(), sample->m_velocity_generated.data(),
-            sample->m_points_orig->get(), sample->m_points_next->get(), (int)sample->m_points_orig->size(),
-            (float)sample->m_current_time_offset, (float)sample->m_current_time_interval, m_config.vertex_motion_scale);
     }
     else {
         sample->m_points = { sample->m_points_orig->get(), sample->m_points_orig->size() };

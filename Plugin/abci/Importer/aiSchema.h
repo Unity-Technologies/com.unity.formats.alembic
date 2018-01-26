@@ -265,7 +265,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
     m_last_sample_index = sample_index;
 
     if (sample) {
-        if (!m_varying_topology && m_config.interpolate_samples) {
+        if (m_config.interpolate_samples) {
             AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
             auto indexTime = m_time_sampling->getSampleTime(sample_index);
             sample->m_current_time_offset = std::max(0.0, std::min((ss.getRequestedTime() - indexTime) / interval, 1.0));

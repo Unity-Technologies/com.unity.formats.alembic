@@ -84,12 +84,8 @@ aiXForm::aiXForm(aiObject *obj)
 aiXForm::Sample* aiXForm::newSample()
 {
     Sample *sample = getSample();
-    
     if (!sample)
-    {
         sample = new Sample(this);
-    }
-    
     return sample;
 }
 
