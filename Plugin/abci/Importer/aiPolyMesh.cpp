@@ -90,7 +90,7 @@ bool aiPolyMeshSample::hasNormals() const
     case aiNormalsMode::Ignore:
         return false;
     default:
-        return (m_normals_orig.valid() || !m_normals_generated.empty());
+        return !m_normals.empty();
     }
 }
 
@@ -167,6 +167,7 @@ void aiPolyMeshSample::computeNormals(const aiConfig &config)
 
     // Normalize normal vectors
     for (abcV3& v : m_normals_generated) { v.normalize(); }
+    m_normals = { m_normals_generated.data(), m_normals_generated.size() };
 }
 
 
@@ -323,13 +324,12 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     if (data.points) {
         IArray<int> remap{ &refiner.new2old_points[split.offset_vertices], (size_t)split.num_vertices };
         CopyWithIndices(data.points, m_points.data(), remap);
-        //refiner.new_points.copy_to((float3*)data.points, split.num_vertices, split.offset_vertices);
         if (m_config.swap_handedness) { swap_handedness(data.points, split.num_vertices); }
     }
     if (data.normals) {
         if (copy_normals) {
             IArray<int> remap{ &refiner.new2old_normals[split.offset_vertices], (size_t)split.num_vertices };
-            CopyWithIndices(data.normals, m_points.data(), remap);
+            CopyWithIndices(data.normals, m_normals.data(), remap);
             if (m_config.swap_handedness) { swap_handedness(data.normals, split.num_vertices); }
         }
         else {
@@ -500,27 +500,28 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     }
 
     m_schema.getPositionsProperty().get(sample->m_points_orig, ss);
-    sample->m_points = { sample->m_points_orig->get(), sample->m_points_orig->size() };
-    //if (!m_varying_topology && m_config.interpolate_samples) {
-    //    m_schema.getPositionsProperty().get(sample->m_points_next, ss2);
+    if (!m_varying_topology && m_config.interpolate_samples) {
+        m_schema.getPositionsProperty().get(sample->m_points_next, ss2);
 
-    //    sample->m_points_generated.resize_discard(sample->m_points_orig->size());
-    //    sample->m_velocity_generated.resize_discard(sample->m_points_orig->size());
-    //    sample->m_points = { sample->m_points_generated.data(), sample->m_points_generated.size() };
-    //    sample->m_velocities = { sample->m_velocity_generated.data(), sample->m_velocity_generated.size() };
-    //    gen_velocity(
-    //        sample->m_velocity_generated.data(), sample->m_velocity_generated.data(),
-    //        sample->m_points_orig->get(), sample->m_points_next->get(), (int)sample->m_points_orig->size(),
-    //        (float)sample->m_current_time_offset, (float)sample->m_current_time_interval, m_config.vertex_motion_scale);
-    //}
-    //else {
-    //    sample->m_velocities_orig.reset();
-    //    auto velocities_prop = m_schema.getVelocitiesProperty();
-    //    if (velocities_prop.valid()) {
-    //        velocities_prop.get(sample->m_velocities_orig, ss);
-    //        sample->m_velocities = { sample->m_velocities_orig->get(), sample->m_velocities_orig->size() };
-    //    }
-    //}
+        sample->m_points_generated.resize_discard(sample->m_points_orig->size());
+        sample->m_velocity_generated.resize_discard(sample->m_points_orig->size());
+        sample->m_points = { sample->m_points_generated.data(), sample->m_points_generated.size() };
+        sample->m_velocities = { sample->m_velocity_generated.data(), sample->m_velocity_generated.size() };
+        gen_velocity(
+            sample->m_points_generated.data(), sample->m_velocity_generated.data(),
+            sample->m_points_orig->get(), sample->m_points_next->get(), (int)sample->m_points_orig->size(),
+            (float)sample->m_current_time_offset, (float)sample->m_current_time_interval, m_config.vertex_motion_scale);
+    }
+    else {
+        sample->m_points = { sample->m_points_orig->get(), sample->m_points_orig->size() };
+
+        sample->m_velocities_orig.reset();
+        auto velocities_prop = m_schema.getVelocitiesProperty();
+        if (velocities_prop.valid()) {
+            velocities_prop.get(sample->m_velocities_orig, ss);
+            sample->m_velocities = { sample->m_velocities_orig->get(), sample->m_velocities_orig->size() };
+        }
+    }
 
     sample->m_uvs_orig.reset();
     auto uvs_param = m_schema.getUVsParam();
@@ -555,6 +556,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
             DebugLog("  Read normals");
             normals_param.getIndexed(sample->m_normals_orig, ss);
         }
+        sample->m_normals = { sample->m_normals_orig.getVals()->get(), sample->m_normals_orig.getVals()->size() };
     }
 
     if (compute_normals_required)

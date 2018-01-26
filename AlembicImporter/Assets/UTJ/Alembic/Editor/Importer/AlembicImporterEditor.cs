@@ -43,11 +43,9 @@ namespace UTJ.Alembic
                 }
                 EditorGUILayout.HelpBox(message,MessageType.Info);
             }
-            
-            
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer"));
 #if !UNITY_2017_3_OR_NEWER
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer"));
             if (serializedObject.FindProperty("streamSettings.use32BitsIndexBuffer").boolValue)
                 EditorGUILayout.HelpBox("32Bits index buffers are not supported on this version of Unity, this setting will be ignored.",MessageType.Warning);
 #endif
