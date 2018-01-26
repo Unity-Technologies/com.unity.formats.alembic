@@ -16,8 +16,8 @@ public:
     virtual void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) = 0;
 
 public:
-    AbcCoreAbstract::chrono_t m_current_time_offset;
-    AbcCoreAbstract::chrono_t m_current_time_interval;
+    AbcCoreAbstract::chrono_t m_current_time_offset = 0;
+    AbcCoreAbstract::chrono_t m_current_time_interval = 0;
 protected:
     aiSchemaBase *m_schema;
     aiConfig m_config;

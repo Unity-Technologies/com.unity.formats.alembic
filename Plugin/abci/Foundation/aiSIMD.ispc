@@ -130,28 +130,35 @@ export void Lerp(
 }
 
 export void GenerateVelocity(
-    uniform float dst[],
-    uniform const float p1[],
-    uniform const float p2[],
+    uniform float3 dst_pos[],
+    uniform float3 dst_vel[],
+    uniform const float3 p1[],
+    uniform const float3 p2[],
     uniform const int num,
+    uniform float time_offset,
     uniform float time_interval,
     uniform float motion_scale)
 {
-    const uniform float inv_time_interval = rcp(time_interval);
-    const uniform float s = inv_time_interval * motion_scale;
+    const uniform float s = rcp(time_interval) * motion_scale;
 
     const uniform int block_size = C;
     const uniform int num_blocks = num / block_size;
 
     // SIMD pass
     for (uniform int bi = 0; bi < num_blocks; ++bi) {
-        const int i = C * bi + I;
-        dst[i] = (p2[i] - p1[i]) * s;
+        int i = C * bi + I;
+        float3 p = p1[i];
+        float3 distance = p2[i] - p;
+        dst_pos[i] = p + distance * time_offset;
+        dst_vel[i] = distance * s;
     }
 
     // non-SIMD pass
     for (uniform int i = num_blocks * block_size; i < num; ++i) {
-        dst[i] = (p2[i] - p1[i]) * s;
+        uniform float3 p = p1[i];
+        uniform float3 distance = p2[i] - p;
+        dst_pos[i] = p + distance * time_offset;
+        dst_vel[i] = distance * s;
     }
 }
 

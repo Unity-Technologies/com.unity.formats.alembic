@@ -251,11 +251,6 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_inde
         sample->fillSplitVertices(split_index, *data);
 }
 
-abciAPI int aiPolyMeshGetAllSubmeshCount(aiPolyMeshSample * sample)
-{
-    return sample ? sample->getAllSubmeshCount() : 0;
-}
-
 abciAPI int aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index)
 {
     return sample ? sample->getSubmeshCount(split_index) : 0;

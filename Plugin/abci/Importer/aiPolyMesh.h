@@ -12,7 +12,6 @@ public:
 
     int getTriangulatedIndexCount() const;
     int getSplitCount() const;
-    int getAllSubmeshCount();
 
     int getSplitVertexCount(int split_index) const;
     int getSubmeshCount(int split_index) const;
@@ -50,7 +49,6 @@ public:
 
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
     void getDataPointer(aiPolyMeshData &data) const;
-    void copyData(aiPolyMeshData &data);
 
     void computeNormals(const aiConfig &config);
     void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
@@ -58,26 +56,29 @@ public:
     int getSplitVertexCount(int split_index) const;
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
 
-    int getAllSubmeshCount() const;
     int getSubmeshCount(int split_index) const;
     void getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary);
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 
 public:
-    Abc::P3fArraySamplePtr m_points;
-    Abc::P3fArraySamplePtr m_next_points;
-    Abc::V3fArraySamplePtr m_velocities;
-    AbcGeom::IN3fGeomParam::Sample m_normals_orig;
+    Abc::P3fArraySamplePtr m_points_orig, m_points_next;
+    Abc::V3fArraySamplePtr m_velocities_orig;
+    AbcGeom::IN3fGeomParam::Sample m_normals_orig, m_normals_next;
     AbcGeom::IV2fGeomParam::Sample m_uvs_orig;
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
+    RawVector<abcV3> m_points_generated;
+    RawVector<abcV3> m_velocity_generated;
+    RawVector<abcV3> m_normals_generated;
+    RawVector<abcV4> m_tangents;
+
+    IArray<abcV3> m_points;
+    IArray<abcV3> m_velocities;
+    IArray<abcV3> m_normals;
+
     TopologyPtr m_topology;
     bool m_own_topology = false;
-
-    RawVector<abcV2> m_uvs;
-    RawVector<abcV3> m_normals;
-    RawVector<abcV4> m_tangents;
 };
 
 

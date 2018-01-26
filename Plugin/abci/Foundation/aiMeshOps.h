@@ -72,6 +72,8 @@ struct MeshRefiner
 {
     struct Submesh
     {
+        int split_index = 0;
+        int submesh_index = 0; // submesh index in split
         int offset_indices = 0;
         int num_indices = 0; // triangulated
         int materialID = 0;
@@ -108,7 +110,7 @@ struct MeshRefiner
     RawVector<int> new2old_uvs;     // 
     RawVector<int> new_indices;
     RawVector<int> new_indices_triangulated;
-    RawVector<int> new_indices_submeshes;
+    RawVector<int> new_indices_submeshes; // triangulated
     RawVector<float3> new_points;
     RawVector<float3> new_normals;
     RawVector<float2> new_uvs;
@@ -135,6 +137,15 @@ private:
 
 
 
+template<class T, class IndexArray>
+inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
+{
+    if (!dst || !src) { return; }
+    size_t size = indices.size();
+    for (size_t i = 0; i < (int)size; ++i) {
+        dst[i] = src[indices[i]];
+    }
+}
 
 
 

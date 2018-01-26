@@ -155,7 +155,7 @@ struct aiMeshSummary
 
 struct aiMeshSampleSummary
 {
-    int32_t splitCount = 0;
+    int splitCount = 0;
     bool has_normals = false;
     bool has_uvs = false;
     bool has_tangents = false;
@@ -194,12 +194,14 @@ struct aiPolyMeshData
 
 struct aiSubmeshSummary
 {
-    int32_t index_count = 0;
+    int split_index = 0;
+    int submesh_index = 0; // submesh index in split
+    int index_count = 0;
 };
 
 struct aiSubmeshData
 {
-    int32_t *indices = nullptr;
+    int *indices = nullptr;
 
 };
 
@@ -277,12 +279,11 @@ abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool force_refresh=false);
-// return pointers to actual data. no conversions (swap handedness / faces) are applied.
+// return pointers to actual data. no conversions (swap handedness, etc) are applied.
 abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // all these below aiPolyMesh* are mesh splitting functions
 abciAPI int             aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
-abciAPI int             aiPolyMeshGetAllSubmeshCount(aiPolyMeshSample* sample);
 abciAPI int             aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index);
 abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data);

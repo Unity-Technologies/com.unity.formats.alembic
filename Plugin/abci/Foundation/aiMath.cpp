@@ -17,9 +17,11 @@ void lerp_ispc(abcV3 *dst, const abcV3 * v1, const abcV3 * v2, int num, float w)
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num*3, w);
 }
 
-void gen_velocity_ispc(abcV3 * dst, const abcV3 * p1, const abcV3 * p2, int num, float time_interval, float motion_scale)
+void gen_velocity_ispc(abcV3 *dst_pos, abcV3 *dst_vel,
+    const abcV3 *p1, const abcV3 *p2, int num, float time_offset, float time_interval, float motion_scale)
 {
-    ispc::GenerateVelocity((float*)dst, (float*)p1, (float*)p2, num, time_interval, motion_scale);
+    ispc::GenerateVelocity((ispc::float3*)dst_pos, (ispc::float3*)dst_vel,(ispc::float3*)p1, (ispc::float3*)p2, num,
+        time_offset, time_interval, motion_scale);
 }
 
 void get_bounds_ispc(abcV3 & min, abcV3 & max, const abcV3 * points, int num)
@@ -60,12 +62,16 @@ void lerp_generic(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w
     }
 }
 
-void gen_velocity_generic(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale)
+void gen_velocity_generic(abcV3 *dst_pos, abcV3 *dst_vel,
+    const abcV3 *p1, const abcV3 *p2, int num, float time_offset, float time_interval, float motion_scale)
 {
     float inv_time_interval = 1.0f / time_interval;
     float s = inv_time_interval * motion_scale;
     for (int i = 0; i < num; ++i) {
-        dst[i] = (p2[i] - p1[i]) * s;
+        auto p = p1[i];
+        auto distance = p2[i] - p;
+        dst_pos[i] = p + distance * time_offset;
+        dst_vel[i] = distance * s;
     }
 }
 
@@ -229,9 +235,10 @@ void lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
     Impl(lerp, dst, v1, v2, num, w);
 }
 
-void gen_velocity(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale)
+void gen_velocity(abcV3 *dst_pos, abcV3 *dst_vel,
+    const abcV3 *p1, const abcV3 *p2, int num, float time_offset, float time_interval, float motion_scale)
 {
-    Impl(gen_velocity, dst, p1, p2, num, time_interval, motion_scale);
+    Impl(gen_velocity, dst_pos, dst_vel, p1, p2, num, time_offset, time_interval, motion_scale);
 }
 
 void get_bounds(abcV3 &min, abcV3 &max, const abcV3 *points, int num)

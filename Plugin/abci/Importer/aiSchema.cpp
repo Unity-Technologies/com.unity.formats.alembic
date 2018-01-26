@@ -7,9 +7,7 @@
 
 
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
-    : m_current_time_offset(0)
-    , m_current_time_interval(0)
-    , m_schema(schema)
+    : m_schema(schema)
 {
     m_config = schema->getConfig();
 }

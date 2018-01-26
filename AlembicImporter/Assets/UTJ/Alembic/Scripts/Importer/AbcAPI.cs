@@ -163,6 +163,8 @@ namespace UTJ.Alembic
 
         public struct aiSubmeshSummary
         {
+            public int splitIndex;
+            public int submeshIndex;
             public int indexCount;
         }
 
