@@ -235,13 +235,13 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
 void MeshRefiner::clear()
 {
     split_unit = 0;
-    counts.clear();
-    indices.clear();
-    normal_indices.clear();
-    uv_indices.clear();
-    points.clear();
-    normals.clear();
-    uvs.clear();
+    counts.reset();
+    indices.reset();
+    normal_indices.reset();
+    uv_indices.reset();
+    points.reset();
+    normals.reset();
+    uvs.reset();
 
     old2new_indices.clear();
     new2old_points.clear();
@@ -432,7 +432,7 @@ int MeshRefiner::findOrAddVertexPNU(int vi, const float3& p, const float3& n, co
     int count = connection.v2f_counts[vi];
     for (int ci = 0; ci < count; ++ci) {
         int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_points[ni]==p && new_normals[ni]==n && new_uvs[ni]==u) {
+        if (ni != -1 && new_normals[ni]==n && new_uvs[ni]==u) {
             return ni;
         }
         else if (ni == -1) {
@@ -454,7 +454,7 @@ int MeshRefiner::findOrAddVertexPN(int vi, const float3& p, const float3& n, con
     int count = connection.v2f_counts[vi];
     for (int ci = 0; ci < count; ++ci) {
         int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_points[ni]==p && new_normals[ni]==n) {
+        if (ni != -1 && new_normals[ni]==n) {
             return ni;
         }
         else if (ni == -1) {
@@ -475,7 +475,7 @@ int MeshRefiner::findOrAddVertexPU(int vi, const float3& p, const float2& u, con
     int count = connection.v2f_counts[vi];
     for (int ci = 0; ci < count; ++ci) {
         int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_points[ni]==p && new_uvs[ni]==u) {
+        if (ni != -1 && new_uvs[ni]==u) {
             return ni;
         }
         else if (ni == -1) {
@@ -496,7 +496,7 @@ int MeshRefiner::findOrAddVertexP(int vi, const float3 & p, const Hook& hook)
     int count = connection.v2f_counts[vi];
     for (int ci = 0; ci < count; ++ci) {
         int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_points[ni] == p) {
+        if (ni != -1) {
             return ni;
         }
         else if (ni == -1) {

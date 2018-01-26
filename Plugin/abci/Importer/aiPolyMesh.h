@@ -16,15 +16,17 @@ public:
     int getSplitVertexCount(int split_index) const;
     int getSubmeshCount(int split_index) const;
 
+    void onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& sample);
+    RawVector<int>& getOffsets();
+
 public:
     Abc::Int32ArraySamplePtr m_indices_orig;
     Abc::Int32ArraySamplePtr m_counts;
-
-    RawVector<int> m_indices; // triangulated
+    RawVector<int> m_offsets;
     RawVector<int> m_material_ids;
-
     MeshRefiner m_refiner;
 
+    int m_triangulated_index_count = 0;
     bool m_freshly_read_topology_data = false;
     bool m_use_32bit_index_buffer = false;
 };
@@ -36,11 +38,11 @@ class aiPolyMeshSample : public aiSampleBase
 using super = aiSampleBase;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo );
-    virtual ~aiPolyMeshSample();
 
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
     bool hasNormals() const;
+    bool useAbcNormals() const;
     bool hasUVs() const;
     bool hasVelocities() const;
     bool hasTangents() const;
@@ -76,6 +78,8 @@ public:
     IArray<abcV3> m_points;
     IArray<abcV3> m_velocities;
     IArray<abcV3> m_normals;
+    IArray<int> m_normal_indices;
+    bool m_use_abc_normals = false;
 
     TopologyPtr m_topology;
     bool m_own_topology = false;

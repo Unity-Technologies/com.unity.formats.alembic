@@ -23,7 +23,7 @@ public:
     IntrusiveArray(const Container& v) : m_data(const_cast<T*>(v.data())), m_size(v.size()) {}
     IntrusiveArray& operator=(const IntrusiveArray& v) { m_data = const_cast<T*>(v.m_data); m_size = v.m_size; return *this; }
 
-    void clear()
+    void reset()
     {
         m_data = nullptr;
         m_size = 0;

@@ -197,53 +197,42 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
 
     readConfig();
 
-    Sample* sample;
+    Sample* sample = nullptr;
     bool topology_changed = false;
     int64_t sample_index = getSampleIndex(ss);
 
     if (dontUseCache()) {
         if (m_samples.size() > 0) {
             DebugLog("  Clear cached samples");
-
             m_samples.clear();
         }
 
         // don't need to check m_constant here, sampleIndex wouldn't change
         if (m_the_sample == 0 || sample_index != m_last_sample_index) {
             DebugLog("  Read sample");
-
             sample = readSample(sample_index, topology_changed);
-
             m_the_sample = sample;
         }
         else {
             DebugLog("  Update sample");
-
             bool data_changed = false;
             sample = m_the_sample;
             sample->updateConfig(m_config, topology_changed, data_changed);
-            
-
             if (!m_config.force_update && !data_changed && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
-
                 sample = 0;
             }
         }
     }
     else {
         auto& sp = m_samples[sample_index];
-
         if (!sp) {
             DebugLog("  Create new cache sample");
-
             sp.reset(readSample(sample_index, topology_changed));
-
             sample = sp.get();
         }
         else {
             DebugLog("  Update cached sample");
-
             bool data_changed = false;
             sample = sp.get();
             sample->updateConfig(m_config, topology_changed, data_changed);
@@ -256,7 +245,6 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
             }
             else if (!data_changed && !m_config.force_update && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
-
                 sample = 0;
             }
         }

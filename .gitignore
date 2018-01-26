@@ -33,6 +33,7 @@ excons.cache
 
 AlembicImporter/*.csproj
 AlembicImporter/*.sln
+AlembicImporter/Assets/UTJ/NormalPainter*
 .vs/
 Library/
 Temp/
