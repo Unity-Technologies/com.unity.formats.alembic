@@ -176,7 +176,7 @@ namespace UTJ.Alembic
                     split.uvCache.Resize(vertexCount);
                 else
                     split.uvCache.Resize(0);
-                vertexData.uvs = split.uvCache;
+                vertexData.uv0 = split.uvCache;
 
                 if (sampleSummary.hasTangents)
                     split.tangentCache.Resize(vertexCount);

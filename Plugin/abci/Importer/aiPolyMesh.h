@@ -107,12 +107,14 @@ public:
 
 private:
     std::unique_ptr<AbcGeom::IV2fGeomParam> m_uv1_param;
-    std::unique_ptr<AbcGeom::IC4fGeomParam> m_color_param;
+    std::unique_ptr<AbcGeom::IC4fGeomParam> m_colors_param;
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     AbcGeom::IN3fGeomParam::Sample m_constant_normals;
-    AbcGeom::IV2fGeomParam::Sample m_constant_uvs;
+    AbcGeom::IV2fGeomParam::Sample m_constant_uv0;
+    AbcGeom::IV2fGeomParam::Sample m_constant_uv1;
+    AbcGeom::IC4fGeomParam::Sample m_constant_colors;
 
     bool m_ignore_normals = false;
     bool m_ignore_uvs = false;

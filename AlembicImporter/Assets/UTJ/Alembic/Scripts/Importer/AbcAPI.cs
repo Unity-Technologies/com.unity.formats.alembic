@@ -139,8 +139,10 @@ namespace UTJ.Alembic
             public IntPtr interpolatedVelocitiesXY;
             public IntPtr interpolatedVelocitiesZ;
             public IntPtr normals;
-            public IntPtr uvs;
             public IntPtr tangents;
+            public IntPtr uv0;
+            public IntPtr uv1;
+            public IntPtr colors;
 
             public IntPtr indices;
             public IntPtr normalIndices;

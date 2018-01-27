@@ -170,8 +170,10 @@ struct aiPolyMeshData
     abcV2 *interpolated_velocities_xy = nullptr;
     abcV2 *interpolated_velocities_z = nullptr;
     abcV3 *normals = nullptr;
-    abcV2 *uvs = nullptr;
     abcV4 *tangents = nullptr;
+    abcV2 *uv0 = nullptr;
+    abcV2 *uv1 = nullptr;
+    abcV4 *colors = nullptr;
 
     int *indices = nullptr;
     int *normal_indices = nullptr;
