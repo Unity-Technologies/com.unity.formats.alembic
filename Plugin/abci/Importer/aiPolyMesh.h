@@ -33,8 +33,6 @@ public:
     int getSubmeshCount() const;
     int getSubmeshCount(int split_index) const;
 
-    void onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample);
-
 public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
@@ -61,8 +59,8 @@ public:
     
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
 
-    void computeNormals(const aiConfig &config);
-    void computeTangents(const aiConfig &config);
+    void computeNormals();
+    void computeTangents();
 
     int getSplitVertexCount(int split_index) const;
     void prepareSplits();
@@ -81,7 +79,14 @@ public:
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
-    RawVector<abcV3> m_points, m_points2;
+    IArray<abcV3> m_points_ref;
+    IArray<abcV3> m_velocities_ref;
+    IArray<abcV2> m_uv0_ref, m_uv1_ref;
+    IArray<abcV3> m_normals_ref;
+    IArray<abcV4> m_tangents_ref;
+    IArray<abcC4> m_colors_ref;
+
+    RawVector<abcV3> m_points, m_points2, m_points_int;
     RawVector<abcV3> m_velocities;
     RawVector<abcV2> m_uv0, m_uv1;
     RawVector<abcV3> m_normals, m_normals2;
@@ -108,6 +113,7 @@ public:
 
     Sample* newSample();
     Sample* readSample(const uint64_t idx, bool &topology_changed) override;
+    void onTopologyUpdate(aiPolyMeshSample& sample);
 
     const aiMeshSummaryInternal& getSummary() const;
     void getSummary(aiMeshSummary &summary) const;
@@ -119,6 +125,8 @@ private:
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
+
+public:
     RawVector<abcV3> m_constant_points;
     RawVector<abcV3> m_constant_velocities;
     RawVector<abcV3> m_constant_normals;
@@ -126,7 +134,4 @@ private:
     RawVector<abcV2> m_constant_uv0;
     RawVector<abcV2> m_constant_uv1;
     RawVector<abcC4> m_constant_colors;
-
-    bool m_ignore_normals = false;
-    bool m_ignore_uvs = false;
 };

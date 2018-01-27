@@ -35,6 +35,13 @@ inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
     }
 }
 
+template<class T>
+inline void Remap(RawVector<T>& dst, const T *src, const RawVector<int>& indices)
+{
+    dst.resize_discard(indices.size());
+    CopyWithIndices(dst.data(), src, indices);
+}
+
 
 aiMeshTopology::aiMeshTopology()
 {
@@ -75,107 +82,6 @@ int aiMeshTopology::getSubmeshCount(int split_index) const
     return (int)m_refiner.splits[split_index].num_submeshes;
 }
 
-void aiMeshTopology::onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample)
-{
-    if (config.turn_quad_edges) {
-        // todo
-    }
-
-    auto& refiner = m_refiner;
-    refiner.clear();
-
-    refiner.split_unit = m_use_32bit_index_buffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
-    refiner.counts = { m_counts_sp->get(), m_counts_sp->size() };
-    refiner.indices = { m_indices_sp->get(), m_indices_sp->size() };
-    refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
-
-    if (sample.m_normals_sp.valid()) {
-        IArray<abcV3> normals { sample.m_normals_sp.getVals()->get(), sample.m_normals_sp.getVals()->size() };
-        if (sample.m_normals_sp.isIndexed()) {
-            IArray<int> normal_indices { (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
-            refiner.addIndexedAttribute<abcV3>(normals, normal_indices, sample.m_normals, m_remap_normals);
-        }
-        else if (normals.size() == refiner.indices.size()) {
-            refiner.addExpandedAttribute<abcV3>(normals, sample.m_normals, m_remap_normals);
-        }
-        else if (normals.size() == refiner.points.size()) {
-            refiner.addIndexedAttribute<abcV3>(normals, refiner.indices, sample.m_normals, m_remap_normals);
-        }
-        else {
-            DebugLog("Invalid attribute");
-        }
-    }
-
-    if (sample.m_uv0_sp.valid()) {
-        IArray<abcV2> uv0 { sample.m_uv0_sp.getVals()->get(), sample.m_uv0_sp.getVals()->size() };
-        if (sample.m_uv0_sp.isIndexed()) {
-            IArray<int> uv0_indices{ (int*)sample.m_uv0_sp.getIndices()->get(), sample.m_uv0_sp.getIndices()->size() };
-            refiner.addIndexedAttribute<abcV2>(uv0, uv0_indices, sample.m_uv0, m_remap_uv0);
-        }
-        else if (uv0.size() == refiner.indices.size()) {
-            refiner.addExpandedAttribute<abcV2>(uv0, sample.m_uv0, m_remap_uv0);
-        }
-        else if (uv0.size() == refiner.points.size()) {
-            refiner.addIndexedAttribute<abcV2>(uv0, refiner.indices, sample.m_uv0, m_remap_uv0);
-        }
-        else {
-            DebugLog("Invalid attribute");
-        }
-    }
-
-    if (sample.m_uv1_sp.valid()) {
-        IArray<abcV2> uv1{ sample.m_uv1_sp.getVals()->get(), sample.m_uv1_sp.getVals()->size() };
-        if (sample.m_uv1_sp.isIndexed()) {
-            IArray<int> uv1_indices{ (int*)sample.m_uv1_sp.getIndices()->get(), sample.m_uv1_sp.getIndices()->size() };
-            refiner.addIndexedAttribute<abcV2>(uv1, uv1_indices, sample.m_uv1, m_remap_uv1);
-        }
-        else if (uv1.size() == refiner.indices.size()) {
-            refiner.addExpandedAttribute<abcV2>(uv1, sample.m_uv1, m_remap_uv1);
-        }
-        else if (uv1.size() == refiner.points.size()) {
-            refiner.addIndexedAttribute<abcV2>(uv1, refiner.indices, sample.m_uv1, m_remap_uv1);
-        }
-        else {
-            DebugLog("Invalid attribute");
-        }
-    }
-
-    if (sample.m_colors_sp.valid()) {
-        IArray<abcC4> colors{ sample.m_colors_sp.getVals()->get(), sample.m_colors_sp.getVals()->size() };
-        if (sample.m_colors_sp.isIndexed()) {
-            IArray<int> colors_indices{ (int*)sample.m_colors_sp.getIndices()->get(), sample.m_colors_sp.getIndices()->size() };
-            refiner.addIndexedAttribute<abcC4>(colors, colors_indices, sample.m_colors, m_remap_colors);
-        }
-        else if (colors.size() == refiner.indices.size()) {
-            refiner.addExpandedAttribute<abcC4>(colors, sample.m_colors, m_remap_colors);
-        }
-        else if (colors.size() == refiner.points.size()) {
-            refiner.addIndexedAttribute<abcC4>(colors, refiner.indices, sample.m_colors, m_remap_colors);
-        }
-        else {
-            DebugLog("Invalid attribute");
-        }
-    }
-
-    // use face set index as material id
-    m_material_ids.resize(refiner.counts.size(), -1);
-    for (size_t fsi = 0; fsi < sample.m_facesets.size(); ++fsi) {
-        auto& faces = *sample.m_facesets[fsi].getFaces();
-        size_t num_faces = faces.size();
-        for (size_t fi = 0; fi < num_faces; ++fi) {
-            m_material_ids[faces[fi]] = (int)fsi;
-        }
-    }
-
-    refiner.refine();
-    refiner.triangulate(config.swap_face_winding);
-    refiner.genSubmeshes(m_material_ids);
-
-    m_remap_points.swap(refiner.new2old_points);
-
-    m_freshly_read_topology_data = true;
-}
-
 aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo)
     : super(schema)
     , m_topology(topo)
@@ -183,26 +89,37 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ow
 {
 }
 
-void aiPolyMeshSample::computeNormals(const aiConfig &config)
+void aiPolyMeshSample::computeNormals()
 {
-    DebugLog("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
-
-    const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-    m_normals.resize_zeroclear(m_points.size());
-    GenerateNormals(m_normals.data(), m_points.data(), indices.data(), (int)m_points.size(), (int)indices.size() / 3);
+    auto& schema = *dynamic_cast<schema_t*>(getSchema());
+    if (!schema.m_constant_normals.empty()) {
+        m_normals_ref = schema.m_constant_normals;
+    }
+    else {
+        const auto &indices = m_topology->m_refiner.new_indices_triangulated;
+        m_normals.resize_discard(m_points.size());
+        GenerateNormals(m_normals.data(), m_points_ref.data(), indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
+        m_normals_ref = m_normals;
+    }
 }
 
-void aiPolyMeshSample::computeTangents(const aiConfig &config)
+void aiPolyMeshSample::computeTangents()
 {
-    const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-    m_tangents.resize_zeroclear(m_points.size());
-    GenerateTangents(m_tangents.data(), m_points.data(), m_uv0.data(), m_normals.data(), indices.data(), (int)m_points.size(), (int)indices.size() / 3);
+    auto& schema = *dynamic_cast<schema_t*>(getSchema());
+    if (!schema.m_constant_tangents.empty()) {
+        m_tangents_ref = schema.m_constant_tangents;
+    }
+    else {
+        const auto &indices = m_topology->m_refiner.new_indices_triangulated;
+        m_tangents.resize_discard(m_points.size());
+        GenerateTangents(m_tangents.data(), m_points_ref.data(), m_uv0_ref.data(), m_normals_ref.data(),
+            indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
+        m_tangents_ref = m_tangents;
+    }
 }
 
 void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
 {
-    DebugLog("aiPolyMeshSample::updateConfig()");
-    
     topology_changed = (config.swap_face_winding != m_config.swap_face_winding);
     data_changed = (config.swap_handedness != m_config.swap_handedness);
 
@@ -211,7 +128,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
     
     if (compute_normals_required) {
         if (m_normals.empty() || topology_changed) {
-            computeNormals(config);
+            computeNormals();
             data_changed = true;
         }
     }
@@ -233,7 +150,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
         if (!m_normals.empty() && !m_uv0.empty()) {
             bool tangents_mode_changed = (config.tangents_mode != m_config.tangents_mode);
             if (m_tangents.empty() || tangents_mode_changed || topology_changed) {
-                computeTangents(config);
+                computeTangents();
                 data_changed = true;
             }
         }
@@ -265,11 +182,18 @@ void aiPolyMeshSample::prepareSplits()
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();
 
+    // cache interpolated points as computeNormals() and computeTangents() require points
+    if (summary.interpolate_points) {
+        m_points_int.resize_discard(m_points.size());
+        Lerp(m_points_int.data(), m_points.data(), m_points2.data(), (int)m_points.size(), (float)m_current_time_offset);
+        m_points_ref = m_points_int;
+    }
+
     if (summary.interpolate_points && summary.compute_normals)
-        computeNormals(m_config);
+        computeNormals();
 
     if (summary.interpolate_points || summary.interpolate_normals)
-        computeTangents(m_config);
+        computeTangents();
 }
 
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
@@ -286,10 +210,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     auto& split = refiner.splits[split_index];
 
     if (data.points) {
-        if (summary.interpolate_points)
-            Lerp(data.points, m_points.data(), m_points2.data(), split.num_vertices, split.offset_vertices, (float)m_current_time_offset);
-        else
-            m_points.copy_to(data.points, split.num_vertices, split.offset_vertices);
+        m_points_ref.copy_to(data.points, split.num_vertices, split.offset_vertices);
     }
     if (data.velocities) {
         if (summary.compute_velocities) {
@@ -298,7 +219,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
                 (float)m_current_time_interval, m_config.vertex_motion_scale);
         }
         else if (!m_velocities.empty()) {
-            m_velocities.copy_to(data.points, split.num_vertices, split.offset_vertices);
+            m_velocities_ref.copy_to(data.points, split.num_vertices, split.offset_vertices);
         }
     }
 
@@ -306,9 +227,10 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
         if (summary.has_normals) {
             if (summary.interpolate_normals) {
                 Lerp(data.normals, m_normals.data(), m_normals2.data(), split.num_vertices, split.offset_vertices, (float)m_current_time_offset);
+                Normalize(data.normals, split.num_vertices);
             }
-            else if (!m_normals.empty()) {
-                m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+            else {
+                m_normals_ref.copy_to(data.normals, split.num_vertices, split.offset_vertices);
             }
         }
         else {
@@ -318,7 +240,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 
     if (data.tangents) {
         if(summary.has_tangents) {
-            m_tangents.copy_to(data.tangents, split.num_vertices, split.offset_vertices);
+            m_tangents_ref.copy_to(data.tangents, split.num_vertices, split.offset_vertices);
         }
         else {
             memset(data.tangents, 0, split.num_vertices * sizeof(abcV4));
@@ -326,22 +248,22 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     }
 
     if (data.uv0) {
-        if (!m_uv0.empty())
-            m_uv0.copy_to(data.uv0, split.num_vertices, split.offset_vertices);
+        if (!m_uv0_ref.empty())
+            m_uv0_ref.copy_to(data.uv0, split.num_vertices, split.offset_vertices);
         else
             memset(data.uv0, 0, split.num_vertices * sizeof(abcV2));
     }
 
     if (data.uv1) {
-        if (!m_uv1.empty())
-            m_uv1.copy_to(data.uv1, split.num_vertices, split.offset_vertices);
+        if (!m_uv1_ref.empty())
+            m_uv1_ref.copy_to(data.uv1, split.num_vertices, split.offset_vertices);
         else
             memset(data.uv1, 0, split.num_vertices * sizeof(abcV2));
     }
 
     if (data.colors) {
-        if (!m_colors.empty())
-            m_colors.copy_to((abcC4*)data.colors, split.num_vertices, split.offset_vertices);
+        if (!m_colors_ref.empty())
+            m_colors_ref.copy_to((abcC4*)data.colors, split.num_vertices, split.offset_vertices);
         else
             memset(data.colors, 0, split.num_vertices * sizeof(abcV4));
     }
@@ -585,15 +507,15 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     }
 
     // points
-    m_schema.getPositionsProperty().get(sample->m_points_sp, ss);
-    if (summary.interpolate_points) {
-        m_schema.getPositionsProperty().get(sample->m_points_sp2, ss2);
-    }
-    else {
-        sample->m_points_sp2.reset();
-        sample->m_velocities_sp.reset();
-        if (summary.has_velocities_prop) {
-            m_schema.getVelocitiesProperty().get(sample->m_velocities_sp, ss);
+    if (m_constant_points.empty()) {
+        m_schema.getPositionsProperty().get(sample->m_points_sp, ss);
+        if (summary.interpolate_points) {
+            m_schema.getPositionsProperty().get(sample->m_points_sp2, ss2);
+        }
+        else {
+            if (summary.has_velocities_prop) {
+                m_schema.getVelocitiesProperty().get(sample->m_velocities_sp, ss);
+            }
         }
     }
 
@@ -626,62 +548,77 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         bounds_param.get(sample->m_bounds, ss);
 
     if (topology_changed) {
-        // update topology!
-        topology.onTopologyUpdate(m_config, *sample);
-        sample->m_points.swap((RawVector<abcV3>&)refiner.new_points);
+        onTopologyUpdate(*sample);
     }
     else {
         // make remapped vertex buffer
-        {
-            auto& remap = topology.m_remap_points;
-            sample->m_points.resize_discard(remap.size());
-            CopyWithIndices(sample->m_points.data(), sample->m_points_sp->get(), remap);
+        if (!m_constant_points.empty()) {
+            sample->m_points_ref = m_constant_points;
         }
-        if (!summary.compute_velocities && sample->m_velocities_sp && sample->m_velocities_sp->valid()) {
-            auto& remap = topology.m_remap_points;
-            sample->m_velocities.resize_discard(remap.size());
-            CopyWithIndices(sample->m_velocities.data(), sample->m_velocities_sp->get(), remap);
+        else {
+            Remap(sample->m_points, sample->m_points_sp->get(), topology.m_remap_points);
+            sample->m_points_ref = sample->m_points;
         }
-        if (!summary.compute_normals && sample->m_normals_sp.valid()) {
-            auto& remap = topology.m_remap_normals;
-            sample->m_normals.resize_discard(remap.size());
-            CopyWithIndices(sample->m_normals.data(), sample->m_normals_sp.getVals()->get(), remap);
+
+        if (!m_constant_velocities.empty()) {
+            sample->m_velocities_ref = m_constant_velocities;
         }
-        if (sample->m_uv0_sp.valid()) {
-            auto& remap = topology.m_remap_uv0;
-            sample->m_uv0.resize_discard(remap.size());
-            CopyWithIndices(sample->m_uv0.data(), sample->m_uv0_sp.getVals()->get(), remap);
+        else if (!summary.compute_velocities && summary.has_velocities_prop) {
+            Remap(sample->m_velocities, sample->m_velocities_sp->get(), topology.m_remap_points);
+            sample->m_velocities_ref = sample->m_velocities;
         }
-        if (sample->m_uv1_sp.valid()) {
-            auto& remap = topology.m_remap_uv1;
-            sample->m_uv1.resize_discard(remap.size());
-            CopyWithIndices(sample->m_uv1.data(), sample->m_uv1_sp.getVals()->get(), remap);
+
+        if (!m_constant_normals.empty()) {
+            sample->m_normals_ref = m_constant_normals;
         }
-        if (sample->m_colors_sp.valid()) {
-            auto& remap = topology.m_remap_colors;
-            sample->m_colors.resize_discard(remap.size());
-            CopyWithIndices(sample->m_colors.data(), sample->m_colors_sp.getVals()->get(), remap);
+        else if (!summary.compute_normals && summary.has_normals_prop) {
+            Remap(sample->m_normals, sample->m_normals_sp.getVals()->get(), topology.m_remap_normals);
+            sample->m_normals_ref = sample->m_normals;
+        }
+
+        if (!m_constant_tangents.empty()) {
+            sample->m_tangents_ref = m_constant_tangents;
+        }
+
+        if (!m_constant_uv0.empty()) {
+            sample->m_uv0_ref = m_constant_uv0;
+        }
+        else if (summary.has_uv0_prop) {
+            Remap(sample->m_uv0, sample->m_uv0_sp.getVals()->get(), topology.m_remap_uv0);
+            sample->m_uv0_ref = sample->m_uv0;
+        }
+
+        if (!m_constant_uv1.empty()) {
+            sample->m_uv1_ref = m_constant_uv1;
+        }
+        else if (summary.has_uv1_prop) {
+            Remap(sample->m_uv1, sample->m_uv1_sp.getVals()->get(), topology.m_remap_uv1);
+            sample->m_uv1_ref = sample->m_uv1;
+        }
+
+        if (!m_constant_colors.empty()) {
+            sample->m_colors_ref = m_constant_colors;
+        }
+        else if (summary.has_colors_prop) {
+            Remap(sample->m_colors, sample->m_colors_sp.getVals()->get(), topology.m_remap_colors);
+            sample->m_colors_ref = sample->m_colors;
         }
     }
 
     if (summary.interpolate_points) {
-        auto& remap = topology.m_remap_points;
-        sample->m_points2.resize_discard(remap.size());
-        CopyWithIndices(sample->m_points2.data(), sample->m_points_sp2->get(), remap);
+        Remap(sample->m_points2, sample->m_points_sp2->get(), topology.m_remap_points);
     }
     if (summary.interpolate_normals) {
-        auto& remap = topology.m_remap_normals;
-        sample->m_normals2.resize_discard(remap.size());
-        CopyWithIndices(sample->m_normals2.data(), sample->m_normals_sp2.getVals()->get(), remap);
+        Remap(sample->m_normals2, sample->m_normals_sp2.getVals()->get(), topology.m_remap_normals);
     }
 
     // compute normals / tangents
-    // if interpolation is enabled, this will be done in fillVertexBuffer()
+    // if interpolation is enabled, this will be done in prepareSplits()
     if (!summary.interpolate_normals) {
         if (summary.compute_normals)
-            sample->computeNormals(m_config);
+            sample->computeNormals();
         if (summary.compute_tangents)
-            sample->computeTangents(m_config);
+            sample->computeTangents();
     }
 
     if (m_config.swap_handedness) {
@@ -696,13 +633,145 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     return sample;
 }
 
-const aiMeshSummaryInternal & aiPolyMesh::getSummary() const
+void aiPolyMesh::onTopologyUpdate(aiPolyMeshSample & sample)
+{
+    auto& config = m_config;
+    auto& summary = m_summary;
+    auto& topology = *sample.m_topology;
+    auto& refiner = topology.m_refiner;
+
+    if (config.turn_quad_edges) {
+        // todo
+    }
+
+    refiner.clear();
+    refiner.split_unit = topology.m_use_32bit_index_buffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
+    refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
+    refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
+    refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
+
+    if (sample.m_normals_sp.valid()) {
+        IArray<abcV3> src{ sample.m_normals_sp.getVals()->get(), sample.m_normals_sp.getVals()->size() };
+        auto& dst = summary.constant_normals ? m_constant_normals : sample.m_normals;
+
+        if (sample.m_normals_sp.isIndexed()) {
+            IArray<int> indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV3>(src, indices, dst, topology.m_remap_normals);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV3>(src, dst, topology.m_remap_normals);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV3>(src, refiner.indices, dst, topology.m_remap_normals);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    if (sample.m_uv0_sp.valid()) {
+        IArray<abcV2> src{ sample.m_uv0_sp.getVals()->get(), sample.m_uv0_sp.getVals()->size() };
+        auto& dst = summary.constant_uv0 ? m_constant_uv0 : sample.m_uv0;
+
+        if (sample.m_uv0_sp.isIndexed()) {
+            IArray<int> indices{ (int*)sample.m_uv0_sp.getIndices()->get(), sample.m_uv0_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(src, indices, dst, topology.m_remap_uv0);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(src, dst, topology.m_remap_uv0);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv0);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    if (sample.m_uv1_sp.valid()) {
+        IArray<abcV2> src{ sample.m_uv1_sp.getVals()->get(), sample.m_uv1_sp.getVals()->size() };
+        auto& dst = summary.constant_uv1 ? m_constant_uv1 : sample.m_uv1;
+
+        if (sample.m_uv1_sp.isIndexed()) {
+            IArray<int> uv1_indices{ (int*)sample.m_uv1_sp.getIndices()->get(), sample.m_uv1_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(src, dst, topology.m_remap_uv1);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv1);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    if (sample.m_colors_sp.valid()) {
+        IArray<abcC4> src{ sample.m_colors_sp.getVals()->get(), sample.m_colors_sp.getVals()->size() };
+        auto& dst = summary.constant_colors ? m_constant_colors : sample.m_colors;
+
+        if (sample.m_colors_sp.isIndexed()) {
+            IArray<int> colors_indices{ (int*)sample.m_colors_sp.getIndices()->get(), sample.m_colors_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcC4>(src, colors_indices, dst, topology.m_remap_colors);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcC4>(src, dst, topology.m_remap_colors);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcC4>(src, refiner.indices, dst, topology.m_remap_colors);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    // use face set index as material id
+    topology.m_material_ids.resize(refiner.counts.size(), -1);
+    for (size_t fsi = 0; fsi < sample.m_facesets.size(); ++fsi) {
+        auto& faces = *sample.m_facesets[fsi].getFaces();
+        size_t num_faces = faces.size();
+        for (size_t fi = 0; fi < num_faces; ++fi) {
+            topology.m_material_ids[faces[fi]] = (int)fsi;
+        }
+    }
+
+    refiner.refine();
+    refiner.triangulate(config.swap_face_winding);
+    refiner.genSubmeshes(topology.m_material_ids);
+
+
+    topology.m_remap_points.swap(refiner.new2old_points);
+    if (summary.constant_points) {
+        m_constant_points.swap((RawVector<abcV3>&)refiner.new_points);
+        sample.m_points_ref = m_constant_points;
+    }
+    else {
+        sample.m_points.swap((RawVector<abcV3>&)refiner.new_points);
+        sample.m_points_ref = sample.m_points;
+    }
+    sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
+    sample.m_uv0_ref = !m_constant_uv0.empty() ? m_constant_uv0 : sample.m_uv0;
+    sample.m_uv1_ref = !m_constant_uv1.empty() ? m_constant_uv1 : sample.m_uv1;
+    sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
+
+    if (summary.constant_tangents) {
+        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        m_constant_tangents.resize_zeroclear(m_constant_points.size());
+        GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
+            indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
+        sample.m_tangents_ref = m_constant_tangents;
+    }
+
+    topology.m_freshly_read_topology_data = true;
+}
+
+const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
 {
     return m_summary;
 }
 
 void aiPolyMesh::getSummary(aiMeshSummary &summary) const
 {
-    DebugLog("aiPolyMesh::getSummary()");
     summary = m_summary;
 }

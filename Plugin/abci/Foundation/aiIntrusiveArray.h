@@ -57,9 +57,9 @@ public:
     {
         memcpy(dst, m_data, sizeof(value_type) * m_size);
     }
-    void copy_to(pointer dst, size_t num_elements)
+    void copy_to(pointer dst, size_t num_elements, size_t offset = 0)
     {
-        memcpy(dst, m_data, sizeof(value_type) * num_elements);
+        memcpy(dst, m_data + offset, sizeof(value_type) * num_elements);
     }
 
 private:
