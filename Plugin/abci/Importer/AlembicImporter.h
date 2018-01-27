@@ -69,6 +69,13 @@ enum class aiTimeSamplingType
     Acyclic,
 };
 
+enum class aiTopologyVariance
+{
+    Constant,
+    Homogeneous, // vertices are variant, topology is constant
+    Heterogenous, // both vertices and topology are variant
+};
+
 enum class aiPropertyType
 {
     Unknown,
@@ -150,7 +157,20 @@ struct aiCameraData
 
 struct aiMeshSummary
 {
-    int32_t topology_variance = 0;
+    aiTopologyVariance topology_variance = aiTopologyVariance::Constant;
+    bool has_velocities = false;
+    bool has_normals = false;
+    bool has_tangents = false;
+    bool has_uv0 = false;
+    bool has_uv1 = false;
+    bool has_colors = false;
+    bool constant_points = false;
+    bool constant_velocities = false;
+    bool constant_normals = false;
+    bool constant_tangents = false;
+    bool constant_uv0 = false;
+    bool constant_uv1 = false;
+    bool constant_colors = false;
 };
 
 struct aiMeshSampleSummary
@@ -169,8 +189,6 @@ struct aiPolyMeshData
 {
     abcV3 *points = nullptr;
     abcV3 *velocities = nullptr;
-    abcV2 *interpolated_velocities_xy = nullptr;
-    abcV2 *interpolated_velocities_z = nullptr;
     abcV3 *normals = nullptr;
     abcV4 *tangents = nullptr;
     abcV2 *uv0 = nullptr;

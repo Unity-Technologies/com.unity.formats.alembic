@@ -35,8 +35,8 @@ namespace UTJ.Alembic
         public enum aiTopologyVariance
         {
             Constant,
-            Homogeneous,
-            Heterogeneous
+            Homogeneous, // vertices are variant, topology is constant
+            Heterogeneous, // both vertices and topology are variant
         }
 
         public enum aiPropertyType
@@ -120,6 +120,19 @@ namespace UTJ.Alembic
         public struct aiMeshSummary
         {
             public aiTopologyVariance topologyVariance;
+            public Bool hasVelocities;
+            public Bool hasNormals;
+            public Bool hasTangents;
+            public Bool hasUV0;
+            public Bool hasUV1;
+            public Bool hasColors;
+            public Bool constantPoints;
+            public Bool constantVelocities;
+            public Bool constantNormals;
+            public Bool constantTangents;
+            public Bool constantUV0;
+            public Bool constantUV1;
+            public Bool constantColors;
         }
 
         public struct aiMeshSampleSummary
@@ -138,8 +151,6 @@ namespace UTJ.Alembic
         {
             public IntPtr positions;
             public IntPtr velocities;
-            public IntPtr interpolatedVelocitiesXY;
-            public IntPtr interpolatedVelocitiesZ;
             public IntPtr normals;
             public IntPtr tangents;
             public IntPtr uv0;

@@ -190,11 +190,21 @@ void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
 {
     Impl(Lerp, dst, v1, v2, num, w);
 }
+void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, int offset, float w)
+{
+    Lerp(dst, v1 + offset, v2 + offset, num, w);
+}
+
 
 void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale)
 {
     Impl(GenerateVelocities, dst, p1, p2, num, time_interval, motion_scale);
 }
+void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, int offset, float time_interval, float motion_scale)
+{
+    GenerateVelocities(dst, p1 + offset, p2+offset, num, time_interval, motion_scale);
+}
+
 
 void MinMax(abcV3 &min, abcV3 &max, const abcV3 *points, int num)
 {

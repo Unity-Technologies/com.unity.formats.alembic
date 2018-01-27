@@ -1,12 +1,18 @@
 Shader "Alembic/Overlay" {
 Properties
 {
-    [Enum(Normals,0,Tangents,1,UV0,2,UV1,3,UV2,4,UV3,5,Colors,6)] _Type("Overlay component", Int) = 6
+    [Enum(Normals,0,Tangents,1,UV0,2,UV1,3,UV2,4,UV3,5,Colors,6)] _Type("Attribute", Int) = 6
+    _Scale("Scale", Float) = 1.0
+    _Offset("Offset", Float) = 0.0
+    [Toggle] _Abs("Abs", Float) = 0.0
 }
 
 CGINCLUDE
 #include "UnityCG.cginc"
 int _Type;
+int _Abs;
+float _Scale;
+float _Offset;
 
 struct ia_out
 {
@@ -34,28 +40,33 @@ vs_out vert(ia_out v)
     vs_out o;
     o.vertex = UnityObjectToClipPos(v.vertex);
     if (_Type == 0) { // normals
-        o.color.rgb = v.normal.xyz * 0.5 + 0.5;
+        o.color.rgb = (v.normal.xyz * 0.5 + 0.5) * _Scale + _Offset;
         o.color.a = 1.0;
     }
     else if (_Type == 1) { // tangents
-        o.color.rgb = (v.tangent.xyz * v.tangent.w) * 0.5 + 0.5;
+        o.color.rgb = ((v.tangent.xyz * v.tangent.w) * 0.5 + 0.5) * _Scale + _Offset;
         o.color.a = 1.0;
     }
     else if (_Type == 2) { // uv0
-        o.color = float4(v.uv0.xyz, 1.0);
+        o.color = float4(v.uv0.xyz * _Scale + _Offset, 1.0);
     }
     else if (_Type == 3) { // uv1
-        o.color = float4(v.uv1.xyz, 1.0);
+        o.color = float4(v.uv1.xyz * _Scale + _Offset, 1.0);
     }
     else if (_Type == 4) { // uv2
-        o.color = float4(v.uv2.xyz, 1.0);
+        o.color = float4(v.uv2.xyz * _Scale + _Offset, 1.0);
     }
     else if (_Type == 5) { // uv3
-        o.color = float4(v.uv3.xyz, 1.0);
+        o.color = float4(v.uv3.xyz * _Scale + _Offset, 1.0);
     }
     else if (_Type == 6) { // colors
-        o.color = v.color;
+        o.color = float4(v.color.xyz * _Scale + _Offset, v.color.w);
     }
+
+    if (_Abs) {
+        o.color = abs(o.color);
+    }
+
     return o;
 }
 

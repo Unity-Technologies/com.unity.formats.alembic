@@ -1344,7 +1344,9 @@ void SwapHandedness(abcV4 *dst, int num);
 void ApplyScale(abcV3 *dst, int num, float scale);
 void Normalize(abcV3 *dst, int num);
 void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
+void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, int offset, float w);
 void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float time_interval, float motion_scale);
+void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, int offset, float time_interval, float motion_scale);
 void MinMax(abcV3& min, abcV3& max, const abcV3 *points, int num);
 void GenerateNormals(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles);
 void GenerateTangents(abcV4 *dst,

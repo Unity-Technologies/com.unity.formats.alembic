@@ -4,6 +4,20 @@
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
+struct aiMeshSummaryInternal : public aiMeshSummary
+{
+    bool has_velocities_prop = false;
+    bool has_normals_prop = false;
+    bool has_uv0_prop = false;
+    bool has_uv1_prop = false;
+    bool has_colors_prop = false;
+
+    bool interpolate_points = false;
+    bool interpolate_normals = false;
+    bool compute_normals = false;
+    bool compute_velocities = false;
+};
+
 class Topology
 {
 public:
@@ -20,8 +34,8 @@ public:
     void onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample);
 
 public:
-    Abc::Int32ArraySamplePtr m_indices_orig;
-    Abc::Int32ArraySamplePtr m_counts;
+    Abc::Int32ArraySamplePtr m_indices_sp;
+    Abc::Int32ArraySamplePtr m_counts_sp;
     RawVector<int> m_material_ids;
 
     MeshRefiner m_refiner;
@@ -66,11 +80,11 @@ public:
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 
 public:
-    Abc::P3fArraySamplePtr m_points_orig, m_points_orig2;
-    Abc::V3fArraySamplePtr m_velocities_orig;
-    AbcGeom::IN3fGeomParam::Sample m_normals_orig, m_normals_orig2;
-    AbcGeom::IV2fGeomParam::Sample m_uv0_orig, m_uv1_orig;
-    AbcGeom::IC4fGeomParam::Sample m_colors_orig;
+    Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
+    Abc::V3fArraySamplePtr m_velocities_sp;
+    AbcGeom::IN3fGeomParam::Sample m_normals_sp, m_normals_sp2;
+    AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv1_sp;
+    AbcGeom::IC4fGeomParam::Sample m_colors_sp;
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
@@ -97,21 +111,27 @@ class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 using super = aiTSchema<aiPolyMeshTraits>;
 public:
     aiPolyMesh(aiObject *obj);
+    void updateSummary();
+
     Sample* newSample();
     Sample* readSample(const uint64_t idx, bool &topology_changed) override;
 
+    const aiMeshSummaryInternal& getSummary() const;
     void getSummary(aiMeshSummary &summary) const;
 
 private:
+    aiMeshSummaryInternal m_summary;
     std::unique_ptr<AbcGeom::IV2fGeomParam> m_uv1_param;
     std::unique_ptr<AbcGeom::IC4fGeomParam> m_colors_param;
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
-    AbcGeom::IN3fGeomParam::Sample m_constant_normals;
-    AbcGeom::IV2fGeomParam::Sample m_constant_uv0;
-    AbcGeom::IV2fGeomParam::Sample m_constant_uv1;
-    AbcGeom::IC4fGeomParam::Sample m_constant_colors;
+    RawVector<abcV3> m_constant_points;
+    RawVector<abcV3> m_constant_normals;
+    RawVector<abcV4> m_constant_tangents;
+    RawVector<abcV2> m_constant_uv0;
+    RawVector<abcV2> m_constant_uv1;
+    RawVector<abcC4> m_constant_colors;
 
     bool m_ignore_normals = false;
     bool m_ignore_uvs = false;

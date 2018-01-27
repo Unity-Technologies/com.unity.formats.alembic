@@ -12,8 +12,6 @@ namespace UTJ.Alembic
         {
             public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
-            public PinnedList<Vector2> velocitiesXYCache = new PinnedList<Vector2>();
-            public PinnedList<Vector2> velocitiesZCache = new PinnedList<Vector2>();
             public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
             public PinnedList<Vector4> tangentCache = new PinnedList<Vector4>();
             public PinnedList<Vector2> uv0Cache = new PinnedList<Vector2>();
@@ -157,16 +155,10 @@ namespace UTJ.Alembic
                 vertexData.positions = split.pointCache;
 
                 if (sampleSummary.hasVelocities)
-                {
                     split.velocitiesCache.Resize(vertexCount);
-                    vertexData.velocities = split.velocitiesCache;
-
-                    split.velocitiesXYCache.Resize(vertexCount);
-                    vertexData.interpolatedVelocitiesXY = split.velocitiesXYCache;
-
-                    split.velocitiesZCache.Resize(vertexCount);
-                    vertexData.interpolatedVelocitiesZ = split.velocitiesZCache;
-                }
+                else
+                    split.velocitiesCache.Resize(0);
+                vertexData.velocities = split.velocitiesCache;
 
                 if (sampleSummary.hasNormals)
                     split.normalCache.Resize(vertexCount);
@@ -302,10 +294,8 @@ namespace UTJ.Alembic
                         split.mesh.SetUVs(0, split.uv0Cache.List);
                     if (split.uv1Cache.Count > 0)
                         split.mesh.SetUVs(1, split.uv1Cache.List);
-                    if (split.velocitiesXYCache.Count > 0)
-                        split.mesh.SetUVs(2, split.velocitiesXYCache.List);
-                    if (split.velocitiesZCache.Count > 0)
-                        split.mesh.SetUVs(3, split.velocitiesZCache.List);
+                    if (split.velocitiesCache.Count > 0)
+                        split.mesh.SetUVs(3, split.velocitiesCache.List);
                     if (split.colorCache.Count > 0)
                         split.mesh.SetColors(split.colorCache.List);
                     // update the bounds
