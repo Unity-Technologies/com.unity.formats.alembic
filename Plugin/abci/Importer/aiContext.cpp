@@ -23,7 +23,6 @@ std::string ToString(const aiConfig &v)
         : (v.tangents_mode == aiTangentsMode::Smooth
             ? "smooth"
             : "split"));
-    oss << ", cacheTangentsSplits: " << (v.cache_tangents_splits ? "true" : "false");
     oss << ", aspectRatio: " << v.aspect_ratio;
     oss << ", forceUpdate: " << (v.force_update ? "true" : "false") << "}";
 

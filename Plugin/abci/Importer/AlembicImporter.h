@@ -113,7 +113,6 @@ struct aiConfig
     bool swap_face_winding = false;
     aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
     aiTangentsMode tangents_mode = aiTangentsMode::None;
-    bool cache_tangents_splits = true;
     float aspect_ratio = -1.0f;
     bool force_update = false;
     bool cache_samples = false;

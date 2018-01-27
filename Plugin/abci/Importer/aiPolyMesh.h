@@ -53,7 +53,8 @@ class aiPolyMeshSample : public aiSampleBase
 using super = aiSampleBase;
 using schema_t = aiPolyMesh;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo );
+    aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
+    void clear();
 
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
@@ -94,7 +95,6 @@ public:
     RawVector<abcC4> m_colors;
 
     TopologyPtr m_topology;
-    bool m_own_topology = false;
 };
 
 

@@ -35,9 +35,6 @@ namespace UTJ.Alembic
             public bool update = true;
         }
 
-        public bool cacheTangentsSplits = true;
-        
-        public bool hasFacesets = false;
         public List<Split> splits = new List<Split>();
 
         public AbcAPI.aiMeshSummary summary;
@@ -108,8 +105,6 @@ namespace UTJ.Alembic
 
         public override void AbcGetConfig(ref AbcAPI.aiConfig config)
         {
-            config.cacheTangentsSplits = cacheTangentsSplits;
-
             // if 'forceUpdate' is set true, even if alembic sample data do not change at all
             // AbcSampleUpdated will still be called (topologyChanged will be false)
 
@@ -123,12 +118,6 @@ namespace UTJ.Alembic
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
         {
-            if (hasFacesets)
-            {
-                topologyChanged = true;
-                hasFacesets = false;
-            }
-
             if (m_FreshSetup)
             {
                 topologyChanged = true;

@@ -80,7 +80,6 @@ namespace UTJ.Alembic
             public Bool swapFaceWinding;
             public aiNormalsMode normalsMode;
             public aiTangentsMode tangentsMode;
-            public Bool cacheTangentsSplits;
             public float aspectRatio;
             public Bool forceUpdate;
             public Bool cacheSamples;
@@ -97,7 +96,6 @@ namespace UTJ.Alembic
                 swapFaceWinding = false;
                 normalsMode = aiNormalsMode.ComputeIfMissing;
                 tangentsMode = aiTangentsMode.None;
-                cacheTangentsSplits = true;
                 aspectRatio = -1.0f;
                 forceUpdate = false;
                 cacheSamples = false;
