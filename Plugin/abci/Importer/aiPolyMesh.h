@@ -55,7 +55,6 @@ public:
     bool computeTangentsRequired() const;
 
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
-    void getDataPointer(aiPolyMeshData &data) const;
 
     void interpolatePoints();
     void computeNormals(const aiConfig &config);

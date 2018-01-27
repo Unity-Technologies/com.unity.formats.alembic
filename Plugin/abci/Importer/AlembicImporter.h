@@ -176,22 +176,10 @@ struct aiPolyMeshData
     abcV2 *uv0 = nullptr;
     abcV2 *uv1 = nullptr;
     abcV4 *colors = nullptr;
-
     int *indices = nullptr;
-    int *normal_indices = nullptr;
-    int *uv_indices = nullptr;
-    int *faces = nullptr;
 
-    int position_count = 0;
-    int normal_count = 0;
-    int uv_count = 0;
-
+    int vertex_count = 0;
     int index_count = 0;
-    int normal_index_count = 0;
-    int uv_index_count = 0;
-    int face_count = 0;
-
-    int triangulated_index_count = 0;
 
     abcV3 center = { 0.0f, 0.0f, 0.0f };
     abcV3 size = { 0.0f, 0.0f, 0.0f };
@@ -284,8 +272,6 @@ abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool force_refresh=false);
-// return pointers to actual data. no conversions (swap handedness, etc) are applied.
-abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
 // all these below aiPolyMesh* are mesh splitting functions
 abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
 abciAPI int             aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index);

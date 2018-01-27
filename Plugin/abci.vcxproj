@@ -28,7 +28,6 @@
     <ClCompile Include="abci\Exporter\AlembicExporter.cpp" />
     <ClCompile Include="abci\Foundation\aiLogger.cpp" />
     <ClCompile Include="abci\Foundation\aiMeshOps.cpp" />
-    <ClCompile Include="abci\Foundation\aiThreadPool.cpp" />
     <ClCompile Include="abci\Foundation\Allocator.cpp" />
     <ClCompile Include="abci\Foundation\aiMath.cpp" />
     <ClCompile Include="abci\Importer\aiCamera.cpp" />
@@ -59,7 +58,6 @@
     <ClInclude Include="abci\Foundation\aiLogger.h" />
     <ClInclude Include="abci\Foundation\aiMeshOps.h" />
     <ClInclude Include="abci\Foundation\aiMisc.h" />
-    <ClInclude Include="abci\Foundation\aiThreadPool.h" />
     <ClInclude Include="abci\Foundation\Allocator.h" />
     <ClInclude Include="abci\Foundation\IntrusiveArray.h" />
     <ClInclude Include="abci\Foundation\ispcmath.h" />

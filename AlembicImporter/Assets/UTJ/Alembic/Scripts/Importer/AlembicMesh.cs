@@ -289,63 +289,55 @@ namespace UTJ.Alembic
 
                     // Feshly created splits may not have their mesh set yet
                     if (split.mesh == null)
-                    {
                         split.mesh = AddMeshComponents(split.host);
-                    }
-
                     if (split.clear)
-                    {
                         split.mesh.Clear();
-                    }
 
                     split.mesh.SetVertices(split.pointCache.List);
-                    split.mesh.SetNormals(split.normalCache.List);
-                    split.mesh.SetTangents(split.tangentCache.List);
-                    split.mesh.SetUVs(0, split.uv0Cache.List);
-                    split.mesh.SetUVs(1, split.uv1Cache.List);
-                    split.mesh.SetUVs(2, split.velocitiesXYCache.List);
-                    split.mesh.SetUVs(3, split.velocitiesZCache.List);
-                    split.mesh.SetColors(split.colorCache.List);
+                    if (split.normalCache.Count > 0)
+                        split.mesh.SetNormals(split.normalCache.List);
+                    if (split.tangentCache.Count > 0)
+                        split.mesh.SetTangents(split.tangentCache.List);
+                    if (split.uv0Cache.Count > 0)
+                        split.mesh.SetUVs(0, split.uv0Cache.List);
+                    if (split.uv1Cache.Count > 0)
+                        split.mesh.SetUVs(1, split.uv1Cache.List);
+                    if (split.velocitiesXYCache.Count > 0)
+                        split.mesh.SetUVs(2, split.velocitiesXYCache.List);
+                    if (split.velocitiesZCache.Count > 0)
+                        split.mesh.SetUVs(3, split.velocitiesZCache.List);
+                    if (split.colorCache.Count > 0)
+                        split.mesh.SetColors(split.colorCache.List);
                     // update the bounds
                     split.mesh.bounds = new Bounds(split.center, split.size);
 
                     if (split.clear)
                     {
                         split.mesh.subMeshCount = split.submeshCount;
-
                         MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
-                        
                         Material[] currentMaterials = renderer.sharedMaterials;
-
                         int nmat = currentMaterials.Length;
-
                         if (nmat != split.submeshCount)
                         {
                             Material[] materials = new Material[split.submeshCount];
-                            
                             int copyTo = (nmat < split.submeshCount ? nmat : split.submeshCount);
-
                             for (int i=0; i<copyTo; ++i)
                             {
                                 materials[i] = currentMaterials[i];
                             }
-
     #if UNITY_EDITOR
                             for (int i=copyTo; i<split.submeshCount; ++i)
                             {
                                 Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
                                 material.name = "Material_" + Convert.ToString(i);
-                                
                                 materials[i] = material;
                             }
     #endif
-
                             renderer.sharedMaterials = materials;
                         }
                     }
 
                     split.clear = false;
-
                     split.host.SetActive(true);
                 }
                 else
@@ -378,9 +370,7 @@ namespace UTJ.Alembic
         Mesh AddMeshComponents(GameObject gameObject)
         {
             Mesh mesh = null;
-            
             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
-
             bool hasMesh = meshFilter != null
                            && meshFilter.sharedMesh != null
                            && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
@@ -391,18 +381,14 @@ namespace UTJ.Alembic
 #if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = AlembicTreeNode.streamDescriptor.settings.use32BitsIndexBuffer ? IndexFormat.UInt32 : IndexFormat.UInt16;
 #endif
-                
                 mesh.MarkDynamic();
-
                 if (meshFilter == null)
                 {
                     meshFilter = gameObject.AddComponent<MeshFilter>();
                 }
-
                 meshFilter.sharedMesh = mesh;
 
                 MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-
                 if (renderer == null)
                 {
                     renderer = gameObject.AddComponent<MeshRenderer>();
@@ -417,7 +403,6 @@ namespace UTJ.Alembic
                 }
     #endif
                 renderer.sharedMaterial = mat;
-
             }
             else
             {

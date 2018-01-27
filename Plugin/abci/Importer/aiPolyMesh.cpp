@@ -333,9 +333,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
     }
 
     if (topology_changed)
-    {
         data_changed = true;
-    }
 
     m_config = config;
 }
@@ -352,52 +350,6 @@ void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summa
     summary.has_uv0 = hasUV0();
     summary.has_uv1 = hasUV1();
     summary.has_colors = hasColors();
-}
-
-
-void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst) const
-{
-    if (m_points_orig) {
-        dst.position_count = m_points_orig->valid() ? (int)m_points_orig->size() : 0;
-        dst.points = (abcV3*)(m_points_orig->get());
-    }
-
-    if (m_velocities_orig) {
-        dst.velocities = m_velocities_orig->valid() ? (abcV3*)m_velocities_orig->get() : nullptr;
-    }
-
-    if (m_normals_orig) {
-        dst.normal_count = (int)m_normals_orig.getVals()->size();
-        dst.normals = (abcV3*)m_normals_orig.getVals()->get();
-        dst.normal_index_count = m_normals_orig.isIndexed() ? (int)m_normals_orig.getIndices()->size() : 0;
-        if (dst.normal_index_count) {
-            dst.normal_indices = (int*)m_normals_orig.getIndices()->get();
-        }
-    }
-
-    if (m_uv0_orig) {
-        dst.uv_count = (int)m_uv0_orig.getVals()->size();
-        dst.uv0 = (abcV2*)m_uv0_orig.getVals()->get();
-        dst.uv_index_count = m_uv0_orig.isIndexed() ? (int)m_uv0_orig.getIndices()->size() : 0;
-        if (dst.uv_index_count) {
-            dst.uv_indices = (int*)m_uv0_orig.getIndices()->get();
-        }
-    }
-
-    if (m_topology) {
-        if (m_topology->m_indices_orig) {
-            dst.index_count = (int)m_topology->m_indices_orig->size();
-            dst.indices = (int*)m_topology->m_indices_orig->get();
-        }
-        if (m_topology->m_counts) {
-            dst.face_count = (int)m_topology->m_counts->size();
-            dst.faces = (int*)m_topology->m_counts->get();
-            dst.triangulated_index_count = m_topology->m_triangulated_index_count;
-        }
-    }
-
-    dst.center = m_bounds.center();
-    dst.size = m_bounds.size();
 }
 
 int aiPolyMeshSample::getSplitVertexCount(int split_index) const
@@ -503,7 +455,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     {
         abcV3 bbmin, bbmax;
         MinMax(bbmin, bbmax, data.points, split.num_vertices);
-        data.center = 0.5f * (bbmin + bbmax);
+        data.center = (bbmin + bbmax) * 0.5f;
         data.size = bbmax - bbmin;
     }
 

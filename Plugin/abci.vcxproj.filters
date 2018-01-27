@@ -4,9 +4,6 @@
     <ClCompile Include="abci\Foundation\aiLogger.cpp">
       <Filter>abci\Foundation</Filter>
     </ClCompile>
-    <ClCompile Include="abci\Foundation\aiThreadPool.cpp">
-      <Filter>abci\Foundation</Filter>
-    </ClCompile>
     <ClCompile Include="abci\Importer\aiPolyMesh.cpp">
       <Filter>abci\Importer</Filter>
     </ClCompile>
@@ -69,9 +66,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="abci\Foundation\aiThreadPool.h">
-      <Filter>abci\Foundation</Filter>
-    </ClInclude>
     <ClInclude Include="abci\Foundation\aiLogger.h">
       <Filter>abci\Foundation</Filter>
     </ClInclude>

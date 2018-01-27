@@ -26,10 +26,6 @@ abciAPI void aiEnableFileLog(bool on, const char *path)
 
 abciAPI void aiCleanup()
 {
-#ifdef aiWithTBB
-#else
-    aiThreadPool::releaseInstance();
-#endif
 }
 
 abciAPI void aiClearContextsWithPath(const char *path)
@@ -232,12 +228,6 @@ abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSu
 {
     if (sample)
         sample->getSummary(force_refresh, *summary, sample);
-}
-
-abciAPI void aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data)
-{
-    if (sample)
-        sample->getDataPointer(*data);
 }
 
 abciAPI void aiPolyMeshPrepareSplits(aiPolyMeshSample * sample)

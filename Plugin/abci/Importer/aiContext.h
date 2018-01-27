@@ -1,6 +1,4 @@
 #pragma once
-#include "aiThreadPool.h"
-
 using abcObject = AbcGeom::IObject;
 using abcXForm = AbcGeom::IXform;
 using abcCamera = AbcGeom::ICamera;
@@ -82,7 +80,6 @@ private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
-    aiTaskGroup m_tasks;
     double m_timeRange[2] = {-0.0, -0.0};
     uint64_t m_numFrames = 0;
     int m_uid = 0;

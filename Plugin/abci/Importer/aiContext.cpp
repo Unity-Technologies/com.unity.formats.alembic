@@ -97,7 +97,6 @@ aiContext::aiContext(int uid)
 
 aiContext::~aiContext()
 {
-    m_tasks.wait();
     m_top_node.reset();
     m_archive.reset();
 }
@@ -202,9 +201,6 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 void aiContext::reset()
 {
     DebugLog("aiContext::reset()");
-    
-    // just in case
-    m_tasks.wait();
 
     m_top_node.reset();
     
@@ -403,15 +399,11 @@ void aiContext::cacheAllSamples()
     {
         const int64_t startIndex = (i == 0) ? 1 : i*numFramesPerBlock;
         const int64_t endIndex = i*numFramesPerBlock + (i == numBlocks - 1 ? lastBlockSize : numFramesPerBlock);
-        m_tasks.run([this, startIndex, endIndex]()
+        eachNodes([this, startIndex, endIndex](aiObject *o)
         {
-            eachNodes([this, startIndex, endIndex](aiObject *o)
-            {
-                o->cacheSamples(startIndex, endIndex);
-            });
-        });   
+            o->cacheSamples(startIndex, endIndex);
+        });
     }
-    m_tasks.wait();
 }
 
 void aiContext::updateSamples(float time)

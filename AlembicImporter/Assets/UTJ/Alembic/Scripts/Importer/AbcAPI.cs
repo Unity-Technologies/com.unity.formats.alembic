@@ -145,22 +145,10 @@ namespace UTJ.Alembic
             public IntPtr uv0;
             public IntPtr uv1;
             public IntPtr colors;
-
             public IntPtr indices;
-            public IntPtr normalIndices;
-            public IntPtr uvIndices;
-            public IntPtr faces;
 
-            public int positionCount;
-            public int normalCount;
-            public int uvCount;
-
+            public int vertexCount;
             public int indexCount;
-            public int normalIndexCount;
-            public int uvIndexCount;
-            public int faceCount;
-
-            public int triangulatedIndexCount;
 
             public Vector3 center;
             public Vector3 size;
