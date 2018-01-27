@@ -1334,6 +1334,7 @@ template<class T> inline tvec4<T> orthogonalize_tangent(
 
 
 void SwapHandedness(abcV3 *dst, int num);
+void SwapHandedness(abcV4 *dst, int num);
 void ApplyScale(abcV3 *dst, int num, float scale);
 void Normalize(abcV3 *dst, int num);
 void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);

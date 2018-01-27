@@ -163,6 +163,12 @@ void SwapHandedness(abcV3 *dst, int num)
         dst[i].x *= -1.0f;
     }
 }
+void SwapHandedness(abcV4 *dst, int num)
+{
+    for (int i = 0; i < num; ++i) {
+        dst[i].x *= -1.0f;
+    }
+}
 
 #ifdef aiEnableISPC
     #define Impl(Func, ...) Func##ISPC(__VA_ARGS__)

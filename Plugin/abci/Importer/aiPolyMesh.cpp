@@ -285,14 +285,11 @@ void aiPolyMeshSample::interpolateNormals()
     }
 }
 
-
 void aiPolyMeshSample::computeTangents(const aiConfig &config)
 {
-    // todo
-}
-
-void aiPolyMeshSample::prepareSplits()
-{
+    const auto &indices = m_topology->m_refiner.new_indices_triangulated;
+    m_tangents.resize_zeroclear(m_points.size());
+    GenerateTangents(m_tangents.data(), m_points.data(), m_uv0.data(), m_normals.data(), indices.data(), (int)m_points.size(), (int)indices.size() / 3);
 }
 
 void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
@@ -410,6 +407,10 @@ int aiPolyMeshSample::getSplitVertexCount(int split_index) const
     return m_topology->getSplitVertexCount(split_index);
 }
 
+void aiPolyMeshSample::prepareSplits()
+{
+}
+
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 {
     DebugLog("aiPolyMeshSample::fillVertexBuffer(split_index=%d)", split_index);
@@ -468,8 +469,10 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     if (data.tangents)
     {
         if (copy_tangents) {
-            // todo
-            //if (m_config.swap_handedness) { swap_handedness(data.normals, split.num_vertices); }
+            if (interpolate)
+                computeTangents(m_config);
+            m_tangents.copy_to(data.tangents, split.num_vertices, split.offset_vertices);
+            if (m_config.swap_handedness) { SwapHandedness(data.tangents, split.num_vertices); }
         }
         else {
             memset(data.tangents, 0, split.num_vertices * sizeof(abcV4));
@@ -800,17 +803,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
 
 
     // compute normals / tangents if needed
-
-    bool compute_normals_required = sample->computeNormalsRequired();
-    if (compute_normals_required)
-        sample->computeNormals(m_config);
-
-    bool compute_tangents_required = sample->computeTangentsRequired();
-    if (compute_tangents_required) {
-        if (!sample->m_normals.empty() && !sample->m_uv0.empty()) {
+    if (!interpolate) {
+        if (sample->computeNormalsRequired())
+            sample->computeNormals(m_config);
+        if (sample->computeTangentsRequired() && !sample->m_normals.empty() && !sample->m_uv0.empty())
             sample->computeTangents(m_config);
-        }
     }
+
 
     return sample;
 }

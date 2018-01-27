@@ -62,8 +62,8 @@ public:
     void interpolateNormals();
     void computeTangents(const aiConfig &config);
 
-    void prepareSplits();
     int getSplitVertexCount(int split_index) const;
+    void prepareSplits();
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
 
     int getSubmeshCount(int split_index) const;
