@@ -45,10 +45,12 @@ public:
 
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
-    bool hasNormals() const;
-    bool hasUVs() const;
     bool hasVelocities() const;
+    bool hasNormals() const;
     bool hasTangents() const;
+    bool hasUV0() const;
+    bool hasUV1() const;
+    bool hasColors() const;
     bool computeNormalsRequired() const;
     bool computeTangentsRequired() const;
 

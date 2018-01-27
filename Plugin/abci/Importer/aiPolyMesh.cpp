@@ -204,6 +204,11 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ow
 {
 }
 
+bool aiPolyMeshSample::hasVelocities() const
+{
+    return !m_schema->hasVaryingTopology() && m_config.interpolate_samples;
+}
+
 bool aiPolyMeshSample::hasNormals() const
 {
     switch (m_config.normals_mode)
@@ -217,19 +222,24 @@ bool aiPolyMeshSample::hasNormals() const
     }
 }
 
-bool aiPolyMeshSample::hasUVs() const
+bool aiPolyMeshSample::hasTangents() const
+{
+    return (m_config.tangents_mode != aiTangentsMode::None && hasUV0() && hasNormals() && !m_tangents.empty());
+}
+
+bool aiPolyMeshSample::hasUV0() const
 {
     return m_uv0_orig.valid();
 }
 
-bool aiPolyMeshSample::hasVelocities() const
+bool aiPolyMeshSample::hasUV1() const
 {
-    return !m_schema->hasVaryingTopology() && m_config.interpolate_samples;
+    return m_uv1_orig.valid();
 }
 
-bool aiPolyMeshSample::hasTangents() const
+bool aiPolyMeshSample::hasColors() const
 {
-    return (m_config.tangents_mode != aiTangentsMode::None && hasUVs() && hasNormals() && !m_tangents.empty());
+    return m_colors_orig.valid();
 }
 
 bool aiPolyMeshSample::computeNormalsRequired() const
@@ -339,10 +349,12 @@ void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summa
 
     summary.split_count = m_topology->getSplitCount();
     summary.submesh_count = m_topology->getSubmeshCount();
-    summary.has_normals = hasNormals();
-    summary.has_uvs = hasUVs();
-    summary.has_tangents = hasTangents();
     summary.has_velocities = hasVelocities();
+    summary.has_normals = hasNormals();
+    summary.has_tangents = hasTangents();
+    summary.has_uv0 = hasUV0();
+    summary.has_uv1 = hasUV1();
+    summary.has_colors = hasColors();
 }
 
 
@@ -408,7 +420,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
         return;
 
     bool copy_normals = (hasNormals() && data.normals);
-    bool copy_uv0 = (hasUVs() && data.uv0);
+    bool copy_uv0 = (hasUV0() && data.uv0);
     bool copy_tangents = (hasTangents() && data.tangents);
     
     bool use_abc_normals = (m_normals_orig.valid() && (m_config.normals_mode == aiNormalsMode::ReadFromFile || m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
@@ -706,35 +718,33 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
 
     // uv1
     sample->m_uv1_orig.reset();
-    auto& uv1_param = *m_uv1_param;
-    if (uv1_param.valid()) {
-        if (uv1_param.isConstant()) {
+    if (m_uv1_param && m_uv1_param->valid()) {
+        if (m_uv1_param->isConstant()) {
             if (!m_constant_uv1.valid()) {
                 DebugLog("  Read uv1 (constant)");
-                uv1_param.getIndexed(m_constant_uv1, ss);
+                m_uv1_param->getIndexed(m_constant_uv1, ss);
             }
             sample->m_uv1_orig = m_constant_uv1;
         }
         else {
             DebugLog("  Read uv1");
-            uv1_param.getIndexed(sample->m_uv1_orig, ss);
+            m_uv1_param->getIndexed(sample->m_uv1_orig, ss);
         }
     }
 
     // colors
     sample->m_colors_orig.reset();
-    auto& colors_param = *m_colors_param;
-    if (colors_param.valid()) {
-        if (colors_param.isConstant()) {
+    if (m_colors_param && m_colors_param->valid()) {
+        if (m_colors_param->isConstant()) {
             if (!m_constant_colors.valid()) {
                 DebugLog("  Read colors (constant)");
-                colors_param.getIndexed(m_constant_colors, ss);
+                m_colors_param->getIndexed(m_constant_colors, ss);
             }
             sample->m_colors_orig = m_constant_colors;
         }
         else {
             DebugLog("  Read colors");
-            colors_param.getIndexed(sample->m_colors_orig, ss);
+            m_colors_param->getIndexed(sample->m_colors_orig, ss);
         }
     }
 

@@ -20,6 +20,7 @@
 *.dll
 *.so
 *.dylib
+*.unitypackage
 
 release/
 debug/

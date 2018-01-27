@@ -126,10 +126,12 @@ namespace UTJ.Alembic
         {
             public int splitCount;
             public int submeshCount;
-            public Bool hasNormals;
-            public Bool hasUVs;
-            public Bool hasTangents;
             public Bool hasVelocities;
+            public Bool hasNormals;
+            public Bool hasTangents;
+            public Bool hasUV0;
+            public Bool hasUV1;
+            public Bool hasColors;
         }
 
         public struct aiPolyMeshData

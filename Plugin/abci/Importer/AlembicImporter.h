@@ -157,10 +157,12 @@ struct aiMeshSampleSummary
 {
     int split_count = 0;
     int submesh_count = 0;
-    bool has_normals = false;
-    bool has_uvs = false;
-    bool has_tangents = false;
     bool has_velocities = false;
+    bool has_normals = false;
+    bool has_tangents = false;
+    bool has_uv0 = false;
+    bool has_uv1 = false;
+    bool has_colors = false;
 };
 
 struct aiPolyMeshData

@@ -10,13 +10,15 @@ namespace UTJ.Alembic
     {
         public class Split
         {
-            public PinnedList<Vector3> positionCache = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
+            public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
             public PinnedList<Vector2> velocitiesXYCache = new PinnedList<Vector2>();
             public PinnedList<Vector2> velocitiesZCache = new PinnedList<Vector2>();
-            public PinnedList<Vector2> uvCache = new PinnedList<Vector2>();
+            public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
             public PinnedList<Vector4> tangentCache = new PinnedList<Vector4>();
+            public PinnedList<Vector2> uv0Cache = new PinnedList<Vector2>();
+            public PinnedList<Vector2> uv1Cache = new PinnedList<Vector2>();
+            public PinnedList<Color> colorCache = new PinnedList<Color>();
             public List<Submesh> submeshes = new List<Submesh>();
             public Mesh mesh;
             public GameObject host;
@@ -151,8 +153,8 @@ namespace UTJ.Alembic
 
                 int vertexCount = AbcAPI.aiPolyMeshGetVertexCount(sample, spi);
 
-                split.positionCache.Resize(vertexCount);
-                vertexData.positions = split.positionCache;
+                split.pointCache.Resize(vertexCount);
+                vertexData.positions = split.pointCache;
 
                 if (sampleSummary.hasVelocities)
                 {
@@ -172,17 +174,29 @@ namespace UTJ.Alembic
                     split.normalCache.Resize(0);
                 vertexData.normals = split.normalCache;
 
-                if (sampleSummary.hasUVs)
-                    split.uvCache.Resize(vertexCount);
-                else
-                    split.uvCache.Resize(0);
-                vertexData.uv0 = split.uvCache;
-
                 if (sampleSummary.hasTangents)
                     split.tangentCache.Resize(vertexCount);
                 else
                     split.tangentCache.Resize(0);
                 vertexData.tangents = split.tangentCache;
+
+                if (sampleSummary.hasUV0)
+                    split.uv0Cache.Resize(vertexCount);
+                else
+                    split.uv0Cache.Resize(0);
+                vertexData.uv0 = split.uv0Cache;
+
+                if (sampleSummary.hasUV1)
+                    split.uv1Cache.Resize(vertexCount);
+                else
+                    split.uv1Cache.Resize(0);
+                vertexData.uv1 = split.uv1Cache;
+
+                if (sampleSummary.hasColors)
+                    split.colorCache.Resize(vertexCount);
+                else
+                    split.colorCache.Resize(0);
+                vertexData.colors = split.colorCache;
 
                 AbcAPI.aiPolyMeshFillVertexBuffer(sample, spi, ref vertexData);
 
@@ -284,12 +298,14 @@ namespace UTJ.Alembic
                         split.mesh.Clear();
                     }
 
-                    split.mesh.SetVertices(split.positionCache.List);
+                    split.mesh.SetVertices(split.pointCache.List);
                     split.mesh.SetNormals(split.normalCache.List);
                     split.mesh.SetTangents(split.tangentCache.List);
-                    split.mesh.SetUVs(0, split.uvCache.List);
+                    split.mesh.SetUVs(0, split.uv0Cache.List);
+                    split.mesh.SetUVs(1, split.uv1Cache.List);
                     split.mesh.SetUVs(2, split.velocitiesXYCache.List);
                     split.mesh.SetUVs(3, split.velocitiesZCache.List);
+                    split.mesh.SetColors(split.colorCache.List);
                     // update the bounds
                     split.mesh.bounds = new Bounds(split.center, split.size);
 
