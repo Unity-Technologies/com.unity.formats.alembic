@@ -116,8 +116,8 @@ struct MeshRefiner
     void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, RawVector<T>& new_values, RawVector<int>& new2old)
     {
         auto attr = newAttribute<IndexedAttribute<T>>();
-        attr->indices = indices;
         attr->values = values;
+        attr->indices = indices;
         attr->new_values = &new_values;
         attr->new2old = &new2old;
     }
@@ -131,7 +131,6 @@ struct MeshRefiner
         attr->new2old = &new2old;
     }
 
-public:
     void refine();
     void triangulate(bool swap_faces);
     void genSubmeshes(IArray<int> materialIDs);
@@ -175,8 +174,8 @@ private:
             new2old->clear();
         }
 
-        IArray<int> indices;
         IArray<T> values;
+        IArray<int> indices;
         RawVector<T> *new_values = nullptr;
         RawVector<int> *new2old = nullptr;
     };

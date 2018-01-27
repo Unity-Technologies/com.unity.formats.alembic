@@ -18,12 +18,10 @@ public:
     int getSubmeshCount(int split_index) const;
 
     void onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample);
-    RawVector<int>& getOffsets();
 
 public:
     Abc::Int32ArraySamplePtr m_indices_orig;
     Abc::Int32ArraySamplePtr m_counts;
-    RawVector<int> m_offsets;
     RawVector<int> m_material_ids;
 
     MeshRefiner m_refiner;
@@ -56,9 +54,7 @@ public:
 
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
 
-    void interpolatePoints();
     void computeNormals(const aiConfig &config);
-    void interpolateNormals();
     void computeTangents(const aiConfig &config);
 
     int getSplitVertexCount(int split_index) const;

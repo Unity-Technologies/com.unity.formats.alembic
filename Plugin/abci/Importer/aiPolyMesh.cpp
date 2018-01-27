@@ -25,18 +25,6 @@ static inline int CalculateTriangulatedIndexCount(const Container& counts)
     return r;
 }
 
-template<class Container>
-static inline void GenerateOffsetTable(RawVector<int>& dst, const Container& counts)
-{
-    size_t size = counts.size();
-    dst.resize_discard(size);
-    int total = 0;
-    for (size_t i = 0; i < size; ++i) {
-        dst[i] = total;
-        total += counts[i];
-    }
-}
-
 template<class T, class IndexArray>
 inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
 {
@@ -57,7 +45,6 @@ void Topology::clear()
     DebugLog("Topology::clear()");
     m_indices_orig.reset();
     m_counts.reset();
-    m_offsets.clear();
     m_material_ids.clear();
     m_refiner.clear();
     m_triangulated_index_count = 0;
@@ -186,15 +173,7 @@ void Topology::onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample
 
     m_remap_points.swap(refiner.new2old_points);
 
-    m_offsets.clear();
     m_freshly_read_topology_data = true;
-}
-
-RawVector<int>& Topology::getOffsets()
-{
-    if (m_offsets.empty())
-        GenerateOffsetTable(m_offsets, *m_counts);
-    return m_offsets;
 }
 
 aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo)
@@ -253,10 +232,6 @@ bool aiPolyMeshSample::computeTangentsRequired() const
     return (m_config.tangents_mode != aiTangentsMode::None);
 }
 
-void aiPolyMeshSample::interpolatePoints()
-{
-}
-
 void aiPolyMeshSample::computeNormals(const aiConfig &config)
 {
     DebugLog("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
@@ -264,25 +239,6 @@ void aiPolyMeshSample::computeNormals(const aiConfig &config)
     const auto &indices = m_topology->m_refiner.new_indices_triangulated;
     m_normals.resize_zeroclear(m_points.size());
     GenerateNormals(m_normals.data(), m_points.data(), indices.data(), (int)m_points.size(), (int)indices.size() / 3);
-}
-
-void aiPolyMeshSample::interpolateNormals()
-{
-    if (!m_normals_orig.valid() || !m_normals_orig2.valid())
-        return;
-
-    const auto *n1 = m_normals_orig.getVals()->get();
-    const auto *n2 = m_normals_orig2.getVals()->get();
-    auto& remap = m_topology->m_remap_normals;
-    float w = (float)m_current_time_offset;
-    float iw = 1.0f - w;
-
-    auto n = remap.size();
-    m_normals.resize_discard(n);
-    for (size_t i = 0; i < n; ++i) {
-        int ri = remap[i];
-        m_normals[i] = n1[ri] * iw + n2[ri] * w;
-    }
 }
 
 void aiPolyMeshSample::computeTangents(const aiConfig &config)
@@ -354,7 +310,7 @@ void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summa
 
 int aiPolyMeshSample::getSplitVertexCount(int split_index) const
 {
-    DebugLog("aiPolyMeshSample::getVertexBufferLength(split_index=%d)", split_index);
+    DebugLog("aiPolyMeshSample::getSplitVertexCount(split_index=%d)", split_index);
     
     return m_topology->getSplitVertexCount(split_index);
 }
@@ -753,15 +709,14 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         }
     }
 
-
-    // compute normals / tangents if needed
+    // compute normals / tangents
+    // if interpolation is enabled, this will be done in fillVertexBuffer()
     if (!interpolate) {
         if (sample->computeNormalsRequired())
             sample->computeNormals(m_config);
         if (sample->computeTangentsRequired() && !sample->m_normals.empty() && !sample->m_uv0.empty())
             sample->computeTangents(m_config);
     }
-
 
     return sample;
 }
