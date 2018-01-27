@@ -37,6 +37,7 @@ using TopologyPtr = std::shared_ptr<Topology>;
 class aiPolyMeshSample : public aiSampleBase
 {
 using super = aiSampleBase;
+using schema_t = aiPolyMesh;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ownTopo );
 
@@ -66,17 +67,18 @@ public:
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 
 public:
-    Abc::P3fArraySamplePtr m_points_orig, m_points_next;
+    Abc::P3fArraySamplePtr m_points_orig, m_points_orig2;
     Abc::V3fArraySamplePtr m_velocities_orig;
-    AbcGeom::IN3fGeomParam::Sample m_normals_orig, m_normals_next;
-    AbcGeom::IV2fGeomParam::Sample m_uvs_orig;
+    AbcGeom::IN3fGeomParam::Sample m_normals_orig, m_normals_orig2;
+    AbcGeom::IV2fGeomParam::Sample m_uv0_orig, m_uv1_orig;
+    AbcGeom::IC4fGeomParam::Sample m_color_orig;
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
-    RawVector<abcV3> m_points;
+    RawVector<abcV3> m_points, m_points2;
     RawVector<abcV3> m_velocities;
     RawVector<abcV2> m_uvs;
-    RawVector<abcV3> m_normals;
+    RawVector<abcV3> m_normals, m_normals2;
     RawVector<abcV4> m_tangents;
 
     TopologyPtr m_topology;
@@ -104,11 +106,14 @@ private:
     void generateSplitAndSubmeshes(aiPolyMeshSample *sample) const;
 
 private:
-    bool m_ignore_normals = false;
-    bool m_ignore_uvs = false;
+    std::unique_ptr<AbcGeom::IV2fGeomParam> m_uv1_param;
+    std::unique_ptr<AbcGeom::IC4fGeomParam> m_color_param;
 
     TopologyPtr m_shared_topology;
+    abcFaceSetSchemas m_facesets;
     AbcGeom::IN3fGeomParam::Sample m_constant_normals;
     AbcGeom::IV2fGeomParam::Sample m_constant_uvs;
-    abcFaceSetSchemas m_facesets;
+
+    bool m_ignore_normals = false;
+    bool m_ignore_uvs = false;
 };

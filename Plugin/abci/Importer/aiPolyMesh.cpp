@@ -110,10 +110,10 @@ void Topology::onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& 
             refiner.normal_indices = refiner.indices;
     }
 
-    if (sample.m_uvs_orig.valid()) {
-        refiner.uvs = { (float2*)sample.m_uvs_orig.getVals()->get(), sample.m_uvs_orig.getVals()->size() };
-        if (sample.m_uvs_orig.isIndexed())
-            refiner.uv_indices = { (int*)sample.m_uvs_orig.getIndices()->get(), sample.m_uvs_orig.getIndices()->size() };
+    if (sample.m_uv0_orig.valid()) {
+        refiner.uvs = { (float2*)sample.m_uv0_orig.getVals()->get(), sample.m_uv0_orig.getVals()->size() };
+        if (sample.m_uv0_orig.isIndexed())
+            refiner.uv_indices = { (int*)sample.m_uv0_orig.getIndices()->get(), sample.m_uv0_orig.getIndices()->size() };
         else if (refiner.uvs.size() == refiner.points.size())
             refiner.uv_indices = refiner.indices;
     }
@@ -165,7 +165,7 @@ bool aiPolyMeshSample::hasNormals() const
 
 bool aiPolyMeshSample::hasUVs() const
 {
-    return m_uvs_orig.valid();
+    return m_uv0_orig.valid();
 }
 
 bool aiPolyMeshSample::hasVelocities() const
@@ -204,11 +204,11 @@ void aiPolyMeshSample::computeNormals(const aiConfig &config)
 
 void aiPolyMeshSample::interpolateNormals()
 {
-    if (!m_normals_orig.valid() || !m_normals_next.valid())
+    if (!m_normals_orig.valid() || !m_normals_orig2.valid())
         return;
 
     const auto *n1 = m_normals_orig.getVals()->get();
-    const auto *n2 = m_normals_next.getVals()->get();
+    const auto *n2 = m_normals_orig2.getVals()->get();
     auto& remap = m_topology->m_refiner.new2old_normals;
     float w = (float)m_current_time_offset;
     float iw = 1.0f - w;
@@ -260,7 +260,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
         m_normals.clear();
     }
 
-    bool tangents_required = (m_uvs_orig.valid() && config.tangents_mode != aiTangentsMode::None);
+    bool tangents_required = (m_uv0_orig.valid() && config.tangents_mode != aiTangentsMode::None);
     if (tangents_required) {
         if (!m_normals.empty() && !m_uvs.empty()) {
             bool tangents_mode_changed = (config.tangents_mode != m_config.tangents_mode);
@@ -312,12 +312,12 @@ void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst) const
         }
     }
 
-    if (m_uvs_orig) {
-        dst.uv_count = (int)m_uvs_orig.getVals()->size();
-        dst.uvs = (abcV2*)m_uvs_orig.getVals()->get();
-        dst.uv_index_count = m_uvs_orig.isIndexed() ? (int)m_uvs_orig.getIndices()->size() : 0;
+    if (m_uv0_orig) {
+        dst.uv_count = (int)m_uv0_orig.getVals()->size();
+        dst.uvs = (abcV2*)m_uv0_orig.getVals()->get();
+        dst.uv_index_count = m_uv0_orig.isIndexed() ? (int)m_uv0_orig.getIndices()->size() : 0;
         if (dst.uv_index_count) {
-            dst.uv_indices = (int*)m_uvs_orig.getIndices()->get();
+            dst.uv_indices = (int*)m_uv0_orig.getIndices()->get();
         }
     }
 
@@ -348,6 +348,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 {
     DebugLog("aiPolyMeshSample::fillVertexBuffer(split_index=%d)", split_index);
     
+    auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& splits = m_topology->m_refiner.splits;
     if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].num_vertices == 0)
         return;
@@ -357,34 +358,47 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     bool copy_tangents = (hasTangents() && data.tangents);
     
     bool use_abc_normals = (m_normals_orig.valid() && (m_config.normals_mode == aiNormalsMode::ReadFromFile || m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
-    bool interpolate = hasVelocities() && m_points_next != nullptr;
+    bool interpolate = m_config.interpolate_samples && !schema.isConstant() && !schema.hasVaryingTopology();
 
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
 
     if (interpolate) {
-        m_points.resize_discard(m_points_orig->size());
-        Lerp(m_points.data(), m_points_orig->get(), m_points_next->get(), (int)m_points_orig->size(), (float)m_current_time_offset);
-
         m_velocities.resize_discard(m_points_orig->size());
         GenerateVelocities(m_velocities.data(),
-            m_points_orig->get(), m_points_next->get(), (int)m_points_orig->size(),
+            m_points_orig->get(), m_points_orig2->get(), (int)m_points_orig->size(),
             (float)m_current_time_interval, m_config.vertex_motion_scale);
     }
 
     if (data.points) {
-        m_points.copy_to(data.points, split.num_vertices, split.offset_vertices);
+        if (interpolate)
+            Lerp(data.points, m_points.data(), m_points2.data(), (int)m_points.size(), (float)m_current_time_offset);
+        else
+            m_points.copy_to(data.points, split.num_vertices, split.offset_vertices);
         if (m_config.swap_handedness) { SwapHandedness(data.points, split.num_vertices); }
     }
+
     if (data.normals) {
         if (copy_normals) {
-            m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+            if (interpolate) {
+                if (use_abc_normals) {
+                    Lerp(data.normals, m_normals.data(), m_normals2.data(), (int)m_normals.size(), (float)m_current_time_offset);
+                }
+                else {
+                    computeNormals(m_config);
+                    m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+                }
+            }
+            else {
+                m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+            }
             if (m_config.swap_handedness) { SwapHandedness(data.normals, split.num_vertices); }
         }
         else {
             memset(data.normals, 0, split.num_vertices * sizeof(abcV3));
         }
     }
+
     if (data.uvs) {
         if (copy_uvs) {
             m_uvs.copy_to(data.uvs, split.num_vertices, split.offset_vertices);
@@ -393,6 +407,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
             memset(data.uvs, 0, split.num_vertices * sizeof(abcV2));
         }
     }
+
     if (data.tangents)
     {
         if (copy_tangents) {
@@ -496,6 +511,21 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
         }
     }
 
+    // find color and uv1 params (Maya's extension)
+    auto geom_params = m_schema.getArbGeomParams();
+    if (geom_params.valid()) {
+        size_t num_geom_params = geom_params.getNumProperties();
+        for (size_t i = 0; i < num_geom_params; ++i) {
+            auto& header = geom_params.getPropertyHeader(i);
+            if (header.getName() == "rgba" && AbcGeom::IC4fGeomParam::matches(header)) {
+                m_color_param.reset(new AbcGeom::IC4fGeomParam(geom_params, "rgba"));
+            }
+            else if (header.getName() == "uv1" && AbcGeom::IV2fGeomParam::matches(header)) {
+                m_uv1_param.reset(new AbcGeom::IV2fGeomParam(geom_params, "uv1"));
+            }
+        }
+    }
+
     DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
              (m_constant ? "true" : "false"),
              (m_varying_topology ? "true" : "false"));
@@ -530,6 +560,8 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     
     Sample *sample = newSample();
     auto& topology = *sample->m_topology;
+    auto& refiner = topology.m_refiner;
+    bool interpolate = m_config.interpolate_samples && !isConstant() && !hasVaryingTopology();
 
     topology_changed = m_varying_topology;
     topology.m_use_32bit_index_buffer = m_config.use_32bit_index_buffer;
@@ -551,11 +583,11 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     }
 
     m_schema.getPositionsProperty().get(sample->m_points_orig, ss);
-    if (!m_varying_topology && m_config.interpolate_samples) {
-        m_schema.getPositionsProperty().get(sample->m_points_next, ss2);
+    if (interpolate) {
+        m_schema.getPositionsProperty().get(sample->m_points_orig2, ss2);
     }
     else {
-        sample->m_points_next.reset();
+        sample->m_points_orig2.reset();
         sample->m_velocities_orig.reset();
         auto velocities_prop = m_schema.getVelocitiesProperty();
         if (velocities_prop.valid()) {
@@ -563,7 +595,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         }
     }
 
-    sample->m_uvs_orig.reset();
+    sample->m_uv0_orig.reset();
     auto uvs_param = m_schema.getUVsParam();
     if (!m_ignore_uvs && uvs_param.valid()) {
         if (uvs_param.isConstant()) {
@@ -571,16 +603,16 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
                 DebugLog("  Read uvs (constant)");
                 uvs_param.getIndexed(m_constant_uvs, ss);
             }
-            sample->m_uvs_orig = m_constant_uvs;
+            sample->m_uv0_orig = m_constant_uvs;
         }
         else {
             DebugLog("  Read uvs");
-            uvs_param.getIndexed(sample->m_uvs_orig, ss);
+            uvs_param.getIndexed(sample->m_uv0_orig, ss);
         }
     }
 
     sample->m_normals_orig.reset();
-    sample->m_normals_next.reset();
+    sample->m_normals_orig2.reset();
     auto normals_param = m_schema.getNormalsParam();
     if (!m_ignore_normals && normals_param.valid()) {
         if (normals_param.isConstant()) {
@@ -589,12 +621,13 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
                 normals_param.getIndexed(m_constant_normals, ss);
             }
             sample->m_normals_orig = m_constant_normals;
+            sample->m_normals_orig2 = m_constant_normals;
         }
         else {
             DebugLog("  Read normals");
             normals_param.getIndexed(sample->m_normals_orig, ss);
-            if (!m_varying_topology && m_config.interpolate_samples) {
-                normals_param.getIndexed(sample->m_normals_next, ss2);
+            if (interpolate) {
+                normals_param.getIndexed(sample->m_normals_orig2, ss2);
             }
         }
     }
@@ -606,14 +639,12 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     if (topology_changed) {
         // update topology!
         topology.onTopologyUpdate(m_config, *sample);
-        auto& refiner = topology.m_refiner;
         sample->m_points.swap((RawVector<abcV3>&)refiner.new_points);
         sample->m_normals.swap((RawVector<abcV3>&)refiner.new_normals);
         sample->m_uvs.swap((RawVector<abcV2>&)refiner.new_uvs);
     }
     else {
         // make remapped vertex buffer
-        auto& refiner = topology.m_refiner;
         {
             auto& remap = refiner.new2old_points;
             sample->m_points.reserve_discard(remap.size());
@@ -624,10 +655,22 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
             sample->m_normals.reserve_discard(remap.size());
             CopyWithIndices(sample->m_normals.data(), sample->m_normals_orig.getVals()->get(), remap);
         }
-        if (sample->m_uvs_orig.valid()) {
+        if (sample->m_uv0_orig.valid()) {
             auto& remap = refiner.new2old_uvs;
             sample->m_uvs.reserve_discard(remap.size());
-            CopyWithIndices(sample->m_uvs.data(), sample->m_uvs_orig.getVals()->get(), remap);
+            CopyWithIndices(sample->m_uvs.data(), sample->m_uv0_orig.getVals()->get(), remap);
+        }
+    }
+    if (interpolate) {
+        {
+            auto& remap = refiner.new2old_points;
+            sample->m_points2.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_points2.data(), sample->m_points_orig2->get(), remap);
+        }
+        if (sample->m_normals_orig2.valid()) {
+            auto& remap = refiner.new2old_normals;
+            sample->m_normals2.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_normals2.data(), sample->m_normals_orig2.getVals()->get(), remap);
         }
     }
 
@@ -644,7 +687,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
             sample->computeTangents(m_config);
         }
     }
-
 
     return sample;
 }

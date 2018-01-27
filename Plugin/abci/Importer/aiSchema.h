@@ -49,6 +49,7 @@ public:
     virtual float           getSampleTime(const abcSampleSelector& ss) const = 0;
 
     void readConfig();
+    bool isConstant() const { return m_constant; }
     bool hasVaryingTopology() const { return m_varying_topology; }
 
     int getNumProperties() const;
