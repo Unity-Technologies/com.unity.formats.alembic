@@ -209,7 +209,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
         }
 
         // don't need to check m_constant here, sampleIndex wouldn't change
-        if (m_the_sample == 0 || sample_index != m_last_sample_index) {
+        if (!m_the_sample || sample_index != m_last_sample_index) {
             DebugLog("  Read sample");
             sample = readSample(sample_index, topology_changed);
             m_the_sample = sample;

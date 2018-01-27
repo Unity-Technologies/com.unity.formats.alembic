@@ -3,6 +3,7 @@
 
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
+template<class T> using SharedVector = std::shared_ptr<RawVector<T>>;
 
 struct aiMeshSummaryInternal : public aiMeshSummary
 {
@@ -15,13 +16,14 @@ struct aiMeshSummaryInternal : public aiMeshSummary
     bool interpolate_points = false;
     bool interpolate_normals = false;
     bool compute_normals = false;
+    bool compute_tangents = false;
     bool compute_velocities = false;
 };
 
-class Topology
+class aiMeshTopology
 {
 public:
-    Topology();
+    aiMeshTopology();
     void clear();
 
     int getTriangulatedIndexCount() const;
@@ -45,7 +47,7 @@ public:
     bool m_freshly_read_topology_data = false;
     bool m_use_32bit_index_buffer = false;
 };
-using TopologyPtr = std::shared_ptr<Topology>;
+using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
 
 class aiPolyMeshSample : public aiSampleBase
@@ -57,15 +59,6 @@ public:
 
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
-    bool hasVelocities() const;
-    bool hasNormals() const;
-    bool hasTangents() const;
-    bool hasUV0() const;
-    bool hasUV1() const;
-    bool hasColors() const;
-    bool computeNormalsRequired() const;
-    bool computeTangentsRequired() const;
-
     void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
 
     void computeNormals(const aiConfig &config);
@@ -127,6 +120,7 @@ private:
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     RawVector<abcV3> m_constant_points;
+    RawVector<abcV3> m_constant_velocities;
     RawVector<abcV3> m_constant_normals;
     RawVector<abcV4> m_constant_tangents;
     RawVector<abcV2> m_constant_uv0;

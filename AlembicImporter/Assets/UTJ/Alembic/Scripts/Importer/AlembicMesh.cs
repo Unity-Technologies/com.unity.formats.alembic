@@ -154,37 +154,37 @@ namespace UTJ.Alembic
                 split.pointCache.Resize(vertexCount);
                 vertexData.positions = split.pointCache;
 
-                if (sampleSummary.hasVelocities)
+                if (summary.hasVelocities)
                     split.velocitiesCache.Resize(vertexCount);
                 else
                     split.velocitiesCache.Resize(0);
                 vertexData.velocities = split.velocitiesCache;
 
-                if (sampleSummary.hasNormals)
+                if (summary.hasNormals)
                     split.normalCache.Resize(vertexCount);
                 else
                     split.normalCache.Resize(0);
                 vertexData.normals = split.normalCache;
 
-                if (sampleSummary.hasTangents)
+                if (summary.hasTangents)
                     split.tangentCache.Resize(vertexCount);
                 else
                     split.tangentCache.Resize(0);
                 vertexData.tangents = split.tangentCache;
 
-                if (sampleSummary.hasUV0)
+                if (summary.hasUV0)
                     split.uv0Cache.Resize(vertexCount);
                 else
                     split.uv0Cache.Resize(0);
                 vertexData.uv0 = split.uv0Cache;
 
-                if (sampleSummary.hasUV1)
+                if (summary.hasUV1)
                     split.uv1Cache.Resize(vertexCount);
                 else
                     split.uv1Cache.Resize(0);
                 vertexData.uv1 = split.uv1Cache;
 
-                if (sampleSummary.hasColors)
+                if (summary.hasColors)
                     split.colorCache.Resize(vertexCount);
                 else
                     split.colorCache.Resize(0);
@@ -343,14 +343,6 @@ namespace UTJ.Alembic
                 {
                     var submesh = split.submeshes[smi];
                     split.mesh.SetTriangles(submesh.indexCache.List, smi);
-                }
-            }
-
-            if (!sampleSummary.hasNormals && !sampleSummary.hasTangents)
-            {
-                for (int s=0; s<sampleSummary.splitCount; ++s)
-                {
-                    splits[s].mesh.RecalculateNormals();
                 }
             }
             

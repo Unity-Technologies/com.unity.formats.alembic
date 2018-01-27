@@ -36,11 +36,11 @@ inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
 }
 
 
-Topology::Topology()
+aiMeshTopology::aiMeshTopology()
 {
 }
 
-void Topology::clear()
+void aiMeshTopology::clear()
 {
     DebugLog("Topology::clear()");
     m_indices_sp.reset();
@@ -50,32 +50,32 @@ void Topology::clear()
     m_triangulated_index_count = 0;
 }
 
-int Topology::getTriangulatedIndexCount() const
+int aiMeshTopology::getTriangulatedIndexCount() const
 {
     return m_triangulated_index_count;
 }
 
-int Topology::getSplitCount() const
+int aiMeshTopology::getSplitCount() const
 {
     return (int)m_refiner.splits.size();
 }
 
-int Topology::getSplitVertexCount(int split_index) const
+int aiMeshTopology::getSplitVertexCount(int split_index) const
 {
     return (int)m_refiner.splits[split_index].num_vertices;
 }
 
-int Topology::getSubmeshCount() const
+int aiMeshTopology::getSubmeshCount() const
 {
     return (int)m_refiner.submeshes.size();
 }
 
-int Topology::getSubmeshCount(int split_index) const
+int aiMeshTopology::getSubmeshCount(int split_index) const
 {
     return (int)m_refiner.splits[split_index].num_submeshes;
 }
 
-void Topology::onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample)
+void aiMeshTopology::onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample)
 {
     if (config.turn_quad_edges) {
         // todo
@@ -183,55 +183,6 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo, bool ow
 {
 }
 
-bool aiPolyMeshSample::hasVelocities() const
-{
-    return !m_schema->hasVaryingTopology() && m_config.interpolate_samples;
-}
-
-bool aiPolyMeshSample::hasNormals() const
-{
-    switch (m_config.normals_mode)
-    {
-    case aiNormalsMode::ReadFromFile:
-        return m_normals_sp.valid();
-    case aiNormalsMode::Ignore:
-        return false;
-    default:
-        return !m_normals.empty();
-    }
-}
-
-bool aiPolyMeshSample::hasTangents() const
-{
-    return (m_config.tangents_mode != aiTangentsMode::None && hasUV0() && hasNormals() && !m_tangents.empty());
-}
-
-bool aiPolyMeshSample::hasUV0() const
-{
-    return m_uv0_sp.valid();
-}
-
-bool aiPolyMeshSample::hasUV1() const
-{
-    return m_uv1_sp.valid();
-}
-
-bool aiPolyMeshSample::hasColors() const
-{
-    return m_colors_sp.valid();
-}
-
-bool aiPolyMeshSample::computeNormalsRequired() const
-{
-    return (m_config.normals_mode == aiNormalsMode::AlwaysCompute ||
-            (!m_normals_sp.valid() && m_config.normals_mode == aiNormalsMode::ComputeIfMissing));
-}
-
-bool aiPolyMeshSample::computeTangentsRequired() const
-{
-    return (m_config.tangents_mode != aiTangentsMode::None);
-}
-
 void aiPolyMeshSample::computeNormals(const aiConfig &config)
 {
     DebugLog("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
@@ -300,12 +251,6 @@ void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summa
 
     summary.split_count = m_topology->getSplitCount();
     summary.submesh_count = m_topology->getSubmeshCount();
-    summary.has_velocities = hasVelocities();
-    summary.has_normals = hasNormals();
-    summary.has_tangents = hasTangents();
-    summary.has_uv0 = hasUV0();
-    summary.has_uv1 = hasUV1();
-    summary.has_colors = hasColors();
 }
 
 int aiPolyMeshSample::getSplitVertexCount(int split_index) const
@@ -317,6 +262,14 @@ int aiPolyMeshSample::getSplitVertexCount(int split_index) const
 
 void aiPolyMeshSample::prepareSplits()
 {
+    auto& schema = *dynamic_cast<schema_t*>(getSchema());
+    auto& summary = schema.getSummary();
+
+    if (summary.interpolate_points && summary.compute_normals)
+        computeNormals(m_config);
+
+    if (summary.interpolate_points || summary.interpolate_normals)
+        computeTangents(m_config);
 }
 
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
@@ -354,10 +307,6 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
             if (summary.interpolate_normals) {
                 Lerp(data.normals, m_normals.data(), m_normals2.data(), split.num_vertices, split.offset_vertices, (float)m_current_time_offset);
             }
-            else if (summary.compute_normals) {
-                computeNormals(m_config);
-                m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
-            }
             else if (!m_normals.empty()) {
                 m_normals.copy_to(data.normals, split.num_vertices, split.offset_vertices);
             }
@@ -367,11 +316,8 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
         }
     }
 
-    if (data.tangents)
-    {
+    if (data.tangents) {
         if(summary.has_tangents) {
-            if (summary.interpolate_normals)
-                computeTangents(m_config);
             m_tangents.copy_to(data.tangents, split.num_vertices, split.offset_vertices);
         }
         else {
@@ -577,6 +523,7 @@ void aiPolyMesh::updateSummary()
     // tangents
     if (m_config.tangents_mode == aiTangentsMode::Smooth && summary.has_normals && summary.has_uv0) {
         summary.has_tangents = true;
+        summary.compute_tangents = true;
         if (summary.constant_points && summary.constant_normals && summary.constant_uv0) {
             summary.constant_tangents = true;
         }
@@ -589,11 +536,11 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     if (!sample) {
         if (dontUseCache() || !m_varying_topology) {
             if (!m_shared_topology)
-                m_shared_topology.reset(new Topology());
+                m_shared_topology.reset(new aiMeshTopology());
             sample = new Sample(this, m_shared_topology, false);
         }
         else {
-            sample = new Sample(this, TopologyPtr(new Topology()), true);
+            sample = new Sample(this, TopologyPtr(new aiMeshTopology()), true);
         }
     }
     else {
@@ -731,19 +678,19 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     // compute normals / tangents
     // if interpolation is enabled, this will be done in fillVertexBuffer()
     if (!summary.interpolate_normals) {
-        if (sample->computeNormalsRequired())
+        if (summary.compute_normals)
             sample->computeNormals(m_config);
-        if (sample->computeTangentsRequired() && !sample->m_normals.empty() && !sample->m_uv0.empty())
+        if (summary.compute_tangents)
             sample->computeTangents(m_config);
     }
 
     if (m_config.swap_handedness) {
         SwapHandedness(sample->m_points.data(), (int)sample->m_points.size());
         SwapHandedness(sample->m_points2.data(), (int)sample->m_points2.size());
-        SwapHandedness(sample->m_velocities.data(), (int)sample->m_velocities.size());
         SwapHandedness(sample->m_normals.data(), (int)sample->m_normals.size());
         SwapHandedness(sample->m_normals2.data(), (int)sample->m_normals2.size());
         SwapHandedness(sample->m_tangents.data(), (int)sample->m_tangents.size());
+        SwapHandedness(sample->m_velocities.data(), (int)sample->m_velocities.size());
     }
 
     return sample;
