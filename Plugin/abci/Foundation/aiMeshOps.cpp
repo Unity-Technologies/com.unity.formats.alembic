@@ -238,40 +238,37 @@ void MeshRefiner::clear()
     split_unit = 0;
     counts.reset();
     indices.reset();
-    normal_indices.reset();
-    uv_indices.reset();
     points.reset();
-    normals.reset();
-    uvs.reset();
+    for (auto& attr : attributes) {
+        attr->clear();
+        // attributes are placement new-ed, so need to call destructor manually
+        attr->~IAttribute();
+    }
+    attributes.clear();
 
     old2new_indices.clear();
     new2old_points.clear();
-    new2old_normals.clear();
-    new2old_uvs.clear();
 
     new_indices.clear();
     new_indices_triangulated.clear();
     new_indices_submeshes.clear();
 
     new_points.clear();
-    new_normals.clear();
-    new_uvs.clear();
-
     splits.clear();
     submeshes.clear();
     num_new_indices = 0;
 }
 
-template<class Body>
-void MeshRefiner::doRefine(const Body& body)
+void MeshRefiner::refine()
 {
-    buildConnection();
+    if (connection.v2f_counts.size() != points.size()) {
+        connection.buildConnection(indices, counts, points);
+    }
 
     int num_indices = (int)indices.size();
     new_points.reserve(num_indices);
-    if (!normals.empty()) { new_normals.reserve(num_indices); }
-    if (!uvs.empty()) { new_uvs.reserve(num_indices); }
     new_indices.reserve(num_indices);
+    for (auto& attr : attributes) { attr->prepare((int)points.size(), (int)indices.size()); }
 
     old2new_indices.resize(num_indices, -1);
 
@@ -302,6 +299,31 @@ void MeshRefiner::doRefine(const Body& body)
         num_indices_triangulated = 0;
     };
 
+    auto compare_all_attributes = [&](int ni, int ii) -> bool {
+        for (auto& attr : attributes)
+            if (!attr->compare(ni, ii)) { return false; }
+        return true;
+    };
+
+    auto find_or_emit_vertex = [&](int vi, int ii) -> int {
+        int offset = connection.v2f_offsets[vi];
+        int connection_count = connection.v2f_counts[vi];
+        for (int ci = 0; ci < connection_count; ++ci) {
+            int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
+            if (ni != -1 && compare_all_attributes(ni, ii)) {
+                return ni;
+            }
+            else if (ni == -1) {
+                ni = (int)new_points.size();
+                new_points.push_back(points[vi]);
+                new2old_points.push_back(vi);
+                for (auto& attr : attributes) { attr->emit(ii); }
+                return ni;
+            }
+        }
+        return 0;
+    };
+
     int offset = 0;
     for (int fi = 0; fi < num_faces_total; ++fi) {
         int count = counts[fi];
@@ -314,10 +336,9 @@ void MeshRefiner::doRefine(const Body& body)
         }
 
         for (int ci = 0; ci < count; ++ci) {
-            int i = offset + ci;
-            int vi = indices[i];
-            int ni = body(vi, i);
-            new_indices.push_back(ni);
+            int ii = offset + ci;
+            int vi = indices[ii];
+            new_indices.push_back(find_or_emit_vertex(vi, ii));
         }
         ++num_faces;
         num_indices_triangulated += (count - 2) * 3;
@@ -326,186 +347,3 @@ void MeshRefiner::doRefine(const Body& body)
     add_new_split();
 }
 
-void MeshRefiner::refine()
-{
-    int num_points = (int)points.size();
-    int num_indices = (int)indices.size();
-    int num_normals = (int)normals.size();
-    int num_uv = (int)uvs.size();
-
-    if (!uvs.empty()) {
-        if (!normals.empty()) {
-            if (num_normals == num_indices && num_uv == num_indices) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPNU(vi, points[vi], normals[i], uvs[i], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_normals.push_back(i);
-                        new2old_uvs.push_back(i);
-                    });
-                });
-            }
-            else if (num_normals == num_indices && !uv_indices.empty()) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPNU(vi, points[vi], normals[i], uvs[uv_indices[i]], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_normals.push_back(i);
-                        new2old_uvs.push_back(uv_indices[i]);
-                    });
-                });
-            }
-            else if (!normal_indices.empty() && num_uv == num_indices) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPNU(vi, points[vi], normals[normal_indices[i]], uvs[i], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_normals.push_back(normal_indices[i]);
-                        new2old_uvs.push_back(i);
-                    });
-                });
-            }
-            else if (!normal_indices.empty() && !uv_indices.empty()) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPNU(vi, points[vi], normals[normal_indices[i]], uvs[uv_indices[i]], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_normals.push_back(normal_indices[i]);
-                        new2old_uvs.push_back(uv_indices[i]);
-                    });
-                });
-            }
-        }
-        else {
-            if (num_uv == num_indices) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPU(vi, points[vi], uvs[i], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_uvs.push_back(i);
-                    });
-                });
-            }
-            else if (!uv_indices.empty()) {
-                doRefine([this](int vi, int i) {
-                    return findOrAddVertexPU(vi, points[vi], uvs[uv_indices[i]], [&]() {
-                        new2old_points.push_back(vi);
-                        new2old_uvs.push_back(uv_indices[i]);
-                    });
-                });
-            }
-        }
-    }
-    else if (!normals.empty()) {
-        if (num_normals == num_indices) {
-            doRefine([this](int vi, int i) {
-                return findOrAddVertexPN(vi, points[vi], normals[i], [&]() {
-                    new2old_points.push_back(vi);
-                    new2old_normals.push_back(i);
-                });
-            });
-        }
-        else if (!normal_indices.empty()) {
-            doRefine([this](int vi, int i) {
-                return findOrAddVertexPN(vi, points[vi], normals[normal_indices[i]], [&]() {
-                    new2old_points.push_back(vi);
-                    new2old_normals.push_back(normal_indices[i]);
-                });
-            });
-        }
-    }
-    else {
-        doRefine([this](int vi, int) {
-            return findOrAddVertexP(vi, points[vi], [&]() {
-                new2old_points.push_back(vi);
-            });
-        });
-    }
-}
-
-void MeshRefiner::buildConnection()
-{
-    // skip if already built
-    if (connection.v2f_counts.size() == points.size()) { return; }
-
-    connection.buildConnection(indices, counts, points);
-}
-
-template<class Hook>
-int MeshRefiner::findOrAddVertexPNU(int vi, const float3& p, const float3& n, const float2& u, const Hook& hook)
-{
-    int offset = connection.v2f_offsets[vi];
-    int count = connection.v2f_counts[vi];
-    for (int ci = 0; ci < count; ++ci) {
-        int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_normals[ni]==n && new_uvs[ni]==u) {
-            return ni;
-        }
-        else if (ni == -1) {
-            ni = (int)new_points.size();
-            new_points.push_back(p);
-            new_normals.push_back(n);
-            new_uvs.push_back(u);
-            hook();
-            return ni;
-        }
-    }
-    return 0;
-}
-
-template<class Hook>
-int MeshRefiner::findOrAddVertexPN(int vi, const float3& p, const float3& n, const Hook& hook)
-{
-    int offset = connection.v2f_offsets[vi];
-    int count = connection.v2f_counts[vi];
-    for (int ci = 0; ci < count; ++ci) {
-        int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_normals[ni]==n) {
-            return ni;
-        }
-        else if (ni == -1) {
-            ni = (int)new_points.size();
-            new_points.push_back(p);
-            new_normals.push_back(n);
-            hook();
-            return ni;
-        }
-    }
-    return 0;
-}
-
-template<class Hook>
-int MeshRefiner::findOrAddVertexPU(int vi, const float3& p, const float2& u, const Hook& hook)
-{
-    int offset = connection.v2f_offsets[vi];
-    int count = connection.v2f_counts[vi];
-    for (int ci = 0; ci < count; ++ci) {
-        int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1 && new_uvs[ni]==u) {
-            return ni;
-        }
-        else if (ni == -1) {
-            ni = (int)new_points.size();
-            new_points.push_back(p);
-            new_uvs.push_back(u);
-            hook();
-            return ni;
-        }
-    }
-    return 0;
-}
-
-template<class Hook>
-int MeshRefiner::findOrAddVertexP(int vi, const float3 & p, const Hook& hook)
-{
-    int offset = connection.v2f_offsets[vi];
-    int count = connection.v2f_counts[vi];
-    for (int ci = 0; ci < count; ++ci) {
-        int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-        if (ni != -1) {
-            return ni;
-        }
-        else if (ni == -1) {
-            ni = (int)new_points.size();
-            new_points.push_back(p);
-            hook();
-            return ni;
-        }
-    }
-    return 0;
-}

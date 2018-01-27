@@ -17,7 +17,7 @@ public:
     int getSubmeshCount() const;
     int getSubmeshCount(int split_index) const;
 
-    void onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& sample);
+    void onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample);
     RawVector<int>& getOffsets();
 
 public:
@@ -25,7 +25,9 @@ public:
     Abc::Int32ArraySamplePtr m_counts;
     RawVector<int> m_offsets;
     RawVector<int> m_material_ids;
+
     MeshRefiner m_refiner;
+    RawVector<int> m_remap_points, m_remap_normals, m_remap_uv0, m_remap_uv1, m_remap_colors;
 
     int m_triangulated_index_count = 0;
     bool m_freshly_read_topology_data = false;
@@ -71,15 +73,16 @@ public:
     Abc::V3fArraySamplePtr m_velocities_orig;
     AbcGeom::IN3fGeomParam::Sample m_normals_orig, m_normals_orig2;
     AbcGeom::IV2fGeomParam::Sample m_uv0_orig, m_uv1_orig;
-    AbcGeom::IC4fGeomParam::Sample m_color_orig;
+    AbcGeom::IC4fGeomParam::Sample m_colors_orig;
     Abc::Box3d m_bounds;
     abcFaceSetSamples m_facesets;
 
     RawVector<abcV3> m_points, m_points2;
     RawVector<abcV3> m_velocities;
-    RawVector<abcV2> m_uvs;
+    RawVector<abcV2> m_uv0, m_uv1;
     RawVector<abcV3> m_normals, m_normals2;
     RawVector<abcV4> m_tangents;
+    RawVector<abcC4> m_colors;
 
     TopologyPtr m_topology;
     bool m_own_topology = false;
@@ -101,9 +104,6 @@ public:
     Sample* readSample(const uint64_t idx, bool &topology_changed) override;
 
     void getSummary(aiMeshSummary &summary) const;
-
-private:
-    void generateSplitAndSubmeshes(aiPolyMeshSample *sample) const;
 
 private:
     std::unique_ptr<AbcGeom::IV2fGeomParam> m_uv1_param;

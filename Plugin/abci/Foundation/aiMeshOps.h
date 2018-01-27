@@ -97,27 +97,39 @@ struct MeshRefiner
     int split_unit = 0; // 0 == no split
     IArray<int> counts;
     IArray<int> indices;
-    IArray<int> normal_indices;
-    IArray<int> uv_indices;
     IArray<float3> points;
-    IArray<float3> normals;
-    IArray<float2> uvs;
 
     // outputs
     RawVector<int> old2new_indices; // old indices to new indices
     RawVector<int> new2old_points;  // new indices to old vertex data
-    RawVector<int> new2old_normals; // 
-    RawVector<int> new2old_uvs;     // 
     RawVector<int> new_indices;
     RawVector<int> new_indices_triangulated;
     RawVector<int> new_indices_submeshes; // triangulated
     RawVector<float3> new_points;
-    RawVector<float3> new_normals;
-    RawVector<float2> new_uvs;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
     MeshConnectionInfo connection;
     int num_new_indices = 0;
+
+    // attributes
+    template<class T>
+    void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, RawVector<T>& new_values, RawVector<int>& new2old)
+    {
+        auto attr = newAttribute<IndexedAttribute<T>>();
+        attr->indices = indices;
+        attr->values = values;
+        attr->new_values = &new_values;
+        attr->new2old = &new2old;
+    }
+
+    template<class T>
+    void addExpandedAttribute(const IArray<T>& values, RawVector<T>& new_values, RawVector<int>& new2old)
+    {
+        auto attr = newAttribute<ExpandedAttribute<T>>();
+        attr->values = values;
+        attr->new_values = &new_values;
+        attr->new2old = &new2old;
+    }
 
 public:
     void refine();
@@ -126,13 +138,97 @@ public:
     void clear();
 
 private:
-    void buildConnection();
+    class IAttribute
+    {
+    public:
+        virtual ~IAttribute() {}
+        virtual void prepare(int vertex_count, int index_count) = 0;
+        virtual bool compare(int vertex_index, int index_index) = 0;
+        virtual void emit(int index_index) = 0;
+        virtual void clear() = 0;
+    };
 
-    template<class Body> void doRefine(const Body& body);
-    template<class Hook> int findOrAddVertexPNU(int vi, const float3& p, const float3& n, const float2& u, const Hook& hook);
-    template<class Hook> int findOrAddVertexPN(int vi, const float3& p, const float3& n, const Hook& hook);
-    template<class Hook> int findOrAddVertexPU(int vi, const float3& p, const float2& u, const Hook& hook);
-    template<class Hook> int findOrAddVertexP(int vi, const float3& p, const Hook& hook);
+    template<class T>
+    class IndexedAttribute : public IAttribute
+    {
+    public:
+        void prepare(int vertex_count, int index_count) override
+        {
+            clear();
+        }
+
+        bool compare(int ni, int ii) override
+        {
+            return (*new_values)[ni] == values[indices[ii]];
+        }
+
+        void emit(int ii) override
+        {
+            int i = indices[ii];
+            new_values->push_back(values[i]);
+            new2old->push_back(i);
+        }
+
+        void clear() override
+        {
+            new_values->clear();
+            new2old->clear();
+        }
+
+        IArray<int> indices;
+        IArray<T> values;
+        RawVector<T> *new_values = nullptr;
+        RawVector<int> *new2old = nullptr;
+    };
+
+    template<class T>
+    class ExpandedAttribute : public IAttribute
+    {
+    public:
+        void prepare(int vertex_count, int index_count) override
+        {
+            clear();
+        }
+
+        bool compare(int ni, int ii) override
+        {
+            return (*new_values)[ni] == values[ii];
+        }
+
+        void emit(int ii) override
+        {
+            new_values->push_back(values[ii]);
+            new2old->push_back(ii);
+        }
+
+        void clear() override
+        {
+            new_values->clear();
+        }
+
+        IArray<T> values;
+        RawVector<T> *new_values = nullptr;
+        RawVector<int> *new2old = nullptr;
+    };
+
+    template<class AttrType>
+    AttrType* newAttribute()
+    {
+        const int size_attr = sizeof(IndexedAttribute<char>);
+        if (buf_attributes.empty())
+            buf_attributes.resize(size_attr * max_attributes);
+
+        size_t i = attributes.size();
+        if (i >= max_attributes)
+            return nullptr;
+        auto *ret = new (&buf_attributes[size_attr * i]) AttrType();
+        attributes.push_back(ret);
+        return ret;
+    }
+
+    RawVector<IAttribute*> attributes;
+    RawVector<char> buf_attributes;
+    static const int max_attributes = 8; // you can increase this if needed
 };
 
 

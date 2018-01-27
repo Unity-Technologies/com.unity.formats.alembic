@@ -88,7 +88,7 @@ int Topology::getSubmeshCount(int split_index) const
     return (int)m_refiner.splits[split_index].num_submeshes;
 }
 
-void Topology::onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& sample)
+void Topology::onTopologyUpdate(const aiConfig &config, aiPolyMeshSample& sample)
 {
     if (config.turn_quad_edges) {
         // todo
@@ -103,19 +103,71 @@ void Topology::onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& 
     refiner.points = { (float3*)sample.m_points_orig->get(), sample.m_points_orig->size() };
 
     if (sample.m_normals_orig.valid()) {
-        refiner.normals = { (float3*)sample.m_normals_orig.getVals()->get(), sample.m_normals_orig.getVals()->size() };
-        if (sample.m_normals_orig.isIndexed())
-            refiner.normal_indices = { (int*)sample.m_normals_orig.getIndices()->get(), sample.m_normals_orig.getIndices()->size() };
-        else if (refiner.uvs.size() == refiner.points.size())
-            refiner.normal_indices = refiner.indices;
+        IArray<abcV3> normals { sample.m_normals_orig.getVals()->get(), sample.m_normals_orig.getVals()->size() };
+        if (sample.m_normals_orig.isIndexed()) {
+            IArray<int> normal_indices { (int*)sample.m_normals_orig.getIndices()->get(), sample.m_normals_orig.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV3>(normals, normal_indices, sample.m_normals, m_remap_normals);
+        }
+        else if (normals.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV3>(normals, sample.m_normals, m_remap_normals);
+        }
+        else if (normals.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV3>(normals, refiner.indices, sample.m_normals, m_remap_normals);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
     }
 
     if (sample.m_uv0_orig.valid()) {
-        refiner.uvs = { (float2*)sample.m_uv0_orig.getVals()->get(), sample.m_uv0_orig.getVals()->size() };
-        if (sample.m_uv0_orig.isIndexed())
-            refiner.uv_indices = { (int*)sample.m_uv0_orig.getIndices()->get(), sample.m_uv0_orig.getIndices()->size() };
-        else if (refiner.uvs.size() == refiner.points.size())
-            refiner.uv_indices = refiner.indices;
+        IArray<abcV2> uv0 { sample.m_uv0_orig.getVals()->get(), sample.m_uv0_orig.getVals()->size() };
+        if (sample.m_uv0_orig.isIndexed()) {
+            IArray<int> uv0_indices{ (int*)sample.m_uv0_orig.getIndices()->get(), sample.m_uv0_orig.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(uv0, uv0_indices, sample.m_uv0, m_remap_uv0);
+        }
+        else if (uv0.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(uv0, sample.m_uv0, m_remap_uv0);
+        }
+        else if (uv0.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(uv0, refiner.indices, sample.m_uv0, m_remap_uv0);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    if (sample.m_uv1_orig.valid()) {
+        IArray<abcV2> uv1{ sample.m_uv1_orig.getVals()->get(), sample.m_uv1_orig.getVals()->size() };
+        if (sample.m_uv1_orig.isIndexed()) {
+            IArray<int> uv1_indices{ (int*)sample.m_uv1_orig.getIndices()->get(), sample.m_uv1_orig.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(uv1, uv1_indices, sample.m_uv1, m_remap_uv1);
+        }
+        else if (uv1.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(uv1, sample.m_uv1, m_remap_uv1);
+        }
+        else if (uv1.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(uv1, refiner.indices, sample.m_uv1, m_remap_uv1);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
+    }
+
+    if (sample.m_colors_orig.valid()) {
+        IArray<abcC4> colors{ sample.m_colors_orig.getVals()->get(), sample.m_colors_orig.getVals()->size() };
+        if (sample.m_colors_orig.isIndexed()) {
+            IArray<int> colors_indices{ (int*)sample.m_colors_orig.getIndices()->get(), sample.m_colors_orig.getIndices()->size() };
+            refiner.addIndexedAttribute<abcC4>(colors, colors_indices, sample.m_colors, m_remap_colors);
+        }
+        else if (colors.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcC4>(colors, sample.m_colors, m_remap_colors);
+        }
+        else if (colors.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcC4>(colors, refiner.indices, sample.m_colors, m_remap_colors);
+        }
+        else {
+            DebugLog("Invalid attribute");
+        }
     }
 
     // use face set index as material id
@@ -131,6 +183,8 @@ void Topology::onTopologyUpdate(const aiConfig &config, const aiPolyMeshSample& 
     refiner.refine();
     refiner.triangulate(config.swap_face_winding);
     refiner.genSubmeshes(m_material_ids);
+
+    m_remap_points.swap(refiner.new2old_points);
 
     m_offsets.clear();
     m_freshly_read_topology_data = true;
@@ -209,7 +263,7 @@ void aiPolyMeshSample::interpolateNormals()
 
     const auto *n1 = m_normals_orig.getVals()->get();
     const auto *n2 = m_normals_orig2.getVals()->get();
-    auto& remap = m_topology->m_refiner.new2old_normals;
+    auto& remap = m_topology->m_remap_normals;
     float w = (float)m_current_time_offset;
     float iw = 1.0f - w;
 
@@ -248,7 +302,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
         }
     }
     else if(m_normals_orig.valid()) {
-        auto& remap = m_topology->m_refiner.new2old_normals;
+        auto& remap = m_topology->m_remap_normals;
         auto n = remap.size();
         m_normals.reserve_discard(n);
         const auto *n1 = m_normals_orig.getVals()->get();
@@ -262,7 +316,7 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
 
     bool tangents_required = (m_uv0_orig.valid() && config.tangents_mode != aiTangentsMode::None);
     if (tangents_required) {
-        if (!m_normals.empty() && !m_uvs.empty()) {
+        if (!m_normals.empty() && !m_uv0.empty()) {
             bool tangents_mode_changed = (config.tangents_mode != m_config.tangents_mode);
             if (m_tangents.empty() || tangents_mode_changed || topology_changed) {
                 computeTangents(config);
@@ -401,7 +455,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 
     if (data.uvs) {
         if (copy_uvs) {
-            m_uvs.copy_to(data.uvs, split.num_vertices, split.offset_vertices);
+            m_uv0.copy_to(data.uvs, split.num_vertices, split.offset_vertices);
         }
         else {
             memset(data.uvs, 0, split.num_vertices * sizeof(abcV2));
@@ -640,35 +694,33 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         // update topology!
         topology.onTopologyUpdate(m_config, *sample);
         sample->m_points.swap((RawVector<abcV3>&)refiner.new_points);
-        sample->m_normals.swap((RawVector<abcV3>&)refiner.new_normals);
-        sample->m_uvs.swap((RawVector<abcV2>&)refiner.new_uvs);
     }
     else {
         // make remapped vertex buffer
         {
-            auto& remap = refiner.new2old_points;
+            auto& remap = topology.m_remap_points;
             sample->m_points.reserve_discard(remap.size());
             CopyWithIndices(sample->m_points.data(), sample->m_points_orig->get(), remap);
         }
         if (sample->m_normals_orig.valid()) {
-            auto& remap = refiner.new2old_normals;
+            auto& remap = topology.m_remap_normals;
             sample->m_normals.reserve_discard(remap.size());
             CopyWithIndices(sample->m_normals.data(), sample->m_normals_orig.getVals()->get(), remap);
         }
         if (sample->m_uv0_orig.valid()) {
-            auto& remap = refiner.new2old_uvs;
-            sample->m_uvs.reserve_discard(remap.size());
-            CopyWithIndices(sample->m_uvs.data(), sample->m_uv0_orig.getVals()->get(), remap);
+            auto& remap = topology.m_remap_uv0;
+            sample->m_uv0.reserve_discard(remap.size());
+            CopyWithIndices(sample->m_uv0.data(), sample->m_uv0_orig.getVals()->get(), remap);
         }
     }
     if (interpolate) {
         {
-            auto& remap = refiner.new2old_points;
+            auto& remap = topology.m_remap_points;
             sample->m_points2.reserve_discard(remap.size());
             CopyWithIndices(sample->m_points2.data(), sample->m_points_orig2->get(), remap);
         }
         if (sample->m_normals_orig2.valid()) {
-            auto& remap = refiner.new2old_normals;
+            auto& remap = topology.m_remap_normals;
             sample->m_normals2.reserve_discard(remap.size());
             CopyWithIndices(sample->m_normals2.data(), sample->m_normals_orig2.getVals()->get(), remap);
         }
@@ -683,7 +735,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
 
     bool compute_tangents_required = sample->computeTangentsRequired();
     if (compute_tangents_required) {
-        if (!sample->m_normals.empty() && !sample->m_uvs.empty()) {
+        if (!sample->m_normals.empty() && !sample->m_uv0.empty()) {
             sample->computeTangents(m_config);
         }
     }
