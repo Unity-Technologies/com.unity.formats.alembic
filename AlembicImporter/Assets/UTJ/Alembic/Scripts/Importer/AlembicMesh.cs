@@ -103,19 +103,20 @@ namespace UTJ.Alembic
             // nothing to do
         }
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
-            if (m_FreshSetup)
-            {
-                topologyChanged = true;
-                m_FreshSetup = false;
-            }
-
             var vertexData = default(AbcAPI.aiPolyMeshData);
 
             AbcAPI.aiPolyMeshPrepareSplits(sample);
             AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary);
             UpdateSplits(sampleSummary.splitCount);
+
+            bool topologyChanged = sampleSummary.topologyChanged;
+            if (m_FreshSetup)
+            {
+                topologyChanged = true;
+                m_FreshSetup = false;
+            }
 
             for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
             {

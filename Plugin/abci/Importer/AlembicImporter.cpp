@@ -174,14 +174,14 @@ abciAPI int aiSchemaGetNumSamples(aiSchemaBase* schema)
     return schema ? schema->getNumSamples() : 0;
 }
 
+abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
+{
+    return schema ? schema->isConstant() : true;
+}
+
 abciAPI aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {    
     return schema ? schema->updateSample(*ss) : 0;
-}
-
-abciAPI aiSampleBase* aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss)
-{
-    return schema ? schema->getSample(*ss) : 0;
 }
 
 abciAPI int aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss)

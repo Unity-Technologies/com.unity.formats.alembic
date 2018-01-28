@@ -8,7 +8,7 @@ namespace UTJ.Alembic
 
         // No config overrides on AlembicXForm
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
             AbcAPI.aiXFormGetData(sample, ref m_AbcData);
 

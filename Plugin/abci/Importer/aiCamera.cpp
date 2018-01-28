@@ -11,13 +11,9 @@ aiCameraSample::aiCameraSample(aiCamera *schema)
 {
 }
 
-void aiCameraSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
+void aiCameraSample::updateConfig(const aiConfig &config, bool &data_changed)
 {
-    DebugLog("aiCameraSample::updateConfig()");
-    
-    topology_changed = false;
     data_changed = (config.aspect_ratio != m_config.aspect_ratio);
-    
     m_config = config;
 }
 
@@ -86,7 +82,7 @@ aiCamera::Sample* aiCamera::newSample()
     return sample;
 }
 
-aiCamera::Sample* aiCamera::readSample(const uint64_t idx, bool &topology_changed)
+aiCamera::Sample* aiCamera::readSample(const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);

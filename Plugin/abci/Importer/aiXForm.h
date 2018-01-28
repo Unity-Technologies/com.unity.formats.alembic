@@ -6,7 +6,7 @@ using super = aiSampleBase;
 public:
     aiXFormSample(aiXForm *schema);
 
-    void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
+    void updateConfig(const aiConfig &config, bool &data_changed) override;
 
     void getData(aiXFormData &dst) const;
 
@@ -32,5 +32,5 @@ public:
     aiXForm(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topology_changed) override;
+    Sample* readSample(const uint64_t idx) override;
 };

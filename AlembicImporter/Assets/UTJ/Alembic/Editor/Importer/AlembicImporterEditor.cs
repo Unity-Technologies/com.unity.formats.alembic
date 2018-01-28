@@ -27,9 +27,6 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
             EditorGUILayout.Separator();
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.cacheSamples"));
-
-            EditorGUILayout.Separator();
             var abcStartTime = serializedObject.FindProperty("abcStartTime");
             var abcEndTime = serializedObject.FindProperty("abcEndTime");
             var abcFrameCount = serializedObject.FindProperty("abcFrameCount");

@@ -7,7 +7,7 @@ public:
     aiPointsSample(aiPoints *schema);
     virtual ~aiPointsSample();
 
-    void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
+    void updateConfig(const aiConfig &config, bool &data_changed) override;
     void getDataPointer(aiPointsData &data);
     void copyData(aiPointsData &data);
 
@@ -39,7 +39,7 @@ public:
     aiPoints(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topology_changed) override;
+    Sample* readSample(const uint64_t idx) override;
 
     const aiPointsSummary& getSummary() const;
 

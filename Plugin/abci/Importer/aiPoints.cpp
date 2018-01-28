@@ -17,11 +17,8 @@ aiPointsSample::~aiPointsSample()
 {
 }
 
-void aiPointsSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
+void aiPointsSample::updateConfig(const aiConfig &config, bool &data_changed)
 {
-    DebugLog("aiPointsSample::updateConfig()");
-
-    topology_changed = false;
     data_changed = (config.swap_handedness != m_config.swap_handedness);
     m_config = config;
 }
@@ -186,7 +183,7 @@ aiPoints::Sample* aiPoints::newSample()
     return sample;
 }
 
-aiPoints::Sample* aiPoints::readSample(const uint64_t idx, bool &topology_changed)
+aiPoints::Sample* aiPoints::readSample(const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     DebugLog("aiPoints::readSample(t=%d)", idx);

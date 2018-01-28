@@ -57,7 +57,7 @@ public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
     void clear();
 
-    void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
+    void updateConfig(const aiConfig &config, bool &data_changed) override;
     
     void getSummary(aiMeshSampleSummary &dst) const;
     void getSplitSummary(int split_index, aiMeshSplitSummary& dst);
@@ -94,6 +94,7 @@ public:
     RawVector<abcC4> m_colors;
 
     TopologyPtr m_topology;
+    bool m_topology_changed = false;
 };
 
 
@@ -111,7 +112,7 @@ public:
     void updateSummary();
 
     Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topology_changed) override;
+    Sample* readSample(const uint64_t idx) override;
     void onTopologyChange(aiPolyMeshSample& sample);
 
     const aiMeshSummaryInternal& getSummary() const;
@@ -124,6 +125,7 @@ private:
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
+    bool m_varying_topology = false;
 
 public:
     RawVector<abcV3> m_constant_points;

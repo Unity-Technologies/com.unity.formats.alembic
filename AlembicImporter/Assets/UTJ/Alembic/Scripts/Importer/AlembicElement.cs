@@ -20,10 +20,10 @@ namespace UTJ.Alembic
             _this.AbcGetConfig(ref config);
         }
 
-        static void SampleCallback(IntPtr __this, AbcAPI.aiSample sample, Bool topologyChanged)
+        static void SampleCallback(IntPtr __this, AbcAPI.aiSample sample)
         {
             var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
-            _this.AbcSampleUpdated(sample, topologyChanged);
+            _this.AbcSampleUpdated(sample);
         }
 
         public T GetOrAddComponent<T>() where T : Component
@@ -67,7 +67,7 @@ namespace UTJ.Alembic
         public abstract void AbcUpdateConfig();
 
         // Called by loading thread (not necessarily the main thread)
-        public abstract void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged);
+        public abstract void AbcSampleUpdated(AbcAPI.aiSample sample);
 
         // Called in main thread after update sample.
         public abstract void AbcUpdate();

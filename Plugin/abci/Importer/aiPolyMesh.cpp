@@ -145,14 +145,14 @@ void aiPolyMeshSample::computeTangents()
     }
 }
 
-void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
+void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &data_changed)
 {
-    topology_changed =
+    m_topology_changed =
         (config.swap_face_winding != m_config.swap_face_winding) ||
         (config.turn_quad_edges != m_config.turn_quad_edges);
 
     data_changed =
-        topology_changed ||
+        m_topology_changed ||
         (config.swap_handedness != m_config.swap_handedness) ||
         (config.normals_mode != m_config.normals_mode) || 
         (config.tangents_mode != m_config.tangents_mode);
@@ -169,6 +169,7 @@ void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
     dst.submesh_count = m_topology->getSubmeshCount();
     dst.vertex_count  = m_topology->getVertexCount();
     dst.index_count   = m_topology->getIndexCount();
+    dst.topology_changed = m_topology_changed;
 }
 
 void aiPolyMeshSample::getSplitSummary(int split_index, aiMeshSplitSummary & dst)
@@ -412,7 +413,7 @@ void aiPolyMesh::updateSummary()
     }
 
 
-    bool interpolate = m_config.interpolate_samples && !isConstant() && !hasVaryingTopology();
+    bool interpolate = m_config.interpolate_samples && !m_constant && !m_varying_topology;
     summary.interpolate_points = interpolate;
 
     // velocities
@@ -457,7 +458,7 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
 {
     Sample *sample = getSample();
     if (!sample) {
-        if (dontUseCache() || !m_varying_topology) {
+        if (!m_varying_topology) {
             if (!m_shared_topology)
                 m_shared_topology.reset(new aiMeshTopology());
             sample = new Sample(this, m_shared_topology);
@@ -474,7 +475,7 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     return sample;
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_changed)
+aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
@@ -487,7 +488,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     auto& summary = m_summary;
 
     sample.clear();
-    topology_changed = m_varying_topology;
+    bool topology_changed = m_varying_topology;
 
     // topology
     if (!topology.m_counts_sp || m_varying_topology) {
@@ -633,6 +634,8 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         if (summary.compute_tangents)
             sample.computeTangents();
     }
+
+    sample.m_topology_changed = topology_changed;
 
     return sample_ptr;
 }

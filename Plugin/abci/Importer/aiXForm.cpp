@@ -11,11 +11,8 @@ aiXFormSample::aiXFormSample(aiXForm *schema)
 {
 }
 
-void aiXFormSample::updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed)
+void aiXFormSample::updateConfig(const aiConfig &config, bool &data_changed)
 {
-    DebugLog("aiXFormSample::updateConfig()");
-    
-    topology_changed = false;
     data_changed = (config.swap_handedness != m_config.swap_handedness);
     m_config = config;
 }
@@ -89,7 +86,7 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topology_changed)
+aiXForm::Sample* aiXForm::readSample(const uint64_t idx)
 {
     DebugLog("aiXForm::readSample(t=%d)", idx);
     Sample *ret = newSample();

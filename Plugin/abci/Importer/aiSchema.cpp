@@ -54,17 +54,13 @@ void aiSchemaBase::setSampleCallback(aiSampleCallback cb, void *arg)
 void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
 {
     if (m_configCb)
-    {
         m_configCb(m_configCbArg, config);
-    }
 }
 
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topology_changed) const
+void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample) const
 {
     if (m_sampleCb)
-    {
-        m_sampleCb(m_sampleCbArg, sample, topology_changed);
-    }
+        m_sampleCb(m_sampleCbArg, sample);
 }
 
 void aiSchemaBase::readConfig()
@@ -79,6 +75,11 @@ void aiSchemaBase::readConfig()
     invokeConfigCallback(&m_config);
 
     DebugLog("  Override config: %s", ToString(m_config).c_str());
+}
+
+bool aiSchemaBase::isConstant() const
+{
+    return m_constant;
 }
 
 int aiSchemaBase::getNumProperties() const

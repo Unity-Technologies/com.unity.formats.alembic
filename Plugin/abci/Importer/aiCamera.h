@@ -6,7 +6,7 @@ using super = aiSampleBase;
 public:
     aiCameraSample(aiCamera *schema);
     
-    void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
+    void updateConfig(const aiConfig &config, bool &data_changed) override;
 
     void getData(aiCameraData &dst) const;
     
@@ -30,5 +30,5 @@ public:
     aiCamera(aiObject *obj);
 
     Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topology_changed) override;
+    Sample* readSample(const uint64_t idx) override;
 };

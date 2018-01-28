@@ -101,14 +101,6 @@ uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(
 aiObject*   aiObject::getChild(int i) { return m_children[i]; }
 aiObject*   aiObject::getParent() const { return m_parent; }
 
-void aiObject::cacheSamples(int64_t startIndex, int64_t endIndex)
-{
-    for (auto s : m_schemas)
-    {
-        s->cacheSamples(startIndex,endIndex);
-    }
-}
-
 aiXForm*    aiObject::getXForm() const { return m_xform.get(); }
 aiPolyMesh* aiObject::getPolyMesh() const { return m_polymesh.get(); }
 aiCamera*   aiObject::getCamera() const { return m_camera.get(); }

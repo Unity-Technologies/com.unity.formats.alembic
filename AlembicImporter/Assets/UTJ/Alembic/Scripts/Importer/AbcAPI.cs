@@ -72,7 +72,7 @@ namespace UTJ.Alembic
 
         public delegate void aiNodeEnumerator(aiObject obj, IntPtr userData);
         public delegate void aiConfigCallback(IntPtr _this, ref aiConfig config);
-        public delegate void aiSampleCallback(IntPtr _this, aiSample sample, Bool topologyChanged);
+        public delegate void aiSampleCallback(IntPtr _this, aiSample sample);
 
         public struct aiConfig
         {
@@ -82,7 +82,6 @@ namespace UTJ.Alembic
             public aiTangentsMode tangentsMode;
             public float aspectRatio;
             public Bool forceUpdate;
-            public Bool cacheSamples;
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
             public float vertexMotionScale;
@@ -96,7 +95,6 @@ namespace UTJ.Alembic
                 tangentsMode = aiTangentsMode.None;
                 aspectRatio = -1.0f;
                 forceUpdate = false;
-                cacheSamples = false;
                 interpolateSamples = true;
                 turnQuadEdges = false;
                 vertexMotionScale = 1.0f;
@@ -135,6 +133,7 @@ namespace UTJ.Alembic
             public int submeshCount;
             public int vertexCount;
             public int indexCount;
+            public Bool topologyChanged;
         }
 
         public struct aiMeshSplitSummary
@@ -277,6 +276,8 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
+        [DllImport("abci")] public static extern Bool       aiSchemaIsConstant(aiSchema schema);
+
         [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);
         [DllImport("abci")] public static extern void       aiXFormGetData(aiSample sample, ref aiXFormData data);
         [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);

@@ -157,12 +157,11 @@ namespace UTJ.Alembic
             m_Config.swapFaceWinding = settings.swapFaceWinding;
             m_Config.normalsMode = settings.normals;
             m_Config.tangentsMode = settings.tangents;
-            m_Config.cacheSamples = settings.cacheSamples;
             m_Config.turnQuadEdges = settings.turnQuadEdges;
             m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.cameraAspectRatio);
 #if UNITY_2017_3_OR_NEWER
             if (settings.use32BitsIndexBuffer)
-                m_Config.splitUnit = 0x7fffff;
+                m_Config.splitUnit = 0x7fffffff;
             else
 #endif
                 m_Config.splitUnit = 65000;

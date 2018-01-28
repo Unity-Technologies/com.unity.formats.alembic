@@ -339,9 +339,6 @@ bool aiContext::load(const char *inPath)
         DebugLog("Succeeded");
 
         aiLogger::Unindent(1);
-
-        if (m_config.cache_samples)
-            cacheAllSamples();
         return true;
     }
     else
@@ -381,27 +378,6 @@ void aiContext::destroyObject(aiObject *obj)
     }
     else {
         delete obj;
-    }
-}
-
-void aiContext::cacheAllSamples()
-{
-    const int64_t numFramesPerBlock = 10;
-    const int64_t lastBlockSize = m_numFrames % numFramesPerBlock;
-    const int64_t numBlocks = m_numFrames / numFramesPerBlock + (lastBlockSize == 0 ? 0 : 1);
-    eachNodes([this, numBlocks, numFramesPerBlock, lastBlockSize](aiObject *o)
-    {
-        o->cacheSamples(0, 1);
-    });
-    
-    for (int64_t i=0; i< numBlocks; i++)
-    {
-        const int64_t startIndex = (i == 0) ? 1 : i*numFramesPerBlock;
-        const int64_t endIndex = i*numFramesPerBlock + (i == numBlocks - 1 ? lastBlockSize : numFramesPerBlock);
-        eachNodes([this, startIndex, endIndex](aiObject *o)
-        {
-            o->cacheSamples(startIndex, endIndex);
-        });
     }
 }
 

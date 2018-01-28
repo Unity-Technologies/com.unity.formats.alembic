@@ -36,7 +36,7 @@ namespace UTJ.Alembic
         }
 
         // No config overrides on AlembicPoints
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
             // get points cloud component
             var cloud = AlembicTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??

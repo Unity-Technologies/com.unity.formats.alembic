@@ -57,7 +57,6 @@ public:
     float getStartTime() const;
     float getEndTime() const;
     int getFrameCount() const;
-    void cacheAllSamples();
     void updateSamples(float time);
 
     Abc::IArchive getArchive() const;

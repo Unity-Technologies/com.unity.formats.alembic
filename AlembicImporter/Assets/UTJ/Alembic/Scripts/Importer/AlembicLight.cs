@@ -21,7 +21,7 @@ namespace UTJ.Alembic
 
         // No config override
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
             // ToDo
         }
