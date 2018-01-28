@@ -35,6 +35,8 @@ excons.cache
 AlembicImporter/*.csproj
 AlembicImporter/*.sln
 AlembicImporter/Assets/UTJ/NormalPainter*
+AlembicImporter/Assets/UTJ/BlendShapeBuilder*
+AlembicImporter/Assets/UTJ/VertexTweaker*
 .vs/
 Library/
 Temp/

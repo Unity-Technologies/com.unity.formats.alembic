@@ -163,11 +163,12 @@ namespace UTJ.Alembic
             m_Config.turnQuadEdges = settings.turnQuadEdges;
             m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
 #if UNITY_2017_3_OR_NEWER
-            m_Config.use32BitsIndexBuffer = settings.use32BitsIndexBuffer;
-#else 
-            m_Config.use32BitsIndexBuffer = false;
+            if (settings.use32BitsIndexBuffer)
+                m_Config.splitUnit = 0x7fffff;
+            else
 #endif
-                AbcAPI.aiSetConfig(m_Context, ref m_Config);
+                m_Config.splitUnit = 65000;
+            AbcAPI.aiSetConfig(m_Context, ref m_Config);
 
             m_Loaded = AbcAPI.aiLoad(m_Context,Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
 

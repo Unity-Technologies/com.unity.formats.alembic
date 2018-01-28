@@ -9,9 +9,6 @@
 #include "../Foundation/aiMath.h"
 
 
-#define MAX_VERTEX_SPLIT_COUNT_16 65000
-#define MAX_VERTEX_SPLIT_COUNT_32 2000000000
-
 template<class Container>
 static inline int CalculateTriangulatedIndexCount(const Container& counts)
 {
@@ -329,7 +326,7 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     // find FaceSetSchema in children
     size_t num_children = m_obj->getAbcObject().getNumChildren();
     for (size_t i = 0; i < num_children; ++i) {
-        auto& child = m_obj->getAbcObject().getChild(i);
+        auto child = m_obj->getAbcObject().getChild(i);
         if (!child.valid())
             continue;
 
@@ -486,7 +483,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
 
     sample.clear();
     topology_changed = m_varying_topology;
-    topology.m_use_32bit_index_buffer = m_config.use_32bit_index_buffer;
 
     // topology
     if (!topology.m_counts_sp || m_varying_topology) {
@@ -647,7 +643,7 @@ void aiPolyMesh::onTopologyUpdate(aiPolyMeshSample & sample)
     }
 
     refiner.clear();
-    refiner.split_unit = topology.m_use_32bit_index_buffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
+    refiner.split_unit = m_config.split_unit;
     refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };

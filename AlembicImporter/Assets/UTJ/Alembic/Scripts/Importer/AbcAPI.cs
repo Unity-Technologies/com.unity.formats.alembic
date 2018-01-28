@@ -88,7 +88,7 @@ namespace UTJ.Alembic
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
             public float vertexMotionScale;
-            public Bool use32BitsIndexBuffer;
+            public int splitUnit;
 
             public void SetDefaults()
             {
@@ -104,7 +104,7 @@ namespace UTJ.Alembic
                 interpolateSamples = true;
                 turnQuadEdges = false;
                 vertexMotionScale = 1.0f;
-                use32BitsIndexBuffer = false;
+                splitUnit = 65000;
             }
         }
 

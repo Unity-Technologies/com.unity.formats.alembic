@@ -43,7 +43,6 @@ public:
 
     int m_triangulated_index_count = 0;
     bool m_freshly_read_topology_data = false;
-    bool m_use_32bit_index_buffer = false;
 };
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 

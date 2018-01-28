@@ -121,7 +121,7 @@ struct aiConfig
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     float vertex_motion_scale = 1.0f;
-    bool use_32bit_index_buffer = false;
+    int split_unit = 0x7fffffff;
 };
 
 struct aiTimeSamplingData

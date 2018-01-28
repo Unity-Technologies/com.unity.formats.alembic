@@ -221,7 +221,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
             sample->updateConfig(m_config, topology_changed, data_changed);
             if (!m_config.force_update && !data_changed && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
-                sample = 0;
+                sample = nullptr;
             }
         }
     }
@@ -246,7 +246,7 @@ aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
             }
             else if (!data_changed && !m_config.force_update && !m_config.interpolate_samples) {
                 DebugLog("  Data didn't change, nor update is forced");
-                sample = 0;
+                sample = nullptr;
             }
         }
     }
