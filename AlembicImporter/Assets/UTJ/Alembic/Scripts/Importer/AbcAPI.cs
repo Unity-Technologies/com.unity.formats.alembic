@@ -70,18 +70,13 @@ namespace UTJ.Alembic
             ArrayTypeEnd = Float4x4Array,
         };
 
-        public delegate void aiNodeEnumerator(aiObject obj, IntPtr userData);
-        public delegate void aiConfigCallback(IntPtr _this, ref aiConfig config);
-        public delegate void aiSampleCallback(IntPtr _this, aiSample sample);
-
         public struct aiConfig
         {
-            public Bool swapHandedness;
-            public Bool swapFaceWinding;
             public aiNormalsMode normalsMode;
             public aiTangentsMode tangentsMode;
             public float aspectRatio;
-            public Bool forceUpdate;
+            public Bool swapHandedness;
+            public Bool swapFaceWinding;
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
             public float vertexMotionScale;
@@ -94,7 +89,6 @@ namespace UTJ.Alembic
                 normalsMode = aiNormalsMode.ComputeIfMissing;
                 tangentsMode = aiTangentsMode.None;
                 aspectRatio = -1.0f;
-                forceUpdate = false;
                 interpolateSamples = true;
                 turnQuadEdges = false;
                 vertexMotionScale = 1.0f;
@@ -290,9 +284,10 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
         [DllImport("abci")] public static extern int        aiGetFrameCount(aiContext ctx);
         [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
+        [DllImport("abci")] public static extern int        aiGetNumChildren(aiObject obj);
+        [DllImport("abci")] public static extern aiObject   aiGetChild(aiObject obj, int i);
         [DllImport("abci")] public static extern void       aiSetEnabled(aiObject obj, Bool v);
         [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-        [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
         [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
         public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
         [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
@@ -320,120 +315,11 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
         [DllImport("abci")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData oData);
 
-        class ImportContext
+        public static void aiEnumerateChild(aiObject obj, Action<aiObject> act)
         {
-            public AlembicTreeNode alembicTreeNode;
-            public aiSampleSelector ss;
-            public bool createMissingNodes;
-        }
-
-        public static float GetAspectRatio(aiAspectRatioMode mode)
-        {
-            if (mode == aiAspectRatioMode.CameraAperture)
-            {
-                return 0.0f;
-            }
-            else if (mode == aiAspectRatioMode.CurrentResolution)
-            {
-                return (float) Screen.width / (float) Screen.height;
-            }
-            else
-            {
-    #if UNITY_EDITOR
-                return (float) PlayerSettings.defaultScreenWidth / (float) PlayerSettings.defaultScreenHeight;
-    #else
-                // fallback on current resoltution
-                return (float) Screen.width / (float) Screen.height;
-    #endif
-            }
-        }
-        
-        public static void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes=true)
-        {
-            var ic = new ImportContext
-            {
-                alembicTreeNode = node,
-                ss = aiTimeToSampleSelector(time),
-                createMissingNodes = createMissingNodes,
-            };
-
-            GCHandle hdl = GCHandle.Alloc(ic);
-            aiObject top = aiGetTopObject(ctx);
-            if (top.ptr != (IntPtr)0)
-            {
-                aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(hdl));
-            }
-        }
-
-        static void ImportEnumerator(aiObject obj, IntPtr userData)
-        {
-            var ic = GCHandle.FromIntPtr(userData).Target as ImportContext;
-            AlembicTreeNode treeNode = ic.alembicTreeNode;
-            AlembicTreeNode childTreeNode = null;
-
-            aiSchema schema = aiGetXForm(obj);
-            if (!schema) schema = aiGetPolyMesh(obj);
-            if (!schema) schema = aiGetCamera(obj);
-            if (!schema) schema = aiGetPoints(obj);
-
-            if (schema)
-            {
-                // Get child. create if needed and allowed.
-                string childName = aiGetName(obj);
-
-                // Find targetted child GameObj
-                GameObject childGO = null;
-
-                var childTransf = treeNode.linkedGameObj == null ? null : treeNode.linkedGameObj.transform.Find(childName);
-                if (childTransf == null)
-                {
-                    if (!ic.createMissingNodes)
-                    {
-                        aiSetEnabled(obj, false);
-                        return;
-                    }
-
-                    childGO = new GameObject { name = childName };
-                    var trans = childGO.GetComponent<Transform>();
-                    trans.parent = treeNode.linkedGameObj.transform;
-                    trans.localPosition = Vector3.zero;
-                    trans.localEulerAngles = Vector3.zero;
-                    trans.localScale = Vector3.one;
-                }
-                else
-                    childGO = childTransf.gameObject;
-
-                childTreeNode = new AlembicTreeNode() { linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
-                treeNode.children.Add(childTreeNode);
-
-                // Update
-                AlembicElement elem = null;
-
-                if (aiGetXForm(obj))
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
-                else if (aiGetPolyMesh(obj))
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                else if (aiGetCamera(obj))
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (aiGetPoints(obj))
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
-
-                if (elem != null)
-                {
-                    elem.AbcSetup(obj, schema);
-                    elem.AbcBeforeUpdateSamples();
-                    aiSchemaUpdateSample(schema, ref ic.ss);
-                    elem.AbcUpdate();
-                }
-            }
-            else
-            {
-                aiSetEnabled(obj, false);
-            }
-
-            ic.alembicTreeNode = childTreeNode;
-            aiEnumerateChild(obj, ImportEnumerator, userData);
-            ic.alembicTreeNode = treeNode;
+            int numChildren = aiGetNumChildren(obj);
+            for (int ci = 0; ci < numChildren; ++ci)
+                act.Invoke(aiGetChild(obj, ci));
         }
     }
 

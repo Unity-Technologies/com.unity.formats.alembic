@@ -59,7 +59,7 @@ enum class aiNormalsMode
 enum class aiTangentsMode
 {
     None,
-    Smooth,
+    Compute,
 };
 
 enum class aiTimeSamplingType
@@ -109,11 +109,11 @@ enum class aiPropertyType
 
 struct aiConfig
 {
-    bool swap_handedness = true;
-    bool swap_face_winding = false;
     aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
     aiTangentsMode tangents_mode = aiTangentsMode::None;
     float aspect_ratio = -1.0f;
+    bool swap_handedness = true;
+    bool swap_face_winding = false;
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     float vertex_motion_scale = 1.0f;
@@ -252,8 +252,6 @@ struct aiPropertyData
 };
 
 
-using aiNodeEnumerator = void (abciSTDCall*)(aiObject *node, void *user_data);
-
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
@@ -269,7 +267,6 @@ abciAPI int             aiGetFrameCount(aiContext* ctx);
 abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
 abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
 
-abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data);
 abciAPI const char*     aiGetNameS(aiObject* obj);
 abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);

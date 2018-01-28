@@ -20,7 +20,7 @@ std::string ToString(const aiConfig &v)
                 : "ignore")));
     oss << ", tangentsMode: " << (v.tangents_mode == aiTangentsMode::None
         ? "none"
-        : (v.tangents_mode == aiTangentsMode::Smooth
+        : (v.tangents_mode == aiTangentsMode::Compute
             ? "smooth"
             : "split"));
     oss << ", aspectRatio: " << v.aspect_ratio;

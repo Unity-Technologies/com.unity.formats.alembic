@@ -82,21 +82,6 @@ abciAPI void aiUpdateSamples(aiContext* ctx, float time)
         ctx->updateSamples(time);
 }
 
-abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data)
-{
-    if (!obj)
-        return;
-
-    try
-    {
-        obj->eachChildren([&](aiObject *child) { e(child, user_data); });
-    }
-    catch (Alembic::Util::Exception ex)
-    {
-        DebugError("aiEnumerateChlid: %s", ex.what());
-    }
-}
-
 abciAPI const char* aiGetNameS(aiObject* obj)
 {
     return obj ? obj->getName() : "";

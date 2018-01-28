@@ -445,7 +445,7 @@ void aiPolyMesh::updateSummary()
     }
 
     // tangents
-    if (m_config.tangents_mode == aiTangentsMode::Smooth && summary.has_normals && summary.has_uv0) {
+    if (m_config.tangents_mode == aiTangentsMode::Compute && summary.has_normals && summary.has_uv0) {
         summary.has_tangents = true;
         summary.compute_tangents = true;
         if (summary.constant_points && summary.constant_normals && summary.constant_uv0) {

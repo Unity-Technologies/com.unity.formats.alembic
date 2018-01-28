@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UTJ.Alembic
 {
@@ -111,7 +114,7 @@ namespace UTJ.Alembic
             m_config.normalsMode = settings.normals;
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
-            m_config.aspectRatio = AbcAPI.GetAspectRatio(settings.cameraAspectRatio);
+            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
 #if UNITY_2017_3_OR_NEWER
             m_config.splitUnit = 0x7fffffff;
 #else
@@ -123,7 +126,7 @@ namespace UTJ.Alembic
 
             if (m_loaded)
             {
-                AbcAPI.UpdateAbcTree(m_context, m_abcTreeRoot, m_time);
+                UpdateAbcTree(m_context, m_abcTreeRoot, m_time);
                 AlembicStream.s_streams.Add(this);
             }
             else
@@ -145,6 +148,124 @@ namespace UTJ.Alembic
             {
                 AbcAPI.aiDestroyContext(m_context);
                 m_context = default(AbcAPI.aiContext);
+            }
+        }
+
+
+
+        class ImportContext
+        {
+            public AlembicTreeNode alembicTreeNode;
+            public AbcAPI.aiSampleSelector ss;
+            public bool createMissingNodes;
+        }
+
+        ImportContext m_importContext;
+        void UpdateAbcTree(AbcAPI.aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes = true)
+        {
+            var top = AbcAPI.aiGetTopObject(ctx);
+            if (!top)
+                return;
+
+            m_importContext = new ImportContext
+            {
+                alembicTreeNode = node,
+                ss = AbcAPI.aiTimeToSampleSelector(time),
+                createMissingNodes = createMissingNodes,
+            };
+            AbcAPI.aiEnumerateChild(top, ImportCallback);
+            m_importContext = null;
+        }
+
+        void ImportCallback(AbcAPI.aiObject obj)
+        {
+            var ic = m_importContext;
+            AlembicTreeNode treeNode = ic.alembicTreeNode;
+            AlembicTreeNode childTreeNode = null;
+
+            AbcAPI.aiSchema schema = AbcAPI.aiGetXForm(obj);
+            if (!schema) schema = AbcAPI.aiGetPolyMesh(obj);
+            if (!schema) schema = AbcAPI.aiGetCamera(obj);
+            if (!schema) schema = AbcAPI.aiGetPoints(obj);
+
+            if (schema)
+            {
+                // Get child. create if needed and allowed.
+                string childName = AbcAPI.aiGetName(obj);
+
+                // Find targetted child GameObj
+                GameObject childGO = null;
+
+                var childTransf = treeNode.linkedGameObj == null ? null : treeNode.linkedGameObj.transform.Find(childName);
+                if (childTransf == null)
+                {
+                    if (!ic.createMissingNodes)
+                    {
+                        AbcAPI.aiSetEnabled(obj, false);
+                        return;
+                    }
+
+                    childGO = new GameObject { name = childName };
+                    var trans = childGO.GetComponent<Transform>();
+                    trans.parent = treeNode.linkedGameObj.transform;
+                    trans.localPosition = Vector3.zero;
+                    trans.localEulerAngles = Vector3.zero;
+                    trans.localScale = Vector3.one;
+                }
+                else
+                    childGO = childTransf.gameObject;
+
+                childTreeNode = new AlembicTreeNode() { linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
+                treeNode.children.Add(childTreeNode);
+
+                // Update
+                AlembicElement elem = null;
+
+                if (AbcAPI.aiGetXForm(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
+                else if (AbcAPI.aiGetPolyMesh(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (AbcAPI.aiGetCamera(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
+                else if (AbcAPI.aiGetPoints(obj))
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
+
+                if (elem != null)
+                {
+                    elem.AbcSetup(obj, schema);
+                    elem.AbcBeforeUpdateSamples();
+                    AbcAPI.aiSchemaUpdateSample(schema, ref ic.ss);
+                    elem.AbcUpdate();
+                }
+            }
+            else
+            {
+                AbcAPI.aiSetEnabled(obj, false);
+            }
+
+            ic.alembicTreeNode = childTreeNode;
+            AbcAPI.aiEnumerateChild(obj, ImportCallback);
+            ic.alembicTreeNode = treeNode;
+        }
+
+        public static float GetAspectRatio(AbcAPI.aiAspectRatioMode mode)
+        {
+            if (mode == AbcAPI.aiAspectRatioMode.CameraAperture)
+            {
+                return 0.0f;
+            }
+            else if (mode == AbcAPI.aiAspectRatioMode.CurrentResolution)
+            {
+                return (float)Screen.width / (float)Screen.height;
+            }
+            else
+            {
+#if UNITY_EDITOR
+                return (float)PlayerSettings.defaultScreenWidth / (float)PlayerSettings.defaultScreenHeight;
+#else
+                // fallback on current resoltution
+                return (float) Screen.width / (float) Screen.height;
+#endif
             }
         }
     }
