@@ -137,6 +137,25 @@ namespace UTJ.Alembic
         {
             public int splitCount;
             public int submeshCount;
+            public int vertexCount;
+            public int indexCount;
+        }
+
+        public struct aiMeshSplitSummary
+        {
+            public int submeshCount;
+            public int submeshOffset;
+            public int vertexCount;
+            public int vertexOffset;
+            public int indexCount;
+            public int indexOffset;
+        }
+
+        public struct aiSubmeshSummary
+        {
+            public int splitIndex;
+            public int submeshIndex;
+            public int indexCount;
         }
 
         public struct aiPolyMeshData
@@ -155,13 +174,6 @@ namespace UTJ.Alembic
 
             public Vector3 center;
             public Vector3 size;
-        }
-
-        public struct aiSubmeshSummary
-        {
-            public int splitIndex;
-            public int submeshIndex;
-            public int indexCount;
         }
 
         public struct aiSubmeshData
@@ -273,12 +285,11 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiXFormGetData(aiSample sample, ref aiXFormData data);
         [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
-        [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
-        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSplits(aiSample sample);
-        [DllImport("abci")] public static extern int        aiPolyMeshGetVertexCount(aiSample sample, int splitIndex);
-        [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
-        [DllImport("abci")] public static extern int        aiPolyMeshGetSubmeshCount(aiSample sample, int splitIndex);
+        [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary);
+        [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSummary(aiSample sample, int splitIndex, ref aiMeshSplitSummary dst);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSubmeshSummary(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshSummary smi);
+        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSplits(aiSample sample);
+        [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
         [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshData data);
         [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
         [DllImport("abci")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);

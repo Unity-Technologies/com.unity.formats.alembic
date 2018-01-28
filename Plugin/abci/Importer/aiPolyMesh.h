@@ -26,8 +26,9 @@ public:
     aiMeshTopology();
     void clear();
 
-    int getTriangulatedIndexCount() const;
     int getSplitCount() const;
+    int getVertexCount() const;
+    int getIndexCount() const;
 
     int getSplitVertexCount(int split_index) const;
     int getSubmeshCount() const;
@@ -41,7 +42,8 @@ public:
     MeshRefiner m_refiner;
     RawVector<int> m_remap_points, m_remap_normals, m_remap_uv0, m_remap_uv1, m_remap_colors;
 
-    int m_triangulated_index_count = 0;
+    int m_vertex_count = 0;
+    int m_index_count = 0; // triangulated
     bool m_freshly_read_topology_data = false;
 };
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
@@ -57,17 +59,15 @@ public:
 
     void updateConfig(const aiConfig &config, bool &topology_changed, bool &data_changed) override;
     
-    void getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
+    void getSummary(aiMeshSampleSummary &dst) const;
+    void getSplitSummary(int split_index, aiMeshSplitSummary& dst);
+    void getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary);
 
     void computeNormals();
     void computeTangents();
 
-    int getSplitVertexCount(int split_index) const;
     void prepareSplits();
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
-
-    int getSubmeshCount(int split_index) const;
-    void getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary);
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 
 public:
@@ -112,10 +112,10 @@ public:
 
     Sample* newSample();
     Sample* readSample(const uint64_t idx, bool &topology_changed) override;
-    void onTopologyUpdate(aiPolyMeshSample& sample);
+    void onTopologyChange(aiPolyMeshSample& sample);
 
     const aiMeshSummaryInternal& getSummary() const;
-    void getSummary(aiMeshSummary &summary) const;
+    void getSummary(aiMeshSummary &dst) const;
 
 private:
     aiMeshSummaryInternal m_summary;

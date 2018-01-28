@@ -176,6 +176,25 @@ struct aiMeshSampleSummary
 {
     int split_count = 0;
     int submesh_count = 0;
+    int vertex_count = 0;
+    int index_count = 0;
+};
+
+struct aiMeshSplitSummary
+{
+    int submesh_count = 0;
+    int submesh_offset = 0;
+    int vertex_count = 0;
+    int vertex_offset = 0;
+    int index_count = 0;
+    int index_offset = 0;
+};
+
+struct aiSubmeshSummary
+{
+    int split_index = 0;
+    int submesh_index = 0; // submesh index in split
+    int index_count = 0;
 };
 
 struct aiPolyMeshData
@@ -194,13 +213,6 @@ struct aiPolyMeshData
 
     abcV3 center = { 0.0f, 0.0f, 0.0f };
     abcV3 size = { 0.0f, 0.0f, 0.0f };
-};
-
-struct aiSubmeshSummary
-{
-    int split_index = 0;
-    int submesh_index = 0; // submesh index in split
-    int index_count = 0;
 };
 
 struct aiSubmeshData
@@ -282,13 +294,11 @@ abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool force_refresh=false);
-// all these below aiPolyMesh* are mesh splitting functions
-abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
-abciAPI int             aiPolyMeshGetVertexCount(aiPolyMeshSample* sample, int split_index);
-abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
-abciAPI int             aiPolyMeshGetSubmeshCount(aiPolyMeshSample* sample, int split_index);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary);
+abciAPI void            aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary);
+abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
+abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);

@@ -10,6 +10,7 @@ namespace UTJ.Alembic
     {
         public class Split
         {
+            public AbcAPI.aiMeshSplitSummary summary;
             public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
@@ -17,13 +18,12 @@ namespace UTJ.Alembic
             public PinnedList<Vector2> uv0Cache = new PinnedList<Vector2>();
             public PinnedList<Vector2> uv1Cache = new PinnedList<Vector2>();
             public PinnedList<Color> colorCache = new PinnedList<Color>();
+
             public List<Submesh> submeshes = new List<Submesh>();
             public Mesh mesh;
             public GameObject host;
-
-            public bool clear;
-            public int submeshCount;
-            public bool active;
+            public bool clear = true;
+            public bool active = true;
 
             public Vector3 center;
             public Vector3 size;
@@ -52,15 +52,7 @@ namespace UTJ.Alembic
                 {
                     if (i >= splits.Count)
                     {
-                        split = new Split
-                        {
-                            host = null,
-                            clear = true,
-                            submeshCount = 0,
-                            active = true,
-                        };
-
-                        splits.Add(split);
+                        splits.Add(new Split());
                     }
                     else
                     {
@@ -72,14 +64,9 @@ namespace UTJ.Alembic
             {
                 if (splits.Count == 0)
                 {
-                    split = new Split
-                    {
+                    split = new Split {
                         host = AlembicTreeNode.linkedGameObj,
-                        clear = true,
-                        submeshCount = 0,
-                        active = true,
                     };
-
                     splits.Add(split);
                 }
                 else
@@ -124,21 +111,21 @@ namespace UTJ.Alembic
                 m_FreshSetup = false;
             }
 
+            var vertexData = default(AbcAPI.aiPolyMeshData);
+
             AbcAPI.aiPolyMeshPrepareSplits(sample);
-            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary, topologyChanged);
-
-            AbcAPI.aiPolyMeshData vertexData = default(AbcAPI.aiPolyMeshData);
-
+            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary);
             UpdateSplits(sampleSummary.splitCount);
 
             for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
             {
                 var split = splits[spi];
+                AbcAPI.aiPolyMeshGetSplitSummary(sample, spi, ref split.summary);
 
                 split.clear = topologyChanged;
                 split.active = true;
 
-                int vertexCount = AbcAPI.aiPolyMeshGetVertexCount(sample, spi);
+                int vertexCount = split.summary.vertexCount;
 
                 split.pointCache.Resize(vertexCount);
                 vertexData.positions = split.pointCache;
@@ -187,17 +174,12 @@ namespace UTJ.Alembic
 
             if (topologyChanged)
             {
-                for (int s = 0; s < sampleSummary.splitCount; ++s)
-                {
-                    splits[s].submeshCount = AbcAPI.aiPolyMeshGetSubmeshCount(sample, s);
-                }
-
                 var submeshSummary = new AbcAPI.aiSubmeshSummary();
                 var submeshData = new AbcAPI.aiSubmeshData();
                 for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
                 {
                     var split = splits[spi];
-                    int submeshCount = split.submeshCount;
+                    int submeshCount = split.summary.submeshCount;
 
                     if (split.submeshes.Count > submeshCount)
                         split.submeshes.RemoveRange(submeshCount, split.submeshes.Count - submeshCount);
@@ -217,7 +199,7 @@ namespace UTJ.Alembic
             else
             {
                 for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
-                    for (int smi = 0; smi < splits[spi].submeshCount; ++smi)
+                    for (int smi = 0; smi < splits[spi].summary.submeshCount; ++smi)
                         splits[spi].submeshes[smi].update = false;
             }
 
@@ -292,26 +274,27 @@ namespace UTJ.Alembic
 
                     if (split.clear)
                     {
-                        split.mesh.subMeshCount = split.submeshCount;
+                        int submeshCount = split.summary.submeshCount;
+                        split.mesh.subMeshCount = submeshCount;
                         MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
                         Material[] currentMaterials = renderer.sharedMaterials;
                         int nmat = currentMaterials.Length;
-                        if (nmat != split.submeshCount)
+                        if (nmat != submeshCount)
                         {
-                            Material[] materials = new Material[split.submeshCount];
-                            int copyTo = (nmat < split.submeshCount ? nmat : split.submeshCount);
+                            Material[] materials = new Material[submeshCount];
+                            int copyTo = (nmat < submeshCount ? nmat : submeshCount);
                             for (int i=0; i<copyTo; ++i)
                             {
                                 materials[i] = currentMaterials[i];
                             }
-    #if UNITY_EDITOR
-                            for (int i=copyTo; i<split.submeshCount; ++i)
+#if UNITY_EDITOR
+                            for (int i = copyTo; i < submeshCount; ++i)
                             {
                                 Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
                                 material.name = "Material_" + Convert.ToString(i);
                                 materials[i] = material;
                             }
-    #endif
+#endif
                             renderer.sharedMaterials = materials;
                         }
                     }
@@ -328,7 +311,7 @@ namespace UTJ.Alembic
             for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
             {
                 var split = splits[spi];
-                for (int smi = 0; smi < splits[spi].submeshCount; ++smi)
+                for (int smi = 0; smi < splits[spi].summary.submeshCount; ++smi)
                 {
                     var submesh = split.submeshes[smi];
                     split.mesh.SetTriangles(submesh.indexCache.List, smi);

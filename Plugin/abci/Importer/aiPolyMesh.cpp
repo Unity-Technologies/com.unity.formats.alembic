@@ -51,17 +51,22 @@ void aiMeshTopology::clear()
     m_counts_sp.reset();
     m_material_ids.clear();
     m_refiner.clear();
-    m_triangulated_index_count = 0;
+    m_vertex_count = 0;
+    m_index_count = 0;
 }
 
-int aiMeshTopology::getTriangulatedIndexCount() const
-{
-    return m_triangulated_index_count;
-}
 
 int aiMeshTopology::getSplitCount() const
 {
     return (int)m_refiner.splits.size();
+}
+int aiMeshTopology::getVertexCount() const
+{
+    return m_vertex_count;
+}
+int aiMeshTopology::getIndexCount() const
+{
+    return m_index_count;
 }
 
 int aiMeshTopology::getSplitVertexCount(int split_index) const
@@ -158,19 +163,34 @@ void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topology_chang
     m_config = config;
 }
 
-void aiPolyMeshSample::getSummary(bool force_refresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const
+void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
 {
-    DebugLog("aiPolyMeshSample::getSummary(force_refresh=%s)", force_refresh ? "true" : "false");
-
-    summary.split_count = m_topology->getSplitCount();
-    summary.submesh_count = m_topology->getSubmeshCount();
+    dst.split_count   = m_topology->getSplitCount();
+    dst.submesh_count = m_topology->getSubmeshCount();
+    dst.vertex_count  = m_topology->getVertexCount();
+    dst.index_count   = m_topology->getIndexCount();
 }
 
-int aiPolyMeshSample::getSplitVertexCount(int split_index) const
+void aiPolyMeshSample::getSplitSummary(int split_index, aiMeshSplitSummary & dst)
 {
-    DebugLog("aiPolyMeshSample::getSplitVertexCount(split_index=%d)", split_index);
-    
-    return m_topology->getSplitVertexCount(split_index);
+    auto& src = m_topology->m_refiner.splits[split_index];
+    dst.submesh_count  = src.num_submeshes;
+    dst.submesh_offset = src.offset_submeshes;
+    dst.vertex_count   = src.num_vertices;
+    dst.vertex_offset  = src.offset_vertices;
+    dst.index_count    = src.num_indices;
+    dst.index_offset   = src.offset_indices;
+}
+
+void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary)
+{
+    auto& refiner = m_topology->m_refiner;
+    auto& split = refiner.splits[split_index];
+    auto& submesh = refiner.submeshes[split.offset_submeshes + submesh_index];
+
+    summary.split_index   = submesh.split_index;
+    summary.submesh_index = submesh.submesh_index;
+    summary.index_count   = submesh.num_indices;
 }
 
 void aiPolyMeshSample::prepareSplits()
@@ -272,22 +292,6 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     }
 
     m_topology->m_freshly_read_topology_data = false;
-}
-
-int aiPolyMeshSample::getSubmeshCount(int split_index) const
-{
-    return m_topology->getSubmeshCount(split_index);
-}
-
-void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary)
-{
-    auto& refiner = m_topology->m_refiner;
-    auto& split = refiner.splits[split_index];
-    auto& submesh = refiner.submeshes[split.offset_submeshes + submesh_index];
-
-    summary.split_index = submesh.split_index;
-    summary.submesh_index = submesh.submesh_index;
-    summary.index_count = submesh.num_indices;
 }
 
 void aiPolyMeshSample::fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const
@@ -487,7 +491,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     // topology
     if (!topology.m_counts_sp || m_varying_topology) {
         m_schema.getFaceCountsProperty().get(topology.m_counts_sp, ss);
-        topology.m_triangulated_index_count = CalculateTriangulatedIndexCount(*topology.m_counts_sp);
         topology_changed = true;
     }
     if (!topology.m_indices_sp || m_varying_topology) {
@@ -545,7 +548,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         bounds_param.get(sample.m_bounds, ss);
 
     if (topology_changed) {
-        onTopologyUpdate(sample);
+        onTopologyChange(sample);
     }
     else {
         // make remapped vertex buffer
@@ -631,7 +634,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
     return sample_ptr;
 }
 
-void aiPolyMesh::onTopologyUpdate(aiPolyMeshSample & sample)
+void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 {
     auto& config = m_config;
     auto& summary = m_summary;
@@ -738,6 +741,8 @@ void aiPolyMesh::onTopologyUpdate(aiPolyMeshSample & sample)
     refiner.triangulate(config.swap_face_winding);
     refiner.genSubmeshes(topology.m_material_ids);
 
+    topology.m_index_count = (int)refiner.new_indices_triangulated.size();
+    topology.m_vertex_count = (int)refiner.new_points.size();
 
     topology.m_remap_points.swap(refiner.new2old_points);
     if (summary.constant_points) {
@@ -762,7 +767,7 @@ void aiPolyMesh::onTopologyUpdate(aiPolyMeshSample & sample)
         GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_normals_ref = m_constant_normals;
     }
-    if (summary.constant_tangents) {
+    if (summary.constant_tangents && summary.compute_tangents) {
         const auto &indices = topology.m_refiner.new_indices_triangulated;
         m_constant_tangents.resize_zeroclear(m_constant_points.size());
         GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
@@ -778,7 +783,7 @@ const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
     return m_summary;
 }
 
-void aiPolyMesh::getSummary(aiMeshSummary &summary) const
+void aiPolyMesh::getSummary(aiMeshSummary &dst) const
 {
-    summary = m_summary;
+    dst = m_summary;
 }
