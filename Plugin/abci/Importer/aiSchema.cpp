@@ -77,10 +77,9 @@ void aiSchemaBase::readConfig()
     DebugLog("  Override config: %s", ToString(m_config).c_str());
 }
 
-bool aiSchemaBase::isConstant() const
-{
-    return m_constant;
-}
+bool aiSchemaBase::isConstant() const { return m_constant; }
+bool aiSchemaBase::isDirty() const { return m_dirty; }
+void aiSchemaBase::clean() { m_dirty = false; }
 
 int aiSchemaBase::getNumProperties() const
 {

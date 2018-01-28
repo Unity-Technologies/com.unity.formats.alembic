@@ -10,8 +10,7 @@ namespace UTJ.Alembic
         AbcAPI.aiCameraData m_abcData;
         bool m_lastIgnoreClippingPlanes = false;
 
-        public override void AbcSetup(AbcAPI.aiObject abcObj,
-                                      AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
 
@@ -21,13 +20,16 @@ namespace UTJ.Alembic
         public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
             AbcAPI.aiCameraGetData(sample, ref m_abcData);
-
-            AbcDirty();
         }
 
         public override void AbcUpdate()
         {
-            if (AbcIsDirty() || m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
+            if (!m_abcSchema.dirty)
+                return;
+
+            AbcSampleUpdated(m_abcSchema.sample);
+
+            if (m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
             {
                 abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;
                 m_camera.fieldOfView = m_abcData.fieldOfView;
@@ -39,9 +41,6 @@ namespace UTJ.Alembic
                 }
 
                 // no use for focusDistance and focalLength yet (could be usefull for DoF component)
-
-                AbcClean();
-
                 m_lastIgnoreClippingPlanes = m_ignoreClippingPlanes;
             }
         }

@@ -101,7 +101,6 @@ namespace UTJ.Alembic
         {
             var vertexData = default(AbcAPI.aiPolyMeshData);
 
-            AbcAPI.aiPolyMeshPrepareSplits(sample);
             AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary);
             UpdateSplits(m_sampleSummary.splitCount);
 
@@ -197,16 +196,14 @@ namespace UTJ.Alembic
                     for (int smi = 0; smi < m_splits[spi].summary.submeshCount; ++smi)
                         m_splits[spi].submeshes[smi].update = false;
             }
-
-            AbcDirty();
         }
 
         public override void AbcUpdate()
         {
-            if (!AbcIsDirty())
-            {
+            if (!m_abcSchema.dirty)
                 return;
-            }
+
+            AbcSampleUpdated(m_abcSchema.sample);
 
             bool useSubObjects = (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 
@@ -312,8 +309,6 @@ namespace UTJ.Alembic
                     split.mesh.SetTriangles(submesh.indexCache.List, smi);
                 }
             }
-            
-            AbcClean();
         }
 
         Mesh AddMeshComponents(GameObject gameObject)

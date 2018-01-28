@@ -14,6 +14,7 @@ public:
 
     // Note: data_changed MUST be true if topology_changed is
     virtual void updateConfig(const aiConfig &config, bool &data_changed) = 0;
+    virtual void doInterpolation() {}
 
 public:
     AbcCoreAbstract::chrono_t m_current_time_offset = 0;
@@ -40,11 +41,14 @@ public:
     void setSampleCallback(aiSampleCallback cb, void *arg);
     void invokeConfigCallback(aiConfig *config) const;
     void invokeSampleCallback(aiSampleBase *sample) const;
-    virtual aiSampleBase*   updateSample(const abcSampleSelector& ss) = 0;
+    virtual aiSampleBase* updateSample(const abcSampleSelector& ss) = 0;
+    virtual aiSampleBase* getSample() = 0;
 
     void readConfig();
 
     bool isConstant() const;
+    bool isDirty() const;
+    void clean();
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
     aiProperty* getPropertyByName(const std::string& name);
@@ -62,6 +66,7 @@ protected:
     void *m_sampleCbArg = nullptr;
     aiConfig m_config;
     bool m_constant = false;
+    bool m_dirty = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -111,14 +116,56 @@ public:
         return static_cast<int>(m_num_samples);
     }
 
-    aiSampleBase* updateSample(const abcSampleSelector& ss) override;
+    aiSampleBase* updateSample(const abcSampleSelector& ss) override
+    {
+        readConfig();
 
-protected:
-    inline Sample* getSample()
+        Sample* sample = nullptr;
+        int64_t sample_index = getSampleIndex(ss);
+
+        if (!m_the_sample || (!m_constant && sample_index != m_last_sample_index)) {
+            sample = readSample(sample_index);
+            if (sample != m_the_sample.get())
+                m_the_sample.reset(sample);
+        }
+        else {
+            bool data_changed = false;
+            sample = m_the_sample.get();
+            sample->updateConfig(m_config, data_changed);
+            if (!m_config.force_update && !data_changed && (m_constant || !m_config.interpolate_samples))
+            {
+                sample = nullptr;
+            }
+        }
+
+
+        m_last_sample_index = sample_index;
+
+        if (sample) {
+            if (m_config.interpolate_samples) {
+                auto interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
+                auto index_time = m_time_sampling->getSampleTime(sample_index);
+                sample->m_current_time_offset = std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
+                sample->m_current_time_interval = interval;
+                sample->doInterpolation();
+            }
+            invokeSampleCallback(sample);
+            m_dirty = true;
+        }
+        else {
+            m_dirty = false;
+        }
+        updateProperties(ss);
+
+        return sample;
+    }
+
+    Sample* getSample() override
     {
         return m_the_sample.get();
     }
 
+protected:
     virtual Sample* readSample(const uint64_t idx) = 0;
 
     AbcGeom::ICompoundProperty getAbcProperties() override
@@ -133,47 +180,3 @@ protected:
     int64_t m_num_samples = 0;
     int64_t m_last_sample_index = -1;
 };
-
-template<class Traits>
-aiSampleBase* aiTSchema<Traits>::updateSample(const abcSampleSelector& ss)
-{
-    DebugLog("aiTSchema::updateSample()");
-
-    readConfig();
-
-    Sample* sample = nullptr;
-    int64_t sample_index = getSampleIndex(ss);
-
-    // don't need to check m_constant here, sampleIndex wouldn't change
-    if (!m_the_sample || sample_index != m_last_sample_index) {
-        DebugLog("  Read sample");
-        sample = readSample(sample_index);
-        if (sample != m_the_sample.get())
-            m_the_sample.reset(sample);
-    }
-    else {
-        DebugLog("  Update sample");
-        bool data_changed = false;
-        sample = m_the_sample.get();
-        sample->updateConfig(m_config, data_changed);
-        if (!m_config.force_update && !data_changed && !m_config.interpolate_samples) {
-            DebugLog("  Data didn't change, nor update is forced");
-            sample = nullptr;
-        }
-    }
-
-    m_last_sample_index = sample_index;
-
-    if (sample) {
-        if (m_config.interpolate_samples) {
-            AbcCoreAbstract::chrono_t interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-            auto index_time = m_time_sampling->getSampleTime(sample_index);
-            sample->m_current_time_offset = std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
-            sample->m_current_time_interval = interval;
-        }
-        invokeSampleCallback(sample);
-    }
-    updateProperties(ss);
-
-    return sample;
-}

@@ -212,6 +212,25 @@ namespace UTJ.Alembic
         {
             public IntPtr ptr;
             public static implicit operator bool(aiSchema v) { return v.ptr != IntPtr.Zero; }
+
+            public bool isConstant
+            {
+                get { return aiSchemaIsConstant(this); }
+            }
+
+            public bool dirty
+            {
+                get { return aiSchemaIsDirty(this); }
+            }
+
+            public aiSample sample
+            {
+                get { return aiSchemaGetSample(this); }
+            }
+
+            [DllImport("abci")] public static extern Bool aiSchemaIsConstant(aiSchema schema);
+            [DllImport("abci")] public static extern Bool aiSchemaIsDirty(aiSchema schema);
+            [DllImport("abci")] public static extern aiSample aiSchemaGetSample(aiSchema schema);
         }
 
         public struct aiProperty
@@ -276,7 +295,6 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
-        [DllImport("abci")] public static extern Bool       aiSchemaIsConstant(aiSchema schema);
 
         [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);
         [DllImport("abci")] public static extern void       aiXFormGetData(aiSample sample, ref aiXFormData data);
@@ -285,7 +303,6 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary);
         [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSummary(aiSample sample, int splitIndex, ref aiMeshSplitSummary dst);
         [DllImport("abci")] public static extern void       aiPolyMeshGetSubmeshSummary(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshSummary smi);
-        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSplits(aiSample sample);
         [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
         [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, int splitIndex, int submeshIndex, ref aiSubmeshData data);
         [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
@@ -403,7 +420,7 @@ namespace UTJ.Alembic
                 if (elem != null)
                 {
                     elem.AbcSetup(obj, schema);
-                    elem.AbcUpdateConfig();
+                    elem.AbcBeforeUpdateSamples();
                     aiSchemaUpdateSample(schema, ref ic.ss);
                     elem.AbcUpdate();
                 }

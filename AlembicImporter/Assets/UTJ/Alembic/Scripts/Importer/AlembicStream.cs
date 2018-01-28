@@ -46,7 +46,7 @@ namespace UTJ.Alembic
             } );
         }
 
-        public AlembicTreeNode m_alembicTreeRoot;
+        public AlembicTreeNode m_abcTreeRoot;
         private AlembicStreamDescriptor m_streamDesc;
         private AbcAPI.aiConfig m_config;
         private AbcAPI.aiContext m_context;
@@ -54,101 +54,56 @@ namespace UTJ.Alembic
         private bool m_loaded;
         private bool m_streamInterupted;
 
+        public bool abcIsValid { get { return m_context; } }
+        public float abcStartTime { get { return AbcAPI.aiGetStartTime(m_context); } }
+        public int abcFrameCount { get { return AbcAPI.aiGetFrameCount(m_context); } }
+        public float abcEndTime { get { return AbcAPI.aiGetEndTime(m_context); } }
+
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
-            m_alembicTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
+            m_abcTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
             m_streamDesc = streamDesc;
         }
 
-        public bool AbcIsValid()
+        void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
-            return (m_context.ptr != (IntPtr)0);
+            foreach (var obj in node.alembicObjects)
+                obj.Value.AbcBeforeUpdateSamples();
+            foreach (var child in node.children)
+                AbcBeforeUpdateSamples(child);
         }
 
-        public void AbcUpdateConfigElements(AlembicTreeNode node = null)
+        void AbcAfterUpdateSamples(AlembicTreeNode node)
         {
-            if (node == null)
-                node = m_alembicTreeRoot;
-            using (var o = node.alembicObjects.GetEnumerator())
-            {
-                while (o.MoveNext())
-                {
-                    o.Current.Value.AbcUpdateConfig();
-                }
-            }
-            using (var c = node.children.GetEnumerator())
-            {
-                while (c.MoveNext())
-                {
-                    AbcUpdateConfigElements(c.Current);
-                }
-            }
-        }
-
-        public void AbcUpdateElements( AlembicTreeNode node = null )
-        {
-            if (node == null)
-                node = m_alembicTreeRoot;
-            using (var o = node.alembicObjects.GetEnumerator())
-            {
-                while (o.MoveNext())
-                {
-                    o.Current.Value.AbcUpdate();
-                }
-            }
-            using (var c = node.children.GetEnumerator())
-            {
-                while (c.MoveNext())
-                {
-                    AbcUpdateElements(c.Current);
-                }
-            }
-        }
-
-        public float abcStartTime
-        {
-            get {
-                return AbcIsValid() ? AbcAPI.aiGetStartTime(m_context) : 0;
-            }
-        }
-        public int abcFrameCount
-        {
-            get {
-                return AbcIsValid() ? AbcAPI.aiGetFrameCount(m_context) : 0;
-            }
-        }
-
-        public float abcEndTime
-        {
-            get
-            {
-                return AbcIsValid() ? AbcAPI.aiGetEndTime(m_context) : 0;
-            }
+            foreach (var obj in node.alembicObjects)
+                obj.Value.AbcUpdate();
+            foreach (var child in node.children)
+                AbcAfterUpdateSamples(child);
         }
 
         // returns false if the context needs to be recovered.
         public bool AbcUpdate(float time, float motionScale, bool interpolateSamples)
         {
             if (m_streamInterupted) return true;
-            if (!AbcIsValid() || !m_loaded) return false;
+            if (!abcIsValid || !m_loaded) return false;
 
             m_time = time;
             m_config.interpolateSamples = interpolateSamples;
             m_config.vertexMotionScale = motionScale;
             AbcAPI.aiSetConfig(m_context, ref m_config);
-            AbcUpdateConfigElements();
+            AbcBeforeUpdateSamples(m_abcTreeRoot);
 
             AbcAPI.aiUpdateSamples(m_context, m_time);
-            AbcUpdateElements();
-
+            AbcAfterUpdateSamples(m_abcTreeRoot);
             return true;
         }
+
    
         public void AbcLoad()
         {
             m_time = 0.0f;
-            m_context = AbcAPI.aiCreateContext(m_alembicTreeRoot.linkedGameObj.GetInstanceID());
+            m_context = AbcAPI.aiCreateContext(m_abcTreeRoot.linkedGameObj.GetInstanceID());
 
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
@@ -168,7 +123,7 @@ namespace UTJ.Alembic
 
             if (m_loaded)
             {
-                AbcAPI.UpdateAbcTree(m_context, m_alembicTreeRoot, m_time);
+                AbcAPI.UpdateAbcTree(m_context, m_abcTreeRoot, m_time);
                 AlembicStream.s_streams.Add(this);
             }
             else
@@ -180,13 +135,13 @@ namespace UTJ.Alembic
         public void Dispose()
         {
             AlembicStream.s_streams.Remove(this);
-            if (m_alembicTreeRoot != null)
+            if (m_abcTreeRoot != null)
             {
-                m_alembicTreeRoot.Dispose();
-                m_alembicTreeRoot = null;
+                m_abcTreeRoot.Dispose();
+                m_abcTreeRoot = null;
             }
 
-            if (AbcIsValid())
+            if (abcIsValid)
             {
                 AbcAPI.aiDestroyContext(m_context);
                 m_context = default(AbcAPI.aiContext);

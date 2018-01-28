@@ -281,7 +281,9 @@ abciAPI void            aiSetEnabled(aiObject* obj, bool v);
 abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
 abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
+abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
+abciAPI bool            aiSchemaIsDirty(aiSchemaBase* schema);
 
 abciAPI aiXForm*        aiGetXForm(aiObject* obj);
 abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
@@ -291,7 +293,6 @@ abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* 
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst);
 abciAPI void            aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* dst);
-abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst);
 abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* dst);
 

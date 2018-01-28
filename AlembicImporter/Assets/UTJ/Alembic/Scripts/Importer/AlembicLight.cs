@@ -23,12 +23,12 @@ namespace UTJ.Alembic
 
         public override void AbcUpdate()
         {
-            if (AbcIsDirty())
-            {
-                // ToDo
+            if (!m_abcSchema.dirty)
+                return;
 
-                AbcClean();
-            }
+            AbcSampleUpdated(m_abcSchema.sample);
+
+            // ToDo
         }
     }
 }

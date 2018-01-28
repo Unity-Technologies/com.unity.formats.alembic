@@ -125,10 +125,10 @@ namespace UTJ.Alembic
                 streamPlayer.m_endFrame = endFrame;
 
                 AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(ctx, abcStream.m_alembicTreeRoot, streamDescriptor);
+                GenerateSubAssets(ctx, abcStream.m_abcTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
-           
+
 #if UNITY_2017_3_OR_NEWER
                 ctx.AddObjectToAsset(go.name, go);
                 ctx.SetMainObject(go);

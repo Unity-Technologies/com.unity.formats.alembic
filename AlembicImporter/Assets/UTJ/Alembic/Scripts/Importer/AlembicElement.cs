@@ -19,12 +19,6 @@ namespace UTJ.Alembic
             _this.AbcGetConfig(ref config);
         }
 
-        static void SampleCallback(IntPtr __this, AbcAPI.aiSample sample)
-        {
-            var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
-            _this.AbcSampleUpdated(sample);
-        }
-
         public T GetOrAddComponent<T>() where T : Component
         {
             var c = abcTreeNode.linkedGameObj.GetComponent<T>();
@@ -48,7 +42,6 @@ namespace UTJ.Alembic
 
             IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
             AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
-            AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
         }
 
         // Called by loading thread (not necessarily the main thread)
@@ -58,29 +51,13 @@ namespace UTJ.Alembic
         }
 
         // Called in main thread before update sample. 
-        public virtual void AbcUpdateConfig() { }
+        public virtual void AbcBeforeUpdateSamples() { }
 
         // Called by loading thread (not necessarily the main thread)
         public abstract void AbcSampleUpdated(AbcAPI.aiSample sample);
 
         // Called in main thread after update sample.
         public abstract void AbcUpdate();
-
-        protected void AbcDirty()
-        {
-            m_pendingUpdate = true;
-        }
-
-        protected void AbcClean()
-        {
-            m_pendingUpdate = false;
-        }
-
-        protected bool AbcIsDirty()
-        {
-            return m_pendingUpdate;
-        }
-
 
     }
 }

@@ -41,9 +41,7 @@ abciAPI aiContext* aiCreateContext(int uid)
 abciAPI void aiDestroyContext(aiContext* ctx)
 {
     if (ctx)
-    {
         aiContextManager::destroyContext(ctx->getUid());
-    }
 }
 
 
@@ -55,9 +53,7 @@ abciAPI bool aiLoad(aiContext* ctx, const char *path)
 abciAPI void aiSetConfig(aiContext* ctx, const aiConfig* conf)
 {
     if (ctx)
-    {
         ctx->setConfig(*conf);
-    }
 }
 
 abciAPI float aiGetStartTime(aiContext* ctx)
@@ -88,7 +84,8 @@ abciAPI void aiUpdateSamples(aiContext* ctx, float time)
 
 abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data)
 {
-    if (obj == nullptr) { return; }
+    if (!obj)
+        return;
 
     try
     {
@@ -96,7 +93,7 @@ abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data
     }
     catch (Alembic::Util::Exception ex)
     {
-        DebugLog("aiEnumerateChlid: %s", ex.what());
+        DebugError("aiEnumerateChlid: %s", ex.what());
     }
 }
 
@@ -154,12 +151,23 @@ abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
 
 abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
 {
-    return schema ? schema->isConstant() : true;
+    return schema ? schema->isConstant() : false;
 }
+
+abciAPI bool aiSchemaIsDirty(aiSchemaBase* schema)
+{
+    return schema ? schema->isDirty() : false;
+}
+
 
 abciAPI aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {    
     return schema ? schema->updateSample(*ss) : 0;
+}
+
+abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
+{
+    return schema ? schema->getSample() : nullptr;
 }
 
 
@@ -203,12 +211,6 @@ abciAPI void aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_ind
 {
     if (sample)
         sample->getSubmeshSummary(split_index, submesh_index, *dst);
-}
-
-abciAPI void aiPolyMeshPrepareSplits(aiPolyMeshSample * sample)
-{
-    if (sample)
-        sample->prepareSplits();
 }
 
 abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst)

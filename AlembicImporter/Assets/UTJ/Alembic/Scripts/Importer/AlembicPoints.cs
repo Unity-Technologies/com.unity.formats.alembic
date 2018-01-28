@@ -22,7 +22,7 @@ namespace UTJ.Alembic
             }
         }
 
-        public override void AbcUpdateConfig()
+        public override void AbcBeforeUpdateSamples()
         {
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             if(cloud != null)
@@ -41,7 +41,6 @@ namespace UTJ.Alembic
             // get points cloud component
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
                         abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
-
 
             if (cloud.abcPoints.Count == 0)
             {
@@ -67,18 +66,14 @@ namespace UTJ.Alembic
             cloud.m_boundsCenter = m_abcData.boundsCenter;
             cloud.m_boundsExtents = m_abcData.boundsExtents;
             cloud.m_count = m_abcData.count;
-
-            AbcDirty();
         }
 
         public override void AbcUpdate()
         {
-            if (AbcIsDirty())
-            {
-                // nothing to do in this component.
-                AbcClean();
-            }
-        }
+            if (!m_abcSchema.dirty)
+                return;
 
+            AbcSampleUpdated(m_abcSchema.sample);
+        }
     }
 }

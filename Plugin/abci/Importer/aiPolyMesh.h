@@ -66,7 +66,7 @@ public:
     void computeNormals();
     void computeTangents();
 
-    void prepareSplits();
+    void doInterpolation() override;
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 

@@ -194,7 +194,7 @@ void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiS
     summary.index_count   = submesh.index_count;
 }
 
-void aiPolyMeshSample::prepareSplits()
+void aiPolyMeshSample::doInterpolation()
 {
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();

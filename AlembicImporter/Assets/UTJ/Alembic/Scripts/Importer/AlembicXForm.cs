@@ -8,36 +8,34 @@ namespace UTJ.Alembic
 
         // No config overrides on AlembicXForm
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
-        {
-            AbcAPI.aiXFormGetData(sample, ref m_abcData);
-
-            AbcDirty();
-        }
-
-        public override void AbcUpdateConfig()
+        public override void AbcBeforeUpdateSamples()
         {
             // nothing to do
         }
 
+        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        {
+            AbcAPI.aiXFormGetData(sample, ref m_abcData);
+        }
+
         public override void AbcUpdate()
         {
-            if (AbcIsDirty())
-            {
-                if (m_abcData.inherits)
-                {
-                    abcTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
-                    abcTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
-                    abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
-                }
-                else
-                {
-                    abcTreeNode.linkedGameObj.transform.position = m_abcData.translation;
-                    abcTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
-                    abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
-                }
+            if (!m_abcSchema.dirty)
+                return;
 
-                AbcClean();
+            AbcSampleUpdated(m_abcSchema.sample);
+
+            if (m_abcData.inherits)
+            {
+                abcTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
+                abcTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
+                abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+            }
+            else
+            {
+                abcTreeNode.linkedGameObj.transform.position = m_abcData.translation;
+                abcTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
+                abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
             }
         }
     }
