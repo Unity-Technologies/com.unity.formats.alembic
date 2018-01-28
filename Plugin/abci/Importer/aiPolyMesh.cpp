@@ -190,7 +190,7 @@ void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiS
 
     summary.split_index   = submesh.split_index;
     summary.submesh_index = submesh.submesh_index;
-    summary.index_count   = submesh.num_indices;
+    summary.index_count   = submesh.index_count;
 }
 
 void aiPolyMeshSample::prepareSplits()
@@ -302,7 +302,7 @@ void aiPolyMeshSample::fillSubmeshIndices(int split_index, int submesh_index, ai
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
     auto& submesh = refiner.submeshes[split.submesh_offset + submesh_index];
-    refiner.new_indices_submeshes.copy_to(data.indices, submesh.num_indices, submesh.offset_indices);
+    refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
 }
 
 // ---
@@ -727,19 +727,27 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
     }
 
-    // use face set index as material id
-    topology.m_material_ids.resize(refiner.counts.size(), -1);
-    for (size_t fsi = 0; fsi < sample.m_facesets.size(); ++fsi) {
-        auto& faces = *sample.m_facesets[fsi].getFaces();
-        size_t num_faces = faces.size();
-        for (size_t fi = 0; fi < num_faces; ++fi) {
-            topology.m_material_ids[faces[fi]] = (int)fsi;
-        }
-    }
 
     refiner.refine();
     refiner.triangulate(config.swap_face_winding);
-    refiner.genSubmeshes(topology.m_material_ids);
+
+    // generate submeshes
+    if (!sample.m_facesets.empty()) {
+        // use face set index as material id
+        topology.m_material_ids.resize(refiner.counts.size(), -1);
+        for (size_t fsi = 0; fsi < sample.m_facesets.size(); ++fsi) {
+            auto& faces = *sample.m_facesets[fsi].getFaces();
+            size_t num_faces = faces.size();
+            for (size_t fi = 0; fi < num_faces; ++fi) {
+                topology.m_material_ids[faces[fi]] = (int)fsi;
+            }
+        }
+        refiner.genSubmeshes(topology.m_material_ids);
+    }
+    else {
+        // no facesets present. one split == one submesh
+        refiner.genSubmeshes();
+    }
 
     topology.m_index_count = (int)refiner.new_indices_triangulated.size();
     topology.m_vertex_count = (int)refiner.new_points.size();

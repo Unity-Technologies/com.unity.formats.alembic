@@ -74,8 +74,8 @@ struct MeshRefiner
     {
         int split_index = 0;
         int submesh_index = 0; // submesh index in split
-        int offset_indices = 0;
-        int num_indices = 0; // triangulated
+        int index_count = 0; // triangulated
+        int index_offset = 0;
         int material_id = 0;
         int* indices_write = nullptr;
     };
@@ -134,9 +134,12 @@ struct MeshRefiner
     void refine();
     void triangulate(bool swap_faces);
     void genSubmeshes(IArray<int> material_ids);
+    void genSubmeshes();
     void clear();
 
 private:
+    void setupSubmeshes();
+
     class IAttribute
     {
     public:
