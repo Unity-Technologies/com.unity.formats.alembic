@@ -76,21 +76,21 @@ struct MeshRefiner
         int submesh_index = 0; // submesh index in split
         int offset_indices = 0;
         int num_indices = 0; // triangulated
-        int materialID = 0;
+        int material_id = 0;
         int* indices_write = nullptr;
     };
 
     struct Split
     {
-        int offset_vertices = 0;
-        int offset_indices = 0;
-        int offset_faces = 0;
-        int offset_submeshes = 0;
-        int num_vertices = 0;
-        int num_indices = 0;
-        int num_faces = 0;
-        int num_indices_triangulated = 0;
-        int num_submeshes = 0;
+        int submesh_count = 0;
+        int submesh_offset = 0;
+        int vertex_count = 0;
+        int vertex_offset = 0;
+        int index_count = 0;
+        int index_offset = 0;
+        int face_count = 0;
+        int face_offset = 0;
+        int triangulated_index_count = 0;
     };
 
     // inputs
@@ -133,7 +133,7 @@ struct MeshRefiner
 
     void refine();
     void triangulate(bool swap_faces);
-    void genSubmeshes(IArray<int> materialIDs);
+    void genSubmeshes(IArray<int> material_ids);
     void clear();
 
 private:

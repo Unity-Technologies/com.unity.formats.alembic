@@ -71,7 +71,7 @@ int aiMeshTopology::getIndexCount() const
 
 int aiMeshTopology::getSplitVertexCount(int split_index) const
 {
-    return (int)m_refiner.splits[split_index].num_vertices;
+    return (int)m_refiner.splits[split_index].vertex_count;
 }
 
 int aiMeshTopology::getSubmeshCount() const
@@ -81,7 +81,7 @@ int aiMeshTopology::getSubmeshCount() const
 
 int aiMeshTopology::getSubmeshCount(int split_index) const
 {
-    return (int)m_refiner.splits[split_index].num_submeshes;
+    return (int)m_refiner.splits[split_index].submesh_count;
 }
 
 aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
@@ -174,19 +174,19 @@ void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
 void aiPolyMeshSample::getSplitSummary(int split_index, aiMeshSplitSummary & dst)
 {
     auto& src = m_topology->m_refiner.splits[split_index];
-    dst.submesh_count  = src.num_submeshes;
-    dst.submesh_offset = src.offset_submeshes;
-    dst.vertex_count   = src.num_vertices;
-    dst.vertex_offset  = src.offset_vertices;
-    dst.index_count    = src.num_indices;
-    dst.index_offset   = src.offset_indices;
+    dst.submesh_count  = src.submesh_count;
+    dst.submesh_offset = src.submesh_offset;
+    dst.vertex_count   = src.vertex_count;
+    dst.vertex_offset  = src.vertex_offset;
+    dst.index_count    = src.index_count;
+    dst.index_offset   = src.index_offset;
 }
 
 void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary)
 {
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
-    auto& submesh = refiner.submeshes[split.offset_submeshes + submesh_index];
+    auto& submesh = refiner.submeshes[split.submesh_offset + submesh_index];
 
     summary.split_index   = submesh.split_index;
     summary.submesh_index = submesh.submesh_index;
@@ -219,74 +219,74 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();
     auto& splits = m_topology->m_refiner.splits;
-    if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].num_vertices == 0)
+    if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].vertex_count == 0)
         return;
 
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
 
     if (data.points) {
-        m_points_ref.copy_to(data.points, split.num_vertices, split.offset_vertices);
+        m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
     }
     if (data.velocities) {
         if (summary.compute_velocities) {
             GenerateVelocities(data.velocities,
-                m_points.data(), m_points2.data(), split.num_vertices, split.offset_vertices,
+                m_points.data(), m_points2.data(), split.vertex_count, split.vertex_offset,
                 (float)m_current_time_interval, m_config.vertex_motion_scale);
         }
         else if (!m_velocities.empty()) {
-            m_velocities_ref.copy_to(data.velocities, split.num_vertices, split.offset_vertices);
+            m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
         }
     }
 
     if (data.normals) {
         if (summary.has_normals) {
             if (summary.interpolate_normals) {
-                Lerp(data.normals, m_normals.data(), m_normals2.data(), split.num_vertices, split.offset_vertices, (float)m_current_time_offset);
-                Normalize(data.normals, split.num_vertices);
+                Lerp(data.normals, m_normals.data(), m_normals2.data(), split.vertex_count, split.vertex_offset, (float)m_current_time_offset);
+                Normalize(data.normals, split.vertex_count);
             }
             else {
-                m_normals_ref.copy_to(data.normals, split.num_vertices, split.offset_vertices);
+                m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
             }
         }
         else {
-            memset(data.normals, 0, split.num_vertices * sizeof(abcV3));
+            memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
         }
     }
 
     if (data.tangents) {
         if(summary.has_tangents) {
-            m_tangents_ref.copy_to(data.tangents, split.num_vertices, split.offset_vertices);
+            m_tangents_ref.copy_to(data.tangents, split.vertex_count, split.vertex_offset);
         }
         else {
-            memset(data.tangents, 0, split.num_vertices * sizeof(abcV4));
+            memset(data.tangents, 0, split.vertex_count * sizeof(abcV4));
         }
     }
 
     if (data.uv0) {
         if (!m_uv0_ref.empty())
-            m_uv0_ref.copy_to(data.uv0, split.num_vertices, split.offset_vertices);
+            m_uv0_ref.copy_to(data.uv0, split.vertex_count, split.vertex_offset);
         else
-            memset(data.uv0, 0, split.num_vertices * sizeof(abcV2));
+            memset(data.uv0, 0, split.vertex_count * sizeof(abcV2));
     }
 
     if (data.uv1) {
         if (!m_uv1_ref.empty())
-            m_uv1_ref.copy_to(data.uv1, split.num_vertices, split.offset_vertices);
+            m_uv1_ref.copy_to(data.uv1, split.vertex_count, split.vertex_offset);
         else
-            memset(data.uv1, 0, split.num_vertices * sizeof(abcV2));
+            memset(data.uv1, 0, split.vertex_count * sizeof(abcV2));
     }
 
     if (data.colors) {
         if (!m_colors_ref.empty())
-            m_colors_ref.copy_to((abcC4*)data.colors, split.num_vertices, split.offset_vertices);
+            m_colors_ref.copy_to((abcC4*)data.colors, split.vertex_count, split.vertex_offset);
         else
-            memset(data.colors, 0, split.num_vertices * sizeof(abcV4));
+            memset(data.colors, 0, split.vertex_count * sizeof(abcV4));
     }
 
     {
         abcV3 bbmin, bbmax;
-        MinMax(bbmin, bbmax, data.points, split.num_vertices);
+        MinMax(bbmin, bbmax, data.points, split.vertex_count);
         data.center = (bbmin + bbmax) * 0.5f;
         data.size = bbmax - bbmin;
     }
@@ -301,7 +301,7 @@ void aiPolyMeshSample::fillSubmeshIndices(int split_index, int submesh_index, ai
 
     auto& refiner = m_topology->m_refiner;
     auto& split = refiner.splits[split_index];
-    auto& submesh = refiner.submeshes[split.offset_submeshes + submesh_index];
+    auto& submesh = refiner.submeshes[split.submesh_offset + submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.num_indices, submesh.offset_indices);
 }
 

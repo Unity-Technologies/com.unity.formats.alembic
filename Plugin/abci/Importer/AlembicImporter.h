@@ -116,8 +116,6 @@ struct aiConfig
     float aspect_ratio = -1.0f;
     bool force_update = false;
     bool cache_samples = false;
-    bool share_vertices = true;
-    bool treat_vertex_extra_data_as_static = false;
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     float vertex_motion_scale = 1.0f;
@@ -293,19 +291,19 @@ abciAPI aiXForm*        aiGetXForm(aiObject* obj);
 abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
-abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary);
+abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst);
 abciAPI void            aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst);
-abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary);
+abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshPrepareSplits(aiPolyMeshSample* sample);
-abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data);
-abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data);
+abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst);
+abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* dst);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);
 abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);
 
 abciAPI aiPoints*       aiGetPoints(aiObject* obj);
-abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
+abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *dst);
@@ -316,4 +314,4 @@ abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
 abciAPI const char*     aiPropertyGetNameS(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
-abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
+abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);

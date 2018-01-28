@@ -178,15 +178,15 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
 
     for (int spi = 0; spi < num_splits; ++spi) {
         auto& split = splits[spi];
-        int offset_vertices = split.offset_vertices;
+        int offset_vertices = split.vertex_offset;
 
         // count triangle indices
-        for (int fi = 0; fi < split.num_faces; ++fi) {
+        for (int fi = 0; fi < split.face_count; ++fi) {
             int mid = materialIDs[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
             while (mid >= (int)tmp_submeshes.size()) {
                 int id = (int)tmp_submeshes.size();
                 tmp_submeshes.push_back({});
-                tmp_submeshes.back().materialID = id - 1;
+                tmp_submeshes.back().material_id = id - 1;
             }
             tmp_submeshes[mid].num_indices += (counts[fi] - 2) * 3;
         }
@@ -199,7 +199,7 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
         }
 
         // copy indices
-        for (int fi = 0; fi < split.num_faces; ++fi) {
+        for (int fi = 0; fi < split.face_count; ++fi) {
             int mid = materialIDs[offset_faces + fi] + 1;
             int count = counts[offset_faces + fi];
             int nidx = (count - 2) * 3;
@@ -211,22 +211,22 @@ void MeshRefiner::genSubmeshes(IArray<int> materialIDs)
         for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
             auto& sm = tmp_submeshes[mi];
             if (sm.num_indices > 0) {
-                ++split.num_submeshes;
+                ++split.submesh_count;
                 submeshes.push_back(sm);
             }
         }
 
-        offset_faces += split.num_faces;
+        offset_faces += split.face_count;
         tmp_submeshes.clear();
     }
 
     int total_submeshes = 0;
     for (int spi = 0; spi < num_splits; ++spi) {
         auto& split = splits[spi];
-        split.offset_submeshes = total_submeshes;
-        total_submeshes += split.num_submeshes;
-        for (int smi = 0; smi < split.num_submeshes; ++smi) {
-            auto& sm = submeshes[smi + split.offset_submeshes];
+        split.submesh_offset = total_submeshes;
+        total_submeshes += split.submesh_count;
+        for (int smi = 0; smi < split.submesh_count; ++smi) {
+            auto& sm = submeshes[smi + split.submesh_offset];
             sm.split_index = spi;
             sm.submesh_index = smi;
         }
@@ -281,18 +281,18 @@ void MeshRefiner::refine()
 
     auto add_new_split = [&]() {
         auto split = Split{};
-        split.offset_faces = offset_faces;
-        split.offset_indices = offset_indices;
-        split.offset_vertices = offset_vertices;
-        split.num_faces = num_faces;
-        split.num_indices_triangulated = num_indices_triangulated;
-        split.num_vertices = (int)new_points.size() - offset_vertices;
-        split.num_indices = (int)new_indices.size() - offset_indices;
+        split.face_offset = offset_faces;
+        split.index_offset = offset_indices;
+        split.vertex_offset = offset_vertices;
+        split.face_count = num_faces;
+        split.triangulated_index_count = num_indices_triangulated;
+        split.vertex_count = (int)new_points.size() - offset_vertices;
+        split.index_count = (int)new_indices.size() - offset_indices;
         splits.push_back(split);
 
-        offset_faces += split.num_faces;
-        offset_indices += split.num_indices;
-        offset_vertices += split.num_vertices;
+        offset_faces += split.face_count;
+        offset_indices += split.index_count;
+        offset_vertices += split.vertex_count;
 
         num_new_indices += num_indices_triangulated;
         num_faces = 0;

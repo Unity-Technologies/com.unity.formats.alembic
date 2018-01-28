@@ -218,16 +218,16 @@ abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
     return obj ? obj->getPolyMesh() : nullptr;
 }
 
-abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary)
+abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst)
 {
     if (schema)
-        schema->getSummary(*summary);
+        schema->getSummary(*dst);
 }
 
-abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary)
+abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst)
 {
     if (sample)
-        sample->getSummary(*summary);
+        sample->getSummary(*dst);
 }
 
 abciAPI void aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst)
@@ -236,10 +236,10 @@ abciAPI void aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index
         sample->getSplitSummary(split_index, *dst);
 }
 
-abciAPI void aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* summary)
+abciAPI void aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* dst)
 {
     if (sample)
-        sample->getSubmeshSummary(split_index, submesh_index, *summary);
+        sample->getSubmeshSummary(split_index, submesh_index, *dst);
 }
 
 abciAPI void aiPolyMeshPrepareSplits(aiPolyMeshSample * sample)
@@ -248,16 +248,16 @@ abciAPI void aiPolyMeshPrepareSplits(aiPolyMeshSample * sample)
         sample->prepareSplits();
 }
 
-abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* data)
+abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst)
 {
     if (sample)
-        sample->fillSplitVertices(split_index, *data);
+        sample->fillSplitVertices(split_index, *dst);
 }
 
-abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* data)
+abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* dst)
 {
     if (sample)
-        sample->fillSubmeshIndices(split_index, submesh_index, *data);
+        sample->fillSubmeshIndices(split_index, submesh_index, *dst);
 }
 
 abciAPI aiCamera* aiGetCamera(aiObject* obj)
@@ -278,10 +278,10 @@ abciAPI aiPoints* aiGetPoints(aiObject* obj)
     return obj ? obj->getPoints() : nullptr;
 }
 
-abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary)
+abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
 {
     if (schema == nullptr) { return; }
-    *summary = schema->getSummary();
+    *dst = schema->getSummary();
 }
 abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
@@ -341,7 +341,7 @@ abciAPI void aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector 
 {
     prop->getDataPointer(*ss, *data);
 }
-abciAPI void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data)
+abciAPI void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst)
 {
-    prop->copyData(*ss, *data);
+    prop->copyData(*ss, *dst);
 }

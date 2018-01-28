@@ -29,7 +29,7 @@ namespace UTJ.Alembic
         public enum aiTangentsMode
         {
             None = 0,
-            Smooth,
+            Compute,
         }
 
         public enum aiTopologyVariance
@@ -83,8 +83,6 @@ namespace UTJ.Alembic
             public float aspectRatio;
             public Bool forceUpdate;
             public Bool cacheSamples;
-            public Bool shareVertices;
-            public Bool treatVertexExtraDataAsStatics;
             public Bool interpolateSamples;
             public Bool turnQuadEdges;
             public float vertexMotionScale;
@@ -99,8 +97,6 @@ namespace UTJ.Alembic
                 aspectRatio = -1.0f;
                 forceUpdate = false;
                 cacheSamples = false;
-                shareVertices = true;
-                treatVertexExtraDataAsStatics = false;
                 interpolateSamples = true;
                 turnQuadEdges = false;
                 vertexMotionScale = 1.0f;

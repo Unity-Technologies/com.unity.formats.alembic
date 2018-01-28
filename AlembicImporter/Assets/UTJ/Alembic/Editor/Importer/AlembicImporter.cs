@@ -72,9 +72,9 @@ namespace UTJ.Alembic
         [SerializeField] public float scaleFactor = 0.01f;
         [SerializeField] public int startFrame = int.MinValue;
         [SerializeField] public int endFrame = int.MaxValue;        
-        [SerializeField] public float AbcStartTime;
-        [SerializeField] public float AbcEndTime;
-        [SerializeField] public int AbcFrameCount;
+        [SerializeField] public float abcStartTime;
+        [SerializeField] public float abcEndTime;
+        [SerializeField] public int abcFrameCount;
         [SerializeField] public string importWarning;
         [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
         [SerializeField] public List<string> splittingMeshNames = new List<string>();
@@ -106,18 +106,18 @@ namespace UTJ.Alembic
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
                 abcStream.AbcLoad();
-                AbcStartTime = abcStream.AbcStartTime;
-                AbcEndTime = abcStream.AbcEndTime;
-                AbcFrameCount = abcStream.AbcFrameCount;
+                abcStartTime = abcStream.abcStartTime;
+                abcEndTime = abcStream.abcEndTime;
+                abcFrameCount = abcStream.abcFrameCount;
 
                 startFrame = startFrame < 0 ? 0 : startFrame;
-                endFrame = endFrame > AbcFrameCount-1 ? AbcFrameCount-1 : endFrame;
+                endFrame = endFrame > abcFrameCount-1 ? abcFrameCount-1 : endFrame;
 
                 streamDescriptor.minFrame = startFrame;
                 streamDescriptor.maxFrame = endFrame;
-                streamDescriptor.abcFrameCount = AbcFrameCount;
-                streamDescriptor.abcDuration = AbcEndTime - AbcStartTime;
-                streamDescriptor.abcStartTime = AbcStartTime;
+                streamDescriptor.abcFrameCount = abcFrameCount;
+                streamDescriptor.abcDuration = abcEndTime - abcStartTime;
+                streamDescriptor.abcStartTime = abcStartTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.streamDescriptor = streamDescriptor;
@@ -174,12 +174,11 @@ namespace UTJ.Alembic
             AlembicMesh mesh = node.GetAlembicObj<AlembicMesh>();
             if (mesh!=null)
             {
-                if ((streamSettings.shareVertices || streamSettings.treatVertexExtraDataAsStatics) && 
-                    mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
+                if (mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
                 {
                     varyingTopologyMeshNames.Add(node.linkedGameObj.name);   
                 }
-                else if (streamSettings.shareVertices && mesh.sampleSummary.splitCount > 1)
+                else if (mesh.sampleSummary.splitCount > 1)
                 {
                     splittingMeshNames.Add(node.linkedGameObj.name);
                 }

@@ -106,20 +106,20 @@ namespace UTJ.Alembic
             }
         }
 
-        public float AbcStartTime
+        public float abcStartTime
         {
             get {
                 return AbcIsValid() ? AbcAPI.aiGetStartTime(m_Context) : 0;
             }
         }
-        public int AbcFrameCount
+        public int abcFrameCount
         {
             get {
                 return AbcIsValid() ? AbcAPI.aiGetFrameCount(m_Context) : 0;
             }
         }
 
-        public float AbcEndTime
+        public float abcEndTime
         {
             get
             {
@@ -128,7 +128,7 @@ namespace UTJ.Alembic
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdate(float time,float motionScale,bool interpolateSamples)
+        public bool AbcUpdate(float time, float motionScale,bool interpolateSamples)
         {
             if (m_StreamInterupted) return true;
             
@@ -139,7 +139,7 @@ namespace UTJ.Alembic
             m_Config.vertexMotionScale = motionScale;
             AbcAPI.aiSetConfig(m_Context, ref m_Config);
             AbcUpdateConfigElements();
-                   
+
             AbcAPI.aiUpdateSamples(m_Context, m_Time);
             AbcUpdateElements();
 
@@ -154,14 +154,12 @@ namespace UTJ.Alembic
 
             var settings = m_StreamDesc.settings;
             m_Config.swapHandedness = settings.swapHandedness;
-            m_Config.shareVertices = settings.shareVertices;
             m_Config.swapFaceWinding = settings.swapFaceWinding;
-            m_Config.normalsMode = settings.normalsMode;
-            m_Config.tangentsMode = settings.tangentsMode;
+            m_Config.normalsMode = settings.normals;
+            m_Config.tangentsMode = settings.tangents;
             m_Config.cacheSamples = settings.cacheSamples;
-            m_Config.treatVertexExtraDataAsStatics = settings.treatVertexExtraDataAsStatics;
             m_Config.turnQuadEdges = settings.turnQuadEdges;
-            m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
+            m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.cameraAspectRatio);
 #if UNITY_2017_3_OR_NEWER
             if (settings.use32BitsIndexBuffer)
                 m_Config.splitUnit = 0x7fffff;
