@@ -58,9 +58,9 @@ abciAPI void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-abciAPI aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
+abciAPI aeXform* aeNewXform(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aeXForm>(name, tsi);
+    return parent->newChild<aeXform>(name, tsi);
 }
 abciAPI aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
 {
@@ -89,9 +89,9 @@ abciAPI aeObject* aeGetParent(aeObject *obj)
     return obj->getParent();
 }
 
-abciAPI aeXForm* aeAsXForm(aeObject *obj)
+abciAPI aeXform* aeAsXform(aeObject *obj)
 {
-    return dynamic_cast<aeXForm*>(obj);
+    return dynamic_cast<aeXform*>(obj);
 }
 abciAPI aePoints* aeAsPoints(aeObject *obj)
 {
@@ -116,7 +116,7 @@ abciAPI void aeSetFromPrevious(aeObject *obj)
     obj->setFromPrevious();
 }
 
-abciAPI void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
+abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
 {
     obj->writeSample(*data);
 }

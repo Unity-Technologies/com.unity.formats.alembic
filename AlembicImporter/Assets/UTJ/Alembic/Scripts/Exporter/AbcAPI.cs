@@ -4,204 +4,259 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
+    public enum aeArchiveType
+    {
+        HDF5,
+        Ogawa,
+    };
+
+    public enum aeTimeSamplingType
+    {
+        Uniform = 0,
+        // Cyclic = 1,
+        Acyclic = 2,
+    };
+
+    public enum aeXformType
+    {
+        Matrix,
+        TRS,
+    };
+
+    public enum aePropertyType
+    {
+        Unknown,
+
+        // scalar types
+        Bool,
+        Int,
+        UInt,
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Float4x4,
+
+        // array types
+        BoolArray,
+        IntArray,
+        UIntArray,
+        FloatArray,
+        Float2Array,
+        Float3Array,
+        Float4Array,
+        Float4x4Array,
+
+        ScalarTypeBegin = Bool,
+        ScalarTypeEnd = Float4x4,
+
+        ArrayTypeBegin = BoolArray,
+        ArrayTypeEnd = Float4x4Array,
+    };
+
+    [Serializable]
+    public struct aeConfig
+    {
+        public aeArchiveType archiveType;
+        public aeTimeSamplingType timeSamplingType;
+        public float startTime;
+        public float frameRate;
+        public aeXformType xformType;
+        public Bool swapHandedness;
+        public Bool swapFaces;
+        public float scaleFactor;
+
+        public static aeConfig default_value
+        {
+            get
+            {
+                return new aeConfig
+                {
+                    archiveType = aeArchiveType.Ogawa,
+                    timeSamplingType = aeTimeSamplingType.Uniform,
+                    startTime = 0.0f,
+                    frameRate = 30.0f,
+                    xformType = aeXformType.TRS,
+                    swapHandedness = true,
+                    swapFaces = false,
+                    scaleFactor = 100.0f,
+                };
+            }
+        }
+    }
+
+    public struct aeXformData
+    {
+        public Vector3 translation;
+        public Quaternion rotation;
+        public Vector3 scale;
+        public Bool inherits;
+    }
+
+    public struct aePointsData
+    {
+        public IntPtr positions; // Vector3*
+        public IntPtr velocities; // Vector3*. can be null
+        public IntPtr ids; // ulong*. can be null
+        public int count;
+    }
+
+    public struct aePolyMeshData
+    {
+        public IntPtr positions;        // Vector3*
+        public IntPtr velocities;       // Vector3*. can be null
+        public IntPtr normals;          // Vector3*. can be null
+        public IntPtr uvs;              // Vector2*. can be null
+
+        public IntPtr indices;          // int*. 
+        public IntPtr normalIndices;    // int*. if null, assume same as indices
+        public IntPtr uvIndices;        // int*. if null, assume same as indices
+
+        public IntPtr faces;            // int*. if null, assume all faces are triangles
+
+        public int positionCount;
+        public int normalCount;         // if 0, assume same as positionCount
+        public int uvCount;             // if 0, assume same as positionCount
+
+        public int indexCount;
+        public int normalIndexCount;    // if 0, assume same as indexCount
+        public int uvIndexCount;        // if 0, assume same as indexCount
+
+        public int faceCount;
+    }
+
+    public struct aeFaceSetData
+    {
+        public IntPtr faces;
+        public int faceCount;
+    }
+
+    public struct aeCameraData
+    {
+        public float nearClippingPlane;
+        public float farClippingPlane;
+        public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)
+        public float aspectRatio;
+
+        public float focusDistance; // in cm
+        public float focalLength;   // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
+        public float aperture;      // in cm. vertical one
+
+        public static aeCameraData defaultValue
+        {
+            get
+            {
+                return new aeCameraData
+                {
+                    nearClippingPlane = 0.3f,
+                    farClippingPlane = 1000.0f,
+                    fieldOfView = 60.0f,
+                    aspectRatio = 16.0f / 9.0f,
+                    focusDistance = 5.0f,
+                    focalLength = 0.0f,
+                    aperture = 2.4f,
+                };
+            }
+        }
+    }
+
+    public struct aeContext
+    {
+        public IntPtr self;
+
+        public aeObject topObject { get { return aeGetTopObject(self); } }
+
+        public static aeContext Create() { return aeCreateContext(); }
+        public void Destroy() { aeDestroyContext(self); self = IntPtr.Zero; }
+        public void SetConfig(ref aeConfig conf) { aeSetConfig(self, ref conf); }
+        public bool OpenArchive(string path) { return aeOpenArchive(self, path); }
+        public int AddTimeSampling(float start_time) { return aeAddTimeSampling(self, start_time); }
+        public void AddTime(float start_time) { aeAddTime(self, start_time); }
+        public void MarkFrameBegin() { aeMarkFrameBegin(self); }
+        public void MarkFrameEnd() { aeMarkFrameEnd(self); }
+
+        #region internal
+        [DllImport("abci")] static extern aeContext aeCreateContext();
+        [DllImport("abci")] static extern void aeDestroyContext(IntPtr ctx);
+
+        [DllImport("abci")] static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
+        [DllImport("abci")] static extern Bool aeOpenArchive(IntPtr ctx, string path);
+        [DllImport("abci")] static extern aeObject aeGetTopObject(IntPtr ctx);
+        [DllImport("abci")] static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
+        // relevant only if plingType is acyclic. if tsi==-1, add time to all time samplings.
+        [DllImport("abci")] static extern void aeAddTime(IntPtr ctx, float time, int tsi = -1);
+        [DllImport("abci")] static extern void aeMarkFrameBegin(IntPtr ctx);
+        [DllImport("abci")] static extern void aeMarkFrameEnd(IntPtr ctx);
+        #endregion
+    }
+
+    public struct aeObject
+    {
+        public IntPtr self;
+
+        public aeObject NewXform(string name) { return aeNewXform(self, name); }
+        public aeObject NewCamera(string name) { return aeNewCamera(self, name); }
+        public aeObject NewPoints(string name) { return aeNewPoints(self, name); }
+        public aeObject NewPolyMesh(string name) { return aeNewPolyMesh(self, name); }
+
+        public void WriteSample(ref aeXformData data) { aeXformWriteSample(self, ref data); }
+        public void WriteSample(ref aeCameraData data) { aeCameraWriteSample(self, ref data); }
+
+        public void WriteSample(ref aePolyMeshData data) { aePolyMeshWriteSample(self, ref data); }
+        public void AddFaceSet(string name) { aePolyMeshAddFaceSet(self, name); }
+        public void WriteFaceSetSample(int fsi, ref aeFaceSetData data) { aePolyMeshWriteFaceSetSample(self, fsi, ref data); }
+
+        public void WriteSample(ref aePointsData data) { aePointsWriteSample(self, ref data); }
+
+        public aeProperty NewProperty(string name, aePropertyType type) { return aeNewProperty(self, name, type); }
+
+        #region internal
+        [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
+        [DllImport("abci")] static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
+        [DllImport("abci")] static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
+        [DllImport("abci")] static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
+        [DllImport("abci")] static extern void aePolyMeshWriteFaceSetSample(IntPtr self, int fsi, ref aeFaceSetData data);
+        [DllImport("abci")] static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
+        [DllImport("abci")] static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
+        #endregion
+    }
+
+    public struct aeProperty
+    {
+        public IntPtr self;
+
+        public void WriteArraySample(IntPtr data, int num_data) { aePropertyWriteArraySample(self, data, num_data); }
+
+        public void WriteScalarSample(ref float data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref int data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Bool data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector2 data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector3 data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector4 data) { aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Matrix4x4 data) { aePropertyWriteScalarSample(self, ref data); }
+
+        #region internal
+        [DllImport("abci")] static extern void aePropertyWriteArraySample(IntPtr self, IntPtr data, int num_data);
+
+        // all of these are  IntPtr version. just for convenience.
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref float data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref int data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref Bool data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector2 data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector3 data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector4 data);
+        [DllImport("abci")] static extern void aePropertyWriteScalarSample(IntPtr self, ref Matrix4x4 data);
+        #endregion
+    }
+
+
+
     public partial class AbcAPI
     {
-        public enum aeArchiveType
-        {
-            HDF5,
-            Ogawa,
-        };
-
-        public enum aeTimeSamplingType
-        {
-            Uniform = 0,
-            // Cyclic = 1,
-            Acyclic = 2,
-        };
-
-        public enum aeXFormType
-        {
-            Matrix,
-            TRS,
-        };
-
-        public enum aePropertyType
-        {
-            Unknown,
-
-            // scalar types
-            Bool,
-            Int,
-            UInt,
-            Float,
-            Float2,
-            Float3,
-            Float4,
-            Float4x4,
-
-            // array types
-            BoolArray,
-            IntArray,
-            UIntArray,
-            FloatArray,
-            Float2Array,
-            Float3Array,
-            Float4Array,
-            Float4x4Array,
-
-            ScalarTypeBegin = Bool,
-            ScalarTypeEnd = Float4x4,
-
-            ArrayTypeBegin = BoolArray,
-            ArrayTypeEnd = Float4x4Array,
-        };
-
-        public struct aeContext { public IntPtr ptr; }
-        public struct aeObject { public IntPtr ptr; }
-        public struct aeProperty { public IntPtr ptr; }
-
-        [Serializable]
-        public struct aeConfig
-        {
-            public aeArchiveType archiveType;
-            public aeTimeSamplingType timeSamplingType;
-            public float startTime;
-            public float frameRate;
-            public aeXFormType xformType;
-            public Bool swapHandedness;
-            public Bool swapFaces;
-            public float scaleFactor;
-
-            public static aeConfig default_value
-            {
-                get
-                {
-                    return new aeConfig
-                    {
-                        archiveType = aeArchiveType.Ogawa,
-                        timeSamplingType = aeTimeSamplingType.Uniform,
-                        startTime = 0.0f,
-                        frameRate = 30.0f,
-                        xformType = aeXFormType.TRS,
-                        swapHandedness = true,
-                        swapFaces = false,
-                        scaleFactor = 100.0f,
-                    };
-                }
-            }
-        }
-
-        public struct aeXFormData
-        {
-            public Vector3 translation;
-            public Quaternion rotation;
-            public Vector3 scale;
-            public Bool inherits;
-        }
-
-        public struct aePointsData
-        {
-            public IntPtr positions; // Vector3*
-            public IntPtr velocities; // Vector3*. can be null
-            public IntPtr ids; // ulong*. can be null
-            public int count;
-        }
-
-        public struct aePolyMeshData
-        {
-            public IntPtr positions;        // Vector3*
-            public IntPtr velocities;       // Vector3*. can be null
-            public IntPtr normals;          // Vector3*. can be null
-            public IntPtr uvs;              // Vector2*. can be null
-
-            public IntPtr indices;          // int*. 
-            public IntPtr normalIndices;    // int*. if null, assume same as indices
-            public IntPtr uvIndices;        // int*. if null, assume same as indices
-
-            public IntPtr faces;            // int*. if null, assume all faces are triangles
-
-            public int positionCount;       
-            public int normalCount;         // if 0, assume same as positionCount
-            public int uvCount;             // if 0, assume same as positionCount
-
-            public int indexCount;
-            public int normalIndexCount;    // if 0, assume same as indexCount
-            public int uvIndexCount;        // if 0, assume same as indexCount
-
-            public int faceCount;
-        }
-        public struct aeFaceSetData
-        {
-            public IntPtr faces;
-            public int faceCount;
-        }
-
-        public struct aeCameraData
-        {
-            public float nearClippingPlane;
-            public float farClippingPlane;
-            public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)
-            public float aspectRatio;
-
-            public float focusDistance; // in cm
-            public float focalLength;   // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
-            public float aperture;      // in cm. vertical one
-
-            public static aeCameraData default_value
-            {
-                get
-                {
-                    return new aeCameraData
-                    {
-                        nearClippingPlane = 0.3f,
-                        farClippingPlane = 1000.0f,
-                        fieldOfView = 60.0f,
-                        aspectRatio = 16.0f / 9.0f,
-                        focusDistance = 5.0f,
-                        focalLength = 0.0f,
-                        aperture = 2.4f,
-                    };
-                }
-            }
-        }
-
-
-        [DllImport("abci")] public static extern aeContext   aeCreateContext();
-        [DllImport("abci")] public static extern void        aeDestroyContext(aeContext ctx);
-
-        [DllImport("abci")] public static extern void        aeSetConfig(aeContext ctx, ref aeConfig conf);
-        [DllImport("abci")] public static extern Bool        aeOpenArchive(aeContext ctx, string path);
-        [DllImport("abci")] public static extern aeObject    aeGetTopObject(aeContext ctx);
-        [DllImport("abci")] public static extern int         aeAddTimeSampling(aeContext ctx, float start_time);
-        // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
-        [DllImport("abci")] public static extern void        aeAddTime(aeContext ctx, float time, int tsi = -1);
-        [DllImport("abci")] public static extern void        aeMarkFrameBegin(aeContext ctx);
-        [DllImport("abci")] public static extern void        aeMarkFrameEnd(aeContext ctx);
-
-        [DllImport("abci")] public static extern aeObject    aeNewXForm(aeObject parent, string name, int tsi = 1);
-        [DllImport("abci")] public static extern aeObject    aeNewCamera(aeObject parent, string name, int tsi = 1);
-        [DllImport("abci")] public static extern aeObject    aeNewPoints(aeObject parent, string name, int tsi = 1);
-        [DllImport("abci")] public static extern aeObject    aeNewPolyMesh(aeObject parent, string name, int tsi = 1);
-        [DllImport("abci")] public static extern void        aeXFormWriteSample(aeObject obj, ref aeXFormData data);
-        [DllImport("abci")] public static extern void        aePointsWriteSample(aeObject obj, ref aePointsData data);
-        [DllImport("abci")] public static extern void        aePolyMeshWriteSample(aeObject obj, ref aePolyMeshData data);
-        [DllImport("abci")] public static extern int         aePolyMeshAddFaceSet(aeObject obj, string name);
-        [DllImport("abci")] public static extern void        aePolyMeshWriteFaceSetSample(aeObject obj, int fsi, ref aeFaceSetData data);
-        [DllImport("abci")] public static extern void        aeCameraWriteSample(aeObject obj, ref aeCameraData data);
-
-        [DllImport("abci")] public static extern aeProperty  aeNewProperty(aeObject parent, string name, aePropertyType type);
-        [DllImport("abci")] public static extern void        aePropertyWriteArraySample(aeProperty prop, IntPtr data, int num_data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, IntPtr data);
-
-        // all of these are same as IntPtr version. just for convenience.
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref float data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref int data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Bool data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector2 data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector3 data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Vector4 data);
-        [DllImport("abci")] public static extern void        aePropertyWriteScalarSample(aeProperty prop, ref Matrix4x4 data);
-
         public static void aeWaitMaxDeltaTime()
         {
             var next = Time.unscaledTime + Time.maximumDeltaTime;

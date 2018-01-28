@@ -1,6 +1,6 @@
 #pragma once
 using abcObject = AbcGeom::IObject;
-using abcXForm = AbcGeom::IXform;
+using abcXform = AbcGeom::IXform;
 using abcCamera = AbcGeom::ICamera;
 using abcPolyMesh = AbcGeom::IPolyMesh;
 using abcPoints = AbcGeom::IPoints;

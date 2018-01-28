@@ -29,7 +29,7 @@ public:
     virtual abcObject&  getAbcObject();
     virtual abcProperties getAbcProperties();
 
-    /// T: aeCamera, aeXForm, aePoint, aePolyMesh
+    /// T: aeCamera, aeXform, aePoint, aePolyMesh
     template<class T> T*    newChild(const char *name, uint32_t tsi = 1);
     void                    removeChild(aeObject *c);
 

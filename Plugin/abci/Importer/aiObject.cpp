@@ -23,7 +23,7 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
         
         if (AbcGeom::IXformSchema::matches(metadata))
         {
-            m_xform.reset(new aiXForm(this));
+            m_xform.reset(new aiXform(this));
             m_schemas.push_back(m_xform.get());
         }
         
@@ -49,17 +49,18 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
 
 aiObject::~aiObject()
 {
-    while (!m_children.empty())
-        delete m_children.back();
-
-    if (m_parent != nullptr)
+    if (!m_children.empty()) {
+        decltype(m_children) tmp;
+        tmp.swap(m_children);
+    }
+    if (m_parent)
         m_parent->removeChild(this);
 }
 
 aiObject* aiObject::newChild(const abcObject &abc)
 {
     auto *child = new aiObject(getContext(), this, abc);
-    m_children.push_back(child);
+    m_children.emplace_back(child);
     return child;
 }
 
@@ -67,7 +68,7 @@ void aiObject::removeChild(aiObject *c)
 {
     if (c == nullptr) { return; }
 
-    auto it = std::find(m_children.begin(), m_children.end(), c);
+    auto it = std::find_if(m_children.begin(), m_children.end(), [c](ObjectPtr& p) { return p.get() == c; });
     if (it != m_children.end())
     {
         c->m_parent = nullptr;
@@ -101,10 +102,10 @@ abcObject&  aiObject::getAbcObject() { return m_abc; }
 const char* aiObject::getName() const { return m_abc.getName().c_str(); }
 const char* aiObject::getFullName() const { return m_abc.getFullName().c_str(); }
 uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(); }
-aiObject*   aiObject::getChild(int i) { return m_children[i]; }
+aiObject*   aiObject::getChild(int i) { return m_children[i].get(); }
 aiObject*   aiObject::getParent() const { return m_parent; }
 
-aiXForm*    aiObject::getXForm() const { return m_xform.get(); }
+aiXform*    aiObject::getXform() const { return m_xform.get(); }
 aiPolyMesh* aiObject::getPolyMesh() const { return m_polymesh.get(); }
 aiCamera*   aiObject::getCamera() const { return m_camera.get(); }
 aiPoints*   aiObject::getPoints() const { return m_points.get(); }

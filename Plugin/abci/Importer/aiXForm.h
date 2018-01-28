@@ -1,35 +1,35 @@
 #pragma once
 
-class aiXFormSample : public aiSampleBase
+class aiXformSample : public aiSampleBase
 {
 using super = aiSampleBase;
 public:
-    aiXFormSample(aiXForm *schema);
+    aiXformSample(aiXform *schema);
 
     void updateConfig(const aiConfig &config, bool &data_changed) override;
 
-    void getData(aiXFormData &dst) const;
+    void getData(aiXformData &dst) const;
 
 public:
     AbcGeom::M44d m_matrix;
     AbcGeom::M44d m_next_matrix;
     bool inherits;
 private:
-    void decomposeXForm(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
+    void decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };
 
 
-struct aiXFormTraits
+struct aiXformTraits
 {
-    using SampleT = aiXFormSample;
+    using SampleT = aiXformSample;
     using AbcSchemaT = AbcGeom::IXformSchema;
 };
 
-class aiXForm : public aiTSchema<aiXFormTraits>
+class aiXform : public aiTSchema<aiXformTraits>
 {
-using super = aiTSchema<aiXFormTraits>;
+using super = aiTSchema<aiXformTraits>;
 public:
-    aiXForm(aiObject *obj);
+    aiXform(aiObject *obj);
 
     Sample* newSample();
     Sample* readSample(const uint64_t idx) override;

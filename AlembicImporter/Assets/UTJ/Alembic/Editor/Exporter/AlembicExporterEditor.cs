@@ -43,10 +43,10 @@ namespace UTJ.Alembic
             {
                 var conf = t.m_conf;
                 EditorGUI.BeginChangeCheck();
-                conf.archiveType = (AbcAPI.aeArchiveType)EditorGUILayout.EnumPopup("Archive Type", conf.archiveType);
-                conf.xformType = (AbcAPI.aeXFormType)EditorGUILayout.EnumPopup("Xform Type", conf.xformType);
-                conf.timeSamplingType = (AbcAPI.aeTimeSamplingType)EditorGUILayout.EnumPopup("Time Sampling Type", conf.timeSamplingType);
-                if (conf.timeSamplingType == AbcAPI.aeTimeSamplingType.Uniform)
+                conf.archiveType = (aeArchiveType)EditorGUILayout.EnumPopup("Archive Type", conf.archiveType);
+                conf.xformType = (aeXformType)EditorGUILayout.EnumPopup("Xform Type", conf.xformType);
+                conf.timeSamplingType = (aeTimeSamplingType)EditorGUILayout.EnumPopup("Time Sampling Type", conf.timeSamplingType);
+                if (conf.timeSamplingType == aeTimeSamplingType.Uniform)
                 {
                     EditorGUI.indentLevel++;
                     conf.frameRate = EditorGUILayout.FloatField("Frame Rate", conf.frameRate);

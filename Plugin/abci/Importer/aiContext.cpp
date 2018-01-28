@@ -360,7 +360,7 @@ void aiContext::updateSamples(float time)
     DebugLog("aiContext::updateSamples()");
     const abcSampleSelector ss = aiTimeToSampleSelector(time);
 
-    eachNodes([ss](aiObject *o) {
-        o->updateSample(ss);
+    eachNodes([ss](aiObject& o) {
+        o.updateSample(ss);
     });
 }

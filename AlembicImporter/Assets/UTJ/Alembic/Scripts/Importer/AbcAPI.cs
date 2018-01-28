@@ -168,7 +168,7 @@ namespace UTJ.Alembic
         public IntPtr indices;
     }
 
-    public struct aiXFormData
+    public struct aiXformData
     {
         public Vector3 translation;
         public Quaternion rotation;
@@ -261,7 +261,7 @@ namespace UTJ.Alembic
         public int childCount { get { return aiGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiGetChild(self, i); }
 
-        public aiSchema AsXform() { return aiGetXForm(self); }
+        public aiSchema AsXform() { return aiGetXform(self); }
         public aiSchema AsCamera() { return aiGetCamera(self); }
         public aiSchema AsPoints() { return aiGetPoints(self); }
         public aiSchema AsPolyMesh() { return aiGetPolyMesh(self); }
@@ -279,7 +279,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern void aiSetEnabled(IntPtr obj, Bool v);
         [DllImport("abci")] static extern IntPtr aiGetNameS(IntPtr obj);
 
-        [DllImport("abci")] static extern aiSchema aiGetXForm(IntPtr obj);
+        [DllImport("abci")] static extern aiSchema aiGetXform(IntPtr obj);
         [DllImport("abci")] static extern aiSchema aiGetCamera(IntPtr obj);
         [DllImport("abci")] static extern aiSchema aiGetPoints(IntPtr obj);
         [DllImport("abci")] static extern aiSchema aiGetPolyMesh(IntPtr obj);
@@ -404,10 +404,10 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiXformSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiXformSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetData(ref aiXFormData dst) { aiXFormGetData(self, ref dst); }
+        public void GetData(ref aiXformData dst) { aiXformGetData(self, ref dst); }
 
         #region internal
-        [DllImport("abci")] public static extern void aiXFormGetData(IntPtr sample, ref aiXFormData data);
+        [DllImport("abci")] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
         #endregion
     }
 

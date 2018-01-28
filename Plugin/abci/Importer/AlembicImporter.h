@@ -4,7 +4,7 @@
 
 struct  aiConfig;
 struct  aiCameraData;
-struct  aiXFormData;
+struct  aiXformData;
 struct  aiMeshSummary;
 struct  aiMeshSampleSummary;
 struct  aiPolyMeshData;
@@ -17,7 +17,7 @@ class   aiObject;
 #ifdef abciImpl
     class aiSchemaBase;
     class aiSampleBase;
-    class aiXFormSample;    // : aiSampleBase
+    class aiXformSample;    // : aiSampleBase
     class aiCameraSample;   // : aiSampleBase
     class aiPolyMeshSample; // : aiSampleBase
     class aiPointsSample;   // : aiSampleBase
@@ -27,7 +27,7 @@ class   aiObject;
     // force make castable
     using aiSchemaBase     = void;
     using aiSampleBase     = void;
-    using aiXFormSample    = void;
+    using aiXformSample    = void;
     using aiCameraSample   = void;
     using aiPolyMeshSample = void;
     using aiPointsSample   = void;
@@ -35,7 +35,7 @@ class   aiObject;
     using aiSubDSample     = void;
 #endif
 
-class   aiXForm;    // : aiSchemaBase
+class   aiXform;    // : aiSchemaBase
 class   aiCamera;   // : aiSchemaBase
 class   aiPolyMesh; // : aiSchemaBase
 class   aiPoints;   // : aiSchemaBase
@@ -130,7 +130,7 @@ struct aiTimeSamplingData
     double *times = nullptr;        // relevant only if type is Acyclic
 };
 
-struct aiXFormData
+struct aiXformData
 {
     abcV3 translation = { 0.0f, 0.0f, 0.0f };
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
@@ -278,8 +278,8 @@ abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsDirty(aiSchemaBase* schema);
 abciAPI void            aiSchemaMarkForceUpdate(aiSchemaBase* schema);
 
-abciAPI aiXForm*        aiGetXForm(aiObject* obj);
-abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);
+abciAPI aiXform*        aiGetXform(aiObject* obj);
+abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst);

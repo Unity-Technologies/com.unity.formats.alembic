@@ -1,7 +1,7 @@
 #pragma once
 class aiContext;
 class aiSchemaBase;
-class aiXForm;
+class aiXform;
 class aiPolyMesh;
 class aiCamera;
 
@@ -20,7 +20,7 @@ public:
     void        readConfig();
     void        updateSample(const abcSampleSelector& ss);
  
-    aiXForm*    getXForm() const;
+    aiXform*    getXform() const;
     aiPolyMesh* getPolyMesh() const;
     aiCamera*   getCamera() const;
     aiPoints*   getPoints() const;
@@ -28,14 +28,14 @@ public:
     template<class F>
     void eachChildren(const F &f)
     {
-        for (auto *c : m_children) { f(c); }
+        for (auto& c : m_children) { f(*c); }
     }
 
     template<class F>
     void eachChildrenRecursive(const F &f)
     {
-        for (auto *c : m_children) {
-            f(c);
+        for (auto& c : m_children) {
+            f(*c);
             c->eachChildrenRecursive(f);
         }
     }
@@ -50,14 +50,16 @@ public:
     void        removeChild(aiObject *c);
 
 private:
+    using ObjectPtr = std::unique_ptr<aiObject>;
+
     aiContext   *m_ctx = nullptr;
     abcObject   m_abc;
     aiObject    *m_parent = nullptr;
-    std::vector<aiObject*> m_children;
+    std::vector<ObjectPtr> m_children;
     bool m_enabled = true;
 
     std::vector<aiSchemaBase*>  m_schemas;
-    std::unique_ptr<aiXForm>    m_xform;
+    std::unique_ptr<aiXform>    m_xform;
     std::unique_ptr<aiPolyMesh> m_polymesh;
     std::unique_ptr<aiCamera>   m_camera;
     std::unique_ptr<aiPoints>   m_points;

@@ -146,12 +146,12 @@ abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
 }
 
 
-abciAPI aiXForm* aiGetXForm(aiObject* obj)
+abciAPI aiXform* aiGetXform(aiObject* obj)
 {
-    return obj ? obj->getXForm() : nullptr;
+    return obj ? obj->getXform() : nullptr;
 }
 
-abciAPI void aiXFormGetData(aiXFormSample* sample, aiXFormData *dst)
+abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
 {
     if (sample)
     {

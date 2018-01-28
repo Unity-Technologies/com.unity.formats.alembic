@@ -220,7 +220,7 @@ namespace UTJ.Alembic
                 AlembicElement elem = null;
 
                 if (obj.AsXform())
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXForm>();
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
                 else if (obj.AsPolyMesh())
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
                 else if (obj.AsCamera())

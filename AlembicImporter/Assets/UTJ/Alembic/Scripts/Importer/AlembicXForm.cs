@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
-    public class AlembicXForm : AlembicElement
+    public class AlembicXform : AlembicElement
     {
         aiXform m_abcSchema;
-        aiXFormData m_abcData;
+        aiXformData m_abcData;
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {

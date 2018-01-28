@@ -8,13 +8,13 @@ class aeContext;
 #else
     using aeObject = void; // force make upper-castable
 #endif
-class aeXForm;    // : aeObject
+class aeXform;    // : aeObject
 class aePoints;   // : aeObject
 class aePolyMesh; // : aeObject
 class aeCamera;   // : aeObject
 class aeProperty;
 
-struct aeXFormData;
+struct aeXformData;
 struct aePointsData;
 struct aePolyMeshData;
 struct aeCameraData;
@@ -83,7 +83,7 @@ struct aeConfig
 };
 
 
-struct aeXFormData
+struct aeXformData
 {
     abcV3 translation = { 0.0f, 0.0f, 0.0f };
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
@@ -162,7 +162,7 @@ abciAPI void        aeMarkFrameBegin(aeContext* ctx);
 abciAPI void        aeMarkFrameEnd(aeContext* ctx);
 
 abciAPI void        aeDeleteObject(aeObject *obj);
-abciAPI aeXForm*    aeNewXForm(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aeXform*    aeNewXform(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePoints*   aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aeCamera*   aeNewCamera(aeObject *parent, const char *name, int tsi = 1);
@@ -170,7 +170,7 @@ abciAPI aeCamera*   aeNewCamera(aeObject *parent, const char *name, int tsi = 1)
 abciAPI int         aeGetNumChildren(aeObject *obj);
 abciAPI aeObject*   aeGetChild(aeObject *obj, int i);
 abciAPI aeObject*   aeGetParent(aeObject *obj);
-abciAPI aeXForm*    aeAsXForm(aeObject *obj);
+abciAPI aeXform*    aeAsXform(aeObject *obj);
 abciAPI aePoints*   aeAsPoints(aeObject *obj);
 abciAPI aePolyMesh* aeAsPolyMesh(aeObject *obj);
 abciAPI aeCamera*   aeAsCamera(aeObject *obj);
@@ -178,7 +178,7 @@ abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 abciAPI int         aeGetNumSamples(aeObject *obj);
 abciAPI void        aeSetFromPrevious(aeObject *obj);
 
-abciAPI void        aeXFormWriteSample(aeXForm *obj, const aeXFormData *data);
+abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
 abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
 abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
 abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);

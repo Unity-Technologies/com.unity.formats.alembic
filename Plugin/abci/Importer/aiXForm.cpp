@@ -6,18 +6,18 @@
 #include "aiXForm.h"
 
 
-aiXFormSample::aiXFormSample(aiXForm *schema)
+aiXformSample::aiXformSample(aiXform *schema)
     : super(schema), inherits(true)
 {
 }
 
-void aiXFormSample::updateConfig(const aiConfig &config, bool &data_changed)
+void aiXformSample::updateConfig(const aiConfig &config, bool &data_changed)
 {
     data_changed = (config.swap_handedness != m_config.swap_handedness);
     m_config = config;
 }
 
-void aiXFormSample::decomposeXForm(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3d &shear,Imath::Quatd &rotation,Imath::V3d &translation) const
+void aiXformSample::decompose(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3d &shear,Imath::Quatd &rotation,Imath::V3d &translation) const
 {
     Imath::M44d mat_remainder(mat);
 
@@ -33,25 +33,23 @@ void aiXFormSample::decomposeXForm(const Imath::M44d &mat,Imath::V3d &scale,Imat
     rotation = extractQuat(mat_remainder);
 }
 
-void aiXFormSample::getData(aiXFormData &dst) const
+void aiXformSample::getData(aiXformData &dst) const
 {
-    DebugLog("aiXFormSample::getData()");
-
     Imath::V3d scale;
     Imath::V3d shear;
     Imath::Quatd rot;
     Imath::V3d trans;
-    decomposeXForm(m_matrix, scale, shear, rot, trans);
+    decompose(m_matrix, scale, shear, rot, trans);
 
     if (m_config.interpolate_samples && m_current_time_offset!=0)
     {
         Imath::V3d scale2;
         Imath::Quatd rot2;
         Imath::V3d trans2;
-        decomposeXForm(m_next_matrix, scale2, shear, rot2, trans2);
+        decompose(m_next_matrix, scale2, shear, rot2, trans2);
         scale += (scale2 - scale)* m_current_time_offset;
         trans += (trans2 - trans)* m_current_time_offset;
-        rot = slerpShortestArc(rot, rot2, m_current_time_offset);
+        rot = slerpShortestArc(rot, rot2, (double)m_current_time_offset);
     }
 
     auto rotFinal = abcV4(
@@ -73,12 +71,12 @@ void aiXFormSample::getData(aiXFormData &dst) const
     dst.scale = scale;
 }
 
-aiXForm::aiXForm(aiObject *obj)
+aiXform::aiXform(aiObject *obj)
     : super(obj)
 {
 }
 
-aiXForm::Sample* aiXForm::newSample()
+aiXform::Sample* aiXform::newSample()
 {
     Sample *sample = getSample();
     if (!sample)
@@ -86,9 +84,8 @@ aiXForm::Sample* aiXForm::newSample()
     return sample;
 }
 
-aiXForm::Sample* aiXForm::readSample(const uint64_t idx)
+aiXform::Sample* aiXform::readSample(const uint64_t idx)
 {
-    DebugLog("aiXForm::readSample(t=%d)", idx);
     Sample *ret = newSample();
 
     auto ss = aiIndexToSampleSelector(idx);

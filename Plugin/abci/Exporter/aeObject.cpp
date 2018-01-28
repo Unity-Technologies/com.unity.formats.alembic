@@ -96,17 +96,17 @@ aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t ts
     , m_abc(abc)
     , m_tsi(tsi)
 {
-    abciDebugLog("aeObject::aeObject() %s", getName());
 }
 
 aeObject::~aeObject()
 {
-    abciDebugLog("aeObject::~aeObject() %s", getName());
-
     m_properties.clear();
-    if (m_parent != nullptr) {
-        m_parent->removeChild(this);
+    if(!m_children.empty()) {
+        decltype(m_children) tmp;
+        tmp.swap(m_children);
     }
+    if (m_parent)
+        m_parent->removeChild(this);
 }
 
 const char* aeObject::getName() const               { return m_abc->getName().c_str(); }
@@ -127,7 +127,7 @@ T* aeObject::newChild(const char *name, uint32_t tsi)
     m_children.emplace_back(child);
     return child;
 }
-template aeXForm*       aeObject::newChild<aeXForm>(const char *name, uint32_t tsi);
+template aeXform*       aeObject::newChild<aeXform>(const char *name, uint32_t tsi);
 template aeCamera*      aeObject::newChild<aeCamera>(const char *name, uint32_t tsi);
 template aePolyMesh*    aeObject::newChild<aePolyMesh>(const char *name, uint32_t tsi);
 template aePoints*      aeObject::newChild<aePoints>(const char *name, uint32_t tsi);

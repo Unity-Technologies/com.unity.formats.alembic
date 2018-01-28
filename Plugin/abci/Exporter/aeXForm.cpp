@@ -5,33 +5,33 @@
 #include "aeXForm.h"
 
 
-aeXForm::aeXForm(aeObject *parent, const char *name, uint32_t tsi)
-    : super(parent->getContext(), parent, new abcXForm(parent->getAbcObject(), name, tsi), tsi)
+aeXform::aeXform(aeObject *parent, const char *name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcXform(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
 {
 }
 
-abcXForm& aeXForm::getAbcObject()
+abcXform& aeXform::getAbcObject()
 {
-    return dynamic_cast<abcXForm&>(*m_abc);
+    return dynamic_cast<abcXform&>(*m_abc);
 }
 
-abcProperties aeXForm::getAbcProperties()
+abcProperties aeXform::getAbcProperties()
 {
     return m_schema.getUserProperties();
 }
 
-size_t aeXForm::getNumSamples()
+size_t aeXform::getNumSamples()
 {
     return m_schema.getNumSamples();
 }
 
-void aeXForm::setFromPrevious()
+void aeXform::setFromPrevious()
 {
     m_schema.setFromPrevious();
 }
 
-void aeXForm::writeSample(const aeXFormData &data_)
+void aeXform::writeSample(const aeXformData &data_)
 {
     auto data = data_;
 

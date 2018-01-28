@@ -1,7 +1,7 @@
 #pragma once
 
 using abcObject = AbcGeom::OObject;
-using abcXForm = AbcGeom::OXform;
+using abcXform = AbcGeom::OXform;
 using abcCamera = AbcGeom::OCamera;
 using abcPolyMesh = AbcGeom::OPolyMesh;
 using abcFaceSet = AbcGeom::OFaceSet;
