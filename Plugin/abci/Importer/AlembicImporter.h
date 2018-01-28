@@ -270,21 +270,17 @@ abciAPI float           aiGetStartTime(aiContext* ctx);
 abciAPI float           aiGetEndTime(aiContext* ctx);
 abciAPI int             aiGetFrameCount(aiContext* ctx);
 abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
-abciAPI void            aiDestroyObject(aiContext* ctx, aiObject* obj);
-abciAPI int             aiGetNumTimeSamplings(aiContext* ctx);
-abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
-
 abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
 
 abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data);
 abciAPI const char*     aiGetNameS(aiObject* obj);
 abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
+abciAPI void            aiSetEnabled(aiObject* obj, bool v);
 
 abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
 abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
 abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI int             aiSchemaGetNumSamples(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
 
 abciAPI aiXForm*        aiGetXForm(aiObject* obj);

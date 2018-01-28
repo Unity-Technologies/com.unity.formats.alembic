@@ -49,12 +49,11 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
 
 aiObject::~aiObject()
 {
-    while (!m_children.empty()) {
+    while (!m_children.empty())
         delete m_children.back();
-    }
-    if (m_parent != nullptr) {
+
+    if (m_parent != nullptr)
         m_parent->removeChild(this);
-    }
 }
 
 aiObject* aiObject::newChild(const abcObject &abc)
@@ -78,19 +77,23 @@ void aiObject::removeChild(aiObject *c)
 
 void aiObject::readConfig()
 {
+    if (!m_enabled)
+        return;
     for (auto s : m_schemas)
-    {
         s->readConfig();
-    }
 }
 
 void aiObject::updateSample(const abcSampleSelector& ss)
 {
-    DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), ss.getRequestedTime());
+    if (!m_enabled)
+        return;
     for (auto s : m_schemas)
-    {
         s->updateSample(ss);
-    }
+}
+
+void aiObject::setEnabled(bool v)
+{
+    m_enabled = v;
 }
 
 aiContext*  aiObject::getContext() const { return m_ctx; }

@@ -29,62 +29,48 @@ std::string ToString(const aiConfig &v)
     return oss.str();
 }
 
-aiContextManager aiContextManager::ms_instance;
+aiContextManager aiContextManager::s_instance;
 
 aiContext* aiContextManager::getContext(int uid)
 {
-    auto it = ms_instance.m_contexts.find(uid);
-
-    if (it != ms_instance.m_contexts.end())
-    {
-        aiLogger::Info("Using already created context for gameObject with ID %d", uid);
-
-        return it->second;
+    auto it = s_instance.m_contexts.find(uid);
+if (it != s_instance.m_contexts.end()) {
+        DebugLog("Using already created context for gameObject with ID %d", uid);
+        return it->second.get();
     }
+
     auto ctx = new aiContext(uid);
-    ms_instance.m_contexts[uid] = ctx;
-    aiLogger::Info("Register context for gameObject with ID %d", uid);
+    s_instance.m_contexts[uid].reset(ctx);
+    DebugLog("Register context for gameObject with ID %d", uid);
     return ctx;
 }
 
 void aiContextManager::destroyContext(int uid)
 {
-    auto it = ms_instance.m_contexts.find(uid);
-        
-    if (it != ms_instance.m_contexts.end())
-    {
-        aiLogger::Info("Unregister context for gameObject with ID %d", uid);
-        ms_instance.m_contexts.erase(it);
-        delete it->second;
+    auto it = s_instance.m_contexts.find(uid);
+    if (it != s_instance.m_contexts.end()) {
+        DebugLog("Unregister context for gameObject with ID %d", uid);
+        s_instance.m_contexts.erase(it);
     }
 }
 
 void aiContextManager::destroyContextsWithPath(const char* assetPath)
 {
-    std::string path = aiContext::normalizePath(assetPath);
-    for (auto it = ms_instance.m_contexts.begin(); it != ms_instance.m_contexts.end(); ++it)
-    {
-        if (it->second->getPath() == path)
-        {
-            aiLogger::Info("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
-            delete it->second;
-            ms_instance.m_contexts.erase(it);
+    auto path = aiContext::normalizePath(assetPath);
+    for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end(); ++it) {
+        if (it->second->getPath() == path) {
+            DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
+            s_instance.m_contexts.erase(it);
         }
     }
 }
 
 aiContextManager::~aiContextManager()
 {
-    if (m_contexts.size())
-    {
-        aiLogger::Warning("%lu remaining context(s) registered", m_contexts.size());
+    if (m_contexts.size()) {
+        DebugWarning("%lu remaining context(s) registered", m_contexts.size());
     }
 
-    for (auto it=m_contexts.begin(); it!=m_contexts.end(); ++it)
-    {
-        delete it->second;
-    }
-        
     m_contexts.clear();
 }
 // ---
@@ -249,11 +235,11 @@ bool aiContext::load(const char *inPath)
 
     if (path == m_path && m_archive)
     {
-        aiLogger::Info("Context already loaded for gameObject with id %d", m_uid);
+        DebugLog("Context already loaded for gameObject with id %d", m_uid);
         return true;
     }
 
-    aiLogger::Info("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
+    DebugLog("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
     aiLogger::Indent(1);
 
     reset();
@@ -268,7 +254,7 @@ bool aiContext::load(const char *inPath)
     
     if (!m_archive.valid())
     {
-        aiLogger::Info("Archive '%s' not yet opened", inPath);
+        DebugLog("Archive '%s' not yet opened", inPath);
 
         try
         {
@@ -292,7 +278,7 @@ bool aiContext::load(const char *inPath)
     }
     else
     {
-        aiLogger::Info("Archive '%s' already opened", inPath);
+        DebugLog("Archive '%s' already opened", inPath);
     }
 
     if (m_archive.valid())
@@ -368,17 +354,6 @@ int aiContext::getFrameCount() const
 aiObject* aiContext::getTopObject() const
 {
     return m_top_node.get();
-}
-
-
-void aiContext::destroyObject(aiObject *obj)
-{
-    if (obj == getTopObject()) {
-        m_top_node.reset();
-    }
-    else {
-        delete obj;
-    }
 }
 
 void aiContext::updateSamples(float time)

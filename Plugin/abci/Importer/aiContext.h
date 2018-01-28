@@ -33,10 +33,13 @@ public:
     static aiContext* getContext(int uid);
     static void destroyContext(int uid);
     static void destroyContextsWithPath(const char* assetPath);
+
 private:
     ~aiContextManager();
-    std::map<int, aiContext*> m_contexts;
-    static aiContextManager ms_instance;
+
+    using ContextPtr = std::unique_ptr<aiContext>;
+    std::map<int, ContextPtr> m_contexts;
+    static aiContextManager s_instance;
 };
 
 
@@ -52,8 +55,6 @@ public:
     void setConfig(const aiConfig &config);
 
     aiObject* getTopObject() const;
-    void destroyObject(aiObject *obj);
-
     float getStartTime() const;
     float getEndTime() const;
     int getFrameCount() const;

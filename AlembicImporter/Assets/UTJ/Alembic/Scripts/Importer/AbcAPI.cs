@@ -268,7 +268,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
         [DllImport("abci")] public static extern int        aiGetFrameCount(aiContext ctx);
         [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
-        [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
+        [DllImport("abci")] public static extern void       aiSetEnabled(aiObject obj, Bool v);
         [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
         [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
         [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
@@ -307,7 +307,6 @@ namespace UTJ.Alembic
             public AlembicTreeNode alembicTreeNode;
             public aiSampleSelector ss;
             public bool createMissingNodes;
-            public List<aiObject> objectsToDelete;
         }
 
         public static float GetAspectRatio(aiAspectRatioMode mode)
@@ -338,7 +337,6 @@ namespace UTJ.Alembic
                 alembicTreeNode = node,
                 ss = aiTimeToSampleSelector(time),
                 createMissingNodes = createMissingNodes,
-                objectsToDelete = new List<aiObject>()
             };
 
             GCHandle hdl = GCHandle.Alloc(ic);
@@ -346,10 +344,6 @@ namespace UTJ.Alembic
             if (top.ptr != (IntPtr)0)
             {
                 aiEnumerateChild(top, ImportEnumerator, GCHandle.ToIntPtr(hdl));
-                foreach (aiObject obj in ic.objectsToDelete)
-                {
-                    aiDestroyObject(ctx, obj);
-                }
             }
         }
 
@@ -377,7 +371,7 @@ namespace UTJ.Alembic
                 {
                     if (!ic.createMissingNodes)
                     {
-                        ic.objectsToDelete.Add(obj);
+                        aiSetEnabled(obj, false);
                         return;
                     }
 
@@ -413,6 +407,10 @@ namespace UTJ.Alembic
                     aiSchemaUpdateSample(schema, ref ic.ss);
                     elem.AbcUpdate();
                 }
+            }
+            else
+            {
+                aiSetEnabled(obj, false);
             }
 
             ic.alembicTreeNode = childTreeNode;

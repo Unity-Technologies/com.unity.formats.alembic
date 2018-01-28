@@ -40,6 +40,8 @@ public:
         }
     }
 
+    void setEnabled(bool v);
+
 public:
     // for internal use
     aiContext*  getContext() const;
@@ -52,6 +54,7 @@ private:
     abcObject   m_abc;
     aiObject    *m_parent = nullptr;
     std::vector<aiObject*> m_children;
+    bool m_enabled = true;
 
     std::vector<aiSchemaBase*>  m_schemas;
     std::unique_ptr<aiXForm>    m_xform;

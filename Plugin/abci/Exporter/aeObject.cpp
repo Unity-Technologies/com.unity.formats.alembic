@@ -103,11 +103,7 @@ aeObject::~aeObject()
 {
     abciDebugLog("aeObject::~aeObject() %s", getName());
 
-    while (!m_children.empty()) {
-        delete m_children.back();
-    }
     m_properties.clear();
-
     if (m_parent != nullptr) {
         m_parent->removeChild(this);
     }
@@ -117,7 +113,7 @@ const char* aeObject::getName() const               { return m_abc->getName().c_
 const char* aeObject::getFullName() const           { return m_abc->getFullName().c_str(); }
 uint32_t    aeObject::getTimeSamplingIndex() const  { return m_tsi; }
 size_t      aeObject::getNumChildren() const        { return m_children.size(); }
-aeObject*   aeObject::getChild(int i)               { return m_children[i]; }
+aeObject*   aeObject::getChild(int i)               { return m_children[i].get(); }
 aeObject*   aeObject::getParent()                   { return m_parent; }
 
 aeContext*          aeObject::getContext()          { return m_ctx; }
@@ -128,7 +124,7 @@ template<class T>
 T* aeObject::newChild(const char *name, uint32_t tsi)
 {
     T* child = new T(this, name, tsi);
-    m_children.push_back(child);
+    m_children.emplace_back(child);
     return child;
 }
 template aeXForm*       aeObject::newChild<aeXForm>(const char *name, uint32_t tsi);
@@ -140,9 +136,8 @@ void aeObject::removeChild(aeObject *c)
 {
     if (c == nullptr) { return; }
 
-    auto it = std::find(m_children.begin(), m_children.end(), c);
-    if (it != m_children.end())
-    {
+    auto it = std::find_if(m_children.begin(), m_children.end(), [c](const ObjectPtr& o) { return o.get() == c; });
+    if (it != m_children.end()) {
         c->m_parent = nullptr;
         m_children.erase(it);
     }

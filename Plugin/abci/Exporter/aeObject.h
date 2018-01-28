@@ -42,10 +42,13 @@ public:
 
 protected:
     using aePropertyPtr = std::unique_ptr<aeProperty>;
-    aeContext                   *m_ctx = nullptr;
-    aeObject                    *m_parent = nullptr;
-    uint32_t                    m_tsi = 0;
-    std::unique_ptr<abcObject>  m_abc;
-    std::vector<aePropertyPtr>  m_properties;
-    std::vector<aeObject*>      m_children;
+    using abcObjectPtr = std::unique_ptr<abcObject>;
+    using ObjectPtr = std::unique_ptr<aeObject>;
+
+    aeContext       *m_ctx = nullptr;
+    aeObject        *m_parent = nullptr;
+    uint32_t        m_tsi = 0;
+    abcObjectPtr    m_abc;
+    std::vector<aePropertyPtr> m_properties;
+    std::vector<ObjectPtr>     m_children;
 };

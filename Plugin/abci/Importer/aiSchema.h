@@ -40,11 +40,7 @@ public:
     void setSampleCallback(aiSampleCallback cb, void *arg);
     void invokeConfigCallback(aiConfig *config) const;
     void invokeSampleCallback(aiSampleBase *sample) const;
-    virtual int             getTimeSamplingIndex() const = 0;
-    virtual int             getNumSamples() const = 0;
     virtual aiSampleBase*   updateSample(const abcSampleSelector& ss) = 0;
-    virtual int             getSampleIndex(const abcSampleSelector& ss) const = 0;
-    virtual float           getSampleTime(const abcSampleSelector& ss) const = 0;
 
     void readConfig();
 
@@ -95,22 +91,22 @@ public:
     virtual ~aiTSchema()
     {}
 
-    int getTimeSamplingIndex() const override
+    int getTimeSamplingIndex() const
     {
         return m_obj->getContext()->getTimeSamplingIndex(m_schema.getTimeSampling());
     }
 
-    int getSampleIndex(const abcSampleSelector& ss) const override
+    int getSampleIndex(const abcSampleSelector& ss) const
     {
         return static_cast<int>(ss.getIndex(m_time_sampling, m_num_samples));
     }
 
-    float getSampleTime(const abcSampleSelector& ss) const override
+    float getSampleTime(const abcSampleSelector& ss) const
     {
         return static_cast<float>(m_time_sampling->getSampleTime(ss.getRequestedIndex()));
     }
 
-    int getNumSamples() const override
+    int getNumSamples() const
     {
         return static_cast<int>(m_num_samples);
     }

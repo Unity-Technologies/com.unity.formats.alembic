@@ -80,33 +80,10 @@ abciAPI aiObject* aiGetTopObject(aiContext* ctx)
     return ctx ? ctx->getTopObject() : 0;
 }
 
-abciAPI void aiDestroyObject(aiContext* ctx, aiObject* obj)
-{
-    if (ctx)
-    {
-        ctx->destroyObject(obj);
-    }
-}
-
-abciAPI int aiGetNumTimeSamplings(aiContext* ctx)
-{
-    return ctx ? ctx->getNumTimeSamplings() : 0;
-}
-abciAPI void aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
-{
-    return ctx->getTimeSampling(i, *dst);
-}
-abciAPI void aiCopyTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst)
-{
-    return ctx->copyTimeSampling(i, *dst);
-}
-
 abciAPI void aiUpdateSamples(aiContext* ctx, float time)
 {
     if (ctx)
-    {
         ctx->updateSamples(time);
-    }
 }
 
 abciAPI void aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *user_data)
@@ -143,6 +120,12 @@ abciAPI aiObject* aiGetChild(aiObject* obj, int i)
     return obj ? obj->getChild(i) : nullptr;
 }
 
+abciAPI void aiSetEnabled(aiObject * obj, bool v)
+{
+    if (obj)
+        obj->setEnabled(v);
+}
+
 abciAPI aiObject* aiGetParent(aiObject* obj)
 {
     return obj ? obj->getParent() : nullptr;
@@ -169,11 +152,6 @@ abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
     return schema ? schema->getObject() : nullptr;
 }
 
-abciAPI int aiSchemaGetNumSamples(aiSchemaBase* schema)
-{
-    return schema ? schema->getNumSamples() : 0;
-}
-
 abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
 {
     return schema ? schema->isConstant() : true;
@@ -182,21 +160,6 @@ abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
 abciAPI aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {    
     return schema ? schema->updateSample(*ss) : 0;
-}
-
-abciAPI int aiSchemaGetSampleIndex(aiSchemaBase* schema, const abcSampleSelector *ss)
-{
-    return schema ? schema->getSampleIndex(*ss) : 0;
-}
-
-abciAPI float aiSchemaGetSampleTime(aiSchemaBase* schema, const abcSampleSelector *ss)
-{
-    return schema ? schema->getSampleTime(*ss) : 0.0f;
-}
-
-abciAPI int aiSchemaGetTimeSamplingIndex(aiSchemaBase* schema)
-{
-    return schema ? schema->getTimeSamplingIndex() : 0;
 }
 
 

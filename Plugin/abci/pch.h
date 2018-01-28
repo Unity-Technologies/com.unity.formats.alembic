@@ -25,8 +25,12 @@
 
 #if defined(abciDebug) || defined(abciDebugLog)
     #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
+    #define DebugWarning(...) aiLogger::Warning(__VA_ARGS__)
+    #define DebugError(...) aiLogger::Error(__VA_ARGS__)
 #else
     #define DebugLog(...)
+#define DebugWarning(...)
+#define DebugError(...)
 #endif
 
 #ifdef _WIN32
