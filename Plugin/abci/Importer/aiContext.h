@@ -80,7 +80,7 @@ private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
-    double m_timeRange[2] = {-0.0, -0.0};
+    double m_timeRange[2] = {0.0, 0.0};
     uint64_t m_numFrames = 0;
     int m_uid = 0;
     aiConfig m_config;

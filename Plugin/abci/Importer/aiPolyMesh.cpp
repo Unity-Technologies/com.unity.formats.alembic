@@ -124,7 +124,7 @@ void aiPolyMeshSample::computeNormals()
     }
     else {
         const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-        m_normals.resize_discard(m_points.size());
+        m_normals.resize_discard(m_points_ref.size());
         GenerateNormals(m_normals.data(), m_points_ref.data(), indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
         m_normals_ref = m_normals;
     }
@@ -138,7 +138,7 @@ void aiPolyMeshSample::computeTangents()
     }
     else {
         const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-        m_tangents.resize_discard(m_points.size());
+        m_tangents.resize_discard(m_points_ref.size());
         GenerateTangents(m_tangents.data(), m_points_ref.data(), m_uv0_ref.data(), m_normals_ref.data(),
             indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
         m_tangents_ref = m_tangents;
@@ -431,16 +431,18 @@ void aiPolyMesh::updateSummary()
     }
 
     // normals - interpolate or compute?
-    if (summary.has_normals && m_config.normals_mode != aiNormalsMode::AlwaysCompute) {
-        summary.interpolate_normals = interpolate;
-    }
-    else {
-        summary.compute_normals =
-            m_config.normals_mode == aiNormalsMode::AlwaysCompute ||
-            (!summary.has_normals && m_config.normals_mode == aiNormalsMode::ComputeIfMissing);
-        if (summary.compute_normals) {
-            summary.has_normals = true;
-            summary.constant_normals = summary.constant_points;
+    if (!summary.constant_normals) {
+        if (summary.has_normals && m_config.normals_mode != aiNormalsMode::AlwaysCompute) {
+            summary.interpolate_normals = interpolate;
+        }
+        else {
+            summary.compute_normals =
+                m_config.normals_mode == aiNormalsMode::AlwaysCompute ||
+                (!summary.has_normals && m_config.normals_mode == aiNormalsMode::ComputeIfMissing);
+            if (summary.compute_normals) {
+                summary.has_normals = true;
+                summary.constant_normals = summary.constant_points;
+            }
         }
     }
 

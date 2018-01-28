@@ -231,9 +231,7 @@ bool aiContext::load(const char *inPath)
     std::string path = normalizePath(inPath);
 
     DebugLog("aiContext::load: '%s'", path.c_str());
-
-    if (path == m_path && m_archive)
-    {
+    if (path == m_path && m_archive) {
         DebugLog("Context already loaded for gameObject with id %d", m_uid);
         return true;
     }
@@ -243,91 +241,78 @@ bool aiContext::load(const char *inPath)
 
     reset();
 
-    if (path.length() == 0)
-    {
+    if (path.length() == 0) {
         aiLogger::Unindent(1);
         return false;
     }
 
     m_path = path;
     
-    if (!m_archive.valid())
-    {
+    if (!m_archive.valid()) {
         DebugLog("Archive '%s' not yet opened", inPath);
 
-        try
-        {
+        try {
             DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
             m_archive = Abc::IArchive(AbcCoreOgawa::ReadArchive(std::thread::hardware_concurrency()), path);
         }
-        catch (Alembic::Util::Exception e)
-        {
+        catch (Alembic::Util::Exception e) {
             DebugLog("Failed (%s)", e.what());
-
-            try
-            {
+            try {
                 DebugLog("Trying to open AbcCoreHDF5::ReadArchive...");
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
             }
-            catch (Alembic::Util::Exception e2)
-            {
+            catch (Alembic::Util::Exception e2) {
                 DebugLog("Failed (%s)", e2.what());
             }
         }
     }
-    else
-    {
+    else {
         DebugLog("Archive '%s' already opened", inPath);
     }
 
-    if (m_archive.valid())
-    {
+    if (m_archive.valid()) {
         abcObject abcTop = m_archive.getTop();
         m_top_node.reset(new aiObject(this, nullptr, abcTop));
         gatherNodesRecursive(m_top_node.get());
 
-        m_timeRange[0] = std::numeric_limits<double>::max();
-        m_timeRange[1] = -std::numeric_limits<double>::max();
+        auto num_time_samplings = (int)m_archive.getNumTimeSamplings();
+        if (num_time_samplings > 1) {
+            m_timeRange[0] = std::numeric_limits<double>::max();
+            m_timeRange[1] = -std::numeric_limits<double>::max();
 
-        for (unsigned int i=0; i<m_archive.getNumTimeSamplings(); ++i)
-        {
-            AbcCoreAbstract::TimeSamplingPtr ts = m_archive.getTimeSampling(i);
+            for (int i = 1; i < num_time_samplings; ++i) {
+                auto ts = m_archive.getTimeSampling(i);
+                auto tst = ts->getTimeSamplingType();
 
-            AbcCoreAbstract::TimeSamplingType tst = ts->getTimeSamplingType();
+                // Note: alembic guaranties we have at least one stored time
+                if (tst.isCyclic() || tst.isUniform()) {
+                    auto max_num_samples = m_archive.getMaxNumSamplesForTimeSamplingIndex(i);
+                    auto samples_per_cycle = tst.getNumSamplesPerCycle();
+                    int numCycles = int(max_num_samples / samples_per_cycle);
 
-            // Note: alembic guaranties we have at least one stored time
+                    m_timeRange[0] = std::min(m_timeRange[0], ts->getStoredTimes()[0]);
+                    m_timeRange[1] = std::max(m_timeRange[1], m_timeRange[0] + (numCycles - 1) * tst.getTimePerCycle());
 
-            if (tst.isCyclic() || tst.isUniform())
-            {
-                int numCycles = int(m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
+                    if (numCycles > m_numFrames) m_numFrames = numCycles;
+                }
+                else if (tst.isAcyclic()) {
+                    m_timeRange[0] = std::min(m_timeRange[0], ts->getSampleTime(0));
+                    m_timeRange[1] = std::max(m_timeRange[1], ts->getSampleTime(ts->getNumStoredTimes() - 1));
 
-                m_timeRange[0] = ts->getStoredTimes()[0];
-                m_timeRange[1] = m_timeRange[0] + (numCycles - 1) * tst.getTimePerCycle();
-
-                if (numCycles > m_numFrames) m_numFrames = numCycles;
+                    if (ts->getNumStoredTimes() > m_numFrames) m_numFrames = ts->getNumStoredTimes();
+                }
             }
-            else if (tst.isAcyclic())
-            {
-                m_timeRange[0] = ts->getSampleTime(0);
-                m_timeRange[1] = ts->getSampleTime(ts->getNumStoredTimes() - 1);
-
-                if (ts->getNumStoredTimes() > m_numFrames) m_numFrames = ts->getNumStoredTimes();
+            if (m_timeRange[0] > m_timeRange[1]) {
+                m_timeRange[0] = 0.0;
+                m_timeRange[1] = 0.0;
             }
-        }
-
-        if (m_timeRange[0] > m_timeRange[1])
-        {
-            m_timeRange[0] = 0.0;
-            m_timeRange[1] = 0.0;
         }
 
         DebugLog("Succeeded");
-
         aiLogger::Unindent(1);
         return true;
     }
-    else
-    {
+    else {
         aiLogger::Error("Invalid archive '%s'", inPath);
         aiLogger::Unindent(1);
         reset();
