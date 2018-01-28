@@ -10,7 +10,7 @@ namespace UTJ.Alembic
     {
         public class Split
         {
-            public AbcAPI.aiMeshSplitSummary summary;
+            public aiMeshSplitSummary summary;
             public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
@@ -35,9 +35,10 @@ namespace UTJ.Alembic
             public bool update = true;
         }
 
+        aiPolyMesh m_abcSchema;
+        public aiMeshSummary m_summary;
+        public aiMeshSampleSummary m_sampleSummary;
         public List<Split> m_splits = new List<Split>();
-        public AbcAPI.aiMeshSummary m_summary;
-        public AbcAPI.aiMeshSampleSummary m_sampleSummary;
         bool m_freshSetup = false;
         
 
@@ -45,7 +46,7 @@ namespace UTJ.Alembic
         {
             Split split = null;
 
-            if (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || numSplits > 1)
+            if (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || numSplits > 1)
             {
                 for (int i=0; i<numSplits; ++i)
                 {
@@ -80,26 +81,27 @@ namespace UTJ.Alembic
             }
         }
 
-        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup(abcObj, abcSchema);
+            m_abcSchema = (aiPolyMesh)abcSchema;
 
-            AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
-
+            m_abcSchema.GetSummary(ref m_summary);
             m_freshSetup = true;
         }
 
         public override void AbcBeforeUpdateSamples()
         {
             if(m_freshSetup)
-                m_abcSchema.markForceUpdate();
+                m_abcSchema.schema.MarkForceUpdate();
         }
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        public override void AbcSampleUpdated(aiSample sample_)
         {
-            var vertexData = default(AbcAPI.aiPolyMeshData);
+            var sample = (aiPolyMeshSample)sample_;
+            var vertexData = default(aiPolyMeshData);
 
-            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary);
+            sample.GetSummary(ref m_sampleSummary);
             UpdateSplits(m_sampleSummary.splitCount);
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
@@ -112,7 +114,7 @@ namespace UTJ.Alembic
             for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
             {
                 var split = m_splits[spi];
-                AbcAPI.aiPolyMeshGetSplitSummary(sample, spi, ref split.summary);
+                sample.GetSplitSummary(spi, ref split.summary);
 
                 split.clear = topologyChanged;
                 split.active = true;
@@ -158,7 +160,7 @@ namespace UTJ.Alembic
                     split.colorCache.Resize(0);
                 vertexData.colors = split.colorCache;
 
-                AbcAPI.aiPolyMeshFillVertexBuffer(sample, spi, ref vertexData);
+                sample.FillVertexBuffer(spi, ref vertexData);
 
                 split.center = vertexData.center;
                 split.size = vertexData.size;
@@ -166,8 +168,8 @@ namespace UTJ.Alembic
 
             if (topologyChanged)
             {
-                var submeshSummary = new AbcAPI.aiSubmeshSummary();
-                var submeshData = new AbcAPI.aiSubmeshData();
+                var submeshSummary = new aiSubmeshSummary();
+                var submeshData = new aiSubmeshData();
                 for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
                 {
                     var split = m_splits[spi];
@@ -181,10 +183,10 @@ namespace UTJ.Alembic
                     for (int smi = 0; smi < submeshCount; ++smi)
                     {
                         var submesh = split.submeshes[smi];
-                        AbcAPI.aiPolyMeshGetSubmeshSummary(sample, spi, smi, ref submeshSummary);
+                        sample.GetSubmeshSummary(spi, smi, ref submeshSummary);
                         submesh.indexCache.Resize(submeshSummary.indexCount);
                         submeshData.indices = submesh.indexCache;
-                        AbcAPI.aiPolyMeshFillSubmeshIndices(sample, spi, smi, ref submeshData);
+                        sample.FillSubmeshIndices(spi, smi, ref submeshData);
                     }
                 }
             }
@@ -198,12 +200,12 @@ namespace UTJ.Alembic
 
         public override void AbcUpdate()
         {
-            if (!m_abcSchema.dirty)
+            if (!m_abcSchema.schema.dirty)
                 return;
 
             AbcSampleUpdated(m_abcSchema.sample);
 
-            bool useSubObjects = (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
+            bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 
             for (int s=0; s<m_splits.Count; ++s)
             {

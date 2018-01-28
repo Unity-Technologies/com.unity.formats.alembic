@@ -5,26 +5,29 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicCamera : AlembicElement
     {
-        public bool m_ignoreClippingPlanes = false;
+        aiCamera m_abcSchema;
+        aiCameraData m_abcData;
         Camera m_camera;
-        AbcAPI.aiCameraData m_abcData;
+        bool m_ignoreClippingPlanes = false;
         bool m_lastIgnoreClippingPlanes = false;
 
-        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
+            m_abcSchema = (aiCamera)abcSchema;
 
             m_camera = GetOrAddComponent<Camera>();
         }
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        public override void AbcSampleUpdated(aiSample sample_)
         {
-            AbcAPI.aiCameraGetData(sample, ref m_abcData);
+            var sample = (aiCameraSample)sample_;
+            sample.GetData(ref m_abcData);
         }
 
         public override void AbcUpdate()
         {
-            if (!m_abcSchema.dirty)
+            if (!m_abcSchema.schema.dirty)
                 return;
 
             AbcSampleUpdated(m_abcSchema.sample);

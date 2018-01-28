@@ -4,19 +4,21 @@ namespace UTJ.Alembic
 {
     public class AlembicLight : AlembicElement
     {
-        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
+        aiSchema m_abcSchema;
+
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
+            m_abcSchema = abcSchema;
 
             Light light = GetOrAddComponent<Light>();
-
             // Disable component for now
             light.enabled = false;
         }
 
         // No config override
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        public override void AbcSampleUpdated(aiSample sample)
         {
             // ToDo
         }

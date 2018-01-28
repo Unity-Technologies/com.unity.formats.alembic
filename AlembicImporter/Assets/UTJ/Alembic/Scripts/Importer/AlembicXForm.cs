@@ -4,16 +4,25 @@ namespace UTJ.Alembic
 {
     public class AlembicXForm : AlembicElement
     {
-        private AbcAPI.aiXFormData m_abcData;
+        aiXform m_abcSchema;
+        aiXFormData m_abcData;
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
-            AbcAPI.aiXFormGetData(sample, ref m_abcData);
+            base.AbcSetup(abcObj, abcSchema);
+
+            m_abcSchema = (aiXform)abcSchema;
+        }
+
+        public override void AbcSampleUpdated(aiSample sample_)
+        {
+            var sample = (aiXformSample)sample_;
+            sample.GetData(ref m_abcData);
         }
 
         public override void AbcUpdate()
         {
-            if (!m_abcSchema.dirty)
+            if (!m_abcSchema.schema.dirty)
                 return;
 
             AbcSampleUpdated(m_abcSchema.sample);

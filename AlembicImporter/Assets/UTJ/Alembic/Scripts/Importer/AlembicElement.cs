@@ -6,8 +6,7 @@ namespace UTJ.Alembic
 {
     public abstract class AlembicElement : IDisposable 
     {
-        protected AbcAPI.aiObject m_abcObj;
-        protected AbcAPI.aiSchema m_abcSchema;
+        protected aiObject m_abcObj;
 
         public AlembicTreeNode abcTreeNode { get; set; }
 
@@ -25,17 +24,16 @@ namespace UTJ.Alembic
                 abcTreeNode.RemoveAlembicObject(this);
         }
 
-        public virtual void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
+        public virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             m_abcObj = abcObj;
-            m_abcSchema = abcSchema;
         }
 
         // Called in main thread before update sample. 
         public virtual void AbcBeforeUpdateSamples() { }
 
         // Called by loading thread (not necessarily the main thread)
-        public abstract void AbcSampleUpdated(AbcAPI.aiSample sample);
+        public abstract void AbcSampleUpdated(aiSample sample);
 
         // Called in main thread after update sample.
         public abstract void AbcUpdate();

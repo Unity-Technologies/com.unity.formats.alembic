@@ -10,15 +10,13 @@ public:
     aiSampleBase(aiSchemaBase *schema);
     virtual ~aiSampleBase();
 
-    aiSchemaBase* getSchema() const { return m_schema; }
-
-    // Note: data_changed MUST be true if topology_changed is
+    virtual aiSchemaBase* getSchema() const { return m_schema; }
     virtual void updateConfig(const aiConfig &config, bool &data_changed) = 0;
     virtual void doInterpolation() {}
 
 public:
-    AbcCoreAbstract::chrono_t m_current_time_offset = 0;
-    AbcCoreAbstract::chrono_t m_current_time_interval = 0;
+    float m_current_time_offset = 0;
+    float m_current_time_interval = 0;
 protected:
     aiSchemaBase *m_schema = nullptr;
     aiConfig m_config;
@@ -138,8 +136,8 @@ public:
             if (m_config.interpolate_samples) {
                 auto interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
                 auto index_time = m_time_sampling->getSampleTime(sample_index);
-                sample->m_current_time_offset = std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
-                sample->m_current_time_interval = interval;
+                sample->m_current_time_offset = (float)std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
+                sample->m_current_time_interval = (float)interval;
                 sample->doInterpolation();
             }
             m_dirty = true;

@@ -15,9 +15,9 @@ namespace UTJ.Alembic
         {
             //var importer = serializedObject.targetObject as AlembicImporter;
 
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"),Enum.GetNames(typeof(AbcAPI.aiNormalsMode)));
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"),Enum.GetNames(typeof(AbcAPI.aiTangentsMode)));
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.cameraAspectRatio"), Enum.GetNames(typeof(AbcAPI.aiAspectRatioMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"),Enum.GetNames(typeof(aiNormalsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"),Enum.GetNames(typeof(aiTangentsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)));
 
             EditorGUILayout.Separator();
 

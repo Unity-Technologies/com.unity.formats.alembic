@@ -6,20 +6,19 @@ namespace UTJ.Alembic
     public class AlembicPoints : AlembicElement
     {
         // members
-        AbcAPI.aiPointsData m_abcData;
-        AbcAPI.aiPointsSummary m_summary;
+        aiPoints m_abcSchema;
+        aiPointsData m_abcData;
+        aiPointsSummary m_summary;
 
         // properties
-        public AbcAPI.aiPointsData abcData { get { return m_abcData; } }
-        public int abcPeakVertexCount
+        public aiPointsData abcData { get { return m_abcData; } }
+
+
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
-            get {
-                if (m_summary.peakCount == 0)
-                {
-                    AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
-                }
-                return m_summary.peakCount;
-            }
+            base.AbcSetup(abcObj, abcSchema);
+            m_abcSchema = (aiPoints)abcSchema;
+            m_abcSchema.GetSummary(ref m_summary);
         }
 
         public override void AbcBeforeUpdateSamples()
@@ -27,24 +26,26 @@ namespace UTJ.Alembic
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             if(cloud != null)
             {
-                AbcAPI.aiPointsSetSort(m_abcSchema, cloud.m_sort);
-                if(cloud.m_sortFrom != null)
+                m_abcSchema.sort = cloud.m_sort;
+                if(cloud.m_sort && cloud.m_sortFrom != null)
                 {
-                    AbcAPI.aiPointsSetSortBasePosition(m_abcSchema, cloud.m_sortFrom.position);
+                    m_abcSchema.sortBasePosition = cloud.m_sortFrom.position;
                 }
             }
         }
 
         // No config overrides on AlembicPoints
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample)
+        public override void AbcSampleUpdated(aiSample sample_)
         {
+            var sample = (aiPointsSample)sample_;
+
             // get points cloud component
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
                         abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
 
             if (cloud.abcPoints.Count == 0)
             {
-                AbcAPI.aiPointsGetSummary(m_abcSchema, ref m_summary);
+                m_abcSchema.GetSummary(ref m_summary);
                 cloud.m_abcPoints.Resize(m_summary.peakCount);
                 cloud.m_abcIDs.Resize(m_summary.peakCount);
                 cloud.m_peakPointCount = m_summary.peakCount;
@@ -62,7 +63,7 @@ namespace UTJ.Alembic
             if (m_summary.hasVelocity)
                 m_abcData.velocities = cloud.m_abcVelocities;
 
-            AbcAPI.aiPointsCopyData(sample, ref m_abcData);
+            sample.CopyData(ref m_abcData);
             cloud.m_boundsCenter = m_abcData.boundsCenter;
             cloud.m_boundsExtents = m_abcData.boundsExtents;
             cloud.m_count = m_abcData.count;
@@ -70,7 +71,7 @@ namespace UTJ.Alembic
 
         public override void AbcUpdate()
         {
-            if (!m_abcSchema.dirty)
+            if (!m_abcSchema.schema.dirty)
                 return;
 
             AbcSampleUpdated(m_abcSchema.sample);
