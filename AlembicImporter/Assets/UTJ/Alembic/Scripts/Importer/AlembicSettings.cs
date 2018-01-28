@@ -11,13 +11,5 @@ namespace UTJ.Alembic
         [SerializeField] public bool swapHandedness = true;
         [SerializeField] public bool swapFaceWinding = false;
         [SerializeField] public bool turnQuadEdges = false;
-        [SerializeField] public bool use32BitsIndexBuffer = false;
-
-        public AlembicStreamSettings()
-        {
-#if UNITY_2017_3_OR_NEWER
-            use32BitsIndexBuffer = true;
-#endif
-        }
     }
 }

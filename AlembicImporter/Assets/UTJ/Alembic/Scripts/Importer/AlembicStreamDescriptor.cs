@@ -15,15 +15,15 @@ namespace UTJ.Alembic
         [SerializeField] public float abcStartTime = 0.0f;
         [SerializeField] public int abcFrameCount = 1;
 
-        public float Duration
+        public float duration
         {
             get
             {
-               return abcFrameCount * FrameLength;
+               return abcFrameCount * frameLength;
             }
         }
 
-        public float FrameLength
+        public float frameLength
         {
             get
             {

@@ -6,13 +6,12 @@ namespace UTJ.Alembic
 {
     public abstract class AlembicElement : IDisposable 
     {
-        public AlembicTreeNode AlembicTreeNode { get; set; }
+        protected AbcAPI.aiObject m_abcObj;
+        protected AbcAPI.aiSchema m_abcSchema;
+        protected GCHandle m_thisHandle;
+        private bool m_pendingUpdate;
 
-        protected AbcAPI.aiObject m_AbcObj;
-        protected AbcAPI.aiSchema m_AbcSchema;
-        protected GCHandle m_ThisHandle;
-
-        private bool m_PendingUpdate;
+        public AlembicTreeNode abcTreeNode { get; set; }
 
         static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
         {
@@ -28,31 +27,26 @@ namespace UTJ.Alembic
 
         public T GetOrAddComponent<T>() where T : Component
         {
-            var c = AlembicTreeNode.linkedGameObj.GetComponent<T>();
+            var c = abcTreeNode.linkedGameObj.GetComponent<T>();
             if (c == null)
-            {
-                c = AlembicTreeNode.linkedGameObj.AddComponent<T>();
-            }
+                c = abcTreeNode.linkedGameObj.AddComponent<T>();
             return c;
         }
 
         public void Dispose()
         {
-            m_ThisHandle.Free();
-           
-            if (AlembicTreeNode != null )
-                AlembicTreeNode.RemoveAlembicObject(this);
+            m_thisHandle.Free();
+            if (abcTreeNode != null )
+                abcTreeNode.RemoveAlembicObject(this);
         }
 
-        public virtual void AbcSetup(AbcAPI.aiObject abcObj,
-                                     AbcAPI.aiSchema abcSchema)
+        public virtual void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
         {
-            m_AbcObj = abcObj;
-            m_AbcSchema = abcSchema;
-            m_ThisHandle = GCHandle.Alloc(this);
+            m_abcObj = abcObj;
+            m_abcSchema = abcSchema;
+            m_thisHandle = GCHandle.Alloc(this);
 
-            IntPtr ptr = GCHandle.ToIntPtr(m_ThisHandle);
-
+            IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
             AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
             AbcAPI.aiSchemaSetSampleCallback(abcSchema, SampleCallback, ptr);
         }
@@ -64,7 +58,7 @@ namespace UTJ.Alembic
         }
 
         // Called in main thread before update sample. 
-        public abstract void AbcUpdateConfig();
+        public virtual void AbcUpdateConfig() { }
 
         // Called by loading thread (not necessarily the main thread)
         public abstract void AbcSampleUpdated(AbcAPI.aiSample sample);
@@ -74,17 +68,17 @@ namespace UTJ.Alembic
 
         protected void AbcDirty()
         {
-            m_PendingUpdate = true;
+            m_pendingUpdate = true;
         }
 
         protected void AbcClean()
         {
-            m_PendingUpdate = false;
+            m_pendingUpdate = false;
         }
 
         protected bool AbcIsDirty()
         {
-            return m_PendingUpdate;
+            return m_pendingUpdate;
         }
 
 

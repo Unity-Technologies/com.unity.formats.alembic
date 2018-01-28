@@ -120,12 +120,12 @@ namespace UTJ.Alembic
                 streamDescriptor.abcStartTime = abcStartTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
-                streamPlayer.streamDescriptor = streamDescriptor;
-                streamPlayer.startFrame = startFrame;
-                streamPlayer.endFrame = endFrame;
+                streamPlayer.m_streamDescriptor = streamDescriptor;
+                streamPlayer.m_startFrame = startFrame;
+                streamPlayer.m_endFrame = endFrame;
 
                 AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(ctx, abcStream.alembicTreeRoot,streamDescriptor);
+                GenerateSubAssets(ctx, abcStream.m_alembicTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
            
@@ -138,20 +138,20 @@ namespace UTJ.Alembic
             }  
         }
 
-        private void GenerateSubAssets( AssetImportContext ctx,AlembicTreeNode root,AlembicStreamDescriptor streamDescr)
+        private void GenerateSubAssets(AssetImportContext ctx, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
             var material = new Material(Shader.Find("Standard"));
             AddObjectToAsset(ctx,"Default Material", material);
 
-            if (streamDescr.Duration>0)
+            if (streamDescr.duration > 0)
             {
                 Keyframe[] frames = new Keyframe[2];
                 frames[0].value = 0.0f;
                 frames[0].time = 0.0f;
                 frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[0].outTangent = 1.0f;
-                frames[1].value = streamDescr.Duration;
-                frames[1].time = streamDescr.Duration;
+                frames[1].value = streamDescr.duration;
+                frames[1].time = streamDescr.duration;
                 frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[1].inTangent = 1.0f;
                 AnimationCurve curve = new AnimationCurve(frames); 
@@ -165,23 +165,19 @@ namespace UTJ.Alembic
             splittingMeshNames = new List<string>();
 
             CollectSubAssets(ctx, root, material);
-            
+
             streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
         }
 
         private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
         {
             AlembicMesh mesh = node.GetAlembicObj<AlembicMesh>();
-            if (mesh!=null)
+            if (mesh != null)
             {
-                if (mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
-                {
-                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);   
-                }
-                else if (mesh.sampleSummary.splitCount > 1)
-                {
+                if (mesh.m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
+                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);
+                else if (mesh.m_sampleSummary.splitCount > 1)
                     splittingMeshNames.Add(node.linkedGameObj.name);
-                }
             }
 
             var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
@@ -196,7 +192,7 @@ namespace UTJ.Alembic
             if (renderer != null)
                 renderer.sharedMaterial = mat;
 
-            foreach( var child in node.children )
+            foreach( var child in node.children)
                 CollectSubAssets(ctx, child, mat);
         }
 

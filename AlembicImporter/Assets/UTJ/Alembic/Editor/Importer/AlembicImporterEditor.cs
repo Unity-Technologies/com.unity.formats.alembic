@@ -23,8 +23,8 @@ namespace UTJ.Alembic
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapHandedness"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapFaceWinding"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleFactor"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleFactor"));
             EditorGUILayout.Separator();
 
             var abcStartTime = serializedObject.FindProperty("abcStartTime");

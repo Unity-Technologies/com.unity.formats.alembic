@@ -15,9 +15,9 @@ namespace UTJ.Alembic
             if (streamPlayer == null)
                 return;
 
-            var duration = streamPlayer.streamDescriptor.Duration;
+            var duration = streamPlayer.m_streamDescriptor.duration;
             var time = (float)playable.GetTime();
-            streamPlayer.currentTime = time == duration ? duration : time % duration;
+            streamPlayer.m_currentTime = time == duration ? duration : time % duration;
         }
     }
 }

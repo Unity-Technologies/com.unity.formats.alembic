@@ -5,50 +5,50 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
-        public AlembicStream Stream;
-        public AlembicStreamDescriptor streamDescriptor;
-        [SerializeField] public float currentTime;
-        [SerializeField] public int startFrame;
-        [SerializeField] public int endFrame;
-        [SerializeField] public float vertexMotionScale = 1.0f;
-        [SerializeField] public bool interpolateSamples = true;
-        float m_LastUpdateTime;
-        bool m_ForceUpdate = false;
+        public AlembicStream m_stream;
+        public AlembicStreamDescriptor m_streamDescriptor;
+        [SerializeField] public float m_currentTime;
+        [SerializeField] public int m_startFrame;
+        [SerializeField] public int m_endFrame;
+        [SerializeField] public float m_vertexMotionScale = 1.0f;
+        [SerializeField] public bool m_interpolateSamples = true;
+        float m_lastUpdateTime;
+        bool m_forceUpdate = false;
 
-        public float Duration
+        public float duration
         {
             get
             {
-               return (endFrame- startFrame) * streamDescriptor.FrameLength;
+               return (m_endFrame- m_startFrame) * m_streamDescriptor.frameLength;
             }
         }
 
         void OnValidate()
         {
-            if (streamDescriptor == null) return;
-            if (startFrame < streamDescriptor.minFrame) startFrame = streamDescriptor.minFrame;
-            if (startFrame > streamDescriptor.maxFrame) startFrame = streamDescriptor.maxFrame;
-            if (endFrame < startFrame) endFrame = startFrame; 
-            if (endFrame > streamDescriptor.maxFrame) endFrame = streamDescriptor.maxFrame;    
+            if (m_streamDescriptor == null) return;
+            if (m_startFrame < m_streamDescriptor.minFrame) m_startFrame = m_streamDescriptor.minFrame;
+            if (m_startFrame > m_streamDescriptor.maxFrame) m_startFrame = m_streamDescriptor.maxFrame;
+            if (m_endFrame < m_startFrame) m_endFrame = m_startFrame; 
+            if (m_endFrame > m_streamDescriptor.maxFrame) m_endFrame = m_streamDescriptor.maxFrame;    
             ClampTime();
-            m_ForceUpdate = true;
+            m_forceUpdate = true;
         } 
 
         void LateUpdate()
         {
-            if (Stream != null && streamDescriptor != null)
+            if (m_stream != null && m_streamDescriptor != null)
             {
                 ClampTime();
-                if (m_LastUpdateTime != currentTime || m_ForceUpdate)
+                if (m_lastUpdateTime != m_currentTime || m_forceUpdate)
                 {
-                    if (Stream.AbcUpdate(currentTime + startFrame * streamDescriptor.FrameLength + streamDescriptor.abcStartTime, vertexMotionScale, interpolateSamples))
+                    if (m_stream.AbcUpdate(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime, m_vertexMotionScale, m_interpolateSamples))
                     {
-                        m_LastUpdateTime = currentTime;
-                        m_ForceUpdate = false;    
+                        m_lastUpdateTime = m_currentTime;
+                        m_forceUpdate = false;  
                     }
                     else
                     {
-                        Stream.Dispose();
+                        m_stream.Dispose();
                         LoadStream();
                     }
                 }
@@ -57,24 +57,24 @@ namespace UTJ.Alembic
 
         private void ClampTime()
         {
-            float duration = Duration;
-            if (duration == .0f || currentTime < .0f)
-                currentTime = .0f;
-            else if (currentTime > duration)
-                currentTime = duration;
+            var d = duration;
+            if (d == .0f || m_currentTime < .0f)
+                m_currentTime = .0f;
+            else if (m_currentTime > d)
+                m_currentTime = d;
         }
 
         public void LoadStream()
         {
-            if (streamDescriptor == null) return;
-            Stream = new AlembicStream(gameObject, streamDescriptor);
-            Stream.AbcLoad();
-            m_ForceUpdate = true;
+            if (m_streamDescriptor == null) return;
+            m_stream = new AlembicStream(gameObject, m_streamDescriptor);
+            m_stream.AbcLoad();
+            m_forceUpdate = true;
         }
 
         void OnEnable()
         {
-            if (Stream == null)
+            if (m_stream == null)
             {
                 LoadStream();
             }
@@ -82,8 +82,8 @@ namespace UTJ.Alembic
 
         public void OnDestroy()
         {
-            if (Stream != null)
-                Stream.Dispose();
+            if (m_stream != null)
+                m_stream.Dispose();
         }
 
         public void OnApplicationQuit()

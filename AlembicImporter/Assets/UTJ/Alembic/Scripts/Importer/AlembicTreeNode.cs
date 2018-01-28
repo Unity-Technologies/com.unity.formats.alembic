@@ -36,7 +36,7 @@ namespace UTJ.Alembic
             var o = GetAlembicObj<T>();
             if (o == null)
             {
-                o = new T() { AlembicTreeNode = this };
+                o = new T() { abcTreeNode = this };
                 alembicObjects.Add(typeof(T).Name, o);
             }
 

@@ -35,49 +35,48 @@ namespace UTJ.Alembic
             public bool update = true;
         }
 
-        public List<Split> splits = new List<Split>();
-
-        public AbcAPI.aiMeshSummary summary;
-        public AbcAPI.aiMeshSampleSummary sampleSummary;
-        bool m_FreshSetup = false;
+        public List<Split> m_splits = new List<Split>();
+        public AbcAPI.aiMeshSummary m_summary;
+        public AbcAPI.aiMeshSampleSummary m_sampleSummary;
+        bool m_freshSetup = false;
         
 
         void UpdateSplits(int numSplits)
         {
             Split split = null;
 
-            if (summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || numSplits > 1)
+            if (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || numSplits > 1)
             {
                 for (int i=0; i<numSplits; ++i)
                 {
-                    if (i >= splits.Count)
+                    if (i >= m_splits.Count)
                     {
-                        splits.Add(new Split());
+                        m_splits.Add(new Split());
                     }
                     else
                     {
-                        splits[i].active = true;
+                        m_splits[i].active = true;
                     }
                 }
             }
             else
             {
-                if (splits.Count == 0)
+                if (m_splits.Count == 0)
                 {
                     split = new Split {
-                        host = AlembicTreeNode.linkedGameObj,
+                        host = abcTreeNode.linkedGameObj,
                     };
-                    splits.Add(split);
+                    m_splits.Add(split);
                 }
                 else
                 {
-                    splits[0].active = true;
+                    m_splits[0].active = true;
                 }
             }
 
-            for (int i=numSplits; i<splits.Count; ++i)
+            for (int i=numSplits; i<m_splits.Count; ++i)
             {
-                splits[i].active = false;
+                m_splits[i].active = false;
             }
         }
 
@@ -85,9 +84,9 @@ namespace UTJ.Alembic
         {
             base.AbcSetup(abcObj, abcSchema);
 
-            AbcAPI.aiPolyMeshGetSummary(abcSchema, ref summary);
+            AbcAPI.aiPolyMeshGetSummary(abcSchema, ref m_summary);
 
-            m_FreshSetup = true;
+            m_freshSetup = true;
         }
 
         public override void AbcGetConfig(ref AbcAPI.aiConfig config)
@@ -95,12 +94,7 @@ namespace UTJ.Alembic
             // if 'forceUpdate' is set true, even if alembic sample data do not change at all
             // AbcSampleUpdated will still be called (topologyChanged will be false)
 
-            config.forceUpdate = m_FreshSetup;
-        }
-
-        public override void AbcUpdateConfig()
-        {
-            // nothing to do
+            config.forceUpdate = m_freshSetup;
         }
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample)
@@ -108,19 +102,19 @@ namespace UTJ.Alembic
             var vertexData = default(AbcAPI.aiPolyMeshData);
 
             AbcAPI.aiPolyMeshPrepareSplits(sample);
-            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref sampleSummary);
-            UpdateSplits(sampleSummary.splitCount);
+            AbcAPI.aiPolyMeshGetSampleSummary(sample, ref m_sampleSummary);
+            UpdateSplits(m_sampleSummary.splitCount);
 
-            bool topologyChanged = sampleSummary.topologyChanged;
-            if (m_FreshSetup)
+            bool topologyChanged = m_sampleSummary.topologyChanged;
+            if (m_freshSetup)
             {
                 topologyChanged = true;
-                m_FreshSetup = false;
+                m_freshSetup = false;
             }
 
-            for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
+            for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
             {
-                var split = splits[spi];
+                var split = m_splits[spi];
                 AbcAPI.aiPolyMeshGetSplitSummary(sample, spi, ref split.summary);
 
                 split.clear = topologyChanged;
@@ -131,37 +125,37 @@ namespace UTJ.Alembic
                 split.pointCache.Resize(vertexCount);
                 vertexData.positions = split.pointCache;
 
-                if (summary.hasVelocities)
+                if (m_summary.hasVelocities)
                     split.velocitiesCache.Resize(vertexCount);
                 else
                     split.velocitiesCache.Resize(0);
                 vertexData.velocities = split.velocitiesCache;
 
-                if (summary.hasNormals)
+                if (m_summary.hasNormals)
                     split.normalCache.Resize(vertexCount);
                 else
                     split.normalCache.Resize(0);
                 vertexData.normals = split.normalCache;
 
-                if (summary.hasTangents)
+                if (m_summary.hasTangents)
                     split.tangentCache.Resize(vertexCount);
                 else
                     split.tangentCache.Resize(0);
                 vertexData.tangents = split.tangentCache;
 
-                if (summary.hasUV0)
+                if (m_summary.hasUV0)
                     split.uv0Cache.Resize(vertexCount);
                 else
                     split.uv0Cache.Resize(0);
                 vertexData.uv0 = split.uv0Cache;
 
-                if (summary.hasUV1)
+                if (m_summary.hasUV1)
                     split.uv1Cache.Resize(vertexCount);
                 else
                     split.uv1Cache.Resize(0);
                 vertexData.uv1 = split.uv1Cache;
 
-                if (summary.hasColors)
+                if (m_summary.hasColors)
                     split.colorCache.Resize(vertexCount);
                 else
                     split.colorCache.Resize(0);
@@ -177,9 +171,9 @@ namespace UTJ.Alembic
             {
                 var submeshSummary = new AbcAPI.aiSubmeshSummary();
                 var submeshData = new AbcAPI.aiSubmeshData();
-                for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
+                for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
                 {
-                    var split = splits[spi];
+                    var split = m_splits[spi];
                     int submeshCount = split.summary.submeshCount;
 
                     if (split.submeshes.Count > submeshCount)
@@ -199,9 +193,9 @@ namespace UTJ.Alembic
             }
             else
             {
-                for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
-                    for (int smi = 0; smi < splits[spi].summary.submeshCount; ++smi)
-                        splits[spi].submeshes[smi].update = false;
+                for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
+                    for (int smi = 0; smi < m_splits[spi].summary.submeshCount; ++smi)
+                        m_splits[spi].submeshes[smi].update = false;
             }
 
             AbcDirty();
@@ -214,11 +208,11 @@ namespace UTJ.Alembic
                 return;
             }
 
-            bool useSubObjects = (summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || sampleSummary.splitCount > 1);
+            bool useSubObjects = (m_summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 
-            for (int s=0; s<splits.Count; ++s)
+            for (int s=0; s<m_splits.Count; ++s)
             {
-                Split split = splits[s];
+                Split split = m_splits[s];
 
                 if (split.active)
                 {
@@ -227,9 +221,9 @@ namespace UTJ.Alembic
                     {
                         if (useSubObjects)
                         {
-                            string name = AlembicTreeNode.linkedGameObj.name + "_split_" + s;
+                            string name = abcTreeNode.linkedGameObj.name + "_split_" + s;
 
-                            Transform trans = AlembicTreeNode.linkedGameObj.transform.Find(name);
+                            Transform trans = abcTreeNode.linkedGameObj.transform.Find(name);
 
                             if (trans == null)
                             {
@@ -237,7 +231,7 @@ namespace UTJ.Alembic
                                 go.name = name;
 
                                 trans = go.GetComponent<Transform>();
-                                trans.parent = AlembicTreeNode.linkedGameObj.transform;
+                                trans.parent = abcTreeNode.linkedGameObj.transform;
                                 trans.localPosition = Vector3.zero;
                                 trans.localEulerAngles = Vector3.zero;
                                 trans.localScale = Vector3.one;
@@ -247,7 +241,7 @@ namespace UTJ.Alembic
                         }
                         else
                         {
-                            split.host = AlembicTreeNode.linkedGameObj;
+                            split.host = abcTreeNode.linkedGameObj;
                         }
                     }
 
@@ -309,10 +303,10 @@ namespace UTJ.Alembic
                 }
             }
 
-            for (int spi = 0; spi < sampleSummary.splitCount; ++spi)
+            for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
             {
-                var split = splits[spi];
-                for (int smi = 0; smi < splits[spi].summary.submeshCount; ++smi)
+                var split = m_splits[spi];
+                for (int smi = 0; smi < m_splits[spi].summary.submeshCount; ++smi)
                 {
                     var submesh = split.submeshes[smi];
                     split.mesh.SetTriangles(submesh.indexCache.List, smi);
@@ -334,7 +328,7 @@ namespace UTJ.Alembic
             {
                 mesh = new Mesh {name = "dyn: " + gameObject.name};
 #if UNITY_2017_3_OR_NEWER
-                mesh.indexFormat = AlembicTreeNode.streamDescriptor.settings.use32BitsIndexBuffer ? IndexFormat.UInt32 : IndexFormat.UInt16;
+                mesh.indexFormat = IndexFormat.UInt32;
 #endif
                 mesh.MarkDynamic();
                 if (meshFilter == null)

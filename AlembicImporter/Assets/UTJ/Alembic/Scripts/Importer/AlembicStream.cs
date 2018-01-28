@@ -6,70 +6,70 @@ namespace UTJ.Alembic
 {
     public class AlembicStream : IDisposable
     {
-        static List<AlembicStream> s_Streams = new List<AlembicStream>();
+        static List<AlembicStream> s_streams = new List<AlembicStream>();
 
         public static void DisconnectStreamsWithPath(string path)
         {
             var fullPath = Application.streamingAssetsPath + path;
             AbcAPI.aiClearContextsWithPath(fullPath);
-            s_Streams.ForEach(s => {
-                if (s.m_StreamDesc.pathToAbc == path)
+            s_streams.ForEach(s => {
+                if (s.m_streamDesc.pathToAbc == path)
                 {
-                    s.m_StreamInterupted = true;
-                    s.m_Context = default(AbcAPI.aiContext);
-                    s.m_Loaded = false;   
+                    s.m_streamInterupted = true;
+                    s.m_context = default(AbcAPI.aiContext);
+                    s.m_loaded = false;   
                 }
             });
         } 
 
         public static void RemapStreamsWithPath(string oldPath , string newPath)
         {
-            s_Streams.ForEach(s =>
+            s_streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == oldPath)
+                if (s.m_streamDesc.pathToAbc == oldPath)
                 {
-                    s.m_StreamInterupted = true;
-                    s.m_StreamDesc.pathToAbc = newPath;
+                    s.m_streamInterupted = true;
+                    s.m_streamDesc.pathToAbc = newPath;
                 }
             } );
         } 
 
         public static void ReconnectStreamsWithPath(string path)
         {
-            s_Streams.ForEach(s =>
+            s_streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == path)
+                if (s.m_streamDesc.pathToAbc == path)
                 {
-                    s.m_StreamInterupted = false;
+                    s.m_streamInterupted = false;
                 }
                     
             } );
         }
 
-        public AlembicTreeNode alembicTreeRoot;
-        private AlembicStreamDescriptor m_StreamDesc;
-        private AbcAPI.aiConfig m_Config;
-        private AbcAPI.aiContext m_Context;
-        private float m_Time;
-        private bool m_Loaded;
-        private bool m_StreamInterupted;
+        public AlembicTreeNode m_alembicTreeRoot;
+        private AlembicStreamDescriptor m_streamDesc;
+        private AbcAPI.aiConfig m_config;
+        private AbcAPI.aiContext m_context;
+        private float m_time;
+        private bool m_loaded;
+        private bool m_streamInterupted;
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
-            m_Config.SetDefaults();
-            alembicTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
-            m_StreamDesc = streamDesc;
+            m_config.SetDefaults();
+            m_alembicTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
+            m_streamDesc = streamDesc;
         }
 
         public bool AbcIsValid()
         {
-            return (m_Context.ptr != (IntPtr)0);
+            return (m_context.ptr != (IntPtr)0);
         }
 
         public void AbcUpdateConfigElements(AlembicTreeNode node = null)
         {
             if (node == null)
-                node = alembicTreeRoot;
+                node = m_alembicTreeRoot;
             using (var o = node.alembicObjects.GetEnumerator())
             {
                 while (o.MoveNext())
@@ -89,7 +89,7 @@ namespace UTJ.Alembic
         public void AbcUpdateElements( AlembicTreeNode node = null )
         {
             if (node == null)
-                node = alembicTreeRoot;
+                node = m_alembicTreeRoot;
             using (var o = node.alembicObjects.GetEnumerator())
             {
                 while (o.MoveNext())
@@ -109,13 +109,13 @@ namespace UTJ.Alembic
         public float abcStartTime
         {
             get {
-                return AbcIsValid() ? AbcAPI.aiGetStartTime(m_Context) : 0;
+                return AbcIsValid() ? AbcAPI.aiGetStartTime(m_context) : 0;
             }
         }
         public int abcFrameCount
         {
             get {
-                return AbcIsValid() ? AbcAPI.aiGetFrameCount(m_Context) : 0;
+                return AbcIsValid() ? AbcAPI.aiGetFrameCount(m_context) : 0;
             }
         }
 
@@ -123,24 +123,23 @@ namespace UTJ.Alembic
         {
             get
             {
-                return AbcIsValid() ? AbcAPI.aiGetEndTime(m_Context) : 0;
+                return AbcIsValid() ? AbcAPI.aiGetEndTime(m_context) : 0;
             }
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdate(float time, float motionScale,bool interpolateSamples)
+        public bool AbcUpdate(float time, float motionScale, bool interpolateSamples)
         {
-            if (m_StreamInterupted) return true;
-            
-            if (!AbcIsValid() || !m_Loaded) return false;
+            if (m_streamInterupted) return true;
+            if (!AbcIsValid() || !m_loaded) return false;
 
-            m_Time = time;
-            m_Config.interpolateSamples = interpolateSamples;
-            m_Config.vertexMotionScale = motionScale;
-            AbcAPI.aiSetConfig(m_Context, ref m_Config);
+            m_time = time;
+            m_config.interpolateSamples = interpolateSamples;
+            m_config.vertexMotionScale = motionScale;
+            AbcAPI.aiSetConfig(m_context, ref m_config);
             AbcUpdateConfigElements();
 
-            AbcAPI.aiUpdateSamples(m_Context, m_Time);
+            AbcAPI.aiUpdateSamples(m_context, m_time);
             AbcUpdateElements();
 
             return true;
@@ -148,51 +147,49 @@ namespace UTJ.Alembic
    
         public void AbcLoad()
         {
-            m_Time = 0.0f;
+            m_time = 0.0f;
+            m_context = AbcAPI.aiCreateContext(m_alembicTreeRoot.linkedGameObj.GetInstanceID());
 
-            m_Context = AbcAPI.aiCreateContext(alembicTreeRoot.linkedGameObj.GetInstanceID());
-
-            var settings = m_StreamDesc.settings;
-            m_Config.swapHandedness = settings.swapHandedness;
-            m_Config.swapFaceWinding = settings.swapFaceWinding;
-            m_Config.normalsMode = settings.normals;
-            m_Config.tangentsMode = settings.tangents;
-            m_Config.turnQuadEdges = settings.turnQuadEdges;
-            m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.cameraAspectRatio);
+            var settings = m_streamDesc.settings;
+            m_config.swapHandedness = settings.swapHandedness;
+            m_config.swapFaceWinding = settings.swapFaceWinding;
+            m_config.normalsMode = settings.normals;
+            m_config.tangentsMode = settings.tangents;
+            m_config.turnQuadEdges = settings.turnQuadEdges;
+            m_config.aspectRatio = AbcAPI.GetAspectRatio(settings.cameraAspectRatio);
 #if UNITY_2017_3_OR_NEWER
-            if (settings.use32BitsIndexBuffer)
-                m_Config.splitUnit = 0x7fffffff;
-            else
+            m_config.splitUnit = 0x7fffffff;
+#else
+            m_config.splitUnit = 65000;
 #endif
-                m_Config.splitUnit = 65000;
-            AbcAPI.aiSetConfig(m_Context, ref m_Config);
+            AbcAPI.aiSetConfig(m_context, ref m_config);
 
-            m_Loaded = AbcAPI.aiLoad(m_Context,Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
+            m_loaded = AbcAPI.aiLoad(m_context,Application.streamingAssetsPath + m_streamDesc.pathToAbc);
 
-            if (m_Loaded)
+            if (m_loaded)
             {
-                AbcAPI.UpdateAbcTree(m_Context, alembicTreeRoot, m_Time);
-                AlembicStream.s_Streams.Add(this);
+                AbcAPI.UpdateAbcTree(m_context, m_alembicTreeRoot, m_time);
+                AlembicStream.s_streams.Add(this);
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
+                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.pathToAbc);
             }
         }
 
         public void Dispose()
         {
-            AlembicStream.s_Streams.Remove(this);
-            if (alembicTreeRoot != null)
+            AlembicStream.s_streams.Remove(this);
+            if (m_alembicTreeRoot != null)
             {
-                alembicTreeRoot.Dispose();
-                alembicTreeRoot = null;
+                m_alembicTreeRoot.Dispose();
+                m_alembicTreeRoot = null;
             }
 
             if (AbcIsValid())
             {
-                AbcAPI.aiDestroyContext(m_Context);
-                m_Context = default(AbcAPI.aiContext);
+                AbcAPI.aiDestroyContext(m_context);
+                m_context = default(AbcAPI.aiContext);
             }
         }
     }

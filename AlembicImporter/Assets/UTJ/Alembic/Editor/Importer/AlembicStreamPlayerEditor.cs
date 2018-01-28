@@ -9,17 +9,17 @@ namespace UTJ.Alembic
     {
         public override void OnInspectorGUI()
         {   
-            SerializedProperty vertexMotionScale = serializedObject.FindProperty("vertexMotionScale");
-            SerializedProperty interpolateSamples = serializedObject.FindProperty("interpolateSamples");
-            SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
-            SerializedProperty currentTime = serializedObject.FindProperty("currentTime");
-            SerializedProperty endFrame = serializedObject.FindProperty("endFrame");
-            SerializedProperty startFrame = serializedObject.FindProperty("startFrame");
+            SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
+            SerializedProperty interpolateSamples = serializedObject.FindProperty("m_interpolateSamples");
+            SerializedProperty streamDescriptorObj = serializedObject.FindProperty("m_streamDescriptor");
+            SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
+            SerializedProperty endFrame = serializedObject.FindProperty("m_endFrame");
+            SerializedProperty startFrame = serializedObject.FindProperty("m_startFrame");
             
-            var targetStreamDesc = (target as AlembicStreamPlayer).streamDescriptor;
+            var targetStreamDesc = (target as AlembicStreamPlayer).m_streamDescriptor;
             var minFrame = targetStreamDesc.minFrame;
             var maxFrame = targetStreamDesc.maxFrame;
-            var frameLength = targetStreamDesc.FrameLength;
+            var frameLength = targetStreamDesc.frameLength;
             var frameRate = frameLength==0.0f ? 0.0f : 1.0f / frameLength;
             var hasVaryingTopology= false;
             var hasAcyclicFramerate = false;
@@ -27,11 +27,11 @@ namespace UTJ.Alembic
             var multipleTimeRanges = false;
             foreach (AlembicStreamPlayer player in targets)
             {
-                if (player.streamDescriptor.minFrame != minFrame) multipleTimeRanges = true;
-                if (player.streamDescriptor.maxFrame != maxFrame) multipleTimeRanges = true;
-                if (player.streamDescriptor.FrameLength != frameLength) multipleFramerates = true;
-                if (player.streamDescriptor.hasVaryingTopology) hasVaryingTopology = true;
-                if (player.streamDescriptor.hasAcyclicFramerate) hasAcyclicFramerate = true;
+                if (player.m_streamDescriptor.minFrame != minFrame) multipleTimeRanges = true;
+                if (player.m_streamDescriptor.maxFrame != maxFrame) multipleTimeRanges = true;
+                if (player.m_streamDescriptor.frameLength != frameLength) multipleFramerates = true;
+                if (player.m_streamDescriptor.hasVaryingTopology) hasVaryingTopology = true;
+                if (player.m_streamDescriptor.hasAcyclicFramerate) hasAcyclicFramerate = true;
             }
 
             EditorGUI.BeginDisabledGroup(true);
