@@ -128,22 +128,6 @@ abciAPI aiObject* aiGetParent(aiObject* obj)
     return obj ? obj->getParent() : nullptr;
 }
 
-abciAPI void aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg)
-{
-    if (schema)
-    {
-        schema->setSampleCallback(cb, arg);
-    }
-}
-
-abciAPI void aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg)
-{
-    if (schema)
-    {
-        schema->setConfigCallback(cb, arg);
-    }
-}
-
 abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
 {
     return schema ? schema->getObject() : nullptr;
@@ -157,6 +141,12 @@ abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
 abciAPI bool aiSchemaIsDirty(aiSchemaBase* schema)
 {
     return schema ? schema->isDirty() : false;
+}
+
+abciAPI void aiSchemaMarkForceUpdate(aiSchemaBase * schema)
+{
+    if (schema)
+        schema->markForceUpdate();
 }
 
 

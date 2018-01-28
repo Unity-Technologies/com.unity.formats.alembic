@@ -39,47 +39,14 @@ const aiConfig& aiSchemaBase::getConfig() const
     return m_config;
 }
 
-void aiSchemaBase::setConfigCallback(aiConfigCallback cb, void *arg)
-{
-    m_configCb = cb;
-    m_configCbArg = arg;
-}
-
-void aiSchemaBase::setSampleCallback(aiSampleCallback cb, void *arg)
-{
-    m_sampleCb = cb;
-    m_sampleCbArg = arg;
-}
-
-void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
-{
-    if (m_configCb)
-        m_configCb(m_configCbArg, config);
-}
-
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample) const
-{
-    if (m_sampleCb)
-        m_sampleCb(m_sampleCbArg, sample);
-}
-
 void aiSchemaBase::readConfig()
 {
-    DebugLog("aiSchemaBase::readConfig");
-
     m_config = m_obj->getContext()->getConfig();
-
-    DebugLog("  Original config: %s", ToString(m_config).c_str());
-
-    // get object config overrides (if any)
-    invokeConfigCallback(&m_config);
-
-    DebugLog("  Override config: %s", ToString(m_config).c_str());
 }
 
 bool aiSchemaBase::isConstant() const { return m_constant; }
 bool aiSchemaBase::isDirty() const { return m_dirty; }
-void aiSchemaBase::clean() { m_dirty = false; }
+void aiSchemaBase::markForceUpdate() { m_force_update = true; }
 
 int aiSchemaBase::getNumProperties() const
 {

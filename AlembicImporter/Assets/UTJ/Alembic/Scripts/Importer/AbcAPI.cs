@@ -228,9 +228,12 @@ namespace UTJ.Alembic
                 get { return aiSchemaGetSample(this); }
             }
 
+            public void markForceUpdate() { aiSchemaMarkForceUpdate(this); }
+
             [DllImport("abci")] public static extern Bool aiSchemaIsConstant(aiSchema schema);
             [DllImport("abci")] public static extern Bool aiSchemaIsDirty(aiSchema schema);
             [DllImport("abci")] public static extern aiSample aiSchemaGetSample(aiSchema schema);
+            [DllImport("abci")] public static extern void aiSchemaMarkForceUpdate(aiSchema schema);
         }
 
         public struct aiProperty
@@ -292,8 +295,6 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
         [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
         public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
-        [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
-        [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
         [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
 
         [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);

@@ -114,7 +114,6 @@ struct aiConfig
     aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
     aiTangentsMode tangents_mode = aiTangentsMode::None;
     float aspect_ratio = -1.0f;
-    bool force_update = false;
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     float vertex_motion_scale = 1.0f;
@@ -254,8 +253,6 @@ struct aiPropertyData
 
 
 using aiNodeEnumerator = void (abciSTDCall*)(aiObject *node, void *user_data);
-using aiConfigCallback =  void (abciSTDCall*)(void *csObj, aiConfig *config);
-using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample);
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
@@ -278,12 +275,11 @@ abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
 abciAPI void            aiSetEnabled(aiObject* obj, bool v);
 
-abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
-abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
 abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsDirty(aiSchemaBase* schema);
+abciAPI void            aiSchemaMarkForceUpdate(aiSchemaBase* schema);
 
 abciAPI aiXForm*        aiGetXForm(aiObject* obj);
 abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *dst);

@@ -20,7 +20,7 @@ public:
     AbcCoreAbstract::chrono_t m_current_time_offset = 0;
     AbcCoreAbstract::chrono_t m_current_time_interval = 0;
 protected:
-    aiSchemaBase *m_schema;
+    aiSchemaBase *m_schema = nullptr;
     aiConfig m_config;
 };
 
@@ -37,10 +37,6 @@ public:
     // config at last update time
     const aiConfig& getConfig() const;
 
-    void setConfigCallback(aiConfigCallback cb, void *arg);
-    void setSampleCallback(aiSampleCallback cb, void *arg);
-    void invokeConfigCallback(aiConfig *config) const;
-    void invokeSampleCallback(aiSampleBase *sample) const;
     virtual aiSampleBase* updateSample(const abcSampleSelector& ss) = 0;
     virtual aiSampleBase* getSample() = 0;
 
@@ -48,7 +44,7 @@ public:
 
     bool isConstant() const;
     bool isDirty() const;
-    void clean();
+    void markForceUpdate();
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
     aiProperty* getPropertyByName(const std::string& name);
@@ -60,13 +56,10 @@ protected:
 
 protected:
     aiObject *m_obj = nullptr;
-    aiConfigCallback m_configCb = nullptr;
-    void *m_configCbArg = nullptr;
-    aiSampleCallback m_sampleCb = nullptr;
-    void *m_sampleCbArg = nullptr;
     aiConfig m_config;
     bool m_constant = false;
     bool m_dirty = false;
+    bool m_force_update = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -132,13 +125,13 @@ public:
             bool data_changed = false;
             sample = m_the_sample.get();
             sample->updateConfig(m_config, data_changed);
-            if (!m_config.force_update && !data_changed && (m_constant || !m_config.interpolate_samples))
+            if (!m_force_update && !data_changed && (m_constant || !m_config.interpolate_samples))
             {
                 sample = nullptr;
             }
         }
 
-
+        m_force_update = false;
         m_last_sample_index = sample_index;
 
         if (sample) {
@@ -149,7 +142,6 @@ public:
                 sample->m_current_time_interval = interval;
                 sample->doInterpolation();
             }
-            invokeSampleCallback(sample);
             m_dirty = true;
         }
         else {

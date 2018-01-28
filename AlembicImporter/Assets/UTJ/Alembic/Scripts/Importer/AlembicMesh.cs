@@ -89,12 +89,10 @@ namespace UTJ.Alembic
             m_freshSetup = true;
         }
 
-        public override void AbcGetConfig(ref AbcAPI.aiConfig config)
+        public override void AbcBeforeUpdateSamples()
         {
-            // if 'forceUpdate' is set true, even if alembic sample data do not change at all
-            // AbcSampleUpdated will still be called (topologyChanged will be false)
-
-            config.forceUpdate = m_freshSetup;
+            if(m_freshSetup)
+                m_abcSchema.markForceUpdate();
         }
 
         public override void AbcSampleUpdated(AbcAPI.aiSample sample)
@@ -307,6 +305,7 @@ namespace UTJ.Alembic
                 {
                     var submesh = split.submeshes[smi];
                     split.mesh.SetTriangles(submesh.indexCache.List, smi);
+                    split.mesh.UploadMeshData(false);
                 }
             }
         }

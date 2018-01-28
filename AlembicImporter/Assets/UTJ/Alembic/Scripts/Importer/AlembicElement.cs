@@ -8,16 +8,8 @@ namespace UTJ.Alembic
     {
         protected AbcAPI.aiObject m_abcObj;
         protected AbcAPI.aiSchema m_abcSchema;
-        protected GCHandle m_thisHandle;
-        private bool m_pendingUpdate;
 
         public AlembicTreeNode abcTreeNode { get; set; }
-
-        static void ConfigCallback(IntPtr __this, ref AbcAPI.aiConfig config)
-        {
-            var _this = GCHandle.FromIntPtr(__this).Target as AlembicElement;
-            _this.AbcGetConfig(ref config);
-        }
 
         public T GetOrAddComponent<T>() where T : Component
         {
@@ -29,7 +21,6 @@ namespace UTJ.Alembic
 
         public void Dispose()
         {
-            m_thisHandle.Free();
             if (abcTreeNode != null )
                 abcTreeNode.RemoveAlembicObject(this);
         }
@@ -38,16 +29,6 @@ namespace UTJ.Alembic
         {
             m_abcObj = abcObj;
             m_abcSchema = abcSchema;
-            m_thisHandle = GCHandle.Alloc(this);
-
-            IntPtr ptr = GCHandle.ToIntPtr(m_thisHandle);
-            AbcAPI.aiSchemaSetConfigCallback(abcSchema, ConfigCallback, ptr);
-        }
-
-        // Called by loading thread (not necessarily the main thread)
-        public virtual void AbcGetConfig(ref AbcAPI.aiConfig config)
-        {
-            // Overrides aiConfig options here if needed
         }
 
         // Called in main thread before update sample. 

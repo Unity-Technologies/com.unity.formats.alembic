@@ -6,13 +6,6 @@ namespace UTJ.Alembic
     {
         private AbcAPI.aiXFormData m_abcData;
 
-        // No config overrides on AlembicXForm
-
-        public override void AbcBeforeUpdateSamples()
-        {
-            // nothing to do
-        }
-
         public override void AbcSampleUpdated(AbcAPI.aiSample sample)
         {
             AbcAPI.aiXFormGetData(sample, ref m_abcData);

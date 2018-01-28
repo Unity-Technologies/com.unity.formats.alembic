@@ -24,7 +24,6 @@ std::string ToString(const aiConfig &v)
             ? "smooth"
             : "split"));
     oss << ", aspectRatio: " << v.aspect_ratio;
-    oss << ", forceUpdate: " << (v.force_update ? "true" : "false") << "}";
 
     return oss.str();
 }
