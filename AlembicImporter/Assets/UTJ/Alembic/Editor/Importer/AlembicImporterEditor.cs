@@ -13,7 +13,7 @@ namespace UTJ.Alembic
     {
         public override void OnInspectorGUI()
         {
-            var importer = serializedObject.targetObject as AlembicImporter;
+            //var importer = serializedObject.targetObject as AlembicImporter;
 
             DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"),Enum.GetNames(typeof(AbcAPI.aiNormalsMode)));
             DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"),Enum.GetNames(typeof(AbcAPI.aiTangentsMode)));

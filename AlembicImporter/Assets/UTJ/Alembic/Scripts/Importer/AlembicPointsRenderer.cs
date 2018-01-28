@@ -97,7 +97,7 @@ namespace UTJ.Alembic
         public void Flush()
         {
             var apc = GetComponent<AlembicPointsCloud>();
-            var points = apc.abcPositions;
+            var points = apc.abcPoints;
             if(points == null) { return; }
 
             int num_instances = points.Count;

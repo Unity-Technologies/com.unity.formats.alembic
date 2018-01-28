@@ -89,7 +89,7 @@ public:
     RawVector<abcV3> m_points, m_points2, m_points_int;
     RawVector<abcV3> m_velocities;
     RawVector<abcV2> m_uv0, m_uv1;
-    RawVector<abcV3> m_normals, m_normals2;
+    RawVector<abcV3> m_normals, m_normals2, m_normals_int;
     RawVector<abcV4> m_tangents;
     RawVector<abcC4> m_colors;
 

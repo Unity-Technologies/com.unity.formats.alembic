@@ -205,8 +205,15 @@ void aiPolyMeshSample::prepareSplits()
         m_points_ref = m_points_int;
     }
 
-    if (summary.compute_normals && summary.interpolate_points)
+    if (summary.compute_normals && summary.interpolate_points) {
         computeNormals();
+    }
+    else if (summary.interpolate_normals) {
+        m_normals_int.resize_discard(m_normals.size());
+        Lerp(m_normals_int.data(), m_normals.data(), m_normals2.data(), (int)m_normals.size(), (float)m_current_time_offset);
+        Normalize(m_normals_int.data(), (int)m_normals.size());
+        m_normals_ref = m_normals_int;
+    }
 
     if (summary.compute_tangents && (summary.interpolate_points || summary.interpolate_normals))
         computeTangents();
@@ -234,20 +241,14 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
                 m_points.data(), m_points2.data(), split.vertex_count, split.vertex_offset,
                 (float)m_current_time_interval, m_config.vertex_motion_scale);
         }
-        else if (!m_velocities.empty()) {
+        else if (!m_velocities_ref.empty()) {
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
         }
     }
 
     if (data.normals) {
         if (summary.has_normals) {
-            if (summary.interpolate_normals) {
-                Lerp(data.normals, m_normals.data(), m_normals2.data(), split.vertex_count, split.vertex_offset, (float)m_current_time_offset);
-                Normalize(data.normals, split.vertex_count);
-            }
-            else {
-                m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
-            }
+            m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
         }
         else {
             memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
@@ -562,16 +563,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
             sample.m_points_ref = sample.m_points;
         }
 
-        if (!m_constant_velocities.empty()) {
-            sample.m_velocities_ref = m_constant_velocities;
-        }
-        else if (!summary.compute_velocities && summary.has_velocities_prop) {
-            Remap(sample.m_velocities, sample.m_velocities_sp->get(), topology.m_remap_points);
-            if (m_config.swap_handedness)
-                SwapHandedness(sample.m_velocities.data(), (int)sample.m_velocities.size());
-            sample.m_velocities_ref = sample.m_velocities;
-        }
-
         if (!m_constant_normals.empty()) {
             sample.m_normals_ref = m_constant_normals;
         }
@@ -611,6 +602,18 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
         }
     }
 
+
+    if (!m_constant_velocities.empty()) {
+        sample.m_velocities_ref = m_constant_velocities;
+    }
+    else if (!summary.compute_velocities && summary.has_velocities_prop) {
+        auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
+        Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
+        if (m_config.swap_handedness)
+            SwapHandedness(dst.data(), (int)dst.size());
+        sample.m_velocities_ref = dst;
+    }
+
     if (summary.interpolate_points) {
         Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
         if (m_config.swap_handedness)
@@ -622,9 +625,9 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topology_ch
             SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
     }
 
-    // compute normals / tangents
+    // compute normals & tangents
     // if interpolation is enabled, this will be done in prepareSplits()
-    if (!summary.interpolate_normals) {
+    if (!summary.interpolate_points && !summary.interpolate_normals) {
         if (summary.compute_normals)
             sample.computeNormals();
         if (summary.compute_tangents)

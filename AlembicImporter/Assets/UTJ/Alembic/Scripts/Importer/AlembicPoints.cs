@@ -43,13 +43,13 @@ namespace UTJ.Alembic
                         AlembicTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
 
 
-            if (cloud.abcPositions.Count == 0)
+            if (cloud.abcPoints.Count == 0)
             {
                 AbcAPI.aiPointsGetSummary(m_AbcSchema, ref m_Summary);
-                cloud.m_abcPositions.Resize(m_Summary.peakCount);
+                cloud.m_abcPoints.Resize(m_Summary.peakCount);
                 cloud.m_abcIDs.Resize(m_Summary.peakCount);
-                cloud.m_peakVertexCount = m_Summary.peakCount;
-                m_AbcData.positions = cloud.m_abcPositions;
+                cloud.m_peakPointCount = m_Summary.peakCount;
+                m_AbcData.positions = cloud.m_abcPoints;
                 m_AbcData.ids = cloud.m_abcIDs;
                 if (m_Summary.hasVelocity)
                 {
@@ -58,7 +58,7 @@ namespace UTJ.Alembic
                 }
             }
 
-            m_AbcData.positions = cloud.m_abcPositions;
+            m_AbcData.positions = cloud.m_abcPoints;
             m_AbcData.ids = cloud.m_abcIDs;
             if (m_Summary.hasVelocity)
                 m_AbcData.velocities = cloud.m_abcVelocities;
