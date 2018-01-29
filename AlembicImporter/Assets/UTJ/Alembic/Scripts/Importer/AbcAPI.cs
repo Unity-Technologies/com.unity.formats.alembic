@@ -435,17 +435,17 @@ namespace UTJ.Alembic
         public static implicit operator aiSample(aiPolyMeshSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
         public void GetSummary(ref aiMeshSampleSummary dst) { aiPolyMeshGetSampleSummary(self, ref dst); }
-        public void GetSplitSummary(int splitIndex, ref aiMeshSplitSummary dst) { aiPolyMeshGetSplitSummary(self, splitIndex, ref dst); }
-        public void GetSubmeshSummary(int splitIndex, int submeshIndex, ref aiSubmeshSummary dst) { aiPolyMeshGetSubmeshSummary(self, splitIndex, submeshIndex, ref dst); }
-        public void FillVertexBuffer(int splitIndex, ref aiPolyMeshData dst) { aiPolyMeshFillVertexBuffer(self, splitIndex, ref dst); }
-        public void FillSubmeshIndices(int splitIndex, int submeshIndex, ref aiSubmeshData dst) { aiPolyMeshFillSubmeshIndices(self, splitIndex, submeshIndex, ref dst); }
+        public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { aiPolyMeshGetSplitSummaries(self, dst); }
+        public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { aiPolyMeshGetSubmeshSummaries(self, dst); }
+        public void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
+        public void Sync() { aiSampleSync(self); }
 
         #region internal
         [DllImport("abci")] static extern void aiPolyMeshGetSampleSummary(IntPtr sample, ref aiMeshSampleSummary dst);
-        [DllImport("abci")] static extern int aiPolyMeshGetSplitSummary(IntPtr sample, int splitIndex, ref aiMeshSplitSummary dst);
-        [DllImport("abci")] static extern void aiPolyMeshGetSubmeshSummary(IntPtr sample, int splitIndex, int submeshIndex, ref aiSubmeshSummary dst);
-        [DllImport("abci")] static extern void aiPolyMeshFillVertexBuffer(IntPtr sample, int splitIndex, ref aiPolyMeshData dst);
-        [DllImport("abci")] static extern void aiPolyMeshFillSubmeshIndices(IntPtr sample, int splitIndex, int submeshIndex, ref aiSubmeshData dst);
+        [DllImport("abci")] static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);
+        [DllImport("abci")] static extern void aiPolyMeshGetSubmeshSummaries(IntPtr sample, IntPtr dst);
+        [DllImport("abci")] static extern void aiPolyMeshFillVertexBuffer(IntPtr sample, IntPtr vbs, IntPtr ibs);
+        [DllImport("abci")] static extern void aiSampleSync(IntPtr sample);
         #endregion
     }
 

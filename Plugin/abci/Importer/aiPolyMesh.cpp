@@ -154,29 +154,32 @@ void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
     dst.topology_changed = m_topology_changed;
 }
 
-void aiPolyMeshSample::getSplitSummary(int split_index, aiMeshSplitSummary & dst)
-{
-    auto& src = m_topology->m_refiner.splits[split_index];
-    dst.submesh_count  = src.submesh_count;
-    dst.submesh_offset = src.submesh_offset;
-    dst.vertex_count   = src.vertex_count;
-    dst.vertex_offset  = src.vertex_offset;
-    dst.index_count    = src.index_count;
-    dst.index_offset   = src.index_offset;
-}
-
-void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary)
+void aiPolyMeshSample::getSplitSummaries(aiMeshSplitSummary  *dst) const
 {
     auto& refiner = m_topology->m_refiner;
-    auto& split = refiner.splits[split_index];
-    auto& submesh = refiner.submeshes[split.submesh_offset + submesh_index];
-
-    summary.split_index   = submesh.split_index;
-    summary.submesh_index = submesh.submesh_index;
-    summary.index_count   = submesh.index_count;
+    for (int i = 0; i < (int)refiner.splits.size(); ++i) {
+        auto& src = refiner.splits[i];
+        dst[i].submesh_count  = src.submesh_count;
+        dst[i].submesh_offset = src.submesh_offset;
+        dst[i].vertex_count   = src.vertex_count;
+        dst[i].vertex_offset  = src.vertex_offset;
+        dst[i].index_count    = src.index_count;
+        dst[i].index_offset   = src.index_offset;
+    }
 }
 
-void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
+void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
+{
+    auto& refiner = m_topology->m_refiner;
+    for (int i = 0; i < (int)refiner.submeshes.size(); ++i) {
+        auto& src = refiner.submeshes[i];
+        dst[i].split_index   = src.split_index;
+        dst[i].submesh_index = src.submesh_index;
+        dst[i].index_count   = src.index_count;
+    }
+}
+
+void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
     auto& config = getConfig();
     DebugLog("aiPolyMeshSample::fillVertexBuffer(split_index=%d)", split_index);
@@ -253,15 +256,37 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
     m_topology->m_freshly_read_topology_data = false;
 }
 
-void aiPolyMeshSample::fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const
+void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
 {
     if (!data.indices)
         return;
 
     auto& refiner = m_topology->m_refiner;
-    auto& split = refiner.splits[split_index];
-    auto& submesh = refiner.submeshes[split.submesh_offset + submesh_index];
+    auto& submesh = refiner.submeshes[submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
+}
+
+void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
+{
+    auto body = [this, vbs, ibs]() {
+        auto& refiner = m_topology->m_refiner;
+        for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
+            fillSplitVertices(spi, vbs[spi]);
+        for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
+            fillSubmeshIndices(smi, ibs[smi]);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_copy = std::async(std::launch::async, body);
+}
+
+void aiPolyMeshSample::sync()
+{
+    if (m_async_copy.valid())
+        m_async_copy.wait();
+    m_force_sync = false;
 }
 
 // ---
@@ -451,31 +476,30 @@ void aiPolyMesh::updateSample(const abcSampleSelector& ss)
     if (m_load_task.task_read) {
         getContext()->queueTask(m_load_task);
     }
-    m_force_sync = false;
 }
 
 void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
 {
-    if (m_force_sync || !getConfig().async_load) {
+    auto body = [this, &sample, idx]() {
         readSampleBody(sample, idx);
-    }
-    else {
-        m_load_task.task_read = [this, &sample, idx]() {
-            readSampleBody(sample, idx);
-        };
-    }
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_load_task.task_read = body;
 }
 
 void aiPolyMesh::cookSample(Sample& sample)
 {
-    if (m_force_sync || !getConfig().async_load) {
+    auto body = [this, &sample]() {
         cookSampleBody(sample);
-    }
-    else {
-        m_load_task.task_cook = [this, &sample]() {
-            cookSampleBody(sample);
-        };
-    }
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_load_task.task_cook = body;
 }
 
 void aiPolyMesh::sync()

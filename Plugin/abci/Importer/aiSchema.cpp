@@ -20,6 +20,8 @@ const aiConfig & aiSampleBase::getConfig() const
     return m_schema->getConfig();
 }
 
+void aiSampleBase::markForceSync() { m_force_sync = true; }
+
 
 aiSchemaBase::aiSchemaBase(aiObject *obj)
     : m_obj(obj)

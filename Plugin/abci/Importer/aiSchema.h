@@ -11,14 +11,17 @@ public:
     virtual ~aiSampleBase();
 
     virtual aiSchemaBase* getSchema() const { return m_schema; }
-
     const aiConfig& getConfig() const;
+
+    virtual void sync() {}
+    void markForceSync();
 
 public:
     float m_current_time_offset = 0;
     float m_current_time_interval = 0;
 protected:
     aiSchemaBase *m_schema = nullptr;
+    bool m_force_sync = false;
 };
 
 
@@ -109,22 +112,22 @@ public:
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();
 
-        if (!m_the_sample || (!m_constant && sample_index != m_last_sample_index)) {
-            if (!m_the_sample)
-                m_the_sample.reset(newSample());
-            sample = m_the_sample.get();
+        if (!m_sample || (!m_constant && sample_index != m_last_sample_index)) {
+            if (!m_sample)
+                m_sample.reset(newSample());
+            sample = m_sample.get();
             readSample(*sample, sample_index);
         }
         else {
-            sample = m_the_sample.get();
+            sample = m_sample.get();
             if ((m_constant || !config.interpolate_samples) && !m_force_update)
                 sample = nullptr;
         }
 
-        m_force_update = false;
-        m_last_sample_index = sample_index;
-
         if (sample) {
+            if (m_force_sync)
+                sample->markForceSync();
+
             if (config.interpolate_samples) {
                 auto& ts = *m_time_sampling;
                 double requested_time = ss.getRequestedTime();
@@ -149,11 +152,15 @@ public:
             m_data_updated = false;
         }
         updateProperties(ss);
+
+        m_last_sample_index = sample_index;
+        m_force_update = false;
+        m_force_sync = false;
     }
 
     Sample* getSample() override
     {
-        return m_the_sample.get();
+        return m_sample.get();
     }
 
 protected:
@@ -169,7 +176,7 @@ protected:
 protected:
     AbcSchema m_schema;
     Abc::TimeSamplingPtr m_time_sampling;
-    SamplePtr m_the_sample;
+    SamplePtr m_sample;
     int64_t m_num_samples = 0;
     int64_t m_last_sample_index = -1;
 };

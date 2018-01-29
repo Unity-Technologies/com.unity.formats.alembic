@@ -280,16 +280,17 @@ abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsDataUpdated(aiSchemaBase* schema);
 abciAPI void            aiSchemaMarkForceUpdate(aiSchemaBase* schema);
 
+abciAPI void            aiSampleSync(aiSampleBase* sample);
+
 abciAPI aiXform*        aiGetXform(aiObject* obj);
 abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
 
 abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst);
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst);
-abciAPI void            aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst);
-abciAPI void            aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* dst);
-abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst);
-abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* dst);
+abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
+abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
+abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
 abciAPI aiCamera*       aiGetCamera(aiObject* obj);
 abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);

@@ -58,14 +58,17 @@ public:
     void clear();
 
     void getSummary(aiMeshSampleSummary &dst) const;
-    void getSplitSummary(int split_index, aiMeshSplitSummary& dst);
-    void getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary);
+    void getSplitSummaries(aiMeshSplitSummary  *dst) const;
+    void getSubmeshSummaries(aiSubmeshSummary *dst) const;
 
     void computeNormals();
     void computeTangents();
 
-    void fillSplitVertices(int split_index, aiPolyMeshData &data);
-    void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
+    void fillSplitVertices(int split_index, aiPolyMeshData &data) const;
+    void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
+    void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
+
+    void sync() override;
 
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
@@ -92,6 +95,8 @@ public:
 
     TopologyPtr m_topology;
     bool m_topology_changed = false;
+
+    std::future<void> m_async_copy;
 };
 
 

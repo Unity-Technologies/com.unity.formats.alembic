@@ -140,6 +140,12 @@ abciAPI void aiSchemaMarkForceUpdate(aiSchemaBase * schema)
         schema->markForceUpdate();
 }
 
+abciAPI void aiSampleSync(aiSampleBase * sample)
+{
+    if (sample)
+        sample->sync();
+}
+
 
 abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
 {
@@ -185,28 +191,22 @@ abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSu
         sample->getSummary(*dst);
 }
 
-abciAPI void aiPolyMeshGetSplitSummary(aiPolyMeshSample* sample, int split_index, aiMeshSplitSummary *dst)
+abciAPI void aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst)
 {
     if (sample)
-        sample->getSplitSummary(split_index, *dst);
+        sample->getSplitSummaries(dst);
 }
 
-abciAPI void aiPolyMeshGetSubmeshSummary(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshSummary* dst)
+abciAPI void aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst)
 {
     if (sample)
-        sample->getSubmeshSummary(split_index, submesh_index, *dst);
+        sample->getSubmeshSummaries(dst);
 }
 
-abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int split_index, aiPolyMeshData* dst)
+abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs)
 {
     if (sample)
-        sample->fillSplitVertices(split_index, *dst);
-}
-
-abciAPI void aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, int split_index, int submesh_index, aiSubmeshData* dst)
-{
-    if (sample)
-        sample->fillSubmeshIndices(split_index, submesh_index, *dst);
+        sample->fillVertexBuffer(vbs, ibs);
 }
 
 abciAPI aiCamera* aiGetCamera(aiObject* obj)

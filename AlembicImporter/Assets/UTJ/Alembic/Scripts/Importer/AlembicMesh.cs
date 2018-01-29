@@ -10,7 +10,6 @@ namespace UTJ.Alembic
     {
         public class Split
         {
-            public aiMeshSplitSummary summary;
             public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
             public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
@@ -19,7 +18,6 @@ namespace UTJ.Alembic
             public PinnedList<Vector2> uv1Cache = new PinnedList<Vector2>();
             public PinnedList<Color> colorCache = new PinnedList<Color>();
 
-            public List<Submesh> submeshes = new List<Submesh>();
             public Mesh mesh;
             public GameObject host;
             public bool clear = true;
@@ -36,11 +34,21 @@ namespace UTJ.Alembic
         }
 
         aiPolyMesh m_abcSchema;
-        public aiMeshSummary m_summary;
-        public aiMeshSampleSummary m_sampleSummary;
-        public List<Split> m_splits = new List<Split>();
+        aiMeshSummary m_summary;
+        aiMeshSampleSummary m_sampleSummary;
+        PinnedList<aiMeshSplitSummary> m_splitSummaries = new PinnedList<aiMeshSplitSummary>();
+        PinnedList<aiSubmeshSummary> m_submeshSummaries = new PinnedList<aiSubmeshSummary>();
+        PinnedList<aiPolyMeshData> m_splitData = new PinnedList<aiPolyMeshData>();
+        PinnedList<aiSubmeshData> m_submeshData = new PinnedList<aiSubmeshData>();
+
+        List<Split> m_splits = new List<Split>();
+        List<Submesh> m_submeshes = new List<Submesh>();
         bool m_freshSetup = false;
-        
+
+
+        public aiMeshSummary summary { get { return m_summary; } }
+        public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
+
 
         void UpdateSplits(int numSplits)
         {
@@ -103,10 +111,20 @@ namespace UTJ.Alembic
                 return;
 
             var sample = m_abcSchema.sample;
-            var vertexData = default(aiPolyMeshData);
 
             sample.GetSummary(ref m_sampleSummary);
-            UpdateSplits(m_sampleSummary.splitCount);
+            int splitCount = m_sampleSummary.splitCount;
+            int submeshCount = m_sampleSummary.submeshCount;
+
+            m_splitSummaries.ResizeDiscard(splitCount);
+            m_splitData.ResizeDiscard(splitCount);
+            m_submeshSummaries.ResizeDiscard(submeshCount);
+            m_submeshData.ResizeDiscard(submeshCount);
+
+            sample.GetSplitSummaries(m_splitSummaries);
+            sample.GetSubmeshSummaries(m_submeshSummaries);
+
+            UpdateSplits(splitCount);
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
             if (m_freshSetup)
@@ -115,91 +133,85 @@ namespace UTJ.Alembic
                 m_freshSetup = false;
             }
 
-            for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
+            // setup buffers
+            var vertexData = default(aiPolyMeshData);
+            for (int spi = 0; spi < splitCount; ++spi)
             {
                 var split = m_splits[spi];
-                sample.GetSplitSummary(spi, ref split.summary);
 
                 split.clear = topologyChanged;
                 split.active = true;
 
-                int vertexCount = split.summary.vertexCount;
+                int vertexCount = m_splitSummaries[spi].vertexCount;
 
-                split.pointCache.Resize(vertexCount);
+                split.pointCache.ResizeDiscard(vertexCount);
                 vertexData.positions = split.pointCache;
 
                 if (m_summary.hasVelocities)
-                    split.velocitiesCache.Resize(vertexCount);
+                    split.velocitiesCache.ResizeDiscard(vertexCount);
                 else
-                    split.velocitiesCache.Resize(0);
+                    split.velocitiesCache.ResizeDiscard(0);
                 vertexData.velocities = split.velocitiesCache;
 
                 if (m_summary.hasNormals)
-                    split.normalCache.Resize(vertexCount);
+                    split.normalCache.ResizeDiscard(vertexCount);
                 else
-                    split.normalCache.Resize(0);
+                    split.normalCache.ResizeDiscard(0);
                 vertexData.normals = split.normalCache;
 
                 if (m_summary.hasTangents)
-                    split.tangentCache.Resize(vertexCount);
+                    split.tangentCache.ResizeDiscard(vertexCount);
                 else
-                    split.tangentCache.Resize(0);
+                    split.tangentCache.ResizeDiscard(0);
                 vertexData.tangents = split.tangentCache;
 
                 if (m_summary.hasUV0)
-                    split.uv0Cache.Resize(vertexCount);
+                    split.uv0Cache.ResizeDiscard(vertexCount);
                 else
-                    split.uv0Cache.Resize(0);
+                    split.uv0Cache.ResizeDiscard(0);
                 vertexData.uv0 = split.uv0Cache;
 
                 if (m_summary.hasUV1)
-                    split.uv1Cache.Resize(vertexCount);
+                    split.uv1Cache.ResizeDiscard(vertexCount);
                 else
-                    split.uv1Cache.Resize(0);
+                    split.uv1Cache.ResizeDiscard(0);
                 vertexData.uv1 = split.uv1Cache;
 
                 if (m_summary.hasColors)
-                    split.colorCache.Resize(vertexCount);
+                    split.colorCache.ResizeDiscard(vertexCount);
                 else
-                    split.colorCache.Resize(0);
+                    split.colorCache.ResizeDiscard(0);
                 vertexData.colors = split.colorCache;
 
-                sample.FillVertexBuffer(spi, ref vertexData);
-
-                split.center = vertexData.center;
-                split.size = vertexData.size;
+                m_splitData[spi] = vertexData;
             }
 
             if (topologyChanged)
             {
-                var submeshSummary = new aiSubmeshSummary();
-                var submeshData = new aiSubmeshData();
-                for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
+                if (m_submeshes.Count > submeshCount)
+                    m_submeshes.RemoveRange(submeshCount, m_submeshes.Count - submeshCount);
+                while (m_submeshes.Count < submeshCount)
+                    m_submeshes.Add(new Submesh());
+
+                var submeshData = default(aiSubmeshData);
+                for (int smi = 0; smi < submeshCount; ++smi)
                 {
-                    var split = m_splits[spi];
-                    int submeshCount = split.summary.submeshCount;
-
-                    if (split.submeshes.Count > submeshCount)
-                        split.submeshes.RemoveRange(submeshCount, split.submeshes.Count - submeshCount);
-                    while (split.submeshes.Count < submeshCount)
-                        split.submeshes.Add(new Submesh());
-
-                    for (int smi = 0; smi < submeshCount; ++smi)
-                    {
-                        var submesh = split.submeshes[smi];
-                        sample.GetSubmeshSummary(spi, smi, ref submeshSummary);
-                        submesh.indexCache.Resize(submeshSummary.indexCount);
-                        submeshData.indices = submesh.indexCache;
-                        sample.FillSubmeshIndices(spi, smi, ref submeshData);
-                    }
+                    var submesh = m_submeshes[smi];
+                    submesh.indexCache.ResizeDiscard(m_submeshSummaries[smi].indexCount);
+                    submeshData.indices = submesh.indexCache;
+                    m_submeshData[smi] = submeshData;
                 }
             }
             else
             {
-                for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
-                    for (int smi = 0; smi < m_splits[spi].summary.submeshCount; ++smi)
-                        m_splits[spi].submeshes[smi].update = false;
+                for (int smi = 0; smi < submeshCount; ++smi)
+                {
+                    m_submeshes[smi].update = false;
+                    m_submeshData[smi] = default(aiSubmeshData);
+                }
             }
+
+            sample.FillVertexBuffer(m_splitData, m_submeshData);
         }
 
         public override void AbcSyncDataEnd()
@@ -207,9 +219,12 @@ namespace UTJ.Alembic
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
+            var sample = m_abcSchema.sample;
+            sample.Sync();
+
             bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 
-            for (int s=0; s<m_splits.Count; ++s)
+            for (int s = 0; s < m_splits.Count; ++s)
             {
                 Split split = m_splits[s];
 
@@ -263,12 +278,14 @@ namespace UTJ.Alembic
                         split.mesh.SetUVs(3, split.velocitiesCache.List);
                     if (split.colorCache.Count > 0)
                         split.mesh.SetColors(split.colorCache.List);
+
                     // update the bounds
-                    split.mesh.bounds = new Bounds(split.center, split.size);
+                    var data = m_splitData[s];
+                    split.mesh.bounds = new Bounds(data.center, data.size);
 
                     if (split.clear)
                     {
-                        int submeshCount = split.summary.submeshCount;
+                        int submeshCount = m_splitSummaries[s].submeshCount;
                         split.mesh.subMeshCount = submeshCount;
                         MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
                         Material[] currentMaterials = renderer.sharedMaterials;
@@ -302,14 +319,14 @@ namespace UTJ.Alembic
                 }
             }
 
-            for (int spi = 0; spi < m_sampleSummary.splitCount; ++spi)
+            for (int smi = 0; smi < m_sampleSummary.submeshCount; ++smi)
             {
-                var split = m_splits[spi];
-                for (int smi = 0; smi < m_splits[spi].summary.submeshCount; ++smi)
+                var submesh = m_submeshes[smi];
+                if (submesh.update)
                 {
-                    var submesh = split.submeshes[smi];
-                    split.mesh.SetTriangles(submesh.indexCache.List, smi);
-                    split.mesh.UploadMeshData(false);
+                    var sum = m_submeshSummaries[smi];
+                    var split = m_splits[sum.splitIndex];
+                    split.mesh.SetTriangles(submesh.indexCache.List, sum.submeshIndex);
                 }
             }
         }

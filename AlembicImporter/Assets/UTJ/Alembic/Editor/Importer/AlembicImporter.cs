@@ -174,9 +174,10 @@ namespace UTJ.Alembic
             AlembicMesh mesh = node.GetAlembicObj<AlembicMesh>();
             if (mesh != null)
             {
-                if (mesh.m_summary.topologyVariance == aiTopologyVariance.Heterogeneous)
+                var sum = mesh.summary;
+                if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
                     varyingTopologyMeshNames.Add(node.linkedGameObj.name);
-                else if (mesh.m_sampleSummary.splitCount > 1)
+                else if (mesh.sampleSummary.splitCount > 1)
                     splittingMeshNames.Add(node.linkedGameObj.name);
             }
 
