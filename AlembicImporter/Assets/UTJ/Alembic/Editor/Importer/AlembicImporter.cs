@@ -69,7 +69,6 @@ namespace UTJ.Alembic
     public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
-        [SerializeField] public float scaleFactor = 0.01f;
         [SerializeField] public int startFrame = int.MinValue;
         [SerializeField] public int endFrame = int.MaxValue;        
         [SerializeField] public float abcStartTime;
@@ -96,7 +95,6 @@ namespace UTJ.Alembic
 
             var fileName = Path.GetFileNameWithoutExtension(destPath);
             var go = new GameObject(fileName);
-            go.transform.localScale *= scaleFactor;
             
             AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";

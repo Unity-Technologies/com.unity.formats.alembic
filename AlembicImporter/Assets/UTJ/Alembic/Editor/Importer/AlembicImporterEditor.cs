@@ -21,10 +21,10 @@ namespace UTJ.Alembic
 
             EditorGUILayout.Separator();
 
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.scaleFactor"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapHandedness"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapFaceWinding"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleFactor"));
             EditorGUILayout.Separator();
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));

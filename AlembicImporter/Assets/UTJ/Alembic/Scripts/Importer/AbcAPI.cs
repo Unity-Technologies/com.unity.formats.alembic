@@ -72,6 +72,7 @@ namespace UTJ.Alembic
     {
         public aiNormalsMode normalsMode;
         public aiTangentsMode tangentsMode;
+        public float scaleFactor;
         public float aspectRatio;
         public float vertexMotionScale;
         public int splitUnit;
@@ -83,15 +84,16 @@ namespace UTJ.Alembic
 
         public void SetDefaults()
         {
-            swapHandedness = true;
-            swapFaceWinding = false;
             normalsMode = aiNormalsMode.ComputeIfMissing;
             tangentsMode = aiTangentsMode.None;
+            scaleFactor = 0.01f;
             aspectRatio = -1.0f;
-            interpolateSamples = true;
-            turnQuadEdges = false;
             vertexMotionScale = 1.0f;
             splitUnit = 65000;
+            swapHandedness = true;
+            swapFaceWinding = false;
+            interpolateSamples = true;
+            turnQuadEdges = false;
             asyncLoad = true;
         }
     }

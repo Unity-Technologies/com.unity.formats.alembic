@@ -181,9 +181,7 @@ void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
 
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
-    auto& config = getConfig();
-    DebugLog("aiPolyMeshSample::fillVertexBuffer(split_index=%d)", split_index);
-    
+    auto& config = getConfig();    
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();
     auto& splits = m_topology->m_refiner.splits;
@@ -252,8 +250,6 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         data.center = (bbmin + bbmax) * 0.5f;
         data.size = bbmax - bbmin;
     }
-
-    m_topology->m_freshly_read_topology_data = false;
 }
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
@@ -596,6 +592,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         onTopologyChange(sample);
     }
     else {
+        notifyTopologyDetermined();
+
         // make remapped vertex buffer
         if (!m_constant_points.empty()) {
             sample.m_points_ref = m_constant_points;
@@ -604,6 +602,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             Remap(sample.m_points, sample.m_points_sp->get(), topology.m_remap_points);
             if (config.swap_handedness)
                 SwapHandedness(sample.m_points.data(), (int)sample.m_points.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(sample.m_points.data(), (int)sample.m_points.size(), config.scale_factor);
             sample.m_points_ref = sample.m_points;
         }
 
@@ -655,6 +655,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
         if (config.swap_handedness)
             SwapHandedness(dst.data(), (int)dst.size());
+        if (config.scale_factor != 1.0f)
+            ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
         sample.m_velocities_ref = dst;
     }
 
@@ -662,6 +664,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
         if (config.swap_handedness)
             SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
+        if (config.scale_factor != 1.0f)
+            ApplyScale(sample.m_points2.data(), (int)sample.m_points2.size(), config.scale_factor);
     }
     if (summary.interpolate_normals) {
         Remap(sample.m_normals2, sample.m_normals_sp2.getVals()->get(), topology.m_remap_normals);
@@ -818,6 +822,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
     topology.m_index_count = (int)refiner.new_indices_triangulated.size();
     topology.m_vertex_count = (int)refiner.new_points.size();
+    notifyTopologyDetermined();
 
     topology.m_remap_points.swap(refiner.new2old_points);
     if (summary.constant_points) {
@@ -830,6 +835,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     }
     if (config.swap_handedness)
         SwapHandedness(sample.m_points_ref.data(), (int)sample.m_points_ref.size());
+    if (config.scale_factor != 1.0f)
+        ApplyScale(sample.m_points_ref.data(), (int)sample.m_points_ref.size(), config.scale_factor);
 
     sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
     sample.m_uv0_ref = !m_constant_uv0.empty() ? m_constant_uv0 : sample.m_uv0;
@@ -849,7 +856,10 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
             indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_tangents_ref = m_constant_tangents;
     }
+}
 
-    topology.m_freshly_read_topology_data = true;
+void aiPolyMesh::notifyTopologyDetermined()
+{
+    // notify C# side?
 }
 

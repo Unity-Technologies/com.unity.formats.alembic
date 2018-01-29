@@ -44,7 +44,6 @@ public:
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
-    bool m_freshly_read_topology_data = false;
 };
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
@@ -125,6 +124,7 @@ public:
     void readSampleBody(Sample& sample, uint64_t idx);
     void cookSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
+    void notifyTopologyDetermined();
 
 public:
     RawVector<abcV3> m_constant_points;

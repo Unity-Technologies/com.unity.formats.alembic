@@ -111,6 +111,7 @@ struct aiConfig
 {
     aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
     aiTangentsMode tangents_mode = aiTangentsMode::None;
+    float scale_factor = 1.0f;
     float aspect_ratio = -1.0f;
     float vertex_motion_scale = 1.0f;
     int split_unit = 0x7fffffff;

@@ -22,6 +22,7 @@ void aiXformSample::decompose(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3
     translation.x = mat_remainder[3][0];
     translation.y = mat_remainder[3][1];
     translation.z = mat_remainder[3][2];
+    translation *= getConfig().scale_factor;
 
     // Extract rotation
     rotation = extractQuat(mat_remainder);

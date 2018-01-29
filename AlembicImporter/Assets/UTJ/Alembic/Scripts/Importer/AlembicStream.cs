@@ -126,6 +126,7 @@ namespace UTJ.Alembic
             m_config.swapHandedness = settings.swapHandedness;
             m_config.swapFaceWinding = settings.swapFaceWinding;
             m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
+            m_config.scaleFactor = settings.scaleFactor;
             m_config.normalsMode = settings.normals;
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
