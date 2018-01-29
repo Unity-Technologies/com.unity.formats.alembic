@@ -11,15 +11,15 @@ public:
     virtual ~aiSampleBase();
 
     virtual aiSchemaBase* getSchema() const { return m_schema; }
-    virtual void updateConfig(const aiConfig &config, bool &data_changed) = 0;
     virtual void doInterpolation() {}
+
+    const aiConfig& getConfig() const;
 
 public:
     float m_current_time_offset = 0;
     float m_current_time_interval = 0;
 protected:
     aiSchemaBase *m_schema = nullptr;
-    aiConfig m_config;
 };
 
 
@@ -31,17 +31,14 @@ public:
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
 
-    aiObject* getObject() const;
-    // config at last update time
+    aiObject* getObject();
     const aiConfig& getConfig() const;
 
     virtual aiSampleBase* updateSample(const abcSampleSelector& ss) = 0;
     virtual aiSampleBase* getSample() = 0;
 
-    void readConfig();
-
     bool isConstant() const;
-    bool isDirty() const;
+    bool isDataUpdated() const;
     void markForceUpdate();
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
@@ -54,9 +51,8 @@ protected:
 
 protected:
     aiObject *m_obj = nullptr;
-    aiConfig m_config;
     bool m_constant = false;
-    bool m_dirty = false;
+    bool m_data_updated = false;
     bool m_force_update = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
@@ -109,10 +105,9 @@ public:
 
     aiSampleBase* updateSample(const abcSampleSelector& ss) override
     {
-        readConfig();
-
         Sample* sample = nullptr;
         int64_t sample_index = getSampleIndex(ss);
+        auto& config = getConfig();
 
         if (!m_the_sample || (!m_constant && sample_index != m_last_sample_index)) {
             sample = readSample(sample_index);
@@ -120,10 +115,8 @@ public:
                 m_the_sample.reset(sample);
         }
         else {
-            bool data_changed = false;
             sample = m_the_sample.get();
-            sample->updateConfig(m_config, data_changed);
-            if (!m_force_update && !data_changed && (m_constant || !m_config.interpolate_samples))
+            if (!m_force_update && (m_constant || !config.interpolate_samples))
             {
                 sample = nullptr;
             }
@@ -133,17 +126,17 @@ public:
         m_last_sample_index = sample_index;
 
         if (sample) {
-            if (m_config.interpolate_samples) {
+            if (config.interpolate_samples) {
                 auto interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
                 auto index_time = m_time_sampling->getSampleTime(sample_index);
                 sample->m_current_time_offset = (float)std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
                 sample->m_current_time_interval = (float)interval;
                 sample->doInterpolation();
             }
-            m_dirty = true;
+            m_data_updated = true;
         }
         else {
-            m_dirty = false;
+            m_data_updated = false;
         }
         updateProperties(ss);
 

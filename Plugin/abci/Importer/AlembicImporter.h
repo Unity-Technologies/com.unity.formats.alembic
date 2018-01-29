@@ -275,7 +275,7 @@ abciAPI void            aiSetEnabled(aiObject* obj, bool v);
 abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
 abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
-abciAPI bool            aiSchemaIsDirty(aiSchemaBase* schema);
+abciAPI bool            aiSchemaIsDataUpdated(aiSchemaBase* schema);
 abciAPI void            aiSchemaMarkForceUpdate(aiSchemaBase* schema);
 
 abciAPI aiXform*        aiGetXform(aiObject* obj);

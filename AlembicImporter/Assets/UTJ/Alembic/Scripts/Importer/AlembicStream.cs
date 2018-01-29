@@ -20,12 +20,12 @@ namespace UTJ.Alembic
                 {
                     s.m_streamInterupted = true;
                     s.m_context = default(aiContext);
-                    s.m_loaded = false;   
+                    s.m_loaded = false;
                 }
             });
-        } 
+        }
 
-        public static void RemapStreamsWithPath(string oldPath , string newPath)
+        public static void RemapStreamsWithPath(string oldPath, string newPath)
         {
             s_streams.ForEach(s =>
             {
@@ -34,8 +34,8 @@ namespace UTJ.Alembic
                     s.m_streamInterupted = true;
                     s.m_streamDesc.pathToAbc = newPath;
                 }
-            } );
-        } 
+            });
+        }
 
         public static void ReconnectStreamsWithPath(string path)
         {
@@ -45,8 +45,8 @@ namespace UTJ.Alembic
                 {
                     s.m_streamInterupted = false;
                 }
-                    
-            } );
+
+            });
         }
 
         public AlembicTreeNode m_abcTreeRoot;
@@ -61,6 +61,13 @@ namespace UTJ.Alembic
         public float abcStartTime { get { return m_context.startTime; } }
         public float abcEndTime { get { return m_context.endTime; } }
         public int abcFrameCount { get { return m_context.frameCount; } }
+
+        public aiConfig config { get { return m_config; } }
+        public float vertexMotionScale
+        {
+            get { return m_config.vertexMotionScale; }
+            set { m_config.vertexMotionScale = value; }
+        }
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
@@ -86,14 +93,12 @@ namespace UTJ.Alembic
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdate(float time, float motionScale, bool interpolateSamples)
+        public bool AbcUpdate(float time)
         {
             if (m_streamInterupted) return true;
             if (!abcIsValid || !m_loaded) return false;
 
             m_time = time;
-            m_config.interpolateSamples = interpolateSamples;
-            m_config.vertexMotionScale = motionScale;
             m_context.SetConfig(ref m_config);
             AbcBeforeUpdateSamples(m_abcTreeRoot);
 
@@ -111,10 +116,11 @@ namespace UTJ.Alembic
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
             m_config.swapFaceWinding = settings.swapFaceWinding;
+            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
             m_config.normalsMode = settings.normals;
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
-            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
+            m_config.interpolateSamples = settings.interpolateSamples;
 #if UNITY_2017_3_OR_NEWER
             m_config.splitUnit = 0x7fffffff;
 #else

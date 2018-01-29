@@ -57,8 +57,6 @@ public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
     void clear();
 
-    void updateConfig(const aiConfig &config, bool &data_changed) override;
-    
     void getSummary(aiMeshSampleSummary &dst) const;
     void getSplitSummary(int split_index, aiMeshSplitSummary& dst);
     void getSubmeshSummary(int split_index, int submesh_index, aiSubmeshSummary &summary);

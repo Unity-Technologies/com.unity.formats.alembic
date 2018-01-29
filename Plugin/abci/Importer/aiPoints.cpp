@@ -17,13 +17,6 @@ aiPointsSample::~aiPointsSample()
 {
 }
 
-void aiPointsSample::updateConfig(const aiConfig &config, bool &data_changed)
-{
-    data_changed = (config.swap_handedness != m_config.swap_handedness);
-    m_config = config;
-}
-
-
 void aiPointsSample::getDataPointer(aiPointsData &data)
 {
     int count = (int)m_points->size();
@@ -72,6 +65,8 @@ void aiPointsSample::getDataPointer(aiPointsData &data)
 
 void aiPointsSample::copyData(aiPointsData &data)
 {
+    auto& config = getConfig();
+
     int count = (int)m_points->size();
     data.count = count;
 
@@ -94,7 +89,7 @@ void aiPointsSample::copyData(aiPointsData &data)
             }
         }
 
-        if (m_config.swap_handedness) {
+        if (config.swap_handedness) {
             for (int i = 0; i < count; ++i) {
                 data.points[i].x *= -1.0f;
             }
@@ -116,7 +111,7 @@ void aiPointsSample::copyData(aiPointsData &data)
             }
         }
 
-        if (m_config.swap_handedness) {
+        if (config.swap_handedness) {
             for (int i = 0; i < v_count; ++i) {
                 data.velocities[i].x *= -1.0f;
             }

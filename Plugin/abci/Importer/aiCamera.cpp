@@ -11,22 +11,18 @@ aiCameraSample::aiCameraSample(aiCamera *schema)
 {
 }
 
-void aiCameraSample::updateConfig(const aiConfig &config, bool &data_changed)
-{
-    data_changed = (config.aspect_ratio != m_config.aspect_ratio);
-    m_config = config;
-}
-
 void aiCameraSample::getData(aiCameraData &dst) const
 {
+    auto& config = getConfig();
+
     // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
     DebugLog("aiCameraSample::getData()");
     static float sRad2Deg = 180.0f / float(M_PI);
     float focalLength = (float)m_sample.getFocalLength();
     float verticalAperture = (float)m_sample.getVerticalAperture();
-    if (m_config.aspect_ratio > 0.0f)
+    if (config.aspect_ratio > 0.0f)
     {
-        verticalAperture = (float)m_sample.getHorizontalAperture() / m_config.aspect_ratio;
+        verticalAperture = (float)m_sample.getHorizontalAperture() / config.aspect_ratio;
     }
     
     dst.near_clipping_plane = (float)m_sample.getNearClippingPlane();
@@ -38,14 +34,14 @@ void aiCameraSample::getData(aiCameraData &dst) const
     dst.aperture = verticalAperture;
     dst.aspect_ratio = float(m_sample.getHorizontalAperture() / verticalAperture);
 
-    if (m_config.interpolate_samples && m_current_time_offset != 0)
+    if (config.interpolate_samples && m_current_time_offset != 0)
     {
         float timeOffset = (float)m_current_time_offset;
         float focalLength2 = (float)m_next_sample.getFocalLength();
         float verticalAperture2 = (float)m_next_sample.getVerticalAperture();
-        if (m_config.aspect_ratio > 0.0f)
+        if (config.aspect_ratio > 0.0f)
         {
-            verticalAperture2 = (float)m_next_sample.getHorizontalAperture() / m_config.aspect_ratio;
+            verticalAperture2 = (float)m_next_sample.getHorizontalAperture() / config.aspect_ratio;
         }
         
         float fov2 = 2.0f * atanf(verticalAperture2 * 10.0f / (2.0f * focalLength2)) * sRad2Deg;

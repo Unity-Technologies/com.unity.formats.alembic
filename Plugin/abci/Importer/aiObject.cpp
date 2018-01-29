@@ -50,6 +50,7 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
 aiObject::~aiObject()
 {
     if (!m_children.empty()) {
+        // make m_children empty before deleting children because children try to remove element of it in their destructor
         decltype(m_children) tmp;
         tmp.swap(m_children);
     }
@@ -74,14 +75,6 @@ void aiObject::removeChild(aiObject *c)
         c->m_parent = nullptr;
         m_children.erase(it);
     }
-}
-
-void aiObject::readConfig()
-{
-    if (!m_enabled)
-        return;
-    for (auto s : m_schemas)
-        s->readConfig();
 }
 
 void aiObject::updateSample(const abcSampleSelector& ss)

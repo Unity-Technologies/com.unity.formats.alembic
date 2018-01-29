@@ -11,12 +11,6 @@ aiXformSample::aiXformSample(aiXform *schema)
 {
 }
 
-void aiXformSample::updateConfig(const aiConfig &config, bool &data_changed)
-{
-    data_changed = (config.swap_handedness != m_config.swap_handedness);
-    m_config = config;
-}
-
 void aiXformSample::decompose(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3d &shear,Imath::Quatd &rotation,Imath::V3d &translation) const
 {
     Imath::M44d mat_remainder(mat);
@@ -35,13 +29,15 @@ void aiXformSample::decompose(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3
 
 void aiXformSample::getData(aiXformData &dst) const
 {
+    auto& config = getConfig();
+
     Imath::V3d scale;
     Imath::V3d shear;
     Imath::Quatd rot;
     Imath::V3d trans;
     decompose(m_matrix, scale, shear, rot, trans);
 
-    if (m_config.interpolate_samples && m_current_time_offset!=0)
+    if (config.interpolate_samples && m_current_time_offset!=0)
     {
         Imath::V3d scale2;
         Imath::Quatd rot2;
@@ -59,7 +55,7 @@ void aiXformSample::getData(aiXformData &dst) const
         static_cast<float>(rot.r)
     );
 
-    if (m_config.swap_handedness)
+    if (config.swap_handedness)
     {
         trans.x *= -1.0f;
         rotFinal.x = -rotFinal.x;

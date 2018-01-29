@@ -17,7 +17,6 @@ public:
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
     aiObject*   getParent() const;
-    void        readConfig();
     void        updateSample(const abcSampleSelector& ss);
  
     aiXform*    getXform() const;

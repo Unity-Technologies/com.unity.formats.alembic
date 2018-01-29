@@ -102,6 +102,7 @@ aeObject::~aeObject()
 {
     m_properties.clear();
     if(!m_children.empty()) {
+        // make m_children empty before deleting children because children try to remove element of it in their destructor
         decltype(m_children) tmp;
         tmp.swap(m_children);
     }

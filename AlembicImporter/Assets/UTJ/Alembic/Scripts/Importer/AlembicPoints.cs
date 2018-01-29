@@ -71,7 +71,7 @@ namespace UTJ.Alembic
 
         public override void AbcUpdate()
         {
-            if (!m_abcSchema.schema.dirty)
+            if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             AbcSampleUpdated(m_abcSchema.sample);

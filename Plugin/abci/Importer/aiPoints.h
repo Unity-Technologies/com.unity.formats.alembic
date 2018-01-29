@@ -7,7 +7,6 @@ public:
     aiPointsSample(aiPoints *schema);
     virtual ~aiPointsSample();
 
-    void updateConfig(const aiConfig &config, bool &data_changed) override;
     void getDataPointer(aiPointsData &data);
     void copyData(aiPointsData &data);
 

@@ -10,7 +10,6 @@ namespace UTJ.Alembic
         public override void OnInspectorGUI()
         {   
             SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
-            SerializedProperty interpolateSamples = serializedObject.FindProperty("m_interpolateSamples");
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("m_streamDescriptor");
             SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
             SerializedProperty endFrame = serializedObject.FindProperty("m_endFrame");
@@ -108,12 +107,6 @@ namespace UTJ.Alembic
             
             EditorGUILayout.PropertyField(currentTime,new GUIContent("Time"));
 
-            EditorGUILayout.Separator();
-            EditorGUILayout.PropertyField(interpolateSamples);
-            if (interpolateSamples.boolValue && hasVaryingTopology)
-            {
-                EditorGUILayout.HelpBox("Sample interpolation and motion vector generation does not apply to meshes with varying topology.",MessageType.Warning);
-            }
             EditorGUILayout.PropertyField(vertexMotionScale);
             this.serializedObject.ApplyModifiedProperties();
         }

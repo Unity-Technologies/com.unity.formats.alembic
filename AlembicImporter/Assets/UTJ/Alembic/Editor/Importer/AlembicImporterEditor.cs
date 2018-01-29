@@ -27,6 +27,9 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleFactor"));
             EditorGUILayout.Separator();
 
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
+            EditorGUILayout.Separator();
+
             var abcStartTime = serializedObject.FindProperty("abcStartTime");
             var abcEndTime = serializedObject.FindProperty("abcEndTime");
             var abcFrameCount = serializedObject.FindProperty("abcFrameCount");

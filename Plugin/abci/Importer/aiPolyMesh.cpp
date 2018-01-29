@@ -145,24 +145,6 @@ void aiPolyMeshSample::computeTangents()
     }
 }
 
-void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &data_changed)
-{
-    m_topology_changed =
-        (config.swap_face_winding != m_config.swap_face_winding) ||
-        (config.turn_quad_edges != m_config.turn_quad_edges);
-
-    data_changed =
-        m_topology_changed ||
-        (config.swap_handedness != m_config.swap_handedness) ||
-        (config.normals_mode != m_config.normals_mode) || 
-        (config.tangents_mode != m_config.tangents_mode);
-
-    if (data_changed)
-        dynamic_cast<schema_t*>(getSchema())->updateSummary();
-
-    m_config = config;
-}
-
 void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
 {
     dst.split_count   = m_topology->getSplitCount();
@@ -222,6 +204,7 @@ void aiPolyMeshSample::doInterpolation()
 
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 {
+    auto& config = getConfig();
     DebugLog("aiPolyMeshSample::fillVertexBuffer(split_index=%d)", split_index);
     
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
@@ -240,7 +223,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
         if (summary.compute_velocities) {
             GenerateVelocities(data.velocities,
                 m_points.data(), m_points2.data(), split.vertex_count, split.vertex_offset,
-                (float)m_current_time_interval, m_config.vertex_motion_scale);
+                (float)m_current_time_interval, config.vertex_motion_scale);
         }
         else if (!m_velocities_ref.empty()) {
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
@@ -362,6 +345,8 @@ void aiPolyMesh::updateSummary()
     m_summary.topology_variance = (aiTopologyVariance)m_schema.getTopologyVariance();
     m_varying_topology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
     auto& summary = m_summary;
+    auto& config = getConfig();
+
 
     // reset
     summary = {};
@@ -413,7 +398,7 @@ void aiPolyMesh::updateSummary()
     }
 
 
-    bool interpolate = m_config.interpolate_samples && !m_constant && !m_varying_topology;
+    bool interpolate = config.interpolate_samples && !m_constant && !m_varying_topology;
     summary.interpolate_points = interpolate;
 
     // velocities
@@ -432,13 +417,13 @@ void aiPolyMesh::updateSummary()
 
     // normals - interpolate or compute?
     if (!summary.constant_normals) {
-        if (summary.has_normals && m_config.normals_mode != aiNormalsMode::AlwaysCompute) {
+        if (summary.has_normals && config.normals_mode != aiNormalsMode::AlwaysCompute) {
             summary.interpolate_normals = interpolate;
         }
         else {
             summary.compute_normals =
-                m_config.normals_mode == aiNormalsMode::AlwaysCompute ||
-                (!summary.has_normals && m_config.normals_mode == aiNormalsMode::ComputeIfMissing);
+                config.normals_mode == aiNormalsMode::AlwaysCompute ||
+                (!summary.has_normals && config.normals_mode == aiNormalsMode::ComputeIfMissing);
             if (summary.compute_normals) {
                 summary.has_normals = true;
                 summary.constant_normals = summary.constant_points;
@@ -447,7 +432,7 @@ void aiPolyMesh::updateSummary()
     }
 
     // tangents
-    if (m_config.tangents_mode == aiTangentsMode::Compute && summary.has_normals && summary.has_uv0) {
+    if (config.tangents_mode == aiTangentsMode::Compute && summary.has_normals && summary.has_uv0) {
         summary.has_tangents = true;
         summary.compute_tangents = true;
         if (summary.constant_points && summary.constant_normals && summary.constant_uv0) {
@@ -488,6 +473,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
+    auto& config = getConfig();
 
     sample.clear();
     bool topology_changed = m_varying_topology;
@@ -561,7 +547,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
         }
         else {
             Remap(sample.m_points, sample.m_points_sp->get(), topology.m_remap_points);
-            if (m_config.swap_handedness)
+            if (config.swap_handedness)
                 SwapHandedness(sample.m_points.data(), (int)sample.m_points.size());
             sample.m_points_ref = sample.m_points;
         }
@@ -571,7 +557,7 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
         }
         else if (!summary.compute_normals && summary.has_normals_prop) {
             Remap(sample.m_normals, sample.m_normals_sp.getVals()->get(), topology.m_remap_normals);
-            if (m_config.swap_handedness)
+            if (config.swap_handedness)
                 SwapHandedness(sample.m_normals.data(), (int)sample.m_normals.size());
             sample.m_normals_ref = sample.m_normals;
         }
@@ -612,19 +598,19 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
     else if (!summary.compute_velocities && summary.has_velocities_prop) {
         auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
         Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
-        if (m_config.swap_handedness)
+        if (config.swap_handedness)
             SwapHandedness(dst.data(), (int)dst.size());
         sample.m_velocities_ref = dst;
     }
 
     if (summary.interpolate_points) {
         Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
-        if (m_config.swap_handedness)
+        if (config.swap_handedness)
             SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
     }
     if (summary.interpolate_normals) {
         Remap(sample.m_normals2, sample.m_normals_sp2.getVals()->get(), topology.m_remap_normals);
-        if (m_config.swap_handedness)
+        if (config.swap_handedness)
             SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
     }
 
@@ -644,17 +630,17 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
 
 void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 {
-    auto& config = m_config;
     auto& summary = m_summary;
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
+    auto& config = getConfig();
 
     if (config.turn_quad_edges) {
         // todo
     }
 
     refiner.clear();
-    refiner.split_unit = m_config.split_unit;
+    refiner.split_unit = config.split_unit;
     refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
@@ -769,7 +755,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_points.swap((RawVector<abcV3>&)refiner.new_points);
         sample.m_points_ref = sample.m_points;
     }
-    if (m_config.swap_handedness)
+    if (config.swap_handedness)
         SwapHandedness(sample.m_points_ref.data(), (int)sample.m_points_ref.size());
 
     sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;

@@ -123,9 +123,9 @@ abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
     return schema ? schema->isConstant() : false;
 }
 
-abciAPI bool aiSchemaIsDirty(aiSchemaBase* schema)
+abciAPI bool aiSchemaIsDataUpdated(aiSchemaBase* schema)
 {
-    return schema ? schema->isDirty() : false;
+    return schema ? schema->isDataUpdated() : false;
 }
 
 abciAPI void aiSchemaMarkForceUpdate(aiSchemaBase * schema)

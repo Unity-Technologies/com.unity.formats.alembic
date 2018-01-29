@@ -296,7 +296,7 @@ namespace UTJ.Alembic
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
 
         public bool isConstant { get { return aiSchemaIsConstant(self); } }
-        public bool dirty { get { return aiSchemaIsDirty(self); } }
+        public bool isDataUpdated { get { return aiSchemaIsDataUpdated(self); } }
         public aiSample sample { get { return aiSchemaGetSample(self); } }
 
 
@@ -308,7 +308,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern aiSample aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
 
         [DllImport("abci")] static extern Bool aiSchemaIsConstant(IntPtr schema);
-        [DllImport("abci")] static extern Bool aiSchemaIsDirty(IntPtr schema);
+        [DllImport("abci")] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
         [DllImport("abci")] static extern aiSample aiSchemaGetSample(IntPtr schema);
         [DllImport("abci")] static extern void aiSchemaMarkForceUpdate(IntPtr schema);
 

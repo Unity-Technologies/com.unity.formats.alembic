@@ -6,8 +6,6 @@ using super = aiSampleBase;
 public:
     aiXformSample(aiXform *schema);
 
-    void updateConfig(const aiConfig &config, bool &data_changed) override;
-
     void getData(aiXformData &dst) const;
 
 public:

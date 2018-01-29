@@ -5,8 +5,6 @@ class aiCameraSample : public aiSampleBase
 using super = aiSampleBase;
 public:
     aiCameraSample(aiCamera *schema);
-    
-    void updateConfig(const aiConfig &config, bool &data_changed) override;
 
     void getData(aiCameraData &dst) const;
     

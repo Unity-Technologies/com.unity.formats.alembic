@@ -9,19 +9,21 @@
 aiSampleBase::aiSampleBase(aiSchemaBase *schema)
     : m_schema(schema)
 {
-    m_config = schema->getConfig();
 }
 
 aiSampleBase::~aiSampleBase()
 {
 }
 
+const aiConfig & aiSampleBase::getConfig() const
+{
+    return m_schema->getConfig();
+}
+
 
 aiSchemaBase::aiSchemaBase(aiObject *obj)
     : m_obj(obj)
 {
-    // start with base config
-    m_config = obj->getContext()->getConfig();
 }
 
 aiSchemaBase::~aiSchemaBase()
@@ -29,23 +31,18 @@ aiSchemaBase::~aiSchemaBase()
     m_properties.clear();
 }
 
-aiObject* aiSchemaBase::getObject() const
+aiObject* aiSchemaBase::getObject()
 {
     return m_obj;
 }
 
 const aiConfig& aiSchemaBase::getConfig() const
 {
-    return m_config;
-}
-
-void aiSchemaBase::readConfig()
-{
-    m_config = m_obj->getContext()->getConfig();
+    return m_obj->getContext()->getConfig();
 }
 
 bool aiSchemaBase::isConstant() const { return m_constant; }
-bool aiSchemaBase::isDirty() const { return m_dirty; }
+bool aiSchemaBase::isDataUpdated() const { return m_data_updated; }
 void aiSchemaBase::markForceUpdate() { m_force_update = true; }
 
 int aiSchemaBase::getNumProperties() const
