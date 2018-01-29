@@ -473,7 +473,7 @@ void aiPolyMesh::updateSample(const abcSampleSelector& ss)
     m_load_task.task_cook = {};
 
     super::updateSample(ss);
-    if (m_load_task.task_read) {
+    if (m_load_task.task_read || m_load_task.task_cook) {
         getContext()->queueTask(m_load_task);
     }
 }

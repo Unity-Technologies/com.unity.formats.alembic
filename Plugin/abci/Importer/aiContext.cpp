@@ -357,15 +357,19 @@ void aiContext::updateSamples(float time)
 
         m_async_load = std::async(std::launch::async, [this]() {
             for (auto t : m_load_tasks) {
-                t->task_read();
-                t->async_cook = std::async(std::launch::async, [t]() {
-                    t->task_cook();
-                    {
-                        std::lock_guard<std::mutex> lock(t->m_mutex);
-                        t->completed = true;
-                    }
-                    t->notify_completed.notify_all();
-                });
+                if(t->task_read)
+                    t->task_read();
+
+                if (t->task_cook) {
+                    t->async_cook = std::async(std::launch::async, [t]() {
+                        t->task_cook();
+                        {
+                            std::lock_guard<std::mutex> lock(t->m_mutex);
+                            t->completed = true;
+                        }
+                        t->notify_completed.notify_all();
+                    });
+                }
             }
             m_load_tasks.clear();
         });

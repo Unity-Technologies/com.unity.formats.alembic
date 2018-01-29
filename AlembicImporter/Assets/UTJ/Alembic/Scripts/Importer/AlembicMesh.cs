@@ -56,16 +56,12 @@ namespace UTJ.Alembic
 
             if (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || numSplits > 1)
             {
-                for (int i=0; i<numSplits; ++i)
+                for (int i = 0; i < numSplits; ++i)
                 {
                     if (i >= m_splits.Count)
-                    {
                         m_splits.Add(new Split());
-                    }
                     else
-                    {
                         m_splits[i].active = true;
-                    }
                 }
             }
             else
@@ -83,10 +79,8 @@ namespace UTJ.Alembic
                 }
             }
 
-            for (int i=numSplits; i<m_splits.Count; ++i)
-            {
+            for (int i = numSplits; i < m_splits.Count; ++i)
                 m_splits[i].active = false;
-            }
         }
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
