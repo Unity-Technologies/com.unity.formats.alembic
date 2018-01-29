@@ -148,8 +148,10 @@ abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
 
 abciAPI void aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
 {
-    if (schema)
+    if (schema) {
+        schema->markForceSync();
         schema->updateSample(*ss);
+    }
 }
 
 

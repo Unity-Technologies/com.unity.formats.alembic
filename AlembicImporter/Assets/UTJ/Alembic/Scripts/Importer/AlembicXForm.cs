@@ -14,19 +14,12 @@ namespace UTJ.Alembic
             m_abcSchema = (aiXform)abcSchema;
         }
 
-        public override void AbcSampleUpdated(aiSample sample_)
-        {
-            var sample = (aiXformSample)sample_;
-            sample.GetData(ref m_abcData);
-        }
-
-        public override void AbcUpdate()
+        public override void AbcSyncDataEnd()
         {
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
-            AbcSampleUpdated(m_abcSchema.sample);
-
+            m_abcSchema.sample.GetData(ref m_abcData);
             if (m_abcData.inherits)
             {
                 abcTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;

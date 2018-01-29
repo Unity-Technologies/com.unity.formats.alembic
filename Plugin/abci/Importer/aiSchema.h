@@ -30,6 +30,7 @@ public:
     aiSchemaBase(aiObject *obj);
     virtual ~aiSchemaBase();
 
+    aiContext* getContext();
     aiObject* getObject();
     const aiConfig& getConfig() const;
 
@@ -40,6 +41,7 @@ public:
     bool isConstant() const;
     bool isDataUpdated() const;
     void markForceUpdate();
+    void markForceSync();
     int getNumProperties() const;
     aiProperty* getPropertyByIndex(int i);
     aiProperty* getPropertyByName(const std::string& name);
@@ -54,6 +56,7 @@ protected:
     bool m_constant = false;
     bool m_data_updated = false;
     bool m_force_update = false;
+    bool m_force_sync = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -138,8 +141,8 @@ public:
                 sample->m_current_time_offset = interval == 0.0 ? 0.0f :
                     (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
                 sample->m_current_time_interval = (float)interval;
-                interpolateSample(*sample);
             }
+            cookSample(*sample);
             m_data_updated = true;
         }
         else {
@@ -156,7 +159,7 @@ public:
 protected:
     virtual Sample* newSample() = 0;
     virtual void readSample(Sample& sample, const uint64_t idx) = 0;
-    virtual void interpolateSample(Sample& sample) {}
+    virtual void cookSample(Sample& sample) {}
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {

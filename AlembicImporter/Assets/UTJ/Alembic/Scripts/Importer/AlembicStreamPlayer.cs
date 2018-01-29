@@ -13,6 +13,7 @@ namespace UTJ.Alembic
         [SerializeField] public float m_vertexMotionScale = 1.0f;
         float m_lastUpdateTime;
         bool m_forceUpdate = false;
+        bool m_updateStarted = false;
 
         public float duration
         {
@@ -33,7 +34,7 @@ namespace UTJ.Alembic
             m_forceUpdate = true;
         }
 
-        void LateUpdate()
+        void Update()
         {
             if (m_stream == null || m_streamDescriptor == null)
                 return;
@@ -42,10 +43,11 @@ namespace UTJ.Alembic
             if (m_lastUpdateTime != m_currentTime || m_forceUpdate)
             {
                 m_stream.vertexMotionScale = m_vertexMotionScale;
-                if (m_stream.AbcUpdate(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime))
+                if (m_stream.AbcUpdateBegin(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime))
                 {
                     m_lastUpdateTime = m_currentTime;
                     m_forceUpdate = false;
+                    m_updateStarted = true;
                 }
                 else
                 {
@@ -54,6 +56,14 @@ namespace UTJ.Alembic
                     LoadStream();
                 }
             }
+        }
+
+        void LateUpdate()
+        {
+            if (!m_updateStarted)
+                return;
+            m_updateStarted = false;
+            m_stream.AbcUpdateEnd();
         }
 
         private void ClampTime()

@@ -90,15 +90,19 @@ namespace UTJ.Alembic
             m_freshSetup = true;
         }
 
-        public override void AbcBeforeUpdateSamples()
+        public override void AbcPrepareSample()
         {
             if(m_freshSetup)
                 m_abcSchema.schema.MarkForceUpdate();
         }
 
-        public override void AbcSampleUpdated(aiSample sample_)
+        public override void AbcSyncDataBegin()
         {
-            var sample = (aiPolyMeshSample)sample_;
+            m_abcSchema.Sync();
+            if (!m_abcSchema.schema.isDataUpdated)
+                return;
+
+            var sample = m_abcSchema.sample;
             var vertexData = default(aiPolyMeshData);
 
             sample.GetSummary(ref m_sampleSummary);
@@ -198,13 +202,10 @@ namespace UTJ.Alembic
             }
         }
 
-        public override void AbcUpdate()
+        public override void AbcSyncDataEnd()
         {
-            m_abcSchema.Sync();
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
-
-            AbcSampleUpdated(m_abcSchema.sample);
 
             bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 

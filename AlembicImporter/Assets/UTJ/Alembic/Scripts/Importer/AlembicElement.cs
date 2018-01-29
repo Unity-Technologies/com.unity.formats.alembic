@@ -29,14 +29,16 @@ namespace UTJ.Alembic
             m_abcObj = abcObj;
         }
 
-        // Called in main thread before update sample. 
-        public virtual void AbcBeforeUpdateSamples() { }
+        // called before update samples
+        public virtual void AbcPrepareSample() { }
 
-        // Called by loading thread (not necessarily the main thread)
-        public abstract void AbcSampleUpdated(aiSample sample);
+        // called after update samples kicked
+        // (possibly not finished yet. call aiPolyMesh.Sync() etc. to sync)
+        public virtual void AbcSyncDataBegin() { }
 
-        // Called in main thread after update sample.
-        public abstract void AbcUpdate();
+        // called after AbcSyncDataBegin()
+        // intended to wait vertex buffer copy task (kicked in AbcSyncDataBegin()) and update meshes in this
+        public virtual void AbcSyncDataEnd() { }
 
     }
 }

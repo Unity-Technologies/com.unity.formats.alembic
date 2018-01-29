@@ -79,21 +79,29 @@ namespace UTJ.Alembic
         void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
             foreach (var obj in node.alembicObjects)
-                obj.Value.AbcBeforeUpdateSamples();
+                obj.Value.AbcPrepareSample();
             foreach (var child in node.children)
                 AbcBeforeUpdateSamples(child);
         }
 
-        void AbcAfterUpdateSamples(AlembicTreeNode node)
+        void AbcBeginSyncData(AlembicTreeNode node)
         {
             foreach (var obj in node.alembicObjects)
-                obj.Value.AbcUpdate();
+                obj.Value.AbcSyncDataBegin();
             foreach (var child in node.children)
-                AbcAfterUpdateSamples(child);
+                AbcBeginSyncData(child);
+        }
+
+        void AbcEndSyncData(AlembicTreeNode node)
+        {
+            foreach (var obj in node.alembicObjects)
+                obj.Value.AbcSyncDataEnd();
+            foreach (var child in node.children)
+                AbcEndSyncData(child);
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdate(float time)
+        public bool AbcUpdateBegin(float time)
         {
             if (m_streamInterupted) return true;
             if (!abcIsValid || !m_loaded) return false;
@@ -101,13 +109,17 @@ namespace UTJ.Alembic
             m_time = time;
             m_context.SetConfig(ref m_config);
             AbcBeforeUpdateSamples(m_abcTreeRoot);
-
             m_context.UpdateSamples(m_time);
-            AbcAfterUpdateSamples(m_abcTreeRoot);
             return true;
         }
 
-   
+        // returns false if the context needs to be recovered.
+        public void AbcUpdateEnd()
+        {
+            AbcBeginSyncData(m_abcTreeRoot);
+            AbcEndSyncData(m_abcTreeRoot);
+        }
+
         public void AbcLoad()
         {
             m_time = 0.0f;
@@ -237,9 +249,10 @@ namespace UTJ.Alembic
                 if (elem != null)
                 {
                     elem.AbcSetup(obj, schema);
-                    elem.AbcBeforeUpdateSamples();
+                    elem.AbcPrepareSample();
                     schema.UpdateSample(ref ic.ss);
-                    elem.AbcUpdate();
+                    elem.AbcSyncDataBegin();
+                    elem.AbcSyncDataEnd();
                 }
             }
             else

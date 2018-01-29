@@ -112,12 +112,13 @@ struct aiConfig
     aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
     aiTangentsMode tangents_mode = aiTangentsMode::None;
     float aspect_ratio = -1.0f;
+    float vertex_motion_scale = 1.0f;
+    int split_unit = 0x7fffffff;
     bool swap_handedness = true;
     bool swap_face_winding = false;
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
-    float vertex_motion_scale = 1.0f;
-    int split_unit = 0x7fffffff;
+    bool force_sync = false;
 };
 
 struct aiTimeSamplingData

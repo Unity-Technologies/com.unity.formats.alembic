@@ -108,19 +108,18 @@ public:
     aiPolyMesh(aiObject *obj);
     ~aiPolyMesh() override;
     void updateSummary();
+    const aiMeshSummaryInternal& getSummary() const;
+    void getSummary(aiMeshSummary &dst) const;
 
     Sample* newSample() override;
     void updateSample(const abcSampleSelector& ss) override;
     void readSample(Sample& sample, const uint64_t idx) override;
-    void interpolateSample(Sample& sample) override;
+    void cookSample(Sample& sample) override;
     void sync() override;
 
     void readSampleBody(Sample& sample, const uint64_t idx);
-    void interpolateSampleBody(Sample& sample);
+    void cookSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
-
-    const aiMeshSummaryInternal& getSummary() const;
-    void getSummary(aiMeshSummary &dst) const;
 
 public:
     RawVector<abcV3> m_constant_points;
@@ -140,6 +139,6 @@ private:
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
 
-    std::vector<std::function<void()>> m_tasks;
-    std::future<void> m_async;
+    aiLoadTaskData m_load_task;
+    std::future<void> m_async_copy;
 };

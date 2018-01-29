@@ -16,19 +16,11 @@ namespace UTJ.Alembic
             light.enabled = false;
         }
 
-        // No config override
 
-        public override void AbcSampleUpdated(aiSample sample)
-        {
-            // ToDo
-        }
-
-        public override void AbcUpdate()
+        public override void AbcSyncDataEnd()
         {
             if (!m_abcSchema.isDataUpdated)
                 return;
-
-            AbcSampleUpdated(m_abcSchema.sample);
 
             // ToDo
         }

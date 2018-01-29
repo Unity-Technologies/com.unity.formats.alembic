@@ -19,19 +19,12 @@ namespace UTJ.Alembic
             m_camera = GetOrAddComponent<Camera>();
         }
 
-        public override void AbcSampleUpdated(aiSample sample_)
-        {
-            var sample = (aiCameraSample)sample_;
-            sample.GetData(ref m_abcData);
-        }
-
-        public override void AbcUpdate()
+        public override void AbcSyncDataEnd()
         {
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
-            AbcSampleUpdated(m_abcSchema.sample);
-
+            m_abcSchema.sample.GetData(ref m_abcData);
             if (m_lastIgnoreClippingPlanes != m_ignoreClippingPlanes)
             {
                 abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;

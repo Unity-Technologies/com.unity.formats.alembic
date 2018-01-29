@@ -27,6 +27,19 @@ using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 class aiObject;
 std::string ToString(const aiConfig &conf);
 
+struct aiLoadTaskData
+{
+    std::function<void()> task_read;
+    std::function<void()> task_cook;
+    std::future<void> async_cook;
+    std::mutex m_mutex;
+    std::condition_variable notify_completed;
+    bool completed = false;
+
+    void wait();
+};
+
+
 class aiContextManager
 {
 public:
@@ -45,6 +58,9 @@ private:
 
 class aiContext
 {
+public:
+    static std::string normalizePath(const char *path);
+
 public:
     explicit aiContext(int uid=-1);
     ~aiContext();
@@ -72,7 +88,8 @@ public:
     template<class F>
     void eachNodes(const F &f);
 
-    static std::string normalizePath(const char *path);
+    void queueTask(aiLoadTaskData& task);
+
 private:
     static void gatherNodesRecursive(aiObject *n);
     void reset();
@@ -84,6 +101,9 @@ private:
     uint64_t m_numFrames = 0;
     int m_uid = 0;
     aiConfig m_config;
+
+    std::vector<aiLoadTaskData*> m_load_tasks;
+    std::future<void> m_async_load;
 };
 
 #include "aiObject.h"

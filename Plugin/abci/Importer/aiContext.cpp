@@ -81,6 +81,9 @@ aiContext::aiContext(int uid)
 
 aiContext::~aiContext()
 {
+    if (m_async_load.valid())
+        m_async_load.wait();
+
     m_top_node.reset();
     m_archive.reset();
 }
@@ -348,4 +351,34 @@ void aiContext::updateSamples(float time)
     eachNodes([ss](aiObject& o) {
         o.updateSample(ss);
     });
+
+    // process async tasks
+    if (!m_load_tasks.empty()) {
+        if (m_async_load.valid())
+            m_async_load.wait();
+
+        m_async_load = std::async(std::launch::async, [this]() {
+            for (auto t : m_load_tasks) {
+                t->task_read();
+                t->async_cook = std::async(std::launch::async, [t]() {
+                    t->task_cook();
+                    t->completed = true;
+                    t->notify_completed.notify_all();
+                });
+            }
+            m_load_tasks.clear();
+        });
+    }
+}
+
+void aiContext::queueTask(aiLoadTaskData& task)
+{
+    task.completed = false;
+    m_load_tasks.push_back(&task);
+}
+
+void aiLoadTaskData::wait()
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    notify_completed.wait(lock, [this] { return completed; });
 }

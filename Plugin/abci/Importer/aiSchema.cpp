@@ -31,6 +31,11 @@ aiSchemaBase::~aiSchemaBase()
     m_properties.clear();
 }
 
+aiContext* aiSchemaBase::getContext()
+{
+    return m_obj->getContext();
+}
+
 aiObject* aiSchemaBase::getObject()
 {
     return m_obj;
@@ -44,6 +49,7 @@ const aiConfig& aiSchemaBase::getConfig() const
 bool aiSchemaBase::isConstant() const { return m_constant; }
 bool aiSchemaBase::isDataUpdated() const { return m_data_updated; }
 void aiSchemaBase::markForceUpdate() { m_force_update = true; }
+void aiSchemaBase::markForceSync() { m_force_sync = true; }
 
 int aiSchemaBase::getNumProperties() const
 {
