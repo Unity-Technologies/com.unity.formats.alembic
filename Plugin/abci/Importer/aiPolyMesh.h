@@ -64,7 +64,6 @@ public:
     void computeNormals();
     void computeTangents();
 
-    void doInterpolation() override;
     void fillSplitVertices(int split_index, aiPolyMeshData &data);
     void fillSubmeshIndices(int split_index, int submesh_index, aiSubmeshData &data) const;
 
@@ -107,14 +106,30 @@ class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 using super = aiTSchema<aiPolyMeshTraits>;
 public:
     aiPolyMesh(aiObject *obj);
+    ~aiPolyMesh() override;
     void updateSummary();
 
     Sample* newSample() override;
+    void updateSample(const abcSampleSelector& ss) override;
     void readSample(Sample& sample, const uint64_t idx) override;
+    void interpolateSample(Sample& sample) override;
+    void sync() override;
+
+    void readSampleBody(Sample& sample, const uint64_t idx);
+    void interpolateSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
 
     const aiMeshSummaryInternal& getSummary() const;
     void getSummary(aiMeshSummary &dst) const;
+
+public:
+    RawVector<abcV3> m_constant_points;
+    RawVector<abcV3> m_constant_velocities;
+    RawVector<abcV3> m_constant_normals;
+    RawVector<abcV4> m_constant_tangents;
+    RawVector<abcV2> m_constant_uv0;
+    RawVector<abcV2> m_constant_uv1;
+    RawVector<abcC4> m_constant_colors;
 
 private:
     aiMeshSummaryInternal m_summary;
@@ -125,12 +140,6 @@ private:
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
 
-public:
-    RawVector<abcV3> m_constant_points;
-    RawVector<abcV3> m_constant_velocities;
-    RawVector<abcV3> m_constant_normals;
-    RawVector<abcV4> m_constant_tangents;
-    RawVector<abcV2> m_constant_uv0;
-    RawVector<abcV2> m_constant_uv1;
-    RawVector<abcC4> m_constant_colors;
+    std::vector<std::function<void()>> m_tasks;
+    std::future<void> m_async;
 };

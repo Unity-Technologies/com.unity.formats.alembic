@@ -11,7 +11,6 @@ public:
     virtual ~aiSampleBase();
 
     virtual aiSchemaBase* getSchema() const { return m_schema; }
-    virtual void doInterpolation() {}
 
     const aiConfig& getConfig() const;
 
@@ -34,8 +33,9 @@ public:
     aiObject* getObject();
     const aiConfig& getConfig() const;
 
-    virtual aiSampleBase* updateSample(const abcSampleSelector& ss) = 0;
     virtual aiSampleBase* getSample() = 0;
+    virtual void updateSample(const abcSampleSelector& ss) = 0;
+    virtual void sync() {}
 
     bool isConstant() const;
     bool isDataUpdated() const;
@@ -80,9 +80,6 @@ public:
         setupProperties();
     }
 
-    virtual ~aiTSchema()
-    {}
-
     int getTimeSamplingIndex() const
     {
         return m_obj->getContext()->getTimeSamplingIndex(m_schema.getTimeSampling());
@@ -103,7 +100,7 @@ public:
         return static_cast<int>(m_num_samples);
     }
 
-    aiSampleBase* updateSample(const abcSampleSelector& ss) override
+    void updateSample(const abcSampleSelector& ss) override
     {
         Sample* sample = nullptr;
         int64_t sample_index = getSampleIndex(ss);
@@ -141,7 +138,7 @@ public:
                 sample->m_current_time_offset = interval == 0.0 ? 0.0f :
                     (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
                 sample->m_current_time_interval = (float)interval;
-                sample->doInterpolation();
+                interpolateSample(*sample);
             }
             m_data_updated = true;
         }
@@ -149,8 +146,6 @@ public:
             m_data_updated = false;
         }
         updateProperties(ss);
-
-        return sample;
     }
 
     Sample* getSample() override
@@ -161,6 +156,7 @@ public:
 protected:
     virtual Sample* newSample() = 0;
     virtual void readSample(Sample& sample, const uint64_t idx) = 0;
+    virtual void interpolateSample(Sample& sample) {}
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {

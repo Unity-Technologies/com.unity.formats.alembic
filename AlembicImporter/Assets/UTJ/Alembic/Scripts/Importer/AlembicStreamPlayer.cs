@@ -31,26 +31,27 @@ namespace UTJ.Alembic
             if (m_endFrame > m_streamDescriptor.maxFrame) m_endFrame = m_streamDescriptor.maxFrame;    
             ClampTime();
             m_forceUpdate = true;
-        } 
+        }
 
         void LateUpdate()
         {
-            if (m_stream != null && m_streamDescriptor != null)
+            if (m_stream == null || m_streamDescriptor == null)
+                return;
+
+            ClampTime();
+            if (m_lastUpdateTime != m_currentTime || m_forceUpdate)
             {
-                ClampTime();
-                if (m_lastUpdateTime != m_currentTime || m_forceUpdate)
+                m_stream.vertexMotionScale = m_vertexMotionScale;
+                if (m_stream.AbcUpdate(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime))
                 {
-                    m_stream.vertexMotionScale = m_vertexMotionScale;
-                    if (m_stream.AbcUpdate(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime))
-                    {
-                        m_lastUpdateTime = m_currentTime;
-                        m_forceUpdate = false;  
-                    }
-                    else
-                    {
-                        m_stream.Dispose();
-                        LoadStream();
-                    }
+                    m_lastUpdateTime = m_currentTime;
+                    m_forceUpdate = false;
+                }
+                else
+                {
+                    m_stream.Dispose();
+                    m_stream = null;
+                    LoadStream();
                 }
             }
         }
@@ -66,7 +67,8 @@ namespace UTJ.Alembic
 
         public void LoadStream()
         {
-            if (m_streamDescriptor == null) return;
+            if (m_streamDescriptor == null)
+                return;
             m_stream = new AlembicStream(gameObject, m_streamDescriptor);
             m_stream.AbcLoad();
             m_forceUpdate = true;
@@ -75,9 +77,7 @@ namespace UTJ.Alembic
         void OnEnable()
         {
             if (m_stream == null)
-            {
                 LoadStream();
-            }
         }
 
         public void OnDestroy()

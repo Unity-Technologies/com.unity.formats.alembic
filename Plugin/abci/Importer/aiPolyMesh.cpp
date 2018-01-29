@@ -176,32 +176,6 @@ void aiPolyMeshSample::getSubmeshSummary(int split_index, int submesh_index, aiS
     summary.index_count   = submesh.index_count;
 }
 
-void aiPolyMeshSample::doInterpolation()
-{
-    auto& schema = *dynamic_cast<schema_t*>(getSchema());
-    auto& summary = schema.getSummary();
-
-    // cache interpolated points as computeNormals() and computeTangents() require points
-    if (summary.interpolate_points) {
-        m_points_int.resize_discard(m_points.size());
-        Lerp(m_points_int.data(), m_points.data(), m_points2.data(), (int)m_points.size(), (float)m_current_time_offset);
-        m_points_ref = m_points_int;
-    }
-
-    if (summary.compute_normals && summary.interpolate_points) {
-        computeNormals();
-    }
-    else if (summary.interpolate_normals) {
-        m_normals_int.resize_discard(m_normals.size());
-        Lerp(m_normals_int.data(), m_normals.data(), m_normals2.data(), (int)m_normals.size(), (float)m_current_time_offset);
-        Normalize(m_normals_int.data(), (int)m_normals.size());
-        m_normals_ref = m_normals_int;
-    }
-
-    if (summary.compute_tangents && (summary.interpolate_points || summary.interpolate_normals))
-        computeTangents();
-}
-
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data)
 {
     auto& config = getConfig();
@@ -339,6 +313,11 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
              (m_varying_topology ? "true" : "false"));
 }
 
+aiPolyMesh::~aiPolyMesh()
+{
+    sync();
+}
+
 void aiPolyMesh::updateSummary()
 {
     m_constant = m_schema.isConstant();
@@ -453,7 +432,41 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     }
 }
 
+void aiPolyMesh::updateSample(const abcSampleSelector& ss)
+{
+    super::updateSample(ss);
+    if (!m_tasks.empty()) {
+        m_async = std::async(std::launch::async, [this]() {
+            for (auto& task : m_tasks)
+                task();
+            m_tasks.clear();
+        });
+    }
+}
+
 void aiPolyMesh::readSample(Sample& sample, const uint64_t idx)
+{
+    m_tasks.push_back([this, &sample, idx]() {
+        readSampleBody(sample, idx);
+    });
+}
+
+void aiPolyMesh::interpolateSample(Sample& sample)
+{
+    m_tasks.push_back([this, &sample]() {
+        interpolateSampleBody(sample);
+    });
+
+}
+
+void aiPolyMesh::sync()
+{
+    if (m_async.valid()) {
+        m_async.wait();
+    }
+}
+
+void aiPolyMesh::readSampleBody(Sample& sample, const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
@@ -768,6 +781,35 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
     topology.m_freshly_read_topology_data = true;
 }
+
+void aiPolyMesh::interpolateSampleBody(Sample& sample)
+{
+    auto& summary = getSummary();
+
+    // cache interpolated points as computeNormals() and computeTangents() require points
+    if (summary.interpolate_points) {
+        sample.m_points_int.resize_discard(sample.m_points.size());
+        Lerp(sample.m_points_int.data(), sample.m_points.data(), sample.m_points2.data(),
+            (int)sample.m_points.size(), (float)sample.m_current_time_offset);
+        sample.m_points_ref = sample.m_points_int;
+    }
+
+    if (summary.compute_normals && summary.interpolate_points) {
+        sample.computeNormals();
+    }
+    else if (summary.interpolate_normals) {
+        sample.m_normals_int.resize_discard(sample.m_normals.size());
+        Lerp(sample.m_normals_int.data(), sample.m_normals.data(), sample.m_normals2.data(),
+            (int)sample.m_normals.size(), (float)sample.m_current_time_offset);
+        Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
+        sample.m_normals_ref = sample.m_normals_int;
+    }
+
+    if (summary.compute_tangents && (summary.interpolate_points || summary.interpolate_normals))
+        sample.computeTangents();
+
+}
+
 
 const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
 {

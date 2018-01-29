@@ -200,6 +200,7 @@ namespace UTJ.Alembic
 
         public override void AbcUpdate()
         {
+            m_abcSchema.Sync();
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 

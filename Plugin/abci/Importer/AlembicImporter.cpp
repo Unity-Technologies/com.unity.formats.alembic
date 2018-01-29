@@ -118,6 +118,12 @@ abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
     return schema ? schema->getObject() : nullptr;
 }
 
+abciAPI void aiSchemaSync(aiSchemaBase* schema)
+{
+    if (schema)
+        schema->sync();
+}
+
 abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
 {
     return schema ? schema->isConstant() : false;
@@ -135,14 +141,15 @@ abciAPI void aiSchemaMarkForceUpdate(aiSchemaBase * schema)
 }
 
 
-abciAPI aiSampleBase* aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
-{    
-    return schema ? schema->updateSample(*ss) : 0;
-}
-
 abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
 {
     return schema ? schema->getSample() : nullptr;
+}
+
+abciAPI void aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
+{
+    if (schema)
+        schema->updateSample(*ss);
 }
 
 

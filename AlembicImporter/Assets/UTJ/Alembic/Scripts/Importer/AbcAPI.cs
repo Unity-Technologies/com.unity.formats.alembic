@@ -300,16 +300,16 @@ namespace UTJ.Alembic
         public aiSample sample { get { return aiSchemaGetSample(self); } }
 
 
-        public aiSample UpdateSample(ref aiSampleSelector ss) { return aiSchemaUpdateSample(self, ref ss); }
+        public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
         public void MarkForceUpdate() { aiSchemaMarkForceUpdate(self); }
 
 
         #region internal
-        [DllImport("abci")] static extern aiSample aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
+        [DllImport("abci")] static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
+        [DllImport("abci")] static extern aiSample aiSchemaGetSample(IntPtr schema);
 
         [DllImport("abci")] static extern Bool aiSchemaIsConstant(IntPtr schema);
         [DllImport("abci")] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
-        [DllImport("abci")] static extern aiSample aiSchemaGetSample(IntPtr schema);
         [DllImport("abci")] static extern void aiSchemaMarkForceUpdate(IntPtr schema);
 
         [DllImport("abci")] static extern int aiSchemaGetNumProperties(IntPtr schema);
@@ -324,7 +324,7 @@ namespace UTJ.Alembic
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
         public static implicit operator bool(aiXform v) { return v.self != IntPtr.Zero; }
-        public static implicit operator aiSchema(aiXform v) { aiSchema tmp; tmp.self = v.self; return tmp; }
+        public static implicit operator aiSchema(aiXform v) { return v.schema; }
 
         public aiXformSample sample { get { return aiSchemaGetSample(self); } }
 
@@ -339,7 +339,7 @@ namespace UTJ.Alembic
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
         public static implicit operator bool(aiCamera v) { return v.self != IntPtr.Zero; }
-        public static implicit operator aiSchema(aiCamera v) { aiSchema tmp; tmp.self = v.self; return tmp; }
+        public static implicit operator aiSchema(aiCamera v) { return v.schema; }
 
         public aiCameraSample sample { get { return aiSchemaGetSample(self); } }
 
@@ -354,12 +354,14 @@ namespace UTJ.Alembic
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
         public static implicit operator bool(aiPolyMesh v) { return v.self != IntPtr.Zero; }
-        public static implicit operator aiSchema(aiPolyMesh v) { aiSchema tmp; tmp.self = v.self; return tmp; }
+        public static implicit operator aiSchema(aiPolyMesh v) { return v.schema; }
 
         public aiPolyMeshSample sample { get { return aiSchemaGetSample(self); } }
+        public void Sync() { aiSchemaSync(self); }
         public void GetSummary(ref aiMeshSummary dst) { aiPolyMeshGetSummary(self, ref dst); }
 
         #region internal
+        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         [DllImport("abci")] static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport("abci")] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
         #endregion
@@ -371,7 +373,7 @@ namespace UTJ.Alembic
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
         public static implicit operator bool(aiPoints v) { return v.self != IntPtr.Zero; }
-        public static implicit operator aiSchema(aiPoints v) { aiSchema tmp; tmp.self = v.self; return tmp; }
+        public static implicit operator aiSchema(aiPoints v) { return v.schema; }
 
         public aiPointsSample sample { get { return aiSchemaGetSample(self); } }
         public bool sort { set { aiPointsSetSort(self, value); } }
