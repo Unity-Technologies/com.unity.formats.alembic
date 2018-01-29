@@ -158,7 +158,7 @@ public:
 
 protected:
     virtual Sample* newSample() = 0;
-    virtual void readSample(Sample& sample, const uint64_t idx) = 0;
+    virtual void readSample(Sample& sample, uint64_t idx) = 0;
     virtual void cookSample(Sample& sample) {}
 
     AbcGeom::ICompoundProperty getAbcProperties() override

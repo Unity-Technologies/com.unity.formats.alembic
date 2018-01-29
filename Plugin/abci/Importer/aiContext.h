@@ -34,7 +34,7 @@ struct aiLoadTaskData
     std::future<void> async_cook;
     std::mutex m_mutex;
     std::condition_variable notify_completed;
-    bool completed = false;
+    bool completed = true;
 
     void wait();
 };

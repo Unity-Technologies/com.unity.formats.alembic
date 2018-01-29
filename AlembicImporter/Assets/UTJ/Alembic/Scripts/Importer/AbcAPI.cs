@@ -79,7 +79,7 @@ namespace UTJ.Alembic
         public Bool swapFaceWinding;
         public Bool interpolateSamples;
         public Bool turnQuadEdges;
-        public Bool forceSync;
+        public Bool asyncLoad;
 
         public void SetDefaults()
         {
@@ -92,7 +92,7 @@ namespace UTJ.Alembic
             turnQuadEdges = false;
             vertexMotionScale = 1.0f;
             splitUnit = 65000;
-            forceSync = false;
+            asyncLoad = true;
         }
     }
 

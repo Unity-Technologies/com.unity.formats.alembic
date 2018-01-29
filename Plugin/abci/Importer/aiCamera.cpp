@@ -65,7 +65,7 @@ aiCamera::Sample* aiCamera::newSample()
     return new Sample(this);
 }
 
-void aiCamera::readSample(Sample& sample, const uint64_t idx)
+void aiCamera::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);

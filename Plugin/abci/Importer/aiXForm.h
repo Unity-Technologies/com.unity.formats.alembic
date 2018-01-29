@@ -29,5 +29,5 @@ public:
     aiXform(aiObject *obj);
 
     Sample* newSample() override;
-    void readSample(Sample& sample, const uint64_t idx) override;
+    void readSample(Sample& sample, uint64_t idx) override;
 };

@@ -113,11 +113,11 @@ public:
 
     Sample* newSample() override;
     void updateSample(const abcSampleSelector& ss) override;
-    void readSample(Sample& sample, const uint64_t idx) override;
+    void readSample(Sample& sample, uint64_t idx) override;
     void cookSample(Sample& sample) override;
     void sync() override;
 
-    void readSampleBody(Sample& sample, const uint64_t idx);
+    void readSampleBody(Sample& sample, uint64_t idx);
     void cookSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
 

@@ -77,7 +77,7 @@ aiXform::Sample* aiXform::newSample()
     return new Sample(this);
 }
 
-void aiXform::readSample(Sample& sample, const uint64_t idx)
+void aiXform::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     AbcGeom::XformSample matSample;

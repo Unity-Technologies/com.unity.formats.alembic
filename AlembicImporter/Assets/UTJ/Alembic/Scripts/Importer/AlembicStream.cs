@@ -63,11 +63,8 @@ namespace UTJ.Alembic
         public int abcFrameCount { get { return m_context.frameCount; } }
 
         public aiConfig config { get { return m_config; } }
-        public float vertexMotionScale
-        {
-            get { return m_config.vertexMotionScale; }
-            set { m_config.vertexMotionScale = value; }
-        }
+        public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
+        public bool asyncLoad { set { m_config.asyncLoad = value; } }
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {

@@ -171,7 +171,7 @@ aiPoints::Sample* aiPoints::newSample()
     return new Sample(this);
 }
 
-void aiPoints::readSample(Sample& sample, const uint64_t idx)
+void aiPoints::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
 

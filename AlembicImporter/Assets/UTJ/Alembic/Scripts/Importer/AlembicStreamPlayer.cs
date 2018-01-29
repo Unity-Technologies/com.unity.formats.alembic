@@ -11,6 +11,7 @@ namespace UTJ.Alembic
         [SerializeField] public int m_startFrame;
         [SerializeField] public int m_endFrame;
         [SerializeField] public float m_vertexMotionScale = 1.0f;
+        [SerializeField] public bool m_asyncLoad = true;
         float m_lastUpdateTime;
         bool m_forceUpdate = false;
         bool m_updateStarted = false;
@@ -43,6 +44,7 @@ namespace UTJ.Alembic
             if (m_lastUpdateTime != m_currentTime || m_forceUpdate)
             {
                 m_stream.vertexMotionScale = m_vertexMotionScale;
+                m_stream.asyncLoad = m_asyncLoad;
                 if (m_stream.AbcUpdateBegin(m_currentTime + m_startFrame * m_streamDescriptor.frameLength + m_streamDescriptor.abcStartTime))
                 {
                     m_lastUpdateTime = m_currentTime;

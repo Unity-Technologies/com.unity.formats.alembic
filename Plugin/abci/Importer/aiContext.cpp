@@ -345,9 +345,7 @@ aiObject* aiContext::getTopObject() const
 
 void aiContext::updateSamples(float time)
 {
-    DebugLog("aiContext::updateSamples()");
-    const abcSampleSelector ss = aiTimeToSampleSelector(time);
-
+    auto ss = aiTimeToSampleSelector(time);
     eachNodes([ss](aiObject& o) {
         o.updateSample(ss);
     });
@@ -362,7 +360,10 @@ void aiContext::updateSamples(float time)
                 t->task_read();
                 t->async_cook = std::async(std::launch::async, [t]() {
                     t->task_cook();
-                    t->completed = true;
+                    {
+                        std::lock_guard<std::mutex> lock(t->m_mutex);
+                        t->completed = true;
+                    }
                     t->notify_completed.notify_all();
                 });
             }
@@ -379,6 +380,8 @@ void aiContext::queueTask(aiLoadTaskData& task)
 
 void aiLoadTaskData::wait()
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
-    notify_completed.wait(lock, [this] { return completed; });
+    if (!completed) {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        notify_completed.wait(lock, [this] { return completed; });
+    }
 }

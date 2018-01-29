@@ -7,6 +7,8 @@ namespace UTJ.Alembic
     [CustomEditor(typeof(AlembicStreamPlayer)),CanEditMultipleObjects]
     public class AlembicStreamPlayerEditor : Editor
     {
+        bool m_foldMisc = false;
+
         public override void OnInspectorGUI()
         {   
             SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
@@ -14,7 +16,8 @@ namespace UTJ.Alembic
             SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
             SerializedProperty endFrame = serializedObject.FindProperty("m_endFrame");
             SerializedProperty startFrame = serializedObject.FindProperty("m_startFrame");
-            
+            SerializedProperty asyncLoad = serializedObject.FindProperty("m_asyncLoad");
+
             var targetStreamDesc = (target as AlembicStreamPlayer).m_streamDescriptor;
             var minFrame = targetStreamDesc.minFrame;
             var maxFrame = targetStreamDesc.maxFrame;
@@ -106,8 +109,17 @@ namespace UTJ.Alembic
             }
             
             EditorGUILayout.PropertyField(currentTime,new GUIContent("Time"));
-
             EditorGUILayout.PropertyField(vertexMotionScale);
+            EditorGUILayout.Space();
+
+            m_foldMisc = EditorGUILayout.Foldout(m_foldMisc, "Misc");
+            if(m_foldMisc)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(asyncLoad);
+                EditorGUI.indentLevel--;
+            }
+
             this.serializedObject.ApplyModifiedProperties();
         }
     }

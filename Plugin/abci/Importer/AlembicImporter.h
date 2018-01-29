@@ -118,7 +118,7 @@ struct aiConfig
     bool swap_face_winding = false;
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
-    bool force_sync = false;
+    bool async_load = false;
 };
 
 struct aiTimeSamplingData
