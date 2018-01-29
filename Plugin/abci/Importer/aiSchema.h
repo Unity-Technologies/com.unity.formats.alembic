@@ -126,9 +126,20 @@ public:
 
         if (sample) {
             if (config.interpolate_samples) {
-                auto interval = m_schema.getTimeSampling()->getTimeSamplingType().getTimePerCycle();
-                auto index_time = m_time_sampling->getSampleTime(sample_index);
-                sample->m_current_time_offset = (float)std::max(0.0, std::min((ss.getRequestedTime() - index_time) / interval, 1.0));
+                auto& ts = *m_time_sampling;
+                double requested_time = ss.getRequestedTime();
+                double index_time = ts.getSampleTime(sample_index);
+                double interval = 0;
+                if (ts.getTimeSamplingType().isAcyclic()) {
+                    auto tsi = std::min<size_t>(sample_index + 1, ts.getNumStoredTimes() - 1);
+                    interval = ts.getSampleTime(tsi) - index_time;
+                }
+                else {
+                    interval = ts.getTimeSamplingType().getTimePerCycle();
+                }
+
+                sample->m_current_time_offset = interval == 0.0 ? 0.0f :
+                    (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
                 sample->m_current_time_interval = (float)interval;
                 sample->doInterpolation();
             }
