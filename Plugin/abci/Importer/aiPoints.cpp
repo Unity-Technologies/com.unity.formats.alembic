@@ -168,42 +168,32 @@ aiPoints::aiPoints(aiObject *obj)
 
 aiPoints::Sample* aiPoints::newSample()
 {
-    Sample *sample = getSample();
-
-    if (!sample)
-    {
-        sample = new Sample(this);
-    }
-
-    return sample;
+    return new Sample(this);
 }
 
-aiPoints::Sample* aiPoints::readSample(const uint64_t idx)
+void aiPoints::readSample(Sample& sample, const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
-    DebugLog("aiPoints::readSample(t=%d)", idx);
-
-    Sample *ret = newSample();
 
     // read positions
-    m_schema.getPositionsProperty().get(ret->m_points, ss);
+    m_schema.getPositionsProperty().get(sample.m_points, ss);
 
     // read velocities
-    ret->m_velocities.reset();
+    sample.m_velocities.reset();
     auto velocitiesProp = m_schema.getVelocitiesProperty();
     if (velocitiesProp.valid())
     {
         DebugLog("  Read velocities");
-        velocitiesProp.get(ret->m_velocities, ss);
+        velocitiesProp.get(sample.m_velocities, ss);
     }
 
     // read IDs
-    ret->m_ids.reset();
+    sample.m_ids.reset();
     auto idProp = m_schema.getIdsProperty();
     if (idProp.valid())
     {
         DebugLog("  Read IDs");
-        idProp.get(ret->m_ids, ss);
+        idProp.get(sample.m_ids, ss);
     }
 
     // read bounds
@@ -211,10 +201,8 @@ aiPoints::Sample* aiPoints::readSample(const uint64_t idx)
     if (boundsProp.valid())
     {
         DebugLog("  Read bounds");
-        boundsProp.get(ret->m_bounds, ss);
+        boundsProp.get(sample.m_bounds, ss);
     }
-
-    return ret;
 }
 
 

@@ -3,7 +3,7 @@
 
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
-template<class T> using SharedVector = std::shared_ptr<RawVector<T>>;
+
 
 struct aiMeshSummaryInternal : public aiMeshSummary
 {
@@ -109,8 +109,8 @@ public:
     aiPolyMesh(aiObject *obj);
     void updateSummary();
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx) override;
+    Sample* newSample() override;
+    void readSample(Sample& sample, const uint64_t idx) override;
     void onTopologyChange(aiPolyMeshSample& sample);
 
     const aiMeshSummaryInternal& getSummary() const;

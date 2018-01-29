@@ -74,27 +74,19 @@ aiXform::aiXform(aiObject *obj)
 
 aiXform::Sample* aiXform::newSample()
 {
-    Sample *sample = getSample();
-    if (!sample)
-        sample = new Sample(this);
-    return sample;
+    return new Sample(this);
 }
 
-aiXform::Sample* aiXform::readSample(const uint64_t idx)
+void aiXform::readSample(Sample& sample, const uint64_t idx)
 {
-    Sample *ret = newSample();
-
     auto ss = aiIndexToSampleSelector(idx);
     AbcGeom::XformSample matSample;
     m_schema.get(matSample, ss);
-    ret->m_matrix = matSample.getMatrix();
-    
-    ret->inherits = matSample.getInheritsXforms();
+    sample.m_matrix = matSample.getMatrix();    
+    sample.inherits = matSample.getInheritsXforms();
 
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     AbcGeom::XformSample nextMatSample;
     m_schema.get(nextMatSample, ss2 );
-    ret->m_next_matrix = nextMatSample.getMatrix();
-    
-    return ret;
+    sample.m_next_matrix = nextMatSample.getMatrix();
 }

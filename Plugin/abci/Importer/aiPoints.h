@@ -37,8 +37,8 @@ using super = aiTSchema<aiPointsTraits>;
 public:
     aiPoints(aiObject *obj);
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx) override;
+    Sample* newSample() override;
+    void readSample(Sample& sample, const uint64_t idx) override;
 
     const aiPointsSummary& getSummary() const;
 

@@ -110,16 +110,15 @@ public:
         auto& config = getConfig();
 
         if (!m_the_sample || (!m_constant && sample_index != m_last_sample_index)) {
-            sample = readSample(sample_index);
-            if (sample != m_the_sample.get())
-                m_the_sample.reset(sample);
+            if (!m_the_sample)
+                m_the_sample.reset(newSample());
+            sample = m_the_sample.get();
+            readSample(*sample, sample_index);
         }
         else {
             sample = m_the_sample.get();
-            if (!m_force_update && (m_constant || !config.interpolate_samples))
-            {
+            if ((m_constant || !config.interpolate_samples) && !m_force_update)
                 sample = nullptr;
-            }
         }
 
         m_force_update = false;
@@ -149,7 +148,8 @@ public:
     }
 
 protected:
-    virtual Sample* readSample(const uint64_t idx) = 0;
+    virtual Sample* newSample() = 0;
+    virtual void readSample(Sample& sample, const uint64_t idx) = 0;
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {

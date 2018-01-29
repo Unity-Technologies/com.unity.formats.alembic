@@ -7,10 +7,9 @@ public:
     aiCameraSample(aiCamera *schema);
 
     void getData(aiCameraData &dst) const;
-    
+
 public:
-    AbcGeom::CameraSample m_sample;
-    AbcGeom::CameraSample m_next_sample;
+    AbcGeom::CameraSample m_sample, m_next_sample;
 };
 
 
@@ -27,6 +26,6 @@ using super = aiTSchema<aiCameraTraits>;
 public:
     aiCamera(aiObject *obj);
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx) override;
+    Sample* newSample() override;
+    void readSample(Sample& sample, const uint64_t idx) override;
 };

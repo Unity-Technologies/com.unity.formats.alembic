@@ -443,39 +443,30 @@ void aiPolyMesh::updateSummary()
 
 aiPolyMesh::Sample* aiPolyMesh::newSample()
 {
-    Sample *sample = getSample();
-    if (!sample) {
-        if (!m_varying_topology) {
-            if (!m_shared_topology)
-                m_shared_topology.reset(new aiMeshTopology());
-            sample = new Sample(this, m_shared_topology);
-        }
-        else {
-            sample = new Sample(this, TopologyPtr(new aiMeshTopology()));
-        }
+    if (!m_varying_topology) {
+        if (!m_shared_topology)
+            m_shared_topology.reset(new aiMeshTopology());
+        return new Sample(this, m_shared_topology);
     }
     else {
-        if (m_varying_topology) {
-            sample->m_topology->clear();
-        }
+        return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
-    return sample;
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
+void aiPolyMesh::readSample(Sample& sample, const uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiPolyMesh::readSample(t=%d)", idx);
     
-    auto *sample_ptr = newSample();
-    auto& sample = *sample_ptr;
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
     auto& config = getConfig();
 
     sample.clear();
+    if (m_varying_topology)
+        topology.clear();
+
     bool topology_changed = m_varying_topology;
 
     // topology
@@ -624,8 +615,6 @@ aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx)
     }
 
     sample.m_topology_changed = topology_changed;
-
-    return sample_ptr;
 }
 
 void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
