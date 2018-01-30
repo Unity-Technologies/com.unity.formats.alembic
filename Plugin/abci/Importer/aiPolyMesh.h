@@ -37,10 +37,14 @@ public:
 public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
+    abcFaceSetSamples m_faceset_sps;
     RawVector<int> m_material_ids;
 
     MeshRefiner m_refiner;
-    RawVector<int> m_remap_points, m_remap_normals, m_remap_uv0, m_remap_uv1, m_remap_colors;
+    RawVector<int> m_remap_points;
+    RawVector<int> m_remap_normals;
+    RawVector<int> m_remap_uv0, m_remap_uv1;
+    RawVector<int> m_remap_colors;
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -76,7 +80,6 @@ public:
     AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv1_sp;
     AbcGeom::IC4fGeomParam::Sample m_colors_sp;
     Abc::Box3d m_bounds;
-    abcFaceSetSamples m_facesets;
 
     IArray<abcV3> m_points_ref;
     IArray<abcV3> m_velocities_ref;

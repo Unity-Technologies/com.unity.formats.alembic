@@ -49,8 +49,10 @@ void aiMeshTopology::clear()
     DebugLog("Topology::clear()");
     m_indices_sp.reset();
     m_counts_sp.reset();
-    m_material_ids.clear();
+    m_faceset_sps.clear();
+
     m_refiner.clear();
+    m_material_ids.clear();
     m_vertex_count = 0;
     m_index_count = 0;
 }
@@ -97,8 +99,6 @@ void aiPolyMeshSample::clear()
     m_normals_sp.reset(); m_normals_sp2.reset();
     m_uv0_sp.reset(); m_uv1_sp.reset();
     m_colors_sp.reset();
-
-    m_facesets.clear();
 
     m_points_ref.reset();
     m_velocities_ref.reset();
@@ -531,9 +531,9 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 
     // face sets
     if (topology_changed && !m_facesets.empty()) {
-        sample.m_facesets.resize(m_facesets.size());
+        topology.m_faceset_sps.resize(m_facesets.size());
         for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
-            m_facesets[fi].get(sample.m_facesets[fi], ss);
+            m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
         }
     }
 
@@ -803,11 +803,11 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     refiner.triangulate(config.swap_face_winding);
 
     // generate submeshes
-    if (!sample.m_facesets.empty()) {
+    if (!topology.m_faceset_sps.empty()) {
         // use face set index as material id
         topology.m_material_ids.resize(refiner.counts.size(), -1);
-        for (size_t fsi = 0; fsi < sample.m_facesets.size(); ++fsi) {
-            auto& faces = *sample.m_facesets[fsi].getFaces();
+        for (size_t fsi = 0; fsi < topology.m_faceset_sps.size(); ++fsi) {
+            auto& faces = *topology.m_faceset_sps[fsi].getFaces();
             size_t num_faces = faces.size();
             for (size_t fi = 0; fi < num_faces; ++fi) {
                 topology.m_material_ids[faces[fi]] = (int)fsi;
