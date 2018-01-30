@@ -10,6 +10,9 @@ namespace UTJ.Alembic
     [CustomEditor(typeof(AlembicExporter))]
     public class AlembicExporterEditor : Editor
     {
+        bool m_foldCaptureComponents;
+        bool m_foldMeshComponents;
+
         public override void OnInspectorGUI()
         {
             var t = target as AlembicExporter;
@@ -65,11 +68,15 @@ namespace UTJ.Alembic
             GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
+            t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
+            t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
+            t.m_assumeTopologiesAreConstant = EditorGUILayout.Toggle("Assume Topologies Are Constant", t.m_assumeTopologiesAreConstant);
+            t.m_assumeNonSkinnedMeshesAreConstant = EditorGUILayout.Toggle("Assume Non-Skinned Meshes Are Constant", t.m_assumeNonSkinnedMeshesAreConstant);
+            GUILayout.Space(5);
+
+            m_foldCaptureComponents = EditorGUILayout.Foldout(m_foldCaptureComponents, "Capture Components");
+            if (m_foldCaptureComponents)
             {
-                t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
-                t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
-                GUILayout.Space(5);
-                EditorGUILayout.LabelField("Capture Components");
                 EditorGUI.indentLevel++;
                 t.m_captureMeshRenderer = EditorGUILayout.Toggle("MeshRenderer", t.m_captureMeshRenderer);
                 t.m_captureSkinnedMeshRenderer = EditorGUILayout.Toggle("SkinnedMeshRenderer", t.m_captureSkinnedMeshRenderer);
@@ -77,16 +84,28 @@ namespace UTJ.Alembic
                 t.m_captureCamera = EditorGUILayout.Toggle("Camera", t.m_captureCamera);
                 t.m_customCapturer = EditorGUILayout.Toggle("Custom Capturer", t.m_customCapturer);
                 EditorGUI.indentLevel--;
-                GUILayout.Space(5);
-                t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
-                if(t.m_captureOnStart)
-                {
-                    EditorGUI.indentLevel++;
-                    t.m_ignoreFirstFrame = EditorGUILayout.Toggle("Ignore First Frame", t.m_ignoreFirstFrame);
-                    EditorGUI.indentLevel--;
-                }
-                t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
             }
+
+            m_foldMeshComponents = EditorGUILayout.Foldout(m_foldMeshComponents, "Mesh Components");
+            if (m_foldMeshComponents)
+            {
+                EditorGUI.indentLevel++;
+                t.m_meshNormals = EditorGUILayout.Toggle("Normal", t.m_meshNormals);
+                t.m_meshUV0 = EditorGUILayout.Toggle("UV0", t.m_meshUV0);
+                t.m_meshUV1 = EditorGUILayout.Toggle("UV1", t.m_meshUV1);
+                t.m_meshColors = EditorGUILayout.Toggle("Vertex Color", t.m_meshColors);
+                EditorGUI.indentLevel--;
+            }
+
+            GUILayout.Space(5);
+            t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
+            if (t.m_captureOnStart)
+            {
+                EditorGUI.indentLevel++;
+                t.m_ignoreFirstFrame = EditorGUILayout.Toggle("Ignore First Frame", t.m_ignoreFirstFrame);
+                EditorGUI.indentLevel--;
+            }
+            t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
             GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Misc", EditorStyles.boldLabel);

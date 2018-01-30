@@ -30,7 +30,7 @@ public:
     void writeFaceSetSample(int faceset_index, const aeFaceSetData &data);
 
 private:
-    void    doWriteSample();
+    void    writeSampleBody();
 
     AbcGeom::OPolyMeshSchema m_schema;
     std::unique_ptr<AbcGeom::OV2fGeomParam> m_uv1_param;

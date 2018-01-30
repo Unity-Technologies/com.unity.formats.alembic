@@ -50,10 +50,10 @@ void aePolyMesh::setFromPrevious()
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
     m_buf_faces.assign(data.faces, data.faces + data.face_count);
+    m_buf_indices.assign(data.indices, data.indices + data.index_count);
 
     m_buf_points.assign(data.points, data.points + data.point_count);
     m_buf_velocities.assign(data.velocities, data.velocities + data.point_count);
-    m_buf_indices.assign(data.indices, data.indices + data.index_count);
 
     m_buf_normals.assign(data.normals, data.normals + (data.normal_count ? data.normal_count : data.point_count));
     m_buf_normal_indices.assign(data.normal_indices, data.normal_indices + data.normal_index_count);
@@ -61,7 +61,13 @@ void aePolyMesh::writeSample(const aePolyMeshData &data)
     m_buf_uv0.assign(data.uv0, data.uv0 + (data.uv0_count ? data.uv0_count : data.point_count));
     m_buf_uv0_indices.assign(data.uv0_indices, data.uv0_indices + data.uv0_index_count);
 
-    m_ctx->addAsyncTask([this]() { doWriteSample(); });
+    m_buf_uv1.assign(data.uv1, data.uv1 + (data.uv1_count ? data.uv1_count : data.point_count));
+    m_buf_uv1_indices.assign(data.uv1_indices, data.uv1_indices + data.uv1_index_count);
+
+    m_buf_colors.assign(data.colors, data.colors + (data.colors_count ? data.colors_count : data.point_count));
+    m_buf_colors_indices.assign(data.colors_indices, data.colors_indices + data.colors_index_count);
+
+    m_ctx->addAsyncTask([this]() { writeSampleBody(); });
 }
 
 int aePolyMesh::addFaceSet(const char *name)
@@ -81,7 +87,7 @@ void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data
     m_facesets[faceset_index]->writeSample(data);
 }
 
-void aePolyMesh::doWriteSample()
+void aePolyMesh::writeSampleBody()
 {
     const auto &conf = getConfig();
 

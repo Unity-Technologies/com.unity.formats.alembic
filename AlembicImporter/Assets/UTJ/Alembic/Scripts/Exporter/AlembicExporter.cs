@@ -22,16 +22,26 @@ namespace UTJ.Alembic
         public aeConfig m_conf = aeConfig.default_value;
         public Scope m_scope = Scope.EntireScene;
         public bool m_fixDeltaTime = true;
-        public bool m_assumeTopologiesAreConstant = true;
+
         public bool m_ignoreDisabled = true;
+        public bool m_assumeTopologiesAreConstant = true;
+        public bool m_assumeNonSkinnedMeshesAreConstant = true;
+
         public bool m_captureMeshRenderer = true;
         public bool m_captureSkinnedMeshRenderer = true;
         public bool m_captureParticleSystem = true;
         public bool m_captureCamera = true;
         public bool m_customCapturer = true;
+
+        public bool m_meshNormals = true;
+        public bool m_meshUV0 = true;
+        public bool m_meshUV1 = true;
+        public bool m_meshColors = true;
+
         public bool m_captureOnStart = false;
         public bool m_ignoreFirstFrame = true;
         public int m_maxCaptureFrame = 0;
+
         public bool m_detailedLog = true;
         public bool m_debugLog = false;
 
@@ -71,7 +81,7 @@ namespace UTJ.Alembic
         {
             if (m_debugLog) { Debug.Log("AlembicExporter: new TransformCapturer(\"" + target.name + "\")"); }
 
-            var cap = new TransformCapturer(parent, target);
+            var cap = new TransformCapturer(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -80,7 +90,7 @@ namespace UTJ.Alembic
         {
             if (m_debugLog) { Debug.Log("AlembicExporter: new CameraCapturer(\"" + target.name + "\")"); }
 
-            var cap = new CameraCapturer(parent, target);
+            var cap = new CameraCapturer(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -89,7 +99,7 @@ namespace UTJ.Alembic
         {
             if (m_debugLog) { Debug.Log("AlembicExporter: new MeshCapturer(\"" + target.name + "\")"); }
 
-            var cap = new MeshCapturer(parent, target);
+            var cap = new MeshCapturer(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -98,7 +108,7 @@ namespace UTJ.Alembic
         {
             if (m_debugLog) { Debug.Log("AlembicExporter: new SkinnedMeshCapturer(\"" + target.name + "\")"); }
 
-            var cap = new SkinnedMeshCapturer(parent, target);
+            var cap = new SkinnedMeshCapturer(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -107,7 +117,7 @@ namespace UTJ.Alembic
         {
             if (m_debugLog) { Debug.Log("AlembicExporter: new ParticleCapturer(\"" + target.name + "\")"); }
 
-            var cap = new ParticleCapturer(parent, target);
+            var cap = new ParticleCapturer(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -117,7 +127,7 @@ namespace UTJ.Alembic
             if (m_debugLog) { Debug.Log("AlembicExporter: new CustomCapturerHandler(\"" + target.name + "\")"); }
 
             target.CreateAbcObject(parent.abc);
-            var cap = new CustomCapturerHandler(parent, target);
+            var cap = new CustomCapturerHandler(this, parent, target);
             m_capturers.Add(cap);
             return cap;
         }
@@ -223,7 +233,7 @@ namespace UTJ.Alembic
 
         void CreateCapturers()
         {
-            m_root = new RootCapturer(m_ctx.topObject);
+            m_root = new RootCapturer(this, m_ctx.topObject);
             m_capture_node = new Dictionary<Transform, CaptureNode>();
             m_top_nodes = new List<CaptureNode>();
 

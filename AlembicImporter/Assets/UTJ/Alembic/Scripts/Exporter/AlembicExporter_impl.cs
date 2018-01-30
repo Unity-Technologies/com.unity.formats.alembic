@@ -21,6 +21,8 @@ namespace UTJ.Alembic
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
             public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
+            public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
+            public PinnedList<Color> colors = new PinnedList<Color>();
             public List<PinnedList<int>> facesets = new List<PinnedList<int>>();
             PinnedList<int> tmpIndices = new PinnedList<int>();
 
@@ -40,13 +42,32 @@ namespace UTJ.Alembic
                 }
             }
 
-            public void Capture(Mesh mesh, bool topology = true)
+            public void Capture(Mesh mesh, bool topology,
+                bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 points.LockList(ls => mesh.GetVertices(ls));
-                normals.LockList(ls => mesh.GetNormals(ls));
-                uv0.LockList(ls => mesh.GetUVs(0, ls));
 
-                if(topology)
+                if (captureNormals)
+                    normals.LockList(ls => mesh.GetNormals(ls));
+                else
+                    normals.Clear();
+
+                if (captureUV0)
+                    uv0.LockList(ls => mesh.GetUVs(0, ls));
+                else
+                    uv0.Clear();
+
+                if (captureUV1)
+                    uv1.LockList(ls => mesh.GetUVs(1, ls));
+                else
+                    uv1.Clear();
+
+                if (captureColors)
+                    colors.LockList(ls => mesh.GetColors(ls));
+                else
+                    colors.Clear();
+
+                if (topology)
                 {
                     int submeshCount = mesh.subMeshCount;
                     if (submeshCount == 1)
@@ -72,27 +93,39 @@ namespace UTJ.Alembic
                         }
                     }
                 }
+                else
+                {
+                    indices.Clear();
+                    facesets.Clear();
+                }
             }
+
+            public void Capture(Mesh mesh, bool topology, AlembicExporter exp)
+            {
+                Capture(mesh, topology, exp.m_meshNormals, exp.m_meshUV0, exp.m_meshUV1, exp.m_meshColors);
+            }
+
 
             public void WriteSample(aeObject abc)
             {
                 {
                     var data = default(aePolyMeshData);
-                    data.points = points;
                     data.indices = indices;
-                    data.pointCount = points.Count;
                     data.indexCount = indices.Count;
-
+                    data.points = points;
+                    data.pointCount = points.Count;
                     data.normals = normals;
                     data.uv0 = uv0;
+                    data.uv1 = uv1;
+                    data.colors = colors;
                     abc.WriteSample(ref data);
                 }
-                for (int smi = 0; smi < facesets.Count; ++smi)
+                for (int fsi = 0; fsi < facesets.Count; ++fsi)
                 {
                     var data = default(aeFaceSetData);
-                    data.faces = facesets[smi];
-                    data.faceCount = facesets[smi].Count;
-                    abc.WriteFaceSetSample(smi, ref data);
+                    data.faces = facesets[fsi];
+                    data.faceCount = facesets[fsi].Count;
+                    abc.WriteFaceSetSample(fsi, ref data);
                 }
             }
         }
@@ -110,7 +143,7 @@ namespace UTJ.Alembic
             [DllImport("abci")] static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
-                mbuf.Capture(mesh);
+                mbuf.Capture(mesh, true, false, false, false, false);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
@@ -118,20 +151,27 @@ namespace UTJ.Alembic
                 numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
             }
 
-            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf)
+            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicExporter exp)
             {
                 if (mesh == null || cloth == null)
                     return;
                 if (remap.Count != mesh.vertexCount)
                     GenerateRemapIndices(mesh, mbuf);
 
+                // capture cloth points and normals
                 vertices.Assign(cloth.vertices);
-                normals.Assign(cloth.normals);
                 if (numRemappedVertices != vertices.Count)
                 {
                     Debug.LogWarning("numRemappedVertices != vertices.Count");
                     return;
                 }
+
+                if (exp.m_meshNormals)
+                    normals.Assign(cloth.normals);
+                else
+                    normals.Clear();
+
+                // apply root bone transform
                 if (rootBone != null)
                 {
                     var mat = Matrix4x4.TRS(rootBone.localPosition, rootBone.localRotation, Vector3.one);
@@ -139,6 +179,7 @@ namespace UTJ.Alembic
                     aeApplyMatrixV(normals, normals.Count, ref mat);
                 }
 
+                // remap vertices and normals
                 for (int vi = 0; vi < remap.Count; ++vi)
                     mbuf.points[vi] = vertices[remap[vi]];
                 if (normals.Count > 0)
@@ -147,12 +188,30 @@ namespace UTJ.Alembic
                     for (int vi = 0; vi < remap.Count; ++vi)
                         mbuf.normals[vi] = normals[remap[vi]];
                 }
+
+                // capture other components
+                if (exp.m_meshUV0)
+                    mbuf.uv0.LockList(ls => mesh.GetUVs(0, ls));
+                else
+                    mbuf.uv0.Clear();
+
+                if (exp.m_meshUV1)
+                    mbuf.uv1.LockList(ls => mesh.GetUVs(1, ls));
+                else
+                    mbuf.uv1.Clear();
+
+                if (exp.m_meshColors)
+                    mbuf.colors.LockList(ls => mesh.GetColors(ls));
+                else
+                    mbuf.colors.Clear();
+
             }
         }
 
 
         public abstract class ComponentCapturer
         {
+            protected AlembicExporter m_exporter;
             protected ComponentCapturer m_parent;
             protected GameObject m_obj;
             protected aeObject m_abc;
@@ -162,8 +221,9 @@ namespace UTJ.Alembic
             public aeObject abc { get { return m_abc; } }
             public abstract void Capture();
 
-            protected ComponentCapturer(ComponentCapturer p, Component c)
+            protected ComponentCapturer(AlembicExporter exp, ComponentCapturer p, Component c)
             {
+                m_exporter = exp;
                 m_parent = p;
                 m_obj = c != null ? c.gameObject : null;
             }
@@ -171,8 +231,8 @@ namespace UTJ.Alembic
 
         public class RootCapturer : ComponentCapturer
         {
-            public RootCapturer(aeObject abc)
-                : base(null, null)
+            public RootCapturer(AlembicExporter exp, aeObject abc)
+                : base(exp, null, null)
             {
                 m_abc = abc;
             }
@@ -198,8 +258,8 @@ namespace UTJ.Alembic
             public bool captureRotation { set { m_captureRotation = value; } }
             public bool captureScale { set { m_captureScale = value; } }
 
-            public TransformCapturer(ComponentCapturer parent, Transform target)
-                : base(parent, target)
+            public TransformCapturer(AlembicExporter exp, ComponentCapturer parent, Transform target)
+                : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")");
                 m_target = target;
@@ -235,8 +295,8 @@ namespace UTJ.Alembic
             Camera m_target;
             AlembicCameraParams m_params;
 
-            public CameraCapturer(ComponentCapturer parent, Camera target)
-                : base(parent, target)
+            public CameraCapturer(AlembicExporter exp, ComponentCapturer parent, Camera target)
+                : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewCamera(target.name);
                 m_target = target;
@@ -269,8 +329,8 @@ namespace UTJ.Alembic
             MeshBuffer m_mbuf;
             bool m_first = false;
 
-            public MeshCapturer(ComponentCapturer parent, MeshRenderer target)
-                : base(parent, target)
+            public MeshCapturer(AlembicExporter exp, ComponentCapturer parent, MeshRenderer target)
+                : base(exp, parent, target)
             {
                 m_target = target;
                 var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
@@ -287,11 +347,12 @@ namespace UTJ.Alembic
                 if (m_target == null) { return; }
 
                 var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                if (mesh != null)
-                {
-                    m_mbuf.Capture(mesh);
-                    m_mbuf.WriteSample(abc);
-                }
+                if (mesh == null || (m_exporter.m_assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
+                    return;
+
+                bool topology = !m_exporter.m_assumeTopologiesAreConstant || m_mbuf.indices.Capacity == 0;
+                m_mbuf.Capture(mesh, topology, m_exporter);
+                m_mbuf.WriteSample(abc);
             }
         }
 
@@ -304,8 +365,8 @@ namespace UTJ.Alembic
             MeshBuffer m_mbuf;
             ClothBuffer m_cbuf;
 
-            public SkinnedMeshCapturer(ComponentCapturer parent, SkinnedMeshRenderer target)
-                : base(parent, target)
+            public SkinnedMeshCapturer(AlembicExporter exp, ComponentCapturer parent, SkinnedMeshRenderer target)
+                : base(exp, parent, target)
             {
                 m_target = target;
                 var mesh = target.sharedMesh;
@@ -343,13 +404,20 @@ namespace UTJ.Alembic
 
                 if (m_cloth != null)
                 {
-                    m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf);
+                    m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, m_exporter);
                     m_mbuf.WriteSample(m_abc);
                 }
                 else
                 {
                     m_target.BakeMesh(m_meshBake);
-                    m_mbuf.Capture(m_meshBake);
+
+                    var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                    if (mesh == null || (m_exporter.m_assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
+                        return;
+
+                    bool topology = !m_exporter.m_assumeTopologiesAreConstant || m_mbuf.indices.Capacity == 0;
+                    m_mbuf.Capture(mesh, topology, m_exporter);
+
                     m_mbuf.WriteSample(m_abc);
                 }
             }
@@ -364,8 +432,8 @@ namespace UTJ.Alembic
             PinnedList<Vector3> m_buf_positions = new PinnedList<Vector3>();
             PinnedList<Vector4> m_buf_rotations = new PinnedList<Vector4>();
 
-            public ParticleCapturer(ComponentCapturer parent, ParticleSystem target)
-                : base(parent, target)
+            public ParticleCapturer(AlembicExporter exp, ComponentCapturer parent, ParticleSystem target)
+                : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewPoints(target.name);
                 m_target = target;
@@ -411,8 +479,8 @@ namespace UTJ.Alembic
         {
             AlembicCustomComponentCapturer m_target;
 
-            public CustomCapturerHandler(ComponentCapturer parent, AlembicCustomComponentCapturer target)
-                : base(parent, target)
+            public CustomCapturerHandler(AlembicExporter exp, ComponentCapturer parent, AlembicCustomComponentCapturer target)
+                : base(exp, parent, target)
             {
                 m_target = target;
             }
