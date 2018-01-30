@@ -8,17 +8,16 @@ using UnityEditor.Experimental.AssetImporters;
 
 namespace UTJ.Alembic
 {
-    [CustomEditor(typeof(AlembicImporter)),CanEditMultipleObjects]
+    [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     public class AlembicImporterEditor : ScriptedImporterEditor
     {
         public override void OnInspectorGUI()
         {
-            //var importer = serializedObject.targetObject as AlembicImporter;
+            var importer = serializedObject.targetObject as AlembicImporter;
 
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"),Enum.GetNames(typeof(aiNormalsMode)));
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"),Enum.GetNames(typeof(aiTangentsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"), Enum.GetNames(typeof(aiNormalsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"), Enum.GetNames(typeof(aiTangentsMode)));
             DisplayEnumProperty(serializedObject.FindProperty("streamSettings.cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)));
-
             EditorGUILayout.Separator();
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.scaleFactor"));
@@ -30,66 +29,41 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
             EditorGUILayout.Separator();
 
-            var abcStartTime = serializedObject.FindProperty("abcStartTime");
-            var abcEndTime = serializedObject.FindProperty("abcEndTime");
-            var abcFrameCount = serializedObject.FindProperty("abcFrameCount");
-            var startFrame = serializedObject.FindProperty("startFrame");
-            var endFrame = serializedObject.FindProperty("endFrame");
-            var frameLength =  (abcFrameCount.intValue == 1) ? 0 : (abcEndTime.floatValue - abcStartTime.floatValue) / (abcFrameCount.intValue-1);
-            var frameRate = (abcFrameCount.intValue == 1) ? 0 : (int)(1.0f/ frameLength);
+            var startTimeProp = serializedObject.FindProperty("startTime");
+            var endTimeProp = serializedObject.FindProperty("endTime");
+            var startTime = (float)startTimeProp.doubleValue;
+            var endTime = (float)endTimeProp.doubleValue;
 
-            float startFrameVal = startFrame.intValue;
-            float endFrameVal = endFrame.intValue;
-            EditorGUI.BeginDisabledGroup(abcStartTime.hasMultipleDifferentValues || abcEndTime.hasMultipleDifferentValues || abcFrameCount.hasMultipleDifferentValues);
+            EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider("Time Range",ref startFrameVal,ref endFrameVal,0,abcFrameCount.intValue-1);
-
-            startFrameVal = (float)Math.Floor(startFrameVal);
-            endFrameVal = (float)Math.Floor(endFrameVal);
-
-            var startTime = startFrameVal * frameLength + abcStartTime.floatValue;
-            var endTime = endFrameVal * frameLength + abcStartTime.floatValue;
+            EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
 
             EditorGUILayout.BeginHorizontal();
-            
-            EditorGUI.showMixedValue = startFrame.hasMultipleDifferentValues;
-            var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ","Start time"),startTime,GUILayout.MinWidth(90.0f));
-            EditorGUI.showMixedValue = endFrame.hasMultipleDifferentValues;
-            var newEndTime = EditorGUILayout.FloatField(new GUIContent(" ","End time"),endTime,GUILayout.MinWidth(90.0f));
+            EditorGUI.showMixedValue = startTimeProp.hasMultipleDifferentValues;
+            var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ", "Start time"), startTime, GUILayout.MinWidth(90.0f));
+            EditorGUI.showMixedValue = endTimeProp.hasMultipleDifferentValues;
+            var newEndTime = EditorGUILayout.FloatField(new GUIContent(" ", "End time"), endTime, GUILayout.MinWidth(90.0f));
             EditorGUI.showMixedValue = false;
+
             if (EditorGUI.EndChangeCheck())
             {
-                if (endTime != newEndTime)
-                {
-                    if (newEndTime < startTime) newEndTime = endTime;
-                    if (newEndTime > abcEndTime.floatValue) newEndTime = abcEndTime.floatValue;
-                    endFrameVal = (float)Math.Round((newEndTime - abcStartTime.floatValue) * frameRate);
-                }
                 if (startTime != newStartTime)
-                {
-                    if (newStartTime > endTime) newStartTime = startTime;
-                    if (newStartTime < abcStartTime.floatValue) newStartTime = abcStartTime.floatValue;
-                    startFrameVal = (float)Math.Round((newStartTime - abcStartTime.floatValue) * frameRate);
-                }
-                startFrame.intValue = (int)startFrameVal;
-                endFrame.intValue = (int)endFrameVal;
+                    newStartTime = Mathf.Clamp(newStartTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
+                if (endTime != newEndTime)
+                    newEndTime = Mathf.Clamp(newEndTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
+                startTimeProp.doubleValue = newStartTime;
+                endTimeProp.doubleValue = newEndTime;
             }
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
 
-            int frameCount = (int)(endFrameVal - startFrameVal);
-            float duration = frameCount * frameLength;
+            float duration = endTime * startTime;
 
             GUIStyle style = new GUIStyle();
             style.alignment = TextAnchor.LowerRight;
-            if (!endFrame.hasMultipleDifferentValues && !startFrame.hasMultipleDifferentValues && !abcFrameCount.hasMultipleDifferentValues)
+            if (!startTimeProp.hasMultipleDifferentValues && !endTimeProp.hasMultipleDifferentValues)
             {
-                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") +"s at " + frameRate + "fps (" + (frameCount+1) + " frames)"),style);
-                EditorGUILayout.LabelField(new GUIContent("frame " + startFrameVal.ToString("0") + " to " + endFrameVal.ToString("0")),style);
-            }
-            else
-            {
-                EditorGUILayout.LabelField(new GUIContent("the selected assets have different time ranges or framerates"), style);
+                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") + "s"), style);
             }
 
             base.ApplyRevertGUI();

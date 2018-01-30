@@ -67,6 +67,7 @@ enum class aiTimeSamplingType
     Uniform,
     Cyclic,
     Acyclic,
+    Mixed,
 };
 
 enum class aiTopologyVariance
@@ -253,8 +254,16 @@ struct aiPropertyData
     aiPropertyData(void *d, int s, aiPropertyType t) : data(d), size(s), type(t) {}
 };
 
+struct aiTimeRange
+{
+    aiTimeSamplingType type = aiTimeSamplingType::Uniform;
+    int frame_count = 0;
+    double start_time = 0.0f;
+    double end_time = 0.0f;
+};
 
-abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
+
+abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
 abciAPI void            aiClearContextsWithPath(const char *path);
@@ -263,13 +272,12 @@ abciAPI void            aiDestroyContext(aiContext* ctx);
 
 abciAPI bool            aiLoad(aiContext* ctx, const char *path);
 abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
-abciAPI float           aiGetStartTime(aiContext* ctx);
-abciAPI float           aiGetEndTime(aiContext* ctx);
-abciAPI int             aiGetFrameCount(aiContext* ctx);
+abciAPI int             aiGetTimeRangeCount(aiContext* ctx);
+abciAPI void            aiGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
 abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
-abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
+abciAPI void            aiUpdateSamples(aiContext* ctx, double time);
 
-abciAPI const char*     aiGetNameS(aiObject* obj);
+abciAPI const char*     aiGetName(aiObject* obj);
 abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
 abciAPI void            aiSetEnabled(aiObject* obj, bool v);
@@ -306,6 +314,6 @@ abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *d
 abciAPI int             aiSchemaGetNumProperties(aiSchemaBase* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
-abciAPI const char*     aiPropertyGetNameS(aiProperty* prop);
+abciAPI const char*     aiPropertyGetName(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
 abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);

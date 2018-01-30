@@ -14,26 +14,16 @@ namespace UTJ.Alembic
             SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("m_streamDescriptor");
             SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
-            SerializedProperty endFrame = serializedObject.FindProperty("m_endFrame");
-            SerializedProperty startFrame = serializedObject.FindProperty("m_startFrame");
+            SerializedProperty startTime = serializedObject.FindProperty("m_startTime");
+            SerializedProperty endTime = serializedObject.FindProperty("m_endTime");
             SerializedProperty asyncLoad = serializedObject.FindProperty("m_asyncLoad");
 
-            var targetStreamDesc = (target as AlembicStreamPlayer).m_streamDescriptor;
-            var minFrame = targetStreamDesc.minFrame;
-            var maxFrame = targetStreamDesc.maxFrame;
-            var frameLength = targetStreamDesc.frameLength;
-            var frameRate = frameLength==0.0f ? 0.0f : 1.0f / frameLength;
-            var hasVaryingTopology= false;
-            var hasAcyclicFramerate = false;
-            var multipleFramerates = false;
+            var streamPlayer = target as AlembicStreamPlayer;
+            var targetStreamDesc = streamPlayer.m_streamDescriptor;
             var multipleTimeRanges = false;
             foreach (AlembicStreamPlayer player in targets)
             {
-                if (player.m_streamDescriptor.minFrame != minFrame) multipleTimeRanges = true;
-                if (player.m_streamDescriptor.maxFrame != maxFrame) multipleTimeRanges = true;
-                if (player.m_streamDescriptor.frameLength != frameLength) multipleFramerates = true;
-                if (player.m_streamDescriptor.hasVaryingTopology) hasVaryingTopology = true;
-                if (player.m_streamDescriptor.hasAcyclicFramerate) hasAcyclicFramerate = true;
+                //
             }
 
             EditorGUI.BeginDisabledGroup(true);
@@ -45,50 +35,36 @@ namespace UTJ.Alembic
                 return;
             }
 
-            EditorGUILayout.LabelField(new GUIContent("Time Range"));     
-            EditorGUI.BeginDisabledGroup(multipleFramerates || multipleTimeRanges);
-            
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(new GUIContent("frames"));            
-            EditorGUIUtility.labelWidth = 35.0f;
-            
-            EditorGUILayout.PropertyField(startFrame,new GUIContent("from","Start frame"),GUILayout.MaxWidth(60.0f));
-            EditorGUILayout.Space();
-            EditorGUIUtility.labelWidth = 20.0f;
-            
-            EditorGUILayout.PropertyField(endFrame,new GUIContent("to","Start frame"),GUILayout.MaxWidth(60.0f));
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Time Range"));
+            EditorGUI.BeginDisabledGroup(multipleTimeRanges);
 
-            float startFrameVal = startFrame.intValue;
-            float endFrameVal = endFrame.intValue;
-            EditorGUIUtility.labelWidth = 0.0f;
-
+            var abcStart = (float)targetStreamDesc.abcStartTime;
+            var abcEnd = (float)targetStreamDesc.abcEndTime;
+            var start = (float)streamPlayer.m_startTime;
+            var end = (float)streamPlayer.m_endTime;
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider(" ",ref startFrameVal,ref endFrameVal,minFrame,maxFrame);
+            EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
             if (EditorGUI.EndChangeCheck())
             {
-                startFrame.intValue = (int)startFrameVal;
-                endFrame.intValue = (int)endFrameVal;    
+                startTime.doubleValue = start;
+                endTime.doubleValue = end;
             }
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(new GUIContent("seconds"));
             EditorGUI.BeginChangeCheck();
             EditorGUIUtility.labelWidth = 35.0f;
-            EditorGUI.showMixedValue = startFrame.hasMultipleDifferentValues;
-            var newStartTime = EditorGUILayout.FloatField(new GUIContent("from","Start time"),targetStreamDesc.abcStartTime +  startFrameVal * frameLength,GUILayout.MinWidth(80.0f));
+            EditorGUI.showMixedValue = startTime.hasMultipleDifferentValues;
+            var newStartTime = EditorGUILayout.FloatField(new GUIContent("from", "Start time"), start, GUILayout.MinWidth(80.0f));
             GUILayout.FlexibleSpace();
             EditorGUIUtility.labelWidth = 20.0f;
-            EditorGUI.showMixedValue = endFrame.hasMultipleDifferentValues;
-            var newEndTime = EditorGUILayout.FloatField(new GUIContent("to","End time"),targetStreamDesc.abcStartTime + endFrameVal * frameLength,GUILayout.MinWidth(80.0f));
+            EditorGUI.showMixedValue = endTime.hasMultipleDifferentValues;
+            var newEndTime = EditorGUILayout.FloatField(new GUIContent("to", "End time"), end, GUILayout.MinWidth(80.0f));
             EditorGUI.showMixedValue = false;
             if (EditorGUI.EndChangeCheck())
             {
-                endFrameVal = (float)Math.Round((newEndTime - targetStreamDesc.abcStartTime) * frameRate);
-                startFrameVal = (float)Math.Round((newStartTime - targetStreamDesc.abcStartTime) * frameRate);
-
-                startFrame.intValue = (int)startFrameVal;
-                endFrame.intValue = (int)endFrameVal;    
+                startTime.doubleValue = newStartTime;
+                endTime.doubleValue = newEndTime;
             }
 
             EditorGUILayout.EndHorizontal();
@@ -97,18 +73,12 @@ namespace UTJ.Alembic
 
             GUIStyle style = new GUIStyle();
             style.alignment = TextAnchor.LowerRight;
-            if (!endFrame.hasMultipleDifferentValues && !startFrame.hasMultipleDifferentValues && !hasAcyclicFramerate)
+            if (!endTime.hasMultipleDifferentValues && !startTime.hasMultipleDifferentValues)
             {
-                int numFrames = (int)(endFrameVal - startFrameVal);
-                float duration = numFrames * frameLength;
-                EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") + "s at " + frameRate + "fps (" + (numFrames+1) + " frames).", "Frame rate"), style);
+                EditorGUILayout.LabelField(new GUIContent((end - start).ToString("0.000") + "s"), style);
             }
-            else
-            {
-                EditorGUILayout.LabelField(new GUIContent("--s at --fps (-- frames).", "Frame rate"), style);
-            }
-            
-            EditorGUILayout.PropertyField(currentTime,new GUIContent("Time"));
+
+            EditorGUILayout.PropertyField(currentTime, new GUIContent("Time"));
             EditorGUILayout.PropertyField(vertexMotionScale);
             EditorGUILayout.Space();
 

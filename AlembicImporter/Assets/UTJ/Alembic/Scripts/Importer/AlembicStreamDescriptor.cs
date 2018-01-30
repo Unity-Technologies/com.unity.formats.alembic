@@ -9,27 +9,9 @@ namespace UTJ.Alembic
         [SerializeField] public AlembicStreamSettings settings = new AlembicStreamSettings();
         [SerializeField] public bool hasVaryingTopology = false;
         [SerializeField] public bool hasAcyclicFramerate = false;
-        [SerializeField] public int minFrame = 0;
-        [SerializeField] public int maxFrame = 0;
-        [SerializeField] public float abcDuration = 0.0f;
-        [SerializeField] public float abcStartTime = 0.0f;
-        [SerializeField] public int abcFrameCount = 1;
+        [SerializeField] public double abcStartTime = 0.0f;
+        [SerializeField] public double abcEndTime = 0.0f;
 
-        public float duration
-        {
-            get
-            {
-               return abcFrameCount * frameLength;
-            }
-        }
-
-        public float frameLength
-        {
-            get
-            {
-               if (abcFrameCount == 1) return 0;
-               return abcDuration / (abcFrameCount-1);
-            }
-        }
+        public double duration { get { return abcStartTime * abcEndTime; } }
     }
 }

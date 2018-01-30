@@ -37,6 +37,14 @@ namespace UTJ.Alembic
         Heterogeneous, // both vertices and topology are variant
     }
 
+    public enum aiTimeSamplingType
+    {
+        Uniform,
+        Cyclic,
+        Acyclic,
+        Mixed,
+    };
+
     public enum aiPropertyType
     {
         Unknown,
@@ -222,6 +230,14 @@ namespace UTJ.Alembic
         aiPropertyType type;
     }
 
+    public struct aiTimeRange
+    {
+        public aiTimeSamplingType type;
+        public int frameCount;
+        public double startTime;
+        public double endTime;
+    };
+
 
     public struct aiContext
     {
@@ -234,12 +250,19 @@ namespace UTJ.Alembic
         public void Destroy() { aiDestroyContext(self); self = IntPtr.Zero; }
         public bool Load(string path) { return aiLoad(self, path); }
         public void SetConfig(ref aiConfig conf) { aiSetConfig(self, ref conf); }
-        public void UpdateSamples(float time) { aiUpdateSamples(self, time); }
+        public void UpdateSamples(double time) { aiUpdateSamples(self, time); }
 
         public aiObject topObject { get { return aiGetTopObject(self); } }
-        public float startTime { get { return aiGetStartTime(self); } }
-        public float endTime { get { return aiGetEndTime(self); } }
-        public int frameCount { get { return aiGetFrameCount(self); } }
+        public aiTimeRange timeRage {
+            get { var ret = default(aiTimeRange); aiGetTimeRange(self, -1, ref ret); return ret; }
+        }
+        public int timeRangeCount { get { return aiGetTimeRangeCount(self); } }
+        public aiTimeRange GetTimeRange(int i)
+        {
+            var ret = default(aiTimeRange);
+            aiGetTimeRange(self, i, ref ret);
+            return ret;
+        }
 
         #region internal
         [DllImport("abci")] public static extern void aiClearContextsWithPath(string path);
@@ -247,11 +270,10 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void aiDestroyContext(IntPtr ctx);
         [DllImport("abci")] static extern Bool aiLoad(IntPtr ctx, string path);
         [DllImport("abci")] static extern void aiSetConfig(IntPtr ctx, ref aiConfig conf);
-        [DllImport("abci")] static extern float aiGetStartTime(IntPtr ctx);
-        [DllImport("abci")] static extern float aiGetEndTime(IntPtr ctx);
-        [DllImport("abci")] static extern int aiGetFrameCount(IntPtr ctx);
+        [DllImport("abci")] static extern int aiGetTimeRangeCount(IntPtr ctx);
+        [DllImport("abci")] static extern void aiGetTimeRange(IntPtr ctx, int i, ref aiTimeRange dst);
         [DllImport("abci")] static extern aiObject aiGetTopObject(IntPtr ctx);
-        [DllImport("abci")] static extern void aiUpdateSamples(IntPtr ctx, float time);
+        [DllImport("abci")] static extern void aiUpdateSamples(IntPtr ctx, double time);
         #endregion
     }
 
@@ -260,7 +282,7 @@ namespace UTJ.Alembic
         public IntPtr self;
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
 
-        public string name { get { return Marshal.PtrToStringAnsi(aiGetNameS(self)); } }
+        public string name { get { return Marshal.PtrToStringAnsi(aiGetName(self)); } }
         public bool enabled { set { aiSetEnabled(self, value); } }
         public int childCount { get { return aiGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiGetChild(self, i); }
@@ -281,7 +303,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern int aiGetNumChildren(IntPtr obj);
         [DllImport("abci")] static extern aiObject aiGetChild(IntPtr obj, int i);
         [DllImport("abci")] static extern void aiSetEnabled(IntPtr obj, Bool v);
-        [DllImport("abci")] static extern IntPtr aiGetNameS(IntPtr obj);
+        [DllImport("abci")] static extern IntPtr aiGetName(IntPtr obj);
 
         [DllImport("abci")] static extern aiSchema aiGetXform(IntPtr obj);
         [DllImport("abci")] static extern aiSchema aiGetCamera(IntPtr obj);
@@ -471,7 +493,7 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiProperty v) { return v.self != IntPtr.Zero; }
 
         #region internal
-        [DllImport("abci")] static extern IntPtr aiPropertyGetNameS(IntPtr prop);
+        [DllImport("abci")] static extern IntPtr aiPropertyGetName(IntPtr prop);
         [DllImport("abci")] static extern aiPropertyType aiPropertyGetType(IntPtr prop);
         [DllImport("abci")] static extern void aiPropertyGetData(IntPtr prop, aiPropertyData oData);
         #endregion
@@ -479,8 +501,8 @@ namespace UTJ.Alembic
 
     public partial class AbcAPI
     {
-        [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
-        [DllImport("abci")] public static extern void       aiCleanup();
+        [DllImport("abci")] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
+        [DllImport("abci")] public static extern void aiCleanup();
 
     }
 

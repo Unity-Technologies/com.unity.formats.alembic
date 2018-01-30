@@ -53,15 +53,12 @@ namespace UTJ.Alembic
         private AlembicStreamDescriptor m_streamDesc;
         private aiConfig m_config;
         private aiContext m_context;
-        private float m_time;
+        private double m_time;
         private bool m_loaded;
         private bool m_streamInterupted;
 
         public bool abcIsValid { get { return m_context; } }
-        public float abcStartTime { get { return m_context.startTime; } }
-        public float abcEndTime { get { return m_context.endTime; } }
-        public int abcFrameCount { get { return m_context.frameCount; } }
-
+        public aiTimeRange abcTimeRange { get { return m_context.timeRage; } }
         public aiConfig config { get { return m_config; } }
         public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
         public bool asyncLoad { set { m_config.asyncLoad = value; } }
@@ -98,7 +95,7 @@ namespace UTJ.Alembic
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdateBegin(float time)
+        public bool AbcUpdateBegin(double time)
         {
             if (m_streamInterupted) return true;
             if (!abcIsValid || !m_loaded) return false;
@@ -175,7 +172,7 @@ namespace UTJ.Alembic
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, float time, bool createMissingNodes = true)
+        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes = true)
         {
             var top = ctx.topObject;
             if (!top)

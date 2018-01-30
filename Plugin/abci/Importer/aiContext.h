@@ -71,16 +71,16 @@ public:
     void setConfig(const aiConfig &config);
 
     aiObject* getTopObject() const;
-    float getStartTime() const;
-    float getEndTime() const;
-    int getFrameCount() const;
-    void updateSamples(float time);
+    void updateSamples(double time);
 
     Abc::IArchive getArchive() const;
     const std::string& getPath() const;
     int getUid() const;
 
-    int getNumTimeSamplings();
+    int getTimeRangeCount() const;
+    void getTimeRange(int tsi, aiTimeRange& dst) const;
+
+    int getTimeSamplingCount();
     void getTimeSampling(int i, aiTimeSamplingData& dst);
     void copyTimeSampling(int i, aiTimeSamplingData& dst);
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
@@ -97,8 +97,8 @@ private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
-    double m_timeRange[2] = {0.0, 0.0};
-    uint64_t m_numFrames = 0;
+    aiTimeRange m_time_range_unified;
+    std::vector<aiTimeRange> m_time_ranges;
     int m_uid = 0;
     aiConfig m_config;
 

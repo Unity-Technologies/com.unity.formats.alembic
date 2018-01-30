@@ -69,10 +69,10 @@ aiContextManager::~aiContextManager()
     if (m_contexts.size()) {
         DebugWarning("%lu remaining context(s) registered", m_contexts.size());
     }
-
     m_contexts.clear();
 }
-// ---
+
+
 
 aiContext::aiContext(int uid)
     : m_uid(uid)
@@ -99,7 +99,21 @@ const std::string& aiContext::getPath() const
 }
 
 
-int aiContext::getNumTimeSamplings()
+int aiContext::getTimeRangeCount() const
+{
+    return (int)m_time_ranges.size();
+}
+void aiContext::getTimeRange(int tsi, aiTimeRange & dst) const
+{
+    if (tsi >= 0 && tsi < m_time_ranges.size()) {
+        dst = m_time_ranges[tsi];
+    }
+    else {
+        dst = m_time_range_unified;
+    }
+}
+
+int aiContext::getTimeSamplingCount()
 {
     return (int)m_archive.getNumTimeSamplings();
 }
@@ -133,7 +147,6 @@ void aiContext::copyTimeSampling(int i, aiTimeSamplingData& dst)
 {
     int dst_numSamples = dst.numTimes;
     double *dst_samples = dst.times;
-
     getTimeSampling(i, dst);
 
     if (dst.type == aiTimeSamplingType::Acyclic) {
@@ -194,8 +207,8 @@ void aiContext::reset()
     m_path = "";
     m_archive.reset();
 
-    m_timeRange[0] = 0.0f;
-    m_timeRange[1] = 0.0f;
+    m_time_range_unified = {};
+    m_time_ranges.clear();
 }
 
 std::string aiContext::normalizePath(const char *inPath)
@@ -278,10 +291,13 @@ bool aiContext::load(const char *inPath)
         m_top_node.reset(new aiObject(this, nullptr, abcTop));
         gatherNodesRecursive(m_top_node.get());
 
+        m_time_range_unified = {};
+        m_time_ranges.clear();
         auto num_time_samplings = (int)m_archive.getNumTimeSamplings();
         if (num_time_samplings > 1) {
-            m_timeRange[0] = std::numeric_limits<double>::max();
-            m_timeRange[1] = -std::numeric_limits<double>::max();
+            aiTimeRange tr;
+            tr.start_time = std::numeric_limits<float>::max();
+            tr.end_time = -std::numeric_limits<float>::max();
 
             for (int i = 1; i < num_time_samplings; ++i) {
                 auto ts = m_archive.getTimeSampling(i);
@@ -291,23 +307,36 @@ bool aiContext::load(const char *inPath)
                 if (tst.isCyclic() || tst.isUniform()) {
                     auto max_num_samples = m_archive.getMaxNumSamplesForTimeSamplingIndex(i);
                     auto samples_per_cycle = tst.getNumSamplesPerCycle();
-                    int numCycles = int(max_num_samples / samples_per_cycle);
+                    int num_cycles = int(max_num_samples / samples_per_cycle);
 
-                    m_timeRange[0] = std::min(m_timeRange[0], ts->getStoredTimes()[0]);
-                    m_timeRange[1] = std::max(m_timeRange[1], m_timeRange[0] + (numCycles - 1) * tst.getTimePerCycle());
-
-                    if (numCycles > m_numFrames) m_numFrames = numCycles;
+                    if (tst.isUniform()) tr.type = aiTimeSamplingType::Uniform;
+                    else if (tst.isCyclic()) tr.type = aiTimeSamplingType::Cyclic;
+                    tr.start_time = ts->getStoredTimes()[0];
+                    tr.end_time = tr.start_time + (num_cycles - 1) * tst.getTimePerCycle();
+                    tr.frame_count = num_cycles;
                 }
                 else if (tst.isAcyclic()) {
-                    m_timeRange[0] = std::min(m_timeRange[0], ts->getSampleTime(0));
-                    m_timeRange[1] = std::max(m_timeRange[1], ts->getSampleTime(ts->getNumStoredTimes() - 1));
-
-                    if (ts->getNumStoredTimes() > m_numFrames) m_numFrames = ts->getNumStoredTimes();
+                    tr.type = aiTimeSamplingType::Acyclic;
+                    tr.start_time = ts->getSampleTime(0);
+                    tr.end_time = ts->getSampleTime(ts->getNumStoredTimes() - 1);
+                    tr.frame_count = (int)ts->getNumStoredTimes();
                 }
+
+                if (tr.start_time > tr.end_time) {
+                    tr.start_time = 0.0;
+                    tr.end_time = 0.0;
+                }
+                m_time_ranges.push_back(tr);
             }
-            if (m_timeRange[0] > m_timeRange[1]) {
-                m_timeRange[0] = 0.0;
-                m_timeRange[1] = 0.0;
+
+            m_time_range_unified = m_time_ranges.front();
+            for (size_t i = 1; i < m_time_ranges.size(); ++i) {
+                auto& tr = m_time_ranges[i];
+                if (m_time_range_unified.type != tr.type)
+                    m_time_range_unified.type = aiTimeSamplingType::Mixed;
+                m_time_range_unified.start_time = std::min(m_time_range_unified.start_time, tr.start_time);
+                m_time_range_unified.end_time = std::max(m_time_range_unified.end_time, tr.end_time);
+                m_time_range_unified.frame_count = std::max(m_time_range_unified.frame_count, tr.frame_count);
             }
         }
 
@@ -323,27 +352,12 @@ bool aiContext::load(const char *inPath)
     }
 }
 
-float aiContext::getStartTime() const
-{
-    return float(m_timeRange[0]);
-}
-
-float aiContext::getEndTime() const
-{
-    return float(m_timeRange[1]);
-}
-
-int aiContext::getFrameCount() const
-{
-    return (int)m_numFrames;
-}
-
 aiObject* aiContext::getTopObject() const
 {
     return m_top_node.get();
 }
 
-void aiContext::updateSamples(float time)
+void aiContext::updateSamples(double time)
 {
     auto ss = aiTimeToSampleSelector(time);
     eachNodes([ss](aiObject& o) {

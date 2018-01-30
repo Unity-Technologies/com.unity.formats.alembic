@@ -327,7 +327,6 @@ namespace UTJ.Alembic
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf;
-            bool m_first = false;
 
             public MeshCapturer(AlembicExporter exp, ComponentCapturer parent, MeshRenderer target)
                 : base(exp, parent, target)

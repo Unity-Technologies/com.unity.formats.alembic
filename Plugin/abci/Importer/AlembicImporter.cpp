@@ -9,9 +9,9 @@
 #include "aiPoints.h"
 #include "aiProperty.h"
 
-abciAPI abcSampleSelector aiTimeToSampleSelector(float time)
+abciAPI abcSampleSelector aiTimeToSampleSelector(double time)
 {
-    return abcSampleSelector(static_cast<AbcCoreAbstract::chrono_t>(time), Abc::ISampleSelector::kFloorIndex);
+    return abcSampleSelector(time, Abc::ISampleSelector::kFloorIndex);
 }
 
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index)
@@ -56,19 +56,17 @@ abciAPI void aiSetConfig(aiContext* ctx, const aiConfig* conf)
         ctx->setConfig(*conf);
 }
 
-abciAPI float aiGetStartTime(aiContext* ctx)
+abciAPI int aiGetTimeRangeCount(aiContext* ctx)
 {
-    return ctx ? ctx->getStartTime() : 0.0f;
+    if (ctx)
+        return ctx->getTimeSamplingCount();
+    return 0;
 }
 
-abciAPI float aiGetEndTime(aiContext* ctx)
+abciAPI void aiGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst)
 {
-    return ctx ? ctx->getEndTime() : 0.0f;
-}
-
-abciAPI int aiGetFrameCount(aiContext* ctx)
-{
-    return ctx ? ctx->getFrameCount() : 0;
+    if(ctx && dst)
+        ctx->getTimeRange(i, *dst);
 }
 
 abciAPI aiObject* aiGetTopObject(aiContext* ctx)
@@ -76,13 +74,13 @@ abciAPI aiObject* aiGetTopObject(aiContext* ctx)
     return ctx ? ctx->getTopObject() : 0;
 }
 
-abciAPI void aiUpdateSamples(aiContext* ctx, float time)
+abciAPI void aiUpdateSamples(aiContext* ctx, double time)
 {
     if (ctx)
         ctx->updateSamples(time);
 }
 
-abciAPI const char* aiGetNameS(aiObject* obj)
+abciAPI const char* aiGetName(aiObject* obj)
 {
     return obj ? obj->getName() : "";
 }
@@ -281,7 +279,7 @@ abciAPI int aiPropertyGetTimeSamplingIndex(aiProperty* prop)
     return prop->getTimeSamplingIndex();
 }
 
-abciAPI const char* aiPropertyGetNameS(aiProperty* prop)
+abciAPI const char* aiPropertyGetName(aiProperty* prop)
 {
     return prop->getName().c_str();
 }
