@@ -123,16 +123,6 @@ struct aiConfig
     bool async_load = false;
 };
 
-struct aiTimeSamplingData
-{
-    aiTimeSamplingType type = aiTimeSamplingType::Uniform;
-    float start_time = 0.0f;
-    float end_time = 0.0f;
-    float interval = 1.0f / 30.0f;  // relevant only if type is Uniform or Cyclic
-    int numTimes = 0;               // relevant only if type is Acyclic
-    double *times = nullptr;        // relevant only if type is Acyclic
-};
-
 struct aiXformData
 {
     abcV3 translation = { 0.0f, 0.0f, 0.0f };

@@ -57,7 +57,7 @@ namespace UTJ.Alembic
             EditorGUI.EndDisabledGroup();
             EditorGUILayout.EndHorizontal();
 
-            float duration = endTime * startTime;
+            float duration = endTime - startTime;
 
             GUIStyle style = new GUIStyle();
             style.alignment = TextAnchor.LowerRight;

@@ -12,6 +12,6 @@ namespace UTJ.Alembic
         [SerializeField] public double abcStartTime = 0.0f;
         [SerializeField] public double abcEndTime = 0.0f;
 
-        public double duration { get { return abcStartTime * abcEndTime; } }
+        public double duration { get { return abcEndTime - abcStartTime; } }
     }
 }

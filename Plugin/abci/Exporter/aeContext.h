@@ -58,8 +58,8 @@ public:
     void markFrameBegin();
     void markFrameEnd();
 
-    void addAsyncTask(const std::function<void()>& task);
-    void finishAsyncTask();
+    void addAsync(const std::function<void()>& task);
+    void waitAsync();
 
 private:
     aeConfig m_config;

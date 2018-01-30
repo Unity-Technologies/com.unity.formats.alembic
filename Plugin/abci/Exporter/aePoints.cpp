@@ -37,7 +37,7 @@ void aePoints::writeSample(const aePointsData &data)
     m_buf_velocities.assign(data.velocities, data.velocities + data.count);
     m_buf_ids.assign(data.ids, data.ids + data.count);
 
-    m_ctx->addAsyncTask([this]() { doWriteSample(); });
+    m_ctx->addAsync([this]() { doWriteSample(); });
 }
 
 void aePoints::doWriteSample()

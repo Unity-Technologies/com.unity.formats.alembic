@@ -79,8 +79,6 @@ public:
     void getTimeRange(int tsi, aiTimeRange& dst) const;
 
     int getTimeSamplingCount();
-    void getTimeSampling(int i, aiTimeSamplingData& dst);
-    void copyTimeSampling(int i, aiTimeSamplingData& dst);
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
     template<class F>

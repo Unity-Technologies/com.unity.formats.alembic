@@ -116,46 +116,6 @@ int aiContext::getTimeSamplingCount()
     return (int)m_archive.getNumTimeSamplings();
 }
 
-void aiContext::getTimeSampling(int i, aiTimeSamplingData& dst)
-{
-    auto ts = m_archive.getTimeSampling(i);
-    auto tst = ts->getTimeSamplingType();
-
-    dst.numTimes = (int)ts->getNumStoredTimes();
-    if (tst.isUniform() || tst.isCyclic()) {
-        int numCycles = int(m_archive.getMaxNumSamplesForTimeSamplingIndex(i) / tst.getNumSamplesPerCycle());
-
-        dst.type = tst.isUniform() ? aiTimeSamplingType::Uniform : aiTimeSamplingType::Cyclic;
-        dst.interval = (float)tst.getTimePerCycle();
-        dst.start_time = (float)ts->getStoredTimes()[0];
-        dst.end_time = dst.start_time + dst.interval * (numCycles - 1);
-        dst.numTimes = (int)ts->getNumStoredTimes();
-        dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
-    }
-    else if (tst.isAcyclic()) {
-        dst.type = aiTimeSamplingType::Acyclic;
-        dst.start_time = (float)ts->getSampleTime(0);
-        dst.end_time = (float)ts->getSampleTime(ts->getNumStoredTimes() - 1);
-        dst.numTimes = (int)ts->getNumStoredTimes();
-        dst.times = const_cast<double*>(&ts->getStoredTimes()[0]);
-    }
-}
-
-void aiContext::copyTimeSampling(int i, aiTimeSamplingData& dst)
-{
-    int dst_numSamples = dst.numTimes;
-    double *dst_samples = dst.times;
-    getTimeSampling(i, dst);
-
-    if (dst.type == aiTimeSamplingType::Acyclic) {
-        const auto& times = m_archive.getTimeSampling(i)->getStoredTimes();
-        if (dst_samples && dst_numSamples >= (int)times.size()) {
-            // memcpy() is way faster than std::copy() on VC...
-            memcpy(dst.times, &times[0], sizeof(times[0])*times.size());
-        }
-    }
-}
-
 int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
 {
     int n = m_archive.getNumTimeSamplings();
@@ -189,8 +149,7 @@ void aiContext::gatherNodesRecursive(aiObject *n)
     abcObject &abc = n->getAbcObject();
     size_t numChildren = abc.getNumChildren();
     
-    for (size_t i = 0; i < numChildren; ++i)
-    {
+    for (size_t i = 0; i < numChildren; ++i) {
         aiObject *child = n->newChild(abc.getChild(i));
         gatherNodesRecursive(child);
     }
@@ -213,27 +172,20 @@ std::string aiContext::normalizePath(const char *inPath)
 {
     std::string path;
 
-    if (inPath != nullptr)
-    {
+    if (inPath != nullptr) {
         path = inPath;
 
         #ifdef _WIN32
-        
         size_t n = path.length();
-        
-        for (size_t i=0; i<n; ++i)
-        {
+        for (size_t i=0; i<n; ++i) {
             char c = path[i];
-            if (c == '\\')
-            {
+            if (c == '\\') {
                 path[i] = '/';
             }
-            else if (c >= 'A' && c <= 'Z')
-            {
+            else if (c >= 'A' && c <= 'Z') {
                 path[i] = 'a' + (c - 'A');
             }
         }
-        
         #endif
     }
 

@@ -67,7 +67,7 @@ void aePolyMesh::writeSample(const aePolyMeshData &data)
     m_buf_colors.assign(data.colors, data.colors + (data.colors_count ? data.colors_count : data.point_count));
     m_buf_colors_indices.assign(data.colors_indices, data.colors_indices + data.colors_index_count);
 
-    m_ctx->addAsyncTask([this]() { writeSampleBody(); });
+    m_ctx->addAsync([this]() { writeSampleBody(); });
 }
 
 int aePolyMesh::addFaceSet(const char *name)

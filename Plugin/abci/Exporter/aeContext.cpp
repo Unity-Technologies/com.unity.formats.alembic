@@ -16,12 +16,12 @@ aeContext::~aeContext()
 
 void aeContext::reset()
 {
-    finishAsyncTask();
+    waitAsync();
 
     if (m_archive != nullptr) {
         if (m_config.time_sampling_type == aeTimeSamplingType::Uniform) {
-            // start time in default timeline maybe changed.
-            Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_config.start_time);
+            // start time in default time sampling maybe changed.
+            auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_config.start_time);
             *m_archive.getTimeSampling(1) = ts;
         }
         else if (m_config.time_sampling_type == aeTimeSamplingType::Cyclic) {
@@ -73,9 +73,8 @@ bool aeContext::openArchive(const char *path)
         return false;
     }
 
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(m_config.start_time));
-    auto tsi = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(tsi + 1);
+    // reserve 'default' time sampling. update it later in reset()
+    auto tsi = addTimeSampling(m_config.start_time);
 
     auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
     m_node_top.reset(new aeObject(this, nullptr, top, tsi));
@@ -104,10 +103,10 @@ aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
 
 uint32_t aeContext::addTimeSampling(float start_time)
 {
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(start_time));
-    uint32_t r = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(r + 1);
-    return r;
+    auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(start_time));
+    auto tsi = m_archive.addTimeSampling(ts);
+    m_timesamplings.resize(tsi + 1);
+    return tsi;
 }
 
 void aeContext::addTime(float time, uint32_t tsi)
@@ -131,26 +130,25 @@ void aeContext::addTime(float time, uint32_t tsi)
 
 void aeContext::markFrameBegin()
 {
-    finishAsyncTask();
+    waitAsync();
 }
 
 void aeContext::markFrameEnd()
 {
     // kick async tasks
     m_async_task_future = std::async(std::launch::async, [this]() {
-        for (auto& task : m_async_tasks) {
+        for (auto& task : m_async_tasks)
             task();
-        }
         m_async_tasks.clear();
     });
 }
 
-void aeContext::addAsyncTask(const std::function<void()>& task)
+void aeContext::addAsync(const std::function<void()>& task)
 {
     m_async_tasks.push_back(task);
 }
 
-void aeContext::finishAsyncTask()
+void aeContext::waitAsync()
 {
     if (m_async_task_future.valid()) {
         m_async_task_future.wait();
