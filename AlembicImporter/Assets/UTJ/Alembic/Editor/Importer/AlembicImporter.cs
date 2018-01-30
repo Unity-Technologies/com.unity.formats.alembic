@@ -19,11 +19,18 @@ namespace UTJ.Alembic
             var streamingAssetPath = assetPath.Replace("Assets","");
             AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
 
-            var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
-            File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
-            File.Delete(fullStreamingAssetPath);
-            File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
-            File.Delete(fullStreamingAssetPath + ".meta");
+            try
+            {
+                var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
+                File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
+                File.Delete(fullStreamingAssetPath);
+                File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
+                File.Delete(fullStreamingAssetPath + ".meta");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning(e);
+            }
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -64,15 +71,15 @@ namespace UTJ.Alembic
             return AssetMoveResult.DidNotMove;
         } 
     }
-        
+
     [ScriptedImporter(1, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         [SerializeField] public double abcStartTime; // read only
         [SerializeField] public double abcEndTime;   // read only
-        [SerializeField] public double startTime;
-        [SerializeField] public double endTime;
+        [SerializeField] public double startTime = double.MinValue;
+        [SerializeField] public double endTime = double.MaxValue;
         [SerializeField] public string importWarning;
         [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
         [SerializeField] public List<string> splittingMeshNames = new List<string>();
@@ -168,23 +175,30 @@ namespace UTJ.Alembic
                     splittingMeshNames.Add(node.linkedGameObj.name);
             }
 
+            int submeshCount = 0;
             var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
             if (meshFilter != null)
             {
                 var m = meshFilter.sharedMesh;
+                submeshCount = m.subMeshCount;
                 m.name = node.linkedGameObj.name;
                 AddObjectToAsset(ctx,m.name, m);
             }
 
             var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();
             if (renderer != null)
-                renderer.sharedMaterial = mat;
+            {
+                var mats = new Material[submeshCount];
+                for (int i = 0; i < submeshCount; ++i)
+                    mats[i] = mat;
+                renderer.sharedMaterials = mats;
+            }
 
-            foreach( var child in node.children)
+            foreach ( var child in node.children)
                 CollectSubAssets(ctx, child, mat);
         }
 
-        private static void AddObjectToAsset(AssetImportContext ctx,string identifier, Object asset)
+        private static void AddObjectToAsset(AssetImportContext ctx, string identifier, Object asset)
         {
 #if UNITY_2017_3_OR_NEWER
             ctx.AddObjectToAsset(identifier, asset);

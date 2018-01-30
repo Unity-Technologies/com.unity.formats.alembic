@@ -31,6 +31,12 @@ namespace UTJ.Alembic
 
             var startTimeProp = serializedObject.FindProperty("startTime");
             var endTimeProp = serializedObject.FindProperty("endTime");
+            if(startTimeProp.doubleValue == endTimeProp.doubleValue)
+            {
+                startTimeProp.doubleValue = importer.abcStartTime;
+                endTimeProp.doubleValue = importer.abcEndTime;
+            }
+
             var startTime = (float)startTimeProp.doubleValue;
             var endTime = (float)endTimeProp.doubleValue;
 

@@ -8,8 +8,8 @@ namespace UTJ.Alembic
         public AlembicStream m_stream;
         public AlembicStreamDescriptor m_streamDescriptor;
         [SerializeField] public double m_currentTime;
-        [SerializeField] public double m_startTime;
-        [SerializeField] public double m_endTime;
+        [SerializeField] public double m_startTime = double.MinValue;
+        [SerializeField] public double m_endTime = double.MaxValue;
         [SerializeField] public float m_vertexMotionScale = 1.0f;
         [SerializeField] public bool m_asyncLoad = true;
         double m_lastUpdateTime;

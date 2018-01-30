@@ -257,12 +257,13 @@ bool aiContext::load(const char *inPath)
                 if (tst.isCyclic() || tst.isUniform()) {
                     auto max_num_samples = m_archive.getMaxNumSamplesForTimeSamplingIndex(i);
                     auto samples_per_cycle = tst.getNumSamplesPerCycle();
+                    auto time_per_cycle = tst.getTimePerCycle();
                     int num_cycles = int(max_num_samples / samples_per_cycle);
 
                     if (tst.isUniform()) tr.type = aiTimeSamplingType::Uniform;
                     else if (tst.isCyclic()) tr.type = aiTimeSamplingType::Cyclic;
                     tr.start_time = ts->getStoredTimes()[0];
-                    tr.end_time = tr.start_time + (num_cycles - 1) * tst.getTimePerCycle();
+                    tr.end_time = tr.start_time + (num_cycles - 1) * time_per_cycle;
                     tr.frame_count = num_cycles;
                 }
                 else if (tst.isAcyclic()) {

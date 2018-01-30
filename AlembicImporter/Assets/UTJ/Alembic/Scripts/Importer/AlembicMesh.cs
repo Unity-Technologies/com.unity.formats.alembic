@@ -138,40 +138,43 @@ namespace UTJ.Alembic
 
                 int vertexCount = m_splitSummaries[spi].vertexCount;
 
-                split.pointCache.ResizeDiscard(vertexCount);
+                if (!m_summary.constantPoints || topologyChanged)
+                    split.pointCache.ResizeDiscard(vertexCount);
+                else
+                    split.pointCache.ResizeDiscard(0);
                 vertexData.positions = split.pointCache;
 
-                if (m_summary.hasVelocities)
+                if (m_summary.hasVelocities && (!m_summary.constantVelocities || topologyChanged))
                     split.velocitiesCache.ResizeDiscard(vertexCount);
                 else
                     split.velocitiesCache.ResizeDiscard(0);
                 vertexData.velocities = split.velocitiesCache;
 
-                if (m_summary.hasNormals)
+                if (m_summary.hasNormals && (!m_summary.constantNormals || topologyChanged))
                     split.normalCache.ResizeDiscard(vertexCount);
                 else
                     split.normalCache.ResizeDiscard(0);
                 vertexData.normals = split.normalCache;
 
-                if (m_summary.hasTangents)
+                if (m_summary.hasTangents && (!m_summary.constantTangents || topologyChanged))
                     split.tangentCache.ResizeDiscard(vertexCount);
                 else
                     split.tangentCache.ResizeDiscard(0);
                 vertexData.tangents = split.tangentCache;
 
-                if (m_summary.hasUV0)
+                if (m_summary.hasUV0 && (!m_summary.constantUV0 || topologyChanged))
                     split.uv0Cache.ResizeDiscard(vertexCount);
                 else
                     split.uv0Cache.ResizeDiscard(0);
                 vertexData.uv0 = split.uv0Cache;
 
-                if (m_summary.hasUV1)
+                if (m_summary.hasUV1 && (!m_summary.constantUV1 || topologyChanged))
                     split.uv1Cache.ResizeDiscard(vertexCount);
                 else
                     split.uv1Cache.ResizeDiscard(0);
                 vertexData.uv1 = split.uv1Cache;
 
-                if (m_summary.hasColors)
+                if (m_summary.hasColors && (!m_summary.constantColors || topologyChanged))
                     split.colorCache.ResizeDiscard(vertexCount);
                 else
                     split.colorCache.ResizeDiscard(0);
@@ -259,7 +262,8 @@ namespace UTJ.Alembic
                     if (split.clear)
                         split.mesh.Clear();
 
-                    split.mesh.SetVertices(split.pointCache.List);
+                    if (split.pointCache.Count > 0)
+                        split.mesh.SetVertices(split.pointCache.List);
                     if (split.normalCache.Count > 0)
                         split.mesh.SetNormals(split.normalCache.List);
                     if (split.tangentCache.Count > 0)
