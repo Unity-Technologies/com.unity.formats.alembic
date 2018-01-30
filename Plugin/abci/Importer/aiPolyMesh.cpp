@@ -848,7 +848,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
 
     refiner.refine();
-    refiner.triangulate(config.swap_face_winding);
+    refiner.triangulate(config.swap_face_winding, config.turn_quad_edges);
 
     // generate submeshes
     if (!topology.m_faceset_sps.empty()) {

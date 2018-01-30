@@ -100,8 +100,8 @@ struct MeshRefiner
     IArray<float3> points;
 
     // outputs
-    RawVector<int> old2new_indices; // old indices to new indices
-    RawVector<int> new2old_points;  // new indices to old vertex data
+    RawVector<int> old2new_indices; // old index to new index
+    RawVector<int> new2old_points;  // new index to old vertex
     RawVector<int> new_indices;
     RawVector<int> new_indices_triangulated;
     RawVector<int> new_indices_submeshes; // triangulated
@@ -132,7 +132,7 @@ struct MeshRefiner
     }
 
     void refine();
-    void triangulate(bool swap_faces);
+    void triangulate(bool swap_faces, bool turn_quads);
     void genSubmeshes(IArray<int> material_ids);
     void genSubmeshes();
     void clear();

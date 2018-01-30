@@ -141,7 +141,7 @@ const RawVector<int>& MeshWelder::getRemapTable() const
 
 
 
-void MeshRefiner::triangulate(bool swap_faces)
+void MeshRefiner::triangulate(bool swap_faces, bool turn_quads)
 {
     auto& dst = new_indices_triangulated;
     dst.resize(num_new_indices);
@@ -152,15 +152,46 @@ void MeshRefiner::triangulate(bool swap_faces)
 
     int n = 0;
     int i = 0;
-    for (size_t fi = 0; fi < num_faces; ++fi) {
-        int count = counts[fi];
-        for (int ni = 0; ni < count - 2; ++ni) {
-            dst[i + 0] = new_indices[n + 0];
-            dst[i + 1] = new_indices[n + ni + i1];
-            dst[i + 2] = new_indices[n + ni + i2];
-            i += 3;
+    if (turn_quads) {
+        for (size_t fi = 0; fi < num_faces; ++fi) {
+            int count = counts[fi];
+            if (count == 4) {
+                int quad[4] = {
+                    new_indices[n + 3],
+                    new_indices[n + 0],
+                    new_indices[n + 1],
+                    new_indices[n + 2],
+                };
+                for (int ni = 0; ni < count - 2; ++ni) {
+                    dst[i + 0] = quad[0];
+                    dst[i + 1] = quad[ni + i1];
+                    dst[i + 2] = quad[ni + i2];
+                    i += 3;
+                }
+                n += count;
+            }
+            else {
+                for (int ni = 0; ni < count - 2; ++ni) {
+                    dst[i + 0] = new_indices[n + 0];
+                    dst[i + 1] = new_indices[n + ni + i1];
+                    dst[i + 2] = new_indices[n + ni + i2];
+                    i += 3;
+                }
+                n += count;
+            }
         }
-        n += count;
+    }
+    else {
+        for (size_t fi = 0; fi < num_faces; ++fi) {
+            int count = counts[fi];
+            for (int ni = 0; ni < count - 2; ++ni) {
+                dst[i + 0] = new_indices[n + 0];
+                dst[i + 1] = new_indices[n + ni + i1];
+                dst[i + 2] = new_indices[n + ni + i2];
+                i += 3;
+            }
+            n += count;
+        }
     }
 }
 
