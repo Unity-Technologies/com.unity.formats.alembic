@@ -103,26 +103,34 @@ namespace UTJ.Alembic
 
     public struct aePolyMeshData
     {
-        public IntPtr positions;        // Vector3*
-        public IntPtr velocities;       // Vector3*. can be null
-        public IntPtr normals;          // Vector3*. can be null
-        public IntPtr uvs;              // Vector2*. can be null
+        public IntPtr   faces;            // int*. if null, assume all faces are triangles
+        public IntPtr   indices;          // int*. 
+        public int      faceCount;
+        public int      indexCount;
 
-        public IntPtr indices;          // int*. 
-        public IntPtr normalIndices;    // int*. if null, assume same as indices
-        public IntPtr uvIndices;        // int*. if null, assume same as indices
+        public IntPtr   points;           // Vector3*
+        public IntPtr   velocities;       // Vector3*. can be null
+        public int      pointCount;
 
-        public IntPtr faces;            // int*. if null, assume all faces are triangles
+        public IntPtr   normals;          // Vector3*. can be null
+        public IntPtr   normalIndices;    // int*. if null, assume same as indices
+        public int      normalCount;      // if 0, assume same as positionCount
+        public int      normalIndexCount; // if 0, assume same as indexCount
 
-        public int positionCount;
-        public int normalCount;         // if 0, assume same as positionCount
-        public int uvCount;             // if 0, assume same as positionCount
-
-        public int indexCount;
-        public int normalIndexCount;    // if 0, assume same as indexCount
-        public int uvIndexCount;        // if 0, assume same as indexCount
-
-        public int faceCount;
+        public IntPtr   uv0;              // Vector2*. can be null
+        public IntPtr   uv0Indices;       // int*. if null, assume same as indices
+        public int      uv0Count;         // if 0, assume same as positionCount
+        public int      uv0IndexCount;    // if 0, assume same as indexCount
+        
+        public IntPtr   uv1;              // Vector2*. can be null
+        public IntPtr   uv1Indices;       // int*. if null, assume same as indices
+        public int      uv1Count;         // if 0, assume same as positionCount
+        public int      uv1IndexCount;    // if 0, assume same as indexCount
+        
+        public IntPtr   colors;           // Vector2*. can be null
+        public IntPtr   colorIndices;     // int*. if null, assume same as indices
+        public int      colorCount;       // if 0, assume same as positionCount
+        public int      colorIndexCount;  // if 0, assume same as indexCount
     }
 
     public struct aeFaceSetData

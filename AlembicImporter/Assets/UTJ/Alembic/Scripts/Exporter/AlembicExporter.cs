@@ -22,6 +22,7 @@ namespace UTJ.Alembic
         public aeConfig m_conf = aeConfig.default_value;
         public Scope m_scope = Scope.EntireScene;
         public bool m_fixDeltaTime = true;
+        public bool m_assumeTopologiesAreConstant = true;
         public bool m_ignoreDisabled = true;
         public bool m_captureMeshRenderer = true;
         public bool m_captureSkinnedMeshRenderer = true;

@@ -18,9 +18,9 @@ namespace UTJ.Alembic
         public class MeshBuffer
         {
             public PinnedList<int> indices = new PinnedList<int>();
-            public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
+            public PinnedList<Vector3> points = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
-            public PinnedList<Vector2> uvs = new PinnedList<Vector2>();
+            public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
             public List<PinnedList<int>> facesets = new List<PinnedList<int>>();
             PinnedList<int> tmpIndices = new PinnedList<int>();
 
@@ -40,33 +40,36 @@ namespace UTJ.Alembic
                 }
             }
 
-            public void Capture(Mesh mesh)
+            public void Capture(Mesh mesh, bool topology = true)
             {
-                vertices.LockList(ls => mesh.GetVertices(ls));
+                points.LockList(ls => mesh.GetVertices(ls));
                 normals.LockList(ls => mesh.GetNormals(ls));
-                uvs.LockList(ls => mesh.GetUVs(0, ls));
+                uv0.LockList(ls => mesh.GetUVs(0, ls));
 
-                int submeshCount = mesh.subMeshCount;
-                if (submeshCount == 1)
+                if(topology)
                 {
-                    indices.LockList(ls => mesh.GetTriangles(ls, 0));
-                }
-                else
-                {
-                    indices.Assign(mesh.triangles);
-
-                    while (facesets.Count < submeshCount)
-                        facesets.Add(new PinnedList<int>());
-
-                    int offsetTriangle = 0;
-                    for (int smi = 0; smi < submeshCount; ++smi)
+                    int submeshCount = mesh.subMeshCount;
+                    if (submeshCount == 1)
                     {
-                        tmpIndices.LockList(ls => { mesh.GetTriangles(ls, smi); });
-                        int numTriangles = tmpIndices.Count / 3;
-                        facesets[smi].ResizeDiscard(numTriangles);
-                        for (int ti = 0; ti < numTriangles; ++ti)
-                            facesets[smi][ti] = ti + offsetTriangle;
-                        offsetTriangle += numTriangles;
+                        indices.LockList(ls => mesh.GetTriangles(ls, 0));
+                    }
+                    else
+                    {
+                        indices.Assign(mesh.triangles);
+
+                        while (facesets.Count < submeshCount)
+                            facesets.Add(new PinnedList<int>());
+
+                        int offsetTriangle = 0;
+                        for (int smi = 0; smi < submeshCount; ++smi)
+                        {
+                            tmpIndices.LockList(ls => { mesh.GetTriangles(ls, smi); });
+                            int numTriangles = tmpIndices.Count / 3;
+                            facesets[smi].ResizeDiscard(numTriangles);
+                            for (int ti = 0; ti < numTriangles; ++ti)
+                                facesets[smi][ti] = ti + offsetTriangle;
+                            offsetTriangle += numTriangles;
+                        }
                     }
                 }
             }
@@ -75,12 +78,13 @@ namespace UTJ.Alembic
             {
                 {
                     var data = default(aePolyMeshData);
+                    data.points = points;
                     data.indices = indices;
-                    data.positions = vertices;
-                    data.normals = normals;
-                    data.uvs = uvs;
-                    data.positionCount = vertices.Count;
+                    data.pointCount = points.Count;
                     data.indexCount = indices.Count;
+
+                    data.normals = normals;
+                    data.uv0 = uv0;
                     abc.WriteSample(ref data);
                 }
                 for (int smi = 0; smi < facesets.Count; ++smi)
@@ -101,17 +105,17 @@ namespace UTJ.Alembic
             public Transform rootBone;
             public int numRemappedVertices;
 
-            [DllImport("abci")] public static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
-            [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
-            [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
+            [DllImport("abci")] static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
+            [DllImport("abci")] static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
+            [DllImport("abci")] static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
                 mbuf.Capture(mesh);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
-                remap.Resize(mbuf.vertices.Count);
-                numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.vertices, weights4, mbuf.vertices.Count);
+                remap.Resize(mbuf.points.Count);
+                numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
             }
 
             public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf)
@@ -136,7 +140,7 @@ namespace UTJ.Alembic
                 }
 
                 for (int vi = 0; vi < remap.Count; ++vi)
-                    mbuf.vertices[vi] = vertices[remap[vi]];
+                    mbuf.points[vi] = vertices[remap[vi]];
                 if (normals.Count > 0)
                 {
                     mbuf.normals.ResizeDiscard(remap.Count);
@@ -263,6 +267,7 @@ namespace UTJ.Alembic
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf;
+            bool m_first = false;
 
             public MeshCapturer(ComponentCapturer parent, MeshRenderer target)
                 : base(parent, target)

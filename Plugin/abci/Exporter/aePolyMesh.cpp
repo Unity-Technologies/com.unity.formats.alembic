@@ -49,17 +49,17 @@ void aePolyMesh::setFromPrevious()
 
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
-    m_buf_indices.assign(data.indices, data.indices + data.index_count);
     m_buf_faces.assign(data.faces, data.faces + data.face_count);
 
-    m_buf_positions.assign(data.positions, data.positions + data.position_count);
-    m_buf_velocities.assign(data.velocities, data.velocities + data.position_count);
+    m_buf_points.assign(data.points, data.points + data.point_count);
+    m_buf_velocities.assign(data.velocities, data.velocities + data.point_count);
+    m_buf_indices.assign(data.indices, data.indices + data.index_count);
 
-    m_buf_normals.assign(data.normals, data.normals + (data.normal_count ? data.normal_count : data.position_count));
+    m_buf_normals.assign(data.normals, data.normals + (data.normal_count ? data.normal_count : data.point_count));
     m_buf_normal_indices.assign(data.normal_indices, data.normal_indices + data.normal_index_count);
 
-    m_buf_uvs.assign(data.uvs, data.uvs + (data.uv_count ? data.uv_count : data.position_count));
-    m_buf_uv_indices.assign(data.uv_indices, data.uv_indices + data.uv_index_count);
+    m_buf_uv0.assign(data.uv0, data.uv0 + (data.uv0_count ? data.uv0_count : data.point_count));
+    m_buf_uv0_indices.assign(data.uv0_indices, data.uv0_indices + data.uv0_index_count);
 
     m_ctx->addAsyncTask([this]() { doWriteSample(); });
 }
@@ -87,7 +87,7 @@ void aePolyMesh::doWriteSample()
 
     // handle swap handedness
     if (conf.swap_handedness) {
-        SwapHandedness(m_buf_positions.data(), (int)m_buf_positions.size());
+        SwapHandedness(m_buf_points.data(), (int)m_buf_points.size());
         SwapHandedness(m_buf_velocities.data(), (int)m_buf_velocities.size());
         SwapHandedness(m_buf_normals.data(), (int)m_buf_normals.size());
     }
@@ -95,7 +95,7 @@ void aePolyMesh::doWriteSample()
     // handle scale factor
     float scale = conf.scale;
     if (scale != 1.0f) {
-        ApplyScale(m_buf_positions.data(), (int)m_buf_positions.size(), scale);
+        ApplyScale(m_buf_points.data(), (int)m_buf_points.size(), scale);
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
@@ -122,35 +122,67 @@ void aePolyMesh::doWriteSample()
         };
         do_swap(m_buf_indices);
         do_swap(m_buf_normal_indices);
-        do_swap(m_buf_uv_indices);
+        do_swap(m_buf_uv0_indices);
     }
 
 
     // write!
     AbcGeom::OPolyMeshSchema::Sample sample;
-    AbcGeom::ON3fGeomParam::Sample sample_normals;
-    AbcGeom::OV2fGeomParam::Sample sample_uvs;
-    sample.setPositions(Abc::P3fArraySample(m_buf_positions.data(), m_buf_positions.size()));
     sample.setFaceIndices(Abc::Int32ArraySample(m_buf_indices.data(), m_buf_indices.size()));
     sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces.data(), m_buf_faces.size()));
+    sample.setPositions(Abc::P3fArraySample(m_buf_points.data(), m_buf_points.size()));
     if (!m_buf_velocities.empty()) {
         sample.setVelocities(Abc::V3fArraySample(m_buf_velocities.data(), m_buf_velocities.size()));
     }
     if (!m_buf_normals.empty()) {
-        sample_normals.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
+        AbcGeom::ON3fGeomParam::Sample sp;
+        sp.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
         if (!m_buf_normal_indices.empty())
-            sample_normals.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
-        else
-            sample_normals.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        sample.setNormals(sample_normals);
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
+        else if(m_buf_normals.size() == m_buf_points.size())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        sample.setNormals(sp);
     }
-    if (!m_buf_uvs.empty()) {
-        sample_uvs.setVals(Abc::V2fArraySample(m_buf_uvs.data(), m_buf_uvs.size()));
-        if (!m_buf_uv_indices.empty())
-            sample_uvs.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv_indices.data(), m_buf_uv_indices.size()));
-        else
-            sample_uvs.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        sample.setUVs(sample_uvs);
+    if (!m_buf_uv0.empty()) {
+        AbcGeom::OV2fGeomParam::Sample sp;
+        sp.setVals(Abc::V2fArraySample(m_buf_uv0.data(), m_buf_uv0.size()));
+        if (!m_buf_uv0_indices.empty())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv0_indices.data(), m_buf_uv0_indices.size()));
+        else if (m_buf_uv0.size() == m_buf_points.size())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        sample.setUVs(sp);
     }
     m_schema.set(sample);
+
+    if (!m_buf_uv1.empty()) {
+        if (!m_uv1_param) {
+            bool indexed = !m_buf_uv1_indices.empty() || m_buf_uv1.size() == m_buf_points.size();
+            m_uv1_param.reset(new AbcGeom::OV2fGeomParam(
+                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+        }
+
+        AbcGeom::OV2fGeomParam::Sample sp;
+        sp.setVals(Abc::V2fArraySample(m_buf_uv1.data(), m_buf_uv1.size()));
+        if (!m_buf_uv1_indices.empty())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv1_indices.data(), m_buf_uv1_indices.size()));
+        else if (m_buf_uv1.size() == m_buf_points.size())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        m_uv1_param->set(sp);
+    }
+
+    if (!m_buf_colors.empty()) {
+        if (!m_colors_param) {
+            bool indexed = !m_buf_colors_indices.empty() || m_buf_colors.size() == m_buf_points.size();
+            m_colors_param.reset(new AbcGeom::OC4fGeomParam(
+                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+        }
+
+        AbcGeom::OC4fGeomParam::Sample sp;
+        sp.setVals(Abc::C4fArraySample((abcC4*)m_buf_colors.data(), m_buf_colors.size()));
+        if (!m_buf_colors_indices.empty())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_colors_indices.data(), m_buf_colors_indices.size()));
+        else if (m_buf_colors.size() == m_buf_points.size())
+            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        m_colors_param->set(sp);
+    }
 }

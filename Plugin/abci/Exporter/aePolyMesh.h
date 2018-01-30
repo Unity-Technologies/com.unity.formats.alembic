@@ -33,14 +33,25 @@ private:
     void    doWriteSample();
 
     AbcGeom::OPolyMeshSchema m_schema;
-    RawVector<abcV3> m_buf_positions;
-    RawVector<abcV3> m_buf_velocities;
-    RawVector<abcV3> m_buf_normals;
-    RawVector<abcV2> m_buf_uvs;
-    RawVector<int>   m_buf_indices;
-    RawVector<int>   m_buf_normal_indices;
-    RawVector<int>   m_buf_uv_indices;
+    std::unique_ptr<AbcGeom::OV2fGeomParam> m_uv1_param;
+    std::unique_ptr<AbcGeom::OC4fGeomParam> m_colors_param;
+    std::vector<aeFaceSetPtr> m_facesets;
+
     RawVector<int>   m_buf_faces;
 
-    std::vector<aeFaceSetPtr> m_facesets;
+    RawVector<abcV3> m_buf_points;
+    RawVector<abcV3> m_buf_velocities;
+    RawVector<int>   m_buf_indices;
+
+    RawVector<abcV3> m_buf_normals;
+    RawVector<int>   m_buf_normal_indices;
+
+    RawVector<abcV2> m_buf_uv0;
+    RawVector<int>   m_buf_uv0_indices;
+
+    RawVector<abcV2> m_buf_uv1;
+    RawVector<int>   m_buf_uv1_indices;
+
+    RawVector<abcV4> m_buf_colors;
+    RawVector<int>   m_buf_colors_indices;
 };

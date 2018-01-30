@@ -124,7 +124,7 @@ AbcGeom::OObject&   aeObject::getAbcObject()        { return *m_abc; }
 template<class T>
 T* aeObject::newChild(const char *name, uint32_t tsi)
 {
-    T* child = new T(this, name, tsi);
+    T* child = new T(this, name, tsi == 0 ? getTimeSamplingIndex() : tsi);
     m_children.emplace_back(child);
     return child;
 }
@@ -174,7 +174,7 @@ aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
         return nullptr;
     }
 
-    auto *ret = aeMakeProperty<T>::make(this, name, tsi);
+    auto *ret = aeMakeProperty<T>::make(this, name, tsi == 0 ? getTimeSamplingIndex() : tsi);
     m_properties.emplace_back(aePropertyPtr(ret));
     return ret;
 }
