@@ -45,7 +45,6 @@ namespace UTJ.Alembic
                 {
                     s.m_streamInterupted = false;
                 }
-
             });
         }
 

@@ -105,17 +105,22 @@ public:
 class aiPolyMeshAsyncLoad : public aiAsync
 {
 public:
-    std::function<void()> task_read;
-    std::function<void()> task_cook;
-    std::future<void> async_cook;
-    // this is needed because async_cook possibly has not started yet when wait() is called
-    std::mutex mutex;
-    std::condition_variable notify_completed;
-    bool completed = true;
+    std::function<void()> m_read;
+    std::function<void()> m_cook;
 
+    ~aiPolyMeshAsyncLoad();
     void prepare() override;
     void run() override;
     void wait() override;
+
+private:
+    void release();
+
+    std::future<void> m_async_cook;
+    // these are needed because m_async_cook possibly has not started yet when wait() is called
+    std::mutex m_mutex;
+    std::condition_variable m_notify_completed;
+    bool m_completed = true;
 };
 
 

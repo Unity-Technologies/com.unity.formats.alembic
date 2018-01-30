@@ -336,33 +336,48 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
 
 
 
+aiPolyMeshAsyncLoad::~aiPolyMeshAsyncLoad()
+{
+    if (m_async_cook.valid())
+        m_async_cook.wait();
+}
+
 void aiPolyMeshAsyncLoad::prepare()
 {
-    completed = false;
+    m_completed = false;
 }
 
 void aiPolyMeshAsyncLoad::run()
 {
-    if (task_read)
-        task_read();
+    if (m_read)
+        m_read();
 
-    if (task_cook) {
-        async_cook = std::async(std::launch::async, [this]() {
-            task_cook();
-            {
-                std::lock_guard<std::mutex> lock(mutex);
-                completed = true;
-            }
-            notify_completed.notify_all();
+    if (m_cook) {
+        m_async_cook = std::async(std::launch::async, [this]() {
+            m_cook();
+            release();
         });
+    }
+    else {
+        release();
     }
 }
 
+void aiPolyMeshAsyncLoad::release()
+{
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_completed = true;
+    }
+    m_notify_completed.notify_all();
+}
+
+
 void aiPolyMeshAsyncLoad::wait()
 {
-    if (!completed) {
-        std::unique_lock<std::mutex> lock(mutex);
-        notify_completed.wait(lock, [this] { return completed; });
+    if (!m_completed) {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_notify_completed.wait(lock, [this] { return m_completed; });
     }
 }
 
@@ -498,11 +513,11 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
 
 void aiPolyMesh::updateSample(const abcSampleSelector& ss)
 {
-    m_load_task.task_read = {};
-    m_load_task.task_cook = {};
+    m_load_task.m_read = {};
+    m_load_task.m_cook = {};
 
     super::updateSample(ss);
-    if (m_load_task.task_read || m_load_task.task_cook) {
+    if (m_load_task.m_read || m_load_task.m_cook) {
         getContext()->queueAsync(m_load_task);
     }
 }
@@ -516,7 +531,7 @@ void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
     if (m_force_sync || !getConfig().async_load)
         body();
     else
-        m_load_task.task_read = body;
+        m_load_task.m_read = body;
 }
 
 void aiPolyMesh::cookSample(Sample& sample)
@@ -528,7 +543,7 @@ void aiPolyMesh::cookSample(Sample& sample)
     if (m_force_sync || !getConfig().async_load)
         body();
     else
-        m_load_task.task_cook = body;
+        m_load_task.m_cook = body;
 }
 
 void aiPolyMesh::sync()

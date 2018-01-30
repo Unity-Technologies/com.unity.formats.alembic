@@ -32,8 +32,7 @@ namespace UTJ.Alembic
         {
             get
             {   
-                return m_stream == null ?
-                    0 : m_stream.m_streamDescriptor.duration;
+                return m_stream == null ? 0 : m_stream.duration;
             }
         }
 
