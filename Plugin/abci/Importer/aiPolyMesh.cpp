@@ -334,6 +334,39 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
              (m_varying_topology ? "true" : "false"));
 }
 
+
+
+void aiPolyMeshAsyncLoad::prepare()
+{
+    completed = false;
+}
+
+void aiPolyMeshAsyncLoad::run()
+{
+    if (task_read)
+        task_read();
+
+    if (task_cook) {
+        async_cook = std::async(std::launch::async, [this]() {
+            task_cook();
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                completed = true;
+            }
+            notify_completed.notify_all();
+        });
+    }
+}
+
+void aiPolyMeshAsyncLoad::wait()
+{
+    if (!completed) {
+        std::unique_lock<std::mutex> lock(mutex);
+        notify_completed.wait(lock, [this] { return completed; });
+    }
+}
+
+
 aiPolyMesh::~aiPolyMesh()
 {
     sync();
@@ -470,7 +503,7 @@ void aiPolyMesh::updateSample(const abcSampleSelector& ss)
 
     super::updateSample(ss);
     if (m_load_task.task_read || m_load_task.task_cook) {
-        getContext()->queueTask(m_load_task);
+        getContext()->queueAsync(m_load_task);
     }
 }
 

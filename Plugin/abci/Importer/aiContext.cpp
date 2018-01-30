@@ -81,9 +81,7 @@ aiContext::aiContext(int uid)
 
 aiContext::~aiContext()
 {
-    if (m_async_load.valid())
-        m_async_load.wait();
-
+    waitAsync();
     m_top_node.reset();
     m_archive.reset();
 }
@@ -359,47 +357,32 @@ aiObject* aiContext::getTopObject() const
 
 void aiContext::updateSamples(double time)
 {
+    waitAsync();
+
     auto ss = aiTimeToSampleSelector(time);
     eachNodes([ss](aiObject& o) {
         o.updateSample(ss);
     });
 
-    // process async tasks
-    if (!m_load_tasks.empty()) {
-        if (m_async_load.valid())
-            m_async_load.wait();
-
-        m_async_load = std::async(std::launch::async, [this]() {
-            for (auto t : m_load_tasks) {
-                if(t->task_read)
-                    t->task_read();
-
-                if (t->task_cook) {
-                    t->async_cook = std::async(std::launch::async, [t]() {
-                        t->task_cook();
-                        {
-                            std::lock_guard<std::mutex> lock(t->m_mutex);
-                            t->completed = true;
-                        }
-                        t->notify_completed.notify_all();
-                    });
-                }
-            }
-            m_load_tasks.clear();
+    // kick async tasks!
+    if (!m_async_tasks.empty()) {
+        for (auto task : m_async_tasks)
+            task->prepare();
+        m_async_future = std::async(std::launch::async, [this]() {
+            for (auto task : m_async_tasks)
+                task->run();
+            m_async_tasks.clear();
         });
     }
 }
 
-void aiContext::queueTask(aiLoadTaskData& task)
+void aiContext::queueAsync(aiAsync& task)
 {
-    task.completed = false;
-    m_load_tasks.push_back(&task);
+    m_async_tasks.push_back(&task);
 }
 
-void aiLoadTaskData::wait()
+void aiContext::waitAsync()
 {
-    if (!completed) {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        notify_completed.wait(lock, [this] { return completed; });
-    }
+    if (m_async_future.valid())
+        m_async_future.wait();
 }

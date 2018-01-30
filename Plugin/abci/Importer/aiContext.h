@@ -27,16 +27,14 @@ using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 class aiObject;
 std::string ToString(const aiConfig &conf);
 
-struct aiLoadTaskData
-{
-    std::function<void()> task_read;
-    std::function<void()> task_cook;
-    std::future<void> async_cook;
-    std::mutex m_mutex;
-    std::condition_variable notify_completed;
-    bool completed = true;
 
-    void wait();
+class aiAsync
+{
+public:
+    virtual ~aiAsync() {}
+    virtual void prepare() = 0;
+    virtual void run() = 0;
+    virtual void wait() = 0;
 };
 
 
@@ -88,7 +86,8 @@ public:
     template<class F>
     void eachNodes(const F &f);
 
-    void queueTask(aiLoadTaskData& task);
+    void queueAsync(aiAsync& task);
+    void waitAsync();
 
 private:
     static void gatherNodesRecursive(aiObject *n);
@@ -102,8 +101,8 @@ private:
     int m_uid = 0;
     aiConfig m_config;
 
-    std::vector<aiLoadTaskData*> m_load_tasks;
-    std::future<void> m_async_load;
+    std::vector<aiAsync*> m_async_tasks;
+    std::future<void> m_async_future;
 };
 
 #include "aiObject.h"

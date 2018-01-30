@@ -102,6 +102,23 @@ public:
 };
 
 
+class aiPolyMeshAsyncLoad : public aiAsync
+{
+public:
+    std::function<void()> task_read;
+    std::function<void()> task_cook;
+    std::future<void> async_cook;
+    // this is needed because async_cook possibly has not started yet when wait() is called
+    std::mutex mutex;
+    std::condition_variable notify_completed;
+    bool completed = true;
+
+    void prepare() override;
+    void run() override;
+    void wait() override;
+};
+
+
 struct aiPolyMeshTraits
 {
     using SampleT = aiPolyMeshSample;
@@ -147,6 +164,6 @@ private:
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
 
-    aiLoadTaskData m_load_task;
+    aiPolyMeshAsyncLoad m_load_task;
     std::future<void> m_async_copy;
 };
