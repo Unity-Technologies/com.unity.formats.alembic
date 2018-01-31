@@ -103,7 +103,7 @@ int aiContext::getTimeRangeCount() const
 }
 void aiContext::getTimeRange(int tsi, aiTimeRange & dst) const
 {
-    if (tsi >= 0 && tsi < m_time_ranges.size()) {
+    if (tsi >= 0 && tsi < (int)m_time_ranges.size()) {
         dst = m_time_ranges[tsi];
     }
     else {

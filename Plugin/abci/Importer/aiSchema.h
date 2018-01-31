@@ -133,7 +133,7 @@ public:
                 double index_time = ts.getSampleTime(sample_index);
                 double interval = 0;
                 if (ts.getTimeSamplingType().isAcyclic()) {
-                    auto tsi = std::min<size_t>(sample_index + 1, ts.getNumStoredTimes() - 1);
+                    auto tsi = std::min((size_t)sample_index + 1, ts.getNumStoredTimes() - 1);
                     interval = ts.getSampleTime(tsi) - index_time;
                 }
                 else {
