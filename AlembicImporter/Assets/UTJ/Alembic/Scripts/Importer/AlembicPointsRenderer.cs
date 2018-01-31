@@ -97,17 +97,16 @@ namespace UTJ.Alembic
         public void Flush()
         {
             var apc = GetComponent<AlembicPointsCloud>();
-            var points = apc.abcPoints;
-            if(points == null) { return; }
 
-            int num_instances = points.Count;
-            if(num_instances == 0) { return; }
+            var points = apc.points;
+            int numInstances = points.Count;
+            if(numInstances == 0) { return; }
 
             var materials = SetupMaterials();
             var mesh = m_mesh;
             if (mesh == null || materials == null) { return; }
 
-            int num_submeshes = System.Math.Min(mesh.subMeshCount, materials.Length);
+            int submeshCount = System.Math.Min(mesh.subMeshCount, materials.Length);
             int layer = gameObject.layer;
 
             var trans = GetComponent<Transform>();
@@ -129,7 +128,7 @@ namespace UTJ.Alembic
                 return;
             }
 
-            for (int si = 0; si < num_submeshes; ++si)
+            for (int si = 0; si < submeshCount; ++si)
             {
                 var material = materials[si];
                 if (material == null)
@@ -142,25 +141,25 @@ namespace UTJ.Alembic
 
             {
                 // update argument buffer
-                if (m_cbArgs == null || m_cbArgs.Length != num_submeshes)
+                if (m_cbArgs == null || m_cbArgs.Length != submeshCount)
                 {
                     Release();
-                    m_cbArgs = new ComputeBuffer[num_submeshes];
-                    for (int i = 0; i < num_submeshes; ++i)
+                    m_cbArgs = new ComputeBuffer[submeshCount];
+                    for (int i = 0; i < submeshCount; ++i)
                     {
                         m_cbArgs[i] = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
                     }
                 }
 
                 // update points buffer
-                if (m_cbPoints != null && m_cbPoints.count < num_instances)
+                if (m_cbPoints != null && m_cbPoints.count < numInstances)
                 {
                     m_cbPoints.Release();
                     m_cbPoints = null;
                 }
                 if (m_cbPoints == null)
                 {
-                    m_cbPoints = new ComputeBuffer(num_instances, 12);
+                    m_cbPoints = new ComputeBuffer(numInstances, 12);
                 }
                 m_cbPoints.SetData(points.List);
 
@@ -168,19 +167,19 @@ namespace UTJ.Alembic
                 bool alembicIDsAvailable = false;
                 if (m_useAlembicIDs)
                 {
-                    if (m_cbIDs != null && m_cbIDs.count < num_instances)
+                    if (m_cbIDs != null && m_cbIDs.count < numInstances)
                     {
                         m_cbIDs.Release();
                         m_cbIDs = null;
                     }
                     if (m_cbIDs == null)
                     {
-                        m_cbIDs = new ComputeBuffer(num_instances, 4);
+                        m_cbIDs = new ComputeBuffer(numInstances, 4);
                     }
-                    var ids = apc.abcIDs;
-                    if (ids != null && ids.Count == num_instances)
+                    var ids = apc.ids;
+                    if (ids != null && ids.Count == numInstances)
                     {
-                        m_ids.Resize(num_instances);
+                        m_ids.Resize(numInstances);
                         m_cbIDs.SetData(m_ids.List);
                         alembicIDsAvailable = true;
                     }
@@ -190,11 +189,11 @@ namespace UTJ.Alembic
                 var bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + mesh.bounds.extents);
 
                 // issue drawcalls
-                for (int si = 0; si < num_submeshes; ++si)
+                for (int si = 0; si < submeshCount; ++si)
                 {
                     var args = m_cbArgs[si];
                     m_args[0] = (int)mesh.GetIndexCount(0);
-                    m_args[1] = num_instances;
+                    m_args[1] = numInstances;
                     args.SetData(m_args);
 
                     var material = materials[si];

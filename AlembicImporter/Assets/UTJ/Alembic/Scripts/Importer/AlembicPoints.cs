@@ -48,17 +48,18 @@ namespace UTJ.Alembic
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
                         abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
 
-            cloud.m_abcPoints.ResizeDiscard(sampleSummary.count);
-            m_abcData.positions = cloud.m_abcPoints;
+            cloud.m_abc = this;
+            cloud.m_points.ResizeDiscard(sampleSummary.count);
+            m_abcData.positions = cloud.m_points;
             if (m_summary.hasVelocities)
             {
-                cloud.m_abcVelocities.ResizeDiscard(sampleSummary.count);
-                m_abcData.velocities = cloud.m_abcVelocities;
+                cloud.m_velocities.ResizeDiscard(sampleSummary.count);
+                m_abcData.velocities = cloud.m_velocities;
             }
             if (m_summary.hasIDs)
             {
-                cloud.m_abcIDs.ResizeDiscard(sampleSummary.count);
-                m_abcData.ids = cloud.m_abcIDs;
+                cloud.m_ids.ResizeDiscard(sampleSummary.count);
+                m_abcData.ids = cloud.m_ids;
             }
 
             sample.FillData(ref m_abcData);

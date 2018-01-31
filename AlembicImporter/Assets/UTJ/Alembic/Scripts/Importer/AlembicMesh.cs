@@ -10,13 +10,13 @@ namespace UTJ.Alembic
     {
         public class Split
         {
-            public PinnedList<Vector3> pointCache = new PinnedList<Vector3>();
-            public PinnedList<Vector3> velocitiesCache = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normalCache = new PinnedList<Vector3>();
-            public PinnedList<Vector4> tangentCache = new PinnedList<Vector4>();
-            public PinnedList<Vector2> uv0Cache = new PinnedList<Vector2>();
-            public PinnedList<Vector2> uv1Cache = new PinnedList<Vector2>();
-            public PinnedList<Color> colorCache = new PinnedList<Color>();
+            public PinnedList<Vector3> points = new PinnedList<Vector3>();
+            public PinnedList<Vector3> velocities = new PinnedList<Vector3>();
+            public PinnedList<Vector3> normals = new PinnedList<Vector3>();
+            public PinnedList<Vector4> tangents = new PinnedList<Vector4>();
+            public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
+            public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
+            public PinnedList<Color> colors = new PinnedList<Color>();
 
             public Mesh mesh;
             public GameObject host;
@@ -139,46 +139,46 @@ namespace UTJ.Alembic
                 int vertexCount = m_splitSummaries[spi].vertexCount;
 
                 if (!m_summary.constantPoints || topologyChanged)
-                    split.pointCache.ResizeDiscard(vertexCount);
+                    split.points.ResizeDiscard(vertexCount);
                 else
-                    split.pointCache.ResizeDiscard(0);
-                vertexData.positions = split.pointCache;
+                    split.points.ResizeDiscard(0);
+                vertexData.positions = split.points;
 
                 if (m_summary.hasVelocities && (!m_summary.constantVelocities || topologyChanged))
-                    split.velocitiesCache.ResizeDiscard(vertexCount);
+                    split.velocities.ResizeDiscard(vertexCount);
                 else
-                    split.velocitiesCache.ResizeDiscard(0);
-                vertexData.velocities = split.velocitiesCache;
+                    split.velocities.ResizeDiscard(0);
+                vertexData.velocities = split.velocities;
 
                 if (m_summary.hasNormals && (!m_summary.constantNormals || topologyChanged))
-                    split.normalCache.ResizeDiscard(vertexCount);
+                    split.normals.ResizeDiscard(vertexCount);
                 else
-                    split.normalCache.ResizeDiscard(0);
-                vertexData.normals = split.normalCache;
+                    split.normals.ResizeDiscard(0);
+                vertexData.normals = split.normals;
 
                 if (m_summary.hasTangents && (!m_summary.constantTangents || topologyChanged))
-                    split.tangentCache.ResizeDiscard(vertexCount);
+                    split.tangents.ResizeDiscard(vertexCount);
                 else
-                    split.tangentCache.ResizeDiscard(0);
-                vertexData.tangents = split.tangentCache;
+                    split.tangents.ResizeDiscard(0);
+                vertexData.tangents = split.tangents;
 
                 if (m_summary.hasUV0 && (!m_summary.constantUV0 || topologyChanged))
-                    split.uv0Cache.ResizeDiscard(vertexCount);
+                    split.uv0.ResizeDiscard(vertexCount);
                 else
-                    split.uv0Cache.ResizeDiscard(0);
-                vertexData.uv0 = split.uv0Cache;
+                    split.uv0.ResizeDiscard(0);
+                vertexData.uv0 = split.uv0;
 
                 if (m_summary.hasUV1 && (!m_summary.constantUV1 || topologyChanged))
-                    split.uv1Cache.ResizeDiscard(vertexCount);
+                    split.uv1.ResizeDiscard(vertexCount);
                 else
-                    split.uv1Cache.ResizeDiscard(0);
-                vertexData.uv1 = split.uv1Cache;
+                    split.uv1.ResizeDiscard(0);
+                vertexData.uv1 = split.uv1;
 
                 if (m_summary.hasColors && (!m_summary.constantColors || topologyChanged))
-                    split.colorCache.ResizeDiscard(vertexCount);
+                    split.colors.ResizeDiscard(vertexCount);
                 else
-                    split.colorCache.ResizeDiscard(0);
-                vertexData.colors = split.colorCache;
+                    split.colors.ResizeDiscard(0);
+                vertexData.colors = split.colors;
 
                 m_splitData[spi] = vertexData;
             }
@@ -262,20 +262,20 @@ namespace UTJ.Alembic
                     if (split.clear)
                         split.mesh.Clear();
 
-                    if (split.pointCache.Count > 0)
-                        split.mesh.SetVertices(split.pointCache.List);
-                    if (split.normalCache.Count > 0)
-                        split.mesh.SetNormals(split.normalCache.List);
-                    if (split.tangentCache.Count > 0)
-                        split.mesh.SetTangents(split.tangentCache.List);
-                    if (split.uv0Cache.Count > 0)
-                        split.mesh.SetUVs(0, split.uv0Cache.List);
-                    if (split.uv1Cache.Count > 0)
-                        split.mesh.SetUVs(1, split.uv1Cache.List);
-                    if (split.velocitiesCache.Count > 0)
-                        split.mesh.SetUVs(3, split.velocitiesCache.List);
-                    if (split.colorCache.Count > 0)
-                        split.mesh.SetColors(split.colorCache.List);
+                    if (split.points.Count > 0)
+                        split.mesh.SetVertices(split.points.List);
+                    if (split.normals.Count > 0)
+                        split.mesh.SetNormals(split.normals.List);
+                    if (split.tangents.Count > 0)
+                        split.mesh.SetTangents(split.tangents.List);
+                    if (split.uv0.Count > 0)
+                        split.mesh.SetUVs(0, split.uv0.List);
+                    if (split.uv1.Count > 0)
+                        split.mesh.SetUVs(1, split.uv1.List);
+                    if (split.velocities.Count > 0)
+                        split.mesh.SetUVs(3, split.velocities.List);
+                    if (split.colors.Count > 0)
+                        split.mesh.SetColors(split.colors.List);
 
                     // update the bounds
                     var data = m_splitData[s];
