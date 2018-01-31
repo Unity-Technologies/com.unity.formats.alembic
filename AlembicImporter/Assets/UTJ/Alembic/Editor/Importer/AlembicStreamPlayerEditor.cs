@@ -12,14 +12,14 @@ namespace UTJ.Alembic
         public override void OnInspectorGUI()
         {   
             SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
-            SerializedProperty streamDescriptorObj = serializedObject.FindProperty("m_streamDescriptor");
+            SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
             SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
             SerializedProperty startTime = serializedObject.FindProperty("m_startTime");
             SerializedProperty endTime = serializedObject.FindProperty("m_endTime");
             SerializedProperty asyncLoad = serializedObject.FindProperty("m_asyncLoad");
 
             var streamPlayer = target as AlembicStreamPlayer;
-            var targetStreamDesc = streamPlayer.m_streamDescriptor;
+            var targetStreamDesc = streamPlayer.streamDescriptor;
             var multipleTimeRanges = false;
             foreach (AlembicStreamPlayer player in targets)
             {

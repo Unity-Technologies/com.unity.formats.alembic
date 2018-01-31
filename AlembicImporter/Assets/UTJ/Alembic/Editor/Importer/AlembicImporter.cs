@@ -121,7 +121,7 @@ namespace UTJ.Alembic
                 streamDescriptor.abcEndTime = abcEndTime = endTime = tr.endTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
-                streamPlayer.m_streamDescriptor = streamDescriptor;
+                streamPlayer.streamDescriptor = streamDescriptor;
                 streamPlayer.m_startTime = startTime;
                 streamPlayer.m_endTime = endTime;
 

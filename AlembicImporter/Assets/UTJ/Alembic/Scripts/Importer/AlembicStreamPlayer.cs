@@ -6,7 +6,7 @@ namespace UTJ.Alembic
     public class AlembicStreamPlayer : MonoBehaviour
     {
         public AlembicStream m_stream;
-        public AlembicStreamDescriptor m_streamDescriptor;
+        public AlembicStreamDescriptor streamDescriptor;
         [SerializeField] public double m_currentTime;
         [SerializeField] public double m_startTime = double.MinValue;
         [SerializeField] public double m_endTime = double.MaxValue;
@@ -20,16 +20,16 @@ namespace UTJ.Alembic
 
         void OnValidate()
         {
-            if (m_streamDescriptor == null) return;
-            m_startTime = Mathf.Clamp((float)m_startTime, (float)m_streamDescriptor.abcStartTime, (float)m_streamDescriptor.abcEndTime);
-            m_endTime = Mathf.Clamp((float)m_endTime, (float)m_startTime, (float)m_streamDescriptor.abcEndTime);
+            if (streamDescriptor == null) return;
+            m_startTime = Mathf.Clamp((float)m_startTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
+            m_endTime = Mathf.Clamp((float)m_endTime, (float)m_startTime, (float)streamDescriptor.abcEndTime);
             ClampTime();
             m_forceUpdate = true;
         }
 
         void Update()
         {
-            if (m_stream == null || m_streamDescriptor == null)
+            if (m_stream == null || streamDescriptor == null)
                 return;
 
             ClampTime();
@@ -67,9 +67,9 @@ namespace UTJ.Alembic
 
         public void LoadStream()
         {
-            if (m_streamDescriptor == null)
+            if (streamDescriptor == null)
                 return;
-            m_stream = new AlembicStream(gameObject, m_streamDescriptor);
+            m_stream = new AlembicStream(gameObject, streamDescriptor);
             m_stream.AbcLoad();
             m_forceUpdate = true;
         }
