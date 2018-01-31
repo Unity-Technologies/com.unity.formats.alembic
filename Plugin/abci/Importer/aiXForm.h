@@ -11,8 +11,7 @@ public:
 public:
     AbcGeom::M44d m_matrix, m_next_matrix;
     bool inherits;
-private:
-    void decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
+    aiXformData m_data;
 };
 
 
@@ -30,4 +29,7 @@ public:
 
     Sample* newSample() override;
     void readSample(Sample& sample, uint64_t idx) override;
+    void cookSample(Sample& sample) override;
+
+    void decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };

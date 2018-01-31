@@ -227,30 +227,30 @@ abciAPI aiPoints* aiGetPoints(aiObject* obj)
 
 abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
 {
-    if (schema == nullptr) { return; }
-    *dst = schema->getSummary();
+    if (schema)
+        *dst = schema->getSummary();
 }
 abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
-    if (schema == nullptr) { return; }
-    schema->setSort(v);
+    if (schema)
+        schema->setSort(v);
 }
 abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
 {
-    if (schema == nullptr) { return; }
-    schema->setSortPosition(v);
+    if (schema)
+        schema->setSortPosition(v);
 }
 
-abciAPI void aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *dst)
+abciAPI void aiPointsGetSampleSummary(aiPointsSample * sample, aiPointsSampleSummary * dst)
 {
-    if (sample == nullptr) { return; }
-    sample->getDataPointer(*dst);
+    if (sample)
+        sample->getSummary(*dst);
 }
 
-abciAPI void aiPointsCopyData(aiPointsSample* sample, aiPointsData *dst)
+abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData *dst)
 {
-    if (sample == nullptr) { return; }
-    sample->copyData(*dst);
+    if (sample)
+        sample->fillData(*dst);
 }
 
 

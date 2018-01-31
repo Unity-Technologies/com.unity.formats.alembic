@@ -213,21 +213,23 @@ struct aiSubmeshData
 
 struct aiPointsSummary
 {
-    bool has_velocity = false;
-    bool position_is_constant = false;
-    bool id_is_constant = false;
-    int32_t peak_count = 0;
-    uint64_t min_id = 0;
-    uint64_t max_id = 0;
-    abcV3 bounds_center = { 0.0f, 0.0f, 0.0f };
-    abcV3 bounds_extents = { 0.0f, 0.0f, 0.0f };
+    bool has_velocities = false;
+    bool has_ids = false;
+    bool constant_points = false;
+    bool constant_velocities = false;
+    bool constant_id = false;
+};
+
+struct aiPointsSampleSummary
+{
+    int count = 0;
 };
 
 struct aiPointsData
 {
     abcV3       *points = nullptr;
     abcV3       *velocities = nullptr;
-    uint64_t    *ids = nullptr;
+    uint32_t    *ids = nullptr;
     int32_t     count = 0;
 
     abcV3       center = { 0.0f, 0.0f, 0.0f };
@@ -298,8 +300,8 @@ abciAPI aiPoints*       aiGetPoints(aiObject* obj);
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
-abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *dst);
-abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *dst);
+abciAPI void            aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary *dst);
+abciAPI void            aiPointsFillData(aiPointsSample* sample, aiPointsData *dst);
 
 abciAPI int             aiSchemaGetNumProperties(aiSchemaBase* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);

@@ -202,15 +202,17 @@ namespace UTJ.Alembic
 
     public struct aiPointsSummary
     {
-        public Bool hasVelocity;
-        public Bool positionIsConstant;
-        public Bool idIsConstant;
-        public int peakCount;
-        public ulong minID;
-        public ulong maxID;
-        public Vector3 boundsCenter;
-        public Vector3 boundsExtents;
+        public Bool hasVelocities;
+        public Bool hasIDs;
+        public Bool constantPoints;
+        public Bool constantVelocities;
+        public Bool constantIDs;
     };
+
+    public struct aiPointsSampleSummary
+    {
+        public int count;
+    }
 
     public struct aiPointsData
     {
@@ -479,10 +481,12 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiPointsSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiPointsSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void CopyData(ref aiPointsData dst) { aiPointsCopyData(self, ref dst); }
+        public void GetSummary(ref aiPointsSampleSummary dst) { aiPointsGetSampleSummary(self, ref dst); }
+        public void FillData(ref aiPointsData dst) { aiPointsFillData(self, ref dst); }
 
         #region internal
-        [DllImport("abci")] static extern void aiPointsCopyData(IntPtr sample, ref aiPointsData dst);
+        [DllImport("abci")] static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
+        [DllImport("abci")] static extern void aiPointsFillData(IntPtr sample, ref aiPointsData dst);
         #endregion
     }
 

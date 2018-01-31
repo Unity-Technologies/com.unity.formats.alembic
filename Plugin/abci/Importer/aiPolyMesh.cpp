@@ -4,7 +4,6 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
-#include <unordered_map>
 #include "../Foundation/aiMisc.h"
 #include "../Foundation/aiMath.h"
 
@@ -116,35 +115,6 @@ void aiPolyMeshSample::clear()
     m_colors.clear();
 }
 
-void aiPolyMeshSample::computeNormals()
-{
-    auto& schema = *dynamic_cast<schema_t*>(getSchema());
-    if (!schema.m_constant_normals.empty()) {
-        m_normals_ref = schema.m_constant_normals;
-    }
-    else {
-        const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-        m_normals.resize_discard(m_points_ref.size());
-        GenerateNormals(m_normals.data(), m_points_ref.data(), indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
-        m_normals_ref = m_normals;
-    }
-}
-
-void aiPolyMeshSample::computeTangents()
-{
-    auto& schema = *dynamic_cast<schema_t*>(getSchema());
-    if (!schema.m_constant_tangents.empty()) {
-        m_tangents_ref = schema.m_constant_tangents;
-    }
-    else {
-        const auto &indices = m_topology->m_refiner.new_indices_triangulated;
-        m_tangents.resize_discard(m_points_ref.size());
-        GenerateTangents(m_tangents.data(), m_points_ref.data(), m_uv0_ref.data(), m_normals_ref.data(),
-            indices.data(), (int)m_points_ref.size(), (int)indices.size() / 3);
-        m_tangents_ref = m_tangents;
-    }
-}
-
 void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
 {
     dst.split_count   = m_topology->getSplitCount();
@@ -195,12 +165,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
     }
     if (data.velocities) {
-        if (summary.compute_velocities) {
-            GenerateVelocities(data.velocities,
-                m_points.data(), m_points2.data(), split.vertex_count, split.vertex_offset,
-                (float)m_current_time_interval, config.vertex_motion_scale);
-        }
-        else if (!m_velocities_ref.empty()) {
+        if (summary.has_velocities) {
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
         }
     }
@@ -639,8 +604,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     if (sample.m_topology_changed) {
         onTopologyChange(sample);
     }
-    else {
-        notifyTopologyDetermined();
+    else if(m_sample_index_changed) {
+        onTopologyDetermined();
 
         // make remapped vertex buffer
         if (!m_constant_points.empty()) {
@@ -693,64 +658,95 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_colors_ref = sample.m_colors;
         }
     }
-
-
-    if (!m_constant_velocities.empty()) {
-        sample.m_velocities_ref = m_constant_velocities;
-    }
-    else if (!summary.compute_velocities && summary.has_velocities_prop) {
-        auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
-        Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
-        if (config.swap_handedness)
-            SwapHandedness(dst.data(), (int)dst.size());
-        if (config.scale_factor != 1.0f)
-            ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
-        sample.m_velocities_ref = dst;
+    else {
+        onTopologyDetermined();
     }
 
-    if (summary.interpolate_points) {
-        Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
-        if (config.swap_handedness)
-            SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
-        if (config.scale_factor != 1.0f)
-            ApplyScale(sample.m_points2.data(), (int)sample.m_points2.size(), config.scale_factor);
-    }
-    if (summary.interpolate_normals) {
-        Remap(sample.m_normals2, sample.m_normals_sp2.getVals()->get(), topology.m_remap_normals);
-        if (config.swap_handedness)
-            SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
+    if (m_sample_index_changed) {
+        // both in the case of topology changed or sample index changed
+
+        if (summary.interpolate_points) {
+            Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(sample.m_points2.data(), (int)sample.m_points2.size(), config.scale_factor);
+        }
+
+        if (summary.interpolate_normals) {
+            Remap(sample.m_normals2, sample.m_normals_sp2.getVals()->get(), topology.m_remap_normals);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
+        }
+
+        // velocities are updated only when sample index is changed, even if interpolation is enabled.
+        // this may should change..
+        if (!m_constant_velocities.empty()) {
+            sample.m_velocities_ref = m_constant_velocities;
+        }
+        else if (!summary.compute_velocities && summary.has_velocities_prop) {
+            auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
+            Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
+            if (config.swap_handedness)
+                SwapHandedness(dst.data(), (int)dst.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
+            sample.m_velocities_ref = dst;
+        }
+        else if (summary.compute_velocities) {
+            sample.m_velocities.resize_discard(sample.m_points.size());
+            GenerateVelocities(sample.m_velocities.data(), sample.m_points.data(), sample.m_points2.data(),
+                (int)sample.m_points.size(), m_current_time_interval, config.vertex_motion_scale);
+            sample.m_velocities_ref = sample.m_velocities;
+        }
     }
 
-    // compute normals & tangents
-    // if interpolation is enabled, this will be done in prepareSplits()
-    if (!summary.interpolate_points && !summary.interpolate_normals) {
-        if (summary.compute_normals)
-            sample.computeNormals();
-        if (summary.compute_tangents)
-            sample.computeTangents();
-    }
+    // interpolate or compute data
 
-    // cache interpolated points as computeNormals() and computeTangents() require points
+    // points
     if (summary.interpolate_points) {
         sample.m_points_int.resize_discard(sample.m_points.size());
         Lerp(sample.m_points_int.data(), sample.m_points.data(), sample.m_points2.data(),
-            (int)sample.m_points.size(), (float)sample.m_current_time_offset);
+            (int)sample.m_points.size(), m_current_time_offset);
         sample.m_points_ref = sample.m_points_int;
     }
 
-    if (summary.compute_normals && summary.interpolate_points) {
-        sample.computeNormals();
+    // normals
+    if (!m_constant_normals.empty()) {
+        // do nothing
     }
-    else if (summary.interpolate_normals) {
+    else if(summary.interpolate_normals) {
         sample.m_normals_int.resize_discard(sample.m_normals.size());
         Lerp(sample.m_normals_int.data(), sample.m_normals.data(), sample.m_normals2.data(),
-            (int)sample.m_normals.size(), (float)sample.m_current_time_offset);
+            (int)sample.m_normals.size(), (float)m_current_time_offset);
         Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
         sample.m_normals_ref = sample.m_normals_int;
     }
+    else if (summary.compute_normals && (m_sample_index_changed || summary.interpolate_points)) {
+        if (sample.m_points_ref.empty()) {
+            DebugError("something is wrong!!");
+        }
+        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        sample.m_normals.resize_discard(sample.m_points_ref.size());
+        GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
+            (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+        sample.m_normals_ref = sample.m_normals;
+    }
 
-    if (summary.compute_tangents && (summary.interpolate_points || summary.interpolate_normals))
-        sample.computeTangents();
+    // tangents
+    if (!m_constant_tangents.empty()) {
+        // do nothing
+    }
+    else if (summary.compute_tangents && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals)) {
+        if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
+            DebugError("something is wrong!!");
+        }
+        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        sample.m_tangents.resize_discard(sample.m_points_ref.size());
+        GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
+            indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+        sample.m_tangents_ref = sample.m_tangents;
+    }
 }
 
 void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
@@ -759,10 +755,6 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& config = getConfig();
-
-    if (config.turn_quad_edges) {
-        // todo
-    }
 
     refiner.clear();
     refiner.split_unit = config.split_unit;
@@ -864,13 +856,13 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         refiner.genSubmeshes(topology.m_material_ids);
     }
     else {
-        // no facesets present. one split == one submesh
+        // no face sets present. one split == one submesh
         refiner.genSubmeshes();
     }
 
     topology.m_index_count = (int)refiner.new_indices_triangulated.size();
     topology.m_vertex_count = (int)refiner.new_points.size();
-    notifyTopologyDetermined();
+    onTopologyDetermined();
 
     topology.m_remap_points.swap(refiner.new2old_points);
     if (summary.constant_points) {
@@ -912,7 +904,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     // velocities are done in later part of cookSampleBody()
 }
 
-void aiPolyMesh::notifyTopologyDetermined()
+void aiPolyMesh::onTopologyDetermined()
 {
     // notify C# side?
 }

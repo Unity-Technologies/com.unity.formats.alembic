@@ -16,9 +16,6 @@ public:
     virtual void sync() {}
     void markForceSync();
 
-public:
-    float m_current_time_offset = 0;
-    float m_current_time_interval = 0;
 protected:
     aiSchemaBase *m_schema = nullptr;
     bool m_force_sync = false;
@@ -113,12 +110,14 @@ public:
         auto& config = getConfig();
 
         if (!m_sample || (!m_constant && sample_index != m_last_sample_index)) {
+            m_sample_index_changed = true;
             if (!m_sample)
                 m_sample.reset(newSample());
             sample = m_sample.get();
             readSample(*sample, sample_index);
         }
         else {
+            m_sample_index_changed = false;
             sample = m_sample.get();
             if ((m_constant || !config.interpolate_samples) && !m_force_update)
                 sample = nullptr;
@@ -141,9 +140,9 @@ public:
                     interval = ts.getTimeSamplingType().getTimePerCycle();
                 }
 
-                sample->m_current_time_offset = interval == 0.0 ? 0.0f :
+                m_current_time_offset = interval == 0.0 ? 0.0f :
                     (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
-                sample->m_current_time_interval = (float)interval;
+                m_current_time_interval = (float)interval;
             }
             cookSample(*sample);
             m_data_updated = true;
@@ -179,4 +178,7 @@ protected:
     SamplePtr m_sample;
     int64_t m_num_samples = 0;
     int64_t m_last_sample_index = -1;
+    float m_current_time_offset = 0;
+    float m_current_time_interval = 0;
+    bool m_sample_index_changed = false;
 };

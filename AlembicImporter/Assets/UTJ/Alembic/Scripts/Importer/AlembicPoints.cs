@@ -40,34 +40,30 @@ namespace UTJ.Alembic
                 return;
 
             var sample = m_abcSchema.sample;
+            var sampleSummary = default(aiPointsSampleSummary);
+            sample.GetSummary(ref sampleSummary);
+            m_abcSchema.GetSummary(ref m_summary);
+
             // get points cloud component
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
                         abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
 
-            if (cloud.abcPoints.Count == 0)
+            cloud.m_abcPoints.ResizeDiscard(sampleSummary.count);
+            m_abcData.positions = cloud.m_abcPoints;
+            if (m_summary.hasVelocities)
             {
-                m_abcSchema.GetSummary(ref m_summary);
-                cloud.m_abcPoints.Resize(m_summary.peakCount);
-                cloud.m_abcIDs.Resize(m_summary.peakCount);
-                cloud.m_peakPointCount = m_summary.peakCount;
-                m_abcData.positions = cloud.m_abcPoints;
+                cloud.m_abcVelocities.ResizeDiscard(sampleSummary.count);
+                m_abcData.velocities = cloud.m_abcVelocities;
+            }
+            if (m_summary.hasIDs)
+            {
+                cloud.m_abcIDs.ResizeDiscard(sampleSummary.count);
                 m_abcData.ids = cloud.m_abcIDs;
-                if (m_summary.hasVelocity)
-                {
-                    cloud.m_abcVelocities.Resize(m_summary.peakCount);
-                    m_abcData.velocities = cloud.m_abcVelocities;
-                }
             }
 
-            m_abcData.positions = cloud.m_abcPoints;
-            m_abcData.ids = cloud.m_abcIDs;
-            if (m_summary.hasVelocity)
-                m_abcData.velocities = cloud.m_abcVelocities;
-
-            sample.CopyData(ref m_abcData);
+            sample.FillData(ref m_abcData);
             cloud.m_boundsCenter = m_abcData.boundsCenter;
             cloud.m_boundsExtents = m_abcData.boundsExtents;
-            cloud.m_count = m_abcData.count;
         }
     }
 }

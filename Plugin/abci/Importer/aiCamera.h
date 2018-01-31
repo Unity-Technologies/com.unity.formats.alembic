@@ -10,6 +10,7 @@ public:
 
 public:
     AbcGeom::CameraSample m_sample, m_next_sample;
+    aiCameraData m_data;
 };
 
 
@@ -28,4 +29,5 @@ public:
 
     Sample* newSample() override;
     void readSample(Sample& sample, uint64_t idx) override;
+    void cookSample(Sample& sample) override;
 };

@@ -64,9 +64,6 @@ public:
     void getSplitSummaries(aiMeshSplitSummary  *dst) const;
     void getSubmeshSummaries(aiSubmeshSummary *dst) const;
 
-    void computeNormals();
-    void computeTangents();
-
     void fillSplitVertices(int split_index, aiPolyMeshData &data) const;
     void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
@@ -149,7 +146,7 @@ public:
     void readSampleBody(Sample& sample, uint64_t idx);
     void cookSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
-    void notifyTopologyDetermined();
+    void onTopologyDetermined();
 
 public:
     RawVector<abcV3> m_constant_points;

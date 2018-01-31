@@ -1,27 +1,24 @@
 #pragma once
+#include "../Foundation/aiIntrusiveArray.h"
 
 class aiPointsSample : public aiSampleBase
 {
 using super = aiSampleBase;
 public:
     aiPointsSample(aiPoints *schema);
-    virtual ~aiPointsSample();
-
-    void getDataPointer(aiPointsData &data);
-    void copyData(aiPointsData &data);
+    void fillData(aiPointsData &dst);
+    void getSummary(aiPointsSampleSummary &dst);
 
 public:
-    void createSortData();
-
-    Abc::P3fArraySamplePtr m_points;
-    Abc::V3fArraySamplePtr m_velocities;
-    Abc::UInt64ArraySamplePtr m_ids;
-    Abc::Box3d m_bounds;
+    Abc::P3fArraySamplePtr m_points_sp;
+    Abc::V3fArraySamplePtr m_velocities_sp;
+    Abc::UInt64ArraySamplePtr m_ids_sp;
 
     RawVector<std::pair<float, int>> m_sort_data;
-    RawVector<abcV3> m_tmp_positions;
-    RawVector<abcV3> m_tmp_velocities;
-    RawVector<uint64_t> m_tmp_ids;
+    RawVector<abcV3> m_points;
+    RawVector<abcV3> m_velocities;
+    RawVector<uint32_t> m_ids;
+    abcV3 m_bb_center, m_bb_size;
 };
 
 
@@ -36,11 +33,15 @@ class aiPoints : public aiTSchema<aiPointsTraits>
 using super = aiTSchema<aiPointsTraits>;
 public:
     aiPoints(aiObject *obj);
+    void updateSummary();
+    const aiPointsSummary& getSummary() const;
 
     Sample* newSample() override;
     void readSample(Sample& sample, uint64_t idx) override;
+    void cookSample(Sample& sample) override;
 
-    const aiPointsSummary& getSummary() const;
+    void readSampleBody(Sample& sample, uint64_t idx);
+    void cookSampleBody(Sample& sample);
 
     void setSort(bool v);
     bool getSort() const;

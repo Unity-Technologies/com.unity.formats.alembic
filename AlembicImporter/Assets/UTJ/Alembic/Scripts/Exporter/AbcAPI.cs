@@ -97,7 +97,7 @@ namespace UTJ.Alembic
     {
         public IntPtr positions; // Vector3*
         public IntPtr velocities; // Vector3*. can be null
-        public IntPtr ids; // ulong*. can be null
+        public IntPtr ids; // uint*. can be null
         public int count;
     }
 

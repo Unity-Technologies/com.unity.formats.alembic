@@ -155,9 +155,9 @@ namespace UTJ.Alembic
                 frames[1].time = (float)streamDescr.duration;
                 frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[1].inTangent = 1.0f;
-                var curve = new AnimationCurve(frames); 
+                var curve = new AnimationCurve(frames);
                 var animationClip = new AnimationClip();
-                animationClip.SetCurve("",typeof(AlembicStreamPlayer),"currentTime",curve);
+                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
                 animationClip.name = root.linkedGameObj.name + "_Clip";
 
                 AddObjectToAsset(ctx, "Default Animation", animationClip);
