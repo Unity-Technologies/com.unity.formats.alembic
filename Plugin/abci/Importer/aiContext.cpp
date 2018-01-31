@@ -60,6 +60,7 @@ void aiContextManager::destroyContextsWithPath(const char* assetPath)
         if (it->second->getPath() == path) {
             DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
             s_instance.m_contexts.erase(it);
+            break;
         }
     }
 }
