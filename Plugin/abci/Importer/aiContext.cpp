@@ -2,7 +2,7 @@
 #include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include <limits>
+#include "aiAsync.h"
 
 
 std::string ToString(const aiConfig &v)

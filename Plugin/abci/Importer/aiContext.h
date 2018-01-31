@@ -25,17 +25,8 @@ using abcFloat4ArrayProperty = Abc::IC4fArrayProperty;
 using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 
 class aiObject;
+class aiAsync;
 std::string ToString(const aiConfig &conf);
-
-
-class aiAsync
-{
-public:
-    virtual ~aiAsync() {}
-    virtual void prepare() = 0;
-    virtual void run() = 0;
-    virtual void wait() = 0;
-};
 
 
 class aiContextManager

@@ -64,6 +64,7 @@
     <ClCompile Include="abci\Foundation\aiMeshOps.cpp">
       <Filter>abci\Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="abci\Importer\aiAsync.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abci\Foundation\aiLogger.h">
@@ -156,6 +157,7 @@
     <ClInclude Include="abci\Foundation\aiIntrusiveArray.h">
       <Filter>abci\Foundation</Filter>
     </ClInclude>
+    <ClInclude Include="abci\Importer\aiAsync.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="abci">

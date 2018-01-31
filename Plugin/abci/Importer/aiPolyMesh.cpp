@@ -168,6 +168,9 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         if (summary.has_velocities) {
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
         }
+        else {
+            memset(data.velocities, 0, split.vertex_count * sizeof(abcV3));
+        }
     }
 
     if (data.normals) {
@@ -250,7 +253,7 @@ void aiPolyMeshSample::sync()
     m_force_sync = false;
 }
 
-// ---
+
 
 aiPolyMesh::aiPolyMesh(aiObject *obj)
     : super(obj)
@@ -293,59 +296,7 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     }
 
     updateSummary();
-
-    DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
-             (m_constant ? "true" : "false"),
-             (m_varying_topology ? "true" : "false"));
 }
-
-
-
-aiPolyMeshAsyncLoad::~aiPolyMeshAsyncLoad()
-{
-    if (m_async_cook.valid())
-        m_async_cook.wait();
-}
-
-void aiPolyMeshAsyncLoad::prepare()
-{
-    m_completed = false;
-}
-
-void aiPolyMeshAsyncLoad::run()
-{
-    if (m_read)
-        m_read();
-
-    if (m_cook) {
-        m_async_cook = std::async(std::launch::async, [this]() {
-            m_cook();
-            release();
-        });
-    }
-    else {
-        release();
-    }
-}
-
-void aiPolyMeshAsyncLoad::release()
-{
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_completed = true;
-    }
-    m_notify_completed.notify_all();
-}
-
-
-void aiPolyMeshAsyncLoad::wait()
-{
-    if (!m_completed) {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        m_notify_completed.wait(lock, [this] { return m_completed; });
-    }
-}
-
 
 aiPolyMesh::~aiPolyMesh()
 {
@@ -478,13 +429,11 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
 
 void aiPolyMesh::updateSample(const abcSampleSelector& ss)
 {
-    m_load_task.m_read = {};
-    m_load_task.m_cook = {};
+    m_async_load.reset();
 
     super::updateSample(ss);
-    if (m_load_task.m_read || m_load_task.m_cook) {
-        getContext()->queueAsync(m_load_task);
-    }
+    if (m_async_load.ready())
+        getContext()->queueAsync(m_async_load);
 }
 
 void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
@@ -496,7 +445,7 @@ void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
     if (m_force_sync || !getConfig().async_load)
         body();
     else
-        m_load_task.m_read = body;
+        m_async_load.m_read = body;
 }
 
 void aiPolyMesh::cookSample(Sample& sample)
@@ -508,12 +457,12 @@ void aiPolyMesh::cookSample(Sample& sample)
     if (m_force_sync || !getConfig().async_load)
         body();
     else
-        m_load_task.m_cook = body;
+        m_async_load.m_cook = body;
 }
 
 void aiPolyMesh::sync()
 {
-    m_load_task.wait();
+    m_async_load.wait();
 }
 
 void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
@@ -600,6 +549,10 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     auto& refiner = topology.m_refiner;
     auto& config = getConfig();
     auto& summary = getSummary();
+
+    // interpolation can't work with varying topology
+    if (m_varying_topology && !m_sample_index_changed)
+        return;
 
     if (sample.m_topology_changed) {
         onTopologyChange(sample);
@@ -906,6 +859,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
 void aiPolyMesh::onTopologyDetermined()
 {
+    // nothing to do for now.
     // notify C# side?
 }
 

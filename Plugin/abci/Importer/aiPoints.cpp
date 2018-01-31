@@ -38,6 +38,11 @@ aiPoints::aiPoints(aiObject *obj)
     updateSummary();
 }
 
+aiPoints::~aiPoints()
+{
+    sync();
+}
+
 void aiPoints::updateSummary()
 {
     auto points = m_schema.getPositionsProperty();
@@ -65,14 +70,42 @@ aiPoints::Sample* aiPoints::newSample()
     return new Sample(this);
 }
 
+void aiPoints::updateSample(const abcSampleSelector & ss)
+{
+    m_async_load.reset();
+
+    super::updateSample(ss);
+    if (m_async_load.ready())
+        getContext()->queueAsync(m_async_load);
+}
+
 void aiPoints::readSample(Sample& sample, uint64_t idx)
 {
-    readSampleBody(sample, idx);
+    auto body = [this, &sample, idx]() {
+        readSampleBody(sample, idx);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_load.m_read = body;
 }
 
 void aiPoints::cookSample(Sample & sample)
 {
-    cookSampleBody(sample);
+    auto body = [this, &sample]() {
+        cookSampleBody(sample);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_load.m_cook = body;
+}
+
+void aiPoints::sync()
+{
+    m_async_load.wait();
 }
 
 void aiPoints::readSampleBody(Sample & sample, uint64_t idx)

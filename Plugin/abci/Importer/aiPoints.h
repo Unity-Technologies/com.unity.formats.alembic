@@ -1,5 +1,6 @@
 #pragma once
-#include "../Foundation/aiIntrusiveArray.h"
+#include "aiIntrusiveArray.h"
+#include "aiAsync.h"
 
 class aiPointsSample : public aiSampleBase
 {
@@ -21,7 +22,6 @@ public:
     abcV3 m_bb_center, m_bb_size;
 };
 
-
 struct aiPointsTraits
 {
     using SampleT = aiPointsSample;
@@ -33,12 +33,16 @@ class aiPoints : public aiTSchema<aiPointsTraits>
 using super = aiTSchema<aiPointsTraits>;
 public:
     aiPoints(aiObject *obj);
+    ~aiPoints();
+
     void updateSummary();
     const aiPointsSummary& getSummary() const;
 
     Sample* newSample() override;
+    void updateSample(const abcSampleSelector& ss) override;
     void readSample(Sample& sample, uint64_t idx) override;
     void cookSample(Sample& sample) override;
+    void sync() override;
 
     void readSampleBody(Sample& sample, uint64_t idx);
     void cookSampleBody(Sample& sample);
@@ -52,4 +56,6 @@ private:
     mutable aiPointsSummary m_summary;
     bool m_sort = false;
     abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
+
+    aiAsyncLoad m_async_load;
 };

@@ -30,6 +30,7 @@
     <ClCompile Include="abci\Foundation\aiMeshOps.cpp" />
     <ClCompile Include="abci\Foundation\Allocator.cpp" />
     <ClCompile Include="abci\Foundation\aiMath.cpp" />
+    <ClCompile Include="abci\Importer\aiAsync.cpp" />
     <ClCompile Include="abci\Importer\aiCamera.cpp" />
     <ClCompile Include="abci\Importer\aiContext.cpp" />
     <ClCompile Include="abci\Importer\aiObject.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="abci\Foundation\ispcmath.h" />
     <ClInclude Include="abci\Foundation\aiMath.h" />
     <ClInclude Include="abci\Foundation\RawVector.h" />
+    <ClInclude Include="abci\Importer\aiAsync.h" />
     <ClInclude Include="abci\Importer\aiCamera.h" />
     <ClInclude Include="abci\Importer\aiContext.h" />
     <ClInclude Include="abci\Importer\aiInternal.h" />

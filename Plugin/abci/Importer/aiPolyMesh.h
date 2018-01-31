@@ -1,5 +1,6 @@
 #pragma once
-#include "../Foundation/aiMeshOps.h"
+#include "aiMeshOps.h"
+#include "aiAsync.h"
 
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
@@ -99,28 +100,6 @@ public:
 };
 
 
-class aiPolyMeshAsyncLoad : public aiAsync
-{
-public:
-    std::function<void()> m_read;
-    std::function<void()> m_cook;
-
-    ~aiPolyMeshAsyncLoad();
-    void prepare() override;
-    void run() override;
-    void wait() override;
-
-private:
-    void release();
-
-    std::future<void> m_async_cook;
-    // these are needed because m_async_cook possibly has not started yet when wait() is called
-    std::mutex m_mutex;
-    std::condition_variable m_notify_completed;
-    bool m_completed = true;
-};
-
-
 struct aiPolyMeshTraits
 {
     using SampleT = aiPolyMeshSample;
@@ -166,6 +145,6 @@ private:
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
 
-    aiPolyMeshAsyncLoad m_load_task;
+    aiAsyncLoad m_async_load;
     std::future<void> m_async_copy;
 };
