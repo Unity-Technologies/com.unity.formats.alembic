@@ -410,11 +410,6 @@ const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
     return m_summary;
 }
 
-void aiPolyMesh::getSummary(aiMeshSummary &dst) const
-{
-    dst = m_summary;
-}
-
 aiPolyMesh::Sample* aiPolyMesh::newSample()
 {
     if (!m_varying_topology) {

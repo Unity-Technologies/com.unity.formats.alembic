@@ -16,19 +16,33 @@ aiPointsSample::aiPointsSample(aiPoints *schema)
 
 void aiPointsSample::fillData(aiPointsData &data)
 {
-    if (data.points)
-        m_points.copy_to(data.points);
-    if (data.velocities)
-        m_velocities.copy_to(data.velocities);
-    if (data.ids)
-        m_ids.copy_to(data.ids);
-    data.center = m_bb_center;
-    data.size = m_bb_size;
+    auto body = [this, &data]() {
+        if (data.points)
+            m_points.copy_to(data.points);
+        if (data.velocities)
+            m_velocities.copy_to(data.velocities);
+        if (data.ids)
+            m_ids.copy_to(data.ids);
+        data.center = m_bb_center;
+        data.size = m_bb_size;
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_copy = std::async(std::launch::async, body);
 }
 
 void aiPointsSample::getSummary(aiPointsSampleSummary & dst)
 {
     dst.count = (int)m_points.size();
+}
+
+void aiPointsSample::sync()
+{
+    if (m_async_copy.valid())
+        m_async_copy.wait();
+    m_force_sync = false;
 }
 
 

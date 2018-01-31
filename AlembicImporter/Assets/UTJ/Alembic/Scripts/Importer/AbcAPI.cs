@@ -216,7 +216,7 @@ namespace UTJ.Alembic
 
     public struct aiPointsData
     {
-        public IntPtr positions;
+        public IntPtr points;
         public IntPtr velocities;
         public IntPtr ids;
         public int count;
@@ -385,13 +385,13 @@ namespace UTJ.Alembic
         public static implicit operator aiSchema(aiPolyMesh v) { return v.schema; }
 
         public aiPolyMeshSample sample { get { return aiSchemaGetSample(self); } }
-        public void Sync() { aiSchemaSync(self); }
         public void GetSummary(ref aiMeshSummary dst) { aiPolyMeshGetSummary(self, ref dst); }
+        public void Sync() { aiSchemaSync(self); }
 
         #region internal
-        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         [DllImport("abci")] static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport("abci")] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
+        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         #endregion
     }
 
@@ -408,12 +408,14 @@ namespace UTJ.Alembic
         public Vector3 sortBasePosition { set { aiPointsSetSortBasePosition(self, value); } }
 
         public void GetSummary(ref aiPointsSummary dst) { aiPointsGetSummary(self, ref dst); }
+        public void Sync() { aiSchemaSync(self); }
 
         #region internal
         [DllImport("abci")] static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
         [DllImport("abci")] static extern void aiPointsSetSort(IntPtr schema, Bool v);
         [DllImport("abci")] static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
         [DllImport("abci")] static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
+        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         #endregion
     }
 
@@ -482,11 +484,13 @@ namespace UTJ.Alembic
         public static implicit operator aiSample(aiPointsSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
         public void GetSummary(ref aiPointsSampleSummary dst) { aiPointsGetSampleSummary(self, ref dst); }
-        public void FillData(ref aiPointsData dst) { aiPointsFillData(self, ref dst); }
+        public void FillData(PinnedList<aiPointsData> dst) { aiPointsFillData(self, dst); }
+        public void Sync() { aiSampleSync(self); }
 
         #region internal
         [DllImport("abci")] static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
-        [DllImport("abci")] static extern void aiPointsFillData(IntPtr sample, ref aiPointsData dst);
+        [DllImport("abci")] static extern void aiPointsFillData(IntPtr sample, IntPtr dst);
+        [DllImport("abci")] static extern void aiSampleSync(IntPtr sample);
         #endregion
     }
 

@@ -180,7 +180,7 @@ abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
 abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst)
 {
     if (schema)
-        schema->getSummary(*dst);
+        *dst = schema->getSummary();
 }
 
 abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst)

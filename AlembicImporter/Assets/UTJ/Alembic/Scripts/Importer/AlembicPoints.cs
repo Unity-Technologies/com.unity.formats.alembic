@@ -7,11 +7,9 @@ namespace UTJ.Alembic
     {
         // members
         aiPoints m_abcSchema;
-        aiPointsData m_abcData;
+        PinnedList<aiPointsData> m_abcData = new PinnedList<aiPointsData>(1);
         aiPointsSummary m_summary;
-
-        // properties
-        public aiPointsData abcData { get { return m_abcData; } }
+        aiPointsSampleSummary m_sampleSummary;
 
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
@@ -34,37 +32,52 @@ namespace UTJ.Alembic
             }
         }
 
+        public override void AbcSyncDataBegin()
+        {
+            m_abcSchema.Sync();
+            if (!m_abcSchema.schema.isDataUpdated)
+                return;
+
+            var sample = m_abcSchema.sample;
+            sample.GetSummary(ref m_sampleSummary);
+
+            // get points cloud component
+            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
+                        abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
+
+            // setup buffers
+            var data = default(aiPointsData);
+            cloud.m_points.ResizeDiscard(m_sampleSummary.count);
+            data.points = cloud.m_points;
+            if (m_summary.hasVelocities)
+            {
+                cloud.m_velocities.ResizeDiscard(m_sampleSummary.count);
+                data.velocities = cloud.m_velocities;
+            }
+            if (m_summary.hasIDs)
+            {
+                cloud.m_ids.ResizeDiscard(m_sampleSummary.count);
+                data.ids = cloud.m_ids;
+            }
+            m_abcData[0] = data;
+
+            // kick async copy
+            sample.FillData(m_abcData);
+        }
+
         public override void AbcSyncDataEnd()
         {
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
-            var sampleSummary = default(aiPointsSampleSummary);
-            sample.GetSummary(ref sampleSummary);
-            m_abcSchema.GetSummary(ref m_summary);
+            // wait async copy complete
+            sample.Sync();
 
-            // get points cloud component
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
-                        abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
-
-            cloud.m_abc = this;
-            cloud.m_points.ResizeDiscard(sampleSummary.count);
-            m_abcData.positions = cloud.m_points;
-            if (m_summary.hasVelocities)
-            {
-                cloud.m_velocities.ResizeDiscard(sampleSummary.count);
-                m_abcData.velocities = cloud.m_velocities;
-            }
-            if (m_summary.hasIDs)
-            {
-                cloud.m_ids.ResizeDiscard(sampleSummary.count);
-                m_abcData.ids = cloud.m_ids;
-            }
-
-            sample.FillData(ref m_abcData);
-            cloud.m_boundsCenter = m_abcData.boundsCenter;
-            cloud.m_boundsExtents = m_abcData.boundsExtents;
+            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var data = m_abcData[0];
+            cloud.m_boundsCenter = data.boundsCenter;
+            cloud.m_boundsExtents = data.boundsExtents;
         }
     }
 }

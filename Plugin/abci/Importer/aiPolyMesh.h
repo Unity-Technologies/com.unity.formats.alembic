@@ -114,7 +114,6 @@ public:
     ~aiPolyMesh() override;
     void updateSummary();
     const aiMeshSummaryInternal& getSummary() const;
-    void getSummary(aiMeshSummary &dst) const;
 
     Sample* newSample() override;
     void updateSample(const abcSampleSelector& ss) override;

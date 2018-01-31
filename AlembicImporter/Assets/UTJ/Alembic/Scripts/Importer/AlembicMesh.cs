@@ -208,6 +208,7 @@ namespace UTJ.Alembic
                 }
             }
 
+            // kick async copy
             sample.FillVertexBuffer(m_splitData, m_submeshData);
         }
 
@@ -216,6 +217,7 @@ namespace UTJ.Alembic
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
+            // wait async copy complete
             var sample = m_abcSchema.sample;
             sample.Sync();
 

@@ -194,6 +194,7 @@ export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
     delete[] mem_tmp;
 }
 
+#if 0
 export void GenerateNormalsPolygonIndexed(uniform float3 dst[],
     uniform const float3 points[], uniform const int indices[], uniform const int counts[], uniform const int offsets[],
     uniform const int num_points, uniform const int num_faces)
@@ -269,6 +270,7 @@ export void GenerateNormalsPolygonIndexed(uniform float3 dst[],
     NormalizeSoAToAoS(dst, tnx, tny, tnz, num_points);
     delete[] mem_tmp;
 }
+#endif
 
 
 export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
@@ -362,6 +364,7 @@ export void GenerateTangentsTriangleIndexed(uniform float4 dst[],
     delete[] mem_tmp;
 }
 
+#if 0
 export void GenerateTangentsPolygonIndexed(uniform float4 dst[],
     uniform const float3 points[], uniform const float2 uv[], uniform const float3 normals[],
     uniform const int indices[], uniform const int counts[], uniform const int offsets[],
@@ -460,3 +463,4 @@ export void GenerateTangentsPolygonIndexed(uniform float4 dst[],
 
     delete[] mem_tmp;
 }
+#endif
