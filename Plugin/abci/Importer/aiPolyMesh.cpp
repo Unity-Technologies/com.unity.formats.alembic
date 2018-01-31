@@ -881,29 +881,35 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_points.swap((RawVector<abcV3>&)refiner.new_points);
         sample.m_points_ref = sample.m_points;
     }
-    if (config.swap_handedness)
-        SwapHandedness(sample.m_points_ref.data(), (int)sample.m_points_ref.size());
-    if (config.scale_factor != 1.0f)
-        ApplyScale(sample.m_points_ref.data(), (int)sample.m_points_ref.size(), config.scale_factor);
 
     sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
     sample.m_uv0_ref = !m_constant_uv0.empty() ? m_constant_uv0 : sample.m_uv0;
     sample.m_uv1_ref = !m_constant_uv1.empty() ? m_constant_uv1 : sample.m_uv1;
     sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
 
+    if (config.swap_handedness) {
+        SwapHandedness(sample.m_points_ref.data(), (int)sample.m_points_ref.size());
+        SwapHandedness(sample.m_normals_ref.data(), (int)sample.m_normals_ref.size());
+    }
+    if (config.scale_factor != 1.0f) {
+        ApplyScale(sample.m_points_ref.data(), (int)sample.m_points_ref.size(), config.scale_factor);
+    }
+
     if (summary.constant_normals && summary.compute_normals) {
         const auto &indices = topology.m_refiner.new_indices_triangulated;
-        m_constant_normals.resize_zeroclear(m_constant_points.size());
+        m_constant_normals.resize_discard(m_constant_points.size());
         GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents) {
         const auto &indices = topology.m_refiner.new_indices_triangulated;
-        m_constant_tangents.resize_zeroclear(m_constant_points.size());
+        m_constant_tangents.resize_discard(m_constant_points.size());
         GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
             indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_tangents_ref = m_constant_tangents;
     }
+
+    // velocities are done in later part of cookSampleBody()
 }
 
 void aiPolyMesh::notifyTopologyDetermined()
