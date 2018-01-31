@@ -14,11 +14,6 @@ class aePolyMesh; // : aeObject
 class aeCamera;   // : aeObject
 class aeProperty;
 
-struct aeXformData;
-struct aePointsData;
-struct aePolyMeshData;
-struct aeCameraData;
-
 
 enum class aeArchiveType
 {

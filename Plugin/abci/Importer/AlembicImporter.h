@@ -2,16 +2,6 @@
 
 #include <cstdint>
 
-struct  aiConfig;
-struct  aiCameraData;
-struct  aiXformData;
-struct  aiMeshSummary;
-struct  aiMeshSampleSummary;
-struct  aiPolyMeshData;
-struct  aiSubmeshSummary;
-struct  aiSubmeshData;
-struct  aiFacesets;
-
 class   aiContext;
 class   aiObject;
 #ifdef abciImpl
@@ -21,8 +11,6 @@ class   aiObject;
     class aiCameraSample;   // : aiSampleBase
     class aiPolyMeshSample; // : aiSampleBase
     class aiPointsSample;   // : aiSampleBase
-    class aiCurvesSample;   // : aiSampleBase
-    class aiSubDSample;     // : aiSampleBase
 #else
     // force make castable
     using aiSchemaBase     = void;
@@ -31,22 +19,13 @@ class   aiObject;
     using aiCameraSample   = void;
     using aiPolyMeshSample = void;
     using aiPointsSample   = void;
-    using aiCurvesSample   = void;
-    using aiSubDSample     = void;
 #endif
 
 class   aiXform;    // : aiSchemaBase
 class   aiCamera;   // : aiSchemaBase
 class   aiPolyMesh; // : aiSchemaBase
 class   aiPoints;   // : aiSchemaBase
-class   aiCurves;   // : aiSchemaBase
-class   aiSubD;     // : aiSchemaBase
 class   aiProperty;
-
-struct  aiPolyMeshData;
-struct  aiPointsData;
-struct  aiCurvesSampleData;
-struct  aiSubDSampleData;
 
 enum class aiNormalsMode
 {

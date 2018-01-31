@@ -145,5 +145,4 @@ private:
     bool m_varying_topology = false;
 
     aiAsyncLoad m_async_load;
-    std::future<void> m_async_copy;
 };

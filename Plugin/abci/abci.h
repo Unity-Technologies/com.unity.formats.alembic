@@ -1,16 +1,5 @@
 #pragma once
 
-#if defined(_M_IX86) || defined(__i386__)
-    #ifdef _MSC_VER
-        #define abciSTDCall __stdcall
-        #pragma warning(disable: 4190)
-    #else // _MSC_VER
-        #define abciSTDCall __attribute__((stdcall))
-    #endif // _MSC_VER
-#else
-    #define abciSTDCall
-#endif
-
 #ifdef abciImpl
     #ifndef abciStaticLink
         #ifdef _WIN32
