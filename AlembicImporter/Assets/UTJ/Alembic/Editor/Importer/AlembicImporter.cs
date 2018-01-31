@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
@@ -16,7 +17,7 @@ namespace UTJ.Alembic
         {
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
-            var streamingAssetPath = assetPath.Replace("Assets","");
+            var streamingAssetPath = AlembicImporter.MakeShortAssetPath(assetPath);
             AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
 
             try
@@ -39,8 +40,8 @@ namespace UTJ.Alembic
         {
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDestPath = to.Replace("Assets" , "");
-            var streamSourcePath = from.Replace("Assets" , "");
+            var streamDestPath = AlembicImporter.MakeShortAssetPath(to);
+            var streamSourcePath = AlembicImporter.MakeShortAssetPath(from);
             AlembicStream.DisconnectStreamsWithPath(streamSourcePath);
             AlembicStream.RemapStreamsWithPath(streamSourcePath,streamDestPath);
 
@@ -84,9 +85,15 @@ namespace UTJ.Alembic
         [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
         [SerializeField] public List<string> splittingMeshNames = new List<string>();
 
+        public static string MakeShortAssetPath(string assetPath)
+        {
+            return Regex.Replace(assetPath, "^Assets", "");
+        }
+
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var shortAssetPath = ctx.assetPath.Replace("Assets", "");
+            var shortAssetPath = MakeShortAssetPath(ctx.assetPath);
             AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
             var sourcePath = Application.dataPath + shortAssetPath;
             var destPath = Application.streamingAssetsPath + shortAssetPath;
