@@ -9,8 +9,8 @@ namespace UTJ.Alembic
         [SerializeField] public AlembicStreamSettings settings = new AlembicStreamSettings();
         [SerializeField] public bool hasVaryingTopology = false;
         [SerializeField] public bool hasAcyclicFramerate = false;
-        [SerializeField] public double abcStartTime = 0.0f;
-        [SerializeField] public double abcEndTime = 0.0f;
+        [SerializeField] public double abcStartTime = double.MinValue;
+        [SerializeField] public double abcEndTime = double.MaxValue;
 
         public double duration { get { return abcEndTime - abcStartTime; } }
     }

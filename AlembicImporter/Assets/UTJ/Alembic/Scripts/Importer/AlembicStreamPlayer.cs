@@ -18,9 +18,19 @@ namespace UTJ.Alembic
 
         public double duration { get { return m_endTime - m_startTime; } }
 
+        void Start()
+        {
+            OnValidate();
+        }
+
         void OnValidate()
         {
-            if (streamDescriptor == null) return;
+            if (streamDescriptor == null || m_stream == null)
+                return;
+            if (streamDescriptor.abcStartTime == double.MinValue)
+                streamDescriptor.abcStartTime = m_stream.abcTimeRange.startTime;
+            if (streamDescriptor.abcEndTime == double.MaxValue)
+                streamDescriptor.abcEndTime = m_stream.abcTimeRange.endTime;
             m_startTime = Mathf.Clamp((float)m_startTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
             m_endTime = Mathf.Clamp((float)m_endTime, (float)m_startTime, (float)streamDescriptor.abcEndTime);
             ClampTime();
