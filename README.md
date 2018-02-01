@@ -29,23 +29,31 @@ Alembic ファイルに含まれるノード群を Unity 側で GameObject と�
 Project ウィンドウでその prefab を選択することでインポート設定を変更できます。
 ![import settings](https://user-images.githubusercontent.com/1488611/35656675-f27445c2-073b-11e8-8365-4060cbff4896.png)
 - "Normals" は .abc ファイルの法線を使うか、頂点位置を元に計算するかを設定します。デフォルトの "Compute If Missing" は .abc ファイルが法線を持っていればそれを使い、なければ計算するもので、ほとんどのケースでこれで問題ないはずです。
- - "Tangents" は接線を計算するかの設定です。.abc ファイルは接線を持たないので、計算するかしないかの 2 択になります。ただし、接線の計算には法線と UV が必要で、これらが欠けている場合は "Tangents" が "Compute" でも計算が行われないことに留意ください。
+
+ - "Tangents" は接線を計算するかの設定です。.abc ファイルは接線を持たないので、計算するかしないかの 2 択になります。ただし、接線の計算には法線と UV が必要で、これらが欠けている場合は "Tangents" が "Compute" でも計算が行われないことに留意ください。  
+ デフォルトで有効になっていますが、接線の計算は重い処理であり、不要な場合は無効にしておくと再生の高速化が見込めます
+ 
  - "Camera Aspect Ratio" は、カメラのアスペクト比に .abc ファイルのカメラパラメータを使うか、Unity 側の画面の縦横比を使うかの設定になります
  
- - "Swap Handedness", "Swap Face Winding", "Turn Quad Edges" はそれぞれ X 方向を反転するか、ポリゴンの向きを反転するか、四角形ポリゴンを三角形に分割する際に三角形の向きを反転するか、の設定になります
+ - "Swap Handedness", "Swap Face Winding", "Turn Quad Edges" はそれぞれ X 方向を反転するか、ポリゴンの向きを反転するか、四角形ポリゴンを三角形に分割する際に三角形の並びを反転するか、の設定になります
  
  - "Interpolate Samples" はアニメーションの補間を行うかの設定です。これが有効だと、Transform、カメラ、そしてトポロジーが変化しない (= 頂点数とインデックスが不変な) Mesh はアニメーションが補間されるようになります
  - 補間が有効な場合、もしくは .abc ファイルに velocity データが含まれる場合、シェーダに velocity データを渡すことができます。(4 番目の UV が velocity になります。パッケージに付属の AlembicMotionVectors.cginc が使い方の参考になるでしょう)
- 
-
-- prefab は AlembicStreamPlayer というコンポーネントを持っており、これが再生を担当します。Time パラメータを動かすと Mesh が動くのを確認できるでしょう。これを Timeline やスクリプトから制御してアニメーションを再生します。
 
 
 - Maya の shading group は submesh としてインポートできます。(Maya 側で "Write Face Sets" オプションを有効にしてエクスポートする必要があります。このオプションはデフォルトではオフです)
-- Maya の vertex color と additional UV set 拡張もサポートしています (それぞれ Maya 側で "Write Color Sets", "Write UV Sets" オプションを有効にしてエクスポートする必要があります。これらはデフォルトではオフです) 
 
-Maya の Alembic エクスポート設定項目
+- Maya の vertex color と additional UV set 拡張もサポートしています (それぞれ Maya 側で "Write Color Sets", "Write UV Sets" オプションを有効にしてエクスポートする必要があります。これらもデフォルトではオフです) 
+
+Maya の Alembic エクスポート設定項目  
 ![](https://user-images.githubusercontent.com/1488611/35655697-86d367e4-0736-11e8-9d28-0b3cb37fd5f0.png)
+
+
+- prefab は AlembicStreamPlayer というコンポーネントを持っており、これが再生を担当します。Time パラメータを動かすと Mesh が動くのを確認できるでしょう。これを Timeline やスクリプトから制御してアニメーションを再生します。
+
+- Timeline 用に Alembic Track という専用の track が用意されています。(Add -> UTJ.Alembic -> Alembic Track でトラックを追加、Add Alembic Shot Asset Clip でクリップを追加し、alembic オブジェクトを設定)  
+Animation Clip で Time パラメータを制御することでも同等の結果は得られますが、Alembic Track の方が duration を考慮した配置になる分手早いでしょう。  
+![](https://user-images.githubusercontent.com/1488611/35694278-2d6026be-07c4-11e8-98b6-c0b72ff10708.gif)
 
 - .abc ファイルは Assets/StreamingAssets 以下にコピーが作られることに留意ください。これはファイルからデータをストリーミングする都合上、ビルド後も .abc ファイルがそのまま残っている必要があるためです。
 
