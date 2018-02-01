@@ -91,7 +91,6 @@ private:
     aiConfig m_config;
 
     std::vector<aiAsync*> m_async_tasks;
-    std::future<void> m_async_future;
 };
 
 #include "aiObject.h"

@@ -320,13 +320,7 @@ void aiContext::updateSamples(double time)
 
     // kick async tasks!
     if (!m_async_tasks.empty()) {
-        for (auto task : m_async_tasks)
-            task->prepare();
-        m_async_future = std::async(std::launch::async, [this]() {
-            for (auto task : m_async_tasks)
-                task->run();
-            m_async_tasks.clear();
-        });
+        aiAsyncManager::instance().queue(m_async_tasks.data(), m_async_tasks.size());
     }
 }
 
@@ -337,6 +331,7 @@ void aiContext::queueAsync(aiAsync& task)
 
 void aiContext::waitAsync()
 {
-    if (m_async_future.valid())
-        m_async_future.wait();
+    for (auto task : m_async_tasks)
+        task->wait();
+    m_async_tasks.clear();
 }

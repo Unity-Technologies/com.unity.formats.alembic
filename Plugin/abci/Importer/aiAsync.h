@@ -9,6 +9,23 @@ public:
     virtual void wait() = 0;
 };
 
+class aiAsyncManager
+{
+public:
+    static aiAsyncManager& instance();
+    void queue(aiAsync *task);
+    void queue(aiAsync **tasks, size_t num);
+
+private:
+    ~aiAsyncManager();
+    void process();
+
+    std::deque<aiAsync*> m_tasks;
+    std::mutex m_mutex;
+    std::future<void> m_future;
+    bool m_processing = false;
+};
+
 
 class aiAsyncLoad : public aiAsync
 {

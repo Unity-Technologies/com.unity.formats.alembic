@@ -2,6 +2,63 @@
 #include "aiAsync.h"
 
 
+aiAsyncManager::~aiAsyncManager()
+{
+    if (m_future.valid())
+        m_future.wait();
+}
+
+aiAsyncManager& aiAsyncManager::instance()
+{
+    static aiAsyncManager s_instance;
+    return s_instance;
+}
+
+void aiAsyncManager::queue(aiAsync *task)
+{
+    queue(&task, 1);
+}
+
+void aiAsyncManager::queue(aiAsync **tasks, size_t num)
+{
+    for (int i = 0; i < num; ++i)
+        tasks[i]->prepare();
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_tasks.insert(m_tasks.end(), tasks, tasks + num);
+
+        // launch worker thread (task) if needed
+        if (!m_processing) {
+            m_processing = true;
+            m_future = std::async(std::launch::async, [this]() { process(); });
+        }
+    }
+}
+
+void aiAsyncManager::process()
+{
+    while (true) {
+        aiAsync *task = nullptr;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            if (!m_tasks.empty()) {
+                task = m_tasks.front();
+                m_tasks.pop_front();
+            }
+            else {
+                m_processing = false;
+            }
+        }
+
+        if (task)
+            task->run();
+        else
+            break;
+    }
+}
+
+
 aiAsyncLoad::~aiAsyncLoad()
 {
     if (m_async_cook.valid())
