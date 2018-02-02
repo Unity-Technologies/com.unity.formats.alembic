@@ -11,12 +11,12 @@ namespace UTJ.Alembic
 
         public override void OnInspectorGUI()
         {   
-            SerializedProperty vertexMotionScale = serializedObject.FindProperty("m_vertexMotionScale");
+            SerializedProperty vertexMotionScale = serializedObject.FindProperty("vertexMotionScale");
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
-            SerializedProperty currentTime = serializedObject.FindProperty("m_currentTime");
-            SerializedProperty startTime = serializedObject.FindProperty("m_startTime");
-            SerializedProperty endTime = serializedObject.FindProperty("m_endTime");
-            SerializedProperty asyncLoad = serializedObject.FindProperty("m_asyncLoad");
+            SerializedProperty currentTime = serializedObject.FindProperty("currentTime");
+            SerializedProperty startTime = serializedObject.FindProperty("startTime");
+            SerializedProperty endTime = serializedObject.FindProperty("endTime");
+            SerializedProperty asyncLoad = serializedObject.FindProperty("asyncLoad");
 
             var streamPlayer = target as AlembicStreamPlayer;
             var targetStreamDesc = streamPlayer.streamDescriptor;
@@ -40,8 +40,8 @@ namespace UTJ.Alembic
 
             var abcStart = (float)targetStreamDesc.abcStartTime;
             var abcEnd = (float)targetStreamDesc.abcEndTime;
-            var start = (float)streamPlayer.m_startTime;
-            var end = (float)streamPlayer.m_endTime;
+            var start = (float)streamPlayer.startTime;
+            var end = (float)streamPlayer.endTime;
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
             if (EditorGUI.EndChangeCheck())

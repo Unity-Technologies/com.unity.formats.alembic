@@ -122,8 +122,8 @@ namespace UTJ.Alembic
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.streamDescriptor = streamDescriptor;
-                streamPlayer.m_startTime = startTime;
-                streamPlayer.m_endTime = endTime;
+                streamPlayer.startTime = startTime;
+                streamPlayer.endTime = endTime;
 
                 AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
                 GenerateSubAssets(ctx, abcStream.m_abcTreeRoot, streamDescriptor);
@@ -158,7 +158,7 @@ namespace UTJ.Alembic
                 frames[1].inTangent = 1.0f;
                 var curve = new AnimationCurve(frames);
                 var animationClip = new AnimationClip();
-                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "m_currentTime", curve);
+                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
                 animationClip.name = root.linkedGameObj.name + "_Clip";
                 animationClip.hideFlags = HideFlags.NotEditable;
 
