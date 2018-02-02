@@ -185,7 +185,7 @@ abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name
 abciAPI void aiSampleSync(aiSample * sample)
 {
     if (sample)
-        sample->sync();
+        sample->waitAsync();
 }
 
 

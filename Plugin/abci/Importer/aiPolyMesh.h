@@ -59,7 +59,8 @@ using super = aiSample;
 using schema_t = aiPolyMesh;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
-    void clear();
+    ~aiPolyMeshSample();
+    void reset();
 
     void getSummary(aiMeshSampleSummary &dst) const;
     void getSplitSummaries(aiMeshSplitSummary  *dst) const;
@@ -69,7 +70,7 @@ public:
     void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-    void sync() override;
+    void waitAsync() override;
 
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
@@ -86,7 +87,7 @@ public:
     IArray<abcV4> m_tangents_ref;
     IArray<abcC4> m_colors_ref;
 
-    RawVector<abcV3> m_points, m_points2, m_points_int;
+    RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
     RawVector<abcV2> m_uv0, m_uv1;
     RawVector<abcV3> m_normals, m_normals2, m_normals_int;

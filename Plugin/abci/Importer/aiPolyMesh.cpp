@@ -91,7 +91,12 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
 {
 }
 
-void aiPolyMeshSample::clear()
+aiPolyMeshSample::~aiPolyMeshSample()
+{
+    waitAsync();
+}
+
+void aiPolyMeshSample::reset()
 {
     m_points_sp.reset(); m_points_sp2.reset();
     m_velocities_sp.reset();
@@ -106,13 +111,6 @@ void aiPolyMeshSample::clear()
     m_normals_ref.reset();
     m_tangents_ref.reset();
     m_colors_ref.reset();
-
-    m_points.clear(); m_points2.clear(); m_points_int.clear();
-    m_velocities.clear();
-    m_uv0.clear(); m_uv1.clear();
-    m_normals.clear(); m_normals2.clear();
-    m_tangents.clear();
-    m_colors.clear();
 }
 
 void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
@@ -165,7 +163,8 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
     }
     if (data.velocities) {
-        if (summary.has_velocities) {
+        // velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
+        if (summary.has_velocities && !m_velocities_ref.empty()) {
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
         }
         else {
@@ -246,7 +245,7 @@ void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ib
         m_async_copy = std::async(std::launch::async, body);
 }
 
-void aiPolyMeshSample::sync()
+void aiPolyMeshSample::waitAsync()
 {
     if (m_async_copy.valid())
         m_async_copy.wait();
@@ -258,7 +257,7 @@ void aiPolyMeshSample::sync()
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
     : super(parent, abc)
 {
-    // find color and uv1 params (Maya's extension attributes)
+    // find color and uv1 params (Maya's extension)
     auto geom_params = m_schema.getArbGeomParams();
     if (geom_params.valid()) {
         size_t num_geom_params = geom_params.getNumProperties();
@@ -275,23 +274,13 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
         }
     }
 
-    // find FaceSetSchema in children
+    // find face set schema in children
     size_t num_children = getAbcObject().getNumChildren();
     for (size_t i = 0; i < num_children; ++i) {
         auto child = getAbcObject().getChild(i);
-        if (!child.valid())
-            continue;
-
-        if (AbcGeom::IFaceSetSchema::matches(child.getMetaData())) {
+        if (child.valid() && AbcGeom::IFaceSetSchema::matches(child.getMetaData())) {
             auto so = Abc::ISchemaObject<AbcGeom::IFaceSetSchema>(child, Abc::kWrapExisting);
-            auto faceset = so.getSchema();
-            // check if time sampling and variance are same
-            if (faceset.isConstant() == m_schema.isConstant() &&
-                faceset.getTimeSampling() == m_schema.getTimeSampling() &&
-                faceset.getNumSamples() == m_schema.getNumSamples())
-            {
-                m_facesets.push_back(faceset);
-            }
+            m_facesets.push_back(so.getSchema());
         }
     }
 
@@ -470,7 +459,7 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     auto& summary = m_summary;
     auto& config = getConfig();
 
-    sample.clear();
+    sample.reset();
     if (m_varying_topology)
         topology.clear();
 
@@ -627,8 +616,6 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
                 SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
         }
 
-        // velocities are updated only when sample index is changed, even if interpolation is enabled.
-        // this may should change..
         if (!m_constant_velocities.empty()) {
             sample.m_velocities_ref = m_constant_velocities;
         }
@@ -641,22 +628,26 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
                 ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
             sample.m_velocities_ref = dst;
         }
-        else if (summary.compute_velocities) {
-            sample.m_velocities.resize_discard(sample.m_points.size());
-            GenerateVelocities(sample.m_velocities.data(), sample.m_points.data(), sample.m_points2.data(),
-                (int)sample.m_points.size(), m_current_time_interval, config.vertex_motion_scale);
-            sample.m_velocities_ref = sample.m_velocities;
-        }
     }
 
     // interpolate or compute data
 
     // points
     if (summary.interpolate_points) {
+        if (summary.compute_velocities)
+            sample.m_points_int.swap(sample.m_points_prev);
+
         sample.m_points_int.resize_discard(sample.m_points.size());
         Lerp(sample.m_points_int.data(), sample.m_points.data(), sample.m_points2.data(),
             (int)sample.m_points.size(), m_current_time_offset);
         sample.m_points_ref = sample.m_points_int;
+
+        if (summary.compute_velocities && sample.m_points_int.size() == sample.m_points_prev.size()) {
+            sample.m_velocities.resize_discard(sample.m_points.size());
+            GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
+                (int)sample.m_points_int.size(), config.vertex_motion_scale);
+            sample.m_velocities_ref = sample.m_velocities;
+        }
     }
 
     // normals

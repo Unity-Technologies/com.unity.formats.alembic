@@ -111,12 +111,10 @@ export void GenerateVelocities(
     uniform const float3 p1[],
     uniform const float3 p2[],
     uniform const int num,
-    uniform float time_interval,
     uniform float motion_scale)
 {
-    uniform float s = rcp(time_interval) * motion_scale;
     foreach(i = 0 ... num) {
-        dst[i] = (p2[i] - p1[i]) * s;
+        dst[i] = (p2[i] - p1[i]) * motion_scale;
     }
 }
 

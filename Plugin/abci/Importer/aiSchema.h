@@ -10,7 +10,7 @@ public:
     virtual aiSchema* getSchema() const { return m_schema; }
     const aiConfig& getConfig() const;
 
-    virtual void sync() {}
+    virtual void waitAsync() {}
     void markForceSync();
 
 protected:

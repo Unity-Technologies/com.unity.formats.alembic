@@ -7,10 +7,11 @@ class aiPointsSample : public aiSample
 using super = aiSample;
 public:
     aiPointsSample(aiPoints *schema);
+    ~aiPointsSample();
     void fillData(aiPointsData &dst);
     void getSummary(aiPointsSampleSummary &dst);
 
-    void sync() override;
+    void waitAsync() override;
 
 public:
     Abc::P3fArraySamplePtr m_points_sp;

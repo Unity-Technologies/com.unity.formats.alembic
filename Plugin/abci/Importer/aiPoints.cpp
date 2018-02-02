@@ -14,6 +14,11 @@ aiPointsSample::aiPointsSample(aiPoints *schema)
 {
 }
 
+aiPointsSample::~aiPointsSample()
+{
+    waitAsync();
+}
+
 void aiPointsSample::fillData(aiPointsData &data)
 {
     auto body = [this, &data]() {
@@ -38,7 +43,7 @@ void aiPointsSample::getSummary(aiPointsSampleSummary & dst)
     dst.count = (int)m_points.size();
 }
 
-void aiPointsSample::sync()
+void aiPointsSample::waitAsync()
 {
     if (m_async_copy.valid())
         m_async_copy.wait();
