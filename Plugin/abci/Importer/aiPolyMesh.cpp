@@ -300,7 +300,7 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
 
 aiPolyMesh::~aiPolyMesh()
 {
-    sync();
+    waitAsync();
 }
 
 void aiPolyMesh::updateSummary()
@@ -455,7 +455,7 @@ void aiPolyMesh::cookSample(Sample& sample)
         m_async_load.m_cook = body;
 }
 
-void aiPolyMesh::sync()
+void aiPolyMesh::waitAsync()
 {
     m_async_load.wait();
 }

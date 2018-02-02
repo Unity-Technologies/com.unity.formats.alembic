@@ -148,7 +148,7 @@ abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 abciAPI void aiSchemaSync(aiSchema* schema)
 {
     if (schema)
-        schema->sync();
+        schema->waitAsync();
 }
 
 abciAPI bool aiSchemaIsConstant(aiSchema * schema)

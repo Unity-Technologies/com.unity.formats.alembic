@@ -119,7 +119,7 @@ public:
     void updateSample(const abcSampleSelector& ss) override;
     void readSample(Sample& sample, uint64_t idx) override;
     void cookSample(Sample& sample) override;
-    void sync() override;
+    void waitAsync() override;
 
     void readSampleBody(Sample& sample, uint64_t idx);
     void cookSampleBody(Sample& sample);

@@ -85,6 +85,6 @@ void aiObject::updateSample(const abcSampleSelector& ss)
 {
 }
 
-void aiObject::sync()
+void aiObject::waitAsync()
 {
 }

@@ -54,7 +54,7 @@ aiPoints::aiPoints(aiObject *parent, const abcObject &abc)
 
 aiPoints::~aiPoints()
 {
-    sync();
+    waitAsync();
 }
 
 void aiPoints::updateSummary()
@@ -117,7 +117,7 @@ void aiPoints::cookSample(Sample & sample)
         m_async_load.m_cook = body;
 }
 
-void aiPoints::sync()
+void aiPoints::waitAsync()
 {
     m_async_load.wait();
 }

@@ -10,7 +10,7 @@ class aiObject
 public:
     aiObject();
     aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc);
-    ~aiObject();
+    virtual ~aiObject();
 
     const char* getName() const;
     const char* getFullName() const;
@@ -21,7 +21,7 @@ public:
 
     virtual aiSample* getSample();
     virtual void updateSample(const abcSampleSelector& ss);
-    virtual void sync();
+    virtual void waitAsync();
 
 
     template<class F>
