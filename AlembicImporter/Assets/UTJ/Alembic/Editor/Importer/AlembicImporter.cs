@@ -142,6 +142,7 @@ namespace UTJ.Alembic
         private void GenerateSubAssets(AssetImportContext ctx, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
             var material = new Material(Shader.Find("Standard"));
+            material.hideFlags = HideFlags.NotEditable;
             AddObjectToAsset(ctx, "Default Material", material);
 
             if (streamDescr.duration > 0)
@@ -157,8 +158,9 @@ namespace UTJ.Alembic
                 frames[1].inTangent = 1.0f;
                 var curve = new AnimationCurve(frames);
                 var animationClip = new AnimationClip();
-                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
+                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "m_currentTime", curve);
                 animationClip.name = root.linkedGameObj.name + "_Clip";
+                animationClip.hideFlags = HideFlags.NotEditable;
 
                 AddObjectToAsset(ctx, "Default Animation", animationClip);
             }

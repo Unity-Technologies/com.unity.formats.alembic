@@ -6,7 +6,7 @@ namespace UTJ.Alembic
     public class AlembicStreamPlayer : MonoBehaviour
     {
         public AlembicStream m_stream;
-        public AlembicStreamDescriptor streamDescriptor;
+        public AlembicStreamDescriptor streamDescriptor; // "m_" prefix is intentionally missing just to keep asset compatibility :(
         [SerializeField] public double m_startTime = double.MinValue;
         [SerializeField] public double m_endTime = double.MaxValue;
         [SerializeField] public float m_currentTime;
