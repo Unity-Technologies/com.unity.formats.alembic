@@ -238,53 +238,54 @@ abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
 abciAPI void            aiClearContextsWithPath(const char *path);
-abciAPI aiContext*      aiCreateContext(int uid);
-abciAPI void            aiDestroyContext(aiContext* ctx);
 
-abciAPI bool            aiLoad(aiContext* ctx, const char *path);
-abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
-abciAPI int             aiGetTimeRangeCount(aiContext* ctx);
-abciAPI void            aiGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
-abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
-abciAPI void            aiUpdateSamples(aiContext* ctx, double time);
+abciAPI aiContext*      aiContextCreate(int uid);
+abciAPI void            aiContextDestroy(aiContext* ctx);
+abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
+abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
+abciAPI int             aiContextGetTimeRangeCount(aiContext* ctx);
+abciAPI void            aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
+abciAPI aiObject*       aiContextGetTopObject(aiContext* ctx);
+abciAPI void            aiContextUpdateSamples(aiContext* ctx, double time);
 
-abciAPI const char*     aiGetName(aiObject* obj);
-abciAPI int             aiGetNumChildren(aiObject* obj);
-abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
-abciAPI void            aiSetEnabled(aiObject* obj, bool v);
+abciAPI const char*     aiObjectGetName(aiObject* obj);
+abciAPI int             aiObjectGetNumChildren(aiObject* obj);
+abciAPI aiObject*       aiObjectGetChild(aiObject* obj, int i);
+abciAPI aiObject*       aiObjectGetParent(aiObject* obj);
+abciAPI void            aiObjectSetEnabled(aiObject* obj, bool v);
+abciAPI aiXform*        aiObjectAsXform(aiObject* obj);
+abciAPI aiPolyMesh*     aiObjectAsPolyMesh(aiObject* obj);
+abciAPI aiCamera*       aiObjectAsCamera(aiObject* obj);
+abciAPI aiPoints*       aiObjectAsPoints(aiObject* obj);
 
-abciAPI aiSample*   aiSchemaGetSample(aiSchema* schema);
+abciAPI aiSample*       aiSchemaGetSample(aiSchema* schema);
 abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss);
 abciAPI void            aiSchemaSync(aiSchema* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchema* schema);
 abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
 abciAPI void            aiSchemaMarkForceUpdate(aiSchema* schema);
+abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
+abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
+abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
 
 abciAPI void            aiSampleSync(aiSample* sample);
 
-abciAPI aiXform*        aiGetXform(aiObject* obj);
 abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
 
-abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
 abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst);
 abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst);
 abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-abciAPI aiCamera*       aiGetCamera(aiObject* obj);
 abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);
 
-abciAPI aiPoints*       aiGetPoints(aiObject* obj);
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary *dst);
 abciAPI void            aiPointsFillData(aiPointsSample* sample, aiPointsData *dst);
 
-abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
-abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
-abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
 abciAPI const char*     aiPropertyGetName(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
 abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);

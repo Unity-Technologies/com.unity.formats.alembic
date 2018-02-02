@@ -62,7 +62,7 @@ public:
 
     int getTimeSamplingIndex() const override
     {
-        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+        return m_schema->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
     }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
@@ -127,7 +127,7 @@ public:
 
     int getTimeSamplingIndex() const override
     {
-        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+        return m_schema->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
     }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override

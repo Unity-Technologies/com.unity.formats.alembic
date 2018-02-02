@@ -33,54 +33,54 @@ abciAPI void aiClearContextsWithPath(const char *path)
     aiContextManager::destroyContextsWithPath(path);
 }
 
-abciAPI aiContext* aiCreateContext(int uid)
+abciAPI aiContext* aiContextCreate(int uid)
 {
     return aiContextManager::getContext(uid);
 }
 
-abciAPI void aiDestroyContext(aiContext* ctx)
+abciAPI void aiContextDestroy(aiContext* ctx)
 {
     if (ctx)
         aiContextManager::destroyContext(ctx->getUid());
 }
 
 
-abciAPI bool aiLoad(aiContext* ctx, const char *path)
+abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
 {
     return ctx ? ctx->load(path) : false;
 }
 
-abciAPI void aiSetConfig(aiContext* ctx, const aiConfig* conf)
+abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
 {
     if (ctx)
         ctx->setConfig(*conf);
 }
 
-abciAPI int aiGetTimeRangeCount(aiContext* ctx)
+abciAPI int aiContextGetTimeRangeCount(aiContext* ctx)
 {
     if (ctx)
         return ctx->getTimeSamplingCount();
     return 0;
 }
 
-abciAPI void aiGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst)
+abciAPI void aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst)
 {
     if(ctx && dst)
         ctx->getTimeRange(i, *dst);
 }
 
-abciAPI aiObject* aiGetTopObject(aiContext* ctx)
+abciAPI aiObject* aiContextGetTopObject(aiContext* ctx)
 {
     return ctx ? ctx->getTopObject() : 0;
 }
 
-abciAPI void aiUpdateSamples(aiContext* ctx, double time)
+abciAPI void aiContextUpdateSamples(aiContext* ctx, double time)
 {
     if (ctx)
         ctx->updateSamples(time);
 }
 
-abciAPI const char* aiGetName(aiObject* obj)
+abciAPI const char* aiObjectGetName(aiObject* obj)
 {
     return obj ? obj->getName() : "";
 }
@@ -90,30 +90,59 @@ abciAPI const char* aiGetFullNameS(aiObject* obj)
     return obj ? obj->getFullName() : "";
 }
 
-abciAPI int aiGetNumChildren(aiObject* obj)
+abciAPI int aiObjectGetNumChildren(aiObject* obj)
 {
     return obj ? obj->getNumChildren() : 0;
 }
 
-abciAPI aiObject* aiGetChild(aiObject* obj, int i)
+abciAPI aiObject* aiObjectGetChild(aiObject* obj, int i)
 {
     return obj ? obj->getChild(i) : nullptr;
 }
 
-abciAPI void aiSetEnabled(aiObject * obj, bool v)
+abciAPI aiObject* aiObjectGetParent(aiObject* obj)
+{
+    return obj ? obj->getParent() : nullptr;
+}
+
+abciAPI void aiObjectSetEnabled(aiObject * obj, bool v)
 {
     if (obj)
         obj->setEnabled(v);
 }
 
-abciAPI aiObject* aiGetParent(aiObject* obj)
+abciAPI aiXform* aiObjectAsXform(aiObject* obj)
 {
-    return obj ? obj->getParent() : nullptr;
+    return obj ? dynamic_cast<aiXform*>(obj) : nullptr;
 }
 
-abciAPI aiObject* aiSchemaGetObject(aiSchema* schema)
+abciAPI aiPolyMesh* aiObjectAsPolyMesh(aiObject* obj)
 {
-    return schema ? schema->getObject() : nullptr;
+    return obj ? dynamic_cast<aiPolyMesh*>(obj) : nullptr;
+}
+
+abciAPI aiCamera* aiObjectAsCamera(aiObject* obj)
+{
+    return obj ? dynamic_cast<aiCamera*>(obj) : nullptr;
+}
+
+abciAPI aiPoints* aiObjectAsPoints(aiObject* obj)
+{
+    return obj ? dynamic_cast<aiPoints*>(obj) : nullptr;
+}
+
+
+abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
+{
+    return schema ? schema->getSample() : nullptr;
+}
+
+abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
+{
+    if (schema) {
+        schema->markForceSync();
+        schema->updateSample(*ss);
+    }
 }
 
 abciAPI void aiSchemaSync(aiSchema* schema)
@@ -138,6 +167,21 @@ abciAPI void aiSchemaMarkForceUpdate(aiSchema * schema)
         schema->markForceUpdate();
 }
 
+abciAPI int aiSchemaGetNumProperties(aiSchema* schema)
+{
+    return schema->getNumProperties();
+}
+
+abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchema* schema, int i)
+{
+    return schema->getPropertyByIndex(i);
+}
+
+abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name)
+{
+    return schema->getPropertyByName(name);
+}
+
 abciAPI void aiSampleSync(aiSample * sample)
 {
     if (sample)
@@ -145,24 +189,6 @@ abciAPI void aiSampleSync(aiSample * sample)
 }
 
 
-abciAPI aiSample * aiSchemaGetSample(aiSchema * schema)
-{
-    return schema ? schema->getSample() : nullptr;
-}
-
-abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
-{
-    if (schema) {
-        schema->markForceSync();
-        schema->updateSample(*ss);
-    }
-}
-
-
-abciAPI aiXform* aiGetXform(aiObject* obj)
-{
-    return obj ? dynamic_cast<aiXform*>(obj->getSchema()) : nullptr;
-}
 
 abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
 {
@@ -170,11 +196,6 @@ abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
     {
         sample->getData(*dst);
     }
-}
-
-abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
-{
-    return obj ? dynamic_cast<aiPolyMesh*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst)
@@ -207,22 +228,12 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
         sample->fillVertexBuffer(vbs, ibs);
 }
 
-abciAPI aiCamera* aiGetCamera(aiObject* obj)
-{
-    return obj ? dynamic_cast<aiCamera*>(obj->getSchema()) : nullptr;
-}
-
 abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *dst)
 {
     if (sample)
     {
         sample->getData(*dst);
     }
-}
-
-abciAPI aiPoints* aiGetPoints(aiObject* obj)
-{
-    return obj ? dynamic_cast<aiPoints*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
@@ -253,21 +264,6 @@ abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData *dst)
         sample->fillData(*dst);
 }
 
-
-abciAPI int aiSchemaGetNumProperties(aiSchema* schema)
-{
-    return schema->getNumProperties();
-}
-
-abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchema* schema, int i)
-{
-    return schema->getPropertyByIndex(i);
-}
-
-abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name)
-{
-    return schema->getPropertyByName(name);
-}
 
 abciAPI aiPropertyType aiPropertyGetType(aiProperty* prop)
 {

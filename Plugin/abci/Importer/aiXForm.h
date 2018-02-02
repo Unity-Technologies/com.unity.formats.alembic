@@ -25,7 +25,7 @@ class aiXform : public aiTSchema<aiXformTraits>
 {
 using super = aiTSchema<aiXformTraits>;
 public:
-    aiXform(aiObject *obj);
+    aiXform(aiObject *parent, const abcObject &abc);
 
     Sample* newSample() override;
     void readSample(Sample& sample, uint64_t idx) override;

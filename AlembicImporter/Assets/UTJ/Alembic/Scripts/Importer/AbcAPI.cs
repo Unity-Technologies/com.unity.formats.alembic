@@ -246,36 +246,36 @@ namespace UTJ.Alembic
         public IntPtr self;
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
 
-        public static aiContext Create(int uid) { return aiCreateContext(uid); }
+        public static aiContext Create(int uid) { return aiContextCreate(uid); }
         public static void DestroyByPath(string path) { aiClearContextsWithPath(path); }
 
-        public void Destroy() { aiDestroyContext(self); self = IntPtr.Zero; }
-        public bool Load(string path) { return aiLoad(self, path); }
-        public void SetConfig(ref aiConfig conf) { aiSetConfig(self, ref conf); }
-        public void UpdateSamples(double time) { aiUpdateSamples(self, time); }
+        public void Destroy() { aiContextDestroy(self); self = IntPtr.Zero; }
+        public bool Load(string path) { return aiContextLoad(self, path); }
+        public void SetConfig(ref aiConfig conf) { aiContextSetConfig(self, ref conf); }
+        public void UpdateSamples(double time) { aiContextUpdateSamples(self, time); }
 
-        public aiObject topObject { get { return aiGetTopObject(self); } }
+        public aiObject topObject { get { return aiContextGetTopObject(self); } }
         public aiTimeRange timeRage {
-            get { var ret = default(aiTimeRange); aiGetTimeRange(self, -1, ref ret); return ret; }
+            get { var ret = default(aiTimeRange); aiContextGetTimeRange(self, -1, ref ret); return ret; }
         }
-        public int timeRangeCount { get { return aiGetTimeRangeCount(self); } }
+        public int timeRangeCount { get { return aiContextGetTimeRangeCount(self); } }
         public aiTimeRange GetTimeRange(int i)
         {
             var ret = default(aiTimeRange);
-            aiGetTimeRange(self, i, ref ret);
+            aiContextGetTimeRange(self, i, ref ret);
             return ret;
         }
 
         #region internal
         [DllImport("abci")] public static extern void aiClearContextsWithPath(string path);
-        [DllImport("abci")] public static extern aiContext aiCreateContext(int uid);
-        [DllImport("abci")] public static extern void aiDestroyContext(IntPtr ctx);
-        [DllImport("abci")] static extern Bool aiLoad(IntPtr ctx, string path);
-        [DllImport("abci")] static extern void aiSetConfig(IntPtr ctx, ref aiConfig conf);
-        [DllImport("abci")] static extern int aiGetTimeRangeCount(IntPtr ctx);
-        [DllImport("abci")] static extern void aiGetTimeRange(IntPtr ctx, int i, ref aiTimeRange dst);
-        [DllImport("abci")] static extern aiObject aiGetTopObject(IntPtr ctx);
-        [DllImport("abci")] static extern void aiUpdateSamples(IntPtr ctx, double time);
+        [DllImport("abci")] public static extern aiContext aiContextCreate(int uid);
+        [DllImport("abci")] public static extern void aiContextDestroy(IntPtr ctx);
+        [DllImport("abci")] static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport("abci")] static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
+        [DllImport("abci")] static extern int aiContextGetTimeRangeCount(IntPtr ctx);
+        [DllImport("abci")] static extern void aiContextGetTimeRange(IntPtr ctx, int i, ref aiTimeRange dst);
+        [DllImport("abci")] static extern aiObject aiContextGetTopObject(IntPtr ctx);
+        [DllImport("abci")] static extern void aiContextUpdateSamples(IntPtr ctx, double time);
         #endregion
     }
 
@@ -284,15 +284,15 @@ namespace UTJ.Alembic
         public IntPtr self;
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
 
-        public string name { get { return Marshal.PtrToStringAnsi(aiGetName(self)); } }
-        public bool enabled { set { aiSetEnabled(self, value); } }
-        public int childCount { get { return aiGetNumChildren(self); } }
-        public aiObject GetChild(int i) { return aiGetChild(self, i); }
+        public string name { get { return Marshal.PtrToStringAnsi(aiObjectGetName(self)); } }
+        public bool enabled { set { aiObjectSetEnabled(self, value); } }
+        public int childCount { get { return aiObjectGetNumChildren(self); } }
+        public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
 
-        public aiSchema AsXform() { return aiGetXform(self); }
-        public aiSchema AsCamera() { return aiGetCamera(self); }
-        public aiSchema AsPoints() { return aiGetPoints(self); }
-        public aiSchema AsPolyMesh() { return aiGetPolyMesh(self); }
+        public aiXform AsXform() { return aiObjectAsXform(self); }
+        public aiCamera AsCamera() { return aiObjectAsCamera(self); }
+        public aiPoints AsPoints() { return aiObjectAsPoints(self); }
+        public aiPolyMesh AsPolyMesh() { return aiObjectAsPolyMesh(self); }
 
         public void EachChild(Action<aiObject> act)
         {
@@ -302,15 +302,15 @@ namespace UTJ.Alembic
         }
 
         #region internal
-        [DllImport("abci")] static extern int aiGetNumChildren(IntPtr obj);
-        [DllImport("abci")] static extern aiObject aiGetChild(IntPtr obj, int i);
-        [DllImport("abci")] static extern void aiSetEnabled(IntPtr obj, Bool v);
-        [DllImport("abci")] static extern IntPtr aiGetName(IntPtr obj);
+        [DllImport("abci")] static extern int aiObjectGetNumChildren(IntPtr obj);
+        [DllImport("abci")] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
+        [DllImport("abci")] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
+        [DllImport("abci")] static extern IntPtr aiObjectGetName(IntPtr obj);
 
-        [DllImport("abci")] static extern aiSchema aiGetXform(IntPtr obj);
-        [DllImport("abci")] static extern aiSchema aiGetCamera(IntPtr obj);
-        [DllImport("abci")] static extern aiSchema aiGetPoints(IntPtr obj);
-        [DllImport("abci")] static extern aiSchema aiGetPolyMesh(IntPtr obj);
+        [DllImport("abci")] static extern aiXform aiObjectAsXform(IntPtr obj);
+        [DllImport("abci")] static extern aiCamera aiObjectAsCamera(IntPtr obj);
+        [DllImport("abci")] static extern aiPoints aiObjectAsPoints(IntPtr obj);
+        [DllImport("abci")] static extern aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
         #endregion
     }
 

@@ -7,7 +7,7 @@
 
 
 aiSample::aiSample(aiSchema *schema)
-    : m_schema(schema)
+    :  m_schema(schema)
 {
 }
 
@@ -23,29 +23,14 @@ const aiConfig & aiSample::getConfig() const
 void aiSample::markForceSync() { m_force_sync = true; }
 
 
-aiSchema::aiSchema(aiObject *obj)
-    : m_obj(obj)
+aiSchema::aiSchema(aiObject *parent, const abcObject &abc)
+    : super(parent->getContext(), parent, abc)
 {
 }
 
 aiSchema::~aiSchema()
 {
     m_properties.clear();
-}
-
-aiContext* aiSchema::getContext()
-{
-    return m_obj->getContext();
-}
-
-aiObject* aiSchema::getObject()
-{
-    return m_obj;
-}
-
-const aiConfig& aiSchema::getConfig() const
-{
-    return m_obj->getContext()->getConfig();
 }
 
 bool aiSchema::isConstant() const { return m_constant; }

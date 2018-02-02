@@ -110,7 +110,7 @@ class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 {
 using super = aiTSchema<aiPolyMeshTraits>;
 public:
-    aiPolyMesh(aiObject *obj);
+    aiPolyMesh(aiObject *parent, const abcObject &abc);
     ~aiPolyMesh() override;
     void updateSummary();
     const aiMeshSummaryInternal& getSummary() const;

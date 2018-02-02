@@ -36,7 +36,7 @@ class aiPoints : public aiTSchema<aiPointsTraits>
 {
 using super = aiTSchema<aiPointsTraits>;
 public:
-    aiPoints(aiObject *obj);
+    aiPoints(aiObject *parent, const abcObject &abc);
     ~aiPoints();
 
     void updateSummary();

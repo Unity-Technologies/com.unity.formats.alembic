@@ -26,7 +26,6 @@ using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 
 class aiObject;
 class aiAsync;
-std::string ToString(const aiConfig &conf);
 
 
 class aiContextManager

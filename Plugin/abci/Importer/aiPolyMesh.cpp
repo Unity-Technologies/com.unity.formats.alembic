@@ -255,8 +255,8 @@ void aiPolyMeshSample::sync()
 
 
 
-aiPolyMesh::aiPolyMesh(aiObject *obj)
-    : super(obj)
+aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
     // find color and uv1 params (Maya's extension attributes)
     auto geom_params = m_schema.getArbGeomParams();
@@ -276,9 +276,9 @@ aiPolyMesh::aiPolyMesh(aiObject *obj)
     }
 
     // find FaceSetSchema in children
-    size_t num_children = m_obj->getAbcObject().getNumChildren();
+    size_t num_children = getAbcObject().getNumChildren();
     for (size_t i = 0; i < num_children; ++i) {
-        auto child = m_obj->getAbcObject().getChild(i);
+        auto child = getAbcObject().getChild(i);
         if (!child.valid())
             continue;
 

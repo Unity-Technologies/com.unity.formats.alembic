@@ -22,21 +22,14 @@ protected:
 };
 
 
-class aiSchema
+class aiSchema : public aiObject
 {
+using super = aiObject;
 public:
     using aiPropertyPtr = std::unique_ptr<aiProperty>;
 
-    aiSchema(aiObject *obj);
+    aiSchema(aiObject *parent, const abcObject &abc);
     virtual ~aiSchema();
-
-    aiContext* getContext();
-    aiObject* getObject();
-    const aiConfig& getConfig() const;
-
-    virtual aiSample* getSample() = 0;
-    virtual void updateSample(const abcSampleSelector& ss) = 0;
-    virtual void sync() {}
 
     bool isConstant() const;
     bool isDataUpdated() const;
@@ -52,7 +45,6 @@ protected:
     void updateProperties(const abcSampleSelector& ss);
 
 protected:
-    aiObject *m_obj = nullptr;
     bool m_constant = false;
     bool m_data_updated = false;
     bool m_force_update = false;
@@ -64,6 +56,7 @@ protected:
 template <class Traits>
 class aiTSchema : public aiSchema
 {
+using super = aiSchema;
 public:
     using Sample = typename Traits::SampleT;
     using SamplePtr = std::shared_ptr<Sample>;
@@ -72,10 +65,10 @@ public:
     using AbcSchemaObject = Abc::ISchemaObject<AbcSchema>;
 
 
-    aiTSchema(aiObject *obj)
-        : aiSchema(obj)
+    aiTSchema(aiObject *parent, const abcObject &abc)
+        : super(parent, abc)
     {
-        AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
+        AbcSchemaObject abcObj(abc, Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
         m_constant = m_schema.isConstant();
         m_time_sampling = m_schema.getTimeSampling();
@@ -85,7 +78,7 @@ public:
 
     int getTimeSamplingIndex() const
     {
-        return m_obj->getContext()->getTimeSamplingIndex(m_schema.getTimeSampling());
+        return getContext()->getTimeSamplingIndex(m_schema.getTimeSampling());
     }
 
     int getSampleIndex(const abcSampleSelector& ss) const
@@ -105,6 +98,9 @@ public:
 
     void updateSample(const abcSampleSelector& ss) override
     {
+        if (!m_enabled)
+            return;
+
         Sample* sample = nullptr;
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();

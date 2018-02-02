@@ -46,8 +46,8 @@ void aiPointsSample::sync()
 }
 
 
-aiPoints::aiPoints(aiObject *obj)
-    : super(obj)
+aiPoints::aiPoints(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
     updateSummary();
 }

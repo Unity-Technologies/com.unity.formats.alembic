@@ -17,10 +17,12 @@ public:
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
     aiObject*   getParent() const;
-    aiSchema*   getSchema() const;
     void        setEnabled(bool v);
 
-    void        updateSample(const abcSampleSelector& ss);
+    virtual aiSample* getSample();
+    virtual void updateSample(const abcSampleSelector& ss);
+    virtual void sync();
+
 
     template<class F>
     void eachChild(const F &f)
@@ -40,11 +42,12 @@ public:
 public:
     // for internal use
     aiContext*  getContext() const;
+    const aiConfig& getConfig() const;
     abcObject&  getAbcObject();
     aiObject*   newChild(const abcObject &abc);
     void        removeChild(aiObject *c);
 
-private:
+protected:
     using ObjectPtr = std::unique_ptr<aiObject>;
 
     aiContext   *m_ctx = nullptr;
@@ -52,6 +55,4 @@ private:
     aiObject    *m_parent = nullptr;
     std::vector<ObjectPtr> m_children;
     bool m_enabled = true;
-
-    std::unique_ptr<aiSchema> m_schema;
 };

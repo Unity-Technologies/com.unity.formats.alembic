@@ -17,8 +17,8 @@ void aiCameraSample::getData(aiCameraData &dst) const
 }
 
 
-aiCamera::aiCamera(aiObject *obj)
-    : super(obj)
+aiCamera::aiCamera(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
 }
 

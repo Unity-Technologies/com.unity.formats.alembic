@@ -17,8 +17,8 @@ void aiXformSample::getData(aiXformData &dst) const
 }
 
 
-aiXform::aiXform(aiObject *obj)
-    : super(obj)
+aiXform::aiXform(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
 }
 

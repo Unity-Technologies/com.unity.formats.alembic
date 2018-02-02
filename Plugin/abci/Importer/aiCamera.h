@@ -25,7 +25,7 @@ class aiCamera : public aiTSchema<aiCameraTraits>
 {
 using super = aiTSchema<aiCameraTraits>;
 public:
-    aiCamera(aiObject *obj);
+    aiCamera(aiObject *parent, const abcObject &abc);
 
     Sample* newSample() override;
     void readSample(Sample& sample, uint64_t idx) override;

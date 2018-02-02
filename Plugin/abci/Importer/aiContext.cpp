@@ -5,29 +5,6 @@
 #include "aiAsync.h"
 
 
-std::string ToString(const aiConfig &v)
-{
-    std::ostringstream oss;
-
-    oss << "{swapHandedness: " << (v.swap_handedness ? "true" : "false");
-    oss << ", swapFaceWinding: " << (v.swap_face_winding ? "true" : "false");
-    oss << ", normalsMode: " << (v.normals_mode == aiNormalsMode::ReadFromFile
-        ? "read_from_file"
-        : (v.normals_mode == aiNormalsMode::ComputeIfMissing
-            ? "compute_if_missing"
-            : (v.normals_mode == aiNormalsMode::AlwaysCompute
-                ? "always_compute"
-                : "ignore")));
-    oss << ", tangentsMode: " << (v.tangents_mode == aiTangentsMode::None
-        ? "none"
-        : (v.tangents_mode == aiTangentsMode::Compute
-            ? "smooth"
-            : "split"));
-    oss << ", aspectRatio: " << v.aspect_ratio;
-
-    return oss.str();
-}
-
 aiContextManager aiContextManager::s_instance;
 
 aiContext* aiContextManager::getContext(int uid)
@@ -56,11 +33,13 @@ void aiContextManager::destroyContext(int uid)
 void aiContextManager::destroyContextsWithPath(const char* assetPath)
 {
     auto path = aiContext::normalizePath(assetPath);
-    for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end(); ++it) {
+    for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end();) {
         if (it->second->getPath() == path) {
             DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
-            s_instance.m_contexts.erase(it);
-            break;
+            s_instance.m_contexts.erase(it++);
+        }
+        else {
+            ++it;
         }
     }
 }
@@ -73,6 +52,30 @@ aiContextManager::~aiContextManager()
     m_contexts.clear();
 }
 
+
+std::string aiContext::normalizePath(const char *inPath)
+{
+    std::string path;
+
+    if (inPath != nullptr) {
+        path = inPath;
+
+#ifdef _WIN32
+        size_t n = path.length();
+        for (size_t i = 0; i < n; ++i) {
+            char c = path[i];
+            if (c == '\\') {
+                path[i] = '/';
+            }
+            else if (c >= 'A' && c <= 'Z') {
+                path[i] = 'a' + (c - 'A');
+            }
+        }
+#endif
+    }
+
+    return path;
+}
 
 
 aiContext::aiContext(int uid)
@@ -141,25 +144,22 @@ const aiConfig& aiContext::getConfig() const
 
 void aiContext::setConfig(const aiConfig &config)
 {
-    DebugLog("aiContext::setConfig: %s", ToString(config).c_str());
     m_config = config;
 }
 
 void aiContext::gatherNodesRecursive(aiObject *n)
 {
-    abcObject &abc = n->getAbcObject();
-    size_t numChildren = abc.getNumChildren();
+    auto& abc = n->getAbcObject();
+    size_t num_children = abc.getNumChildren();
     
-    for (size_t i = 0; i < numChildren; ++i) {
-        aiObject *child = n->newChild(abc.getChild(i));
+    for (size_t i = 0; i < num_children; ++i) {
+        auto *child = n->newChild(abc.getChild(i));
         gatherNodesRecursive(child);
     }
 }
 
 void aiContext::reset()
 {
-    DebugLog("aiContext::reset()");
-
     m_top_node.reset();
     
     m_path = "";
@@ -167,30 +167,6 @@ void aiContext::reset()
 
     m_time_range_unified = {};
     m_time_ranges.clear();
-}
-
-std::string aiContext::normalizePath(const char *inPath)
-{
-    std::string path;
-
-    if (inPath != nullptr) {
-        path = inPath;
-
-        #ifdef _WIN32
-        size_t n = path.length();
-        for (size_t i=0; i<n; ++i) {
-            char c = path[i];
-            if (c == '\\') {
-                path[i] = '/';
-            }
-            else if (c >= 'A' && c <= 'Z') {
-                path[i] = 'a' + (c - 'A');
-            }
-        }
-        #endif
-    }
-
-    return path;
 }
 
 bool aiContext::load(const char *inPath)
@@ -238,8 +214,8 @@ bool aiContext::load(const char *inPath)
     }
 
     if (m_archive.valid()) {
-        abcObject abcTop = m_archive.getTop();
-        m_top_node.reset(new aiObject(this, nullptr, abcTop));
+        abcObject abc_top = m_archive.getTop();
+        m_top_node.reset(new aiObject(this, nullptr, abc_top));
         gatherNodesRecursive(m_top_node.get());
 
         m_time_range_unified = {};

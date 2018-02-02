@@ -21,7 +21,7 @@ void aiAsyncManager::queue(aiAsync *task)
 
 void aiAsyncManager::queue(aiAsync **tasks, size_t num)
 {
-    for (int i = 0; i < num; ++i)
+    for (size_t i = 0; i < num; ++i)
         tasks[i]->prepare();
 
     {
