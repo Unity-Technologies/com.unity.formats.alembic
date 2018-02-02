@@ -53,9 +53,9 @@ public:
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
 
-class aiPolyMeshSample : public aiSampleBase
+class aiPolyMeshSample : public aiSample
 {
-using super = aiSampleBase;
+using super = aiSample;
 using schema_t = aiPolyMesh;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);

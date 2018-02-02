@@ -1,6 +1,6 @@
 #pragma once
 class aiContext;
-class aiSchemaBase;
+class aiSchema;
 class aiXform;
 class aiPolyMesh;
 class aiCamera;
@@ -17,29 +17,25 @@ public:
     uint32_t    getNumChildren() const;
     aiObject*   getChild(int i);
     aiObject*   getParent() const;
+    aiSchema*   getSchema() const;
+    void        setEnabled(bool v);
+
     void        updateSample(const abcSampleSelector& ss);
- 
-    aiXform*    getXform() const;
-    aiPolyMesh* getPolyMesh() const;
-    aiCamera*   getCamera() const;
-    aiPoints*   getPoints() const;
 
     template<class F>
-    void eachChildren(const F &f)
+    void eachChild(const F &f)
     {
         for (auto& c : m_children) { f(*c); }
     }
 
     template<class F>
-    void eachChildrenRecursive(const F &f)
+    void eachChildRecursive(const F &f)
     {
         for (auto& c : m_children) {
             f(*c);
-            c->eachChildrenRecursive(f);
+            c->eachChildRecursive(f);
         }
     }
-
-    void setEnabled(bool v);
 
 public:
     // for internal use
@@ -57,9 +53,5 @@ private:
     std::vector<ObjectPtr> m_children;
     bool m_enabled = true;
 
-    std::vector<aiSchemaBase*>  m_schemas;
-    std::unique_ptr<aiXform>    m_xform;
-    std::unique_ptr<aiPolyMesh> m_polymesh;
-    std::unique_ptr<aiCamera>   m_camera;
-    std::unique_ptr<aiPoints>   m_points;
+    std::unique_ptr<aiSchema> m_schema;
 };

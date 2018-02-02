@@ -20,30 +20,18 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     if (m_abc.valid())
     {
         const auto& metadata = m_abc.getMetaData();
-        
+
         if (AbcGeom::IXformSchema::matches(metadata))
-        {
-            m_xform.reset(new aiXform(this));
-            m_schemas.push_back(m_xform.get());
-        }
-        
+            m_schema.reset(new aiXform(this));
+
         if (AbcGeom::IPolyMeshSchema::matches(metadata))
-        {
-            m_polymesh.reset(new aiPolyMesh(this));
-            m_schemas.push_back(m_polymesh.get());
-        }
+            m_schema.reset(new aiPolyMesh(this));
 
         if (AbcGeom::ICameraSchema::matches(metadata))
-        {
-            m_camera.reset(new aiCamera(this));
-            m_schemas.push_back(m_camera.get());
-        }
+            m_schema.reset(new aiCamera(this));
 
         if (AbcGeom::IPointsSchema::matches(metadata))
-        {
-            m_points.reset(new aiPoints(this));
-            m_schemas.push_back(m_points.get());
-        }
+            m_schema.reset(new aiPoints(this));
     }
 }
 
@@ -81,13 +69,8 @@ void aiObject::updateSample(const abcSampleSelector& ss)
 {
     if (!m_enabled)
         return;
-    for (auto s : m_schemas)
-        s->updateSample(ss);
-}
-
-void aiObject::setEnabled(bool v)
-{
-    m_enabled = v;
+    if (m_schema)
+        m_schema->updateSample(ss);
 }
 
 aiContext*  aiObject::getContext() const { return m_ctx; }
@@ -97,10 +80,6 @@ const char* aiObject::getFullName() const { return m_abc.getFullName().c_str(); 
 uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(); }
 aiObject*   aiObject::getChild(int i) { return m_children[i].get(); }
 aiObject*   aiObject::getParent() const { return m_parent; }
-
-aiXform*    aiObject::getXform() const { return m_xform.get(); }
-aiPolyMesh* aiObject::getPolyMesh() const { return m_polymesh.get(); }
-aiCamera*   aiObject::getCamera() const { return m_camera.get(); }
-aiPoints*   aiObject::getPoints() const { return m_points.get(); }
-
+aiSchema*   aiObject::getSchema() const { return m_schema.get(); }
+void        aiObject::setEnabled(bool v) { m_enabled = v; }
 

@@ -6,66 +6,66 @@
 #include "aiProperty.h"
 
 
-aiSampleBase::aiSampleBase(aiSchemaBase *schema)
+aiSample::aiSample(aiSchema *schema)
     : m_schema(schema)
 {
 }
 
-aiSampleBase::~aiSampleBase()
+aiSample::~aiSample()
 {
 }
 
-const aiConfig & aiSampleBase::getConfig() const
+const aiConfig & aiSample::getConfig() const
 {
     return m_schema->getConfig();
 }
 
-void aiSampleBase::markForceSync() { m_force_sync = true; }
+void aiSample::markForceSync() { m_force_sync = true; }
 
 
-aiSchemaBase::aiSchemaBase(aiObject *obj)
+aiSchema::aiSchema(aiObject *obj)
     : m_obj(obj)
 {
 }
 
-aiSchemaBase::~aiSchemaBase()
+aiSchema::~aiSchema()
 {
     m_properties.clear();
 }
 
-aiContext* aiSchemaBase::getContext()
+aiContext* aiSchema::getContext()
 {
     return m_obj->getContext();
 }
 
-aiObject* aiSchemaBase::getObject()
+aiObject* aiSchema::getObject()
 {
     return m_obj;
 }
 
-const aiConfig& aiSchemaBase::getConfig() const
+const aiConfig& aiSchema::getConfig() const
 {
     return m_obj->getContext()->getConfig();
 }
 
-bool aiSchemaBase::isConstant() const { return m_constant; }
-bool aiSchemaBase::isDataUpdated() const { return m_data_updated; }
-void aiSchemaBase::markForceUpdate() { m_force_update = true; }
-void aiSchemaBase::markForceSync() { m_force_sync = true; }
+bool aiSchema::isConstant() const { return m_constant; }
+bool aiSchema::isDataUpdated() const { return m_data_updated; }
+void aiSchema::markForceUpdate() { m_force_update = true; }
+void aiSchema::markForceSync() { m_force_sync = true; }
 
-int aiSchemaBase::getNumProperties() const
+int aiSchema::getNumProperties() const
 {
     return static_cast<int>(m_properties.size());
 }
 
-aiProperty* aiSchemaBase::getPropertyByIndex(int i)
+aiProperty* aiSchema::getPropertyByIndex(int i)
 {
     auto& r = m_properties[i];
     if (r != nullptr) { r->setActive(true); }
     return r.get();
 }
 
-aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
+aiProperty* aiSchema::getPropertyByName(const std::string& name)
 {
     auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
         [](const aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
@@ -76,7 +76,7 @@ aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
     return nullptr;
 }
 
-void aiSchemaBase::setupProperties()
+void aiSchema::setupProperties()
 {
     auto cpro = getAbcProperties();
     if (!cpro.valid()) { return; }
@@ -93,7 +93,7 @@ void aiSchemaBase::setupProperties()
         [](const aiPropertyPtr& a, const aiPropertyPtr& b) { return a->getName() < b->getName(); });
 }
 
-void aiSchemaBase::updateProperties(const abcSampleSelector& ss)
+void aiSchema::updateProperties(const abcSampleSelector& ss)
 {
     for (auto &prop : m_properties) {
         prop->updateSample(ss);

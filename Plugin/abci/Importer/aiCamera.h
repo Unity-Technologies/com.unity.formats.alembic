@@ -1,8 +1,8 @@
 #pragma once
 
-class aiCameraSample : public aiSampleBase
+class aiCameraSample : public aiSample
 {
-using super = aiSampleBase;
+using super = aiSample;
 public:
     aiCameraSample(aiCamera *schema);
 

@@ -2,9 +2,9 @@
 #include "aiIntrusiveArray.h"
 #include "aiAsync.h"
 
-class aiPointsSample : public aiSampleBase
+class aiPointsSample : public aiSample
 {
-using super = aiSampleBase;
+using super = aiSample;
 public:
     aiPointsSample(aiPoints *schema);
     void fillData(aiPointsData &dst);

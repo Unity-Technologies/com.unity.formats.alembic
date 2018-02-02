@@ -98,7 +98,6 @@ private:
 template<class F>
 inline void aiContext::eachNodes(const F &f)
 {
-    if (m_top_node) {
-        m_top_node->eachChildrenRecursive(f);
-    }
+    if (m_top_node)
+        m_top_node->eachChildRecursive(f);
 }

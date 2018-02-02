@@ -1,40 +1,40 @@
 #pragma once
 
-class aiSampleBase;
-class aiSchemaBase;
+class aiSample;
+class aiSchema;
 
 
-class aiSampleBase
+class aiSample
 {
 public:
-    aiSampleBase(aiSchemaBase *schema);
-    virtual ~aiSampleBase();
+    aiSample(aiSchema *schema);
+    virtual ~aiSample();
 
-    virtual aiSchemaBase* getSchema() const { return m_schema; }
+    virtual aiSchema* getSchema() const { return m_schema; }
     const aiConfig& getConfig() const;
 
     virtual void sync() {}
     void markForceSync();
 
 protected:
-    aiSchemaBase *m_schema = nullptr;
+    aiSchema *m_schema = nullptr;
     bool m_force_sync = false;
 };
 
 
-class aiSchemaBase
+class aiSchema
 {
 public:
     using aiPropertyPtr = std::unique_ptr<aiProperty>;
 
-    aiSchemaBase(aiObject *obj);
-    virtual ~aiSchemaBase();
+    aiSchema(aiObject *obj);
+    virtual ~aiSchema();
 
     aiContext* getContext();
     aiObject* getObject();
     const aiConfig& getConfig() const;
 
-    virtual aiSampleBase* getSample() = 0;
+    virtual aiSample* getSample() = 0;
     virtual void updateSample(const abcSampleSelector& ss) = 0;
     virtual void sync() {}
 
@@ -62,7 +62,7 @@ protected:
 
 
 template <class Traits>
-class aiTSchema : public aiSchemaBase
+class aiTSchema : public aiSchema
 {
 public:
     using Sample = typename Traits::SampleT;
@@ -73,7 +73,7 @@ public:
 
 
     aiTSchema(aiObject *obj)
-        : aiSchemaBase(obj)
+        : aiSchema(obj)
     {
         AbcSchemaObject abcObj(obj->getAbcObject(), Abc::kWrapExisting);
         m_schema = abcObj.getSchema();

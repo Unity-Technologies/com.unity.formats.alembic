@@ -5,16 +5,16 @@
 class   aiContext;
 class   aiObject;
 #ifdef abciImpl
-    class aiSchemaBase;
-    class aiSampleBase;
+    class aiSchema;
+    class aiSample;
     class aiXformSample;    // : aiSampleBase
     class aiCameraSample;   // : aiSampleBase
     class aiPolyMeshSample; // : aiSampleBase
     class aiPointsSample;   // : aiSampleBase
 #else
     // force make castable
-    using aiSchemaBase     = void;
-    using aiSampleBase     = void;
+    using aiSchema         = void;
+    using aiSample         = void;
     using aiXformSample    = void;
     using aiCameraSample   = void;
     using aiPolyMeshSample = void;
@@ -253,14 +253,14 @@ abciAPI int             aiGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
 abciAPI void            aiSetEnabled(aiObject* obj, bool v);
 
-abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema);
-abciAPI void            aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI void            aiSchemaSync(aiSchemaBase* schema);
-abciAPI bool            aiSchemaIsConstant(aiSchemaBase* schema);
-abciAPI bool            aiSchemaIsDataUpdated(aiSchemaBase* schema);
-abciAPI void            aiSchemaMarkForceUpdate(aiSchemaBase* schema);
+abciAPI aiSample*   aiSchemaGetSample(aiSchema* schema);
+abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss);
+abciAPI void            aiSchemaSync(aiSchema* schema);
+abciAPI bool            aiSchemaIsConstant(aiSchema* schema);
+abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
+abciAPI void            aiSchemaMarkForceUpdate(aiSchema* schema);
 
-abciAPI void            aiSampleSync(aiSampleBase* sample);
+abciAPI void            aiSampleSync(aiSample* sample);
 
 abciAPI aiXform*        aiGetXform(aiObject* obj);
 abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
@@ -282,9 +282,9 @@ abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary *dst);
 abciAPI void            aiPointsFillData(aiPointsSample* sample, aiPointsData *dst);
 
-abciAPI int             aiSchemaGetNumProperties(aiSchemaBase* schema);
-abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
-abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
+abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
+abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
+abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
 abciAPI const char*     aiPropertyGetName(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
 abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);

@@ -111,46 +111,46 @@ abciAPI aiObject* aiGetParent(aiObject* obj)
     return obj ? obj->getParent() : nullptr;
 }
 
-abciAPI aiObject* aiSchemaGetObject(aiSchemaBase* schema)
+abciAPI aiObject* aiSchemaGetObject(aiSchema* schema)
 {
     return schema ? schema->getObject() : nullptr;
 }
 
-abciAPI void aiSchemaSync(aiSchemaBase* schema)
+abciAPI void aiSchemaSync(aiSchema* schema)
 {
     if (schema)
         schema->sync();
 }
 
-abciAPI bool aiSchemaIsConstant(aiSchemaBase * schema)
+abciAPI bool aiSchemaIsConstant(aiSchema * schema)
 {
     return schema ? schema->isConstant() : false;
 }
 
-abciAPI bool aiSchemaIsDataUpdated(aiSchemaBase* schema)
+abciAPI bool aiSchemaIsDataUpdated(aiSchema* schema)
 {
     return schema ? schema->isDataUpdated() : false;
 }
 
-abciAPI void aiSchemaMarkForceUpdate(aiSchemaBase * schema)
+abciAPI void aiSchemaMarkForceUpdate(aiSchema * schema)
 {
     if (schema)
         schema->markForceUpdate();
 }
 
-abciAPI void aiSampleSync(aiSampleBase * sample)
+abciAPI void aiSampleSync(aiSample * sample)
 {
     if (sample)
         sample->sync();
 }
 
 
-abciAPI aiSampleBase * aiSchemaGetSample(aiSchemaBase * schema)
+abciAPI aiSample * aiSchemaGetSample(aiSchema * schema)
 {
     return schema ? schema->getSample() : nullptr;
 }
 
-abciAPI void aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss)
+abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 {
     if (schema) {
         schema->markForceSync();
@@ -161,7 +161,7 @@ abciAPI void aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector 
 
 abciAPI aiXform* aiGetXform(aiObject* obj)
 {
-    return obj ? obj->getXform() : nullptr;
+    return obj ? dynamic_cast<aiXform*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
@@ -174,7 +174,7 @@ abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
 
 abciAPI aiPolyMesh* aiGetPolyMesh(aiObject* obj)
 {
-    return obj ? obj->getPolyMesh() : nullptr;
+    return obj ? dynamic_cast<aiPolyMesh*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst)
@@ -209,7 +209,7 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
 
 abciAPI aiCamera* aiGetCamera(aiObject* obj)
 {
-    return obj ? obj->getCamera() : nullptr;
+    return obj ? dynamic_cast<aiCamera*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *dst)
@@ -222,7 +222,7 @@ abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *dst)
 
 abciAPI aiPoints* aiGetPoints(aiObject* obj)
 {
-    return obj ? obj->getPoints() : nullptr;
+    return obj ? dynamic_cast<aiPoints*>(obj->getSchema()) : nullptr;
 }
 
 abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
@@ -254,17 +254,17 @@ abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData *dst)
 }
 
 
-abciAPI int aiSchemaGetNumProperties(aiSchemaBase* schema)
+abciAPI int aiSchemaGetNumProperties(aiSchema* schema)
 {
     return schema->getNumProperties();
 }
 
-abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i)
+abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchema* schema, int i)
 {
     return schema->getPropertyByIndex(i);
 }
 
-abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name)
+abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name)
 {
     return schema->getPropertyByName(name);
 }

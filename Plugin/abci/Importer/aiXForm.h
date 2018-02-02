@@ -1,8 +1,8 @@
 #pragma once
 
-class aiXformSample : public aiSampleBase
+class aiXformSample : public aiSample
 {
-using super = aiSampleBase;
+using super = aiSample;
 public:
     aiXformSample(aiXform *schema);
 
