@@ -171,7 +171,7 @@ public:
     template<class FwdIter>
     void assign(FwdIter first, FwdIter last)
     {
-        resize(std::distance(first, last));
+        resize_discard(std::distance(first, last));
         std::copy(first, last, begin());
     }
     void assign(const_pointer first, const_pointer last)
@@ -181,7 +181,7 @@ public:
             return;
         }
         else {
-            resize(std::distance(first, last));
+            resize_discard(std::distance(first, last));
             // sadly, memcpy() can way faster than std::copy()
             memcpy(m_data, first, sizeof(value_type) * m_size);
         }

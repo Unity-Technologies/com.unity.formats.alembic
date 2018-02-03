@@ -196,7 +196,7 @@ struct aiPointsSummary
     bool has_ids = false;
     bool constant_points = false;
     bool constant_velocities = false;
-    bool constant_id = false;
+    bool constant_ids = false;
 };
 
 struct aiPointsSampleSummary

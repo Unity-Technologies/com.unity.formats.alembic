@@ -2,6 +2,13 @@
 #include "aiIntrusiveArray.h"
 #include "aiAsync.h"
 
+struct aiPointsSummaryInternal : public aiPointsSummary
+{
+    bool interpolate_points = false;
+    bool compute_velocities = false;
+};
+
+
 class aiPointsSample : public aiSample
 {
 using super = aiSample;
@@ -14,12 +21,14 @@ public:
     void waitAsync() override;
 
 public:
-    Abc::P3fArraySamplePtr m_points_sp;
+    Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
     Abc::UInt64ArraySamplePtr m_ids_sp;
 
+    IArray<abcV3> m_points_ref;
+
     RawVector<std::pair<float, int>> m_sort_data;
-    RawVector<abcV3> m_points;
+    RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
     RawVector<uint32_t> m_ids;
     abcV3 m_bb_center, m_bb_size;
@@ -41,7 +50,7 @@ public:
     ~aiPoints();
 
     void updateSummary();
-    const aiPointsSummary& getSummary() const;
+    const aiPointsSummaryInternal& getSummary() const;
 
     Sample* newSample() override;
     void updateSample(const abcSampleSelector& ss) override;
@@ -58,7 +67,7 @@ public:
     const abcV3& getSortPosition() const;
 
 private:
-    aiPointsSummary m_summary;
+    aiPointsSummaryInternal m_summary;
     bool m_sort = false;
     abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
 

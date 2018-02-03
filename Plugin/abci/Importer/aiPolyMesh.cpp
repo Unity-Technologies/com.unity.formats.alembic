@@ -149,7 +149,6 @@ void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
 
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
-    auto& config = getConfig();    
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();
     auto& splits = m_topology->m_refiner.splits;
@@ -457,7 +456,6 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
-    auto& config = getConfig();
 
     sample.reset();
     if (m_varying_topology)
