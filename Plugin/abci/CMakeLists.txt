@@ -36,3 +36,7 @@ if(ENABLE_ISPC)
     add_definitions(-DaiEnableISPC)
     target_include_directories(abci PUBLIC ${ISPC_OUTDIR})
 endif()
+
+add_subdirectory(googletest)
+include_directories(./googletest/googletest/include)
+cxx_test(abci_test gtest_main) # link with libm

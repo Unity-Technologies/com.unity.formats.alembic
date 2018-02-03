@@ -1,0 +1,3 @@
+[submodule "Plugin/abci/googletest"]
+	path = Plugin/abci/googletest
+	url = https://github.com/google/googletest.git
