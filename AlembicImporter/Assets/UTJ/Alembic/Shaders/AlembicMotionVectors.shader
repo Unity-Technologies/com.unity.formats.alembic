@@ -1,4 +1,4 @@
-Shader "Hidden/AlembicMotionVectors"
+Shader "Hidden/Alembic/MotionVectors"
 {
     SubShader
     {

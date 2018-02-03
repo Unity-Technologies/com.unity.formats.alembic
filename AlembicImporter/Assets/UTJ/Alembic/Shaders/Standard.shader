@@ -53,7 +53,7 @@ Shader "Alembic/Standard"
     {
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
 
-        UsePass "Hidden/AlembicMotionVectors/MOTIONVECTORS"
+        UsePass "Hidden/Alembic/MotionVectors/MOTIONVECTORS"
         UsePass "Standard/FORWARD"
         UsePass "Standard/FORWARD_DELTA"
         UsePass "Standard/SHADOWCASTER"

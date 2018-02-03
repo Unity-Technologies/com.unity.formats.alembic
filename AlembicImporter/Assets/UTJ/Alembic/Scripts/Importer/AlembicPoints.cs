@@ -42,8 +42,12 @@ namespace UTJ.Alembic
             sample.GetSummary(ref m_sampleSummary);
 
             // get points cloud component
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>() ??
-                        abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            if (cloud == null)
+            {
+                cloud = abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
+                abcTreeNode.linkedGameObj.AddComponent<AlembicPointsRenderer>();
+            }
 
             // setup buffers
             var data = default(aiPointsData);

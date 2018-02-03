@@ -52,7 +52,7 @@ Shader "Alembic/Standard (Specular setup)"
     {
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
 
-        UsePass "Hidden/AlembicMotionVectors/MOTIONVECTORS"
+        UsePass "Hidden/Alembic/MotionVectors/MOTIONVECTORS"
         UsePass "Standard (Specular setup)/FORWARD"
         UsePass "Standard (Specular setup)/FORWARD_DELTA"
         UsePass "Standard (Specular setup)/SHADOWCASTER"

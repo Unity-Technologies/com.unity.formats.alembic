@@ -52,7 +52,7 @@ Shader "Alembic/Standard (Roughness setup)"
     {
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
 
-        UsePass "Hidden/AlembicMotionVectors/MOTIONVECTORS"
+        UsePass "Hidden/Alembic/MotionVectors/MOTIONVECTORS"
         UsePass "Standard (Roughness setup)/FORWARD"
         UsePass "Standard (Roughness setup)/FORWARD_DELTA"
         UsePass "Standard (Roughness setup)/SHADOWCASTER"

@@ -640,10 +640,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             (int)sample.m_points.size(), m_current_time_offset);
         sample.m_points_ref = sample.m_points_int;
 
-        if (summary.compute_velocities && sample.m_points_int.size() == sample.m_points_prev.size()) {
+        if (summary.compute_velocities) {
             sample.m_velocities.resize_discard(sample.m_points.size());
-            GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
-                (int)sample.m_points_int.size(), config.vertex_motion_scale);
+            if (sample.m_points_int.size() == sample.m_points_prev.size()) {
+                GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
+                    (int)sample.m_points_int.size(), config.vertex_motion_scale);
+            }
+            else {
+                sample.m_velocities.zeroclear();
+            }
             sample.m_velocities_ref = sample.m_velocities;
         }
     }
