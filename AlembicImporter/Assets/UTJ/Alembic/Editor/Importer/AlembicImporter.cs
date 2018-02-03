@@ -141,7 +141,8 @@ namespace UTJ.Alembic
 
         private void GenerateSubAssets(AssetImportContext ctx, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
-            var material = new Material(Shader.Find("Standard"));
+            var material = new Material(Shader.Find("Alembic/Standard"));
+            material.name = "Default Material";
             material.hideFlags = HideFlags.NotEditable;
             AddObjectToAsset(ctx, "Default Material", material);
 

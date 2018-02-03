@@ -52,9 +52,9 @@ public:
 public:
     explicit aiContext(int uid=-1);
     ~aiContext();
-    
+
     bool load(const char *path);
-    
+
     const aiConfig& getConfig() const;
     void setConfig(const aiConfig &config);
 
