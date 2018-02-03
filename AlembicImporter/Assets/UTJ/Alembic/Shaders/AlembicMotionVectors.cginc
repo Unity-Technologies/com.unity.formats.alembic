@@ -32,7 +32,7 @@
             float3 oldPos : NORMAL;
 
             //>>> Alembic
-            float4 velocity  : TEXCOORD3;
+            float3 velocity  : TEXCOORD3;
             //Alembic <<<
 
             UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -62,8 +62,7 @@
 
             //>>> Alembic
             //Integrate to recontruct the previous stream position.
-            float3 streamVelocity = velocity.xyz;
-            float3 streamPosOld = v.vertex + (streamVelocity * -unity_DeltaTime.x); //TODO: What should this timestep be?
+            float3 streamPosOld = v.vertex - v.velocity; //TODO: What should this timestep be?
             o.transferStreamPosOld = mul(_PreviousVP, mul(_PreviousM, float4(streamPosOld, 1)));
             //Alembic <<<
 #endif
