@@ -60,6 +60,5 @@ Shader "Alembic/Standard (Roughness setup)"
         UsePass "Standard (Roughness setup)/META"
     }
 
-    FallBack "VertexLit"
     CustomEditor "StandardRoughnessShaderGUI"
 }

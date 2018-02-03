@@ -58,10 +58,7 @@ Shader "Alembic/Standard (Specular setup)"
         UsePass "Standard (Specular setup)/SHADOWCASTER"
         UsePass "Standard (Specular setup)/DEFERRED"
         UsePass "Standard (Specular setup)/META"
-        UsePass "Standard (Specular setup)/FORWARD"
-        UsePass "Standard (Specular setup)/FORWARD"
     }
 
-    FallBack "VertexLit"
     CustomEditor "StandardShaderGUI"
 }

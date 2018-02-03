@@ -6,7 +6,10 @@ float3 _Scale;
 float _PointSize;
 #ifdef UNITY_SUPPORT_INSTANCING
 StructuredBuffer<float3> _AlembicPoints;
-StructuredBuffer<float> _AlembicIDs;
+StructuredBuffer<float3> _AlembicVelocities;
+StructuredBuffer<int> _AlembicIDs;
+int _AlembicHasVelocities;
+int _AlembicHasIDs;
 #endif
 
 float GetPointSize()
@@ -78,7 +81,17 @@ float3 GetAlembicPoint(int iid)
 #endif
 }
 
-float GetAlembicID(int iid)
+float3 GetAlembicVelocity(int iid)
+{
+    return
+#ifdef UNITY_SUPPORT_INSTANCING
+        Rotate(_Rotate, _AlembicVelocities[iid] * _Scale);
+#else
+        float3(0, 0, 0);
+#endif
+}
+
+int GetAlembicID(int iid)
 {
     return
 #ifdef UNITY_SUPPORT_INSTANCING
@@ -92,6 +105,18 @@ float4x4 GetPointMatrix(int iid)
 {
 #ifdef UNITY_SUPPORT_INSTANCING
     float3 ppos = GetAlembicPoint(iid);
+    float4 prot = _Rotate;
+    float3 pscale = _Scale * _PointSize;
+    return mul(mul(Translate44(ppos), Rotate44(prot)), Scale44(pscale));
+#else
+    return unity_ObjectToWorld;
+#endif
+}
+
+float4x4 GetOldPointMatrix(int iid)
+{
+#ifdef UNITY_SUPPORT_INSTANCING
+    float3 ppos = GetAlembicPoint(iid) - GetAlembicVelocity(iid);
     float4 prot = _Rotate;
     float3 pscale = _Scale * _PointSize;
     return mul(mul(Translate44(ppos), Rotate44(prot)), Scale44(pscale));

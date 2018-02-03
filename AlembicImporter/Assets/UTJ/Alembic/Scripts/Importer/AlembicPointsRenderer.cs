@@ -18,9 +18,9 @@ namespace UTJ.Alembic
         [SerializeField] float m_pointSize = 0.2f;
         [Tooltip("Use Alembic Points IDs as shader input")]
         [SerializeField] bool m_useAlembicIDs = false;
-        
-        PinnedList<float> m_ids = new PinnedList<float>();
+
         ComputeBuffer m_cbPoints;
+        ComputeBuffer m_cbVelocities;
         ComputeBuffer m_cbIDs;
         ComputeBuffer[] m_cbArgs;
         int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
@@ -115,13 +115,6 @@ namespace UTJ.Alembic
             var scale = trans.lossyScale;
 
             bool supportsInstancing = SystemInfo.supportsInstancing && SystemInfo.supportsComputeShaders;
-            int pidAlembicPoints = Shader.PropertyToID("_AlembicPoints");
-            int pidAlembicIDs = Shader.PropertyToID("_AlembicIDs");
-            int pidTranslate = Shader.PropertyToID("_Translate");
-            int pidRotate = Shader.PropertyToID("_Rotate");
-            int pidScale = Shader.PropertyToID("_Scale");
-            int pidPointSize = Shader.PropertyToID("_PointSize");
-
             if (!supportsInstancing)
             {
                 Debug.LogWarning("AlembicPointsRenderer: Instancing is not supported on this system.");
@@ -133,10 +126,10 @@ namespace UTJ.Alembic
                 var material = materials[si];
                 if (material == null)
                     continue;
-                material.SetVector(pidTranslate, pos);
-                material.SetVector(pidRotate, new Vector4(rot.x, rot.y, rot.z, rot.w));
-                material.SetVector(pidScale, scale);
-                material.SetFloat(pidPointSize, m_pointSize);
+                material.SetVector("_Translate", pos);
+                material.SetVector("_Rotate", new Vector4(rot.x, rot.y, rot.z, rot.w));
+                material.SetVector("_Scale", scale);
+                material.SetFloat("_PointSize", m_pointSize);
             }
 
             {
@@ -151,6 +144,9 @@ namespace UTJ.Alembic
                     }
                 }
 
+                bool abcHasVelocities = false;
+                bool abcHasIDs = false;
+
                 // update points buffer
                 if (m_cbPoints != null && m_cbPoints.count < numInstances)
                 {
@@ -163,8 +159,27 @@ namespace UTJ.Alembic
                 }
                 m_cbPoints.SetData(points.List);
 
+                // update velocity buffer
+                if (m_useAlembicIDs)
+                {
+                    if (m_cbVelocities != null && m_cbVelocities.count < numInstances)
+                    {
+                        m_cbVelocities.Release();
+                        m_cbVelocities = null;
+                    }
+                    if (m_cbVelocities == null)
+                    {
+                        m_cbVelocities = new ComputeBuffer(numInstances, 12);
+                    }
+                    var ids = apc.ids;
+                    if (ids != null && ids.Count == numInstances)
+                    {
+                        m_cbVelocities.SetData(apc.velocities.List);
+                        abcHasVelocities = true;
+                    }
+                }
+
                 // update ID buffer
-                bool alembicIDsAvailable = false;
                 if (m_useAlembicIDs)
                 {
                     if (m_cbIDs != null && m_cbIDs.count < numInstances)
@@ -179,9 +194,8 @@ namespace UTJ.Alembic
                     var ids = apc.ids;
                     if (ids != null && ids.Count == numInstances)
                     {
-                        m_ids.Resize(numInstances);
-                        m_cbIDs.SetData(m_ids.List);
-                        alembicIDsAvailable = true;
+                        m_cbIDs.SetData(apc.ids.List);
+                        abcHasIDs = true;
                     }
                 }
 
@@ -199,9 +213,17 @@ namespace UTJ.Alembic
                     var material = materials[si];
                     if (material == null)
                         continue;
-                    material.SetBuffer(pidAlembicPoints, m_cbPoints);
-                    if (alembicIDsAvailable)
-                        material.SetBuffer(pidAlembicIDs, m_cbIDs);
+                    material.SetBuffer("_AlembicPoints", m_cbPoints);
+                    if (abcHasVelocities)
+                    {
+                        material.SetInt("_AlembicHasVelocities", 1);
+                        material.SetBuffer("_AlembicVelocities", m_cbVelocities);
+                    }
+                    if (abcHasIDs)
+                    {
+                        material.SetInt("_AlembicHasIDs", 1);
+                        material.SetBuffer("_AlembicIDs", m_cbIDs);
+                    }
                     Graphics.DrawMeshInstancedIndirect(mesh, si, material,
                         bounds, args, 0, null, m_castShadows, m_receiveShadows, layer);
                 }
@@ -215,6 +237,7 @@ namespace UTJ.Alembic
                 m_cbArgs = null;
             }
             if (m_cbPoints != null) { m_cbPoints.Release(); m_cbPoints = null; }
+            if (m_cbVelocities != null) { m_cbVelocities.Release(); m_cbVelocities = null; }
             if (m_cbIDs != null) { m_cbIDs.Release(); m_cbIDs = null; }
         }
 

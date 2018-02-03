@@ -8,8 +8,7 @@
 
     SubShader {
         Tags { "RenderType"="Opaque" }
-        LOD 200
-        
+
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.0
@@ -37,7 +36,7 @@
         }
 #endif
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;

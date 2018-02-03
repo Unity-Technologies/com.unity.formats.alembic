@@ -61,6 +61,5 @@ Shader "Alembic/Standard"
         UsePass "Standard/META"
     }
 
-    FallBack "VertexLit"
     CustomEditor "StandardShaderGUI"
 }
