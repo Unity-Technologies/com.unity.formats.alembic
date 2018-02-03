@@ -70,7 +70,7 @@ namespace UTJ.Alembic
         Material SetupMotionVectorMaterial()
         {
             if (m_motionVectorMaterial == null)
-                m_motionVectorMaterial = null;
+                m_motionVectorMaterialsInternal = null;
             else if(m_motionVectorMaterialsInternal == null)
                 m_motionVectorMaterialsInternal = new Material(m_motionVectorMaterial);
             return m_motionVectorMaterialsInternal;
@@ -171,24 +171,24 @@ namespace UTJ.Alembic
 
 
             // update materials
-            Action<Material> updateMaterial = (material) => {
-                if (material == null)
+            Action<Material> updateMaterial = (mat) => {
+                if (mat == null)
                     return;
 
-                material.SetVector("_Translate", pos);
-                material.SetVector("_Rotate", new Vector4(rot.x, rot.y, rot.z, rot.w));
-                material.SetVector("_Scale", scale);
-                material.SetFloat("_PointSize", m_pointSize);
-                material.SetBuffer("_AlembicPoints", m_cbPoints);
+                mat.SetVector("_Translate", pos);
+                mat.SetVector("_Rotate", new Vector4(rot.x, rot.y, rot.z, rot.w));
+                mat.SetVector("_Scale", scale);
+                mat.SetFloat("_PointSize", m_pointSize);
+                mat.SetBuffer("_AlembicPoints", m_cbPoints);
                 if (abcHasIDs)
                 {
-                    material.SetInt("_AlembicHasIDs", 1);
-                    material.SetBuffer("_AlembicIDs", m_cbIDs);
+                    mat.SetInt("_AlembicHasIDs", 1);
+                    mat.SetBuffer("_AlembicIDs", m_cbIDs);
                 }
                 if (abcHasVelocities)
                 {
-                    material.SetInt("_AlembicHasVelocities", 1);
-                    material.SetBuffer("_AlembicVelocities", m_cbVelocities);
+                    mat.SetInt("_AlembicHasVelocities", 1);
+                    mat.SetBuffer("_AlembicVelocities", m_cbVelocities);
                 }
             };
 
@@ -225,7 +225,7 @@ namespace UTJ.Alembic
 
         void FlushMotionVector()
         {
-            if (!m_generateMotionVector)
+            if (!m_generateMotionVector || Camera.current == null || (Camera.current.depthTextureMode & DepthTextureMode.MotionVectors) == 0)
                 return;
 
             // assume setup is already done in Flush()
@@ -244,6 +244,7 @@ namespace UTJ.Alembic
                 m_cmdMotionVector.name = "AlembicPointsRenderer";
             }
             m_cmdMotionVector.Clear();
+            m_cmdMotionVector.SetRenderTarget(BuiltinRenderTextureType.MotionVectors, BuiltinRenderTextureType.CameraTarget);
             for (int si = 0; si < mesh.subMeshCount; ++si)
                 m_cmdMotionVector.DrawMeshInstancedIndirect(mesh, si, material, 0, m_cbArgs[si], 0);
             Graphics.ExecuteCommandBuffer(m_cmdMotionVector);

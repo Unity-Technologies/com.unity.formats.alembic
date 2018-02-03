@@ -24,8 +24,6 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma multi_compile_instancing
-            #pragma instancing_options assumeuniformscaling
             #pragma target 4.5
             #include "PointRenderer.cginc"
 
@@ -36,7 +34,7 @@
             {
                 float4 vertex : POSITION;
                 float4 texcoord : TEXCOORD0;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
+                uint iid : SV_InstanceID;
             };
 
             struct v2f
@@ -50,11 +48,7 @@
                 UNITY_SETUP_INSTANCE_ID(v);
 
                 float4 vertex = v.vertex;
-#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-                vertex = mul(mul(UNITY_MATRIX_VP, GetPointMatrix(unity_InstanceID)), vertex);
-#else
-                vertex = mul(UNITY_MATRIX_VP, vertex);
-#endif
+                vertex = mul(mul(UNITY_MATRIX_VP, GetPointMatrix(v.iid)), vertex);
 
                 v2f o;
                 o.vertex = vertex;

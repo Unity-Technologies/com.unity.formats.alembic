@@ -1,10 +1,18 @@
 #include "UnityCG.cginc"
 
+#if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_PS4) || defined(SHADER_API_GLCORE) || defined(SHADER_API_VULKAN) || defined(SHADER_API_PSSL)
+    #define STRUCTURED_BUFFER_SUPPORT 1
+#else
+    #define STRUCTURED_BUFFER_SUPPORT 0
+#endif
+
+
 float3 _Translate;
 float4 _Rotate;
 float3 _Scale;
 float _PointSize;
-#ifdef UNITY_SUPPORT_INSTANCING
+
+#if STRUCTURED_BUFFER_SUPPORT
 StructuredBuffer<float3> _AlembicPoints;
 StructuredBuffer<float3> _AlembicVelocities;
 StructuredBuffer<int> _AlembicIDs;
@@ -74,7 +82,7 @@ float3 Rotate(float4 q, float3 p)
 float3 GetAlembicPoint(int iid)
 {
     return
-#ifdef UNITY_SUPPORT_INSTANCING
+#if STRUCTURED_BUFFER_SUPPORT
         Rotate(_Rotate, _AlembicPoints[iid] * _Scale) + _Translate;
 #else
         float3(0,0,0);
@@ -84,7 +92,7 @@ float3 GetAlembicPoint(int iid)
 float3 GetAlembicVelocity(int iid)
 {
     return
-#ifdef UNITY_SUPPORT_INSTANCING
+#if STRUCTURED_BUFFER_SUPPORT
         Rotate(_Rotate, _AlembicVelocities[iid] * _Scale);
 #else
         float3(0, 0, 0);
@@ -94,7 +102,7 @@ float3 GetAlembicVelocity(int iid)
 int GetAlembicID(int iid)
 {
     return
-#ifdef UNITY_SUPPORT_INSTANCING
+#if STRUCTURED_BUFFER_SUPPORT
         _AlembicIDs[iid];
 #else
         0;
@@ -103,7 +111,7 @@ int GetAlembicID(int iid)
 
 float4x4 GetPointMatrix(int iid)
 {
-#ifdef UNITY_SUPPORT_INSTANCING
+#if STRUCTURED_BUFFER_SUPPORT
     float3 ppos = GetAlembicPoint(iid);
     float4 prot = _Rotate;
     float3 pscale = _Scale * _PointSize;
@@ -115,7 +123,7 @@ float4x4 GetPointMatrix(int iid)
 
 float4x4 GetOldPointMatrix(int iid)
 {
-#ifdef UNITY_SUPPORT_INSTANCING
+#if STRUCTURED_BUFFER_SUPPORT
     float3 ppos = GetAlembicPoint(iid) - GetAlembicVelocity(iid);
     float4 prot = _Rotate;
     float3 pscale = _Scale * _PointSize;

@@ -7,23 +7,24 @@ Shader "Hidden/Alembic/PointsMotionVectors"
             Name "MOTIONVECTORS"
             Tags{ "LightMode" = "MotionVectors" }
 
-            Cull[_CullMode]
             ZTest LEqual
+            Cull Back
             ZWrite Off
 
 CGPROGRAM
 #pragma vertex VertMotionVectors
 #pragma fragment FragMotionVectors
+#pragma target 4.5
+
 #include "UnityCG.cginc"
 #include "PointRenderer.cginc"
 
-    // Object rendering things
 #if defined(USING_STEREO_MATRICES)
     float4x4 _StereoNonJitteredVP[2];
-float4x4 _StereoPreviousVP[2];
+    float4x4 _StereoPreviousVP[2];
 #else
     float4x4 _NonJitteredVP;
-float4x4 _PreviousVP;
+    float4x4 _PreviousVP;
 #endif
 float4x4 _PreviousM;
 bool _HasLastPositionData;
@@ -41,25 +42,19 @@ struct MotionVectorData
 struct MotionVertexInput
 {
     float4 vertex : POSITION;
-    UNITY_VERTEX_INPUT_INSTANCE_ID
+    uint iid : SV_InstanceID;
 };
 
 MotionVectorData VertMotionVectors(MotionVertexInput v)
 {
     MotionVectorData o;
-    UNITY_SETUP_INSTANCE_ID(v);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 
     float4 vertex = v.vertex;
     float4 vertex_old = v.vertex;
-#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-    vertex = GetPointMatrix(unity_InstanceID));
-    vertex_old = GetOldPointMatrix(unity_InstanceID));
-#else
-    vertex = mul(unity_ObjectToWorld, vertex);
-    vertex_old = mul(unity_ObjectToWorld, vertex);
-#endif
+    vertex = mul(GetPointMatrix(v.iid), vertex);
+    vertex_old = mul(GetOldPointMatrix(v.iid), vertex_old);
 
     o.pos = mul(UNITY_MATRIX_VP, vertex);
 #if defined(UNITY_REVERSED_Z)
