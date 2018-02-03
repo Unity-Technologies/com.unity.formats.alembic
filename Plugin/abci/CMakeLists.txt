@@ -19,3 +19,7 @@ target_link_libraries(abci
     ${ALEMBIC_LIBRARY}
 )
 install(TARGETS abci DESTINATION .)
+
+add_subdirectory(googletest)
+include_directories(./googletest/googletest/include)
+cxx_test(abci_test gtest_main) # link with libm
