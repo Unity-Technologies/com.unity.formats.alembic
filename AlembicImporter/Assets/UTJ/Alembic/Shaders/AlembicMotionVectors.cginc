@@ -18,23 +18,15 @@
             float4 transferPos : TEXCOORD0;
             float4 transferPosOld : TEXCOORD1;
             float4 pos : SV_POSITION;
-
-            //>>> Alembic
-            float4 transferStreamPosOld : TEXCOORD2;
-            //Alembic <<<
-
             UNITY_VERTEX_OUTPUT_STEREO
         };
 
         struct MotionVertexInput
         {
             float4 vertex : POSITION;
-            float3 oldPos : NORMAL;
-
             //>>> Alembic
             float3 velocity  : TEXCOORD3;
             //Alembic <<<
-
             UNITY_VERTEX_INPUT_INSTANCE_ID
         };
 
@@ -55,16 +47,10 @@
 
 #if defined(USING_STEREO_MATRICES)
             o.transferPos = mul(_StereoNonJitteredVP[unity_StereoEyeIndex], mul(unity_ObjectToWorld, v.vertex));
-            o.transferPosOld = mul(_StereoPreviousVP[unity_StereoEyeIndex], mul(_PreviousM, _HasLastPositionData ? float4(v.oldPos, 1) : v.vertex));
+            o.transferPosOld = mul(_StereoPreviousVP[unity_StereoEyeIndex], mul(_PreviousM, float4(v.vertex - v.velocity, 1));
 #else
             o.transferPos = mul(_NonJitteredVP, mul(unity_ObjectToWorld, v.vertex));
-            o.transferPosOld = mul(_PreviousVP, mul(_PreviousM, _HasLastPositionData ? float4(v.oldPos, 1) : v.vertex));
-
-            //>>> Alembic
-            //Integrate to recontruct the previous stream position.
-            float3 streamPosOld = v.vertex - v.velocity; //TODO: What should this timestep be?
-            o.transferStreamPosOld = mul(_PreviousVP, mul(_PreviousM, float4(streamPosOld, 1)));
-            //Alembic <<<
+            o.transferPosOld = mul(_PreviousVP, mul(_PreviousM, float4(v.vertex - v.velocity, 1)));
 #endif
 
             return o;
@@ -75,27 +61,14 @@
             float3 hPos = (i.transferPos.xyz / i.transferPos.w);
             float3 hPosOld = (i.transferPosOld.xyz / i.transferPosOld.w);
 
-            //>>> Alembic
-            float3 hStreamPosOld = (i.transferStreamPosOld.xyz / i.transferStreamPosOld.w);
-            //Alembic <<<
-
             // V is the viewport position at this pixel in the range 0 to 1.
             float2 vPos = (hPos.xy + 1.0f) / 2.0f;
             float2 vPosOld = (hPosOld.xy + 1.0f) / 2.0f;
-            
-            //>>> Alembic
-            float2 vStreamPosOld = (hStreamPosOld.xy + 1.0f) / 2.0f;
-            //Alembic <<<
 
 #if UNITY_UV_STARTS_AT_TOP
             vPos.y = 1.0 - vPos.y;
             vPosOld.y = 1.0 - vPosOld.y;
-
-            //>>> Alembic
-            vStreamPosOld.y = 1.0 - vStreamPosOld.y;
-            //Alembic <<<
 #endif
-
-            half2 uvDiff = (vPos - vPosOld) + (vPos - vStreamPosOld);
+            half2 uvDiff = vPos - vPosOld;
             return lerp(half4(uvDiff, 0, 1), 0, (half)_ForceNoMotion);
         }

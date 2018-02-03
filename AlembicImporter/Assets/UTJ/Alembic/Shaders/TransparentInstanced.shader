@@ -1,4 +1,4 @@
-﻿Shader "Alembic/Transparent Instanced" {
+﻿Shader "Alembic/Points Transparent" {
     Properties {
         //_AlembicID("AlembicID", Float) = 0.0
 
