@@ -19,14 +19,9 @@ CGPROGRAM
 #include "UnityCG.cginc"
 #include "PointRenderer.cginc"
 
-#if defined(USING_STEREO_MATRICES)
-    float4x4 _StereoNonJitteredVP[2];
-    float4x4 _StereoPreviousVP[2];
-#else
-    float4x4 _NonJitteredVP;
-    float4x4 _PreviousVP;
-#endif
-float4x4 _PreviousM;
+float4x4 _NonJitteredVP;
+float4x4 _PreviousVP;
+
 bool _HasLastPositionData;
 bool _ForceNoMotion;
 float _MotionVectorDepthBias;
@@ -60,14 +55,8 @@ MotionVectorData VertMotionVectors(MotionVertexInput v)
     o.pos.z += _MotionVectorDepthBias * o.pos.w;
 #endif
 
-#if defined(USING_STEREO_MATRICES)
-    o.transferPos = mul(_StereoNonJitteredVP[unity_StereoEyeIndex], vertex);
-    o.transferPosOld = mul(_StereoPreviousVP[unity_StereoEyeIndex], vertex_old);
-#else
     o.transferPos = mul(_NonJitteredVP, vertex);
     o.transferPosOld = mul(_PreviousVP, vertex_old);
-#endif
-
     return o;
 }
 

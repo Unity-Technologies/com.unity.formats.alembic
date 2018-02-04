@@ -9,6 +9,47 @@ using UnityEditor;
 
 namespace UTJ.Alembic
 {
+    public static class VPMatrices
+    {
+        static Dictionary<Camera, Matrix4x4> m_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
+        static Dictionary<Camera, Matrix4x4> m_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
+        static int m_frameCount;
+
+        public static Matrix4x4 Get(Camera camera)
+        {
+            if (Time.frameCount != m_frameCount) SwapMatrixMap();
+
+            Matrix4x4 m;
+            if (!m_currentVPMatrix.TryGetValue(camera, out m))
+            {
+                m = camera.nonJitteredProjectionMatrix * camera.worldToCameraMatrix;
+                m_currentVPMatrix.Add(camera, m);
+            }
+
+            return m;
+        }
+
+        public static Matrix4x4 GetPrevious(Camera camera)
+        {
+            if (Time.frameCount != m_frameCount) SwapMatrixMap();
+
+            Matrix4x4 m;
+            if (m_previousVPMatrix.TryGetValue(camera, out m))
+                return m;
+            else
+                return Get(camera);
+        }
+
+        static void SwapMatrixMap()
+        {
+            var temp = m_previousVPMatrix;
+            m_previousVPMatrix = m_currentVPMatrix;
+            temp.Clear();
+            m_currentVPMatrix = temp;
+            m_frameCount = Time.frameCount;
+        }
+    }
+
     [ExecuteInEditMode]
     [RequireComponent(typeof(AlembicPointsCloud))]
     public class AlembicPointsRenderer : MonoBehaviour
@@ -229,6 +270,9 @@ namespace UTJ.Alembic
             var apc = GetComponent<AlembicPointsCloud>();
             if (mesh == null || material == null || apc.velocities.Count == 0)
                 return;
+
+            material.SetMatrix("_PreviousVP", VPMatrices.GetPrevious(Camera.current));
+            material.SetMatrix("_NonJitteredVP", VPMatrices.Get(Camera.current));
 
             int layer = gameObject.layer;
 
