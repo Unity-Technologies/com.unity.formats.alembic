@@ -31,6 +31,11 @@ namespace UTJ.Alembic
         Bounds m_bounds;
         Material[] m_materialsInternal;
         Material m_motionVectorMaterialsInternal;
+        MaterialPropertyBlock m_mpb;
+
+        Vector3 m_position, m_positionOld;
+        Quaternion m_rotation, m_rotationOld;
+        Vector3 m_scale, m_scaleOld;
 
 
         public Mesh sharedMesh
@@ -88,17 +93,11 @@ namespace UTJ.Alembic
             var ids = apc.ids;
 
             var materials = SetupMaterials();
-            var mvmaterial = SetupMotionVectorMaterial();
             var mesh = m_mesh;
             if (mesh == null || materials == null) { return; }
 
             int submeshCount = System.Math.Min(mesh.subMeshCount, materials.Length);
             int layer = gameObject.layer;
-
-            var trans = GetComponent<Transform>();
-            var pos = trans.position;
-            var rot = trans.rotation;
-            var scale = trans.lossyScale;
 
             bool supportsInstancing = SystemInfo.supportsInstancing && SystemInfo.supportsComputeShaders;
             if (!supportsInstancing)
@@ -171,31 +170,26 @@ namespace UTJ.Alembic
 
 
             // update materials
-            Action<Material> updateMaterial = (mat) => {
-                if (mat == null)
-                    return;
-
-                mat.SetVector("_Translate", pos);
-                mat.SetVector("_Rotate", new Vector4(rot.x, rot.y, rot.z, rot.w));
-                mat.SetVector("_Scale", scale);
-                mat.SetFloat("_PointSize", m_pointSize);
-                mat.SetBuffer("_AlembicPoints", m_cbPoints);
-                if (abcHasIDs)
-                {
-                    mat.SetInt("_AlembicHasIDs", 1);
-                    mat.SetBuffer("_AlembicIDs", m_cbIDs);
-                }
-                if (abcHasVelocities)
-                {
-                    mat.SetInt("_AlembicHasVelocities", 1);
-                    mat.SetBuffer("_AlembicVelocities", m_cbVelocities);
-                }
-            };
-
-            foreach (var material in materials)
-                updateMaterial.Invoke(material);
-            updateMaterial.Invoke(mvmaterial);
-
+            if(m_mpb==null)
+                m_mpb = new MaterialPropertyBlock();
+            m_mpb.SetVector("_Position", m_position);
+            m_mpb.SetVector("_PositionOld", m_positionOld);
+            m_mpb.SetVector("_Rotation", new Vector4(m_rotation.x, m_rotation.y, m_rotation.z, m_rotation.w));
+            m_mpb.SetVector("_RotationOld", new Vector4(m_rotationOld.x, m_rotationOld.y, m_rotationOld.z, m_rotationOld.w));
+            m_mpb.SetVector("_Scale", m_scale);
+            m_mpb.SetVector("_ScaleOld", m_scaleOld);
+            m_mpb.SetFloat("_PointSize", m_pointSize);
+            m_mpb.SetBuffer("_AlembicPoints", m_cbPoints);
+            if (abcHasIDs)
+            {
+                m_mpb.SetFloat("_AlembicHasIDs", 1);
+                m_mpb.SetBuffer("_AlembicIDs", m_cbIDs);
+            }
+            if (abcHasVelocities)
+            {
+                m_mpb.SetFloat("_AlembicHasVelocities", 1);
+                m_mpb.SetBuffer("_AlembicVelocities", m_cbVelocities);
+            }
 
             // update argument buffer
             if (m_cbArgs == null || m_cbArgs.Length != submeshCount)
@@ -219,7 +213,7 @@ namespace UTJ.Alembic
                 if (material == null)
                     continue;
                 Graphics.DrawMeshInstancedIndirect(mesh, si, material,
-                    m_bounds, args, 0, null, m_castShadows, m_receiveShadows, layer);
+                    m_bounds, args, 0, m_mpb, m_castShadows, m_receiveShadows, layer);
             }
         }
 
@@ -246,7 +240,7 @@ namespace UTJ.Alembic
             m_cmdMotionVector.Clear();
             m_cmdMotionVector.SetRenderTarget(BuiltinRenderTextureType.MotionVectors, BuiltinRenderTextureType.CameraTarget);
             for (int si = 0; si < mesh.subMeshCount; ++si)
-                m_cmdMotionVector.DrawMeshInstancedIndirect(mesh, si, material, 0, m_cbArgs[si], 0);
+                m_cmdMotionVector.DrawMeshInstancedIndirect(mesh, si, material, 0, m_cbArgs[si], 0, m_mpb);
             Graphics.ExecuteCommandBuffer(m_cmdMotionVector);
         }
 
@@ -270,6 +264,15 @@ namespace UTJ.Alembic
 
         void LateUpdate()
         {
+            m_positionOld = m_position;
+            m_rotationOld = m_rotation;
+            m_scaleOld = m_scale;
+
+            var trans = GetComponent<Transform>();
+            m_position = trans.position;
+            m_rotation = trans.rotation;
+            m_scale = trans.lossyScale;
+
             Flush();
         }
 
@@ -309,6 +312,11 @@ namespace UTJ.Alembic
                 m_motionVectorMaterial = mat;
             }
 #endif
+
+            var trans = GetComponent<Transform>();
+            m_position = m_positionOld = trans.position;
+            m_rotation = m_rotationOld = trans.rotation;
+            m_scale = m_scaleOld = trans.lossyScale;
         }
     }
 }

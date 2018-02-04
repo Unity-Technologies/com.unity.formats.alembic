@@ -50,11 +50,8 @@ MotionVectorData VertMotionVectors(MotionVertexInput v)
     MotionVectorData o;
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-
-    float4 vertex = v.vertex;
-    float4 vertex_old = v.vertex;
-    vertex = mul(GetPointMatrix(v.iid), vertex);
-    vertex_old = mul(GetOldPointMatrix(v.iid), vertex_old);
+    float4 vertex = mul(GetPointMatrix(v.iid), v.vertex);
+    float4 vertex_old = mul(GetPointMatrixOld(v.iid), v.vertex);
 
     o.pos = mul(UNITY_MATRIX_VP, vertex);
 #if defined(UNITY_REVERSED_Z)

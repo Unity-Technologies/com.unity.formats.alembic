@@ -6,10 +6,9 @@
     #define STRUCTURED_BUFFER_SUPPORT 0
 #endif
 
-
-float3 _Translate;
-float4 _Rotate;
-float3 _Scale;
+float3 _Position, _PositionOld;
+float4 _Rotation, _RotationOld;
+float3 _Scale, _ScaleOld;
 float _PointSize;
 
 #if STRUCTURED_BUFFER_SUPPORT
@@ -83,7 +82,7 @@ float3 GetAlembicPoint(int iid)
 {
     return
 #if STRUCTURED_BUFFER_SUPPORT
-        Rotate(_Rotate, _AlembicPoints[iid] * _Scale) + _Translate;
+        Rotate(_Rotation, _AlembicPoints[iid] * _Scale) + _Position;
 #else
         float3(0,0,0);
 #endif
@@ -93,7 +92,7 @@ float3 GetAlembicVelocity(int iid)
 {
     return
 #if STRUCTURED_BUFFER_SUPPORT
-        Rotate(_Rotate, _AlembicVelocities[iid] * _Scale);
+        Rotate(_Rotation, _AlembicVelocities[iid] * _Scale);
 #else
         float3(0, 0, 0);
 #endif
@@ -112,8 +111,8 @@ int GetAlembicID(int iid)
 float4x4 GetPointMatrix(int iid)
 {
 #if STRUCTURED_BUFFER_SUPPORT
-    float3 ppos = GetAlembicPoint(iid);
-    float4 prot = _Rotate;
+    float3 ppos = Rotate(_Rotation, _AlembicPoints[iid] * _Scale) + _Position;
+    float4 prot = _Rotation;
     float3 pscale = _Scale * _PointSize;
     return mul(mul(Translate44(ppos), Rotate44(prot)), Scale44(pscale));
 #else
@@ -121,12 +120,12 @@ float4x4 GetPointMatrix(int iid)
 #endif
 }
 
-float4x4 GetOldPointMatrix(int iid)
+float4x4 GetPointMatrixOld(int iid)
 {
 #if STRUCTURED_BUFFER_SUPPORT
-    float3 ppos = GetAlembicPoint(iid) - GetAlembicVelocity(iid);
-    float4 prot = _Rotate;
-    float3 pscale = _Scale * _PointSize;
+    float3 ppos = Rotate(_RotationOld, (_AlembicPoints[iid] - _AlembicVelocities[iid]) * _ScaleOld) + _PositionOld;
+    float4 prot = _RotationOld;
+    float3 pscale = _ScaleOld * _PointSize;
     return mul(mul(Translate44(ppos), Rotate44(prot)), Scale44(pscale));
 #else
     return unity_ObjectToWorld;
