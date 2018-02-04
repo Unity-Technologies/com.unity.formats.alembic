@@ -172,7 +172,11 @@ namespace UTJ.Alembic
             {
                 m_cbPoints = new ComputeBuffer(numInstances, 12);
             }
+#if UNITY_2017_3_OR_NEWER
             m_cbPoints.SetData(points.List);
+#else
+            m_cbPoints.SetData(points.Array);
+#endif
 
             // update velocity buffer
             if (velocities.Count == numInstances)
@@ -187,7 +191,11 @@ namespace UTJ.Alembic
                 {
                     m_cbVelocities = new ComputeBuffer(numInstances, 12);
                 }
+#if UNITY_2017_3_OR_NEWER
                 m_cbVelocities.SetData(velocities.List);
+#else
+                m_cbVelocities.SetData(velocities.Array);
+#endif
             }
 
             // update ID buffer
@@ -203,7 +211,11 @@ namespace UTJ.Alembic
                 {
                     m_cbIDs = new ComputeBuffer(numInstances, 4);
                 }
+#if UNITY_2017_3_OR_NEWER
                 m_cbIDs.SetData(ids.List);
+#else
+                m_cbIDs.SetData(ids.Array);
+#endif
             }
 
             // build bounds
