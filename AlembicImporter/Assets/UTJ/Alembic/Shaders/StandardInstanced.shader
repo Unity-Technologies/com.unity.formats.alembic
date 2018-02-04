@@ -11,7 +11,7 @@
 
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows addshadow
-        #pragma target 3.0
+        #pragma target 4.5
         #pragma multi_compile_instancing
         #pragma instancing_options assumeuniformscaling procedural:setup
         #include "PointRenderer.cginc"

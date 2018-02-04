@@ -70,8 +70,6 @@ namespace UTJ.Alembic
         CommandBuffer m_cmdMotionVector;
         int[] m_args = new int[5] { 0, 0, 0, 0, 0 };
         Bounds m_bounds;
-        Material[] m_materialsInternal;
-        Material m_motionVectorMaterialsInternal;
         MaterialPropertyBlock m_mpb;
 
         Vector3 m_position, m_positionOld;
@@ -88,38 +86,13 @@ namespace UTJ.Alembic
         public Material[] sharedMaterials
         {
             get { return m_materials; }
-            set
-            {
-                m_materialsInternal = m_materials = value;
-            }
+            set { m_materials = value; }
         }
 
-
-        Material[] SetupMaterials()
+        public Material motionVectorMaterial
         {
-            if (m_materials == null || m_materials.Length == 0)
-            {
-                m_materialsInternal = null;
-            }
-            else if (m_materialsInternal == null || m_materialsInternal.Length != m_materials.Length)
-            {
-                m_materialsInternal = new Material[m_materials.Length];
-                for (int i = 0; i < m_materials.Length; ++i)
-                {
-                    if (m_materials[i] != null)
-                        m_materialsInternal[i] = new Material(m_materials[i]);
-                }
-            }
-            return m_materialsInternal;
-        }
-
-        Material SetupMotionVectorMaterial()
-        {
-            if (m_motionVectorMaterial == null)
-                m_motionVectorMaterialsInternal = null;
-            else if(m_motionVectorMaterialsInternal == null)
-                m_motionVectorMaterialsInternal = new Material(m_motionVectorMaterial);
-            return m_motionVectorMaterialsInternal;
+            get { return m_motionVectorMaterial; }
+            set { m_motionVectorMaterial = value; }
         }
 
 
@@ -133,7 +106,7 @@ namespace UTJ.Alembic
             var velocities = apc.velocities;
             var ids = apc.ids;
 
-            var materials = SetupMaterials();
+            var materials = m_materials;
             var mesh = m_mesh;
             if (mesh == null || materials == null) { return; }
 
@@ -259,7 +232,8 @@ namespace UTJ.Alembic
             }
 
             // issue drawcalls
-            for (int si = 0; si < submeshCount; ++si)
+            int n = Math.Min(submeshCount, materials.Length);
+            for (int si = 0; si < n; ++si)
             {
                 var args = m_cbArgs[si];
                 var material = materials[si];
@@ -277,7 +251,7 @@ namespace UTJ.Alembic
 
             // assume setup is already done in Flush()
 
-            var material = SetupMotionVectorMaterial();
+            var material = m_motionVectorMaterial;
             var mesh = m_mesh;
             var apc = GetComponent<AlembicPointsCloud>();
             if (mesh == null || material == null || apc.velocities.Count == 0)
@@ -339,36 +313,6 @@ namespace UTJ.Alembic
 
         private void Start()
         {
-#if UNITY_EDITOR
-            if (m_mesh == null)
-            {
-                var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                m_mesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
-                DestroyImmediate(cubeGO);
-            }
-            if (m_materials != null)
-            {
-                bool allNull = true;
-                foreach (var m in m_materials)
-                    if (m_materials != null)
-                        allNull = false;
-                if (allNull)
-                    m_materials = null;
-            }
-            if (m_materials == null)
-            {
-                var mat = new Material(AssetDatabase.LoadAssetAtPath<Shader>(AssetDatabase.GUIDToAssetPath("a002496809b1b604c8a724108e6add6e")));
-                mat.name = "Default Alembic Points";
-                m_materials = new Material[] { mat };
-            }
-            if(m_motionVectorMaterial == null)
-            {
-                var mat = new Material(AssetDatabase.LoadAssetAtPath<Shader>(AssetDatabase.GUIDToAssetPath("05cc257315ad20240b491c6a72f29db6")));
-                mat.name = "Default Alembic Points Motion Vector";
-                m_motionVectorMaterial = mat;
-            }
-#endif
-
             var trans = GetComponent<Transform>();
             m_position = m_positionOld = trans.position;
             m_rotation = m_rotationOld = trans.rotation;

@@ -125,8 +125,9 @@ namespace UTJ.Alembic
                 streamPlayer.startTime = startTime;
                 streamPlayer.endTime = endTime;
 
-                AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(ctx, abcStream.m_abcTreeRoot, streamDescriptor);
+                var subassets = new Subassets(ctx);
+                subassets.Add(streamDescriptor.name, streamDescriptor);
+                GenerateSubAssets(subassets, abcStream.m_abcTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
 
@@ -139,41 +140,105 @@ namespace UTJ.Alembic
             }  
         }
 
-        private void GenerateSubAssets(AssetImportContext ctx, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
+        class Subassets
         {
-            var material = new Material(Shader.Find("Alembic/Standard"));
-            material.name = "Default Material";
-            material.hideFlags = HideFlags.NotEditable;
-            AddObjectToAsset(ctx, "Default Material", material);
+            AssetImportContext m_ctx;
+            Material m_defaultMaterial;
+            Material m_defaultPointsMaterial;
+            Material m_defaultPointsMotionVectorMaterial;
 
+            public Subassets(AssetImportContext ctx)
+            {
+                m_ctx = ctx;
+            }
+
+            public Material defaultMaterial
+            {
+                get
+                {
+                    if (m_defaultMaterial == null)
+                    {
+                        m_defaultMaterial = new Material(Shader.Find("Alembic/Standard"));
+                        m_defaultMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultMaterial.name = "Default Material";
+                        Add("Default Material", m_defaultMaterial);
+                    }
+                    return m_defaultMaterial;
+                }
+            }
+
+            public Material pointsMaterial
+            {
+                get
+                {
+                    if (m_defaultPointsMaterial == null)
+                    {
+                        m_defaultPointsMaterial = new Material(Shader.Find("Alembic/Points Standard"));
+                        m_defaultPointsMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultPointsMaterial.name = "Default Points";
+                        Add("Default Points", m_defaultPointsMaterial);
+                    }
+                    return m_defaultPointsMaterial;
+                }
+            }
+
+            public Material pointsMotionVectorMaterial
+            {
+                get
+                {
+                    if (m_defaultPointsMotionVectorMaterial == null)
+                    {
+                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/PointsMotionVectors"));
+                        m_defaultPointsMotionVectorMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
+                        Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
+                    }
+                    return m_defaultPointsMotionVectorMaterial;
+                }
+            }
+
+            public void Add(string identifier, Object asset)
+            {
+#if UNITY_2017_3_OR_NEWER
+                m_ctx.AddObjectToAsset(identifier, asset);
+#else
+                m_ctx.AddSubAsset(identifier, asset);
+#endif
+            }
+        }
+
+        private void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
+        {
             if (streamDescr.duration > 0)
             {
                 var frames = new Keyframe[2];
                 frames[0].value = 0.0f;
                 frames[0].time = 0.0f;
-                frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[0].outTangent = 1.0f;
                 frames[1].value = (float)streamDescr.duration;
                 frames[1].time = (float)streamDescr.duration;
-                frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[1].inTangent = 1.0f;
+
                 var curve = new AnimationCurve(frames);
+                AnimationUtility.SetKeyLeftTangentMode(curve, 0, AnimationUtility.TangentMode.Linear);
+                AnimationUtility.SetKeyRightTangentMode(curve, 1, AnimationUtility.TangentMode.Linear);
+
                 var animationClip = new AnimationClip();
                 animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
                 animationClip.name = root.linkedGameObj.name + "_Clip";
                 animationClip.hideFlags = HideFlags.NotEditable;
 
-                AddObjectToAsset(ctx, "Default Animation", animationClip);
+                subassets.Add("Default Animation", animationClip);
             }
             varyingTopologyMeshNames = new List<string>();
             splittingMeshNames = new List<string>();
 
-            CollectSubAssets(ctx, root, material);
+            CollectSubAssets(subassets, root);
 
             streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
         }
 
-        private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
+        private void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
             var mesh = node.GetAlembicObj<AlembicMesh>();
             if (mesh != null)
@@ -192,7 +257,7 @@ namespace UTJ.Alembic
                 var m = meshFilter.sharedMesh;
                 submeshCount = m.subMeshCount;
                 m.name = node.linkedGameObj.name;
-                AddObjectToAsset(ctx,m.name, m);
+                subassets.Add(m.name, m);
             }
 
             var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();
@@ -200,21 +265,23 @@ namespace UTJ.Alembic
             {
                 var mats = new Material[submeshCount];
                 for (int i = 0; i < submeshCount; ++i)
-                    mats[i] = mat;
+                    mats[i] = subassets.defaultMaterial;
                 renderer.sharedMaterials = mats;
             }
 
-            foreach ( var child in node.children)
-                CollectSubAssets(ctx, child, mat);
-        }
+            var apr = node.linkedGameObj.GetComponent<AlembicPointsRenderer>();
+            if (apr != null)
+            {
+                var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
+                DestroyImmediate(cubeGO);
 
-        private static void AddObjectToAsset(AssetImportContext ctx, string identifier, Object asset)
-        {
-#if UNITY_2017_3_OR_NEWER
-            ctx.AddObjectToAsset(identifier, asset);
-#else
-            ctx.AddSubAsset(identifier, asset);
-#endif
+                apr.sharedMaterials = new Material[] { subassets.pointsMaterial };
+                apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
+            }
+
+            foreach ( var child in node.children)
+                CollectSubAssets(subassets, child);
         }
     }
 }

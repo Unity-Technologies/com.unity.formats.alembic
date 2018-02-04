@@ -1,4 +1,4 @@
-Shader "Hidden/Alembic/PointsMotionVectors"
+Shader "Alembic/PointsMotionVectors"
 {
     SubShader
     {
