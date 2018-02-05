@@ -17,58 +17,48 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     , m_abc(abc)
     , m_parent(parent)
 {
-    if (m_abc.valid())
-    {
-        const auto& metadata = m_abc.getMetaData();
-        
-        if (AbcGeom::IXformSchema::matches(metadata))
-        {
-            m_xform.reset(new aiXForm(this));
-            m_schemas.push_back(m_xform.get());
-        }
-        
-        if (AbcGeom::IPolyMeshSchema::matches(metadata))
-        {
-            m_polymesh.reset(new aiPolyMesh(this));
-            m_schemas.push_back(m_polymesh.get());
-        }
-
-        if (AbcGeom::ICameraSchema::matches(metadata))
-        {
-            m_camera.reset(new aiCamera(this));
-            m_schemas.push_back(m_camera.get());
-        }
-
-        if (AbcGeom::IPointsSchema::matches(metadata))
-        {
-            m_points.reset(new aiPoints(this));
-            m_schemas.push_back(m_points.get());
-        }
-    }
 }
 
 aiObject::~aiObject()
 {
-    while (!m_children.empty()) {
-        delete m_children.back();
+    if (!m_children.empty()) {
+        // make m_children empty before deleting children because children try to remove element of it in their destructor
+        decltype(m_children) tmp;
+        tmp.swap(m_children);
     }
-    if (m_parent != nullptr) {
+    if (m_parent)
         m_parent->removeChild(this);
-    }
 }
 
 aiObject* aiObject::newChild(const abcObject &abc)
 {
-    auto *child = new aiObject(getContext(), this, abc);
-    m_children.push_back(child);
-    return child;
+    aiObject *ret = nullptr;
+    if (abc.valid())
+    {
+        const auto& metadata = abc.getMetaData();
+
+        if (AbcGeom::IXformSchema::matches(metadata))
+            ret = new aiXform(this, abc);
+        else if (AbcGeom::IPolyMeshSchema::matches(metadata))
+            ret = new aiPolyMesh(this, abc);
+        else if (AbcGeom::ICameraSchema::matches(metadata))
+            ret = new aiCamera(this, abc);
+        else if (AbcGeom::IPointsSchema::matches(metadata))
+            ret = new aiPoints(this, abc);
+        else
+            ret = new aiObject(m_ctx, this, abc);
+    }
+
+    if (ret)
+        m_children.emplace_back(ret);
+    return ret;
 }
 
 void aiObject::removeChild(aiObject *c)
 {
     if (c == nullptr) { return; }
 
-    auto it = std::find(m_children.begin(), m_children.end(), c);
+    auto it = std::find_if(m_children.begin(), m_children.end(), [c](ObjectPtr& p) { return p.get() == c; });
     if (it != m_children.end())
     {
         c->m_parent = nullptr;
@@ -76,42 +66,25 @@ void aiObject::removeChild(aiObject *c)
     }
 }
 
-void aiObject::readConfig()
-{
-    for (auto s : m_schemas)
-    {
-        s->readConfig();
-    }
-}
-
-void aiObject::updateSample(const abcSampleSelector& ss)
-{
-    DebugLog("aiObject::updateSample(obj='%s', t=%f)", getFullName(), ss.getRequestedTime());
-    for (auto s : m_schemas)
-    {
-        s->updateSample(ss);
-    }
-}
-
 aiContext*  aiObject::getContext() const { return m_ctx; }
+const aiConfig& aiObject::getConfig() const { return m_ctx->getConfig(); }
 abcObject&  aiObject::getAbcObject() { return m_abc; }
 const char* aiObject::getName() const { return m_abc.getName().c_str(); }
 const char* aiObject::getFullName() const { return m_abc.getFullName().c_str(); }
 uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(); }
-aiObject*   aiObject::getChild(int i) { return m_children[i]; }
+aiObject*   aiObject::getChild(int i) { return m_children[i].get(); }
 aiObject*   aiObject::getParent() const { return m_parent; }
+void        aiObject::setEnabled(bool v) { m_enabled = v; }
 
-void aiObject::cacheSamples(int64_t startIndex, int64_t endIndex)
+aiSample* aiObject::getSample()
 {
-    for (auto s : m_schemas)
-    {
-        s->cacheSamples(startIndex,endIndex);
-    }
+    return nullptr;
 }
 
-aiXForm*    aiObject::getXForm() const { return m_xform.get(); }
-aiPolyMesh* aiObject::getPolyMesh() const { return m_polymesh.get(); }
-aiCamera*   aiObject::getCamera() const { return m_camera.get(); }
-aiPoints*   aiObject::getPoints() const { return m_points.get(); }
+void aiObject::updateSample(const abcSampleSelector& ss)
+{
+}
 
-
+void aiObject::waitAsync()
+{
+}

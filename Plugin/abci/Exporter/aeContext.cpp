@@ -16,13 +16,15 @@ aeContext::~aeContext()
 
 void aeContext::reset()
 {
+    waitAsync();
+
     if (m_archive != nullptr) {
-        if (m_config.timeSamplingType == aeTimeSamplingType::Uniform) {
-            // start time in default timeline maybe changed.
-            Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), m_config.startTime);
+        if (m_config.time_sampling_type == aeTimeSamplingType::Uniform) {
+            // start time in default time sampling maybe changed.
+            auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_config.start_time);
             *m_archive.getTimeSampling(1) = ts;
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType::Cyclic) {
+        else if (m_config.time_sampling_type == aeTimeSamplingType::Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 if (!t.times.empty()) {
@@ -31,7 +33,7 @@ void aeContext::reset()
                 }
             }
         }
-        else if (m_config.timeSamplingType == aeTimeSamplingType::Acyclic) {
+        else if (m_config.time_sampling_type == aeTimeSamplingType::Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
                 auto &t = m_timesamplings[i];
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
@@ -56,10 +58,10 @@ bool aeContext::openArchive(const char *path)
 
     abciDebugLog("aeContext::openArchive() %s", path);
     try {
-        if (m_config.archiveType == aeArchiveType::HDF5) {
+        if (m_config.archive_type == aeArchiveType::HDF5) {
             m_archive = Abc::OArchive(Alembic::AbcCoreHDF5::WriteArchive(), path);
         }
-        else if (m_config.archiveType == aeArchiveType::Ogawa) {
+        else if (m_config.archive_type == aeArchiveType::Ogawa) {
             m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
         }
         else {
@@ -71,9 +73,8 @@ bool aeContext::openArchive(const char *path)
         return false;
     }
 
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(m_config.startTime));
-    auto tsi = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(tsi + 1);
+    // reserve 'default' time sampling. update it later in reset()
+    auto tsi = addTimeSampling(m_config.start_time);
 
     auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
     m_node_top.reset(new aeObject(this, nullptr, top, tsi));
@@ -102,10 +103,10 @@ aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
 
 uint32_t aeContext::addTimeSampling(float start_time)
 {
-    Abc::TimeSampling ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frameRate), abcChrono(start_time));
-    uint32_t r = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(r + 1);
-    return r;
+    auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(start_time));
+    auto tsi = m_archive.addTimeSampling(ts);
+    m_timesamplings.resize(tsi + 1);
+    return tsi;
 }
 
 void aeContext::addTime(float time, uint32_t tsi)
@@ -124,5 +125,32 @@ void aeContext::addTime(float time, uint32_t tsi)
         if (ts.times.empty() || ts.times.back() != time) {
             ts.times.push_back(time);
         }
+    }
+}
+
+void aeContext::markFrameBegin()
+{
+    waitAsync();
+}
+
+void aeContext::markFrameEnd()
+{
+    // kick async tasks
+    m_async_task_future = std::async(std::launch::async, [this]() {
+        for (auto& task : m_async_tasks)
+            task();
+        m_async_tasks.clear();
+    });
+}
+
+void aeContext::addAsync(const std::function<void()>& task)
+{
+    m_async_tasks.push_back(task);
+}
+
+void aeContext::waitAsync()
+{
+    if (m_async_task_future.valid()) {
+        m_async_task_future.wait();
     }
 }

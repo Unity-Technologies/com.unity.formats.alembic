@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
@@ -16,14 +17,21 @@ namespace UTJ.Alembic
         {
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
-            var streamingAssetPath = assetPath.Replace("Assets","");
+            var streamingAssetPath = AlembicImporter.MakeShortAssetPath(assetPath);
             AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
 
-            var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
-            File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
-            File.Delete(fullStreamingAssetPath);
-            File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
-            File.Delete(fullStreamingAssetPath + ".meta");
+            try
+            {
+                var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
+                File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
+                File.Delete(fullStreamingAssetPath);
+                File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
+                File.Delete(fullStreamingAssetPath + ".meta");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning(e);
+            }
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -32,73 +40,81 @@ namespace UTJ.Alembic
         {
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDestPath = to.Replace("Assets" , "");
-            var streamSourcePath = from.Replace("Assets" , "");
-            AlembicStream.DisconnectStreamsWithPath(streamSourcePath);
-            AlembicStream.RemapStreamsWithPath(streamSourcePath,streamDestPath);
+            var streamDstPath = AlembicImporter.MakeShortAssetPath(to);
+            var streamSrcPath = AlembicImporter.MakeShortAssetPath(from);
+            AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
+            AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
 
-            var destPath = Application.streamingAssetsPath + streamDestPath;
-            var sourcePath = Application.streamingAssetsPath + streamSourcePath;
+            var dstPath = Application.streamingAssetsPath + streamDstPath;
+            var srcPath = Application.streamingAssetsPath + streamSrcPath;
 
-            var directoryPath = Path.GetDirectoryName(destPath);
-            if (File.Exists(destPath))
+            try
             {
-                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                File.Delete(destPath);    
-            }
-            else if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-            if (File.Exists(destPath))
-                File.SetAttributes(destPath, FileAttributes.Normal);
-            File.Move(sourcePath, destPath);
-            if (File.Exists(destPath + ".meta"))
-            {
-                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                File.Move(sourcePath + ".meta", destPath+ ".meta");    
-            }
-            AssetDatabase.Refresh(ImportAssetOptions.Default);
-            AlembicStream.ReconnectStreamsWithPath(streamDestPath);        
+                var directoryPath = Path.GetDirectoryName(dstPath);
+                if (File.Exists(dstPath))
+                {
+                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
+                    File.Delete(dstPath);
+                }
+                else if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                if (File.Exists(dstPath))
+                    File.SetAttributes(dstPath, FileAttributes.Normal);
+                File.Move(srcPath, dstPath);
+                if (File.Exists(dstPath + ".meta"))
+                {
+                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
+                    File.Move(srcPath + ".meta", dstPath + ".meta");
+                }
 
+                AssetDatabase.Refresh(ImportAssetOptions.Default);
+                AlembicStream.ReconnectStreamsWithPath(streamDstPath);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning(e);
+            }
             return AssetMoveResult.DidNotMove;
         } 
     }
-        
+
     [ScriptedImporter(1, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
-        [SerializeField] public float scaleFactor = 0.01f;
-        [SerializeField] public int startFrame = int.MinValue;
-        [SerializeField] public int endFrame = int.MaxValue;        
-        [SerializeField] public float AbcStartTime;
-        [SerializeField] public float AbcEndTime;
-        [SerializeField] public int AbcFrameCount;
+        [SerializeField] public double abcStartTime; // read only
+        [SerializeField] public double abcEndTime;   // read only
+        [SerializeField] public double startTime = double.MinValue;
+        [SerializeField] public double endTime = double.MaxValue;
         [SerializeField] public string importWarning;
         [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
         [SerializeField] public List<string> splittingMeshNames = new List<string>();
 
+        public static string MakeShortAssetPath(string assetPath)
+        {
+            return Regex.Replace(assetPath, "^Assets", "");
+        }
+
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var shortAssetPath = ctx.assetPath.Replace("Assets", "");
+            var shortAssetPath = MakeShortAssetPath(ctx.assetPath);
             AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
             var sourcePath = Application.dataPath + shortAssetPath;
             var destPath = Application.streamingAssetsPath + shortAssetPath;
             var directoryPath = Path.GetDirectoryName(destPath);
             if (!Directory.Exists(directoryPath))
-            {
                 Directory.CreateDirectory(directoryPath);
-            }
             if (File.Exists(destPath))
                 File.SetAttributes(destPath, FileAttributes.Normal);
             File.Copy(sourcePath, destPath ,true);
 
             var fileName = Path.GetFileNameWithoutExtension(destPath);
             var go = new GameObject(fileName);
-            go.transform.localScale *= scaleFactor;
             
-            AlembicStreamDescriptor streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+            var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
             streamDescriptor.pathToAbc = shortAssetPath;
             streamDescriptor.settings = streamSettings;
@@ -106,29 +122,22 @@ namespace UTJ.Alembic
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
                 abcStream.AbcLoad();
-                AbcStartTime = abcStream.AbcStartTime;
-                AbcEndTime = abcStream.AbcEndTime;
-                AbcFrameCount = abcStream.AbcFrameCount;
 
-                startFrame = startFrame < 0 ? 0 : startFrame;
-                endFrame = endFrame > AbcFrameCount-1 ? AbcFrameCount-1 : endFrame;
-
-                streamDescriptor.minFrame = startFrame;
-                streamDescriptor.maxFrame = endFrame;
-                streamDescriptor.abcFrameCount = AbcFrameCount;
-                streamDescriptor.abcDuration = AbcEndTime - AbcStartTime;
-                streamDescriptor.abcStartTime = AbcStartTime;
+                var tr = abcStream.abcTimeRange;
+                streamDescriptor.abcStartTime = abcStartTime = startTime = tr.startTime;
+                streamDescriptor.abcEndTime = abcEndTime = endTime = tr.endTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.streamDescriptor = streamDescriptor;
-                streamPlayer.startFrame = startFrame;
-                streamPlayer.endFrame = endFrame;
+                streamPlayer.startTime = startTime;
+                streamPlayer.endTime = endTime;
 
-                AddObjectToAsset(ctx,streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(ctx, abcStream.alembicTreeRoot,streamDescriptor);
+                var subassets = new Subassets(ctx);
+                subassets.Add(streamDescriptor.name, streamDescriptor);
+                GenerateSubAssets(subassets, abcStream.m_abcTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
-           
+
 #if UNITY_2017_3_OR_NEWER
                 ctx.AddObjectToAsset(go.name, go);
                 ctx.SetMainObject(go);
@@ -138,76 +147,148 @@ namespace UTJ.Alembic
             }  
         }
 
-        private void GenerateSubAssets( AssetImportContext ctx,AlembicTreeNode root,AlembicStreamDescriptor streamDescr)
+        class Subassets
         {
-            var material = new Material(Shader.Find("Standard"));
-            AddObjectToAsset(ctx,"Default Material", material);
+            AssetImportContext m_ctx;
+            Material m_defaultMaterial;
+            Material m_defaultPointsMaterial;
+            Material m_defaultPointsMotionVectorMaterial;
 
-            if (streamDescr.Duration>0)
+            public Subassets(AssetImportContext ctx)
             {
-                Keyframe[] frames = new Keyframe[2];
+                m_ctx = ctx;
+            }
+
+            public Material defaultMaterial
+            {
+                get
+                {
+                    if (m_defaultMaterial == null)
+                    {
+                        m_defaultMaterial = new Material(Shader.Find("Alembic/Standard"));
+                        m_defaultMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultMaterial.name = "Default Material";
+                        Add("Default Material", m_defaultMaterial);
+                    }
+                    return m_defaultMaterial;
+                }
+            }
+
+            public Material pointsMaterial
+            {
+                get
+                {
+                    if (m_defaultPointsMaterial == null)
+                    {
+                        m_defaultPointsMaterial = new Material(Shader.Find("Alembic/Points Standard"));
+                        m_defaultPointsMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultPointsMaterial.name = "Default Points";
+                        Add("Default Points", m_defaultPointsMaterial);
+                    }
+                    return m_defaultPointsMaterial;
+                }
+            }
+
+            public Material pointsMotionVectorMaterial
+            {
+                get
+                {
+                    if (m_defaultPointsMotionVectorMaterial == null)
+                    {
+                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/PointsMotionVectors"));
+                        m_defaultPointsMotionVectorMaterial.hideFlags = HideFlags.NotEditable;
+                        m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
+                        Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
+                    }
+                    return m_defaultPointsMotionVectorMaterial;
+                }
+            }
+
+            public void Add(string identifier, Object asset)
+            {
+#if UNITY_2017_3_OR_NEWER
+                m_ctx.AddObjectToAsset(identifier, asset);
+#else
+                m_ctx.AddSubAsset(identifier, asset);
+#endif
+            }
+        }
+
+        private void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
+        {
+            if (streamDescr.duration > 0)
+            {
+                var frames = new Keyframe[2];
                 frames[0].value = 0.0f;
                 frames[0].time = 0.0f;
-                frames[0].tangentMode = (int)AnimationUtility.TangentMode.Linear;
                 frames[0].outTangent = 1.0f;
-                frames[1].value = streamDescr.Duration;
-                frames[1].time = streamDescr.Duration;
-                frames[1].tangentMode = (int)AnimationUtility.TangentMode.Linear;
+                frames[1].value = (float)streamDescr.duration;
+                frames[1].time = (float)streamDescr.duration;
                 frames[1].inTangent = 1.0f;
-                AnimationCurve curve = new AnimationCurve(frames); 
-                var animationClip = new AnimationClip();
-                animationClip.SetCurve("",typeof(AlembicStreamPlayer),"currentTime",curve);
-                animationClip.name = root.linkedGameObj.name + "_Clip";
 
-                AddObjectToAsset(ctx,"Default Animation", animationClip);
+                var curve = new AnimationCurve(frames);
+                AnimationUtility.SetKeyLeftTangentMode(curve, 0, AnimationUtility.TangentMode.Linear);
+                AnimationUtility.SetKeyRightTangentMode(curve, 1, AnimationUtility.TangentMode.Linear);
+
+                var animationClip = new AnimationClip();
+                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
+                animationClip.name = root.linkedGameObj.name + "_Clip";
+                animationClip.hideFlags = HideFlags.NotEditable;
+
+                subassets.Add("Default Animation", animationClip);
             }
             varyingTopologyMeshNames = new List<string>();
             splittingMeshNames = new List<string>();
 
-            CollectSubAssets(ctx, root, material);
-            
+            CollectSubAssets(subassets, root);
+
             streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
         }
 
-        private void CollectSubAssets(AssetImportContext ctx, AlembicTreeNode node,  Material mat)
+        private void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
-            AlembicMesh mesh = node.GetAlembicObj<AlembicMesh>();
-            if (mesh!=null)
+            var mesh = node.GetAlembicObj<AlembicMesh>();
+            if (mesh != null)
             {
-                if ((streamSettings.shareVertices || streamSettings.treatVertexExtraDataAsStatics) && 
-                    mesh.summary.topologyVariance == AbcAPI.aiTopologyVariance.Heterogeneous)
-                {
-                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);   
-                }
-                else if (streamSettings.shareVertices && mesh.sampleSummary.splitCount > 1)
-                {
+                var sum = mesh.summary;
+                if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
+                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);
+                else if (mesh.sampleSummary.splitCount > 1)
                     splittingMeshNames.Add(node.linkedGameObj.name);
-                }
             }
 
+            int submeshCount = 0;
             var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
             if (meshFilter != null)
             {
                 var m = meshFilter.sharedMesh;
+                submeshCount = m.subMeshCount;
                 m.name = node.linkedGameObj.name;
-                AddObjectToAsset(ctx,m.name, m);
+                subassets.Add(m.name, m);
             }
 
             var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();
             if (renderer != null)
-                renderer.sharedMaterial = mat;
+            {
+                var mats = new Material[submeshCount];
+                for (int i = 0; i < submeshCount; ++i)
+                    mats[i] = subassets.defaultMaterial;
+                renderer.sharedMaterials = mats;
+            }
 
-            foreach( var child in node.children )
-                CollectSubAssets(ctx, child, mat);
-        }
+            var apr = node.linkedGameObj.GetComponent<AlembicPointsRenderer>();
+            if (apr != null)
+            {
+                var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
+                DestroyImmediate(cubeGO);
 
-        private static void AddObjectToAsset(AssetImportContext ctx,string identifier, Object asset)
-        {
-#if UNITY_2017_3_OR_NEWER
-            ctx.AddObjectToAsset(identifier, asset);
-#else
-            ctx.AddSubAsset(identifier, asset);
-#endif
+                apr.sharedMaterials = new Material[] { subassets.pointsMaterial };
+                apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
+            }
+
+            foreach ( var child in node.children)
+                CollectSubAssets(subassets, child);
         }
     }
 }

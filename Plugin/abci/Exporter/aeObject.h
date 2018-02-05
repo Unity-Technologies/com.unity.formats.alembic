@@ -29,23 +29,26 @@ public:
     virtual abcObject&  getAbcObject();
     virtual abcProperties getAbcProperties();
 
-    /// T: aeCamera, aeXForm, aePoint, aePolyMesh
-    template<class T> T*    newChild(const char *name, uint32_t tsi = 1);
+    /// T: aeCamera, aeXform, aePoint, aePolyMesh
+    template<class T> T*    newChild(const char *name, uint32_t tsi = 0);
     void                    removeChild(aeObject *c);
 
     /// T: abcFloatArrayProperty, abcFloatProperty, etc
     template<class T>
-    aeProperty*             newProperty(const char *name, uint32_t tsi = 1);
+    aeProperty*             newProperty(const char *name, uint32_t tsi = 0);
 
     virtual size_t  getNumSamples();
     virtual void    setFromPrevious();
 
 protected:
-    typedef std::unique_ptr<aeProperty> aePropertyPtr;
-    aeContext                   *m_ctx = nullptr;
-    aeObject                    *m_parent = nullptr;
-    uint32_t                    m_tsi = 0;
-    std::unique_ptr<abcObject>  m_abc;
-    std::vector<aePropertyPtr>  m_properties;
-    std::vector<aeObject*>      m_children;
+    using aePropertyPtr = std::unique_ptr<aeProperty>;
+    using abcObjectPtr = std::unique_ptr<abcObject>;
+    using ObjectPtr = std::unique_ptr<aeObject>;
+
+    aeContext       *m_ctx = nullptr;
+    aeObject        *m_parent = nullptr;
+    uint32_t        m_tsi = 0;
+    abcObjectPtr    m_abc;
+    std::vector<aePropertyPtr> m_properties;
+    std::vector<ObjectPtr>     m_children;
 };

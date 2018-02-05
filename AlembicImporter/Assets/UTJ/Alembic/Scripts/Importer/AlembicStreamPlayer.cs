@@ -5,85 +5,96 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
-        public AlembicStream Stream;
+        // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
+        public AlembicStream abcStream;
         public AlembicStreamDescriptor streamDescriptor;
-        [SerializeField] public float currentTime;
-        [SerializeField] public int startFrame;
-        [SerializeField] public int endFrame;
-        [SerializeField] public float vertexMotionScale = 1.0f;
-        [SerializeField] public bool interpolateSamples = true;
-        float m_LastUpdateTime;
-        bool m_ForceUpdate = false;
+        public double startTime = double.MinValue;
+        public double endTime = double.MaxValue;
+        public float currentTime;
+        public float vertexMotionScale = 1.0f;
+        public bool asyncLoad = true;
+        float lastUpdateTime;
+        bool forceUpdate = false;
+        bool updateStarted = false;
 
-        public float Duration
+        public double duration { get { return endTime - startTime; } }
+
+        void Start()
         {
-            get
-            {
-               return (endFrame- startFrame) * streamDescriptor.FrameLength;
-            }
+            OnValidate();
         }
 
         void OnValidate()
         {
-            if (streamDescriptor == null) return;
-            if (startFrame < streamDescriptor.minFrame) startFrame = streamDescriptor.minFrame;
-            if (startFrame > streamDescriptor.maxFrame) startFrame = streamDescriptor.maxFrame;
-            if (endFrame < startFrame) endFrame = startFrame; 
-            if (endFrame > streamDescriptor.maxFrame) endFrame = streamDescriptor.maxFrame;    
+            if (streamDescriptor == null || abcStream == null)
+                return;
+            if (streamDescriptor.abcStartTime == double.MinValue)
+                streamDescriptor.abcStartTime = abcStream.abcTimeRange.startTime;
+            if (streamDescriptor.abcEndTime == double.MaxValue)
+                streamDescriptor.abcEndTime = abcStream.abcTimeRange.endTime;
+            startTime = Mathf.Clamp((float)startTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
+            endTime = Mathf.Clamp((float)endTime, (float)startTime, (float)streamDescriptor.abcEndTime);
             ClampTime();
-            m_ForceUpdate = true;
-        } 
+            forceUpdate = true;
+        }
 
-        void LateUpdate()
+        void Update()
         {
-            if (Stream != null && streamDescriptor != null)
+            if (abcStream == null || streamDescriptor == null)
+                return;
+
+            ClampTime();
+            if (lastUpdateTime != currentTime || forceUpdate)
             {
-                ClampTime();
-                if (m_LastUpdateTime != currentTime || m_ForceUpdate)
+                abcStream.vertexMotionScale = vertexMotionScale;
+                abcStream.asyncLoad = asyncLoad;
+                if (abcStream.AbcUpdateBegin(startTime + currentTime))
                 {
-                    if (Stream.AbcUpdate(currentTime + startFrame * streamDescriptor.FrameLength + streamDescriptor.abcStartTime, vertexMotionScale, interpolateSamples))
-                    {
-                        m_LastUpdateTime = currentTime;
-                        m_ForceUpdate = false;    
-                    }
-                    else
-                    {
-                        Stream.Dispose();
-                        LoadStream();
-                    }
+                    lastUpdateTime = currentTime;
+                    forceUpdate = false;
+                    updateStarted = true;
+                }
+                else
+                {
+                    abcStream.Dispose();
+                    abcStream = null;
+                    LoadStream();
                 }
             }
         }
 
+        void LateUpdate()
+        {
+            if (!updateStarted)
+                return;
+            updateStarted = false;
+            abcStream.AbcUpdateEnd();
+        }
+
         private void ClampTime()
         {
-            float duration = Duration;
-            if (duration == .0f || currentTime < .0f)
-                currentTime = .0f;
-            else if (currentTime > duration)
-                currentTime = duration;
+            currentTime = Mathf.Clamp((float)currentTime, 0.0f, (float)duration);
         }
 
         public void LoadStream()
         {
-            if (streamDescriptor == null) return;
-            Stream = new AlembicStream(gameObject, streamDescriptor);
-            Stream.AbcLoad();
-            m_ForceUpdate = true;
+            if (streamDescriptor == null)
+                return;
+            abcStream = new AlembicStream(gameObject, streamDescriptor);
+            abcStream.AbcLoad();
+            forceUpdate = true;
         }
 
         void OnEnable()
         {
-            if (Stream == null)
-            {
+            if (abcStream == null)
                 LoadStream();
-            }
         }
 
         public void OnDestroy()
         {
-            if (Stream != null)
-                Stream.Dispose();
+            if (abcStream != null)
+                abcStream.Dispose();
         }
 
         public void OnApplicationQuit()

@@ -1,34 +1,33 @@
 #pragma once
 
-class aiCameraSample : public aiSampleBase
+class aiCameraSample : public aiSample
 {
-typedef aiSampleBase super;
+using super = aiSample;
 public:
     aiCameraSample(aiCamera *schema);
-    
-    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
 
-    void getData(aiCameraData &outData) const;
-    
+    void getData(aiCameraData &dst) const;
+
 public:
-    AbcGeom::CameraSample m_sample;
-    AbcGeom::CameraSample m_nextSample;
+    AbcGeom::CameraSample m_sample, m_next_sample;
+    aiCameraData m_data;
 };
 
 
 struct aiCameraTraits
 {
-    typedef aiCameraSample SampleT;
-    typedef AbcGeom::ICameraSchema AbcSchemaT;
+    using SampleT = aiCameraSample;
+    using AbcSchemaT = AbcGeom::ICameraSchema;
 };
 
 
 class aiCamera : public aiTSchema<aiCameraTraits>
 {
-typedef aiTSchema<aiCameraTraits> super;
+using super = aiTSchema<aiCameraTraits>;
 public:
-    aiCamera(aiObject *obj);
+    aiCamera(aiObject *parent, const abcObject &abc);
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
+    Sample* newSample() override;
+    void readSample(Sample& sample, uint64_t idx) override;
+    void cookSample(Sample& sample) override;
 };

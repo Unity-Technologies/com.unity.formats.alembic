@@ -1,16 +1,16 @@
 #pragma once
 
-class aeXForm : public aeObject
+class aeXform : public aeObject
 {
-typedef aeObject super;
+using super = aeObject;
 public:
-    aeXForm(aeObject *parent, const char *name, uint32_t tsi);
-    abcXForm& getAbcObject() override;
+    aeXform(aeObject *parent, const char *name, uint32_t tsi);
+    abcXform& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
     size_t  getNumSamples() override;
     void    setFromPrevious() override;
-    void    writeSample(const aeXFormData &data);
+    void    writeSample(const aeXformData &data);
 
 private:
     AbcGeom::OXformSchema m_schema;

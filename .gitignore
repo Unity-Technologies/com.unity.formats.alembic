@@ -20,6 +20,7 @@
 *.dll
 *.so
 *.dylib
+*.unitypackage
 
 release/
 debug/
@@ -33,6 +34,10 @@ excons.cache
 
 AlembicImporter/*.csproj
 AlembicImporter/*.sln
+AlembicImporter/Assets/UTJ/NormalPainter*
+AlembicImporter/Assets/UTJ/BlendShapeBuilder*
+AlembicImporter/Assets/UTJ/VertexTweaker*
+AlembicImporter/Assets/PostProcessing*
 .vs/
 Library/
 Temp/

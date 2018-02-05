@@ -12,14 +12,10 @@ namespace UTJ.Alembic
         {
             public const int size = 32;
 
-            [FieldOffset(0)]
-            public Vector3 position;
-            [FieldOffset(0)]
-            public Vector4 position4;
-            [FieldOffset(16)]
-            public Vector3 velocity;
-            [FieldOffset(16)]
-            public Vector4 velocity4;
+            [FieldOffset(0)] public Vector3 position;
+            [FieldOffset(0)] public Vector4 position4;
+            [FieldOffset(16)] public Vector3 velocity;
+            [FieldOffset(16)] public Vector4 velocity4;
         }
 
 

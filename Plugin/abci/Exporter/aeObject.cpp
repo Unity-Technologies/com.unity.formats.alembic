@@ -22,11 +22,11 @@ aeProperty::~aeProperty()
 template<class T>
 class aeTArrayProprty : public aeProperty
 {
-typedef aeProperty super;
+using super = aeProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
-    typedef typename T::sample_type sample_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
+    using sample_type = typename T::sample_type;
 
     aeTArrayProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
@@ -59,10 +59,10 @@ template class aeTArrayProprty<abcFloat4x4ArrayProperty>;
 template<class T>
 class aeTScalarProprty : public aeProperty
 {
-    typedef aeProperty super;
+using super = aeProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
 
     aeTScalarProprty(aeObject *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
@@ -96,28 +96,25 @@ aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t ts
     , m_abc(abc)
     , m_tsi(tsi)
 {
-    abciDebugLog("aeObject::aeObject() %s", getName());
 }
 
 aeObject::~aeObject()
 {
-    abciDebugLog("aeObject::~aeObject() %s", getName());
-
-    while (!m_children.empty()) {
-        delete m_children.back();
-    }
     m_properties.clear();
-
-    if (m_parent != nullptr) {
-        m_parent->removeChild(this);
+    if(!m_children.empty()) {
+        // make m_children empty before deleting children because children try to remove element of it in their destructor
+        decltype(m_children) tmp;
+        tmp.swap(m_children);
     }
+    if (m_parent)
+        m_parent->removeChild(this);
 }
 
 const char* aeObject::getName() const               { return m_abc->getName().c_str(); }
 const char* aeObject::getFullName() const           { return m_abc->getFullName().c_str(); }
 uint32_t    aeObject::getTimeSamplingIndex() const  { return m_tsi; }
 size_t      aeObject::getNumChildren() const        { return m_children.size(); }
-aeObject*   aeObject::getChild(int i)               { return m_children[i]; }
+aeObject*   aeObject::getChild(int i)               { return m_children[i].get(); }
 aeObject*   aeObject::getParent()                   { return m_parent; }
 
 aeContext*          aeObject::getContext()          { return m_ctx; }
@@ -127,11 +124,11 @@ AbcGeom::OObject&   aeObject::getAbcObject()        { return *m_abc; }
 template<class T>
 T* aeObject::newChild(const char *name, uint32_t tsi)
 {
-    T* child = new T(this, name, tsi);
-    m_children.push_back(child);
+    T* child = new T(this, name, tsi == 0 ? getTimeSamplingIndex() : tsi);
+    m_children.emplace_back(child);
     return child;
 }
-template aeXForm*       aeObject::newChild<aeXForm>(const char *name, uint32_t tsi);
+template aeXform*       aeObject::newChild<aeXform>(const char *name, uint32_t tsi);
 template aeCamera*      aeObject::newChild<aeCamera>(const char *name, uint32_t tsi);
 template aePolyMesh*    aeObject::newChild<aePolyMesh>(const char *name, uint32_t tsi);
 template aePoints*      aeObject::newChild<aePoints>(const char *name, uint32_t tsi);
@@ -140,9 +137,8 @@ void aeObject::removeChild(aeObject *c)
 {
     if (c == nullptr) { return; }
 
-    auto it = std::find(m_children.begin(), m_children.end(), c);
-    if (it != m_children.end())
-    {
+    auto it = std::find_if(m_children.begin(), m_children.end(), [c](const ObjectPtr& o) { return o.get() == c; });
+    if (it != m_children.end()) {
         c->m_parent = nullptr;
         m_children.erase(it);
     }
@@ -178,7 +174,7 @@ aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
         return nullptr;
     }
 
-    auto *ret = aeMakeProperty<T>::make(this, name, tsi);
+    auto *ret = aeMakeProperty<T>::make(this, name, tsi == 0 ? getTimeSamplingIndex() : tsi);
     m_properties.emplace_back(aePropertyPtr(ret));
     return ret;
 }

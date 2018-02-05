@@ -5,51 +5,35 @@ namespace UTJ.Alembic
     [ExecuteInEditMode]
     public class AlembicCamera : AlembicElement
     {
-        public bool ignoreClippingPlanes = false;
+        aiCamera m_abcSchema;
+        aiCameraData m_abcData;
+        Camera m_camera;
+        bool m_ignoreClippingPlanes = false;
 
-        private Camera m_Camera;
-        private AbcAPI.aiCameraData m_AbcData;
-        private bool m_LastIgnoreClippingPlanes = false;
-
-        public override void AbcSetup(AbcAPI.aiObject abcObj,
-                                      AbcAPI.aiSchema abcSchema)
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
+            m_abcSchema = (aiCamera)abcSchema;
 
-            m_Camera = GetOrAddComponent<Camera>();
+            m_camera = GetOrAddComponent<Camera>();
         }
 
-        public override void AbcUpdateConfig()
+        public override void AbcSyncDataEnd()
         {
-            // nothing to do
-        }
+            if (!m_abcSchema.schema.isDataUpdated)
+                return;
 
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
-        {
-            AbcAPI.aiCameraGetData(sample, ref m_AbcData);
+            m_abcSchema.sample.GetData(ref m_abcData);
+            abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;
+            m_camera.fieldOfView = m_abcData.fieldOfView;
 
-            AbcDirty();
-        }
-
-        public override void AbcUpdate()
-        {
-            if (AbcIsDirty() || m_LastIgnoreClippingPlanes != ignoreClippingPlanes)
+            if (!m_ignoreClippingPlanes)
             {
-                AlembicTreeNode.linkedGameObj.transform.forward = -AlembicTreeNode.linkedGameObj.transform.parent.forward;
-                m_Camera.fieldOfView = m_AbcData.fieldOfView;
-
-                if (!ignoreClippingPlanes)
-                {
-                    m_Camera.nearClipPlane = m_AbcData.nearClippingPlane;
-                    m_Camera.farClipPlane = m_AbcData.farClippingPlane;
-                }
-
-                // no use for focusDistance and focalLength yet (could be usefull for DoF component)
-
-                AbcClean();
-
-                m_LastIgnoreClippingPlanes = ignoreClippingPlanes;
+                m_camera.nearClipPlane = m_abcData.nearClippingPlane;
+                m_camera.farClipPlane = m_abcData.farClippingPlane;
             }
+
+            // no use for focusDistance and focalLength yet (could be usefull for DoF component)
         }
     }
 }

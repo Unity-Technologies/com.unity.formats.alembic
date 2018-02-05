@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 #include <map>
 #include <set>
 #include <vector>
@@ -7,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 #include <functional>
 #include <limits>
 #include <sstream>
@@ -23,8 +25,12 @@
 
 #if defined(abciDebug) || defined(abciDebugLog)
     #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
+    #define DebugWarning(...) aiLogger::Warning(__VA_ARGS__)
+    #define DebugError(...) aiLogger::Error(__VA_ARGS__)
 #else
     #define DebugLog(...)
+#define DebugWarning(...)
+#define DebugError(...)
 #endif
 
 #ifdef _WIN32
@@ -39,13 +45,14 @@ using namespace Alembic;
 
 #define aiPI 3.14159265f
 
-typedef Imath::V2f      abcV2;
-typedef Imath::V3f      abcV3;
-typedef Imath::V3d      abcV3d;
-typedef Imath::V4f      abcV4;
-typedef Imath::M44f     abcM44;
-typedef Imath::M44d     abcM44d;
-typedef Imath::Box3f    abcBox;
-typedef Imath::Box3d    abcBoxd;
-typedef Abc::chrono_t   abcChrono;
-typedef Abc::ISampleSelector abcSampleSelector;
+using abcV2 = Imath::V2f;
+using abcV3 = Imath::V3f;
+using abcV3d = Imath::V3d;
+using abcV4 = Imath::V4f;
+using abcC4 = Imath::C4f;
+using abcM44 = Imath::M44f;
+using abcM44d = Imath::M44d;
+using abcBox = Imath::Box3f;
+using abcBoxd = Imath::Box3d;
+using abcChrono = Abc::chrono_t;
+using abcSampleSelector = Abc::ISampleSelector;

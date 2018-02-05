@@ -9,7 +9,7 @@ public class AlembicForUnityPackaging
     {
         string[] files = new string[]
         {
-"Assets/UTJ",
+"Assets/UTJ/Alembic",
         };
         AssetDatabase.ExportPackage(files, "AlembicForUnity.unitypackage", ExportPackageOptions.Recurse);
     }

@@ -4,36 +4,25 @@ namespace UTJ.Alembic
 {
     public class AlembicLight : AlembicElement
     {
-        public override void AbcSetup(AbcAPI.aiObject abcObj, AbcAPI.aiSchema abcSchema)
+        aiSchema m_abcSchema;
+
+        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
+            m_abcSchema = abcSchema;
 
             Light light = GetOrAddComponent<Light>();
-
             // Disable component for now
             light.enabled = false;
         }
 
-        public override void AbcUpdateConfig()
-        {
-            // nothing to do
-        }
 
-        // No config override
-
-        public override void AbcSampleUpdated(AbcAPI.aiSample sample, bool topologyChanged)
+        public override void AbcSyncDataEnd()
         {
+            if (!m_abcSchema.isDataUpdated)
+                return;
+
             // ToDo
-        }
-
-        public override void AbcUpdate()
-        {
-            if (AbcIsDirty())
-            {
-                // ToDo
-
-                AbcClean();
-            }
         }
     }
 }

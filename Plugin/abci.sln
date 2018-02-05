@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "abci", "abci.vcxproj", "{08361722-5520-47AC-A0C2-31E8A062B73F}"
 EndProject
@@ -25,11 +25,11 @@ Global
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.ActiveCfg = Master|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.Build.0 = Master|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.Master|x64.Deploy.0 = Master|x64
-		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.Build.0 = Debug|Win32
-		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|x64.ActiveCfg = Debug|x64
-		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|x64.Build.0 = Debug|x64
-		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|Win32.ActiveCfg = Master|Win32
+		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.ActiveCfg = Master|x64
+		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|Win32.Build.0 = Master|x64
+		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|x64.ActiveCfg = Master|x64
+		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Debug|x64.Build.0 = Master|x64
+		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|Win32.ActiveCfg = Master|x64
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|x64.ActiveCfg = Master|x64
 		{1C5DE91B-7AE9-4304-9FA1-0DE1ABA8C02D}.Master|x64.Build.0 = Master|x64
 	EndGlobalSection

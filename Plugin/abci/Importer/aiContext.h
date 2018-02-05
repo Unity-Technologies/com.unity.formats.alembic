@@ -1,33 +1,32 @@
 #pragma once
-#include "aiThreadPool.h"
+using abcObject = AbcGeom::IObject;
+using abcXform = AbcGeom::IXform;
+using abcCamera = AbcGeom::ICamera;
+using abcPolyMesh = AbcGeom::IPolyMesh;
+using abcPoints = AbcGeom::IPoints;
+using abcProperties = AbcGeom::ICompoundProperty;
 
-typedef AbcGeom::IObject            abcObject;
-typedef AbcGeom::IXform             abcXForm;
-typedef AbcGeom::ICamera            abcCamera;
-typedef AbcGeom::IPolyMesh          abcPolyMesh;
-typedef AbcGeom::IPoints            abcPoints;
-typedef AbcGeom::ICompoundProperty  abcProperties;
+using abcBoolProperty = Abc::IBoolProperty;
+using abcIntProperty = Abc::IInt32Property;
+using abcUIntProperty = Abc::IUInt32Property;
+using abcFloatProperty = Abc::IFloatProperty;
+using abcFloat2Property = Abc::IV2fProperty;
+using abcFloat3Property = Abc::IV3fProperty;
+using abcFloat4Property = Abc::IC4fProperty;
+using abcFloat4x4Property = Abc::IM44fProperty;
 
-typedef Abc::IBoolProperty          abcBoolProperty;
-typedef Abc::IInt32Property         abcIntProperty;
-typedef Abc::IUInt32Property        abcUIntProperty;
-typedef Abc::IFloatProperty         abcFloatProperty;
-typedef Abc::IV2fProperty           abcFloat2Property;
-typedef Abc::IV3fProperty           abcFloat3Property;
-typedef Abc::IC4fProperty           abcFloat4Property;
-typedef Abc::IM44fProperty          abcFloat4x4Property;
-
-typedef Abc::IBoolArrayProperty     abcBoolArrayProperty;
-typedef Abc::IInt32ArrayProperty    abcIntArrayProperty;
-typedef Abc::IUInt32ArrayProperty   abcUIntArrayProperty;
-typedef Abc::IFloatArrayProperty    abcFloatArrayProperty;
-typedef Abc::IV2fArrayProperty      abcFloat2ArrayProperty;
-typedef Abc::IV3fArrayProperty      abcFloat3ArrayProperty;
-typedef Abc::IC4fArrayProperty      abcFloat4ArrayProperty;
-typedef Abc::IM44fArrayProperty     abcFloat4x4ArrayProperty;
+using abcBoolArrayProperty = Abc::IBoolArrayProperty;
+using abcIntArrayProperty = Abc::IInt32ArrayProperty;
+using abcUIntArrayProperty = Abc::IUInt32ArrayProperty;
+using abcFloatArrayProperty = Abc::IFloatArrayProperty;
+using abcFloat2ArrayProperty = Abc::IV2fArrayProperty;
+using abcFloat3ArrayProperty = Abc::IV3fArrayProperty;
+using abcFloat4ArrayProperty = Abc::IC4fArrayProperty;
+using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 
 class aiObject;
-std::string ToString(const aiConfig &conf);
+class aiAsync;
+
 
 class aiContextManager
 {
@@ -35,46 +34,49 @@ public:
     static aiContext* getContext(int uid);
     static void destroyContext(int uid);
     static void destroyContextsWithPath(const char* assetPath);
+
 private:
     ~aiContextManager();
-    std::map<int, aiContext*> m_contexts;
-    static aiContextManager ms_instance;
+
+    using ContextPtr = std::unique_ptr<aiContext>;
+    std::map<int, ContextPtr> m_contexts;
+    static aiContextManager s_instance;
 };
 
 
 class aiContext
 {
 public:
+    static std::string normalizePath(const char *path);
+
+public:
     explicit aiContext(int uid=-1);
     ~aiContext();
-    
+
     bool load(const char *path);
-    
+
     const aiConfig& getConfig() const;
     void setConfig(const aiConfig &config);
 
     aiObject* getTopObject() const;
-    void destroyObject(aiObject *obj);
-
-    float getStartTime() const;
-    float getEndTime() const;
-    int getFrameCount() const;
-    void cacheAllSamples();
-    void updateSamples(float time);
+    void updateSamples(double time);
 
     Abc::IArchive getArchive() const;
     const std::string& getPath() const;
     int getUid() const;
 
-    int getNumTimeSamplings();
-    void getTimeSampling(int i, aiTimeSamplingData& dst);
-    void copyTimeSampling(int i, aiTimeSamplingData& dst);
+    int getTimeRangeCount() const;
+    void getTimeRange(int tsi, aiTimeRange& dst) const;
+
+    int getTimeSamplingCount();
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
     template<class F>
     void eachNodes(const F &f);
 
-    static std::string normalizePath(const char *path);
+    void queueAsync(aiAsync& task);
+    void waitAsync();
+
 private:
     static void gatherNodesRecursive(aiObject *n);
     void reset();
@@ -82,11 +84,12 @@ private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
-    aiTaskGroup m_tasks;
-    double m_timeRange[2] = {-0.0, -0.0};
-    uint64_t m_numFrames = 0;
+    aiTimeRange m_time_range_unified;
+    std::vector<aiTimeRange> m_time_ranges;
     int m_uid = 0;
     aiConfig m_config;
+
+    std::vector<aiAsync*> m_async_tasks;
 };
 
 #include "aiObject.h"
@@ -94,7 +97,6 @@ private:
 template<class F>
 inline void aiContext::eachNodes(const F &f)
 {
-    if (m_top_node) {
-        m_top_node->eachChildrenRecursive(f);
-    }
+    if (m_top_node)
+        m_top_node->eachChildRecursive(f);
 }

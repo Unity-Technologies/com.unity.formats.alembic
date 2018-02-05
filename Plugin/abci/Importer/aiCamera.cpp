@@ -11,91 +11,72 @@ aiCameraSample::aiCameraSample(aiCamera *schema)
 {
 }
 
-void aiCameraSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
+void aiCameraSample::getData(aiCameraData &dst) const
 {
-    DebugLog("aiCameraSample::updateConfig()");
-    
-    topoChanged = false;
-    dataChanged = (config.aspectRatio != m_config.aspectRatio);
-    
-    m_config = config;
-}
-
-void aiCameraSample::getData(aiCameraData &outData) const
-{
-    // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
-    DebugLog("aiCameraSample::getData()");
-    static float sRad2Deg = 180.0f / float(M_PI);
-    float focalLength = (float)m_sample.getFocalLength();
-    float verticalAperture = (float)m_sample.getVerticalAperture();
-    if (m_config.aspectRatio > 0.0f)
-    {
-        verticalAperture = (float)m_sample.getHorizontalAperture() / m_config.aspectRatio;
-    }
-    
-    outData.nearClippingPlane = (float)m_sample.getNearClippingPlane();
-    outData.farClippingPlane = (float)m_sample.getFarClippingPlane();
-    outData.fieldOfView = 2.0f * atanf(verticalAperture * 10.0f / (2.0f * focalLength)) * sRad2Deg;
-
-    outData.focusDistance = (float)m_sample.getFocusDistance();
-    outData.focalLength = focalLength;
-    outData.aperture = verticalAperture;
-    outData.aspectRatio = float(m_sample.getHorizontalAperture() / verticalAperture);
-
-    if (m_config.interpolateSamples && m_currentTimeOffset != 0)
-    {
-        float timeOffset = (float)m_currentTimeOffset;
-        float focalLength2 = (float)m_nextSample.getFocalLength();
-        float verticalAperture2 = (float)m_nextSample.getVerticalAperture();
-        if (m_config.aspectRatio > 0.0f)
-        {
-            verticalAperture2 = (float)m_nextSample.getHorizontalAperture() / m_config.aspectRatio;
-        }
-        
-        float fov2 = 2.0f * atanf(verticalAperture2 * 10.0f / (2.0f * focalLength2)) * sRad2Deg;
-        outData.nearClippingPlane += timeOffset * (float)(m_nextSample.getNearClippingPlane() - m_sample.getNearClippingPlane());
-        outData.farClippingPlane += timeOffset * (float)(m_nextSample.getFarClippingPlane() - m_sample.getFarClippingPlane());
-        outData.fieldOfView += timeOffset * (fov2 - outData.fieldOfView);
-
-        outData.focusDistance += timeOffset * (float)(m_nextSample.getFocusDistance() - m_sample.getFocusDistance());
-        outData.focalLength += timeOffset * (focalLength2 - focalLength);
-        outData.aperture += timeOffset * (verticalAperture2 - verticalAperture);
-        outData.aspectRatio += timeOffset * (float(m_nextSample.getHorizontalAperture() / verticalAperture2) - outData.aspectRatio);
-    }
-    if (outData.nearClippingPlane==.0f)
-    {
-        outData.nearClippingPlane = 0.01f;
-    }
+    dst = m_data;
 }
 
 
-aiCamera::aiCamera(aiObject *obj)
-    : super(obj)
+aiCamera::aiCamera(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
 }
 
 aiCamera::Sample* aiCamera::newSample()
 {
-    Sample *sample = getSample();
-    
-    if (!sample)
-    {
-        sample = new Sample(this);
-    }
-    
-    return sample;
+    return new Sample(this);
 }
 
-aiCamera::Sample* aiCamera::readSample(const uint64_t idx, bool &topologyChanged)
+void aiCamera::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiCamera::readSample(t=%d)", idx);
-    
-    Sample *ret = newSample();
-    
-    m_schema.get(ret->m_sample, ss);
-    m_schema.get(ret->m_nextSample, ss2);
 
-    return ret;
+    m_schema.get(sample.m_sample, ss);
+    m_schema.get(sample.m_next_sample, ss2);
+}
+
+void aiCamera::cookSample(Sample& sample)
+{
+    auto& config = getConfig();
+    auto& cs = sample.m_sample;
+    auto& cs_next = sample.m_next_sample;
+    auto& dst = sample.m_data;
+
+    // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
+    static float sRad2Deg = 180.0f / float(M_PI);
+    float focal_length = (float)cs.getFocalLength();
+    float vertical_aperture = (float)cs.getVerticalAperture();
+    if (config.aspect_ratio > 0.0f)
+        vertical_aperture = (float)cs.getHorizontalAperture() / config.aspect_ratio;
+
+    dst.near_clipping_plane = (float)cs.getNearClippingPlane();
+    dst.far_clipping_plane = (float)cs.getFarClippingPlane();
+    dst.field_of_view = 2.0f * atanf(vertical_aperture * 10.0f / (2.0f * focal_length)) * sRad2Deg;
+
+    dst.focus_distance = (float)cs.getFocusDistance();
+    dst.focal_length = focal_length;
+    dst.aperture = vertical_aperture;
+    dst.aspect_ratio = float(cs.getHorizontalAperture() / vertical_aperture);
+
+    if (config.interpolate_samples && m_current_time_offset != 0) {
+        float time_offset = (float)m_current_time_offset;
+        float focal_length2 = (float)cs_next.getFocalLength();
+        float vertical_aperture2 = (float)cs_next.getVerticalAperture();
+        if (config.aspect_ratio > 0.0f)
+            vertical_aperture2 = (float)cs_next.getHorizontalAperture() / config.aspect_ratio;
+
+        float fov2 = 2.0f * atanf(vertical_aperture2 * 10.0f / (2.0f * focal_length2)) * sRad2Deg;
+        dst.near_clipping_plane += time_offset * (float)(cs_next.getNearClippingPlane() - cs.getNearClippingPlane());
+        dst.far_clipping_plane += time_offset * (float)(cs_next.getFarClippingPlane() - cs.getFarClippingPlane());
+        dst.field_of_view += time_offset * (fov2 - dst.field_of_view);
+
+        dst.focus_distance += time_offset * (float)(cs_next.getFocusDistance() - cs.getFocusDistance());
+        dst.focal_length += time_offset * (focal_length2 - focal_length);
+        dst.aperture += time_offset * (vertical_aperture2 - vertical_aperture);
+        dst.aspect_ratio += time_offset * (float(cs_next.getHorizontalAperture() / vertical_aperture2) - dst.aspect_ratio);
+    }
+
+    if (dst.near_clipping_plane == 0.0f)
+        dst.near_clipping_plane = 0.01f;
 }

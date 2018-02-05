@@ -8,11 +8,11 @@ namespace UTJ.Alembic
     public class ParticleEngineCapturer : AlembicCustomComponentCapturer
     {
         public bool m_captureVelocities = true;
-        AbcAPI.aeObject m_abc;
+        aeObject m_abc;
 
-        public override void CreateAbcObject(AbcAPI.aeObject parent)
+        public override void CreateAbcObject(aeObject parent)
         {
-            m_abc = AbcAPI.aeNewPoints(parent, gameObject.name);
+            m_abc = parent.NewPoints(gameObject.name);
         }
 
         public override void Capture()
@@ -21,7 +21,7 @@ namespace UTJ.Alembic
             var positions = target.positionBuffer;
             if (positions == null) { return; }
 
-            var data = new AbcAPI.aePointsData();
+            var data = default(aePointsData);
             data.count = positions.Length;
             data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             if(m_captureVelocities)
@@ -32,7 +32,7 @@ namespace UTJ.Alembic
                     data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
                 }
             }
-            AbcAPI.aePointsWriteSample(m_abc, ref data);
+            m_abc.WriteSample(ref data);
         }
 
     }

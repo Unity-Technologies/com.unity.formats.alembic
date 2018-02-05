@@ -6,6 +6,7 @@
 #include "aePoints.h"
 #include "aePolyMesh.h"
 #include "aeCamera.h"
+#include "../Foundation/aiMeshOps.h"
 
 
 abciAPI aeContext* aeCreateContext()
@@ -44,14 +45,22 @@ abciAPI void aeAddTime(aeContext* ctx, float time, int tsi)
     ctx->addTime(time, tsi);
 }
 
+abciAPI void aeMarkFrameBegin(aeContext* ctx)
+{
+    ctx->markFrameBegin();
+}
+abciAPI void aeMarkFrameEnd(aeContext* ctx)
+{
+    ctx->markFrameEnd();
+}
 
 abciAPI void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-abciAPI aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
+abciAPI aeXform* aeNewXform(aeObject *parent, const char *name, int tsi)
 {
-    return parent->newChild<aeXForm>(name, tsi);
+    return parent->newChild<aeXform>(name, tsi);
 }
 abciAPI aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
 {
@@ -80,9 +89,9 @@ abciAPI aeObject* aeGetParent(aeObject *obj)
     return obj->getParent();
 }
 
-abciAPI aeXForm* aeAsXForm(aeObject *obj)
+abciAPI aeXform* aeAsXform(aeObject *obj)
 {
-    return dynamic_cast<aeXForm*>(obj);
+    return dynamic_cast<aeXform*>(obj);
 }
 abciAPI aePoints* aeAsPoints(aeObject *obj)
 {
@@ -107,7 +116,7 @@ abciAPI void aeSetFromPrevious(aeObject *obj)
     obj->setFromPrevious();
 }
 
-abciAPI void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
+abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
 {
     obj->writeSample(*data);
 }
@@ -118,6 +127,14 @@ abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
 abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
     obj->writeSample(*data);
+}
+abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
+{
+    return obj->addFaceSet(name);
+}
+abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data)
+{
+    obj->writeFaceSetSample(fsi, *data);
 }
 abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
@@ -170,64 +187,23 @@ abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 }
 
 
-inline uint32_t hash(const abcV3& value)
-{
-    auto* h = (const uint32_t*)(&value);
-    uint32_t f = (h[0] + h[1] * 11 - (h[2] * 17)) & 0x7fffffff;
-    return (f >> 22) ^ (f >> 12) ^ (f);
-}
-inline int next_power_of_two(uint32_t v)
-{
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v + (v == 0);
-}
 abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
 {
-    const int NIL = -1;
-    int output_count = 0;
-    int hash_size = next_power_of_two(vertex_count);
-    RawVector<int> hash_table(hash_size + vertex_count);
-    int* next = &hash_table[hash_size];
+    int ret = 0;
 
-    memset(hash_table.data(), NIL, (hash_size) * sizeof(int));
-
-    for (int i = 0; i < vertex_count; i++)
-    {
-        auto& v = points[i];
-        uint32_t hash_value = hash(v) & (hash_size - 1);
-        int offset = hash_table[hash_value];
-        while (offset != NIL)
-        {
-            if (points[offset] == v)
-            {
-                if (!weights || weights[i] == weights[offset])
-                    break;
-            }
-            offset = next[offset];
-        }
-
-        if (offset == NIL)
-        {
-            remap[i] = output_count;
-            points[output_count] = v;
-            if (weights)
-                weights[output_count] = weights[i];
-
-            next[output_count] = hash_table[hash_value];
-            hash_table[hash_value] = output_count++;
-        }
-        else
-        {
-            remap[i] = offset;
-        }
+    MeshWelder welder;
+    if (weights) {
+        auto compare_op = [&](int vi, int ni) { return weights[vi] == weights[ni]; };
+        auto weld_op = [&](int vi, int ni) { weights[ni] = weights[vi]; };
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
     }
-    return output_count;
+    else {
+        auto compare_op = [&](int vi, int ni) { return true; };
+        auto weld_op = [&](int vi, int ni) {};
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
+    }
+    welder.getRemapTable().copy_to(remap);
+    return ret;
 }
 
 abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, const abcM44 *matrix)
