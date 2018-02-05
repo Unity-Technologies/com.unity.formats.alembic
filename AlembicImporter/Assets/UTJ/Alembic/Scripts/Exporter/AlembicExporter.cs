@@ -24,7 +24,6 @@ namespace UTJ.Alembic
         public bool m_fixDeltaTime = true;
 
         public bool m_ignoreDisabled = true;
-        public bool m_assumeTopologiesAreConstant = true;
         public bool m_assumeNonSkinnedMeshesAreConstant = true;
 
         public bool m_captureMeshRenderer = true;

@@ -70,7 +70,6 @@ namespace UTJ.Alembic
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
             t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
             t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
-            t.m_assumeTopologiesAreConstant = EditorGUILayout.Toggle("Assume Topologies Are Constant", t.m_assumeTopologiesAreConstant);
             t.m_assumeNonSkinnedMeshesAreConstant = EditorGUILayout.Toggle("Assume Non-Skinned Meshes Are Constant", t.m_assumeNonSkinnedMeshesAreConstant);
             GUILayout.Space(5);
 

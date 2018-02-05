@@ -42,7 +42,7 @@ namespace UTJ.Alembic
                 }
             }
 
-            public void Capture(Mesh mesh, bool topology,
+            public void Capture(Mesh mesh,
                 bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 points.LockList(ls => mesh.GetVertices(ls));
@@ -67,7 +67,6 @@ namespace UTJ.Alembic
                 else
                     colors.Clear();
 
-                if (topology)
                 {
                     int submeshCount = mesh.subMeshCount;
                     if (submeshCount == 1)
@@ -93,16 +92,11 @@ namespace UTJ.Alembic
                         }
                     }
                 }
-                else
-                {
-                    indices.Clear();
-                    facesets.Clear();
-                }
             }
 
-            public void Capture(Mesh mesh, bool topology, AlembicExporter exp)
+            public void Capture(Mesh mesh, AlembicExporter exp)
             {
-                Capture(mesh, topology, exp.m_meshNormals, exp.m_meshUV0, exp.m_meshUV1, exp.m_meshColors);
+                Capture(mesh, exp.m_meshNormals, exp.m_meshUV0, exp.m_meshUV1, exp.m_meshColors);
             }
 
 
@@ -143,7 +137,7 @@ namespace UTJ.Alembic
             [DllImport("abci")] static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
-                mbuf.Capture(mesh, true, false, false, false, false);
+                mbuf.Capture(mesh, false, false, false, false);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
@@ -349,8 +343,7 @@ namespace UTJ.Alembic
                 if (mesh == null || (m_exporter.m_assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
                     return;
 
-                bool topology = !m_exporter.m_assumeTopologiesAreConstant || m_mbuf.indices.Capacity == 0;
-                m_mbuf.Capture(mesh, topology, m_exporter);
+                m_mbuf.Capture(mesh, m_exporter);
                 m_mbuf.WriteSample(abc);
             }
         }
@@ -391,10 +384,6 @@ namespace UTJ.Alembic
                         tc.captureScale = false;
                     }
                 }
-                else
-                {
-                    m_meshBake = new Mesh();
-                }
             }
 
             public override void Capture()
@@ -408,11 +397,12 @@ namespace UTJ.Alembic
                 }
                 else
                 {
+                    if (m_meshBake == null)
+                        m_meshBake = new Mesh();
+                    m_meshBake.Clear();
                     m_target.BakeMesh(m_meshBake);
 
-                    bool topology = !m_exporter.m_assumeTopologiesAreConstant || m_mbuf.indices.Capacity == 0;
-                    m_mbuf.Capture(m_meshBake, topology, m_exporter);
-
+                    m_mbuf.Capture(m_meshBake, m_exporter);
                     m_mbuf.WriteSample(m_abc);
                 }
             }

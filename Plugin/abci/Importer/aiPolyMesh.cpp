@@ -457,7 +457,6 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
 
-    sample.reset();
     if (m_varying_topology)
         topology.clear();
 
