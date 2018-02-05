@@ -181,7 +181,6 @@ namespace UTJ.Alembic
                 m_splitData[spi] = vertexData;
             }
 
-            if (topologyChanged)
             {
                 if (m_submeshes.Count > submeshCount)
                     m_submeshes.RemoveRange(submeshCount, m_submeshes.Count - submeshCount);
@@ -196,14 +195,6 @@ namespace UTJ.Alembic
                     submesh.indexCache.ResizeDiscard(m_submeshSummaries[smi].indexCount);
                     submeshData.indices = submesh.indexCache;
                     m_submeshData[smi] = submeshData;
-                }
-            }
-            else
-            {
-                for (int smi = 0; smi < submeshCount; ++smi)
-                {
-                    m_submeshes[smi].update = false;
-                    m_submeshData[smi] = default(aiSubmeshData);
                 }
             }
 
