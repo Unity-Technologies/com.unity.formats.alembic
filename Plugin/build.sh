@@ -18,6 +18,8 @@ if echo "$PATH" | grep -q anaconda ; then
 fi
 
 plugindir=`dirname "$0"`
+plugindir=`cd "$plugindir" && pwd`
+
 
 # echo and exit on error, like a makefile
 set -ex
