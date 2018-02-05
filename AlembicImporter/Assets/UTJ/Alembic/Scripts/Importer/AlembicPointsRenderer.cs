@@ -58,6 +58,7 @@ namespace UTJ.Alembic
         [SerializeField] Material[] m_materials;
         [SerializeField] Material m_motionVectorMaterial;
         [SerializeField] ShadowCastingMode m_castShadows = ShadowCastingMode.On;
+        [SerializeField] bool m_applyTransform = false;
         [SerializeField] bool m_receiveShadows = true;
         [SerializeField] bool m_generateMotionVector = true;
         [SerializeField] float m_pointSize = 0.2f;
@@ -198,12 +199,24 @@ namespace UTJ.Alembic
             // update materials
             if(m_mpb==null)
                 m_mpb = new MaterialPropertyBlock();
-            m_mpb.SetVector("_Position", m_position);
-            m_mpb.SetVector("_PositionOld", m_positionOld);
-            m_mpb.SetVector("_Rotation", new Vector4(m_rotation.x, m_rotation.y, m_rotation.z, m_rotation.w));
-            m_mpb.SetVector("_RotationOld", new Vector4(m_rotationOld.x, m_rotationOld.y, m_rotationOld.z, m_rotationOld.w));
-            m_mpb.SetVector("_Scale", m_scale);
-            m_mpb.SetVector("_ScaleOld", m_scaleOld);
+            if (m_applyTransform)
+            {
+                m_mpb.SetVector("_Position", m_position);
+                m_mpb.SetVector("_PositionOld", m_positionOld);
+                m_mpb.SetVector("_Rotation", new Vector4(m_rotation.x, m_rotation.y, m_rotation.z, m_rotation.w));
+                m_mpb.SetVector("_RotationOld", new Vector4(m_rotationOld.x, m_rotationOld.y, m_rotationOld.z, m_rotationOld.w));
+                m_mpb.SetVector("_Scale", m_scale);
+                m_mpb.SetVector("_ScaleOld", m_scaleOld);
+            }
+            else
+            {
+                m_mpb.SetVector("_Position", Vector3.zero);
+                m_mpb.SetVector("_PositionOld", Vector3.zero);
+                m_mpb.SetVector("_Rotation", new Vector4(0, 0, 0, 1));
+                m_mpb.SetVector("_RotationOld", new Vector4(0, 0, 0, 1));
+                m_mpb.SetVector("_Scale", Vector3.one);
+                m_mpb.SetVector("_ScaleOld", Vector3.one);
+            }
             m_mpb.SetFloat("_PointSize", m_pointSize);
             m_mpb.SetBuffer("_AlembicPoints", m_cbPoints);
             if (abcHasIDs)

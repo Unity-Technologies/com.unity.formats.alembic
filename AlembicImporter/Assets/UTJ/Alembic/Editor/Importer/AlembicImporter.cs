@@ -40,35 +40,42 @@ namespace UTJ.Alembic
         {
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDestPath = AlembicImporter.MakeShortAssetPath(to);
-            var streamSourcePath = AlembicImporter.MakeShortAssetPath(from);
-            AlembicStream.DisconnectStreamsWithPath(streamSourcePath);
-            AlembicStream.RemapStreamsWithPath(streamSourcePath,streamDestPath);
+            var streamDstPath = AlembicImporter.MakeShortAssetPath(to);
+            var streamSrcPath = AlembicImporter.MakeShortAssetPath(from);
+            AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
+            AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
 
-            var destPath = Application.streamingAssetsPath + streamDestPath;
-            var sourcePath = Application.streamingAssetsPath + streamSourcePath;
+            var dstPath = Application.streamingAssetsPath + streamDstPath;
+            var srcPath = Application.streamingAssetsPath + streamSrcPath;
 
-            var directoryPath = Path.GetDirectoryName(destPath);
-            if (File.Exists(destPath))
+            try
             {
-                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                File.Delete(destPath);    
-            }
-            else if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-            if (File.Exists(destPath))
-                File.SetAttributes(destPath, FileAttributes.Normal);
-            File.Move(sourcePath, destPath);
-            if (File.Exists(destPath + ".meta"))
-            {
-                File.SetAttributes(destPath + ".meta", FileAttributes.Normal);
-                File.Move(sourcePath + ".meta", destPath+ ".meta");    
-            }
-            AssetDatabase.Refresh(ImportAssetOptions.Default);
-            AlembicStream.ReconnectStreamsWithPath(streamDestPath);        
+                var directoryPath = Path.GetDirectoryName(dstPath);
+                if (File.Exists(dstPath))
+                {
+                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
+                    File.Delete(dstPath);
+                }
+                else if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                if (File.Exists(dstPath))
+                    File.SetAttributes(dstPath, FileAttributes.Normal);
+                File.Move(srcPath, dstPath);
+                if (File.Exists(dstPath + ".meta"))
+                {
+                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
+                    File.Move(srcPath + ".meta", dstPath + ".meta");
+                }
 
+                AssetDatabase.Refresh(ImportAssetOptions.Default);
+                AlembicStream.ReconnectStreamsWithPath(streamDstPath);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning(e);
+            }
             return AssetMoveResult.DidNotMove;
         } 
     }
