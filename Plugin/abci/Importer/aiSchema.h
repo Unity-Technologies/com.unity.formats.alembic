@@ -116,27 +116,33 @@ public:
                 sample = nullptr;
         }
 
+        if (sample && config.interpolate_samples) {
+            auto& ts = *m_time_sampling;
+            double requested_time = ss.getRequestedTime();
+            double index_time = ts.getSampleTime(sample_index);
+            double interval = 0;
+            if (ts.getTimeSamplingType().isAcyclic()) {
+                auto tsi = std::min((size_t)sample_index + 1, ts.getNumStoredTimes() - 1);
+                interval = ts.getSampleTime(tsi) - index_time;
+            }
+            else {
+                interval = ts.getTimeSamplingType().getTimePerCycle();
+            }
+
+            float prev_offset = m_current_time_offset;
+            m_current_time_offset = interval == 0.0 ? 0.0f :
+                (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
+            m_current_time_interval = (float)interval;
+
+            // skip if time offset is not changed
+            if (sample_index == m_last_sample_index && prev_offset == m_current_time_offset && !m_force_update)
+                sample = nullptr;
+        }
+
         if (sample) {
             if (m_force_sync)
                 sample->markForceSync();
 
-            if (config.interpolate_samples) {
-                auto& ts = *m_time_sampling;
-                double requested_time = ss.getRequestedTime();
-                double index_time = ts.getSampleTime(sample_index);
-                double interval = 0;
-                if (ts.getTimeSamplingType().isAcyclic()) {
-                    auto tsi = std::min((size_t)sample_index + 1, ts.getNumStoredTimes() - 1);
-                    interval = ts.getSampleTime(tsi) - index_time;
-                }
-                else {
-                    interval = ts.getTimeSamplingType().getTimePerCycle();
-                }
-
-                m_current_time_offset = interval == 0.0 ? 0.0f :
-                    (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
-                m_current_time_interval = (float)interval;
-            }
             cookSample(*sample);
             m_data_updated = true;
         }

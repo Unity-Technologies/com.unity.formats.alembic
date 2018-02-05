@@ -95,7 +95,10 @@ namespace UTJ.Alembic
         public override void AbcPrepareSample()
         {
             if(m_freshSetup)
+            {
+                m_freshSetup = false;
                 m_abcSchema.schema.MarkForceUpdate();
+            }
         }
 
         public override void AbcSyncDataBegin()
@@ -121,11 +124,6 @@ namespace UTJ.Alembic
             UpdateSplits(splitCount);
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
-            if (m_freshSetup)
-            {
-                topologyChanged = true;
-                m_freshSetup = false;
-            }
 
             // setup buffers
             var vertexData = default(aiPolyMeshData);
@@ -194,6 +192,7 @@ namespace UTJ.Alembic
                 for (int smi = 0; smi < submeshCount; ++smi)
                 {
                     var submesh = m_submeshes[smi];
+                    m_submeshes[smi].update = true;
                     submesh.indexCache.ResizeDiscard(m_submeshSummaries[smi].indexCount);
                     submeshData.indices = submesh.indexCache;
                     m_submeshData[smi] = submeshData;
@@ -214,6 +213,16 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
+#if UNITY_EDITOR
+            for (int s = 0; s < m_splits.Count; ++s)
+            {
+                var split = m_splits[s];
+                var mf = split.host.GetComponent<MeshFilter>();
+                if (mf != null)
+                    mf.sharedMesh = split.mesh;
+            }
+#endif
+
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
@@ -225,8 +234,7 @@ namespace UTJ.Alembic
 
             for (int s = 0; s < m_splits.Count; ++s)
             {
-                Split split = m_splits[s];
-
+                var split = m_splits[s];
                 if (split.active)
                 {
                     // Feshly created splits may not have their host set yet
@@ -335,9 +343,7 @@ namespace UTJ.Alembic
         {
             Mesh mesh = null;
             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
-            bool hasMesh = meshFilter != null
-                           && meshFilter.sharedMesh != null
-                           && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
             if( !hasMesh)
             {
