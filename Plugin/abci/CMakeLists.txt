@@ -37,6 +37,9 @@ if(ENABLE_ISPC)
     target_include_directories(abci PUBLIC ${ISPC_OUTDIR})
 endif()
 
+########################################
+# Unit tests
 add_subdirectory(googletest)
 include_directories(./googletest/googletest/include)
-cxx_test(abci_test gtest_main) # link with libm
+enable_testing()
+add_subdirectory(test)

@@ -29,15 +29,48 @@ endif()
 option(ENABLE_DEPLOY "Copy built binaries to plugins directory." ON)
 
 
+# We create a ${name} target, which gets installed appropriately.
+# We create a ${name}_test_lib target, which does *not* get installed.
+# 
+# The reason is OSX: Unity needs a .bundle because it won't find a .dylib.
+# To do that you need a MODULE target. But you can't link to a MODULE to run
+# unit tests. So we create a ${name}_test_lib target on top of the ${name}
+# target. Oh, and it's STATIC because it's a pain to get the @rpath stuff to
+# work in a unit testing setting.
+#
+# On other platforms, the two targets are the same, just make sure you
+# link tests against the ${name}_test_lib target for your OSX colleagues.
+#
 function(add_plugin name)
     cmake_parse_arguments(arg "" "PLUGINS_DIR" "SOURCES" ${ARGN})
 
+    # In all cases we link to these source files. Make sure that
+    # compile-relevant properties set on ${name} are applied to the objects.
+    add_library(${name}_objects OBJECT ${arg_SOURCES})
+    set_target_properties(${name}_objects PROPERTIES 
+            C_STANDARD $<TARGET_PROPERTY:${name},C_STANDARD>
+            COMPILE_DEFINITIONS $<TARGET_PROPERTY:${name},COMPILE_DEFINITIONS>
+            COMPILE_OPTIONS $<TARGET_PROPERTY:${name},COMPILE_OPTIONS>
+            INCLUDE_DIRECTORIES $<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>
+    )
+
     if(ENABLE_OSX_BUNDLE)
-        add_library(${name} MODULE ${arg_SOURCES})
+        # To use in Unity, it must be a bundle. A bundle must be a MODULE.
+        add_library(${name} MODULE $<TARGET_OBJECTS:${name}_objects>)
         set_target_properties(${name} PROPERTIES BUNDLE ON)
+
+        # A MODULE can't be used to link tests against. Also, dynamic linking
+        # gets you into rpath hell on OSX. So build a static lib on the side
+        # for unit testing.
+        add_library(${name}_test_lib STATIC $<TARGET_OBJECTS:${name}_objects>)
+        target_link_libraries(${name}_test_lib $<TARGET_PROPERTY:${name},LINK_LIBRARIES>)
     else()
+        # It's simpler on other platforms: we have a SHARED and that's it.
+        # Add the ALIAS so that the tests don't have to think about this mess.
         add_library(${name} SHARED ${arg_SOURCES})
+        add_library(${name}_test_lib ALIAS ${name})
     endif()
+
 
     if(ENABLE_DEPLOY)
         if(ENABLE_OSX_BUNDLE)
