@@ -41,7 +41,6 @@ popd
 # recommend some work to do
 set +ex
 
-echo "If you're happy with the results, run these lines:"
+echo "If you're happy with the results, run this lines:"
 echo ""
-echo "  rm -rf \"$plugindir/../AlembicImporter/Assets/UTJ/Alembic/Plugins/abci.bundle\""
-echo "  cp -rp plugin-build/abci/abci.bundle \"$plugindir/../AlembicImporter/Assets/UTJ/Alembic/Plugins/abci.bundle\""
+echo "  cd plugin-build && make install"

@@ -20,6 +20,9 @@ target_link_libraries(abci
 )
 install(TARGETS abci DESTINATION .)
 
+########################################
+# Unit tests
 add_subdirectory(googletest)
 include_directories(./googletest/googletest/include)
-cxx_test(abci_test gtest_main) # link with libm
+enable_testing()
+add_subdirectory(test)

@@ -1,14 +1,13 @@
 #include "gtest/gtest.h"
-#include <math.h>
+#include "../abci.h"
 
-TEST(AllTests, BasicTest) {
-    EXPECT_EQ(1.0, fabs(-1.0));
-}
+TEST(AllTests, Basic) {
+    aiContext *ctx = aiCreateContext(5);
+    ASSERT_NE(nullptr, ctx);
 
-#if 0
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    ASSERT_TRUE(aiLoad(ctx, "cube.abc"));
+    EXPECT_EQ(12, getFrameCount(ctx));
+
+    // Clean up... and make sure there's no crash.
+    aiDestroyContext(ctx);
 }
-#endif
