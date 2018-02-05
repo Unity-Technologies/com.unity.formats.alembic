@@ -1,6 +1,6 @@
 #include "UnityCG.cginc"
 
-#if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_PS4) || defined(SHADER_API_GLCORE) || defined(SHADER_API_VULKAN) || defined(SHADER_API_PSSL)
+#if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_PS4) || defined(SHADER_API_GLCORE) || defined(SHADER_API_VULKAN) || defined(SHADER_API_PSSL) || defined(SHADER_API_METAL)
     #define STRUCTURED_BUFFER_SUPPORT 1
 #else
     #define STRUCTURED_BUFFER_SUPPORT 0
