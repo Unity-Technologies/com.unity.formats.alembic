@@ -1,6 +1,6 @@
 # Alembic Importer / Exporter
 
-**Latest package: [AlembicForUnity.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20180201/AlembicForUnity.unitypackage)**  
+**Latest package: [AlembicForUnity.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20180205/AlembicForUnity.unitypackage)**  
 **Do not clone this repository unless you are trying to build plugin from source.**
 
 [English](https://translate.google.com/translate?sl=ja&tl=en&u=https://github.com/unity3d-jp/AlembicImporter) (by Google Translate)
@@ -18,7 +18,7 @@ Alembic 本家: http://www.alembic.io/
 
 Windows (32bit & 64bit)、Mac、Linux と Unity 2017.1 以降で動作を確認済みです。
 使用するにはまずこのパッケージをプロジェクトに import します。  
-[AlembicForUnity.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20180201/AlembicForUnity.unitypackage)  
+[AlembicForUnity.unitypackage](https://github.com/unity3d-jp/AlembicImporter/releases/download/20180205/AlembicForUnity.unitypackage)  
 (Linux の場合プラグインをソースからビルドする必要があります。このリポジトリを clone し、Plugin/ に移動して cmake を用いてビルドしてください)
 
 ## Alembic Importer
@@ -38,22 +38,30 @@ Project ウィンドウでその prefab を選択することでインポート�
  - "Swap Handedness", "Swap Face Winding", "Turn Quad Edges" はそれぞれ X 方向を反転するか、ポリゴンの向きを反転するか、四角形ポリゴンを三角形に分割する際に三角形の並びを反転するか、の設定になります
  
  - "Interpolate Samples" はアニメーションの補間を行うかの設定です。これが有効だと、Transform、カメラ、そしてトポロジーが変化しない (= 頂点数とインデックスが不変な) Mesh はアニメーションが補間されるようになります
- - 補間が有効な場合、もしくは .abc ファイルに velocity データが含まれる場合、シェーダに velocity データを渡すことができます。(4 番目の UV が velocity になります。パッケージに付属の AlembicMotionVectors.cginc が使い方の参考になるでしょう)
+ - 補間が有効な場合、もしくは .abc ファイルに velocity データが含まれる場合、シェーダに velocity データを渡すことができます。  
+パッケージに付属の Alembic/Standard シェーダは、通常の Standard シェーダに上記 velocity による motion vector 生成を追加したシェーダです。ポストエフェクトの MotionBlur など、motion vector を必要とする状況で役立つでしょう。
+   - 独自のシェーダに motion vector 生成機能を加えたい場合、SubShader の中に  
+   UsePass "Hidden/Alembic/MotionVectors/MOTIONVECTORS"  
+   の一行を足すだけで対応できるはずです。内部的な詳細を知りたい場合、AlembicMotionVectors.cginc を参照ください。(4 番目の UV に velocity データが渡されるので、それを元に 1 フレーム前の頂点位置を算出しています)
 
+左は未加工、右は motion vector を出力して [Post Processing Stack](https://github.com/Unity-Technologies/PostProcessing) の MotionBlur をかけた状態  
+![velocity](https://user-images.githubusercontent.com/1488611/35801196-c587e75a-0aae-11e8-8eda-da4eae575831.png)
 
 - **Maya の shading group は submesh としてインポートできます**。Maya 側で "Write Face Sets" オプションを有効にしてエクスポートしておく必要があります。このオプションはデフォルトではオフであることにご注意ください。
+  - Maya に限らず、Face Set のエクスポートに対応したツールであればマテリアルの設定が submesh としてインポートできるはずです。
 
-- Maya の vertex color と additional UV set 拡張もサポートしています。
+- Maya の vertex color と additional UV set もサポートしています。
 それぞれ Maya 側で "Write Color Sets", "Write UV Sets" オプションを有効にしてエクスポートしておく必要があります。これらもデフォルトではオフになっています。  
+  - これらは Maya の拡張であるため、他のツールは対応していない可能性が高いです。
 
 Maya の Alembic エクスポート設定  
 ![](https://user-images.githubusercontent.com/1488611/35655697-86d367e4-0736-11e8-9d28-0b3cb37fd5f0.png)
 
 
-- インポートによって生成された prefab は AlembicStreamPlayer というコンポーネントを持っており、これが再生を担当します。Time パラメータを動かすと Mesh などが動くのを確認できるでしょう。これを Timeline やスクリプトから制御してアニメーションを再生します。
+- インポートによって生成された prefab は AlembicStreamPlayer というコンポーネントを持っており、これが再生を担当します。Time パラメータを動かすと Mesh などが動くのを確認できるでしょう。これを Timeline やスクリプトから制御してアニメーションを再生します。  
+Vertex Motion Scale は velocity を算出する際にかける倍率です。大きいほど velocity が大きくなり、ポストエフェクト MotionBlur で激しくブラーがかかるようになります。
 
 - Timeline 用に Alembic Track という専用のトラックが用意されています。(Add -> UTJ.Alembic -> Alembic Track でトラックを追加、Add Alembic Shot Asset Clip でクリップを追加し、alembic オブジェクトを設定)  
-Animation Clip で Time パラメータを制御することでも同等の結果は得られますが、Alembic Track の方が duration を考慮した配置になる分手早いでしょう。  
 ![](https://user-images.githubusercontent.com/1488611/35694278-2d6026be-07c4-11e8-98b6-c0b72ff10708.gif)
 
 - .abc ファイルは Assets/StreamingAssets 以下にコピーが作られることに留意ください。これはファイルからデータをストリーミングする都合上、ビルド後も .abc ファイルがそのまま残っている必要があるためです。
