@@ -410,12 +410,8 @@ namespace UTJ.Alembic
                 {
                     m_target.BakeMesh(m_meshBake);
 
-                    var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                    if (mesh == null || (m_exporter.m_assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
-                        return;
-
                     bool topology = !m_exporter.m_assumeTopologiesAreConstant || m_mbuf.indices.Capacity == 0;
-                    m_mbuf.Capture(mesh, topology, m_exporter);
+                    m_mbuf.Capture(m_meshBake, topology, m_exporter);
 
                     m_mbuf.WriteSample(m_abc);
                 }

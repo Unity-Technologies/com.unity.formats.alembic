@@ -57,7 +57,7 @@ namespace UTJ.Alembic
         [SerializeField] Mesh m_mesh;
         [SerializeField] Material[] m_materials;
         [SerializeField] Material m_motionVectorMaterial;
-        [SerializeField] ShadowCastingMode m_castShadows = ShadowCastingMode.Off;
+        [SerializeField] ShadowCastingMode m_castShadows = ShadowCastingMode.On;
         [SerializeField] bool m_receiveShadows = true;
         [SerializeField] bool m_generateMotionVector = true;
         [SerializeField] float m_pointSize = 0.2f;
