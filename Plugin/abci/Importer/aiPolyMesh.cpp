@@ -38,6 +38,17 @@ inline void Remap(RawVector<T>& dst, const T *src, const RawVector<int>& indices
     CopyWithIndices(dst.data(), src, indices);
 }
 
+template<class T>
+inline void Lerp(RawVector<T>& dst, const RawVector<T>& src1, const RawVector<T>& src2, float w)
+{
+    if (src1.size() != src2.size()) {
+        DebugError("something is wrong!!");
+        return;
+    }
+    dst.resize_discard(src1.size());
+    Lerp(dst.data(), src1.data(), src2.data(), (int)src1.size(), w);
+}
+
 
 aiMeshTopology::aiMeshTopology()
 {
@@ -391,6 +402,15 @@ void aiPolyMesh::updateSummary()
             summary.constant_tangents = true;
         }
     }
+
+    if (interpolate) {
+        if (summary.has_uv0_prop && !summary.constant_uv0)
+            summary.interpolate_uv0 = true;
+        if (summary.has_uv1_prop && !summary.constant_uv1)
+            summary.interpolate_uv1 = true;
+        if (summary.has_colors_prop && !summary.constant_colors)
+            summary.interpolate_colors = true;
+    }
 }
 
 const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
@@ -482,9 +502,10 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 
     // points
     if (m_constant_points.empty()) {
-        m_schema.getPositionsProperty().get(sample.m_points_sp, ss);
+        auto param = m_schema.getPositionsProperty();
+        param.get(sample.m_points_sp, ss);
         if (summary.interpolate_points) {
-            m_schema.getPositionsProperty().get(sample.m_points_sp2, ss2);
+            param.get(sample.m_points_sp2, ss2);
         }
         else {
             if (summary.has_velocities_prop) {
@@ -495,26 +516,36 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 
     // normals
     if (m_constant_normals.empty() && summary.has_normals_prop && !summary.compute_normals) {
-        auto normals_param = m_schema.getNormalsParam();
-        normals_param.getIndexed(sample.m_normals_sp, ss);
+        auto param = m_schema.getNormalsParam();
+        param.getIndexed(sample.m_normals_sp, ss);
         if (summary.interpolate_normals) {
-            normals_param.getIndexed(sample.m_normals_sp2, ss2);
+            param.getIndexed(sample.m_normals_sp2, ss2);
         }
     }
 
     // uv0
     if (m_constant_uv0.empty() && summary.has_uv0_prop) {
-        m_schema.getUVsParam().getIndexed(sample.m_uv0_sp, ss);
+        auto param = m_schema.getUVsParam();
+        param.getIndexed(sample.m_uv0_sp, ss);
+        if (summary.interpolate_uv0) {
+            param.getIndexed(sample.m_uv0_sp2, ss2);
+        }
     }
 
     // uv1
     if (m_constant_uv1.empty() && summary.has_uv1_prop) {
         m_uv1_param->getIndexed(sample.m_uv1_sp, ss);
+        if (summary.interpolate_uv1) {
+            m_uv1_param->getIndexed(sample.m_uv1_sp2, ss2);
+        }
     }
 
     // colors
     if (m_constant_colors.empty() && summary.has_colors_prop) {
         m_colors_param->getIndexed(sample.m_colors_sp, ss);
+        if (summary.interpolate_colors) {
+            m_colors_param->getIndexed(sample.m_colors_sp2, ss2);
+        }
     }
 
     auto bounds_param = m_schema.getSelfBoundsProperty();
@@ -613,6 +644,18 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
                 SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
         }
 
+        if (summary.interpolate_uv0) {
+            Remap(sample.m_uv02, sample.m_uv0_sp2.getVals()->get(), topology.m_remap_uv0);
+        }
+
+        if (summary.interpolate_uv1) {
+            Remap(sample.m_uv12, sample.m_uv1_sp2.getVals()->get(), topology.m_remap_uv1);
+        }
+
+        if (summary.interpolate_colors) {
+            Remap(sample.m_colors2, sample.m_colors_sp2.getVals()->get(), topology.m_remap_colors);
+        }
+
         if (!m_constant_velocities.empty()) {
             sample.m_velocities_ref = m_constant_velocities;
         }
@@ -634,9 +677,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (summary.compute_velocities)
             sample.m_points_int.swap(sample.m_points_prev);
 
-        sample.m_points_int.resize_discard(sample.m_points.size());
-        Lerp(sample.m_points_int.data(), sample.m_points.data(), sample.m_points2.data(),
-            (int)sample.m_points.size(), m_current_time_offset);
+        Lerp(sample.m_points_int, sample.m_points, sample.m_points2, m_current_time_offset);
         sample.m_points_ref = sample.m_points_int;
 
         if (summary.compute_velocities) {
@@ -657,9 +698,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         // do nothing
     }
     else if(summary.interpolate_normals) {
-        sample.m_normals_int.resize_discard(sample.m_normals.size());
-        Lerp(sample.m_normals_int.data(), sample.m_normals.data(), sample.m_normals2.data(),
-            (int)sample.m_normals.size(), (float)m_current_time_offset);
+        Lerp(sample.m_normals_int, sample.m_normals, sample.m_normals2, (float)m_current_time_offset);
         Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
         sample.m_normals_ref = sample.m_normals_int;
     }
@@ -687,6 +726,24 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
             indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
         sample.m_tangents_ref = sample.m_tangents;
+    }
+
+    // uv0
+    if (summary.interpolate_uv0) {
+        Lerp(sample.m_uv0_int, sample.m_uv0, sample.m_uv02, m_current_time_offset);
+        sample.m_uv0_ref = sample.m_uv0_int;
+    }
+
+    // uv1
+    if (summary.interpolate_uv1) {
+        Lerp(sample.m_uv1_int, sample.m_uv1, sample.m_uv12, m_current_time_offset);
+        sample.m_uv1_ref = sample.m_uv1_int;
+    }
+
+    // colors
+    if (summary.interpolate_colors) {
+        Lerp(sample.m_colors_int, sample.m_colors, sample.m_colors2, m_current_time_offset);
+        sample.m_colors_ref = sample.m_colors_int;
     }
 }
 

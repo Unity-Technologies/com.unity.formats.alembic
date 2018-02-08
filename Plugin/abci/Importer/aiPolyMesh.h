@@ -16,6 +16,9 @@ struct aiMeshSummaryInternal : public aiMeshSummary
 
     bool interpolate_points = false;
     bool interpolate_normals = false;
+    bool interpolate_uv0 = false;
+    bool interpolate_uv1 = false;
+    bool interpolate_colors = false;
     bool compute_normals = false;
     bool compute_tangents = false;
     bool compute_velocities = false;
@@ -76,8 +79,9 @@ public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
     AbcGeom::IN3fGeomParam::Sample m_normals_sp, m_normals_sp2;
-    AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv1_sp;
-    AbcGeom::IC4fGeomParam::Sample m_colors_sp;
+    AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv0_sp2;
+    AbcGeom::IV2fGeomParam::Sample m_uv1_sp, m_uv1_sp2;
+    AbcGeom::IC4fGeomParam::Sample m_colors_sp, m_colors_sp2;
     Abc::Box3d m_bounds;
 
     IArray<abcV3> m_points_ref;
@@ -89,10 +93,11 @@ public:
 
     RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
-    RawVector<abcV2> m_uv0, m_uv1;
+    RawVector<abcV2> m_uv0, m_uv02, m_uv0_int;
+    RawVector<abcV2> m_uv1, m_uv12, m_uv1_int;
     RawVector<abcV3> m_normals, m_normals2, m_normals_int;
     RawVector<abcV4> m_tangents;
-    RawVector<abcC4> m_colors;
+    RawVector<abcC4> m_colors, m_colors2, m_colors_int;
 
     TopologyPtr m_topology;
     bool m_topology_changed = false;
