@@ -172,7 +172,7 @@ namespace UTJ.Alembic
         public int indexCount;
 
         public Vector3 center;
-        public Vector3 size;
+        public Vector3 extents;
     }
 
     public struct aiSubmeshData

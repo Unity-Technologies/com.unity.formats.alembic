@@ -13,8 +13,42 @@ using UnityEditor;
 
 namespace UTJ.Alembic
 {
-    public partial class AlembicExporter : MonoBehaviour
+    public enum ExportScope
     {
+        EntireScene,
+        CurrentBranch,
+    }
+
+    [Serializable]
+    public class AlembicRecorderSettings
+    {
+        public string outputPath;
+        public aeConfig conf = aeConfig.default_value;
+        public ExportScope scope = ExportScope.EntireScene;
+        public bool fixDeltaTime = true;
+
+        public bool ignoreDisabled = true;
+        public bool assumeNonSkinnedMeshesAreConstant = true;
+
+        public bool captureMeshRenderer = true;
+        public bool captureSkinnedMeshRenderer = true;
+        public bool captureParticleSystem = true;
+        public bool captureCamera = true;
+        public bool customCapturer = true;
+
+        public bool meshNormals = true;
+        public bool meshUV0 = true;
+        public bool meshUV1 = true;
+        public bool meshColors = true;
+
+        public bool detailedLog = true;
+        public bool debugLog = false;
+    }
+
+    [Serializable]
+    public class AlembicRecorder : IDisposable
+    {
+        #region internal types
         public class MeshBuffer
         {
             public PinnedList<int> indices = new PinnedList<int>();
@@ -94,9 +128,9 @@ namespace UTJ.Alembic
                 }
             }
 
-            public void Capture(Mesh mesh, AlembicExporter exp)
+            public void Capture(Mesh mesh, AlembicRecorderSettings settings)
             {
-                Capture(mesh, exp.m_meshNormals, exp.m_meshUV0, exp.m_meshUV1, exp.m_meshColors);
+                Capture(mesh, settings.meshNormals, settings.meshUV0, settings.meshUV1, settings.meshColors);
             }
 
 
@@ -145,7 +179,7 @@ namespace UTJ.Alembic
                 numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
             }
 
-            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicExporter exp)
+            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicRecorderSettings settings)
             {
                 if (mesh == null || cloth == null)
                     return;
@@ -160,7 +194,7 @@ namespace UTJ.Alembic
                     return;
                 }
 
-                if (exp.m_meshNormals)
+                if (settings.meshNormals)
                     normals.Assign(cloth.normals);
                 else
                     normals.Clear();
@@ -184,17 +218,17 @@ namespace UTJ.Alembic
                 }
 
                 // capture other components
-                if (exp.m_meshUV0)
+                if (settings.meshUV0)
                     mbuf.uv0.LockList(ls => mesh.GetUVs(0, ls));
                 else
                     mbuf.uv0.Clear();
 
-                if (exp.m_meshUV1)
+                if (settings.meshUV1)
                     mbuf.uv1.LockList(ls => mesh.GetUVs(1, ls));
                 else
                     mbuf.uv1.Clear();
 
-                if (exp.m_meshColors)
+                if (settings.meshColors)
                     mbuf.colors.LockList(ls => mesh.GetColors(ls));
                 else
                     mbuf.colors.Clear();
@@ -205,7 +239,7 @@ namespace UTJ.Alembic
 
         public abstract class ComponentCapturer
         {
-            protected AlembicExporter m_exporter;
+            protected AlembicRecorder m_recorder;
             protected ComponentCapturer m_parent;
             protected GameObject m_obj;
             protected aeObject m_abc;
@@ -215,9 +249,9 @@ namespace UTJ.Alembic
             public aeObject abc { get { return m_abc; } }
             public abstract void Capture();
 
-            protected ComponentCapturer(AlembicExporter exp, ComponentCapturer p, Component c)
+            protected ComponentCapturer(AlembicRecorder exp, ComponentCapturer p, Component c)
             {
-                m_exporter = exp;
+                m_recorder = exp;
                 m_parent = p;
                 m_obj = c != null ? c.gameObject : null;
             }
@@ -225,7 +259,7 @@ namespace UTJ.Alembic
 
         public class RootCapturer : ComponentCapturer
         {
-            public RootCapturer(AlembicExporter exp, aeObject abc)
+            public RootCapturer(AlembicRecorder exp, aeObject abc)
                 : base(exp, null, null)
             {
                 m_abc = abc;
@@ -252,7 +286,7 @@ namespace UTJ.Alembic
             public bool captureRotation { set { m_captureRotation = value; } }
             public bool captureScale { set { m_captureScale = value; } }
 
-            public TransformCapturer(AlembicExporter exp, ComponentCapturer parent, Transform target)
+            public TransformCapturer(AlembicRecorder exp, ComponentCapturer parent, Transform target)
                 : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")");
@@ -289,7 +323,7 @@ namespace UTJ.Alembic
             Camera m_target;
             AlembicCameraParams m_params;
 
-            public CameraCapturer(AlembicExporter exp, ComponentCapturer parent, Camera target)
+            public CameraCapturer(AlembicRecorder exp, ComponentCapturer parent, Camera target)
                 : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewCamera(target.name);
@@ -322,7 +356,7 @@ namespace UTJ.Alembic
             MeshRenderer m_target;
             MeshBuffer m_mbuf;
 
-            public MeshCapturer(AlembicExporter exp, ComponentCapturer parent, MeshRenderer target)
+            public MeshCapturer(AlembicRecorder exp, ComponentCapturer parent, MeshRenderer target)
                 : base(exp, parent, target)
             {
                 m_target = target;
@@ -340,10 +374,10 @@ namespace UTJ.Alembic
                 if (m_target == null) { return; }
 
                 var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                if (mesh == null || (m_exporter.m_assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
+                if (mesh == null || (m_recorder.m_settings.assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
                     return;
 
-                m_mbuf.Capture(mesh, m_exporter);
+                m_mbuf.Capture(mesh, m_recorder.m_settings);
                 m_mbuf.WriteSample(abc);
             }
         }
@@ -357,7 +391,7 @@ namespace UTJ.Alembic
             MeshBuffer m_mbuf;
             ClothBuffer m_cbuf;
 
-            public SkinnedMeshCapturer(AlembicExporter exp, ComponentCapturer parent, SkinnedMeshRenderer target)
+            public SkinnedMeshCapturer(AlembicRecorder exp, ComponentCapturer parent, SkinnedMeshRenderer target)
                 : base(exp, parent, target)
             {
                 m_target = target;
@@ -392,7 +426,7 @@ namespace UTJ.Alembic
 
                 if (m_cloth != null)
                 {
-                    m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, m_exporter);
+                    m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, m_recorder.m_settings);
                     m_mbuf.WriteSample(m_abc);
                 }
                 else
@@ -402,7 +436,7 @@ namespace UTJ.Alembic
                     m_meshBake.Clear();
                     m_target.BakeMesh(m_meshBake);
 
-                    m_mbuf.Capture(m_meshBake, m_exporter);
+                    m_mbuf.Capture(m_meshBake, m_recorder.m_settings);
                     m_mbuf.WriteSample(m_abc);
                 }
             }
@@ -417,7 +451,7 @@ namespace UTJ.Alembic
             PinnedList<Vector3> m_buf_positions = new PinnedList<Vector3>();
             PinnedList<Vector4> m_buf_rotations = new PinnedList<Vector4>();
 
-            public ParticleCapturer(AlembicExporter exp, ComponentCapturer parent, ParticleSystem target)
+            public ParticleCapturer(AlembicRecorder exp, ComponentCapturer parent, ParticleSystem target)
                 : base(exp, parent, target)
             {
                 m_abc = parent.abc.NewPoints(target.name);
@@ -464,7 +498,7 @@ namespace UTJ.Alembic
         {
             AlembicCustomComponentCapturer m_target;
 
-            public CustomCapturerHandler(AlembicExporter exp, ComponentCapturer parent, AlembicCustomComponentCapturer target)
+            public CustomCapturerHandler(AlembicRecorder exp, ComponentCapturer parent, AlembicCustomComponentCapturer target)
                 : base(exp, parent, target)
             {
                 m_target = target;
@@ -477,21 +511,367 @@ namespace UTJ.Alembic
                 m_target.Capture();
             }
         }
+        #endregion
 
 
+        #region fields
+        [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
+        [SerializeField] GameObject m_targetBranch;
+
+        aeContext m_ctx;
+        ComponentCapturer m_root;
+        List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
+        bool m_recording;
+        float m_time;
+        float m_elapsed;
+        int m_frameCount;
+        #endregion
+
+
+        #region properties
+        public AlembicRecorderSettings settings { get { return m_settings; } }
+        public GameObject targetBranch { get { return m_targetBranch; } set { m_targetBranch = value; } }
+        public bool recording { get { return m_recording; } }
+        public int frameCount { get { return m_frameCount; } }
+        #endregion
+
+
+        #region private methods
 #if UNITY_EDITOR
-        void ForceDisableBatching()
+        public static void ForceDisableBatching()
         {
             var method = typeof(UnityEditor.PlayerSettings).GetMethod("SetBatchingForPlatform", BindingFlags.NonPublic | BindingFlags.Static);
-            method.Invoke(null, new object[] { BuildTarget.StandaloneWindows, 0, 0 });
-            method.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, 0, 0 });
+            if (method != null)
+            {
+                method.Invoke(null, new object[] { BuildTarget.StandaloneWindows, 0, 0 });
+                method.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, 0, 0 });
+            }
         }
 #endif
 
-        public enum Scope
+        T[] GetTargets<T>() where T : Component
         {
-            EntireScene,
-            CurrentBranch,
+            if (m_settings.scope == ExportScope.CurrentBranch && m_targetBranch != null)
+            {
+                return m_targetBranch.GetComponentsInChildren<T>();
+            }
+            else
+            {
+                return GameObject.FindObjectsOfType<T>();
+            }
         }
+
+
+        TransformCapturer CreateComponentCapturer(ComponentCapturer parent, Transform target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new TransformCapturer(\"" + target.name + "\")"); }
+
+            var cap = new TransformCapturer(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        CameraCapturer CreateComponentCapturer(ComponentCapturer parent, Camera target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new CameraCapturer(\"" + target.name + "\")"); }
+
+            var cap = new CameraCapturer(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        MeshCapturer CreateComponentCapturer(ComponentCapturer parent, MeshRenderer target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new MeshCapturer(\"" + target.name + "\")"); }
+
+            var cap = new MeshCapturer(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        SkinnedMeshCapturer CreateComponentCapturer(ComponentCapturer parent, SkinnedMeshRenderer target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new SkinnedMeshCapturer(\"" + target.name + "\")"); }
+
+            var cap = new SkinnedMeshCapturer(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        ParticleCapturer CreateComponentCapturer(ComponentCapturer parent, ParticleSystem target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new ParticleCapturer(\"" + target.name + "\")"); }
+
+            var cap = new ParticleCapturer(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        CustomCapturerHandler CreateComponentCapturer(ComponentCapturer parent, AlembicCustomComponentCapturer target)
+        {
+            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new CustomCapturerHandler(\"" + target.name + "\")"); }
+
+            target.CreateAbcObject(parent.abc);
+            var cap = new CustomCapturerHandler(this, parent, target);
+            m_capturers.Add(cap);
+            return cap;
+        }
+
+        bool ShouldBeIgnored(Behaviour target)
+        {
+            return m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
+        }
+        bool ShouldBeIgnored(ParticleSystem target)
+        {
+            return m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy);
+        }
+        bool ShouldBeIgnored(MeshRenderer target)
+        {
+            if (m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
+            if (target.GetComponent<MeshFilter>().sharedMesh == null) { return true; }
+            return false;
+        }
+        bool ShouldBeIgnored(SkinnedMeshRenderer target)
+        {
+            if (m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
+            if (target.sharedMesh == null) { return true; }
+            return false;
+        }
+
+
+        // capture node tree for "Preserve Tree Structure" option.
+        class CaptureNode
+        {
+            public CaptureNode parent;
+            public List<CaptureNode> children = new List<CaptureNode>();
+            public Type componentType;
+
+            public Transform obj;
+            public TransformCapturer transform;
+            public ComponentCapturer component;
+        }
+
+        Dictionary<Transform, CaptureNode> m_capture_node;
+        List<CaptureNode> m_top_nodes;
+
+        CaptureNode ConstructTree(Transform node)
+        {
+            if (node == null) { return null; }
+
+            CaptureNode cn;
+            if (m_capture_node.TryGetValue(node, out cn)) { return cn; }
+
+            cn = new CaptureNode();
+            cn.obj = node;
+            m_capture_node.Add(node, cn);
+
+            var parent = ConstructTree(node.parent);
+            if (parent != null)
+            {
+                parent.children.Add(cn);
+            }
+            else
+            {
+                m_top_nodes.Add(cn);
+            }
+
+            return cn;
+        }
+
+        void SetupComponentCapturer(CaptureNode parent, CaptureNode node)
+        {
+            node.parent = parent;
+            node.transform = CreateComponentCapturer(parent == null ? m_root : parent.transform, node.obj);
+            node.transform.inherits = true;
+
+            if (node.componentType == null)
+            {
+                // do nothing
+            }
+            else if (node.componentType == typeof(Camera))
+            {
+                node.transform.invertForward = true;
+                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<Camera>());
+            }
+            else if (node.componentType == typeof(MeshRenderer))
+            {
+                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<MeshRenderer>());
+            }
+            else if (node.componentType == typeof(SkinnedMeshRenderer))
+            {
+                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<SkinnedMeshRenderer>());
+            }
+            else if (node.componentType == typeof(ParticleSystem))
+            {
+                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<ParticleSystem>());
+            }
+            else if (node.componentType == typeof(AlembicCustomComponentCapturer))
+            {
+                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<AlembicCustomComponentCapturer>());
+            }
+
+            foreach (var c in node.children)
+            {
+                SetupComponentCapturer(node, c);
+            }
+        }
+
+        void CreateCapturers()
+        {
+            m_root = new RootCapturer(this, m_ctx.topObject);
+            m_capture_node = new Dictionary<Transform, CaptureNode>();
+            m_top_nodes = new List<CaptureNode>();
+
+            // construct tree
+            // (bottom-up)
+            if (m_settings.captureCamera)
+            {
+                foreach (var t in GetTargets<Camera>())
+                {
+                    if (ShouldBeIgnored(t)) { continue; }
+                    var node = ConstructTree(t.GetComponent<Transform>());
+                    node.componentType = t.GetType();
+                }
+            }
+            if (m_settings.captureMeshRenderer)
+            {
+                foreach (var t in GetTargets<MeshRenderer>())
+                {
+                    if (ShouldBeIgnored(t)) { continue; }
+                    var node = ConstructTree(t.GetComponent<Transform>());
+                    node.componentType = t.GetType();
+                }
+            }
+            if (m_settings.captureSkinnedMeshRenderer)
+            {
+                foreach (var t in GetTargets<SkinnedMeshRenderer>())
+                {
+                    if (ShouldBeIgnored(t)) { continue; }
+                    var node = ConstructTree(t.GetComponent<Transform>());
+                    node.componentType = t.GetType();
+                }
+            }
+            if (m_settings.captureParticleSystem)
+            {
+                foreach (var t in GetTargets<ParticleSystem>())
+                {
+                    if (ShouldBeIgnored(t)) { continue; }
+                    var node = ConstructTree(t.GetComponent<Transform>());
+                    node.componentType = t.GetType();
+                }
+            }
+            if (m_settings.customCapturer)
+            {
+                foreach (var t in GetTargets<AlembicCustomComponentCapturer>())
+                {
+                    if (ShouldBeIgnored(t)) { continue; }
+                    var node = ConstructTree(t.GetComponent<Transform>());
+                    node.componentType = typeof(AlembicCustomComponentCapturer);
+                }
+            }
+
+            // make component capturers (top-down)
+            foreach (var c in m_top_nodes)
+            {
+                SetupComponentCapturer(null, c);
+            }
+
+
+            m_top_nodes = null;
+            m_capture_node = null;
+        }
+        #endregion
+
+
+        #region public methods
+        public void Dispose()
+        {
+            m_ctx.Destroy();
+        }
+
+        public bool BeginRecording()
+        {
+            if (m_recording)
+            {
+                Debug.Log("AlembicRecorder: already recording");
+                return false;
+            }
+
+            {
+                var dir = Path.GetDirectoryName(m_settings.outputPath);
+                if (!Directory.Exists(dir))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    catch (Exception)
+                    {
+                        Debug.LogWarning("AlembicRecorder: Failed to create directory " + dir);
+                        return false;
+                    }
+                }
+            }
+
+            // create context and open archive
+            m_ctx = aeContext.Create();
+            if (m_ctx.self == IntPtr.Zero)
+            {
+                Debug.LogWarning("AlembicRecorder: failed to create context");
+                return false;
+            }
+
+            m_ctx.SetConfig(ref m_settings.conf);
+            if (!m_ctx.OpenArchive(m_settings.outputPath))
+            {
+                Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.outputPath);
+                m_ctx.Destroy();
+                return false;
+            }
+
+            // create capturers
+            CreateCapturers();
+
+            m_recording = true;
+            m_time = m_settings.conf.startTime;
+            m_frameCount = 0;
+
+            Debug.Log("AlembicRecorder: start " + m_settings.outputPath);
+            return true;
+        }
+
+        public void EndRecording()
+        {
+            if (!m_recording) { return; }
+
+            m_capturers.Clear();
+            m_ctx.Destroy(); // flush archive
+            m_recording = false;
+
+            Debug.Log("AlembicRecorder: end: " + m_settings.outputPath);
+        }
+
+        public void ProcessRecording()
+        {
+            if (!m_recording) { return; }
+
+            float begin_time = Time.realtimeSinceStartup;
+
+            m_ctx.MarkFrameBegin();
+            m_ctx.AddTime(m_time);
+            foreach (var recorder in m_capturers)
+                recorder.Capture();
+            m_ctx.MarkFrameEnd();
+
+            m_time += Time.deltaTime;
+            ++m_frameCount;
+
+            m_elapsed = Time.realtimeSinceStartup - begin_time;
+            if (m_settings.detailedLog)
+            {
+                Debug.Log("AlembicRecorder: frame " + m_frameCount + " (" + (m_elapsed * 1000.0f) + " ms)");
+            }
+        }
+        #endregion
     }
 }

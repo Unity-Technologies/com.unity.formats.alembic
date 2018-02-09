@@ -16,72 +16,77 @@ namespace UTJ.Alembic
         public override void OnInspectorGUI()
         {
             var t = target as AlembicExporter;
+            var recorder = t.recorder;
+            var settings = recorder.settings;
+            var so = serializedObject;
 
             GUILayout.Space(5);
-            EditorGUI.BeginChangeCheck();
             EditorGUILayout.LabelField("Output Path", EditorStyles.boldLabel);
-            EditorGUILayout.BeginHorizontal();
-            t.m_outputPath = EditorGUILayout.TextField(t.m_outputPath);
-            if (GUILayout.Button("...", GUILayout.Width(24)))
             {
-                var dir = "";
-                var filename = "";
-                try
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.BeginHorizontal();
+                settings.outputPath = EditorGUILayout.TextField(settings.outputPath);
+                if (GUILayout.Button("...", GUILayout.Width(24)))
                 {
-                    dir = Path.GetDirectoryName(t.m_outputPath);
-                    filename = Path.GetFileName(t.m_outputPath);
-                }
-                catch(Exception) { }
+                    var dir = "";
+                    var filename = "";
+                    try
+                    {
+                        dir = Path.GetDirectoryName(settings.outputPath);
+                        filename = Path.GetFileName(settings.outputPath);
+                    }
+                    catch (Exception) { }
 
-                var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
-                if (path.Length > 0)
+                    var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
+                    if (path.Length > 0)
+                    {
+                        settings.outputPath = path;
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+                if (EditorGUI.EndChangeCheck())
                 {
-                    t.m_outputPath = path;
+                    EditorUtility.SetDirty(t);
+                    EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 }
             }
-            EditorGUILayout.EndHorizontal();
             GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
-                var conf = t.m_conf;
-                EditorGUI.BeginChangeCheck();
-                conf.archiveType = (aeArchiveType)EditorGUILayout.EnumPopup("Archive Type", conf.archiveType);
-                conf.xformType = (aeXformType)EditorGUILayout.EnumPopup("Xform Type", conf.xformType);
-                conf.timeSamplingType = (aeTimeSamplingType)EditorGUILayout.EnumPopup("Time Sampling Type", conf.timeSamplingType);
-                if (conf.timeSamplingType == aeTimeSamplingType.Uniform)
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.archiveType"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.xformType"));
+                var timeSamplingType = so.FindProperty("m_recorder.m_settings.conf.timeSamplingType");
+                EditorGUILayout.PropertyField(timeSamplingType);
+                if (timeSamplingType.intValue == (int)aeTimeSamplingType.Uniform)
                 {
                     EditorGUI.indentLevel++;
-                    conf.frameRate = EditorGUILayout.FloatField("Frame Rate", conf.frameRate);
-                    t.m_fixDeltaTime = EditorGUILayout.Toggle("Fix Delta Time", t.m_fixDeltaTime);
+                    EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.frameRate"));
+                    EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.fixDeltaTime"));
                     EditorGUI.indentLevel--;
                 }
-                conf.swapHandedness = EditorGUILayout.Toggle("Swap Handedness", conf.swapHandedness);
-                conf.swapFaces = EditorGUILayout.Toggle("Swap Faces", conf.swapFaces);
-                conf.scaleFactor = EditorGUILayout.FloatField("Scale Factor", conf.scaleFactor);
-                conf.startTime = EditorGUILayout.FloatField("Start Time", conf.startTime);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    t.m_conf = conf;
-                }
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.swapHandedness"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.swapFaces"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.scaleFactor"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.startTime"));
             }
             GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
-            t.m_scope = (AlembicExporter.Scope)EditorGUILayout.EnumPopup("Scope", t.m_scope);
-            t.m_ignoreDisabled = EditorGUILayout.Toggle("Ignore Disabled", t.m_ignoreDisabled);
-            t.m_assumeNonSkinnedMeshesAreConstant = EditorGUILayout.Toggle("Assume Non-Skinned Meshes Are Constant", t.m_assumeNonSkinnedMeshesAreConstant);
+            EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.scope"));
+            EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.ignoreDisabled"));
+            EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.assumeNonSkinnedMeshesAreConstant"));
             GUILayout.Space(5);
 
             m_foldCaptureComponents = EditorGUILayout.Foldout(m_foldCaptureComponents, "Capture Components");
             if (m_foldCaptureComponents)
             {
                 EditorGUI.indentLevel++;
-                t.m_captureMeshRenderer = EditorGUILayout.Toggle("MeshRenderer", t.m_captureMeshRenderer);
-                t.m_captureSkinnedMeshRenderer = EditorGUILayout.Toggle("SkinnedMeshRenderer", t.m_captureSkinnedMeshRenderer);
-                t.m_captureParticleSystem = EditorGUILayout.Toggle("ParticleSystem", t.m_captureParticleSystem);
-                t.m_captureCamera = EditorGUILayout.Toggle("Camera", t.m_captureCamera);
-                t.m_customCapturer = EditorGUILayout.Toggle("Custom Capturer", t.m_customCapturer);
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureMeshRenderer"), new GUIContent("MeshRenderer"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureSkinnedMeshRenderer"), new GUIContent("SkinnedMeshRenderer"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureParticleSystem"), new GUIContent("ParticleSystem"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureCamera"), new GUIContent("Camera"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.customCapturer"), new GUIContent("Custom Capturer"));
                 EditorGUI.indentLevel--;
             }
 
@@ -89,49 +94,50 @@ namespace UTJ.Alembic
             if (m_foldMeshComponents)
             {
                 EditorGUI.indentLevel++;
-                t.m_meshNormals = EditorGUILayout.Toggle("Normal", t.m_meshNormals);
-                t.m_meshUV0 = EditorGUILayout.Toggle("UV0", t.m_meshUV0);
-                t.m_meshUV1 = EditorGUILayout.Toggle("UV1", t.m_meshUV1);
-                t.m_meshColors = EditorGUILayout.Toggle("Vertex Color", t.m_meshColors);
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshNormals"), new GUIContent("Normals"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshUV0"), new GUIContent("UV 1"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshUV1"), new GUIContent("UV 2"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshColors"), new GUIContent("Vertex Color"));
                 EditorGUI.indentLevel--;
             }
+            GUILayout.Space(5);
 
-            GUILayout.Space(5);
-            t.m_captureOnStart = EditorGUILayout.Toggle("Capture On Start", t.m_captureOnStart);
-            if (t.m_captureOnStart)
             {
-                EditorGUI.indentLevel++;
-                t.m_ignoreFirstFrame = EditorGUILayout.Toggle("Ignore First Frame", t.m_ignoreFirstFrame);
-                EditorGUI.indentLevel--;
+                var m_captureOnStart = so.FindProperty("m_captureOnStart");
+                EditorGUILayout.PropertyField(m_captureOnStart);
+                if (m_captureOnStart.boolValue)
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.PropertyField(so.FindProperty("m_ignoreFirstFrame"));
+                    EditorGUI.indentLevel--;
+                }
+                EditorGUILayout.PropertyField(so.FindProperty("m_maxCaptureFrame"));
+                GUILayout.Space(5);
             }
-            t.m_maxCaptureFrame = EditorGUILayout.IntField("Max Capture Frame", t.m_maxCaptureFrame);
-            GUILayout.Space(5);
 
             EditorGUILayout.LabelField("Misc", EditorStyles.boldLabel);
-            t.m_detailedLog = EditorGUILayout.Toggle("Detailed Log", t.m_detailedLog);
+            {
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.detailedLog"));
+            }
 
             GUILayout.Space(10);
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(t);
-                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            }
-
             EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-            if (t.isRecording)
+            if (recorder.recording)
             {
-                if (GUILayout.Button("End Capture"))
-                    t.EndCapture();
+                if (GUILayout.Button("End Recording"))
+                    t.EndRecording();
             }
             else
             {
-                if (GUILayout.Button("Begin Capture"))
-                    t.BeginCapture();
+                if (GUILayout.Button("Begin Recording"))
+                    t.BeginRecording();
 
                 if (GUILayout.Button("One Shot"))
                     t.OneShot();
             }
+
+            so.ApplyModifiedProperties();
         }
     }
 }

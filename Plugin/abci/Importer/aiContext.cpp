@@ -30,9 +30,9 @@ void aiContextManager::destroyContext(int uid)
     }
 }
 
-void aiContextManager::destroyContextsWithPath(const char* assetPath)
+void aiContextManager::destroyContextsWithPath(const char* asset_path)
 {
-    auto path = aiContext::normalizePath(assetPath);
+    auto path = aiContext::normalizePath(asset_path);
     for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end();) {
         if (it->second->getPath() == path) {
             DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
@@ -53,12 +53,12 @@ aiContextManager::~aiContextManager()
 }
 
 
-std::string aiContext::normalizePath(const char *inPath)
+std::string aiContext::normalizePath(const char *in_path)
 {
     std::string path;
 
-    if (inPath != nullptr) {
-        path = inPath;
+    if (in_path != nullptr) {
+        path = in_path;
 
 #ifdef _WIN32
         size_t n = path.length();

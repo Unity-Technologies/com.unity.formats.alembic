@@ -8,6 +8,12 @@ namespace UTJ.Alembic
 {
     public class AlembicMesh : AlembicElement
     {
+        public class Submesh
+        {
+            public PinnedList<int> indices = new PinnedList<int>();
+            public bool update = true;
+        }
+
         public class Split
         {
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
@@ -25,12 +31,6 @@ namespace UTJ.Alembic
 
             public Vector3 center;
             public Vector3 size;
-        }
-
-        public class Submesh
-        {
-            public PinnedList<int> indexCache = new PinnedList<int>();
-            public bool update = true;
         }
 
         aiPolyMesh m_abcSchema;
@@ -192,8 +192,8 @@ namespace UTJ.Alembic
                 {
                     var submesh = m_submeshes[smi];
                     m_submeshes[smi].update = true;
-                    submesh.indexCache.ResizeDiscard(m_submeshSummaries[smi].indexCount);
-                    submeshData.indices = submesh.indexCache;
+                    submesh.indices.ResizeDiscard(m_submeshSummaries[smi].indexCount);
+                    submeshData.indices = submesh.indices;
                     m_submeshData[smi] = submeshData;
                 }
             }
@@ -280,7 +280,7 @@ namespace UTJ.Alembic
 
                     // update the bounds
                     var data = m_splitData[s];
-                    split.mesh.bounds = new Bounds(data.center, data.size);
+                    split.mesh.bounds = new Bounds(data.center, data.extents);
 
                     if (split.clear)
                     {
@@ -325,37 +325,37 @@ namespace UTJ.Alembic
                 {
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
-                    split.mesh.SetTriangles(submesh.indexCache.List, sum.submeshIndex);
+                    split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex);
                 }
             }
         }
 
-        Mesh AddMeshComponents(GameObject gameObject)
+        Mesh AddMeshComponents(GameObject go)
         {
             Mesh mesh = null;
-            MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
+            MeshFilter meshFilter = go.GetComponent<MeshFilter>();
             bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
             if( !hasMesh)
             {
-                mesh = new Mesh {name = "dyn: " + gameObject.name};
+                mesh = new Mesh {name = "dyn: " + go.name};
 #if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = IndexFormat.UInt32;
 #endif
                 mesh.MarkDynamic();
                 if (meshFilter == null)
                 {
-                    meshFilter = gameObject.AddComponent<MeshFilter>();
+                    meshFilter = go.AddComponent<MeshFilter>();
                 }
                 meshFilter.sharedMesh = mesh;
 
-                MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+                MeshRenderer renderer = go.GetComponent<MeshRenderer>();
                 if (renderer == null)
                 {
-                    renderer = gameObject.AddComponent<MeshRenderer>();
+                    renderer = go.AddComponent<MeshRenderer>();
                 }
 
-                var mat = gameObject.transform.parent.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+                var mat = go.transform.parent.GetComponentInChildren<MeshRenderer>().sharedMaterial;
     #if UNITY_EDITOR
                 if (mat == null)
                 {
@@ -369,7 +369,7 @@ namespace UTJ.Alembic
             {
                 mesh = UnityEngine.Object.Instantiate(meshFilter.sharedMesh);
                 meshFilter.sharedMesh = mesh;
-                mesh.name = "dyn: " + gameObject.name;
+                mesh.name = "dyn: " + go.name;
             }
 
             return mesh;
