@@ -814,6 +814,22 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         refiner.genSubmeshes();
     }
 
+    // workaround for irregular case
+    // I encountered zero vertices, non-zero triangles data
+    if (refiner.new_points.size() == 0) {
+        refiner.new_indices.clear();
+        refiner.new_indices_triangulated.clear();
+        refiner.new_indices_submeshes.clear();
+        for (auto& sp : refiner.splits) {
+            sp.face_count = 0;
+            sp.index_count = 0;
+            sp.triangulated_index_count = 0;
+        }
+        for (auto& sm : refiner.submeshes) {
+            sm.index_count = 0;
+        }
+    }
+
     topology.m_index_count = (int)refiner.new_indices_triangulated.size();
     topology.m_vertex_count = (int)refiner.new_points.size();
     onTopologyDetermined();
