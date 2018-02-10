@@ -149,6 +149,7 @@ private:
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
+    bool m_force_update_local = false; // copy from aiTSchema to avoid race condition
 
     aiAsyncLoad m_async_load;
 };

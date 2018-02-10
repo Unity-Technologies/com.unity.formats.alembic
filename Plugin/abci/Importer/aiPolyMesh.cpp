@@ -447,6 +447,8 @@ void aiPolyMesh::updateSample(const abcSampleSelector& ss)
 
 void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
 {
+    m_force_update_local = m_force_update;
+
     auto body = [this, &sample, idx]() {
         readSampleBody(sample, idx);
     };
@@ -485,23 +487,23 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
 
-    if (m_varying_topology)
+    bool topology_changed = m_varying_topology || m_force_update_local;
+
+    if (topology_changed)
         topology.clear();
 
-    bool topology_changed = m_varying_topology;
-
     // topology
-    if (!topology.m_counts_sp || m_varying_topology) {
+    if (!topology.m_counts_sp || topology_changed) {
         m_schema.getFaceCountsProperty().get(topology.m_counts_sp, ss);
         topology_changed = true;
     }
-    if (!topology.m_indices_sp || m_varying_topology) {
+    if (!topology.m_indices_sp || topology_changed) {
         m_schema.getFaceIndicesProperty().get(topology.m_indices_sp, ss);
         topology_changed = true;
     }
 
     // face sets
-    if (topology_changed && !m_facesets.empty()) {
+    if (!m_facesets.empty() && topology_changed) {
         topology.m_faceset_sps.resize(m_facesets.size());
         for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
             m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
