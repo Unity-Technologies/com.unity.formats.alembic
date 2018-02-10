@@ -34,6 +34,7 @@ void aeCamera::setFromPrevious()
 void aeCamera::writeSample(const aeCameraData &data_)
 {
     auto data = data_;
+    writeVisibility(data.visibility);
 
     const float Rad2Deg = 180.0f / float(M_PI);
     const float Deg2Rad = float(M_PI) / 180;

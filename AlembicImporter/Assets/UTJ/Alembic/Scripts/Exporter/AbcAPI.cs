@@ -87,6 +87,8 @@ namespace UTJ.Alembic
 
     public struct aeXformData
     {
+        public Bool visibility;
+
         public Vector3 translation;
         public Quaternion rotation;
         public Vector3 scale;
@@ -95,6 +97,8 @@ namespace UTJ.Alembic
 
     public struct aePointsData
     {
+        public Bool visibility;
+
         public IntPtr positions; // Vector3*
         public IntPtr velocities; // Vector3*. can be null
         public IntPtr ids; // uint*. can be null
@@ -103,6 +107,8 @@ namespace UTJ.Alembic
 
     public struct aePolyMeshData
     {
+        public Bool visibility;
+
         public IntPtr   faces;            // int*. if null, assume all faces are triangles
         public IntPtr   indices;          // int*. 
         public int      faceCount;
@@ -141,6 +147,8 @@ namespace UTJ.Alembic
 
     public struct aeCameraData
     {
+        public Bool visibility;
+
         public float nearClippingPlane;
         public float farClippingPlane;
         public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)

@@ -5,13 +5,15 @@
 class aeContext;
 #ifdef abciImpl
     class aeObject;
+    class aeSchema;
 #else
     using aeObject = void; // force make upper-castable
+    using aeSchema = void; // 
 #endif
-class aeXform;    // : aeObject
-class aePoints;   // : aeObject
-class aePolyMesh; // : aeObject
-class aeCamera;   // : aeObject
+class aeXform;    // : aeSchema
+class aePoints;   // : aeSchema
+class aePolyMesh; // : aeSchema
+class aeCamera;   // : aeSchema
 class aeProperty;
 
 
@@ -80,6 +82,8 @@ struct aeConfig
 
 struct aeXformData
 {
+    bool visibility = true;
+
     abcV3 translation = { 0.0f, 0.0f, 0.0f };
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
     abcV3 scale = { 1.0f, 1.0f, 1.0f };
@@ -88,6 +92,8 @@ struct aeXformData
 
 struct aePolyMeshData
 {
+    bool visibility = true;
+
     const int   *faces = nullptr;           // can be null. if null, assume all faces are triangles
     const int   *indices = nullptr;
     int         face_count = 0;
@@ -126,6 +132,8 @@ struct aeFaceSetData
 
 struct aePointsData
 {
+    bool visibility = true;
+
     const abcV3 *positions = nullptr;
     const abcV3 *velocities = nullptr;  // can be null
     const uint64_t *ids = nullptr;      // can be null
@@ -134,6 +142,8 @@ struct aePointsData
 
 struct aeCameraData
 {
+    bool visibility = true;
+
     float near_clipping_plane = 0.3f;
     float far_clipping_plane = 1000.0f;
     float field_of_view = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
@@ -180,8 +190,8 @@ abciAPI aePoints*   aeAsPoints(aeObject *obj);
 abciAPI aePolyMesh* aeAsPolyMesh(aeObject *obj);
 abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 
-abciAPI int         aeGetNumSamples(aeObject *obj);
-abciAPI void        aeSetFromPrevious(aeObject *obj);
+abciAPI int         aeGetNumSamples(aeSchema *obj);
+abciAPI void        aeSetFromPrevious(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
 abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
@@ -190,7 +200,7 @@ abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
 abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
 
-abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type);
+abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type);
 abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
 abciAPI void        aePropertyWriteScalarSample(aeProperty *prop, const void *data);
 

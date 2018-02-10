@@ -21,7 +21,7 @@ abcProperties aePoints::getAbcProperties()
     return m_schema.getUserProperties();
 }
 
-size_t aePoints::getNumSamples() const
+size_t aePoints::getNumSamples()
 {
     return m_schema.getNumSamples();
 }
@@ -33,6 +33,7 @@ void aePoints::setFromPrevious()
 
 void aePoints::writeSample(const aePointsData &data)
 {
+    m_buf_visibility = data.visibility;
     m_buf_positions.assign(data.positions, data.positions + data.count);
     m_buf_velocities.assign(data.velocities, data.velocities + data.count);
     m_buf_ids.assign(data.ids, data.ids + data.count);
@@ -64,6 +65,8 @@ void aePoints::doWriteSample()
     }
 
     // write!
+    writeVisibility(m_buf_visibility);
+
     AbcGeom::OPointsSchema::Sample sample;
     sample.setPositions(Abc::P3fArraySample(m_buf_positions.data(), m_buf_positions.size()));
     sample.setIds(Abc::UInt64ArraySample(m_buf_ids.data(), m_buf_ids.size()));

@@ -49,6 +49,8 @@ void aePolyMesh::setFromPrevious()
 
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
+    m_buf_visibility = data.visibility;
+
     m_buf_faces.assign(data.faces, data.faces + data.face_count);
     m_buf_indices.assign(data.indices, data.indices + data.index_count);
 
@@ -133,6 +135,8 @@ void aePolyMesh::writeSampleBody()
 
 
     // write!
+    writeVisibility(m_buf_visibility);
+
     AbcGeom::OPolyMeshSchema::Sample sample;
     sample.setFaceIndices(Abc::Int32ArraySample(m_buf_indices.data(), m_buf_indices.size()));
     sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces.data(), m_buf_faces.size()));

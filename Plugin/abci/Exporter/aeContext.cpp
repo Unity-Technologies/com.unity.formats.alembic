@@ -96,7 +96,12 @@ uint32_t aeContext::getNumTimeSampling() const
     return (uint32_t)m_timesamplings.size();
 }
 
-aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
+abcTimeamplingPtr aeContext::getTimeSampling(uint32_t i)
+{
+    return m_archive.getTimeSampling(i);
+}
+
+aeTimeSamplingData& aeContext::getTimeSamplingData(uint32_t i)
 {
     return *m_timesamplings[i];
 }
@@ -104,10 +109,10 @@ aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
 uint32_t aeContext::addTimeSampling(double start_time)
 {
     // add dummy data. it will be updated in aeContext::reset()
-    auto ts = Abc::TimeSampling(abcChrono(1.0f / 30.0f), abcChrono(start_time));
+    auto ts = abcTimeampling(abcChrono(1.0f / 30.0f), abcChrono(start_time));
     auto tsi = m_archive.addTimeSampling(ts);
     while (m_timesamplings.size() < tsi + 1) {
-        m_timesamplings.emplace_back(new aeTimeSampling());
+        m_timesamplings.emplace_back(new aeTimeSamplingData());
     }
     return tsi;
 }

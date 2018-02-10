@@ -1,8 +1,8 @@
 #pragma once
 
-class aeCamera : public aeObject
+class aeCamera : public aeSchema
 {
-using super = aeObject;
+using super = aeSchema;
 public:
     aeCamera(aeObject *parent, const char *name, uint32_t tsi);
     abcCamera& getAbcObject() override;

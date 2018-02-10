@@ -26,7 +26,6 @@ namespace UTJ.Alembic
         public ExportScope scope = ExportScope.EntireScene;
         public bool fixDeltaTime = true;
 
-        public bool ignoreDisabled = true;
         public bool assumeNonSkinnedMeshesAreConstant = true;
 
         public bool captureMeshRenderer = true;
@@ -50,6 +49,7 @@ namespace UTJ.Alembic
         #region internal types
         public class MeshBuffer
         {
+            public bool visibility = true;
             public PinnedList<int> indices = new PinnedList<int>();
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
@@ -137,6 +137,7 @@ namespace UTJ.Alembic
             {
                 {
                     var data = default(aePolyMeshData);
+                    data.visibility = visibility;
                     data.indices = indices;
                     data.indexCount = indices.Count;
                     data.points = points;
@@ -298,6 +299,7 @@ namespace UTJ.Alembic
                 var trans = m_target;
 
                 aeXformData data;
+                data.visibility = m_target.gameObject.activeSelf;
                 if (m_invertForward) { trans.forward = trans.forward * -1.0f; }
                 data.inherits = m_inherits;
                 if (m_inherits)
@@ -336,6 +338,7 @@ namespace UTJ.Alembic
                 var cam = m_target;
 
                 var data = aeCameraData.defaultValue;
+                data.visibility = m_target.gameObject.activeSelf;
                 data.nearClippingPlane = cam.nearClipPlane;
                 data.farClippingPlane = cam.farClipPlane;
                 data.fieldOfView = cam.fieldOfView;
@@ -376,6 +379,7 @@ namespace UTJ.Alembic
                 if (mesh == null || (m_recorder.m_settings.assumeNonSkinnedMeshesAreConstant && m_mbuf.points.Capacity != 0))
                     return;
 
+                m_mbuf.visibility = m_target.gameObject.activeSelf;
                 m_mbuf.Capture(mesh, m_recorder.m_settings);
                 m_mbuf.WriteSample(abc);
             }
@@ -423,6 +427,7 @@ namespace UTJ.Alembic
             {
                 if (m_target == null) { return; }
 
+                m_mbuf.visibility = m_target.gameObject.activeSelf;
                 if (m_cloth != null)
                 {
                     m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, m_recorder.m_settings);
@@ -432,6 +437,7 @@ namespace UTJ.Alembic
                 {
                     if (m_meshBake == null)
                         m_meshBake = new Mesh();
+
                     m_meshBake.Clear();
                     m_target.BakeMesh(m_meshBake);
 
@@ -486,6 +492,7 @@ namespace UTJ.Alembic
 
                 // write!
                 var data = new aePointsData();
+                data.visibility = m_target.gameObject.activeSelf;
                 data.positions = m_buf_positions;
                 data.count = count;
                 m_abc.WriteSample(ref data);
@@ -616,28 +623,6 @@ namespace UTJ.Alembic
             return cap;
         }
 
-        bool ShouldBeIgnored(Behaviour target)
-        {
-            return m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled);
-        }
-        bool ShouldBeIgnored(ParticleSystem target)
-        {
-            return m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy);
-        }
-        bool ShouldBeIgnored(MeshRenderer target)
-        {
-            if (m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
-            if (target.GetComponent<MeshFilter>().sharedMesh == null) { return true; }
-            return false;
-        }
-        bool ShouldBeIgnored(SkinnedMeshRenderer target)
-        {
-            if (m_settings.ignoreDisabled && (!target.gameObject.activeInHierarchy || !target.enabled)) { return true; }
-            if (target.sharedMesh == null) { return true; }
-            return false;
-        }
-
-
         // capture node tree for "Preserve Tree Structure" option.
         class CaptureNode
         {
@@ -727,7 +712,6 @@ namespace UTJ.Alembic
             {
                 foreach (var t in GetTargets<Camera>())
                 {
-                    if (ShouldBeIgnored(t)) { continue; }
                     var node = ConstructTree(t.GetComponent<Transform>());
                     node.componentType = t.GetType();
                 }
@@ -736,7 +720,6 @@ namespace UTJ.Alembic
             {
                 foreach (var t in GetTargets<MeshRenderer>())
                 {
-                    if (ShouldBeIgnored(t)) { continue; }
                     var node = ConstructTree(t.GetComponent<Transform>());
                     node.componentType = t.GetType();
                 }
@@ -745,7 +728,6 @@ namespace UTJ.Alembic
             {
                 foreach (var t in GetTargets<SkinnedMeshRenderer>())
                 {
-                    if (ShouldBeIgnored(t)) { continue; }
                     var node = ConstructTree(t.GetComponent<Transform>());
                     node.componentType = t.GetType();
                 }
@@ -754,7 +736,6 @@ namespace UTJ.Alembic
             {
                 foreach (var t in GetTargets<ParticleSystem>())
                 {
-                    if (ShouldBeIgnored(t)) { continue; }
                     var node = ConstructTree(t.GetComponent<Transform>());
                     node.componentType = t.GetType();
                 }
@@ -763,7 +744,6 @@ namespace UTJ.Alembic
             {
                 foreach (var t in GetTargets<AlembicCustomComponentCapturer>())
                 {
-                    if (ShouldBeIgnored(t)) { continue; }
                     var node = ConstructTree(t.GetComponent<Transform>());
                     node.componentType = typeof(AlembicCustomComponentCapturer);
                 }

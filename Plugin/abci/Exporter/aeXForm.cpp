@@ -34,6 +34,7 @@ void aeXform::setFromPrevious()
 void aeXform::writeSample(const aeXformData &data_)
 {
     auto data = data_;
+    writeVisibility(data.visibility);
 
     // quaternion to angle axis
     auto &quat = data.rotation;

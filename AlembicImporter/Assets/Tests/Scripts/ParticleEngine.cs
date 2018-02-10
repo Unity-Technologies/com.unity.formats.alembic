@@ -29,7 +29,6 @@ namespace UTJ.Alembic
             public float pressure_stiffness;
             public float wall_stiffness;
             public float timestep;
-
             float pad1, pad2;
         };
 

@@ -1,8 +1,8 @@
 #pragma once
 
-class aeXform : public aeObject
+class aeXform : public aeSchema
 {
-using super = aeObject;
+using super = aeSchema;
 public:
     aeXform(aeObject *parent, const char *name, uint32_t tsi);
     abcXform& getAbcObject() override;

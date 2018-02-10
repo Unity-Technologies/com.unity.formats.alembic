@@ -107,11 +107,11 @@ abciAPI aeCamera* aeAsCamera(aeObject *obj)
 }
 
 
-abciAPI int aeGetNumSamples(aeObject *obj)
+abciAPI int aeGetNumSamples(aeSchema *obj)
 {
     return (int)obj->getNumSamples();
 }
-abciAPI void aeSetFromPrevious(aeObject *obj)
+abciAPI void aeSetFromPrevious(aeSchema *obj)
 {
     obj->setFromPrevious();
 }
@@ -141,7 +141,7 @@ abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
     obj->writeSample(*data);
 }
 
-abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
+abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type)
 {
     switch (type) {
         // scalar properties

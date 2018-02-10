@@ -74,7 +74,6 @@ namespace UTJ.Alembic
 
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.scope"));
-            EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.ignoreDisabled"));
             EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.assumeNonSkinnedMeshesAreConstant"));
             GUILayout.Space(5);
 
