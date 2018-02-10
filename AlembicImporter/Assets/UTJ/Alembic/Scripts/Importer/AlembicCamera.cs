@@ -26,7 +26,9 @@ namespace UTJ.Alembic
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
-            abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
 
             abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;

@@ -22,7 +22,9 @@ namespace UTJ.Alembic
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
-            abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
 
             var trans = abcTreeNode.linkedGameObj.GetComponent<Transform>();
             if (m_abcData.inherits)

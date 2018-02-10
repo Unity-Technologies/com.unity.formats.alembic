@@ -80,7 +80,9 @@ namespace UTJ.Alembic
             sample.Sync();
 
             var data = m_abcData[0];
-            abcTreeNode.linkedGameObj.SetActive(data.visibility);
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.linkedGameObj.SetActive(data.visibility);
 
             var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             cloud.m_boundsCenter = data.boundsCenter;

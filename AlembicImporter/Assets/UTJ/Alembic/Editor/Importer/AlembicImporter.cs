@@ -134,7 +134,7 @@ namespace UTJ.Alembic
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(subassets, abcStream.m_abcTreeRoot, streamDescriptor);
+                GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
 

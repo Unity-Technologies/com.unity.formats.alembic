@@ -222,9 +222,12 @@ namespace UTJ.Alembic
             var sample = m_abcSchema.sample;
             sample.Sync();
 
-            abcTreeNode.linkedGameObj.SetActive(m_sampleSummary.visibility);
-            if (!m_sampleSummary.visibility)
-                return;
+            if(!abcTreeNode.stream.ignoreVisibility)
+            {
+                abcTreeNode.linkedGameObj.SetActive(m_sampleSummary.visibility);
+                if (!m_sampleSummary.visibility)
+                    return;
+            }
 
             bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 

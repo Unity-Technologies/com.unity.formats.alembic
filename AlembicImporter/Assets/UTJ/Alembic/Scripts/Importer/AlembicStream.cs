@@ -48,24 +48,28 @@ namespace UTJ.Alembic
             });
         }
 
-        public AlembicTreeNode m_abcTreeRoot;
-        private AlembicStreamDescriptor m_streamDesc;
-        private aiConfig m_config;
-        private aiContext m_context;
-        private double m_time;
-        private bool m_loaded;
-        private bool m_streamInterupted;
+        AlembicStreamDescriptor m_streamDesc;
+        AlembicTreeNode m_abcTreeRoot;
+        aiConfig m_config;
+        aiContext m_context;
+        double m_time;
+        bool m_ignoreVisibility;
+        bool m_loaded;
+        bool m_streamInterupted;
 
+        public AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
         public bool abcIsValid { get { return m_context; } }
         public aiTimeRange abcTimeRange { get { return m_context.timeRage; } }
         public aiConfig config { get { return m_config; } }
         public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
         public bool asyncLoad { set { m_config.asyncLoad = value; } }
+        public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
-            m_abcTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
+            m_abcTreeRoot = new AlembicTreeNode() { stream = this, linkedGameObj = rootGo };
             m_streamDesc = streamDesc;
         }
 
@@ -225,7 +229,7 @@ namespace UTJ.Alembic
                 else
                     childGO = childTransf.gameObject;
 
-                childTreeNode = new AlembicTreeNode() { linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
+                childTreeNode = new AlembicTreeNode() { stream =this, linkedGameObj = childGO };
                 treeNode.children.Add(childTreeNode);
 
                 // Update

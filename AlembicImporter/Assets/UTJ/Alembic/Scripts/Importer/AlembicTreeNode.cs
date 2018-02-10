@@ -8,7 +8,7 @@ namespace UTJ.Alembic
 
     public class AlembicTreeNode : IDisposable
     {
-        public AlembicStreamDescriptor streamDescriptor;
+        public AlembicStream stream;
         public GameObject linkedGameObj;
         public Dictionary<string, AlembicElement> alembicObjects = new Dictionary<string, AlembicElement>();
         public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
