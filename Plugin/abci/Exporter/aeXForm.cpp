@@ -55,7 +55,7 @@ void aeXform::writeSample(const aeXformData &data_)
         axis.x *= -1.0f;
         angle *= -1.0f;
     }
-    data.translation *= getConfig().scale;
+    data.translation *= getConfig().scale_factor;
 
     m_sample.setInheritsXforms(data.inherits);
     if (getConfig().xform_type == aeXFromType::Matrix)

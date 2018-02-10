@@ -5,9 +5,9 @@ namespace UTJ.Alembic
 {
     public class AlembicRecorderPlayableBehaviour : PlayableBehaviour
     {
-        PlayState m_PlayState = PlayState.Paused;
-        WaitForEndOfFrameComponent endOfFrameComp;
-        bool m_FirstOneSkipped;
+        PlayState m_playState = PlayState.Paused;
+        WaitForEndOfFrameComponent m_endOfFrameComp;
+        bool m_firstOneSkipped;
 
         public override void OnGraphStart(Playable playable)
         {
@@ -27,16 +27,16 @@ namespace UTJ.Alembic
 
         public override void OnBehaviourPlay(Playable playable, FrameData info)
         {
-            m_PlayState = PlayState.Playing;
+            m_playState = PlayState.Playing;
         }
 
         public override void OnBehaviourPause(Playable playable, FrameData info)
         {
-            if (m_PlayState == PlayState.Playing)
+            if (m_playState == PlayState.Playing)
             {
             }
 
-            m_PlayState = PlayState.Paused;
+            m_playState = PlayState.Paused;
         }
 
         public void OnFrameEnd()

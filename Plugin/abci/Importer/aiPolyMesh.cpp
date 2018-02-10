@@ -221,7 +221,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
             memset(data.colors, 0, split.vertex_count * sizeof(abcV4));
     }
 
-    {
+    if(data.points) {
         abcV3 bbmin, bbmax;
         MinMax(bbmin, bbmax, data.points, split.vertex_count);
         data.center = (bbmin + bbmax) * 0.5f;
@@ -362,7 +362,7 @@ void aiPolyMesh::updateSummary()
 
 
     bool interpolate = config.interpolate_samples && !m_constant && !m_varying_topology;
-    summary.interpolate_points = interpolate;
+    summary.interpolate_points = interpolate && !summary.constant_points;
 
     // velocities
     if (interpolate) {

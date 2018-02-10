@@ -99,7 +99,7 @@ void aePolyMesh::writeSampleBody()
     }
 
     // handle scale factor
-    float scale = conf.scale;
+    float scale = conf.scale_factor;
     if (scale != 1.0f) {
         ApplyScale(m_buf_points.data(), (int)m_buf_points.size(), scale);
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);

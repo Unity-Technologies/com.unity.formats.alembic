@@ -6,8 +6,8 @@
 TestCase(ExportAlembic_UVAndColorAnimation)
 {
     aeConfig config;
-    config.swap_handedness = false;
-    config.frame_rate = 5.0f;
+    config.frame_rate = 1.0f;
+    config.scale_factor = 100.0f;
 
     auto ctx = aeCreateContext();
     aeSetConfig(ctx, &config);

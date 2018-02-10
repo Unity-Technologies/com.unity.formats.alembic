@@ -26,7 +26,7 @@ void aeContext::reset()
         }
         else if (m_config.time_sampling_type == aeTimeSamplingType::Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
-                auto &t = m_timesamplings[i];
+                auto &t = *m_timesamplings[i];
                 if (!t.times.empty()) {
                     auto ts = Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.times.size(), t.times.back()), t.times);
                     *m_archive.getTimeSampling(i) = ts;
@@ -35,7 +35,7 @@ void aeContext::reset()
         }
         else if (m_config.time_sampling_type == aeTimeSamplingType::Acyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
-                auto &t = m_timesamplings[i];
+                auto &t = *m_timesamplings[i];
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
                 *m_archive.getTimeSampling(i) = ts;
             }
@@ -98,30 +98,33 @@ uint32_t aeContext::getNumTimeSampling() const
 
 aeTimeSampling& aeContext::getTimeSampling(uint32_t i)
 {
-    return m_timesamplings[i];
+    return *m_timesamplings[i];
 }
 
-uint32_t aeContext::addTimeSampling(float start_time)
+uint32_t aeContext::addTimeSampling(double start_time)
 {
-    auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), abcChrono(start_time));
+    // add dummy data. it will be updated in aeContext::reset()
+    auto ts = Abc::TimeSampling(abcChrono(1.0f / 30.0f), abcChrono(start_time));
     auto tsi = m_archive.addTimeSampling(ts);
-    m_timesamplings.resize(tsi + 1);
+    while (m_timesamplings.size() < tsi + 1) {
+        m_timesamplings.emplace_back(new aeTimeSampling());
+    }
     return tsi;
 }
 
-void aeContext::addTime(float time, uint32_t tsi)
+void aeContext::addTime(double time, uint32_t tsi)
 {
     // if tsi==-1, add time to all time samplings
     if (tsi == -1) {
         for (size_t i = 1; i < m_timesamplings.size(); ++i) {
-            auto &ts = m_timesamplings[i];
+            auto &ts = *m_timesamplings[i];
             if (ts.times.empty() || ts.times.back() != time) {
                 ts.times.push_back(time);
             }
         }
     }
     else {
-        auto &ts = m_timesamplings[tsi];
+        auto &ts = *m_timesamplings[tsi];
         if (ts.times.empty() || ts.times.back() != time) {
             ts.times.push_back(time);
         }

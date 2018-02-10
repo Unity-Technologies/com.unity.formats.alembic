@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Reflection;
@@ -23,7 +22,7 @@ namespace UTJ.Alembic
     public class AlembicRecorderSettings
     {
         public string outputPath;
-        public aeConfig conf = aeConfig.default_value;
+        public aeConfig conf = aeConfig.defaultValue;
         public ExportScope scope = ExportScope.EntireScene;
         public bool fixDeltaTime = true;
 

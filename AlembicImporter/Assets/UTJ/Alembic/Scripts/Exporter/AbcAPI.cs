@@ -66,7 +66,7 @@ namespace UTJ.Alembic
         public Bool swapFaces;
         public float scaleFactor;
 
-        public static aeConfig default_value
+        public static aeConfig defaultValue
         {
             get
             {

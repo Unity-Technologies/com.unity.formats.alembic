@@ -57,7 +57,7 @@ void aePoints::doWriteSample()
     }
 
     // handle scale factor
-    float scale = conf.scale;
+    float scale = conf.scale_factor;
     if (scale != 1.0f) {
         for (auto &v : m_buf_positions) { v *= scale; }
         for (auto &v : m_buf_velocities) { v *= scale; }
