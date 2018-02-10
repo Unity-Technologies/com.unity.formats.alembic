@@ -45,6 +45,7 @@ namespace UTJ.Alembic
         List<Submesh> m_submeshes = new List<Submesh>();
         bool m_freshSetup = false;
 
+        public override bool visibility { get { return m_sampleSummary.visibility; } }
 
         public aiMeshSummary summary { get { return m_summary; } }
         public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
@@ -221,6 +222,10 @@ namespace UTJ.Alembic
             var sample = m_abcSchema.sample;
             sample.Sync();
 
+            abcTreeNode.linkedGameObj.SetActive(m_sampleSummary.visibility);
+            if (!m_sampleSummary.visibility)
+                return;
+
             bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
 
             for (int s = 0; s < m_splits.Count; ++s)
@@ -293,7 +298,7 @@ namespace UTJ.Alembic
                         {
                             Material[] materials = new Material[submeshCount];
                             int copyTo = (nmat < submeshCount ? nmat : submeshCount);
-                            for (int i=0; i<copyTo; ++i)
+                            for (int i = 0; i < copyTo; ++i)
                             {
                                 materials[i] = currentMaterials[i];
                             }
@@ -327,7 +332,7 @@ namespace UTJ.Alembic
                     var split = m_splits[sum.splitIndex];
                     split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex);
                 }
-            }
+                }
         }
 
         Mesh AddMeshComponents(GameObject go)

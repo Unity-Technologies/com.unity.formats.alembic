@@ -43,6 +43,8 @@ aiPointsSample::~aiPointsSample()
 void aiPointsSample::fillData(aiPointsData &data)
 {
     auto body = [this, &data]() {
+        data.visibility = visibility;
+
         if (data.points) {
             if(!m_points_ref.empty())
                 m_points_ref.copy_to(data.points);
@@ -170,6 +172,8 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     auto& summary = getSummary();
+
+    readVisibility(sample, ss);
 
     // points
     m_schema.getPositionsProperty().get(sample.m_points_sp, ss);

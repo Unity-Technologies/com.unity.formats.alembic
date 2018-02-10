@@ -9,6 +9,7 @@ namespace UTJ.Alembic
         protected aiObject m_abcObj;
 
         public AlembicTreeNode abcTreeNode { get; set; }
+        public abstract bool visibility { get; }
 
         public T GetOrAddComponent<T>() where T : Component
         {

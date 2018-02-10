@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace UTJ.Alembic
 {
+    /*
     public class AlembicLight : AlembicElement
     {
         aiSchema m_abcSchema;
@@ -25,4 +26,5 @@ namespace UTJ.Alembic
             // ToDo
         }
     }
+    */
 }

@@ -11,6 +11,7 @@ namespace UTJ.Alembic
         aiPointsSummary m_summary;
         aiPointsSampleSummary m_sampleSummary;
 
+        public override bool visibility { get { return m_abcData[0].visibility; } }
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
@@ -78,8 +79,10 @@ namespace UTJ.Alembic
             // wait async copy complete
             sample.Sync();
 
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             var data = m_abcData[0];
+            abcTreeNode.linkedGameObj.SetActive(data.visibility);
+
+            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             cloud.m_boundsCenter = data.boundsCenter;
             cloud.m_boundsExtents = data.boundsExtents;
         }

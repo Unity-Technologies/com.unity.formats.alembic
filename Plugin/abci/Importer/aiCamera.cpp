@@ -31,6 +31,7 @@ void aiCamera::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
+    readVisibility(sample, ss);
 
     m_schema.get(sample.m_sample, ss);
     m_schema.get(sample.m_next_sample, ss2);
@@ -42,6 +43,8 @@ void aiCamera::cookSample(Sample& sample)
     auto& cs = sample.m_sample;
     auto& cs_next = sample.m_next_sample;
     auto& dst = sample.m_data;
+
+    dst.visibility = sample.visibility;
 
     // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
     static float sRad2Deg = 180.0f / float(M_PI);

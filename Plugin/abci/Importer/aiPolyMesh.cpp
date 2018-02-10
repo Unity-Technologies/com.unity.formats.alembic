@@ -126,6 +126,7 @@ void aiPolyMeshSample::reset()
 
 void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
 {
+    dst.visibility = visibility;
     dst.split_count   = m_topology->getSplitCount();
     dst.submesh_count = m_topology->getSubmeshCount();
     dst.vertex_count  = m_topology->getVertexCount();
@@ -171,6 +172,12 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
 
     if (data.points) {
         m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
+
+        // bounds
+        abcV3 bbmin, bbmax;
+        MinMax(bbmin, bbmax, data.points, split.vertex_count);
+        data.center = (bbmin + bbmax) * 0.5f;
+        data.extents = bbmax - bbmin;
     }
     if (data.velocities) {
         // velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
@@ -219,13 +226,6 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
             m_colors_ref.copy_to((abcC4*)data.colors, split.vertex_count, split.vertex_offset);
         else
             memset(data.colors, 0, split.vertex_count * sizeof(abcV4));
-    }
-
-    if(data.points) {
-        abcV3 bbmin, bbmax;
-        MinMax(bbmin, bbmax, data.points, split.vertex_count);
-        data.center = (bbmin + bbmax) * 0.5f;
-        data.size = bbmax - bbmin;
     }
 }
 
@@ -472,6 +472,8 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
+
+    readVisibility(sample, ss);
     
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;

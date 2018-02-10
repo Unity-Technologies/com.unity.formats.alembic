@@ -30,15 +30,17 @@ aiXform::Sample* aiXform::newSample()
 void aiXform::readSample(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
-    AbcGeom::XformSample matSample;
-    m_schema.get(matSample, ss);
-    sample.m_matrix = matSample.getMatrix();    
-    sample.inherits = matSample.getInheritsXforms();
-
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    AbcGeom::XformSample nextMatSample;
-    m_schema.get(nextMatSample, ss2 );
-    sample.m_next_matrix = nextMatSample.getMatrix();
+    readVisibility(sample, ss);
+
+    AbcGeom::XformSample xf_sample;
+    m_schema.get(xf_sample, ss);
+    sample.m_matrix = xf_sample.getMatrix();
+    sample.inherits = xf_sample.getInheritsXforms();
+
+    AbcGeom::XformSample xf_sample2;
+    m_schema.get(xf_sample2, ss2);
+    sample.m_next_matrix = xf_sample2.getMatrix();
 }
 
 void aiXform::cookSample(Sample& sample)
@@ -76,6 +78,7 @@ void aiXform::cookSample(Sample& sample)
         rot_final.w = -rot_final.w;
     }
     auto& dst = sample.m_data;
+    dst.visibility = sample.visibility;
     dst.inherits = sample.inherits;
     dst.translation = trans;
     dst.rotation = rot_final;

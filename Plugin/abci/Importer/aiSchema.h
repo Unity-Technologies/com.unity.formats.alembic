@@ -13,6 +13,9 @@ public:
     virtual void waitAsync() {}
     void markForceSync();
 
+public:
+    bool visibility = true;
+
 protected:
     aiSchema *m_schema = nullptr;
     bool m_force_sync = false;
@@ -70,6 +73,7 @@ public:
         m_constant = m_schema.isConstant();
         m_time_sampling = m_schema.getTimeSampling();
         m_num_samples = static_cast<int64_t>(m_schema.getNumSamples());
+        m_visibility_prop = AbcGeom::GetVisibilityProperty(const_cast<abcObject&>(abc));
         setupProperties();
     }
 
@@ -171,9 +175,19 @@ protected:
         return m_schema.getUserProperties();
     }
 
+    void readVisibility(Sample& sample, const abcSampleSelector& ss)
+    {
+        if (m_visibility_prop.valid()) {
+            int8_t v;
+            m_visibility_prop.get(v, ss);
+            sample.visibility = v != 0;
+        }
+    }
+
 protected:
     AbcSchema m_schema;
     Abc::TimeSamplingPtr m_time_sampling;
+    AbcGeom::IVisibilityProperty m_visibility_prop;
     SamplePtr m_sample;
     int64_t m_num_samples = 0;
     int64_t m_last_sample_index = -1;

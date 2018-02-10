@@ -133,6 +133,8 @@ namespace UTJ.Alembic
 
     public struct aiMeshSampleSummary
     {
+        public Bool visibility;
+
         public int splitCount;
         public int submeshCount;
         public int vertexCount;
@@ -182,6 +184,8 @@ namespace UTJ.Alembic
 
     public struct aiXformData
     {
+        public Bool visibility;
+
         public Vector3 translation;
         public Quaternion rotation;
         public Vector3 scale;
@@ -190,6 +194,8 @@ namespace UTJ.Alembic
 
     public struct aiCameraData
     {
+        public Bool visibility;
+
         public float nearClippingPlane;
         public float farClippingPlane;
         public float fieldOfView;   // in degree. vertical one
@@ -216,6 +222,8 @@ namespace UTJ.Alembic
 
     public struct aiPointsData
     {
+        public Bool visibility;
+
         public IntPtr points;
         public IntPtr velocities;
         public IntPtr ids;
