@@ -177,7 +177,7 @@ protected:
 
     void readVisibility(Sample& sample, const abcSampleSelector& ss)
     {
-        if (m_visibility_prop.valid()) {
+        if (m_visibility_prop.valid() && m_visibility_prop.getNumSamples() > 0) {
             int8_t v;
             m_visibility_prop.get(v, ss);
             sample.visibility = v != 0;

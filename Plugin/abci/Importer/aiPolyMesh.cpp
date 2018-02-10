@@ -314,6 +314,12 @@ void aiPolyMesh::updateSummary()
     // reset
     summary = {};
 
+    if (m_visibility_prop.valid()) {
+        if (!m_visibility_prop.isConstant()) {
+            m_constant = false;
+        }
+    }
+
     // points
     auto points = m_schema.getPositionsProperty();
     if (points.valid()) {
@@ -324,7 +330,7 @@ void aiPolyMesh::updateSummary()
 
     // normals
     auto normals = m_schema.getNormalsParam();
-    if (normals.valid() && normals.getScope() != AbcGeom::kUnknownScope) {
+    if (normals.valid() && normals.getNumSamples() > 0 && normals.getScope() != AbcGeom::kUnknownScope) {
         summary.has_normals_prop = true;
         summary.has_normals = true;
         summary.constant_normals = normals.isConstant();
@@ -334,7 +340,7 @@ void aiPolyMesh::updateSummary()
 
     // uv0
     auto uvs = m_schema.getUVsParam();
-    if (uvs.valid() && uvs.getScope() != AbcGeom::kUnknownScope) {
+    if (uvs.valid() && uvs.getNumSamples() > 0 && uvs.getScope() != AbcGeom::kUnknownScope) {
         summary.has_uv0_prop = true;
         summary.has_uv0 = true;
         summary.constant_uv0 = uvs.isConstant();
@@ -343,7 +349,7 @@ void aiPolyMesh::updateSummary()
     }
 
     // uv1
-    if (m_uv1_param && m_uv1_param->valid()) {
+    if (m_uv1_param && m_uv1_param->valid() && m_uv1_param->getNumSamples() > 0) {
         summary.has_uv1_prop = true;
         summary.has_uv1 = true;
         summary.constant_uv1 = m_uv1_param->isConstant();
@@ -352,7 +358,7 @@ void aiPolyMesh::updateSummary()
     }
 
     // colors
-    if (m_colors_param && m_colors_param->valid()) {
+    if (m_colors_param && m_colors_param->valid() && m_colors_param->getNumSamples() > 0) {
         summary.has_colors_prop = true;
         summary.has_colors = true;
         summary.constant_colors = m_colors_param->isConstant();
@@ -371,7 +377,7 @@ void aiPolyMesh::updateSummary()
     }
     else {
         auto velocities = m_schema.getVelocitiesProperty();
-        if (velocities.valid()) {
+        if (velocities.valid() && velocities.getNumSamples() > 0) {
             summary.has_velocities_prop = true;
             summary.has_velocities = true;
             summary.constant_velocities = velocities.isConstant();

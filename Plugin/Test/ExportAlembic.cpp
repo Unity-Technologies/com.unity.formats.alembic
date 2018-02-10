@@ -77,3 +77,46 @@ TestCase(ExportAlembic_UVAndColorAnimation)
     }
     aeDestroyContext(ctx);
 }
+
+TestCase(ExportAlembic_VisibilityAnimation)
+{
+    aeConfig config;
+    config.frame_rate = 2.0f;
+    config.scale_factor = 100.0f;
+
+    auto ctx = aeCreateContext();
+    aeSetConfig(ctx, &config);
+    aeOpenArchive(ctx, "VisibilityAnimation.abc");
+
+    auto top = aeGetTopObject(ctx);
+    auto xf = aeNewXform(top, "VisibilityAnimation");
+    auto mesh = aeNewPolyMesh(xf, "VisibilityAnimation_Mesh");
+    {
+        aePolyMeshData data;
+
+        int counts[] = { 4 };
+        int indices[] = { 0, 1, 2, 3 };
+        abcV3 points[] = {
+            {-0.5f, 0.0f, -0.5f },
+            {-0.5f, 0.0f,  0.5f },
+            { 0.5f, 0.0f,  0.5f },
+            { 0.5f, 0.0f, -0.5f },
+        };
+
+        data.faces = counts;
+        data.face_count = 1;
+        data.indices = indices;
+        data.index_count = 4;
+        data.points = points;
+        data.point_count = 4;
+
+        for (int i = 0; i < 10; ++i) {
+            data.visibility = i % 2 == 0;
+
+            aeMarkFrameBegin(ctx);
+            aePolyMeshWriteSample(mesh, &data);
+            aeMarkFrameEnd(ctx);
+        }
+    }
+    aeDestroyContext(ctx);
+}
