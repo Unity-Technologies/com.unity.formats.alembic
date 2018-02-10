@@ -90,7 +90,7 @@ void aiXform::decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &s
     Imath::M44d mat_remainder(mat);
 
     // Extract Scale, Shear
-    Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear);
+    Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear, false);
 
     // Extract translation
     translation.x = mat_remainder[3][0];
