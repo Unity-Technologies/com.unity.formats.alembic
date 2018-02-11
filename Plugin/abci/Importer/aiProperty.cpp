@@ -54,7 +54,7 @@ public:
     aiTScalarProprty(aiSchema *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
@@ -119,7 +119,7 @@ public:
     aiTArrayProprty(aiSchema *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }

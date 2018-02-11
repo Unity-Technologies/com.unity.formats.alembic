@@ -25,25 +25,16 @@
     struct abcV2
     {
         float x, y;
-
-        abcV2() {}
-        abcV2(float _x, float _y) : x(_x), y(_y) {}
     };
 
     struct abcV3
     {
         float x, y, z;
-
-        abcV3() {}
-        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
     };
 
     struct abcV4
     {
         float x, y, z, w;
-
-        abcV4() {}
-        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
     };
 
     struct abcSampleSelector

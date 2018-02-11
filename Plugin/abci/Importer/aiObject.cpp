@@ -17,6 +17,9 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     , m_abc(abc)
     , m_parent(parent)
 {
+#ifdef aiDebug
+    m_fullname = getFullName();
+#endif
 }
 
 aiObject::~aiObject()
@@ -66,15 +69,15 @@ void aiObject::removeChild(aiObject *c)
     }
 }
 
-aiContext*  aiObject::getContext() const { return m_ctx; }
+aiContext*  aiObject::getContext() const    { return m_ctx; }
 const aiConfig& aiObject::getConfig() const { return m_ctx->getConfig(); }
-abcObject&  aiObject::getAbcObject() { return m_abc; }
-const char* aiObject::getName() const { return m_abc.getName().c_str(); }
-const char* aiObject::getFullName() const { return m_abc.getFullName().c_str(); }
-uint32_t    aiObject::getNumChildren() const { return (uint32_t)m_children.size(); }
-aiObject*   aiObject::getChild(int i) { return m_children[i].get(); }
-aiObject*   aiObject::getParent() const { return m_parent; }
-void        aiObject::setEnabled(bool v) { m_enabled = v; }
+abcObject&  aiObject::getAbcObject()        { return m_abc; }
+const char* aiObject::getName() const       { return m_abc.getName().c_str(); }
+const char* aiObject::getFullName() const   { return m_abc.getFullName().c_str(); }
+uint32_t    aiObject::getNumChildren() const{ return (uint32_t)m_children.size(); }
+aiObject*   aiObject::getChild(int i)       { return m_children[i].get(); }
+aiObject*   aiObject::getParent() const     { return m_parent; }
+void        aiObject::setEnabled(bool v)    { m_enabled = v; }
 
 aiSample* aiObject::getSample()
 {

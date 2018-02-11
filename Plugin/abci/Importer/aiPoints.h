@@ -1,6 +1,4 @@
 #pragma once
-#include "aiIntrusiveArray.h"
-#include "aiAsync.h"
 
 struct aiPointsSummaryInternal : public aiPointsSummary
 {
@@ -53,13 +51,8 @@ public:
     const aiPointsSummaryInternal& getSummary() const;
 
     Sample* newSample() override;
-    void updateSample(const abcSampleSelector& ss) override;
-    void readSample(Sample& sample, uint64_t idx) override;
-    void cookSample(Sample& sample) override;
-    void waitAsync() override;
-
-    void readSampleBody(Sample& sample, uint64_t idx);
-    void cookSampleBody(Sample& sample);
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
 
     void setSort(bool v);
     bool getSort() const;
@@ -70,6 +63,4 @@ private:
     aiPointsSummaryInternal m_summary;
     bool m_sort = false;
     abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
-
-    aiAsyncLoad m_async_load;
 };

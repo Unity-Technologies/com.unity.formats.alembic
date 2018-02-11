@@ -10,6 +10,9 @@ namespace UTJ.Alembic
         Camera m_camera;
         bool m_ignoreClippingPlanes = false;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        public override bool visibility { get { return m_abcData.visibility; } }
+
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
@@ -24,7 +27,11 @@ namespace UTJ.Alembic
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
-            abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.gameObject.SetActive(m_abcData.visibility);
+
+            abcTreeNode.gameObject.transform.forward = -abcTreeNode.gameObject.transform.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
 
             if (!m_ignoreClippingPlanes)

@@ -1,4 +1,5 @@
 #pragma once
+#include "aiAsync.h"
 
 
 class aiSample
@@ -12,6 +13,9 @@ public:
 
     virtual void waitAsync() {}
     void markForceSync();
+
+public:
+    bool visibility = true;
 
 protected:
     aiSchema *m_schema = nullptr;
@@ -67,9 +71,12 @@ public:
     {
         AbcSchemaObject abcObj(abc, Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
-        m_constant = m_schema.isConstant();
         m_time_sampling = m_schema.getTimeSampling();
         m_num_samples = static_cast<int64_t>(m_schema.getNumSamples());
+
+        m_visibility_prop = AbcGeom::GetVisibilityProperty(const_cast<abcObject&>(abc));
+        m_constant = m_schema.isConstant() && (!m_visibility_prop.valid() || m_visibility_prop.isConstant());
+
         setupProperties();
     }
 
@@ -93,7 +100,55 @@ public:
         return static_cast<int>(m_num_samples);
     }
 
+
+    Sample* getSample() override
+    {
+        return m_sample.get();
+    }
+
+    virtual Sample* newSample() = 0;
+
     void updateSample(const abcSampleSelector& ss) override
+    {
+        m_async_load.reset();
+        updateSampleBody(ss);
+        if (m_async_load.ready())
+            getContext()->queueAsync(m_async_load);
+    }
+
+    virtual void readSample(Sample& sample, uint64_t idx)
+    {
+        m_force_update_local = m_force_update;
+
+        auto body = [this, &sample, idx]() {
+            readSampleBody(sample, idx);
+        };
+
+        if (m_force_sync || !getConfig().async_load)
+            body();
+        else
+            m_async_load.m_read = body;
+    }
+
+    virtual void cookSample(Sample& sample)
+    {
+        auto body = [this, &sample]() {
+            cookSampleBody(sample);
+        };
+
+        if (m_force_sync || !getConfig().async_load)
+            body();
+        else
+            m_async_load.m_cook = body;
+    }
+
+    virtual void waitAsync()
+    {
+        m_async_load.wait();
+    }
+
+protected:
+    virtual void updateSampleBody(const abcSampleSelector& ss)
     {
         if (!m_enabled)
             return;
@@ -102,7 +157,7 @@ public:
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();
 
-        if (!m_sample || (!m_constant && sample_index != m_last_sample_index)) {
+        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update) {
             m_sample_index_changed = true;
             if (!m_sample)
                 m_sample.reset(newSample());
@@ -112,7 +167,7 @@ public:
         else {
             m_sample_index_changed = false;
             sample = m_sample.get();
-            if ((m_constant || !config.interpolate_samples) && !m_force_update)
+            if (m_constant || !config.interpolate_samples)
                 sample = nullptr;
         }
 
@@ -156,28 +211,37 @@ public:
         m_force_sync = false;
     }
 
-    Sample* getSample() override
-    {
-        return m_sample.get();
-    }
+    virtual void readSampleBody(Sample& sample, uint64_t idx) = 0;
+    virtual void cookSampleBody(Sample& sample) = 0;
 
-protected:
-    virtual Sample* newSample() = 0;
-    virtual void readSample(Sample& sample, uint64_t idx) = 0;
-    virtual void cookSample(Sample& sample) {}
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
         return m_schema.getUserProperties();
     }
 
+    void readVisibility(Sample& sample, const abcSampleSelector& ss)
+    {
+        if (m_visibility_prop.valid() && m_visibility_prop.getNumSamples() > 0) {
+            int8_t v;
+            m_visibility_prop.get(v, ss);
+            sample.visibility = v != 0;
+        }
+    }
+
 protected:
     AbcSchema m_schema;
     Abc::TimeSamplingPtr m_time_sampling;
+    AbcGeom::IVisibilityProperty m_visibility_prop;
     SamplePtr m_sample;
     int64_t m_num_samples = 0;
     int64_t m_last_sample_index = -1;
     float m_current_time_offset = 0;
     float m_current_time_interval = 0;
     bool m_sample_index_changed = false;
+
+    bool m_force_update_local = false; // m_force_update for worker thread
+
+private:
+    aiAsyncLoad m_async_load;
 };

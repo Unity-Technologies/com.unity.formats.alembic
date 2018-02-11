@@ -28,10 +28,10 @@ public:
     using value_type = typename T::value_type;
     using sample_type = typename T::sample_type;
 
-    aeTArrayProprty(aeObject *parent, const char *name, uint32_t tsi)
+    aeTArrayProprty(aeSchema *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        abciDebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return true; }
@@ -64,10 +64,10 @@ public:
     using property_type = T;
     using value_type = typename T::value_type;
 
-    aeTScalarProprty(aeObject *parent, const char *name, uint32_t tsi)
+    aeTScalarProprty(aeSchema *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return false; }
@@ -89,6 +89,22 @@ template class aeTScalarProprty<abcFloat3Property >;
 template class aeTScalarProprty<abcFloat4Property >;
 template class aeTScalarProprty<abcFloat4x4Property>;
 
+template<class T, bool is_array = std::is_base_of<Abc::OArrayProperty, T>::value>
+struct aeMakeProperty;
+
+template<class T>
+struct aeMakeProperty<T, false>
+{
+    static aeProperty* make(aeSchema *parent, const char *name, uint32_t tsi) { return new aeTScalarProprty<T>(parent, name, tsi); }
+};
+
+template<class T>
+struct aeMakeProperty<T, true>
+{
+    static aeProperty* make(aeSchema *parent, const char *name, uint32_t tsi) { return new aeTArrayProprty<T>(parent, name, tsi); }
+};
+
+
 
 aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t tsi)
     : m_ctx(ctx)
@@ -100,7 +116,6 @@ aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t ts
 
 aeObject::~aeObject()
 {
-    m_properties.clear();
     if(!m_children.empty()) {
         // make m_children empty before deleting children because children try to remove element of it in their destructor
         decltype(m_children) tmp;
@@ -145,32 +160,28 @@ void aeObject::removeChild(aeObject *c)
 }
 
 
-abcProperties aeObject::getAbcProperties()
+aeSchema::aeSchema(aeContext * ctx, aeObject * parent, abcObject * abc, uint32_t tsi)
+    : super(ctx, parent, abc, tsi)
 {
-    return abcProperties();
+    m_visibility_prop = AbcGeom::CreateVisibilityProperty(*m_abc, tsi);
 }
 
-
-template<class T, bool is_array=std::is_base_of<Abc::OArrayProperty, T>::value>
-struct aeMakeProperty;
-
-template<class T>
-struct aeMakeProperty<T, false>
+aeSchema::~aeSchema()
 {
-    static aeProperty* make(aeObject *parent, const char *name, uint32_t tsi) { return new aeTScalarProprty<T>(parent, name, tsi); }
-};
-template<class T>
-struct aeMakeProperty<T, true>
+    m_properties.clear();
+}
+
+void aeSchema::writeVisibility(bool v)
 {
-    static aeProperty* make(aeObject *parent, const char *name, uint32_t tsi) { return new aeTArrayProprty<T>(parent, name, tsi); }
-};
+    m_visibility_prop.set(v ? 1 : 0);
+}
 
 template<class T>
-aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
+aeProperty* aeSchema::newProperty(const char *name, uint32_t tsi)
 {
     auto cprop = getAbcProperties();
     if (!cprop.valid()) {
-        abciDebugLog("aeObject::newProperty() %s failed!", name);
+        DebugLog("aeObject::newProperty() %s failed!", name);
         return nullptr;
     }
 
@@ -179,31 +190,22 @@ aeProperty* aeObject::newProperty(const char *name, uint32_t tsi)
     return ret;
 }
 
-size_t aeObject::getNumSamples()
-{
-    abciDebugLog("aeObject::getNumSamples(): this should not be called!");
-    return 0;
-}
+#define Impl(T) template aeProperty* aeSchema::newProperty<T >(const char *name, uint32_t tsi)
+Impl(abcBoolProperty);
+Impl(abcIntProperty);
+Impl(abcUIntProperty);
+Impl(abcFloatProperty);
+Impl(abcFloat2Property);
+Impl(abcFloat3Property);
+Impl(abcFloat4Property);
+Impl(abcFloat4x4Property);
 
-void aeObject::setFromPrevious()
-{
-    abciDebugLog("aeObject::setFromPrevious(): this should not be called!");
-}
-
-template aeProperty*    aeObject::newProperty<abcBoolProperty >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcIntProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcUIntProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloatProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat2Property >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat3Property >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat4Property >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat4x4Property>(const char *name, uint32_t tsi);
-
-template aeProperty*    aeObject::newProperty<abcBoolArrayProperty >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcIntArrayProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcUIntArrayProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloatArrayProperty>(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat2ArrayProperty >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat3ArrayProperty >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat4ArrayProperty >(const char *name, uint32_t tsi);
-template aeProperty*    aeObject::newProperty<abcFloat4x4ArrayProperty>(const char *name, uint32_t tsi);
+Impl(abcBoolArrayProperty);
+Impl(abcIntArrayProperty);
+Impl(abcUIntArrayProperty);
+Impl(abcFloatArrayProperty);
+Impl(abcFloat2ArrayProperty);
+Impl(abcFloat3ArrayProperty);
+Impl(abcFloat4ArrayProperty);
+Impl(abcFloat4x4ArrayProperty);
+#undef Impl

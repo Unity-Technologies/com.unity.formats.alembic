@@ -48,47 +48,51 @@ namespace UTJ.Alembic
             });
         }
 
-        public AlembicTreeNode m_abcTreeRoot;
-        private AlembicStreamDescriptor m_streamDesc;
-        private aiConfig m_config;
-        private aiContext m_context;
-        private double m_time;
-        private bool m_loaded;
-        private bool m_streamInterupted;
+        AlembicStreamDescriptor m_streamDesc;
+        AlembicTreeNode m_abcTreeRoot;
+        aiConfig m_config;
+        aiContext m_context;
+        double m_time;
+        bool m_ignoreVisibility;
+        bool m_loaded;
+        bool m_streamInterupted;
 
+        public AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
         public bool abcIsValid { get { return m_context; } }
         public aiTimeRange abcTimeRange { get { return m_context.timeRage; } }
         public aiConfig config { get { return m_config; } }
         public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
         public bool asyncLoad { set { m_config.asyncLoad = value; } }
+        public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
-            m_abcTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
+            m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
             m_streamDesc = streamDesc;
         }
 
         void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcPrepareSample();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcPrepareSample();
             foreach (var child in node.children)
                 AbcBeforeUpdateSamples(child);
         }
 
         void AbcBeginSyncData(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcSyncDataBegin();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataBegin();
             foreach (var child in node.children)
                 AbcBeginSyncData(child);
         }
 
         void AbcEndSyncData(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcSyncDataEnd();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataEnd();
             foreach (var child in node.children)
                 AbcEndSyncData(child);
         }
@@ -113,10 +117,10 @@ namespace UTJ.Alembic
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public void AbcLoad()
+        public void AbcLoad(bool createMissingNodes)
         {
             m_time = 0.0f;
-            m_context = aiContext.Create(m_abcTreeRoot.linkedGameObj.GetInstanceID());
+            m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
 
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
@@ -127,17 +131,13 @@ namespace UTJ.Alembic
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
             m_config.interpolateSamples = settings.interpolateSamples;
-#if UNITY_2017_3_OR_NEWER
-            m_config.splitUnit = 0x7fffffff;
-#else
-            m_config.splitUnit = 65000;
-#endif
+
             m_context.SetConfig(ref m_config);
             m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);
 
             if (m_loaded)
             {
-                UpdateAbcTree(m_context, m_abcTreeRoot, m_time);
+                UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes);
                 AlembicStream.s_streams.Add(this);
             }
             else
@@ -171,7 +171,7 @@ namespace UTJ.Alembic
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes = true)
+        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes)
         {
             var top = ctx.topObject;
             if (!top)
@@ -206,7 +206,7 @@ namespace UTJ.Alembic
                 // Find targetted child GameObj
                 GameObject childGO = null;
 
-                var childTransf = treeNode.linkedGameObj == null ? null : treeNode.linkedGameObj.transform.Find(childName);
+                var childTransf = treeNode.gameObject == null ? null : treeNode.gameObject.transform.Find(childName);
                 if (childTransf == null)
                 {
                     if (!ic.createMissingNodes)
@@ -214,30 +214,30 @@ namespace UTJ.Alembic
                         obj.enabled = false;
                         return;
                     }
+                    else
+                    {
+                        obj.enabled = true;
+                    }
 
                     childGO = new GameObject { name = childName };
-                    var trans = childGO.GetComponent<Transform>();
-                    trans.parent = treeNode.linkedGameObj.transform;
-                    trans.localPosition = Vector3.zero;
-                    trans.localEulerAngles = Vector3.zero;
-                    trans.localScale = Vector3.one;
+                    childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
                 }
                 else
                     childGO = childTransf.gameObject;
 
-                childTreeNode = new AlembicTreeNode() { linkedGameObj = childGO, streamDescriptor = treeNode.streamDescriptor };
+                childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
                 treeNode.children.Add(childTreeNode);
 
                 // Update
                 AlembicElement elem = null;
 
-                if (obj.AsXform())
+                if (obj.AsXform() && m_streamDesc.settings.importXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsPolyMesh())
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                else if (obj.AsCamera())
+                else if (obj.AsCamera() && m_streamDesc.settings.importCamera)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPoints())
+                else if (obj.AsPolyMesh() && m_streamDesc.settings.importPolyMesh)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
 
                 if (elem != null)

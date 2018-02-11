@@ -31,9 +31,17 @@ void aeXform::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeXform::writeSample(const aeXformData &data_)
+void aeXform::writeSample(const aeXformData &data)
 {
-    auto data = data_;
+    m_data_local = data;
+    m_ctx->addAsync([this]() { writeSampleBody(); });
+}
+
+void aeXform::writeSampleBody()
+{
+    auto& data = m_data_local;
+
+    writeVisibility(data.visibility);
 
     // quaternion to angle axis
     auto &quat = data.rotation;
@@ -55,7 +63,7 @@ void aeXform::writeSample(const aeXformData &data_)
         axis.x *= -1.0f;
         angle *= -1.0f;
     }
-    data.translation *= getConfig().scale;
+    data.translation *= getConfig().scale_factor;
 
     m_sample.setInheritsXforms(data.inherits);
     if (getConfig().xform_type == aeXFromType::Matrix)

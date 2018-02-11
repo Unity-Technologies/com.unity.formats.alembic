@@ -31,9 +31,16 @@ void aeCamera::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeCamera::writeSample(const aeCameraData &data_)
+void aeCamera::writeSample(const aeCameraData &data)
 {
-    auto data = data_;
+    m_data_local = data;
+    m_ctx->addAsync([this]() { writeSampleBody(); });
+}
+
+void aeCamera::writeSampleBody()
+{
+    auto& data = m_data_local;
+    writeVisibility(data.visibility);
 
     const float Rad2Deg = 180.0f / float(M_PI);
     const float Deg2Rad = float(M_PI) / 180;

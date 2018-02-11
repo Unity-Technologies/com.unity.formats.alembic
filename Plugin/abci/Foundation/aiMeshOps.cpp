@@ -197,6 +197,10 @@ void MeshRefiner::triangulate(bool swap_faces, bool turn_quads)
 
 void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 {
+    if (material_ids.empty()) {
+        genSubmeshes();
+        return;
+    }
     submeshes.clear();
 
     new_indices_submeshes.resize(new_indices_triangulated.size());
@@ -320,6 +324,8 @@ void MeshRefiner::clear()
     splits.clear();
     submeshes.clear();
     num_new_indices = 0;
+
+    connection.clear();
 }
 
 void MeshRefiner::refine()

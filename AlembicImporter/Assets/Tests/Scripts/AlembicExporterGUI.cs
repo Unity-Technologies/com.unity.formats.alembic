@@ -41,10 +41,11 @@ namespace UTJ.Alembic
             m_exporters = FindObjectsOfType<AlembicExporter>();
             foreach(var e in m_exporters)
             {
-                e.m_maxCaptureFrame = 0;
-                e.m_conf.timeSamplingType = time_sampling_type;
-                e.m_conf.frameRate = frame_rate;
-                e.BeginCapture();
+                e.maxCaptureFrame = 0;
+                var settings = e.recorder.settings;
+                settings.conf.timeSamplingType = time_sampling_type;
+                settings.conf.frameRate = frame_rate;
+                e.BeginRecording();
             }
 
             m_recording = true;
@@ -59,7 +60,7 @@ namespace UTJ.Alembic
 
             foreach (var e in m_exporters)
             {
-                e.EndCapture();
+                e.EndRecording();
             }
 
             m_recording = false;

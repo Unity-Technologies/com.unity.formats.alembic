@@ -9,8 +9,8 @@ public:
     void getData(aiCameraData &dst) const;
 
 public:
-    AbcGeom::CameraSample m_sample, m_next_sample;
-    aiCameraData m_data;
+    AbcGeom::CameraSample cam_sp, cam_sp2;
+    aiCameraData data;
 };
 
 
@@ -28,6 +28,9 @@ public:
     aiCamera(aiObject *parent, const abcObject &abc);
 
     Sample* newSample() override;
-    void readSample(Sample& sample, uint64_t idx) override;
-    void cookSample(Sample& sample) override;
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
+
+private:
+    aiAsyncLoad m_async_load;
 };

@@ -21,16 +21,16 @@
 #include <Alembic/AbcMaterial/All.h>
 
 #define abciImpl
-#define abciDebugLog(...) 
 
-#if defined(abciDebug) || defined(abciDebugLog)
-    #define DebugLog(...) aiLogger::Debug(__VA_ARGS__)
-    #define DebugWarning(...) aiLogger::Warning(__VA_ARGS__)
-    #define DebugError(...) aiLogger::Error(__VA_ARGS__)
+#if defined(aiDebug)
+    void aiLogPrint(const char* fmt, ...);
+    #define DebugLog(...)       aiLogPrint("[Log] " __VA_ARGS__)
+    #define DebugWarning(...)   aiLogPrint("[Warning]" __VA_ARGS__)
+    #define DebugError(...)     aiLogPrint("[Error] "  __VA_ARGS__)
 #else
     #define DebugLog(...)
-#define DebugWarning(...)
-#define DebugError(...)
+    #define DebugWarning(...)
+    #define DebugError(...)
 #endif
 
 #ifdef _WIN32

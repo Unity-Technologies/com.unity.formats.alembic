@@ -24,21 +24,13 @@ public:
     aeObject*   getChild(int i);
     aeObject*   getParent();
 
-    aeContext*          getContext();
-    const aeConfig&     getConfig() const;
-    virtual abcObject&  getAbcObject();
-    virtual abcProperties getAbcProperties();
+    aeContext* getContext();
+    const aeConfig& getConfig() const;
+    virtual abcObject& getAbcObject();
 
     /// T: aeCamera, aeXform, aePoint, aePolyMesh
     template<class T> T*    newChild(const char *name, uint32_t tsi = 0);
     void                    removeChild(aeObject *c);
-
-    /// T: abcFloatArrayProperty, abcFloatProperty, etc
-    template<class T>
-    aeProperty*             newProperty(const char *name, uint32_t tsi = 0);
-
-    virtual size_t  getNumSamples();
-    virtual void    setFromPrevious();
 
 protected:
     using aePropertyPtr = std::unique_ptr<aeProperty>;
@@ -49,6 +41,27 @@ protected:
     aeObject        *m_parent = nullptr;
     uint32_t        m_tsi = 0;
     abcObjectPtr    m_abc;
+    std::vector<ObjectPtr> m_children;
+};
+
+
+class aeSchema : public aeObject
+{
+using super = aeObject;
+public:
+    aeSchema(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t tsi);
+    ~aeSchema();
+
+    virtual size_t  getNumSamples() = 0;
+    virtual void    setFromPrevious() = 0;
+    virtual abcProperties getAbcProperties() = 0;
+
+    void writeVisibility(bool v);
+
+    /// T: abcFloatArrayProperty, abcFloatProperty, etc
+    template<class T> aeProperty* newProperty(const char *name, uint32_t tsi = 0);
+
+protected:
+    AbcGeom::OVisibilityProperty m_visibility_prop;
     std::vector<aePropertyPtr> m_properties;
-    std::vector<ObjectPtr>     m_children;
 };

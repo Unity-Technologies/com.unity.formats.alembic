@@ -11,6 +11,8 @@ namespace UTJ.Alembic
         aiPointsSummary m_summary;
         aiPointsSampleSummary m_sampleSummary;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        public override bool visibility { get { return m_abcData[0].visibility; } }
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
@@ -21,7 +23,7 @@ namespace UTJ.Alembic
 
         public override void AbcPrepareSample()
         {
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             if(cloud != null)
             {
                 m_abcSchema.sort = cloud.m_sort;
@@ -34,7 +36,6 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataBegin()
         {
-            m_abcSchema.Sync();
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
@@ -42,11 +43,11 @@ namespace UTJ.Alembic
             sample.GetSummary(ref m_sampleSummary);
 
             // get points cloud component
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             if (cloud == null)
             {
-                cloud = abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
-                abcTreeNode.linkedGameObj.AddComponent<AlembicPointsRenderer>();
+                cloud = abcTreeNode.gameObject.AddComponent<AlembicPointsCloud>();
+                abcTreeNode.gameObject.AddComponent<AlembicPointsRenderer>();
             }
 
             // setup buffers
@@ -78,8 +79,12 @@ namespace UTJ.Alembic
             // wait async copy complete
             sample.Sync();
 
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
             var data = m_abcData[0];
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.gameObject.SetActive(data.visibility);
+
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             cloud.m_boundsCenter = data.boundsCenter;
             cloud.m_boundsExtents = data.boundsExtents;
         }

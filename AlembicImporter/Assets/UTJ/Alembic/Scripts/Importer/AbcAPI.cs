@@ -97,7 +97,11 @@ namespace UTJ.Alembic
             scaleFactor = 0.01f;
             aspectRatio = -1.0f;
             vertexMotionScale = 1.0f;
+#if UNITY_2017_3_OR_NEWER
+            splitUnit = 0x7fffffff;
+#else
             splitUnit = 65000;
+#endif
             swapHandedness = true;
             swapFaceWinding = false;
             interpolateSamples = true;
@@ -133,6 +137,8 @@ namespace UTJ.Alembic
 
     public struct aiMeshSampleSummary
     {
+        public Bool visibility;
+
         public int splitCount;
         public int submeshCount;
         public int vertexCount;
@@ -172,7 +178,7 @@ namespace UTJ.Alembic
         public int indexCount;
 
         public Vector3 center;
-        public Vector3 size;
+        public Vector3 extents;
     }
 
     public struct aiSubmeshData
@@ -182,6 +188,8 @@ namespace UTJ.Alembic
 
     public struct aiXformData
     {
+        public Bool visibility;
+
         public Vector3 translation;
         public Quaternion rotation;
         public Vector3 scale;
@@ -190,6 +198,8 @@ namespace UTJ.Alembic
 
     public struct aiCameraData
     {
+        public Bool visibility;
+
         public float nearClippingPlane;
         public float farClippingPlane;
         public float fieldOfView;   // in degree. vertical one
@@ -216,6 +226,8 @@ namespace UTJ.Alembic
 
     public struct aiPointsData
     {
+        public Bool visibility;
+
         public IntPtr points;
         public IntPtr velocities;
         public IntPtr ids;
@@ -324,21 +336,18 @@ namespace UTJ.Alembic
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
 
         public bool isConstant { get { return aiSchemaIsConstant(self); } }
-        public bool isDataUpdated { get { return aiSchemaIsDataUpdated(self); } }
+        public bool isDataUpdated { get { aiSchemaSync(self); return aiSchemaIsDataUpdated(self); } }
         public aiSample sample { get { return aiSchemaGetSample(self); } }
 
-
         public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
-        public void MarkForceUpdate() { aiSchemaMarkForceUpdate(self); }
-
 
         #region internal
         [DllImport("abci")] static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
+        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         [DllImport("abci")] static extern aiSample aiSchemaGetSample(IntPtr schema);
 
         [DllImport("abci")] static extern Bool aiSchemaIsConstant(IntPtr schema);
         [DllImport("abci")] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
-        [DllImport("abci")] static extern void aiSchemaMarkForceUpdate(IntPtr schema);
 
         [DllImport("abci")] static extern int aiSchemaGetNumProperties(IntPtr schema);
         [DllImport("abci")] static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);
@@ -386,12 +395,10 @@ namespace UTJ.Alembic
 
         public aiPolyMeshSample sample { get { return aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { aiPolyMeshGetSummary(self, ref dst); }
-        public void Sync() { aiSchemaSync(self); }
 
         #region internal
         [DllImport("abci")] static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport("abci")] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
-        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         #endregion
     }
 
@@ -408,14 +415,12 @@ namespace UTJ.Alembic
         public Vector3 sortBasePosition { set { aiPointsSetSortBasePosition(self, value); } }
 
         public void GetSummary(ref aiPointsSummary dst) { aiPointsGetSummary(self, ref dst); }
-        public void Sync() { aiSchemaSync(self); }
 
         #region internal
         [DllImport("abci")] static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
         [DllImport("abci")] static extern void aiPointsSetSort(IntPtr schema, Bool v);
         [DllImport("abci")] static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
         [DllImport("abci")] static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
-        [DllImport("abci")] static extern void aiSchemaSync(IntPtr schema);
         #endregion
     }
 

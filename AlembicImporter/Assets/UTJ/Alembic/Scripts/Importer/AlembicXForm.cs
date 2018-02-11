@@ -7,6 +7,9 @@ namespace UTJ.Alembic
         aiXform m_abcSchema;
         aiXformData m_abcData;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        public override bool visibility { get { return m_abcData.visibility; } }
+
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup(abcObj, abcSchema);
@@ -20,17 +23,22 @@ namespace UTJ.Alembic
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
+
+            if (!abcTreeNode.stream.ignoreVisibility)
+                abcTreeNode.gameObject.SetActive(m_abcData.visibility);
+
+            var trans = abcTreeNode.gameObject.GetComponent<Transform>();
             if (m_abcData.inherits)
             {
-                abcTreeNode.linkedGameObj.transform.localPosition = m_abcData.translation;
-                abcTreeNode.linkedGameObj.transform.localRotation = m_abcData.rotation;
-                abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                trans.localPosition = m_abcData.translation;
+                trans.localRotation = m_abcData.rotation;
+                trans.localScale = m_abcData.scale;
             }
             else
             {
-                abcTreeNode.linkedGameObj.transform.position = m_abcData.translation;
-                abcTreeNode.linkedGameObj.transform.rotation = m_abcData.rotation;
-                abcTreeNode.linkedGameObj.transform.localScale = m_abcData.scale;
+                trans.position = m_abcData.translation;
+                trans.rotation = m_abcData.rotation;
+                trans.localScale = m_abcData.scale;
             }
         }
     }

@@ -1,12 +1,11 @@
-﻿#if UNITY_2017_1_OR_NEWER
-
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
 namespace UTJ.Alembic
 {
+    [System.ComponentModel.DisplayName("Alembic Shot")]
     public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset
     {
         AlembicStreamPlayer m_stream;
@@ -38,5 +37,3 @@ namespace UTJ.Alembic
 
     }
 }
-
-#endif

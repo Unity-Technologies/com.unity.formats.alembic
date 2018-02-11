@@ -22,6 +22,7 @@ namespace UTJ.Alembic
             if (positions == null) { return; }
 
             var data = default(aePointsData);
+            data.visibility = true;
             data.count = positions.Length;
             data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             if(m_captureVelocities)

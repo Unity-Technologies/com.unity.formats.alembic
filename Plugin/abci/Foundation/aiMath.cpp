@@ -17,9 +17,17 @@ void NormalizeISPC(abcV3 *dst, int num)
     ispc::Normalize((ispc::float3*)dst, num);
 }
 
+void LerpISPC(abcV2 *dst, const abcV2 * v1, const abcV2 * v2, int num, float w)
+{
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 2, w);
+}
 void LerpISPC(abcV3 *dst, const abcV3 * v1, const abcV3 * v2, int num, float w)
 {
-    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num*3, w);
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 3, w);
+}
+void LerpISPC(abcC4 *dst, const abcC4 * v1, const abcC4 * v2, int num, float w)
+{
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 4, w);
 }
 
 void GenerateVelocitiesISPC(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float motion_scale)
@@ -58,7 +66,21 @@ void ApplyScaleGeneric(abcV3 *dst, int num, float scale)
     }
 }
 
+void LerpGeneric(abcV2 *dst, const abcV2 *v1, const abcV2 *v2, int num, float w)
+{
+    float iw = 1.0f - w;
+    for (int i = 0; i < num; ++i) {
+        dst[i] = (v1[i] * iw) + (v2[i] * w);
+    }
+}
 void LerpGeneric(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
+{
+    float iw = 1.0f - w;
+    for (int i = 0; i < num; ++i) {
+        dst[i] = (v1[i] * iw) + (v2[i] * w);
+    }
+}
+void LerpGeneric(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w)
 {
     float iw = 1.0f - w;
     for (int i = 0; i < num; ++i) {
@@ -184,13 +206,17 @@ void Normalize(abcV3 *dst, int num)
     Impl(Normalize, dst, num);
 }
 
+void Lerp(abcV2 *dst, const abcV2 *v1, const abcV2 *v2, int num, float w)
+{
+    Impl(Lerp, dst, v1, v2, num, w);
+}
 void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
 {
     Impl(Lerp, dst, v1, v2, num, w);
 }
-void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, int offset, float w)
+void Lerp(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w)
 {
-    Lerp(dst, v1 + offset, v2 + offset, num, w);
+    Impl(Lerp, dst, v1, v2, num, w);
 }
 
 

@@ -71,11 +71,11 @@ public:
     int getTimeSamplingCount();
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
-    template<class F>
-    void eachNodes(const F &f);
-
     void queueAsync(aiAsync& task);
     void waitAsync();
+
+    template<class F>
+    void eachNodes(const F &f);
 
 private:
     static void gatherNodesRecursive(aiObject *n);

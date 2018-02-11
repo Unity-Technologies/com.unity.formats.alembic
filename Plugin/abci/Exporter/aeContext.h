@@ -1,5 +1,7 @@
 #pragma once
 
+using abcTimeampling = Abc::TimeSampling;
+using abcTimeamplingPtr = Abc::TimeSamplingPtr;
 using abcObject = AbcGeom::OObject;
 using abcXform = AbcGeom::OXform;
 using abcCamera = AbcGeom::OCamera;
@@ -26,13 +28,14 @@ using abcFloat3ArrayProperty = Abc::OV3fArrayProperty;
 using abcFloat4ArrayProperty = Abc::OC4fArrayProperty;
 using abcFloat4x4ArrayProperty = Abc::OM44fArrayProperty;
 
-struct aeTimeSampling
+struct aeTimeSamplingData
 {
     abcChrono start_time;
     std::vector<abcChrono> times;
 
-    aeTimeSampling() : start_time(0.0) {}
+    aeTimeSamplingData() : start_time(0.0) {}
 };
+using aeTimeSamplingPtr = std::shared_ptr<aeTimeSamplingData>;
 
 
 class aeContext
@@ -51,9 +54,10 @@ public:
     aeObject* getTopObject();
 
     uint32_t getNumTimeSampling() const;
-    aeTimeSampling& getTimeSampling(uint32_t i);
-    uint32_t addTimeSampling(float start_time);
-    void addTime(float time, uint32_t tsi = -1);
+    abcTimeamplingPtr getTimeSampling(uint32_t i);
+    aeTimeSamplingData& getTimeSamplingData(uint32_t i);
+    uint32_t addTimeSampling(double start_time);
+    void addTime(double time, uint32_t tsi = -1);
 
     void markFrameBegin();
     void markFrameEnd();
@@ -65,7 +69,7 @@ private:
     aeConfig m_config;
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;
-    std::vector<aeTimeSampling> m_timesamplings;
+    std::vector<aeTimeSamplingPtr> m_timesamplings;
 
     std::vector<std::function<void()>> m_async_tasks;
     std::future<void> m_async_task_future;

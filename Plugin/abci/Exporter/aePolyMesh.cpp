@@ -49,6 +49,8 @@ void aePolyMesh::setFromPrevious()
 
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
+    m_buf_visibility = data.visibility;
+
     m_buf_faces.assign(data.faces, data.faces + data.face_count);
     m_buf_indices.assign(data.indices, data.indices + data.index_count);
 
@@ -81,7 +83,7 @@ int aePolyMesh::addFaceSet(const char *name)
 void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data)
 {
     if (faceset_index >= (int)m_facesets.size()) {
-        abciDebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
+        DebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
         return;
     }
     m_facesets[faceset_index]->writeSample(data);
@@ -99,7 +101,7 @@ void aePolyMesh::writeSampleBody()
     }
 
     // handle scale factor
-    float scale = conf.scale;
+    float scale = conf.scale_factor;
     if (scale != 1.0f) {
         ApplyScale(m_buf_points.data(), (int)m_buf_points.size(), scale);
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
@@ -133,6 +135,8 @@ void aePolyMesh::writeSampleBody()
 
 
     // write!
+    writeVisibility(m_buf_visibility);
+
     AbcGeom::OPolyMeshSchema::Sample sample;
     sample.setFaceIndices(Abc::Int32ArraySample(m_buf_indices.data(), m_buf_indices.size()));
     sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces.data(), m_buf_faces.size()));

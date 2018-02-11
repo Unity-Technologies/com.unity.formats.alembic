@@ -30,9 +30,9 @@ void aiContextManager::destroyContext(int uid)
     }
 }
 
-void aiContextManager::destroyContextsWithPath(const char* assetPath)
+void aiContextManager::destroyContextsWithPath(const char* asset_path)
 {
-    auto path = aiContext::normalizePath(assetPath);
+    auto path = aiContext::normalizePath(asset_path);
     for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end();) {
         if (it->second->getPath() == path) {
             DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
@@ -53,12 +53,12 @@ aiContextManager::~aiContextManager()
 }
 
 
-std::string aiContext::normalizePath(const char *inPath)
+std::string aiContext::normalizePath(const char *in_path)
 {
     std::string path;
 
-    if (inPath != nullptr) {
-        path = inPath;
+    if (in_path != nullptr) {
+        path = in_path;
 
 #ifdef _WIN32
         size_t n = path.length();
@@ -169,9 +169,9 @@ void aiContext::reset()
     m_time_ranges.clear();
 }
 
-bool aiContext::load(const char *inPath)
+bool aiContext::load(const char *in_path)
 {
-    std::string path = normalizePath(inPath);
+    std::string path = normalizePath(in_path);
 
     DebugLog("aiContext::load: '%s'", path.c_str());
     if (path == m_path && m_archive) {
@@ -180,19 +180,17 @@ bool aiContext::load(const char *inPath)
     }
 
     DebugLog("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
-    aiLogger::Indent(1);
 
     reset();
 
     if (path.length() == 0) {
-        aiLogger::Unindent(1);
         return false;
     }
 
     m_path = path;
     
     if (!m_archive.valid()) {
-        DebugLog("Archive '%s' not yet opened", inPath);
+        DebugLog("Archive '%s' not yet opened", in_path);
 
         try {
             DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
@@ -210,7 +208,7 @@ bool aiContext::load(const char *inPath)
         }
     }
     else {
-        DebugLog("Archive '%s' already opened", inPath);
+        DebugLog("Archive '%s' already opened", in_path);
     }
 
     if (m_archive.valid()) {
@@ -269,12 +267,10 @@ bool aiContext::load(const char *inPath)
         }
 
         DebugLog("Succeeded");
-        aiLogger::Unindent(1);
         return true;
     }
     else {
-        aiLogger::Error("Invalid archive '%s'", inPath);
-        aiLogger::Unindent(1);
+        DebugError("Invalid archive '%s'", in_path);
         reset();
         return false;
     }

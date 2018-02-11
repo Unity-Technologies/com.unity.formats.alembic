@@ -104,6 +104,8 @@ struct aiConfig
 
 struct aiXformData
 {
+    bool visibility = true;
+
     abcV3 translation = { 0.0f, 0.0f, 0.0f };
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
     abcV3 scale = { 1.0f, 1.0f, 1.0f };
@@ -112,6 +114,8 @@ struct aiXformData
 
 struct aiCameraData
 {
+    bool visibility = true;
+
     float near_clipping_plane = 0.3f;
     float far_clipping_plane = 1000.0f;
     float field_of_view = 60.0f;      // in degree. vertical one
@@ -142,6 +146,8 @@ struct aiMeshSummary
 
 struct aiMeshSampleSummary
 {
+    bool visibility = true;
+
     int split_count = 0;
     int submesh_count = 0;
     int vertex_count = 0;
@@ -181,7 +187,7 @@ struct aiPolyMeshData
     int index_count = 0;
 
     abcV3 center = { 0.0f, 0.0f, 0.0f };
-    abcV3 size = { 0.0f, 0.0f, 0.0f };
+    abcV3 extents = { 0.0f, 0.0f, 0.0f };
 };
 
 struct aiSubmeshData
@@ -206,6 +212,8 @@ struct aiPointsSampleSummary
 
 struct aiPointsData
 {
+    bool        visibility = true;
+
     abcV3       *points = nullptr;
     abcV3       *velocities = nullptr;
     uint32_t    *ids = nullptr;
@@ -263,7 +271,6 @@ abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSe
 abciAPI void            aiSchemaSync(aiSchema* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchema* schema);
 abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
-abciAPI void            aiSchemaMarkForceUpdate(aiSchema* schema);
 abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);

@@ -107,11 +107,11 @@ abciAPI aeCamera* aeAsCamera(aeObject *obj)
 }
 
 
-abciAPI int aeGetNumSamples(aeObject *obj)
+abciAPI int aeGetNumSamples(aeSchema *obj)
 {
     return (int)obj->getNumSamples();
 }
-abciAPI void aeSetFromPrevious(aeObject *obj)
+abciAPI void aeSetFromPrevious(aeSchema *obj)
 {
     obj->setFromPrevious();
 }
@@ -141,7 +141,7 @@ abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
     obj->writeSample(*data);
 }
 
-abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
+abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type)
 {
     switch (type) {
         // scalar properties
@@ -164,14 +164,14 @@ abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aeProperty
     case aePropertyType::Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
     case aePropertyType::Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
-    abciDebugLog("aeNewProperty(): unknown type");
+    DebugLog("aeNewProperty(): unknown type");
     return nullptr;
 }
 
 abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
 {
     if (!prop->isArray()) {
-        abciDebugLog("aePropertyWriteArraySample(): property is scalar!");
+        DebugLog("aePropertyWriteArraySample(): property is scalar!");
         return;
     }
     prop->writeSample(data, num_data);
@@ -180,7 +180,7 @@ abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int 
 abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 {
     if (prop->isArray()) {
-        abciDebugLog("aePropertyWriteScalarSample(): property is array!");
+        DebugLog("aePropertyWriteScalarSample(): property is array!");
         return;
     }
     prop->writeSample(data, 1);

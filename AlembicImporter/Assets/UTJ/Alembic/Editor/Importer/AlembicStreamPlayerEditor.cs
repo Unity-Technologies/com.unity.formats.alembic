@@ -11,12 +11,9 @@ namespace UTJ.Alembic
 
         public override void OnInspectorGUI()
         {   
-            SerializedProperty vertexMotionScale = serializedObject.FindProperty("vertexMotionScale");
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
-            SerializedProperty currentTime = serializedObject.FindProperty("currentTime");
             SerializedProperty startTime = serializedObject.FindProperty("startTime");
             SerializedProperty endTime = serializedObject.FindProperty("endTime");
-            SerializedProperty asyncLoad = serializedObject.FindProperty("asyncLoad");
 
             var streamPlayer = target as AlembicStreamPlayer;
             var targetStreamDesc = streamPlayer.streamDescriptor;
@@ -78,15 +75,24 @@ namespace UTJ.Alembic
                 EditorGUILayout.LabelField(new GUIContent((end - start).ToString("0.000") + "s"), style);
             }
 
-            EditorGUILayout.PropertyField(currentTime, new GUIContent("Time"));
-            EditorGUILayout.PropertyField(vertexMotionScale);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
             EditorGUILayout.Space();
 
             m_foldMisc = EditorGUILayout.Foldout(m_foldMisc, "Misc");
             if(m_foldMisc)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(asyncLoad);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("ignoreVisibility"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("asyncLoad"));
+
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(16);
+                if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                {
+                    streamPlayer.LoadStream(true);
+                }
+                EditorGUILayout.EndHorizontal();
                 EditorGUI.indentLevel--;
             }
 

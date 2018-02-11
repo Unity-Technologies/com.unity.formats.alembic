@@ -121,7 +121,7 @@ namespace UTJ.Alembic
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
-                abcStream.AbcLoad();
+                abcStream.AbcLoad(true);
 
                 var tr = abcStream.abcTimeRange;
                 streamDescriptor.abcStartTime = abcStartTime = startTime = tr.startTime;
@@ -134,7 +134,7 @@ namespace UTJ.Alembic
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(subassets, abcStream.m_abcTreeRoot, streamDescriptor);
+                GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
                 AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
 
@@ -232,7 +232,7 @@ namespace UTJ.Alembic
 
                 var animationClip = new AnimationClip();
                 animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
-                animationClip.name = root.linkedGameObj.name + "_Clip";
+                animationClip.name = root.gameObject.name + "_Clip";
                 animationClip.hideFlags = HideFlags.NotEditable;
 
                 subassets.Add("Default Animation", animationClip);
@@ -252,22 +252,22 @@ namespace UTJ.Alembic
             {
                 var sum = mesh.summary;
                 if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
-                    varyingTopologyMeshNames.Add(node.linkedGameObj.name);
+                    varyingTopologyMeshNames.Add(node.gameObject.name);
                 else if (mesh.sampleSummary.splitCount > 1)
-                    splittingMeshNames.Add(node.linkedGameObj.name);
+                    splittingMeshNames.Add(node.gameObject.name);
             }
 
             int submeshCount = 0;
-            var meshFilter = node.linkedGameObj.GetComponent<MeshFilter>();
+            var meshFilter = node.gameObject.GetComponent<MeshFilter>();
             if (meshFilter != null)
             {
                 var m = meshFilter.sharedMesh;
                 submeshCount = m.subMeshCount;
-                m.name = node.linkedGameObj.name;
+                m.name = node.gameObject.name;
                 subassets.Add(m.name, m);
             }
 
-            var renderer = node.linkedGameObj.GetComponent<MeshRenderer>();
+            var renderer = node.gameObject.GetComponent<MeshRenderer>();
             if (renderer != null)
             {
                 var mats = new Material[submeshCount];
@@ -276,7 +276,7 @@ namespace UTJ.Alembic
                 renderer.sharedMaterials = mats;
             }
 
-            var apr = node.linkedGameObj.GetComponent<AlembicPointsRenderer>();
+            var apr = node.gameObject.GetComponent<AlembicPointsRenderer>();
             if (apr != null)
             {
                 var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);

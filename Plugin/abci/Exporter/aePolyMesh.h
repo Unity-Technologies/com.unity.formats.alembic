@@ -14,9 +14,9 @@ private:
 using aeFaceSetPtr = std::shared_ptr<aeFaceSet>;
 
 
-class aePolyMesh : public aeObject
+class aePolyMesh : public aeSchema
 {
-using super = aeObject;
+using super = aeSchema;
 public:
     aePolyMesh(aeObject *parent, const char *name, uint32_t tsi);
     abcPolyMesh& getAbcObject() override;
@@ -37,8 +37,9 @@ private:
     std::unique_ptr<AbcGeom::OC4fGeomParam> m_colors_param;
     std::vector<aeFaceSetPtr> m_facesets;
 
-    RawVector<int>   m_buf_faces;
+    bool m_buf_visibility = true;
 
+    RawVector<int>   m_buf_faces;
     RawVector<abcV3> m_buf_points;
     RawVector<abcV3> m_buf_velocities;
     RawVector<int>   m_buf_indices;
