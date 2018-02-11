@@ -27,7 +27,40 @@ aiCamera::Sample* aiCamera::newSample()
     return new Sample(this);
 }
 
+void aiCamera::updateSample(const abcSampleSelector& ss)
+{
+    m_async_load.reset();
+
+    super::updateSample(ss);
+    if (m_async_load.ready())
+        getContext()->queueAsync(m_async_load);
+}
+
 void aiCamera::readSample(Sample& sample, uint64_t idx)
+{
+    auto body = [this, &sample, idx]() {
+        readSampleBody(sample, idx);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_load.m_read = body;
+}
+
+void aiCamera::cookSample(Sample& sample)
+{
+    auto body = [this, &sample]() {
+        cookSampleBody(sample);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_load.m_cook = body;
+}
+
+void aiCamera::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
@@ -37,7 +70,7 @@ void aiCamera::readSample(Sample& sample, uint64_t idx)
     m_schema.get(sample.m_next_sample, ss2);
 }
 
-void aiCamera::cookSample(Sample& sample)
+void aiCamera::cookSampleBody(Sample& sample)
 {
     auto& config = getConfig();
     auto& cs = sample.m_sample;

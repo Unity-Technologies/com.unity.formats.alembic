@@ -94,7 +94,6 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataBegin()
         {
-            m_abcSchema.Sync();
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
