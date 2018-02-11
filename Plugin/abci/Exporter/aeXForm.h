@@ -12,7 +12,10 @@ public:
     void    setFromPrevious() override;
     void    writeSample(const aeXformData &data);
 
+    void    writeSampleBody();
+
 private:
     AbcGeom::OXformSchema m_schema;
     AbcGeom::XformSample m_sample;
+    aeXformData m_data_local;
 };

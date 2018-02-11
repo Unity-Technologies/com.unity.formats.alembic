@@ -12,6 +12,9 @@ public:
     void    setFromPrevious() override;
     void    writeSample(const aeCameraData &data);
 
+    void    writeSampleBody();
+
 private:
     AbcGeom::OCameraSchema m_schema;
+    aeCameraData m_data_local;
 };

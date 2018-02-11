@@ -31,9 +31,16 @@ void aeXform::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeXform::writeSample(const aeXformData &data_)
+void aeXform::writeSample(const aeXformData &data)
 {
-    auto data = data_;
+    m_data_local = data;
+    m_ctx->addAsync([this]() { writeSampleBody(); });
+}
+
+void aeXform::writeSampleBody()
+{
+    auto& data = m_data_local;
+
     writeVisibility(data.visibility);
 
     // quaternion to angle axis
