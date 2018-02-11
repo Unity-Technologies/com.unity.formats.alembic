@@ -879,7 +879,7 @@ namespace UTJ.Alembic
             CreateCapturers();
 
             m_recording = true;
-            m_time = m_settings.conf.startTime;
+            m_time = 0.0f;
             m_frameCount = 0;
 
             Debug.Log("AlembicRecorder: start " + m_settings.outputPath);

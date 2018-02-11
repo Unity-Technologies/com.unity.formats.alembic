@@ -30,7 +30,4 @@ public:
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
-
-private:
-    aiAsyncLoad m_async_load;
 };

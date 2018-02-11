@@ -71,7 +71,6 @@ struct aeConfig
 {
     aeArchiveType archive_type = aeArchiveType::Ogawa;
     aeTimeSamplingType time_sampling_type = aeTimeSamplingType::Uniform;
-    float start_time = 0.0f;    // start time on Alembic.
     float frame_rate = 30.0f;    // frame rate on Alembic. relevant only if time_sampling_type is uniform
     aeXFromType xform_type = aeXFromType::TRS;
     bool swap_handedness = true; // swap rhs <-> lhs

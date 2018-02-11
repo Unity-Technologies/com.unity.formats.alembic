@@ -59,7 +59,6 @@ namespace UTJ.Alembic
     {
         public aeArchiveType archiveType;
         public aeTimeSamplingType timeSamplingType;
-        public float startTime;
         public float frameRate;
         public aeXformType xformType;
         public Bool swapHandedness;
@@ -74,7 +73,6 @@ namespace UTJ.Alembic
                 {
                     archiveType = aeArchiveType.Ogawa,
                     timeSamplingType = aeTimeSamplingType.Uniform,
-                    startTime = 0.0f,
                     frameRate = 30.0f,
                     xformType = aeXformType.TRS,
                     swapHandedness = true,

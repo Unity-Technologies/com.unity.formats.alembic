@@ -21,8 +21,10 @@ void aeContext::reset()
     if (m_archive != nullptr) {
         if (m_config.time_sampling_type == aeTimeSamplingType::Uniform) {
             // start time in default time sampling maybe changed.
-            auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_config.start_time);
-            *m_archive.getTimeSampling(1) = ts;
+            for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
+                auto ts = Abc::TimeSampling(abcChrono(1.0f / m_config.frame_rate), m_timesamplings[i]->start_time);
+                *m_archive.getTimeSampling(i) = ts;
+            }
         }
         else if (m_config.time_sampling_type == aeTimeSamplingType::Cyclic) {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i) {
@@ -74,7 +76,7 @@ bool aeContext::openArchive(const char *path)
     }
 
     // reserve 'default' time sampling. update it later in reset()
-    auto tsi = addTimeSampling(m_config.start_time);
+    auto tsi = addTimeSampling(0.0);
 
     auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
     m_node_top.reset(new aeObject(this, nullptr, top, tsi));
@@ -114,6 +116,7 @@ uint32_t aeContext::addTimeSampling(double start_time)
     while (m_timesamplings.size() < tsi + 1) {
         m_timesamplings.emplace_back(new aeTimeSamplingData());
     }
+    m_timesamplings[tsi]->start_time = start_time;
     return tsi;
 }
 

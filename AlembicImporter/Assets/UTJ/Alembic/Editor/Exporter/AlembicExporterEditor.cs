@@ -68,7 +68,6 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.swapHandedness"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.swapFaces"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.scaleFactor"));
-                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.conf.startTime"));
             }
             GUILayout.Space(5);
 
