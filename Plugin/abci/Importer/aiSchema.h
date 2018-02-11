@@ -108,7 +108,7 @@ public:
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();
 
-        if (!m_sample || (!m_constant && sample_index != m_last_sample_index)) {
+        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update) {
             m_sample_index_changed = true;
             if (!m_sample)
                 m_sample.reset(newSample());
@@ -118,7 +118,7 @@ public:
         else {
             m_sample_index_changed = false;
             sample = m_sample.get();
-            if ((m_constant || !config.interpolate_samples) && !m_force_update)
+            if (m_constant || !config.interpolate_samples)
                 sample = nullptr;
         }
 
