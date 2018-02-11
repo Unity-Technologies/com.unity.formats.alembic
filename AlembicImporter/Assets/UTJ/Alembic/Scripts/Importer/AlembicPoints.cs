@@ -23,7 +23,7 @@ namespace UTJ.Alembic
 
         public override void AbcPrepareSample()
         {
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             if(cloud != null)
             {
                 m_abcSchema.sort = cloud.m_sort;
@@ -44,11 +44,11 @@ namespace UTJ.Alembic
             sample.GetSummary(ref m_sampleSummary);
 
             // get points cloud component
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             if (cloud == null)
             {
-                cloud = abcTreeNode.linkedGameObj.AddComponent<AlembicPointsCloud>();
-                abcTreeNode.linkedGameObj.AddComponent<AlembicPointsRenderer>();
+                cloud = abcTreeNode.gameObject.AddComponent<AlembicPointsCloud>();
+                abcTreeNode.gameObject.AddComponent<AlembicPointsRenderer>();
             }
 
             // setup buffers
@@ -73,7 +73,7 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
+            if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
@@ -83,9 +83,9 @@ namespace UTJ.Alembic
             var data = m_abcData[0];
 
             if (!abcTreeNode.stream.ignoreVisibility)
-                abcTreeNode.linkedGameObj.SetActive(data.visibility);
+                abcTreeNode.gameObject.SetActive(data.visibility);
 
-            var cloud = abcTreeNode.linkedGameObj.GetComponent<AlembicPointsCloud>();
+            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             cloud.m_boundsCenter = data.boundsCenter;
             cloud.m_boundsExtents = data.boundsExtents;
         }

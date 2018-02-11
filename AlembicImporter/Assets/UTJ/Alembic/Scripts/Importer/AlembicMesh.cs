@@ -70,7 +70,7 @@ namespace UTJ.Alembic
                 if (m_splits.Count == 0)
                 {
                     split = new Split {
-                        host = abcTreeNode.linkedGameObj,
+                        host = abcTreeNode.gameObject,
                     };
                     m_splits.Add(split);
                 }
@@ -208,7 +208,7 @@ namespace UTJ.Alembic
             }
 #endif
 
-            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
+            if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             // wait async copy complete
@@ -217,7 +217,7 @@ namespace UTJ.Alembic
 
             if(!abcTreeNode.stream.ignoreVisibility)
             {
-                abcTreeNode.linkedGameObj.SetActive(m_sampleSummary.visibility);
+                abcTreeNode.gameObject.SetActive(m_sampleSummary.visibility);
                 if (!m_sampleSummary.visibility)
                     return;
             }
@@ -234,9 +234,9 @@ namespace UTJ.Alembic
                     {
                         if (useSubObjects)
                         {
-                            string name = abcTreeNode.linkedGameObj.name + "_split_" + s;
+                            string name = abcTreeNode.gameObject.name + "_split_" + s;
 
-                            Transform trans = abcTreeNode.linkedGameObj.transform.Find(name);
+                            Transform trans = abcTreeNode.gameObject.transform.Find(name);
 
                             if (trans == null)
                             {
@@ -244,7 +244,7 @@ namespace UTJ.Alembic
                                 go.name = name;
 
                                 trans = go.GetComponent<Transform>();
-                                trans.parent = abcTreeNode.linkedGameObj.transform;
+                                trans.parent = abcTreeNode.gameObject.transform;
                                 trans.localPosition = Vector3.zero;
                                 trans.localEulerAngles = Vector3.zero;
                                 trans.localScale = Vector3.one;
@@ -254,7 +254,7 @@ namespace UTJ.Alembic
                         }
                         else
                         {
-                            split.host = abcTreeNode.linkedGameObj;
+                            split.host = abcTreeNode.gameObject;
                         }
                     }
 

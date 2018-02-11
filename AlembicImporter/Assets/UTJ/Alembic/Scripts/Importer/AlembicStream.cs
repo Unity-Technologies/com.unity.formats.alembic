@@ -69,30 +69,30 @@ namespace UTJ.Alembic
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
-            m_abcTreeRoot = new AlembicTreeNode() { stream = this, linkedGameObj = rootGo };
+            m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
             m_streamDesc = streamDesc;
         }
 
         void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
-            if (node.alembicObject != null)
-                node.alembicObject.AbcPrepareSample();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcPrepareSample();
             foreach (var child in node.children)
                 AbcBeforeUpdateSamples(child);
         }
 
         void AbcBeginSyncData(AlembicTreeNode node)
         {
-            if (node.alembicObject != null)
-                node.alembicObject.AbcSyncDataBegin();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataBegin();
             foreach (var child in node.children)
                 AbcBeginSyncData(child);
         }
 
         void AbcEndSyncData(AlembicTreeNode node)
         {
-            if (node.alembicObject != null)
-                node.alembicObject.AbcSyncDataEnd();
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataEnd();
             foreach (var child in node.children)
                 AbcEndSyncData(child);
         }
@@ -120,7 +120,7 @@ namespace UTJ.Alembic
         public void AbcLoad(bool createMissingNodes)
         {
             m_time = 0.0f;
-            m_context = aiContext.Create(m_abcTreeRoot.linkedGameObj.GetInstanceID());
+            m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
 
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
@@ -206,7 +206,7 @@ namespace UTJ.Alembic
                 // Find targetted child GameObj
                 GameObject childGO = null;
 
-                var childTransf = treeNode.linkedGameObj == null ? null : treeNode.linkedGameObj.transform.Find(childName);
+                var childTransf = treeNode.gameObject == null ? null : treeNode.gameObject.transform.Find(childName);
                 if (childTransf == null)
                 {
                     if (!ic.createMissingNodes)
@@ -220,12 +220,12 @@ namespace UTJ.Alembic
                     }
 
                     childGO = new GameObject { name = childName };
-                    childGO.GetComponent<Transform>().SetParent(treeNode.linkedGameObj.transform, false);
+                    childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
                 }
                 else
                     childGO = childTransf.gameObject;
 
-                childTreeNode = new AlembicTreeNode() { stream = this, linkedGameObj = childGO };
+                childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
                 treeNode.children.Add(childTreeNode);
 
                 // Update

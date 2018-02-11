@@ -14,9 +14,9 @@ namespace UTJ.Alembic
 
         public T GetOrAddComponent<T>() where T : Component
         {
-            var c = abcTreeNode.linkedGameObj.GetComponent<T>();
+            var c = abcTreeNode.gameObject.GetComponent<T>();
             if (c == null)
-                c = abcTreeNode.linkedGameObj.AddComponent<T>();
+                c = abcTreeNode.gameObject.AddComponent<T>();
             return c;
         }
 

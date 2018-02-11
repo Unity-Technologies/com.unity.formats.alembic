@@ -9,14 +9,14 @@ namespace UTJ.Alembic
     public class AlembicTreeNode : IDisposable
     {
         public AlembicStream stream;
-        public GameObject linkedGameObj;
-        public AlembicElement alembicObject;
+        public GameObject gameObject;
+        public AlembicElement abcObject;
         public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
 
         public void Dispose()
         {
             ResetTree();
-            linkedGameObj = null;
+            gameObject = null;
         }
 
         public void ResetTree()
@@ -25,40 +25,40 @@ namespace UTJ.Alembic
                 c.Dispose();
             children.Clear();
 
-            if (alembicObject != null)
+            if (abcObject != null)
             {
-                alembicObject.Dispose();
-                alembicObject = null;
+                abcObject.Dispose();
+                abcObject = null;
             }
         }
 
         public T GetOrAddAlembicObj<T>() where T : AlembicElement, new()
         {
-            var o = alembicObject as T;
+            var o = abcObject as T;
             if (o == null)
             {
                 o = new T() { abcTreeNode = this };
-                alembicObject = o;
+                abcObject = o;
             }
             return o;
         }
 
         public T GetAlembicObj<T>() where T : AlembicElement, new()
         {
-            return alembicObject as T;
+            return abcObject as T;
         }
 
         public void RemoveAlembicObject(AlembicElement obj)
         {
-            if (obj != null && obj == alembicObject)
+            if (obj != null && obj == abcObject)
             {
-                alembicObject = null;
+                abcObject = null;
             }
         }
 
         public AlembicTreeNode FindNode(GameObject go)
         {
-            if (go == linkedGameObj)
+            if (go == gameObject)
                 return this;
 
             foreach (var child in children)

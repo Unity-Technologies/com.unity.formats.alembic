@@ -19,15 +19,15 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
+            if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
 
             if (!abcTreeNode.stream.ignoreVisibility)
-                abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
+                abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
-            var trans = abcTreeNode.linkedGameObj.GetComponent<Transform>();
+            var trans = abcTreeNode.gameObject.GetComponent<Transform>();
             if (m_abcData.inherits)
             {
                 trans.localPosition = m_abcData.translation;

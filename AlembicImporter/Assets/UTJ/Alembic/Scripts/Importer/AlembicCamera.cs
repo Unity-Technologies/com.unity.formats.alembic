@@ -23,15 +23,15 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
+            if (!m_abcSchema.schema.isDataUpdated)
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);
 
             if (!abcTreeNode.stream.ignoreVisibility)
-                abcTreeNode.linkedGameObj.SetActive(m_abcData.visibility);
+                abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
-            abcTreeNode.linkedGameObj.transform.forward = -abcTreeNode.linkedGameObj.transform.parent.forward;
+            abcTreeNode.gameObject.transform.forward = -abcTreeNode.gameObject.transform.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
 
             if (!m_ignoreClippingPlanes)
