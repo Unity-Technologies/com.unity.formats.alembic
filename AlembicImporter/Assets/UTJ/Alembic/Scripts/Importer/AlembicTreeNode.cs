@@ -10,7 +10,7 @@ namespace UTJ.Alembic
     {
         public AlembicStream stream;
         public GameObject linkedGameObj;
-        public Dictionary<string, AlembicElement> alembicObjects = new Dictionary<string, AlembicElement>();
+        public AlembicElement alembicObject;
         public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
 
         public void Dispose()
@@ -19,65 +19,54 @@ namespace UTJ.Alembic
             linkedGameObj = null;
         }
 
-
         public void ResetTree()
         {
             foreach (var c in children)
                 c.Dispose();
             children.Clear();
 
-            foreach (var o in alembicObjects.ToArray())  // elements.dispose removes itself from list
-                o.Value.Dispose();
-            alembicObjects.Clear();
+            if (alembicObject != null)
+            {
+                alembicObject.Dispose();
+                alembicObject = null;
+            }
         }
 
         public T GetOrAddAlembicObj<T>() where T : AlembicElement, new()
         {
-            var o = GetAlembicObj<T>();
+            var o = alembicObject as T;
             if (o == null)
             {
                 o = new T() { abcTreeNode = this };
-                alembicObjects.Add(typeof(T).Name, o);
+                alembicObject = o;
             }
-
             return o;
         }
 
         public T GetAlembicObj<T>() where T : AlembicElement, new()
         {
-            AlembicElement o;
-            if (alembicObjects.TryGetValue(typeof(T).Name, out o))
-                return o as T;
-
-            return null;
+            return alembicObject as T;
         }
 
-        public void RemoveAlembicObject(AlembicElement obj )
+        public void RemoveAlembicObject(AlembicElement obj)
         {
-            foreach (var o in alembicObjects)
+            if (obj != null && obj == alembicObject)
             {
-                if (o.Value == obj)
-                {
-                    alembicObjects.Remove(o.Key);
-                    return;
-                }
+                alembicObject = null;
             }
         }
 
-
-        public AlembicTreeNode FindNodeRecursive( GameObject go )
+        public AlembicTreeNode FindNode(GameObject go)
         {
             if (go == linkedGameObj)
                 return this;
 
-            if( children != null )
-                foreach (var child in children)
-                {
-                    var x = child.FindNodeRecursive(go);
-                    if (x != null)
-                        return x;
-                }
-
+            foreach (var child in children)
+            {
+                var x = child.FindNode(go);
+                if (x != null)
+                    return x;
+            }
             return null;
         }
     }

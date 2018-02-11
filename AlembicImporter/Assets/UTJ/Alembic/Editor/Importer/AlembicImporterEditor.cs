@@ -11,6 +11,8 @@ namespace UTJ.Alembic
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     public class AlembicImporterEditor : ScriptedImporterEditor
     {
+        bool m_foldComponents = true;
+
         public override void OnInspectorGUI()
         {
             var importer = serializedObject.targetObject as AlembicImporter;
@@ -29,9 +31,21 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
             EditorGUILayout.Separator();
 
+
+            m_foldComponents = EditorGUILayout.Foldout(m_foldComponents, "Components");
+            if(m_foldComponents) {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importXform"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importCamera"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importPolyMesh"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importPoints"));
+                EditorGUILayout.Separator();
+                EditorGUI.indentLevel--;
+            }
+
             var startTimeProp = serializedObject.FindProperty("startTime");
             var endTimeProp = serializedObject.FindProperty("endTime");
-            if(startTimeProp.doubleValue == endTimeProp.doubleValue)
+            if (startTimeProp.doubleValue == endTimeProp.doubleValue)
             {
                 startTimeProp.doubleValue = importer.abcStartTime;
                 endTimeProp.doubleValue = importer.abcEndTime;

@@ -26,7 +26,7 @@ namespace UTJ.Alembic
 
             public Mesh mesh;
             public GameObject host;
-            public bool clear = true;
+            public bool topologyChanged = true;
             public bool active = true;
 
             public Vector3 center;
@@ -95,7 +95,7 @@ namespace UTJ.Alembic
 
         public override void AbcPrepareSample()
         {
-            if(m_freshSetup)
+            if (m_freshSetup)
             {
                 m_freshSetup = false;
                 m_abcSchema.schema.MarkForceUpdate();
@@ -132,7 +132,7 @@ namespace UTJ.Alembic
             {
                 var split = m_splits[spi];
 
-                split.clear = topologyChanged;
+                split.topologyChanged = topologyChanged;
                 split.active = true;
 
                 int vertexCount = m_splitSummaries[spi].vertexCount;
@@ -268,7 +268,7 @@ namespace UTJ.Alembic
                     // Feshly created splits may not have their mesh set yet
                     if (split.mesh == null)
                         split.mesh = AddMeshComponents(split.host);
-                    if (split.clear)
+                    if (split.topologyChanged)
                         split.mesh.Clear();
 
                     if (split.points.Count > 0)
@@ -290,7 +290,7 @@ namespace UTJ.Alembic
                     var data = m_splitData[s];
                     split.mesh.bounds = new Bounds(data.center, data.extents);
 
-                    if (split.clear)
+                    if (split.topologyChanged)
                     {
                         int submeshCount = m_splitSummaries[s].submeshCount;
                         split.mesh.subMeshCount = submeshCount;
@@ -317,7 +317,7 @@ namespace UTJ.Alembic
                         }
                     }
 
-                    split.clear = false;
+                    split.topologyChanged = false;
                     split.host.SetActive(true);
                 }
                 else

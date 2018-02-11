@@ -75,24 +75,24 @@ namespace UTJ.Alembic
 
         void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcPrepareSample();
+            if (node.alembicObject != null)
+                node.alembicObject.AbcPrepareSample();
             foreach (var child in node.children)
                 AbcBeforeUpdateSamples(child);
         }
 
         void AbcBeginSyncData(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcSyncDataBegin();
+            if (node.alembicObject != null)
+                node.alembicObject.AbcSyncDataBegin();
             foreach (var child in node.children)
                 AbcBeginSyncData(child);
         }
 
         void AbcEndSyncData(AlembicTreeNode node)
         {
-            foreach (var obj in node.alembicObjects)
-                obj.Value.AbcSyncDataEnd();
+            if (node.alembicObject != null)
+                node.alembicObject.AbcSyncDataEnd();
             foreach (var child in node.children)
                 AbcEndSyncData(child);
         }
@@ -131,11 +131,7 @@ namespace UTJ.Alembic
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
             m_config.interpolateSamples = settings.interpolateSamples;
-#if UNITY_2017_3_OR_NEWER
-            m_config.splitUnit = 0x7fffffff;
-#else
-            m_config.splitUnit = 65000;
-#endif
+
             m_context.SetConfig(ref m_config);
             m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);
 
@@ -220,28 +216,24 @@ namespace UTJ.Alembic
                     }
 
                     childGO = new GameObject { name = childName };
-                    var trans = childGO.GetComponent<Transform>();
-                    trans.parent = treeNode.linkedGameObj.transform;
-                    trans.localPosition = Vector3.zero;
-                    trans.localEulerAngles = Vector3.zero;
-                    trans.localScale = Vector3.one;
+                    childGO.GetComponent<Transform>().SetParent(treeNode.linkedGameObj.transform, false);
                 }
                 else
                     childGO = childTransf.gameObject;
 
-                childTreeNode = new AlembicTreeNode() { stream =this, linkedGameObj = childGO };
+                childTreeNode = new AlembicTreeNode() { stream = this, linkedGameObj = childGO };
                 treeNode.children.Add(childTreeNode);
 
                 // Update
                 AlembicElement elem = null;
 
-                if (obj.AsXform())
+                if (obj.AsXform() && m_streamDesc.settings.importXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsPolyMesh())
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                else if (obj.AsCamera())
+                else if (obj.AsCamera() && m_streamDesc.settings.importCamera)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPoints())
+                else if (obj.AsPolyMesh() && m_streamDesc.settings.importPolyMesh)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
 
                 if (elem != null)
