@@ -11,6 +11,7 @@ namespace UTJ.Alembic
         aiPointsSummary m_summary;
         aiPointsSampleSummary m_sampleSummary;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_abcData[0].visibility; } }
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
@@ -72,7 +73,7 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
                 return;
 
             var sample = m_abcSchema.sample;

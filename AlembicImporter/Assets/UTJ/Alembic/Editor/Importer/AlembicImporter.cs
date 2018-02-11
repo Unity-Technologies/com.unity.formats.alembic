@@ -121,7 +121,7 @@ namespace UTJ.Alembic
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
-                abcStream.AbcLoad();
+                abcStream.AbcLoad(true);
 
                 var tr = abcStream.abcTimeRange;
                 streamDescriptor.abcStartTime = abcStartTime = startTime = tr.startTime;

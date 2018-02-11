@@ -20,6 +20,23 @@ namespace UTJ.Alembic
 
         public double duration { get { return endTime - startTime; } }
 
+
+        void ClampTime()
+        {
+            currentTime = Mathf.Clamp((float)currentTime, 0.0f, (float)duration);
+        }
+
+        public void LoadStream(bool createMissingNodes)
+        {
+            if (streamDescriptor == null)
+                return;
+            abcStream = new AlembicStream(gameObject, streamDescriptor);
+            abcStream.AbcLoad(createMissingNodes);
+            forceUpdate = true;
+        }
+
+
+        #region messages
         void Start()
         {
             OnValidate();
@@ -60,7 +77,7 @@ namespace UTJ.Alembic
                 {
                     abcStream.Dispose();
                     abcStream = null;
-                    LoadStream();
+                    LoadStream(false);
                 }
             }
         }
@@ -73,35 +90,22 @@ namespace UTJ.Alembic
             abcStream.AbcUpdateEnd();
         }
 
-        private void ClampTime()
-        {
-            currentTime = Mathf.Clamp((float)currentTime, 0.0f, (float)duration);
-        }
-
-        public void LoadStream()
-        {
-            if (streamDescriptor == null)
-                return;
-            abcStream = new AlembicStream(gameObject, streamDescriptor);
-            abcStream.AbcLoad();
-            forceUpdate = true;
-        }
-
         void OnEnable()
         {
             if (abcStream == null)
-                LoadStream();
+                LoadStream(false);
         }
 
-        public void OnDestroy()
+        void OnDestroy()
         {
             if (abcStream != null)
                 abcStream.Dispose();
         }
 
-        public void OnApplicationQuit()
+        void OnApplicationQuit()
         {
             AbcAPI.aiCleanup();
         }
+        #endregion
     }
 }

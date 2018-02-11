@@ -143,8 +143,8 @@ public:
 
 private:
     aiMeshSummaryInternal m_summary;
-    std::unique_ptr<AbcGeom::IV2fGeomParam> m_uv1_param;
-    std::unique_ptr<AbcGeom::IC4fGeomParam> m_colors_param;
+    AbcGeom::IV2fGeomParam m_uv1_param;
+    AbcGeom::IC4fGeomParam m_colors_param;
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;

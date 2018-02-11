@@ -136,6 +136,7 @@ abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 {
     if (schema) {
         schema->markForceSync();
+        schema->markForceUpdate();
         schema->updateSample(*ss);
     }
 }
@@ -154,12 +155,6 @@ abciAPI bool aiSchemaIsConstant(aiSchema * schema)
 abciAPI bool aiSchemaIsDataUpdated(aiSchema* schema)
 {
     return schema ? schema->isDataUpdated() : false;
-}
-
-abciAPI void aiSchemaMarkForceUpdate(aiSchema * schema)
-{
-    if (schema)
-        schema->markForceUpdate();
 }
 
 abciAPI int aiSchemaGetNumProperties(aiSchema* schema)

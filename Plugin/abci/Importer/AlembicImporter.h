@@ -271,7 +271,6 @@ abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSe
 abciAPI void            aiSchemaSync(aiSchema* schema);
 abciAPI bool            aiSchemaIsConstant(aiSchema* schema);
 abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
-abciAPI void            aiSchemaMarkForceUpdate(aiSchema* schema);
 abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);

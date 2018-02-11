@@ -43,8 +43,8 @@ namespace UTJ.Alembic
 
         List<Split> m_splits = new List<Split>();
         List<Submesh> m_submeshes = new List<Submesh>();
-        bool m_freshSetup = false;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_sampleSummary.visibility; } }
 
         public aiMeshSummary summary { get { return m_summary; } }
@@ -90,16 +90,6 @@ namespace UTJ.Alembic
             m_abcSchema = (aiPolyMesh)abcSchema;
 
             m_abcSchema.GetSummary(ref m_summary);
-            m_freshSetup = true;
-        }
-
-        public override void AbcPrepareSample()
-        {
-            if (m_freshSetup)
-            {
-                m_freshSetup = false;
-                m_abcSchema.schema.MarkForceUpdate();
-            }
         }
 
         public override void AbcSyncDataBegin()
@@ -209,13 +199,16 @@ namespace UTJ.Alembic
             for (int s = 0; s < m_splits.Count; ++s)
             {
                 var split = m_splits[s];
+                if (split.host == null)
+                    continue;
+
                 var mf = split.host.GetComponent<MeshFilter>();
                 if (mf != null)
                     mf.sharedMesh = split.mesh;
             }
 #endif
 
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
                 return;
 
             // wait async copy complete

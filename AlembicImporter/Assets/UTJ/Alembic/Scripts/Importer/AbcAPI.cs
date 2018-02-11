@@ -339,9 +339,7 @@ namespace UTJ.Alembic
         public bool isDataUpdated { get { return aiSchemaIsDataUpdated(self); } }
         public aiSample sample { get { return aiSchemaGetSample(self); } }
 
-
         public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
-        public void MarkForceUpdate() { aiSchemaMarkForceUpdate(self); }
 
 
         #region internal
@@ -350,7 +348,6 @@ namespace UTJ.Alembic
 
         [DllImport("abci")] static extern Bool aiSchemaIsConstant(IntPtr schema);
         [DllImport("abci")] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
-        [DllImport("abci")] static extern void aiSchemaMarkForceUpdate(IntPtr schema);
 
         [DllImport("abci")] static extern int aiSchemaGetNumProperties(IntPtr schema);
         [DllImport("abci")] static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);

@@ -10,6 +10,7 @@ namespace UTJ.Alembic
         Camera m_camera;
         bool m_ignoreClippingPlanes = false;
 
+        public override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_abcData.visibility; } }
 
         public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
@@ -22,7 +23,7 @@ namespace UTJ.Alembic
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (!m_abcSchema.schema.isDataUpdated || abcTreeNode.linkedGameObj == null)
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);

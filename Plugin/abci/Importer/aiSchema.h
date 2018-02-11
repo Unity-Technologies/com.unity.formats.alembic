@@ -70,10 +70,12 @@ public:
     {
         AbcSchemaObject abcObj(abc, Abc::kWrapExisting);
         m_schema = abcObj.getSchema();
-        m_constant = m_schema.isConstant();
         m_time_sampling = m_schema.getTimeSampling();
         m_num_samples = static_cast<int64_t>(m_schema.getNumSamples());
+
         m_visibility_prop = AbcGeom::GetVisibilityProperty(const_cast<abcObject&>(abc));
+        m_constant = m_schema.isConstant() && (!m_visibility_prop.valid() || m_visibility_prop.isConstant());
+
         setupProperties();
     }
 

@@ -275,11 +275,11 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
             auto& header = geom_params.getPropertyHeader(i);
             if (header.getName() == "rgba" && AbcGeom::IC4fGeomParam::matches(header)) {
                 // colors
-                m_colors_param.reset(new AbcGeom::IC4fGeomParam(geom_params, "rgba"));
+                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, "rgba");
             }
             else if (header.getName() == "uv1" && AbcGeom::IV2fGeomParam::matches(header)) {
                 // uv1
-                m_uv1_param.reset(new AbcGeom::IV2fGeomParam(geom_params, "uv1"));
+                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, "uv1");
             }
         }
     }
@@ -304,20 +304,17 @@ aiPolyMesh::~aiPolyMesh()
 
 void aiPolyMesh::updateSummary()
 {
-    m_constant = m_schema.isConstant();
     m_summary.topology_variance = (aiTopologyVariance)m_schema.getTopologyVariance();
     m_varying_topology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
     auto& summary = m_summary;
     auto& config = getConfig();
 
-
-    // reset
     summary = {};
+    m_constant = m_schema.isConstant();
 
-    if (m_visibility_prop.valid()) {
-        if (!m_visibility_prop.isConstant()) {
-            m_constant = false;
-        }
+    // m_schema.isConstant() doesn't consider custom properties. check them
+    if (m_visibility_prop.valid() && !m_visibility_prop.isConstant()) {
+        m_constant = false;
     }
 
     // points
@@ -349,19 +346,19 @@ void aiPolyMesh::updateSummary()
     }
 
     // uv1
-    if (m_uv1_param && m_uv1_param->valid() && m_uv1_param->getNumSamples() > 0) {
+    if (m_uv1_param.valid() && m_uv1_param.getNumSamples() > 0) {
         summary.has_uv1_prop = true;
         summary.has_uv1 = true;
-        summary.constant_uv1 = m_uv1_param->isConstant();
+        summary.constant_uv1 = m_uv1_param.isConstant();
         if (!summary.constant_uv1)
             m_constant = false;
     }
 
     // colors
-    if (m_colors_param && m_colors_param->valid() && m_colors_param->getNumSamples() > 0) {
+    if (m_colors_param.valid() && m_colors_param.getNumSamples() > 0) {
         summary.has_colors_prop = true;
         summary.has_colors = true;
-        summary.constant_colors = m_colors_param->isConstant();
+        summary.constant_colors = m_colors_param.isConstant();
         if (!summary.constant_colors)
             m_constant = false;
     }
@@ -544,17 +541,17 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 
     // uv1
     if (m_constant_uv1.empty() && summary.has_uv1_prop) {
-        m_uv1_param->getIndexed(sample.m_uv1_sp, ss);
+        m_uv1_param.getIndexed(sample.m_uv1_sp, ss);
         if (summary.interpolate_uv1) {
-            m_uv1_param->getIndexed(sample.m_uv1_sp2, ss2);
+            m_uv1_param.getIndexed(sample.m_uv1_sp2, ss2);
         }
     }
 
     // colors
     if (m_constant_colors.empty() && summary.has_colors_prop) {
-        m_colors_param->getIndexed(sample.m_colors_sp, ss);
+        m_colors_param.getIndexed(sample.m_colors_sp, ss);
         if (summary.interpolate_colors) {
-            m_colors_param->getIndexed(sample.m_colors_sp2, ss2);
+            m_colors_param.getIndexed(sample.m_colors_sp2, ss2);
         }
     }
 

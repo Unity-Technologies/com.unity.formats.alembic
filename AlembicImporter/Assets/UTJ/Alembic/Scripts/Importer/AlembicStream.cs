@@ -117,7 +117,7 @@ namespace UTJ.Alembic
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public void AbcLoad()
+        public void AbcLoad(bool createMissingNodes)
         {
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.linkedGameObj.GetInstanceID());
@@ -137,7 +137,7 @@ namespace UTJ.Alembic
 
             if (m_loaded)
             {
-                UpdateAbcTree(m_context, m_abcTreeRoot, m_time);
+                UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes);
                 AlembicStream.s_streams.Add(this);
             }
             else
@@ -171,7 +171,7 @@ namespace UTJ.Alembic
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes = true)
+        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes)
         {
             var top = ctx.topObject;
             if (!top)
@@ -213,6 +213,10 @@ namespace UTJ.Alembic
                     {
                         obj.enabled = false;
                         return;
+                    }
+                    else
+                    {
+                        obj.enabled = true;
                     }
 
                     childGO = new GameObject { name = childName };
