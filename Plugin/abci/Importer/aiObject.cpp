@@ -17,6 +17,9 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     , m_abc(abc)
     , m_parent(parent)
 {
+#ifdef aiDebug
+    m_fullname = getFullName();
+#endif
 }
 
 aiObject::~aiObject()

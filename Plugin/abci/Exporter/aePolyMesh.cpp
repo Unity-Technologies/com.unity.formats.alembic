@@ -83,7 +83,7 @@ int aePolyMesh::addFaceSet(const char *name)
 void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data)
 {
     if (faceset_index >= (int)m_facesets.size()) {
-        abciDebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
+        DebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
         return;
     }
     m_facesets[faceset_index]->writeSample(data);

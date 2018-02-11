@@ -164,14 +164,14 @@ abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aeProperty
     case aePropertyType::Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
     case aePropertyType::Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
-    abciDebugLog("aeNewProperty(): unknown type");
+    DebugLog("aeNewProperty(): unknown type");
     return nullptr;
 }
 
 abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
 {
     if (!prop->isArray()) {
-        abciDebugLog("aePropertyWriteArraySample(): property is scalar!");
+        DebugLog("aePropertyWriteArraySample(): property is scalar!");
         return;
     }
     prop->writeSample(data, num_data);
@@ -180,7 +180,7 @@ abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int 
 abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 {
     if (prop->isArray()) {
-        abciDebugLog("aePropertyWriteScalarSample(): property is array!");
+        DebugLog("aePropertyWriteScalarSample(): property is array!");
         return;
     }
     prop->writeSample(data, 1);

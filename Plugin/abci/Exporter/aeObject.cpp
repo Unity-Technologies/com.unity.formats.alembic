@@ -31,7 +31,7 @@ public:
     aeTArrayProprty(aeSchema *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        abciDebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return true; }
@@ -67,7 +67,7 @@ public:
     aeTScalarProprty(aeSchema *parent, const char *name, uint32_t tsi)
         : m_abcprop(new property_type(parent->getAbcProperties(), name, tsi))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return false; }
@@ -181,7 +181,7 @@ aeProperty* aeSchema::newProperty(const char *name, uint32_t tsi)
 {
     auto cprop = getAbcProperties();
     if (!cprop.valid()) {
-        abciDebugLog("aeObject::newProperty() %s failed!", name);
+        DebugLog("aeObject::newProperty() %s failed!", name);
         return nullptr;
     }
 

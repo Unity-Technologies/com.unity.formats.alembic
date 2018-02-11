@@ -19,11 +19,6 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index)
     return abcSampleSelector(index);
 }
 
-abciAPI void aiEnableFileLog(bool on, const char *path)
-{
-    aiLogger::Enable(on, path);
-}
-
 abciAPI void aiCleanup()
 {
 }
