@@ -1,4 +1,5 @@
 #pragma once
+#include "aiAsync.h"
 
 
 class aiSample
@@ -99,7 +100,55 @@ public:
         return static_cast<int>(m_num_samples);
     }
 
+
+    Sample* getSample() override
+    {
+        return m_sample.get();
+    }
+
+    virtual Sample* newSample() = 0;
+
     void updateSample(const abcSampleSelector& ss) override
+    {
+        m_async_load.reset();
+        updateSampleBody(ss);
+        if (m_async_load.ready())
+            getContext()->queueAsync(m_async_load);
+    }
+
+    virtual void readSample(Sample& sample, uint64_t idx)
+    {
+        m_force_update_local = m_force_update;
+
+        auto body = [this, &sample, idx]() {
+            readSampleBody(sample, idx);
+        };
+
+        if (m_force_sync || !getConfig().async_load)
+            body();
+        else
+            m_async_load.m_read = body;
+    }
+
+    virtual void cookSample(Sample& sample)
+    {
+        auto body = [this, &sample]() {
+            cookSampleBody(sample);
+        };
+
+        if (m_force_sync || !getConfig().async_load)
+            body();
+        else
+            m_async_load.m_cook = body;
+    }
+
+    virtual void waitAsync()
+    {
+        m_async_load.wait();
+    }
+
+protected:
+    virtual void updateSampleBody(const abcSampleSelector& ss)
     {
         if (!m_enabled)
             return;
@@ -162,15 +211,9 @@ public:
         m_force_sync = false;
     }
 
-    Sample* getSample() override
-    {
-        return m_sample.get();
-    }
+    virtual void readSampleBody(Sample& sample, uint64_t idx) = 0;
+    virtual void cookSampleBody(Sample& sample) = 0;
 
-protected:
-    virtual Sample* newSample() = 0;
-    virtual void readSample(Sample& sample, uint64_t idx) = 0;
-    virtual void cookSample(Sample& sample) {}
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
@@ -196,4 +239,9 @@ protected:
     float m_current_time_offset = 0;
     float m_current_time_interval = 0;
     bool m_sample_index_changed = false;
+
+    bool m_force_update_local = false; // m_force_update for worker thread
+
+private:
+    aiAsyncLoad m_async_load;
 };

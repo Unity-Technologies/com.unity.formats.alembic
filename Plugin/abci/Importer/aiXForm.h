@@ -1,5 +1,4 @@
 #pragma once
-#include "aiAsync.h"
 
 class aiXformSample : public aiSample
 {
@@ -10,6 +9,7 @@ public:
     void getData(aiXformData &dst) const;
 
 public:
+    AbcGeom::XformSample xf_sp, xf_sp2;
     AbcGeom::M44d m_matrix, m_next_matrix;
     bool inherits;
     aiXformData m_data;
@@ -29,14 +29,7 @@ public:
     aiXform(aiObject *parent, const abcObject &abc);
 
     Sample* newSample() override;
-    void updateSample(const abcSampleSelector& ss) override;
-    void readSample(Sample& sample, uint64_t idx) override;
-    void cookSample(Sample& sample) override;
-
-    void readSampleBody(Sample& sample, uint64_t idx);
-    void cookSampleBody(Sample& sample);
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
     void decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
-
-private:
-    aiAsyncLoad m_async_load;
 };

@@ -433,46 +433,6 @@ aiPolyMesh::Sample* aiPolyMesh::newSample()
     }
 }
 
-void aiPolyMesh::updateSample(const abcSampleSelector& ss)
-{
-    m_async_load.reset();
-
-    super::updateSample(ss);
-    if (m_async_load.ready())
-        getContext()->queueAsync(m_async_load);
-}
-
-void aiPolyMesh::readSample(Sample& sample, uint64_t idx)
-{
-    m_force_update_local = m_force_update;
-
-    auto body = [this, &sample, idx]() {
-        readSampleBody(sample, idx);
-    };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_load.m_read = body;
-}
-
-void aiPolyMesh::cookSample(Sample& sample)
-{
-    auto body = [this, &sample]() {
-        cookSampleBody(sample);
-    };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_load.m_cook = body;
-}
-
-void aiPolyMesh::waitAsync()
-{
-    m_async_load.wait();
-}
-
 void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);

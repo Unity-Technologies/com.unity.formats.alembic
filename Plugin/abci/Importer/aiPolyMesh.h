@@ -1,6 +1,5 @@
 #pragma once
 #include "aiMeshOps.h"
-#include "aiAsync.h"
 
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
@@ -122,13 +121,9 @@ public:
     const aiMeshSummaryInternal& getSummary() const;
 
     Sample* newSample() override;
-    void updateSample(const abcSampleSelector& ss) override;
-    void readSample(Sample& sample, uint64_t idx) override;
-    void cookSample(Sample& sample) override;
-    void waitAsync() override;
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
 
-    void readSampleBody(Sample& sample, uint64_t idx);
-    void cookSampleBody(Sample& sample);
     void onTopologyChange(aiPolyMeshSample& sample);
     void onTopologyDetermined();
 
@@ -149,7 +144,4 @@ private:
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
-    bool m_force_update_local = false; // copy from aiTSchema to avoid race condition
-
-    aiAsyncLoad m_async_load;
 };

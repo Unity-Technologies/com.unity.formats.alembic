@@ -27,58 +27,23 @@ aiXform::Sample* aiXform::newSample()
     return new Sample(this);
 }
 
-void aiXform::updateSample(const abcSampleSelector& ss)
-{
-    m_async_load.reset();
-
-    super::updateSample(ss);
-    if (m_async_load.ready())
-        getContext()->queueAsync(m_async_load);
-}
-
-void aiXform::readSample(Sample& sample, uint64_t idx)
-{
-    auto body = [this, &sample, idx]() {
-        readSampleBody(sample, idx);
-    };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_load.m_read = body;
-}
-
-void aiXform::cookSample(Sample& sample)
-{
-    auto body = [this, &sample]() {
-        cookSampleBody(sample);
-    };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_load.m_cook = body;
-}
-
 void aiXform::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
+
     readVisibility(sample, ss);
-
-    AbcGeom::XformSample xf_sample;
-    m_schema.get(xf_sample, ss);
-    sample.m_matrix = xf_sample.getMatrix();
-    sample.inherits = xf_sample.getInheritsXforms();
-
-    AbcGeom::XformSample xf_sample2;
-    m_schema.get(xf_sample2, ss2);
-    sample.m_next_matrix = xf_sample2.getMatrix();
+    m_schema.get(sample.xf_sp, ss);
+    m_schema.get(sample.xf_sp2, ss2);
 }
 
 void aiXform::cookSampleBody(Sample& sample)
 {
     auto& config = getConfig();
+
+    sample.inherits = sample.xf_sp.getInheritsXforms();
+    sample.m_matrix = sample.xf_sp.getMatrix();
+    sample.m_next_matrix = sample.xf_sp2.getMatrix();
 
     Imath::V3d scale;
     Imath::V3d shear;
