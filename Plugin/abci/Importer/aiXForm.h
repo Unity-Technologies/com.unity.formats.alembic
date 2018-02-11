@@ -10,9 +10,7 @@ public:
 
 public:
     AbcGeom::XformSample xf_sp, xf_sp2;
-    AbcGeom::M44d m_matrix, m_next_matrix;
-    bool inherits;
-    aiXformData m_data;
+    aiXformData data;
 };
 
 

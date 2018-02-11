@@ -9,8 +9,8 @@ public:
     void getData(aiCameraData &dst) const;
 
 public:
-    AbcGeom::CameraSample m_sample, m_next_sample;
-    aiCameraData m_data;
+    AbcGeom::CameraSample cam_sp, cam_sp2;
+    aiCameraData data;
 };
 
 
