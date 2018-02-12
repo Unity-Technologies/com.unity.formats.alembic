@@ -325,7 +325,7 @@ namespace UTJ.Alembic
                 {
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
-                    split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex);
+                    split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
                 }
                 }
         }
