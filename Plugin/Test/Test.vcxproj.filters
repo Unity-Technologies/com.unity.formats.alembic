@@ -3,12 +3,12 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="ExportAlembic.cpp" />
+    <ClCompile Include="MeshGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Test.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ExportAlembic.cpp" />
+    <ClInclude Include="MeshGenerator.h" />
   </ItemGroup>
 </Project>

@@ -22,20 +22,10 @@
     #else
     #endif
 
-    struct abcV2
-    {
-        float x, y;
-    };
-
-    struct abcV3
-    {
-        float x, y, z;
-    };
-
-    struct abcV4
-    {
-        float x, y, z, w;
-    };
+    struct abcV2 { float x, y; };
+    struct abcV3 { float x, y, z; };
+    struct abcV4 { float x, y, z, w; };
+    using abcC4 = abcV4;
 
     struct abcSampleSelector
     {

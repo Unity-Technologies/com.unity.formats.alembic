@@ -1,6 +1,7 @@
 #include "pch.h"
-#include "Test.h"
 #include "../abci/abci.h"
+#include "MeshGenerator.h"
+#include "Test.h"
 
 
 TestCase(ExportAlembic_UVAndColorAnimation)
@@ -80,6 +81,22 @@ TestCase(ExportAlembic_UVAndColorAnimation)
 
 TestCase(ExportAlembic_VisibilityAnimation)
 {
+    std::vector<int> counts, indices;
+    std::vector<float3> points;
+    std::vector<float2> uv;
+    GenerateCylinderMesh(counts, indices, points, uv, 0.5f, 0.5f, 32, 16);
+
+    aePolyMeshData mesh_data;
+    mesh_data.faces = counts.data();
+    mesh_data.face_count = (int)counts.size();
+    mesh_data.indices = indices.data();
+    mesh_data.index_count = (int)indices.size();
+    mesh_data.points = (abcV3*)points.data();
+    mesh_data.point_count = (int)points.size();
+    mesh_data.uv0 = (abcV2*)uv.data();
+    mesh_data.uv0_count = (int)uv.size();
+
+
     aeConfig config;
     config.frame_rate = 2.0f;
     config.scale_factor = 100.0f;
@@ -92,29 +109,11 @@ TestCase(ExportAlembic_VisibilityAnimation)
     auto xf = aeNewXform(top, "VisibilityAnimation");
     auto mesh = aeNewPolyMesh(xf, "VisibilityAnimation_Mesh");
     {
-        aePolyMeshData data;
-
-        int counts[] = { 4 };
-        int indices[] = { 0, 1, 2, 3 };
-        abcV3 points[] = {
-            {-0.5f, 0.0f, -0.5f },
-            {-0.5f, 0.0f,  0.5f },
-            { 0.5f, 0.0f,  0.5f },
-            { 0.5f, 0.0f, -0.5f },
-        };
-
-        data.faces = counts;
-        data.face_count = 1;
-        data.indices = indices;
-        data.index_count = 4;
-        data.points = points;
-        data.point_count = 4;
-
         for (int i = 0; i < 10; ++i) {
-            data.visibility = i % 2 == 0;
+            mesh_data.visibility = i % 2 == 0;
 
             aeMarkFrameBegin(ctx);
-            aePolyMeshWriteSample(mesh, &data);
+            aePolyMeshWriteSample(mesh, &mesh_data);
             aeMarkFrameEnd(ctx);
         }
     }
@@ -182,5 +181,38 @@ TestCase(ExportAlembic_MultipleTimeSampling)
         aeMarkFrameEnd(ctx);
     }
 
+    aeDestroyContext(ctx);
+}
+
+TestCase(ExportAlembic_PolyMeshWithNoTopology)
+{
+    std::vector<int> counts, indices;
+    std::vector<float3> points;
+    std::vector<float2> uv;
+    GenerateIcoSphereMesh(counts, indices, points, uv, 0.5f, 4);
+
+    aePolyMeshData mesh_data;
+    mesh_data.points = (abcV3*)points.data();
+    mesh_data.point_count = (int)points.size();
+    mesh_data.uv0 = (abcV2*)uv.data();
+    mesh_data.uv0_count = (int)uv.size();
+
+
+    aeConfig config;
+    config.frame_rate = 2.0f;
+    config.scale_factor = 100.0f;
+
+    auto ctx = aeCreateContext();
+    aeSetConfig(ctx, &config);
+    aeOpenArchive(ctx, "PolyMeshWithNoTopology.abc");
+
+    auto top = aeGetTopObject(ctx);
+    auto xf = aeNewXform(top, "Obj1");
+    auto mesh = aeNewPolyMesh(xf, "Mesh");
+    {
+        aeMarkFrameBegin(ctx);
+        aePolyMeshWriteSample(mesh, &mesh_data);
+        aeMarkFrameEnd(ctx);
+    }
     aeDestroyContext(ctx);
 }
