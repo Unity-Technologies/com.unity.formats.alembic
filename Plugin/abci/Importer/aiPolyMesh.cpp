@@ -31,11 +31,16 @@ inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
     }
 }
 
-template<class T>
-inline void Remap(RawVector<T>& dst, const T *src, const RawVector<int>& indices)
+template<class T, class AbcArraySample>
+inline void Remap(RawVector<T>& dst, const AbcArraySample& src, const RawVector<int>& indices)
 {
-    dst.resize_discard(indices.size());
-    CopyWithIndices(dst.data(), src, indices);
+    if (indices.empty()) {
+        dst.assign(src.get(), src.get() + src.size());
+    }
+    else {
+        dst.resize_discard(indices.size());
+        CopyWithIndices(dst.data(), src.get(), indices);
+    }
 }
 
 template<class T>
@@ -544,7 +549,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_points_ref = m_constant_points;
         }
         else {
-            Remap(sample.m_points, sample.m_points_sp->get(), topology.m_remap_points);
+            Remap(sample.m_points, *sample.m_points_sp, topology.m_remap_points);
             if (config.swap_handedness)
                 SwapHandedness(sample.m_points.data(), (int)sample.m_points.size());
             if (config.scale_factor != 1.0f)
@@ -556,7 +561,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_normals_ref = m_constant_normals;
         }
         else if (!summary.compute_normals && summary.has_normals_prop) {
-            Remap(sample.m_normals, sample.m_normals_sp.getVals()->get(), topology.m_remap_normals);
+            Remap(sample.m_normals, *sample.m_normals_sp.getVals(), topology.m_remap_normals);
             if (config.swap_handedness)
                 SwapHandedness(sample.m_normals.data(), (int)sample.m_normals.size());
             sample.m_normals_ref = sample.m_normals;
@@ -570,7 +575,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_uv0_ref = m_constant_uv0;
         }
         else if (summary.has_uv0_prop) {
-            Remap(sample.m_uv0, sample.m_uv0_sp.getVals()->get(), topology.m_remap_uv0);
+            Remap(sample.m_uv0, *sample.m_uv0_sp.getVals(), topology.m_remap_uv0);
             sample.m_uv0_ref = sample.m_uv0;
         }
 
@@ -578,7 +583,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_uv1_ref = m_constant_uv1;
         }
         else if (summary.has_uv1_prop) {
-            Remap(sample.m_uv1, sample.m_uv1_sp.getVals()->get(), topology.m_remap_uv1);
+            Remap(sample.m_uv1, *sample.m_uv1_sp.getVals(), topology.m_remap_uv1);
             sample.m_uv1_ref = sample.m_uv1;
         }
 
@@ -586,7 +591,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             sample.m_colors_ref = m_constant_colors;
         }
         else if (summary.has_colors_prop) {
-            Remap(sample.m_colors, sample.m_colors_sp.getVals()->get(), topology.m_remap_colors);
+            Remap(sample.m_colors, *sample.m_colors_sp.getVals(), topology.m_remap_colors);
             sample.m_colors_ref = sample.m_colors;
         }
     }
@@ -598,7 +603,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         // both in the case of topology changed or sample index changed
 
         if (summary.interpolate_points) {
-            Remap(sample.m_points2, sample.m_points_sp2->get(), topology.m_remap_points);
+            Remap(sample.m_points2, *sample.m_points_sp2, topology.m_remap_points);
             if (config.swap_handedness)
                 SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
             if (config.scale_factor != 1.0f)
@@ -606,21 +611,21 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         }
 
         if (summary.interpolate_normals) {
-            Remap(sample.m_normals2, sample.m_normals_sp2.getVals()->get(), topology.m_remap_normals);
+            Remap(sample.m_normals2, *sample.m_normals_sp2.getVals(), topology.m_remap_normals);
             if (config.swap_handedness)
                 SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
         }
 
         if (summary.interpolate_uv0) {
-            Remap(sample.m_uv02, sample.m_uv0_sp2.getVals()->get(), topology.m_remap_uv0);
+            Remap(sample.m_uv02, *sample.m_uv0_sp2.getVals(), topology.m_remap_uv0);
         }
 
         if (summary.interpolate_uv1) {
-            Remap(sample.m_uv12, sample.m_uv1_sp2.getVals()->get(), topology.m_remap_uv1);
+            Remap(sample.m_uv12, *sample.m_uv1_sp2.getVals(), topology.m_remap_uv1);
         }
 
         if (summary.interpolate_colors) {
-            Remap(sample.m_colors2, sample.m_colors_sp2.getVals()->get(), topology.m_remap_colors);
+            Remap(sample.m_colors2, *sample.m_colors_sp2.getVals(), topology.m_remap_colors);
         }
 
         if (!m_constant_velocities.empty()) {
@@ -628,7 +633,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         }
         else if (!summary.compute_velocities && summary.has_velocities_prop) {
             auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
-            Remap(dst, sample.m_velocities_sp->get(), topology.m_remap_points);
+            Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
             if (config.swap_handedness)
                 SwapHandedness(dst.data(), (int)dst.size());
             if (config.scale_factor != 1.0f)
@@ -673,7 +678,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (sample.m_points_ref.empty()) {
             DebugError("something is wrong!!");
         }
-        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        const auto &indices = topology.m_refiner.new_indices_retopo;
         sample.m_normals.resize_discard(sample.m_points_ref.size());
         GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
             (int)sample.m_points_ref.size(), (int)indices.size() / 3);
@@ -688,7 +693,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
             DebugError("something is wrong!!");
         }
-        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        const auto &indices = topology.m_refiner.new_indices_retopo;
         sample.m_tangents.resize_discard(sample.m_points_ref.size());
         GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
             indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
@@ -818,7 +823,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
 
     refiner.refine();
-    refiner.triangulate(config.swap_face_winding, config.turn_quad_edges);
+    refiner.retopology(config.swap_face_winding, config.turn_quad_edges);
 
     // generate submeshes
     if (!topology.m_faceset_sps.empty()) {
@@ -838,25 +843,21 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         refiner.genSubmeshes();
     }
 
-    topology.m_index_count = (int)refiner.new_indices_triangulated.size();
+    topology.m_index_count = (int)refiner.new_indices_retopo.size();
     topology.m_vertex_count = (int)refiner.new_points.size();
     onTopologyDetermined();
 
 
     topology.m_remap_points.swap(refiner.new2old_points);
-    if (summary.constant_points) {
-        m_constant_points.swap((RawVector<abcV3>&)refiner.new_points);
-        sample.m_points_ref = m_constant_points;
+    {
+        auto& points = summary.constant_points ? m_constant_points : sample.m_points;
+        points.swap((RawVector<abcV3>&)refiner.new_points);
+        if (config.swap_handedness)
+            SwapHandedness(points.data(), (int)points.size());
+        if (config.scale_factor != 1.0f)
+            ApplyScale(points.data(), (int)points.size(), config.scale_factor);
+        sample.m_points_ref = points;
     }
-    else {
-        sample.m_points.swap((RawVector<abcV3>&)refiner.new_points);
-        sample.m_points_ref = sample.m_points;
-    }
-    if (config.swap_handedness)
-        SwapHandedness(sample.m_points_ref.data(), (int)sample.m_points_ref.size());
-    if (config.scale_factor != 1.0f)
-        ApplyScale(sample.m_points_ref.data(), (int)sample.m_points_ref.size(), config.scale_factor);
-
 
     if (weld_normals) {
         sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
@@ -874,13 +875,13 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
 
     if (summary.constant_normals && summary.compute_normals) {
-        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        const auto &indices = topology.m_refiner.new_indices_retopo;
         m_constant_normals.resize_discard(m_constant_points.size());
         GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents) {
-        const auto &indices = topology.m_refiner.new_indices_triangulated;
+        const auto &indices = topology.m_refiner.new_indices_retopo;
         m_constant_tangents.resize_discard(m_constant_points.size());
         GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
             indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);

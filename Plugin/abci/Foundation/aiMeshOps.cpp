@@ -141,10 +141,11 @@ const RawVector<int>& MeshWelder::getRemapTable() const
 
 
 
-void MeshRefiner::triangulate(bool swap_faces, bool turn_quads)
+void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
 {
-    auto& dst = new_indices_triangulated;
-    dst.resize(num_new_indices);
+    auto& src = new_indices;
+    auto& dst = new_indices_retopo;
+    dst.resize(num_indices_retopo);
 
     const int i1 = swap_faces ? 2 : 1;
     const int i2 = swap_faces ? 1 : 2;
@@ -155,40 +156,62 @@ void MeshRefiner::triangulate(bool swap_faces, bool turn_quads)
     if (turn_quads) {
         for (size_t fi = 0; fi < num_faces; ++fi) {
             int count = counts[fi];
-            if (count == 4) {
-                int quad[4] = {
-                    new_indices[n + 3],
-                    new_indices[n + 0],
-                    new_indices[n + 1],
-                    new_indices[n + 2],
-                };
-                for (int ni = 0; ni < count - 2; ++ni) {
-                    dst[i + 0] = quad[0];
-                    dst[i + 1] = quad[ni + i1];
-                    dst[i + 2] = quad[ni + i2];
-                    i += 3;
+            if(count >= 3) {
+                if (count == 4) {
+                    int quad[4] = {
+                        src[n + 3],
+                        src[n + 0],
+                        src[n + 1],
+                        src[n + 2],
+                    };
+                    for (int ni = 0; ni < count - 2; ++ni) {
+                        dst[i + 0] = quad[0];
+                        dst[i + 1] = quad[ni + i1];
+                        dst[i + 2] = quad[ni + i2];
+                        i += 3;
+                    }
+                    n += count;
                 }
-                n += count;
+                else {
+                    for (int ni = 0; ni < count - 2; ++ni) {
+                        dst[i + 0] = src[n + 0];
+                        dst[i + 1] = src[n + ni + i1];
+                        dst[i + 2] = src[n + ni + i2];
+                        i += 3;
+                    }
+                    n += count;
+                }
             }
-            else {
-                for (int ni = 0; ni < count - 2; ++ni) {
-                    dst[i + 0] = new_indices[n + 0];
-                    dst[i + 1] = new_indices[n + ni + i1];
-                    dst[i + 2] = new_indices[n + ni + i2];
-                    i += 3;
-                }
-                n += count;
+            else if (count == 2) {
+                dst[i + 0] = src[n + 0];
+                dst[i + 1] = src[n + 1];
+                i += 2;
+            }
+            else if (count == 1) {
+                dst[i] = src[n];
+                i += 1;
             }
         }
     }
     else {
         for (size_t fi = 0; fi < num_faces; ++fi) {
             int count = counts[fi];
-            for (int ni = 0; ni < count - 2; ++ni) {
-                dst[i + 0] = new_indices[n + 0];
-                dst[i + 1] = new_indices[n + ni + i1];
-                dst[i + 2] = new_indices[n + ni + i2];
-                i += 3;
+            if (count >= 3) {
+                for (int ni = 0; ni < count - 2; ++ni) {
+                    dst[i + 0] = src[n + 0];
+                    dst[i + 1] = src[n + ni + i1];
+                    dst[i + 2] = src[n + ni + i2];
+                    i += 3;
+                }
+            }
+            else if (count == 2) {
+                dst[i + 0] = src[n + 0];
+                dst[i + 1] = src[n + 1];
+                i += 2;
+            }
+            else if (count == 1) {
+                dst[i] = src[n];
+                i += 1;
             }
             n += count;
         }
@@ -203,9 +226,9 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     }
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_triangulated.size());
-    const int *indices_read = new_indices_triangulated.data();
-    int *indices_write = new_indices_submeshes.data();
+    new_indices_submeshes.resize(new_indices_retopo.size());
+    const int *indices_read = new_indices_retopo.data();
+    int *dst_indices = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
@@ -225,21 +248,39 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
             }
             tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
         }
+        if (split.index_count_lines > 0) {
+            tmp_submeshes.push_back({});
+            tmp_submeshes.back().topology = Topology::Lines;
+            tmp_submeshes.back().index_count = split.index_count_lines;
+        }
+        if (split.index_count_points > 0) {
+            tmp_submeshes.push_back({});
+            tmp_submeshes.back().topology = Topology::Points;
+            tmp_submeshes.back().index_count = split.index_count_points;
+        }
 
         for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
             auto& sm = tmp_submeshes[mi];
-            sm.indices_write = indices_write;
-            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
-            indices_write += sm.index_count;
+            sm.dst_indices = dst_indices;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
+            dst_indices += sm.index_count;
         }
 
         // copy indices
         for (int fi = 0; fi < split.face_count; ++fi) {
-            int mid = material_ids[offset_faces + fi] + 1;
             int count = counts[offset_faces + fi];
-            int nidx = (count - 2) * 3;
-            for (int i = 0; i < nidx; ++i) {
-                *(tmp_submeshes[mid].indices_write++) = *(indices_read++) - offset_vertices;
+            if (count >= 3) {
+                int mid = material_ids[offset_faces + fi] + 1;
+                int nidx = (count - 2) * 3;
+                for (int i = 0; i < nidx; ++i) {
+                    *(tmp_submeshes[mid].dst_indices++) = *(indices_read++) - offset_vertices;
+                }
+            }
+            else if (count == 2) {
+
+            }
+            else if (count == 1) {
+
             }
         }
 
@@ -261,8 +302,8 @@ void MeshRefiner::genSubmeshes()
 {
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_triangulated.size());
-    const int *indices_read = new_indices_triangulated.data();
+    new_indices_submeshes.resize(new_indices_retopo.size());
+    const int *indices_read = new_indices_retopo.data();
     int *indices_write = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
@@ -270,15 +311,35 @@ void MeshRefiner::genSubmeshes()
         auto& split = splits[spi];
         int offset_vertices = split.vertex_offset;
 
-        Submesh sm;
-        sm.index_count = split.triangulated_index_count;
-        sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
-        for (int ii = 0; ii < sm.index_count; ++ii) {
-            *(indices_write++) = *(indices_read++) - offset_vertices;
+        if (split.index_count_tri > 0) {
+            Submesh sm;
+            sm.index_count = split.index_count_tri;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            for (int ii = 0; ii < sm.index_count; ++ii)
+                *(indices_write++) = *(indices_read++) - offset_vertices;
+            submeshes.push_back(sm);
+            ++split.submesh_count;
         }
-
-        ++split.submesh_count;
-        submeshes.push_back(sm);
+        if (split.index_count_lines > 0) {
+            Submesh sm;
+            sm.topology = Topology::Lines;
+            sm.index_count = split.index_count_lines;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            for (int ii = 0; ii < sm.index_count; ++ii)
+                *(indices_write++) = *(indices_read++) - offset_vertices;
+            submeshes.push_back(sm);
+            ++split.submesh_count;
+        }
+        if (split.index_count_points > 0) {
+            Submesh sm;
+            sm.topology = Topology::Points;
+            sm.index_count = split.index_count_points;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            for (int ii = 0; ii < sm.index_count; ++ii)
+                *(indices_write++) = *(indices_read++) - offset_vertices;
+            submeshes.push_back(sm);
+            ++split.submesh_count;
+        }
     }
     setupSubmeshes();
 }
@@ -317,15 +378,15 @@ void MeshRefiner::clear()
     new2old_points.clear();
 
     new_indices.clear();
-    new_indices_triangulated.clear();
+    new_indices_retopo.clear();
     new_indices_submeshes.clear();
 
     new_points.clear();
     splits.clear();
     submeshes.clear();
-    num_new_indices = 0;
-
     connection.clear();
+
+    num_indices_retopo = 0;
 }
 
 void MeshRefiner::refine()
@@ -346,7 +407,9 @@ void MeshRefiner::refine()
     int offset_indices = 0;
     int offset_vertices = 0;
     int num_faces = 0;
-    int num_indices_triangulated = 0;
+    int num_indices_tri = 0;
+    int num_indices_lines = 0;
+    int num_indices_points = 0;
 
     auto add_new_split = [&]() {
         auto split = Split{};
@@ -354,7 +417,7 @@ void MeshRefiner::refine()
         split.index_offset = offset_indices;
         split.vertex_offset = offset_vertices;
         split.face_count = num_faces;
-        split.triangulated_index_count = num_indices_triangulated;
+        split.index_count_tri = num_indices_tri;
         split.vertex_count = (int)new_points.size() - offset_vertices;
         split.index_count = (int)new_indices.size() - offset_indices;
         splits.push_back(split);
@@ -363,9 +426,14 @@ void MeshRefiner::refine()
         offset_indices += split.index_count;
         offset_vertices += split.vertex_count;
 
-        num_new_indices += num_indices_triangulated;
+        num_indices_retopo += num_indices_tri;
+        num_indices_retopo += num_indices_lines;
+        num_indices_retopo += num_indices_points;
+
         num_faces = 0;
-        num_indices_triangulated = 0;
+        num_indices_tri = 0;
+        num_indices_lines = 0;
+        num_indices_points = 0;
     };
 
     auto compare_all_attributes = [&](int ni, int ii) -> bool {
@@ -410,7 +478,12 @@ void MeshRefiner::refine()
             new_indices.push_back(find_or_emit_vertex(vi, ii));
         }
         ++num_faces;
-        num_indices_triangulated += (count - 2) * 3;
+        if (count >= 3)
+            num_indices_tri += (count - 2) * 3;
+        else if (count == 2)
+            num_indices_lines += 2;
+        else if (count == 1)
+            num_indices_points += 1;
         offset += count;
     }
     add_new_split();

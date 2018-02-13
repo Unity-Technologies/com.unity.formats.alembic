@@ -70,14 +70,23 @@ private:
 
 struct MeshRefiner
 {
+    enum class Topology
+    {
+        Points,
+        Lines,
+        Triangles,
+        Quads,
+    };
+
     struct Submesh
     {
+        Topology topology = Topology::Triangles;
         int split_index = 0;
         int submesh_index = 0; // submesh index in split
         int index_count = 0; // triangulated
         int index_offset = 0;
         int material_id = 0;
-        int* indices_write = nullptr;
+        int* dst_indices = nullptr;
     };
 
     struct Split
@@ -90,7 +99,10 @@ struct MeshRefiner
         int index_offset = 0;
         int face_count = 0;
         int face_offset = 0;
-        int triangulated_index_count = 0;
+
+        int index_count_tri = 0;
+        int index_count_lines = 0;
+        int index_count_points = 0;
     };
 
     // inputs
@@ -103,13 +115,13 @@ struct MeshRefiner
     RawVector<int> old2new_indices; // old index to new index
     RawVector<int> new2old_points;  // new index to old vertex
     RawVector<int> new_indices;
-    RawVector<int> new_indices_triangulated;
-    RawVector<int> new_indices_submeshes; // triangulated
+    RawVector<int> new_indices_retopo;
+    RawVector<int> new_indices_submeshes;
     RawVector<float3> new_points;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
     MeshConnectionInfo connection;
-    int num_new_indices = 0;
+    int num_indices_retopo = 0;
 
     // attributes
     template<class T>
@@ -132,7 +144,7 @@ struct MeshRefiner
     }
 
     void refine();
-    void triangulate(bool swap_faces, bool turn_quads);
+    void retopology(bool swap_faces, bool turn_quads);
     void genSubmeshes(IArray<int> material_ids);
     void genSubmeshes();
     void clear();
