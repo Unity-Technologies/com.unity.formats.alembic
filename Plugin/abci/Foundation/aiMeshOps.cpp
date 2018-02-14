@@ -332,7 +332,7 @@ void MeshRefiner::genSubmeshes()
 {
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_tri.size());
+    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
     const int *src_tri = new_indices_tri.data();
     const int *src_lines = new_indices_lines.data();
     const int *src_points = new_indices_points.data();

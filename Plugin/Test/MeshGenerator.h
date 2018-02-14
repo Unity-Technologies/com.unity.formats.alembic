@@ -9,9 +9,7 @@ void GenerateCylinderMesh(
     std::vector<float3> &points,
     std::vector<float2> &uv,
     float radius, float height,
-    int cseg, int hseg,
-    bool wave = false,
-    bool triangulate = false);
+    int cseg, int hseg);
 
 void GenerateIcoSphereMesh(
     std::vector<int>& counts,

@@ -36,6 +36,14 @@ namespace UTJ.Alembic
         Homogeneous, // vertices are variant, topology is constant
         Heterogeneous, // both vertices and topology are variant
     }
+    public enum aiTopology
+    {
+        Points,
+        Lines,
+        Triangles,
+        Quads,
+    };
+
 
     public enum aiTimeSamplingType
     {
@@ -161,6 +169,7 @@ namespace UTJ.Alembic
         public int splitIndex;
         public int submeshIndex;
         public int indexCount;
+        public aiTopology topology;
     }
 
     public struct aiPolyMeshData

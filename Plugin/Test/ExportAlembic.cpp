@@ -120,7 +120,6 @@ TestCase(ExportAlembic_VisibilityAnimation)
     aeDestroyContext(ctx);
 }
 
-
 TestCase(ExportAlembic_MultipleTimeSampling)
 {
     aeConfig config;
@@ -184,12 +183,44 @@ TestCase(ExportAlembic_MultipleTimeSampling)
     aeDestroyContext(ctx);
 }
 
-TestCase(ExportAlembic_PolyMeshWithNoTopology)
+TestCase(ExportAlembic_LinesAndPoints)
 {
-    std::vector<int> counts, indices;
+    std::vector<int> counts_poly, indices_poly;
+    std::vector<int> counts_lines, indices_lines;
+    std::vector<int> counts_points, indices_points;
+    std::vector<int> counts_mixed, indices_mixed;
     std::vector<float3> points;
     std::vector<float2> uv;
-    GenerateIcoSphereMesh(counts, indices, points, uv, 0.5f, 4);
+    GenerateCylinderMesh(counts_poly, indices_poly, points, uv, 0.2f, 1.0f, 32, 16);
+
+    {
+        counts_points.resize(points.size());
+        indices_points.resize(points.size());
+        std::fill(counts_points.begin(), counts_points.end(), 1);
+        std::iota(indices_points.begin(), indices_points.end(), 0);
+    }
+
+    {
+        int n = 0;
+        for (int c : counts_poly) {
+            for (int i = 0; i < c; ++i) {
+                indices_lines.push_back(indices_poly[n + i]);
+                indices_lines.push_back(indices_poly[n + (i + 1) % c]);
+                counts_lines.push_back(2);
+            }
+            n += c;
+        }
+    }
+
+    {
+        counts_mixed.insert(counts_mixed.end(), counts_lines.begin(), counts_lines.begin() + counts_lines.size() / 4);
+        indices_mixed.insert(indices_mixed.end(), indices_lines.begin(), indices_lines.begin() + indices_lines.size() / 4);
+        counts_mixed.insert(counts_mixed.end(), counts_points.begin() + counts_points.size() / 4, counts_points.begin() + counts_points.size() / 2);
+        indices_mixed.insert(indices_mixed.end(), indices_points.begin() + indices_points.size() / 4, indices_points.begin() + indices_points.size() / 2);
+        counts_mixed.insert(counts_mixed.end(), counts_poly.begin() + counts_poly.size() / 2, counts_poly.begin() + counts_poly.size());
+        indices_mixed.insert(indices_mixed.end(), indices_poly.begin() + indices_poly.size() / 2, indices_poly.begin() + indices_poly.size());
+    }
+
 
     aePolyMeshData mesh_data;
     mesh_data.points = (abcV3*)points.data();
@@ -204,13 +235,74 @@ TestCase(ExportAlembic_PolyMeshWithNoTopology)
 
     auto ctx = aeCreateContext();
     aeSetConfig(ctx, &config);
-    aeOpenArchive(ctx, "PolyMeshWithNoTopology.abc");
+    aeOpenArchive(ctx, "LinesAndPoints.abc");
 
     auto top = aeGetTopObject(ctx);
-    auto xf = aeNewXform(top, "Obj1");
-    auto mesh = aeNewPolyMesh(xf, "Mesh");
     {
+        auto xf = aeNewXform(top, "Polygons");
+        auto mesh = aeNewPolyMesh(xf, "Mesh");
+
+        aeXformData xfd;
+        xfd.translation.x = -0.8f;
+
+        mesh_data.faces = counts_poly.data();
+        mesh_data.face_count = (int)counts_poly.size();
+        mesh_data.indices = indices_poly.data();
+        mesh_data.index_count = (int)indices_poly.size();
+
         aeMarkFrameBegin(ctx);
+        aeXformWriteSample(xf, &xfd);
+        aePolyMeshWriteSample(mesh, &mesh_data);
+        aeMarkFrameEnd(ctx);
+    }
+    {
+        auto xf = aeNewXform(top, "Lines");
+        auto mesh = aeNewPolyMesh(xf, "Mesh");
+
+        aeXformData xfd;
+        xfd.translation.x = 0.0f;
+
+        mesh_data.faces = counts_lines.data();
+        mesh_data.face_count = (int)counts_lines.size();
+        mesh_data.indices = indices_lines.data();
+        mesh_data.index_count = (int)indices_lines.size();
+
+        aeMarkFrameBegin(ctx);
+        aeXformWriteSample(xf, &xfd);
+        aePolyMeshWriteSample(mesh, &mesh_data);
+        aeMarkFrameEnd(ctx);
+    }
+    {
+        auto xf = aeNewXform(top, "Points");
+        auto mesh = aeNewPolyMesh(xf, "Mesh");
+
+        aeXformData xfd;
+        xfd.translation.x = 0.8f;
+
+        mesh_data.faces = counts_points.data();
+        mesh_data.face_count = (int)counts_points.size();
+        mesh_data.indices = indices_points.data();
+        mesh_data.index_count = (int)indices_points.size();
+
+        aeMarkFrameBegin(ctx);
+        aeXformWriteSample(xf, &xfd);
+        aePolyMeshWriteSample(mesh, &mesh_data);
+        aeMarkFrameEnd(ctx);
+    }
+    {
+        auto xf = aeNewXform(top, "Mixed");
+        auto mesh = aeNewPolyMesh(xf, "Mesh");
+
+        aeXformData xfd;
+        xfd.translation.z = 0.8f;
+
+        mesh_data.faces = counts_mixed.data();
+        mesh_data.face_count = (int)counts_mixed.size();
+        mesh_data.indices = indices_mixed.data();
+        mesh_data.index_count = (int)indices_mixed.size();
+
+        aeMarkFrameBegin(ctx);
+        aeXformWriteSample(xf, &xfd);
         aePolyMeshWriteSample(mesh, &mesh_data);
         aeMarkFrameEnd(ctx);
     }

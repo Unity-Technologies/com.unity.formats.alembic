@@ -7,9 +7,7 @@ void GenerateCylinderMesh(
     std::vector<float3> &points,
     std::vector<float2> &uv,
     float radius, float height,
-    int cseg, int hseg,
-    bool wave,
-    bool triangulate)
+    int cseg, int hseg)
 {
     const int num_vertices = cseg * hseg;
 
@@ -22,9 +20,6 @@ void GenerateCylinderMesh(
             int i = cseg * ih + ic;
             float ang = ((360.0f / cseg) * ic) * Deg2Rad;
             float r = radius;
-            if (wave) {
-                r = radius * (std::sin(y * 2000.0f * Deg2Rad) * 0.1 + 0.9f);
-            }
 
             float3 pos{ std::cos(ang) * r, y, std::sin(ang) * r };
             float2 t{ float(ic) / float(cseg - 1), float(ih) / float(hseg - 1), };
@@ -35,39 +30,18 @@ void GenerateCylinderMesh(
     }
 
     // topology
-    if (triangulate) {
-        const int num_faces = cseg * (hseg - 1) * 2;
-        const int num_indices = num_faces * 6;
+    const int num_faces = cseg * (hseg - 1);
+    const int num_indices = num_faces * 4;
 
-        counts.resize(num_faces, 3);
-        indices.resize(num_indices);
-        for (int ih = 0; ih < hseg - 1; ++ih) {
-            for (int ic = 0; ic < cseg; ++ic) {
-                auto *dst = &indices[(ih * cseg + ic) * 6];
-                dst[0] = cseg * ih + ic;
-                dst[1] = cseg * (ih + 1) + ic;
-                dst[2] = cseg * (ih + 1) + ((ic + 1) % cseg);
-
-                dst[3] = cseg * ih + ic;
-                dst[4] = cseg * (ih + 1) + ((ic + 1) % cseg);
-                dst[5] = cseg * ih + ((ic + 1) % cseg);
-            }
-        }
-    }
-    else {
-        const int num_faces = cseg * (hseg - 1);
-        const int num_indices = num_faces * 4;
-
-        counts.resize(num_faces, 4);
-        indices.resize(num_indices);
-        for (int ih = 0; ih < hseg - 1; ++ih) {
-            for (int ic = 0; ic < cseg; ++ic) {
-                auto *dst = &indices[(ih * cseg + ic) * 4];
-                dst[0] = cseg * ih + ic;
-                dst[1] = cseg * (ih + 1) + ic;
-                dst[2] = cseg * (ih + 1) + ((ic + 1) % cseg);
-                dst[3] = cseg * ih + ((ic + 1) % cseg);
-            }
+    counts.resize(num_faces, 4);
+    indices.resize(num_indices);
+    for (int ih = 0; ih < hseg - 1; ++ih) {
+        for (int ic = 0; ic < cseg; ++ic) {
+            auto *dst = &indices[(ih * cseg + ic) * 4];
+            dst[0] = cseg * ih + ic;
+            dst[1] = cseg * (ih + 1) + ic;
+            dst[2] = cseg * (ih + 1) + ((ic + 1) % cseg);
+            dst[3] = cseg * ih + ((ic + 1) % cseg);
         }
     }
 }

@@ -56,6 +56,14 @@ enum class aiTopologyVariance
     Heterogenous, // both vertices and topology are variant
 };
 
+enum class aiTopology
+{
+    Points,
+    Lines,
+    Triangles,
+    Quads,
+};
+
 enum class aiPropertyType
 {
     Unknown,
@@ -170,6 +178,7 @@ struct aiSubmeshSummary
     int split_index = 0;
     int submesh_index = 0; // submesh index in split
     int index_count = 0;
+    aiTopology topology = aiTopology::Triangles;
 };
 
 struct aiPolyMeshData

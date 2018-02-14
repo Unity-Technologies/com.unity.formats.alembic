@@ -325,9 +325,16 @@ namespace UTJ.Alembic
                 {
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
-                    split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
+                    if (sum.topology == aiTopology.Triangles)
+                        split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
+                    else if (sum.topology == aiTopology.Lines)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Lines, sum.submeshIndex);
+                    else if (sum.topology == aiTopology.Points)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Points, sum.submeshIndex);
+                    else if (sum.topology == aiTopology.Quads)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Quads, sum.submeshIndex);
                 }
-                }
+            }
         }
 
         Mesh AddMeshComponents(GameObject go)

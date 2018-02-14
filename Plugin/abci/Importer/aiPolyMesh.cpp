@@ -161,6 +161,7 @@ void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
         dst[i].split_index   = src.split_index;
         dst[i].submesh_index = src.submesh_index;
         dst[i].index_count   = src.index_count;
+        dst[i].topology      = (aiTopology)src.topology;
     }
 }
 
