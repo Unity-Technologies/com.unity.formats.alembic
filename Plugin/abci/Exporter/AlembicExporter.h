@@ -36,6 +36,14 @@ enum class aeXFromType
     TRS,
 };
 
+enum class aeTopology
+{
+    Points,
+    Lines,
+    Triangles,
+    Quads,
+};
+
 enum class aePropertyType
 {
     Unknown,
@@ -89,6 +97,13 @@ struct aeXformData
     bool inherits = true;
 };
 
+struct aeSubmeshData
+{
+    const int   *indices = nullptr;
+    int         index_count = 0;
+    aeTopology  topology = aeTopology::Triangles;
+};
+
 struct aePolyMeshData
 {
     bool visibility = true;
@@ -121,6 +136,9 @@ struct aePolyMeshData
     const int   *colors_indices = nullptr;  // can be null. if null, colors_count must be same as point_count or index_count
     int         colors_count = 0;           // if 0, assume same as position_count
     int         colors_index_count = 0;
+
+    const aeSubmeshData *submeshes = nullptr;
+    int submesh_count = 0;
 };
 
 struct aeFaceSetData
@@ -193,11 +211,12 @@ abciAPI int         aeGetNumSamples(aeSchema *obj);
 abciAPI void        aeSetFromPrevious(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
-abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
-abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
-abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
-abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
+abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
+
+abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
+abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
+abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 
 abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type);
 abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);

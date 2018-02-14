@@ -120,25 +120,26 @@ abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
 {
     obj->writeSample(*data);
 }
+abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
+{
+    obj->writeSample(*data);
+}
 abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
 {
     obj->writeSample(*data);
+}
+
+abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
+{
+    return obj->addFaceSet(name);
 }
 abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
     obj->writeSample(*data);
 }
-abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
-{
-    return obj->addFaceSet(name);
-}
 abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data)
 {
     obj->writeFaceSetSample(fsi, *data);
-}
-abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
-{
-    obj->writeSample(*data);
 }
 
 abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type)

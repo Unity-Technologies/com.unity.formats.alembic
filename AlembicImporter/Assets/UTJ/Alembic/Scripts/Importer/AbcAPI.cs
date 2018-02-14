@@ -36,6 +36,7 @@ namespace UTJ.Alembic
         Homogeneous, // vertices are variant, topology is constant
         Heterogeneous, // both vertices and topology are variant
     }
+
     public enum aiTopology
     {
         Points,
@@ -43,7 +44,6 @@ namespace UTJ.Alembic
         Triangles,
         Quads,
     };
-
 
     public enum aiTimeSamplingType
     {

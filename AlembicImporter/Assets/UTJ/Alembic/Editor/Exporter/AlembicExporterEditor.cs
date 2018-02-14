@@ -96,6 +96,7 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshUV0"), new GUIContent("UV 1"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshUV1"), new GUIContent("UV 2"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshColors"), new GUIContent("Vertex Color"));
+                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.meshSubmeshes"), new GUIContent("Submeshes"));
                 EditorGUI.indentLevel--;
             }
             GUILayout.Space(5);

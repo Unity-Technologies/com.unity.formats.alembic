@@ -38,6 +38,7 @@ namespace UTJ.Alembic
         public bool meshUV0 = true;
         public bool meshUV1 = true;
         public bool meshColors = true;
+        public bool meshSubmeshes = true;
 
         public bool detailedLog = true;
         public bool debugLog = false;
@@ -50,40 +51,31 @@ namespace UTJ.Alembic
         public class MeshBuffer
         {
             public bool visibility = true;
-            public PinnedList<int> indices = new PinnedList<int>();
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
             public PinnedList<Vector3> normals = new PinnedList<Vector3>();
             public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
             public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
             public PinnedList<Color> colors = new PinnedList<Color>();
-            public List<PinnedList<int>> facesets = new List<PinnedList<int>>();
-            PinnedList<int> tmpIndices = new PinnedList<int>();
+
+            public PinnedList<aeSubmeshData> submeshData = new PinnedList<aeSubmeshData>();
+            public List<PinnedList<int>> submeshIndices = new List<PinnedList<int>>();
 
             public void Clear()
             {
-                indices.Clear();
                 points.Clear();
                 normals.Clear();
                 uv0.Clear();
                 uv1.Clear();
                 colors.Clear();
-                facesets.Clear();
+
+                submeshData.Clear();
+                submeshIndices.Clear();
             }
 
             public void SetupSubmeshes(aeObject abc, Mesh mesh, Material[] materials)
             {
-                if (mesh.subMeshCount > 1)
-                {
-                    for (int smi = 0; smi < mesh.subMeshCount; ++smi)
-                    {
-                        string name;
-                        if (smi < materials.Length && materials[smi] != null)
-                            name = materials[smi].name;
-                        else
-                            name = string.Format("submesh[{0}]", smi);
-                        abc.AddFaceSet(name);
-                    }
-                }
+                for (int smi = 0; smi < mesh.subMeshCount; ++smi)
+                    abc.AddFaceSet(string.Format("submesh[{0}]", smi));
             }
 
             public void Capture(Mesh mesh,
@@ -117,28 +109,28 @@ namespace UTJ.Alembic
                 else
                     colors.Clear();
 
+
                 int submeshCount = mesh.subMeshCount;
-                if (submeshCount == 1)
+                submeshData.Resize(submeshCount);
+                if (submeshIndices.Count > submeshCount)
+                    submeshIndices.RemoveRange(submeshCount, submeshIndices.Count - submeshCount);
+                while (submeshIndices.Count < submeshCount)
+                    submeshIndices.Add(new PinnedList<int>());
+                for (int smi = 0; smi < submeshCount; ++smi)
                 {
-                    indices.LockList(ls => mesh.GetTriangles(ls, 0));
-                }
-                else
-                {
-                    indices.Assign(mesh.triangles);
+                    var indices = submeshIndices[smi];
+                    indices.LockList(l => { mesh.GetIndices(l, smi); });
 
-                    while (facesets.Count < submeshCount)
-                        facesets.Add(new PinnedList<int>());
-
-                    int offsetTriangle = 0;
-                    for (int smi = 0; smi < submeshCount; ++smi)
-                    {
-                        tmpIndices.LockList(ls => { mesh.GetTriangles(ls, smi); });
-                        int numTriangles = tmpIndices.Count / 3;
-                        facesets[smi].ResizeDiscard(numTriangles);
-                        for (int ti = 0; ti < numTriangles; ++ti)
-                            facesets[smi][ti] = ti + offsetTriangle;
-                        offsetTriangle += numTriangles;
+                    aeSubmeshData smd;
+                    switch (mesh.GetTopology(smi)) {
+                        case MeshTopology.Triangles: smd.topology = aeTopology.Triangles; break;
+                        case MeshTopology.Lines: smd.topology = aeTopology.Lines; break;
+                        case MeshTopology.Quads: smd.topology = aeTopology.Quads; break;
+                        default: smd.topology = aeTopology.Points; break;
                     }
+                    smd.indices = indices;
+                    smd.indexCount = indices.Count;
+                    submeshData[smi] = smd;
                 }
             }
 
@@ -150,26 +142,17 @@ namespace UTJ.Alembic
 
             public void WriteSample(aeObject abc)
             {
-                {
-                    var data = default(aePolyMeshData);
-                    data.visibility = visibility;
-                    data.indices = indices;
-                    data.indexCount = indices.Count;
-                    data.points = points;
-                    data.pointCount = points.Count;
-                    data.normals = normals;
-                    data.uv0 = uv0;
-                    data.uv1 = uv1;
-                    data.colors = colors;
-                    abc.WriteSample(ref data);
-                }
-                for (int fsi = 0; fsi < facesets.Count; ++fsi)
-                {
-                    var data = default(aeFaceSetData);
-                    data.faces = facesets[fsi];
-                    data.faceCount = facesets[fsi].Count;
-                    abc.WriteFaceSetSample(fsi, ref data);
-                }
+                var data = default(aePolyMeshData);
+                data.visibility = visibility;
+                data.points = points;
+                data.pointCount = points.Count;
+                data.normals = normals;
+                data.uv0 = uv0;
+                data.uv1 = uv1;
+                data.colors = colors;
+                data.submeshes = submeshData;
+                data.submeshCount = submeshData.Count;
+                abc.WriteSample(ref data);
             }
         }
 
@@ -417,7 +400,8 @@ namespace UTJ.Alembic
 
                 m_abc = parent.abcObject.NewPolyMesh(target.name);
                 m_mbuf = new MeshBuffer();
-                m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
+                if (exp.settings.meshSubmeshes)
+                    m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
             }
 
             public override void Capture()
@@ -460,7 +444,8 @@ namespace UTJ.Alembic
 
                 m_abc = parent.abcObject.NewPolyMesh(target.name);
                 m_mbuf = new MeshBuffer();
-                m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
+                if (exp.settings.meshSubmeshes)
+                    m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
 
                 m_meshSrc = target.sharedMesh;
                 m_cloth = m_target.GetComponent<Cloth>();

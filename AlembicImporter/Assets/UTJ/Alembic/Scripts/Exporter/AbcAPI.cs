@@ -23,6 +23,14 @@ namespace UTJ.Alembic
         TRS,
     };
 
+    public enum aeTopology
+    {
+        Points,
+        Lines,
+        Triangles,
+        Quads,
+    };
+
     public enum aePropertyType
     {
         Unknown,
@@ -103,6 +111,14 @@ namespace UTJ.Alembic
         public int count;
     }
 
+
+    public struct aeSubmeshData
+    {
+        public IntPtr     indices;
+        public int        indexCount;
+        public aeTopology topology;
+    };
+
     public struct aePolyMeshData
     {
         public Bool visibility;
@@ -135,6 +151,9 @@ namespace UTJ.Alembic
         public IntPtr   colorIndices;     // int*. if null, assume same as indices
         public int      colorCount;       // if 0, assume same as positionCount
         public int      colorIndexCount;  // if 0, assume same as indexCount
+
+        public IntPtr   submeshes;        // aeSubmeshData*
+        public int      submeshCount;
     }
 
     public struct aeFaceSetData
@@ -218,7 +237,6 @@ namespace UTJ.Alembic
 
         public void WriteSample(ref aePolyMeshData data) { aePolyMeshWriteSample(self, ref data); }
         public void AddFaceSet(string name) { aePolyMeshAddFaceSet(self, name); }
-        public void WriteFaceSetSample(int fsi, ref aeFaceSetData data) { aePolyMeshWriteFaceSetSample(self, fsi, ref data); }
 
         public void WriteSample(ref aePointsData data) { aePointsWriteSample(self, ref data); }
 
@@ -233,7 +251,6 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
         [DllImport("abci")] static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
         [DllImport("abci")] static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
-        [DllImport("abci")] static extern void aePolyMeshWriteFaceSetSample(IntPtr self, int fsi, ref aeFaceSetData data);
         [DllImport("abci")] static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
         [DllImport("abci")] static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
         #endregion
