@@ -39,8 +39,8 @@ private:
     };
 
     AbcGeom::OPolyMeshSchema m_schema;
-    std::unique_ptr<AbcGeom::OV2fGeomParam> m_uv1_param;
-    std::unique_ptr<AbcGeom::OC4fGeomParam> m_colors_param;
+    AbcGeom::OV2fGeomParam m_uv1_param;
+    AbcGeom::OC4fGeomParam m_colors_param;
     std::vector<aeFaceSetPtr> m_facesets;
 
     bool m_buf_visibility = true;

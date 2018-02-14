@@ -216,10 +216,10 @@ void aePolyMesh::writeSampleBody()
     m_schema.set(sample);
 
     if (!m_buf_uv1.empty()) {
-        if (!m_uv1_param) {
+        if (!m_uv1_param.valid()) {
             bool indexed = !m_buf_uv1_indices.empty() || m_buf_uv1.size() == m_buf_points.size();
-            m_uv1_param.reset(new AbcGeom::OV2fGeomParam(
-                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+            m_uv1_param = AbcGeom::OV2fGeomParam(
+                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OV2fGeomParam::Sample sp;
@@ -228,14 +228,14 @@ void aePolyMesh::writeSampleBody()
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv1_indices.data(), m_buf_uv1_indices.size()));
         else if (m_buf_uv1.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        m_uv1_param->set(sp);
+        m_uv1_param.set(sp);
     }
 
     if (!m_buf_colors.empty()) {
-        if (!m_colors_param) {
+        if (!m_colors_param.valid()) {
             bool indexed = !m_buf_colors_indices.empty() || m_buf_colors.size() == m_buf_points.size();
-            m_colors_param.reset(new AbcGeom::OC4fGeomParam(
-                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+            m_colors_param = AbcGeom::OC4fGeomParam(
+                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OC4fGeomParam::Sample sp;
@@ -244,6 +244,6 @@ void aePolyMesh::writeSampleBody()
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_colors_indices.data(), m_buf_colors_indices.size()));
         else if (m_buf_colors.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        m_colors_param->set(sp);
+        m_colors_param.set(sp);
     }
 }

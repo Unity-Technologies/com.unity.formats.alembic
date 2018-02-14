@@ -262,13 +262,16 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
         // add triangles submeshes
         for (int fi = 0; fi < split.face_count; ++fi) {
-            int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
-            while (mid >= (int)tmp_submeshes.size()) {
-                int id = (int)tmp_submeshes.size();
-                tmp_submeshes.push_back({});
-                tmp_submeshes.back().material_id = id - 1;
+            int count = counts[offset_faces + fi];
+            if (count >= 3) {
+                int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
+                while (mid >= (int)tmp_submeshes.size()) {
+                    int id = (int)tmp_submeshes.size();
+                    tmp_submeshes.push_back({});
+                    tmp_submeshes.back().material_id = id - 1;
+                }
+                tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
             }
-            tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
         }
 
         for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
@@ -297,9 +300,6 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
             }
         }
 
-        offset_faces += split.face_count;
-        tmp_submeshes.clear();
-
 
         // lines
         if (split.index_count_lines > 0) {
@@ -324,6 +324,9 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
             submeshes.push_back(sm);
             ++split.submesh_count;
         }
+
+        offset_faces += split.face_count;
+        tmp_submeshes.clear();
     }
     setupSubmeshes();
 }

@@ -296,7 +296,9 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
         auto child = getAbcObject().getChild(i);
         if (child.valid() && AbcGeom::IFaceSetSchema::matches(child.getMetaData())) {
             auto so = Abc::ISchemaObject<AbcGeom::IFaceSetSchema>(child, Abc::kWrapExisting);
-            m_facesets.push_back(so.getSchema());
+            auto& fs = so.getSchema();
+            if (fs.valid() && fs.getNumSamples() > 0)
+                m_facesets.push_back(fs);
         }
     }
 
@@ -469,9 +471,7 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     if (!m_facesets.empty() && topology_changed) {
         topology.m_faceset_sps.resize(m_facesets.size());
         for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
-            if (m_facesets[fi].getNumSamples() > 0) {
-                m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
-            }
+            m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
         }
     }
 
