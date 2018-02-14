@@ -469,7 +469,9 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     if (!m_facesets.empty() && topology_changed) {
         topology.m_faceset_sps.resize(m_facesets.size());
         for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
-            m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
+            if (m_facesets[fi].getNumSamples() > 0) {
+                m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
+            }
         }
     }
 
@@ -831,10 +833,13 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         // use face set index as material id
         topology.m_material_ids.resize(refiner.counts.size(), -1);
         for (size_t fsi = 0; fsi < topology.m_faceset_sps.size(); ++fsi) {
-            auto& faces = *topology.m_faceset_sps[fsi].getFaces();
-            size_t num_faces = faces.size();
-            for (size_t fi = 0; fi < num_faces; ++fi) {
-                topology.m_material_ids[faces[fi]] = (int)fsi;
+            auto& fsp = topology.m_faceset_sps[fsi];
+            if (fsp.valid()) {
+                auto& faces = *fsp.getFaces();
+                size_t num_faces = faces.size();
+                for (size_t fi = 0; fi < num_faces; ++fi) {
+                    topology.m_material_ids[faces[fi]] = (int)fsi;
+                }
             }
         }
         refiner.genSubmeshes(topology.m_material_ids);

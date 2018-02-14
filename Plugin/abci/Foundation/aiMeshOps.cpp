@@ -167,9 +167,9 @@ int MeshRefiner::getPointsIndexCountTotal() const
 
 void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
 {
-    new_indices_tri.resize(getTrianglesIndexCountTotal());
-    new_indices_lines.resize(getLinesIndexCountTotal());
-    new_indices_points.resize(getPointsIndexCountTotal());
+    new_indices_tri.resize_discard(getTrianglesIndexCountTotal());
+    new_indices_lines.resize_discard(getLinesIndexCountTotal());
+    new_indices_points.resize_discard(getPointsIndexCountTotal());
 
     auto& src = new_indices;
     auto dst_tri = new_indices_tri.data();
@@ -246,7 +246,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     }
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
+    new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
     const int *src_tri = new_indices_tri.data();
     const int *src_lines = new_indices_lines.data();
     const int *src_points = new_indices_points.data();
@@ -332,7 +332,7 @@ void MeshRefiner::genSubmeshes()
 {
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
+    new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
     const int *src_tri = new_indices_tri.data();
     const int *src_lines = new_indices_lines.data();
     const int *src_points = new_indices_points.data();
@@ -416,6 +416,8 @@ void MeshRefiner::clear()
 
     new_indices.clear();
     new_indices_tri.clear();
+    new_indices_lines.clear();
+    new_indices_points.clear();
     new_indices_submeshes.clear();
 
     new_points.clear();
