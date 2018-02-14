@@ -140,19 +140,47 @@ const RawVector<int>& MeshWelder::getRemapTable() const
 }
 
 
+int MeshRefiner::getTrianglesIndexCountTotal() const
+{
+    int ret = 0;
+    for (auto& sp : splits)
+        ret += sp.index_count_tri;
+    return ret;
+}
+
+int MeshRefiner::getLinesIndexCountTotal() const
+{
+    int ret = 0;
+    for (auto& sp : splits)
+        ret += sp.index_count_lines;
+    return ret;
+}
+
+int MeshRefiner::getPointsIndexCountTotal() const
+{
+    int ret = 0;
+    for (auto& sp : splits)
+        ret += sp.index_count_points;
+    return ret;
+}
+
 
 void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
 {
+    new_indices_tri.resize(getTrianglesIndexCountTotal());
+    new_indices_lines.resize(getLinesIndexCountTotal());
+    new_indices_points.resize(getPointsIndexCountTotal());
+
     auto& src = new_indices;
-    auto& dst = new_indices_retopo;
-    dst.resize(num_indices_retopo);
+    auto dst_tri = new_indices_tri.data();
+    auto dst_lines = new_indices_lines.data();
+    auto dst_points = new_indices_points.data();
 
     const int i1 = swap_faces ? 2 : 1;
     const int i2 = swap_faces ? 1 : 2;
     size_t num_faces = counts.size();
 
     int n = 0;
-    int i = 0;
     if (turn_quads) {
         for (size_t fi = 0; fi < num_faces; ++fi) {
             int count = counts[fi];
@@ -165,32 +193,27 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
                         src[n + 2],
                     };
                     for (int ni = 0; ni < count - 2; ++ni) {
-                        dst[i + 0] = quad[0];
-                        dst[i + 1] = quad[ni + i1];
-                        dst[i + 2] = quad[ni + i2];
-                        i += 3;
+                        *(dst_tri++) = quad[0];
+                        *(dst_tri++) = quad[ni + i1];
+                        *(dst_tri++) = quad[ni + i2];
                     }
-                    n += count;
                 }
                 else {
                     for (int ni = 0; ni < count - 2; ++ni) {
-                        dst[i + 0] = src[n + 0];
-                        dst[i + 1] = src[n + ni + i1];
-                        dst[i + 2] = src[n + ni + i2];
-                        i += 3;
+                        *(dst_tri++) = src[n + 0];
+                        *(dst_tri++) = src[n + ni + i1];
+                        *(dst_tri++) = src[n + ni + i2];
                     }
-                    n += count;
                 }
             }
             else if (count == 2) {
-                dst[i + 0] = src[n + 0];
-                dst[i + 1] = src[n + 1];
-                i += 2;
+                for (int ni = 0; ni < 2; ++ni)
+                    *(dst_lines++) = src[n + ni];
             }
             else if (count == 1) {
-                dst[i] = src[n];
-                i += 1;
+                *(dst_points++) = src[n];
             }
+            n += count;
         }
     }
     else {
@@ -198,20 +221,17 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
             int count = counts[fi];
             if (count >= 3) {
                 for (int ni = 0; ni < count - 2; ++ni) {
-                    dst[i + 0] = src[n + 0];
-                    dst[i + 1] = src[n + ni + i1];
-                    dst[i + 2] = src[n + ni + i2];
-                    i += 3;
+                    *(dst_tri++) = src[n + 0];
+                    *(dst_tri++) = src[n + ni + i1];
+                    *(dst_tri++) = src[n + ni + i2];
                 }
             }
             else if (count == 2) {
-                dst[i + 0] = src[n + 0];
-                dst[i + 1] = src[n + 1];
-                i += 2;
+                for (int ni = 0; ni < 2; ++ni)
+                    *(dst_lines++) = src[n + ni];
             }
             else if (count == 1) {
-                dst[i] = src[n];
-                i += 1;
+                *(dst_points++) = src[n];
             }
             n += count;
         }
@@ -226,8 +246,10 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     }
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_retopo.size());
-    const int *indices_read = new_indices_retopo.data();
+    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
+    const int *src_tri = new_indices_tri.data();
+    const int *src_lines = new_indices_lines.data();
+    const int *src_points = new_indices_points.data();
     int *dst_indices = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
@@ -238,7 +260,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
         auto& split = splits[spi];
         int offset_vertices = split.vertex_offset;
 
-        // count triangle indices
+        // add triangles submeshes
         for (int fi = 0; fi < split.face_count; ++fi) {
             int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
             while (mid >= (int)tmp_submeshes.size()) {
@@ -247,16 +269,6 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                 tmp_submeshes.back().material_id = id - 1;
             }
             tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
-        }
-        if (split.index_count_lines > 0) {
-            tmp_submeshes.push_back({});
-            tmp_submeshes.back().topology = Topology::Lines;
-            tmp_submeshes.back().index_count = split.index_count_lines;
-        }
-        if (split.index_count_points > 0) {
-            tmp_submeshes.push_back({});
-            tmp_submeshes.back().topology = Topology::Points;
-            tmp_submeshes.back().index_count = split.index_count_points;
         }
 
         for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
@@ -272,15 +284,8 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
             if (count >= 3) {
                 int mid = material_ids[offset_faces + fi] + 1;
                 int nidx = (count - 2) * 3;
-                for (int i = 0; i < nidx; ++i) {
-                    *(tmp_submeshes[mid].dst_indices++) = *(indices_read++) - offset_vertices;
-                }
-            }
-            else if (count == 2) {
-
-            }
-            else if (count == 1) {
-
+                for (int i = 0; i < nidx; ++i)
+                    *(tmp_submeshes[mid].dst_indices++) = *(src_tri++) - offset_vertices;
             }
         }
 
@@ -294,6 +299,31 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
         offset_faces += split.face_count;
         tmp_submeshes.clear();
+
+
+        // lines
+        if (split.index_count_lines > 0) {
+            Submesh sm;
+            sm.topology = Topology::Lines;
+            sm.index_count = split.index_count_lines;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
+            for (int ii = 0; ii < sm.index_count; ++ii)
+                *(dst_indices++) = *(src_lines++) - offset_vertices;
+            submeshes.push_back(sm);
+            ++split.submesh_count;
+        }
+
+        // points
+        if (split.index_count_points > 0) {
+            Submesh sm;
+            sm.topology = Topology::Points;
+            sm.index_count = split.index_count_points;
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
+            for (int ii = 0; ii < sm.index_count; ++ii)
+                *(dst_indices++) = *(src_points++) - offset_vertices;
+            submeshes.push_back(sm);
+            ++split.submesh_count;
+        }
     }
     setupSubmeshes();
 }
@@ -302,41 +332,48 @@ void MeshRefiner::genSubmeshes()
 {
     submeshes.clear();
 
-    new_indices_submeshes.resize(new_indices_retopo.size());
-    const int *indices_read = new_indices_retopo.data();
-    int *indices_write = new_indices_submeshes.data();
+    new_indices_submeshes.resize(new_indices_tri.size());
+    const int *src_tri = new_indices_tri.data();
+    const int *src_lines = new_indices_lines.data();
+    const int *src_points = new_indices_points.data();
+    int *dst_indices = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
     for (int spi = 0; spi < num_splits; ++spi) {
         auto& split = splits[spi];
         int offset_vertices = split.vertex_offset;
 
+        // triangles
         if (split.index_count_tri > 0) {
             Submesh sm;
             sm.index_count = split.index_count_tri;
-            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
             for (int ii = 0; ii < sm.index_count; ++ii)
-                *(indices_write++) = *(indices_read++) - offset_vertices;
+                *(dst_indices++) = *(src_tri++) - offset_vertices;
             submeshes.push_back(sm);
             ++split.submesh_count;
         }
+
+        // lines
         if (split.index_count_lines > 0) {
             Submesh sm;
             sm.topology = Topology::Lines;
             sm.index_count = split.index_count_lines;
-            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
             for (int ii = 0; ii < sm.index_count; ++ii)
-                *(indices_write++) = *(indices_read++) - offset_vertices;
+                *(dst_indices++) = *(src_lines++) - offset_vertices;
             submeshes.push_back(sm);
             ++split.submesh_count;
         }
+
+        // points
         if (split.index_count_points > 0) {
             Submesh sm;
             sm.topology = Topology::Points;
             sm.index_count = split.index_count_points;
-            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), indices_write);
+            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
             for (int ii = 0; ii < sm.index_count; ++ii)
-                *(indices_write++) = *(indices_read++) - offset_vertices;
+                *(dst_indices++) = *(src_points++) - offset_vertices;
             submeshes.push_back(sm);
             ++split.submesh_count;
         }
@@ -378,15 +415,13 @@ void MeshRefiner::clear()
     new2old_points.clear();
 
     new_indices.clear();
-    new_indices_retopo.clear();
+    new_indices_tri.clear();
     new_indices_submeshes.clear();
 
     new_points.clear();
     splits.clear();
     submeshes.clear();
     connection.clear();
-
-    num_indices_retopo = 0;
 }
 
 void MeshRefiner::refine()
@@ -418,6 +453,8 @@ void MeshRefiner::refine()
         split.vertex_offset = offset_vertices;
         split.face_count = num_faces;
         split.index_count_tri = num_indices_tri;
+        split.index_count_lines = num_indices_lines;
+        split.index_count_points = num_indices_points;
         split.vertex_count = (int)new_points.size() - offset_vertices;
         split.index_count = (int)new_indices.size() - offset_indices;
         splits.push_back(split);
@@ -425,10 +462,6 @@ void MeshRefiner::refine()
         offset_faces += split.face_count;
         offset_indices += split.index_count;
         offset_vertices += split.vertex_count;
-
-        num_indices_retopo += num_indices_tri;
-        num_indices_retopo += num_indices_lines;
-        num_indices_retopo += num_indices_points;
 
         num_faces = 0;
         num_indices_tri = 0;

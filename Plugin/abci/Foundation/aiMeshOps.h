@@ -114,14 +114,15 @@ struct MeshRefiner
     // outputs
     RawVector<int> old2new_indices; // old index to new index
     RawVector<int> new2old_points;  // new index to old vertex
-    RawVector<int> new_indices;
-    RawVector<int> new_indices_retopo;
+    RawVector<int> new_indices;     // non-triangulated new indices
+    RawVector<int> new_indices_tri;
+    RawVector<int> new_indices_lines;
+    RawVector<int> new_indices_points;
     RawVector<int> new_indices_submeshes;
     RawVector<float3> new_points;
     RawVector<Split> splits;
     RawVector<Submesh> submeshes;
     MeshConnectionInfo connection;
-    int num_indices_retopo = 0;
 
     // attributes
     template<class T>
@@ -148,6 +149,10 @@ struct MeshRefiner
     void genSubmeshes(IArray<int> material_ids);
     void genSubmeshes();
     void clear();
+
+    int getTrianglesIndexCountTotal() const;
+    int getLinesIndexCountTotal() const;
+    int getPointsIndexCountTotal() const;
 
 private:
     void setupSubmeshes();

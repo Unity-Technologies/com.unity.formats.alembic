@@ -678,7 +678,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (sample.m_points_ref.empty()) {
             DebugError("something is wrong!!");
         }
-        const auto &indices = topology.m_refiner.new_indices_retopo;
+        const auto &indices = topology.m_refiner.new_indices_tri;
         sample.m_normals.resize_discard(sample.m_points_ref.size());
         GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
             (int)sample.m_points_ref.size(), (int)indices.size() / 3);
@@ -693,7 +693,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
             DebugError("something is wrong!!");
         }
-        const auto &indices = topology.m_refiner.new_indices_retopo;
+        const auto &indices = topology.m_refiner.new_indices_tri;
         sample.m_tangents.resize_discard(sample.m_points_ref.size());
         GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
             indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
@@ -843,7 +843,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         refiner.genSubmeshes();
     }
 
-    topology.m_index_count = (int)refiner.new_indices_retopo.size();
+    topology.m_index_count = (int)refiner.new_indices_tri.size();
     topology.m_vertex_count = (int)refiner.new_points.size();
     onTopologyDetermined();
 
@@ -875,13 +875,13 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
 
     if (summary.constant_normals && summary.compute_normals) {
-        const auto &indices = topology.m_refiner.new_indices_retopo;
+        const auto &indices = topology.m_refiner.new_indices_tri;
         m_constant_normals.resize_discard(m_constant_points.size());
         GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents) {
-        const auto &indices = topology.m_refiner.new_indices_retopo;
+        const auto &indices = topology.m_refiner.new_indices_tri;
         m_constant_tangents.resize_discard(m_constant_points.size());
         GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
             indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
