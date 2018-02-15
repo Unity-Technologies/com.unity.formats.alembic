@@ -2,15 +2,16 @@
 
 #include <cstdint>
 
-class   aiContext;
-class   aiObject;
+class aiContext;
+class aiTimeSampling;
+class aiObject;
 #ifdef abciImpl
-    class aiSchema;
+    class aiSchema;         // : aiObject
     class aiSample;
-    class aiXformSample;    // : aiSampleBase
-    class aiCameraSample;   // : aiSampleBase
-    class aiPolyMeshSample; // : aiSampleBase
-    class aiPointsSample;   // : aiSampleBase
+    class aiXformSample;    // : aiSample
+    class aiCameraSample;   // : aiSample
+    class aiPolyMeshSample; // : aiSample
+    class aiPointsSample;   // : aiSample
 #else
     // force make castable
     using aiSchema         = void;
@@ -21,11 +22,11 @@ class   aiObject;
     using aiPointsSample   = void;
 #endif
 
-class   aiXform;    // : aiSchemaBase
-class   aiCamera;   // : aiSchemaBase
-class   aiPolyMesh; // : aiSchemaBase
-class   aiPoints;   // : aiSchemaBase
-class   aiProperty;
+class aiXform;    // : aiSchema
+class aiCamera;   // : aiSchema
+class aiPolyMesh; // : aiSchema
+class aiPoints;   // : aiSchema
+class aiProperty;
 
 enum class aiNormalsMode
 {
@@ -264,6 +265,10 @@ abciAPI int             aiContextGetTimeRangeCount(aiContext* ctx);
 abciAPI void            aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
 abciAPI aiObject*       aiContextGetTopObject(aiContext* ctx);
 abciAPI void            aiContextUpdateSamples(aiContext* ctx, double time);
+
+abciAPI int             aiTimeSamplingGetSampleCount(aiTimeSampling *self);
+abciAPI double          aiTimeSamplingGetTime(aiTimeSampling *self, int index);
+abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end);
 
 abciAPI const char*     aiObjectGetName(aiObject* obj);
 abciAPI int             aiObjectGetNumChildren(aiObject* obj);

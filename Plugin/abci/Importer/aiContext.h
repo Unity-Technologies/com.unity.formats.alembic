@@ -26,6 +26,7 @@ using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 
 class aiObject;
 class aiAsync;
+class aiTimeSampling;
 
 
 class aiContextManager

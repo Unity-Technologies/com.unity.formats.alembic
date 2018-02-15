@@ -300,6 +300,21 @@ namespace UTJ.Alembic
         #endregion
     }
 
+    public struct aiTimeSampling
+    {
+        public IntPtr self;
+
+        public int sampleCount { get { return aiTimeSamplingGetSampleCount(self); } }
+        public double GetTime(int index) { return aiTimeSamplingGetTime(self, index); }
+        public void GetRange(ref double start, ref double end) { aiTimeSamplingGetRange(self, ref start, ref end); }
+
+        #region internal
+        [DllImport("abci")] static extern int aiTimeSamplingGetSampleCount(IntPtr self);
+        [DllImport("abci")] static extern double aiTimeSamplingGetTime(IntPtr self, int index);
+        [DllImport("abci")] static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
+        #endregion
+    }
+
     public struct aiObject
     {
         public IntPtr self;

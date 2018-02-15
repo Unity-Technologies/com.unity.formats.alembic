@@ -123,7 +123,7 @@ void aePolyMesh::writeSampleBody()
     // process submesh data if present
     {
         int offset_faces = 0;
-        for (int smi = 0; smi < m_buf_submeshes.size(); ++smi) {
+        for (size_t smi = 0; smi < m_buf_submeshes.size(); ++smi) {
             auto& sm = m_buf_submeshes[smi];
             m_buf_indices.insert(m_buf_indices.end(), sm.indices.begin(), sm.indices.end());
 

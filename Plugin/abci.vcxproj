@@ -38,6 +38,7 @@
     <ClCompile Include="abci\Importer\aiPolyMesh.cpp" />
     <ClCompile Include="abci\Importer\aiProperty.cpp" />
     <ClCompile Include="abci\Importer\aiSchema.cpp" />
+    <ClCompile Include="abci\Importer\aiTimeSampling.cpp" />
     <ClCompile Include="abci\Importer\aiXForm.cpp" />
     <ClCompile Include="abci\Importer\AlembicImporter.cpp" />
     <ClCompile Include="abci\pch.cpp">
@@ -73,6 +74,7 @@
     <ClInclude Include="abci\Importer\aiPolyMesh.h" />
     <ClInclude Include="abci\Importer\aiProperty.h" />
     <ClInclude Include="abci\Importer\aiSchema.h" />
+    <ClInclude Include="abci\Importer\aiTimeSampling.h" />
     <ClInclude Include="abci\Importer\aiXForm.h" />
     <ClInclude Include="abci\Importer\AlembicImporter.h" />
     <ClInclude Include="abci\pch.h" />
