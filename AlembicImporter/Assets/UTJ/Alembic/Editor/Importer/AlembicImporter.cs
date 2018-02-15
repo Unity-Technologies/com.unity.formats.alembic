@@ -123,9 +123,9 @@ namespace UTJ.Alembic
             {
                 abcStream.AbcLoad(true);
 
-                var tr = abcStream.abcTimeRange;
-                streamDescriptor.abcStartTime = abcStartTime = startTime = tr.startTime;
-                streamDescriptor.abcEndTime = abcEndTime = endTime = tr.endTime;
+                abcStream.GetTimeRange(ref startTime, ref endTime);
+                streamDescriptor.abcStartTime = abcStartTime = startTime;
+                streamDescriptor.abcEndTime = abcEndTime = endTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.streamDescriptor = streamDescriptor;
@@ -214,28 +214,44 @@ namespace UTJ.Alembic
             }
         }
 
-        private void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
+        void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
             if (streamDescr.duration > 0)
             {
-                var frames = new Keyframe[2];
-                frames[0].value = 0.0f;
-                frames[0].time = 0.0f;
-                frames[0].outTangent = 1.0f;
-                frames[1].value = (float)streamDescr.duration;
-                frames[1].time = (float)streamDescr.duration;
-                frames[1].inTangent = 1.0f;
+                // AnimationClip for time
+                {
+                    var frames = new Keyframe[2];
+                    frames[0].value = 0.0f;
+                    frames[0].time = 0.0f;
+                    frames[0].outTangent = 1.0f;
+                    frames[1].value = (float)streamDescr.duration;
+                    frames[1].time = (float)streamDescr.duration;
+                    frames[1].inTangent = 1.0f;
 
-                var curve = new AnimationCurve(frames);
-                AnimationUtility.SetKeyLeftTangentMode(curve, 0, AnimationUtility.TangentMode.Linear);
-                AnimationUtility.SetKeyRightTangentMode(curve, 1, AnimationUtility.TangentMode.Linear);
+                    var curve = new AnimationCurve(frames);
+                    AnimationUtility.SetKeyLeftTangentMode(curve, 0, AnimationUtility.TangentMode.Linear);
+                    AnimationUtility.SetKeyRightTangentMode(curve, 1, AnimationUtility.TangentMode.Linear);
 
-                var animationClip = new AnimationClip();
-                animationClip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
-                animationClip.name = root.gameObject.name + "_Clip";
-                animationClip.hideFlags = HideFlags.NotEditable;
+                    var clip = new AnimationClip();
+                    clip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
+                    clip.name = root.gameObject.name + "_Clip";
+                    clip.hideFlags = HideFlags.NotEditable;
 
-                subassets.Add("Default Animation", animationClip);
+                    subassets.Add("Default Animation", clip);
+                }
+
+                // AnimationClip for frame events
+                {
+                    var abc = root.stream.abcContext;
+                    var n = abc.timeSamplingCount;
+                    for (int i = 1; i < n; ++i)
+                    {
+                        var clip = new AnimationClip();
+                        AddFrameEvents(clip, abc.GetTimeSampling(i));
+                        clip.name = root.gameObject.name + "_Timeline" + i + "_Frames";
+                        subassets.Add("Timeline" + i + "_Frames", clip);
+                    }
+                }
             }
             varyingTopologyMeshNames = new List<string>();
             splittingMeshNames = new List<string>();
@@ -245,7 +261,7 @@ namespace UTJ.Alembic
             streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
         }
 
-        private void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
+        void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
             var mesh = node.GetAlembicObj<AlembicMesh>();
             if (mesh != null)
@@ -289,6 +305,21 @@ namespace UTJ.Alembic
 
             foreach ( var child in node.children)
                 CollectSubAssets(subassets, child);
+        }
+
+        void AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
+        {
+            int n = ts.sampleCount;
+            var events = new AnimationEvent[n];
+            for (int i = 0; i < n; ++i)
+            {
+                var ev = new AnimationEvent();
+                ev.time = (float)ts.GetTime(i);
+                ev.intParameter = i;
+                ev.functionName = "AbcOnFrameChange";
+                events[i] = ev;
+            }
+            AnimationUtility.SetAnimationEvents(clip, events);
         }
     }
 }

@@ -1,3 +1,4 @@
+#pragma once
 
 class aiTimeSampling
 {
@@ -7,5 +8,6 @@ public:
     virtual size_t getSampleCount() const = 0;
     virtual double getTime(uint64_t sample_index) const = 0;
 };
+using aiTimeSamplingPtr = std::shared_ptr<aiTimeSampling>;
 
 aiTimeSampling* aiCreateTimeSampling(Abc::IArchive& archive, int index);

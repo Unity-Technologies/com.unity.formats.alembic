@@ -50,7 +50,6 @@ namespace UTJ.Alembic
         Uniform,
         Cyclic,
         Acyclic,
-        Mixed,
     };
 
     public enum aiPropertyType
@@ -253,14 +252,6 @@ namespace UTJ.Alembic
         aiPropertyType type;
     }
 
-    public struct aiTimeRange
-    {
-        public aiTimeSamplingType type;
-        public int frameCount;
-        public double startTime;
-        public double endTime;
-    };
-
 
     public struct aiContext
     {
@@ -276,16 +267,9 @@ namespace UTJ.Alembic
         public void UpdateSamples(double time) { aiContextUpdateSamples(self, time); }
 
         public aiObject topObject { get { return aiContextGetTopObject(self); } }
-        public aiTimeRange timeRage {
-            get { var ret = default(aiTimeRange); aiContextGetTimeRange(self, -1, ref ret); return ret; }
-        }
-        public int timeRangeCount { get { return aiContextGetTimeRangeCount(self); } }
-        public aiTimeRange GetTimeRange(int i)
-        {
-            var ret = default(aiTimeRange);
-            aiContextGetTimeRange(self, i, ref ret);
-            return ret;
-        }
+        public int timeSamplingCount { get { return aiContextGetTimeSamplingCount(self); } }
+        public aiTimeSampling GetTimeSampling(int i) { return aiContextGetTimeSampling(self, i); }
+        public void GetTimeRange(ref double begin, ref double end) { aiContextGetTimeRange(self, ref begin, ref end); }
 
         #region internal
         [DllImport("abci")] public static extern void aiClearContextsWithPath(string path);
@@ -293,8 +277,9 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport("abci")] static extern Bool aiContextLoad(IntPtr ctx, string path);
         [DllImport("abci")] static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
-        [DllImport("abci")] static extern int aiContextGetTimeRangeCount(IntPtr ctx);
-        [DllImport("abci")] static extern void aiContextGetTimeRange(IntPtr ctx, int i, ref aiTimeRange dst);
+        [DllImport("abci")] static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
+        [DllImport("abci")] static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
+        [DllImport("abci")] static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
         [DllImport("abci")] static extern aiObject aiContextGetTopObject(IntPtr ctx);
         [DllImport("abci")] static extern void aiContextUpdateSamples(IntPtr ctx, double time);
         #endregion

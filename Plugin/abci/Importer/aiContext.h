@@ -26,7 +26,8 @@ using abcFloat4x4ArrayProperty = Abc::IM44fArrayProperty;
 
 class aiObject;
 class aiAsync;
-class aiTimeSampling;
+
+#include "aiTimeSampling.h"
 
 
 class aiContextManager
@@ -66,8 +67,9 @@ public:
     const std::string& getPath() const;
     int getUid() const;
 
-    int getTimeRangeCount() const;
-    void getTimeRange(int tsi, aiTimeRange& dst) const;
+    int getTimeSamplingCount() const;
+    aiTimeSampling* getTimeSampling(int i);
+    void getTimeRange(double& begin, double& end) const;
 
     int getTimeSamplingCount();
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
@@ -85,8 +87,7 @@ private:
     std::string m_path;
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
-    aiTimeRange m_time_range_unified;
-    std::vector<aiTimeRange> m_time_ranges;
+    std::vector<aiTimeSamplingPtr> m_timesamplings;
     int m_uid = 0;
     aiConfig m_config;
 

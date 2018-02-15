@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "aiInternal.h"
-#include "aiTimeSampling.h"
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
@@ -52,17 +51,20 @@ abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
         ctx->setConfig(*conf);
 }
 
-abciAPI int aiContextGetTimeRangeCount(aiContext* ctx)
+abciAPI int aiContextGetTimeSamplingCount(aiContext* ctx)
 {
-    if (ctx)
-        return ctx->getTimeSamplingCount();
-    return 0;
+    return ctx ? ctx->getTimeSamplingCount() : 0;
 }
 
-abciAPI void aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst)
+abciAPI aiTimeSampling * aiContextGetTimeSampling(aiContext * ctx, int i)
 {
-    if(ctx && dst)
-        ctx->getTimeRange(i, *dst);
+    return ctx ? ctx->getTimeSampling(i) : nullptr;
+}
+
+abciAPI void aiContextGetTimeRange(aiContext* ctx, double *begin, double *end)
+{
+    if(ctx && begin && end)
+        ctx->getTimeRange(*begin, *end);
 }
 
 abciAPI aiObject* aiContextGetTopObject(aiContext* ctx)

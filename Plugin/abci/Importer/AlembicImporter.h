@@ -47,7 +47,6 @@ enum class aiTimeSamplingType
     Uniform,
     Cyclic,
     Acyclic,
-    Mixed,
 };
 
 enum class aiTopologyVariance
@@ -243,14 +242,6 @@ struct aiPropertyData
     aiPropertyData(void *d, int s, aiPropertyType t) : data(d), size(s), type(t) {}
 };
 
-struct aiTimeRange
-{
-    aiTimeSamplingType type = aiTimeSamplingType::Uniform;
-    int frame_count = 0;
-    double start_time = 0.0f;
-    double end_time = 0.0f;
-};
-
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
@@ -261,8 +252,9 @@ abciAPI aiContext*      aiContextCreate(int uid);
 abciAPI void            aiContextDestroy(aiContext* ctx);
 abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
 abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
-abciAPI int             aiContextGetTimeRangeCount(aiContext* ctx);
-abciAPI void            aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
+abciAPI int             aiContextGetTimeSamplingCount(aiContext* ctx);
+abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i);
+abciAPI void            aiContextGetTimeRange(aiContext* ctx, double *begin, double *end);
 abciAPI aiObject*       aiContextGetTopObject(aiContext* ctx);
 abciAPI void            aiContextUpdateSamples(aiContext* ctx, double time);
 

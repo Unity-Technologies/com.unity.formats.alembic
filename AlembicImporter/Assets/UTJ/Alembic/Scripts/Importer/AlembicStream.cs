@@ -59,12 +59,15 @@ namespace UTJ.Alembic
 
         public AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
+        public aiContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context; } }
-        public aiTimeRange abcTimeRange { get { return m_context.timeRage; } }
         public aiConfig config { get { return m_config; } }
         public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
         public bool asyncLoad { set { m_config.asyncLoad = value; } }
         public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
+
+        public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
+
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
