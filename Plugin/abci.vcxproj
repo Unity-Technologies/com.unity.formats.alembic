@@ -147,6 +147,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Alembic.lib;libhdf5.lib;libhdf5_hl.lib;libszip.lib;zlibstatic.lib;Half.lib;Iex-2_2.lib;IexMath-2_2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
@@ -172,6 +173,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>Alembic.lib;libhdf5.lib;libhdf5_hl.lib;libszip.lib;zlibstatic.lib;Half.lib;Iex-2_2.lib;IexMath-2_2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
@@ -194,6 +196,7 @@
     </Link>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>Alembic.lib;libhdf5.lib;libhdf5_hl.lib;libszip.lib;zlibstatic.lib;Half.lib;Iex-2_2.lib;IexMath-2_2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Alembic\Plugins\x86\</Command>
@@ -212,6 +215,9 @@
     <PostBuildEvent>
       <Command>xcopy /Yq $(TargetPath) $(SolutionDir)..\AlembicImporter\Assets\UTJ\Alembic\Plugins\x86\</Command>
     </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>Alembic.lib;libhdf5.lib;libhdf5_hl.lib;libszip.lib;zlibstatic.lib;Half.lib;Iex-2_2.lib;IexMath-2_2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
