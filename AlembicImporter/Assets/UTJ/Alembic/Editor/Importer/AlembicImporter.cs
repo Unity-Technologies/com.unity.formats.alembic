@@ -80,7 +80,7 @@ namespace UTJ.Alembic
         } 
     }
 
-    [ScriptedImporter(1, "abc")]
+    [ScriptedImporter(2, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
         [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
@@ -234,7 +234,7 @@ namespace UTJ.Alembic
 
                     var clip = new AnimationClip();
                     clip.SetCurve("", typeof(AlembicStreamPlayer), "currentTime", curve);
-                    clip.name = root.gameObject.name + "_Clip";
+                    clip.name = root.gameObject.name + "_Time";
                     clip.hideFlags = HideFlags.NotEditable;
 
                     subassets.Add("Default Animation", clip);
@@ -248,8 +248,12 @@ namespace UTJ.Alembic
                     {
                         var clip = new AnimationClip();
                         AddFrameEvents(clip, abc.GetTimeSampling(i));
-                        clip.name = root.gameObject.name + "_Timeline" + i + "_Frames";
-                        subassets.Add("Timeline" + i + "_Frames", clip);
+
+                        var name = root.gameObject.name + "_Frames";
+                        if (n > 2)
+                            name += i.ToString();
+                        clip.name = name;
+                        subassets.Add(clip.name, clip);
                     }
                 }
             }

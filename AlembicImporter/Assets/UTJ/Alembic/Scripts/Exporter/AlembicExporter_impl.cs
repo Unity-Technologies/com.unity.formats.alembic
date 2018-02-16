@@ -257,7 +257,8 @@ namespace UTJ.Alembic
             {
                 m_recorder = exp;
                 m_parent = p;
-                m_obj = c != null ? c.gameObject : null;
+                if (c != null)
+                    m_obj = c.gameObject;
             }
         }
 
@@ -569,6 +570,17 @@ namespace UTJ.Alembic
                 m_target.Capture();
             }
         }
+
+
+        class CaptureNode
+        {
+            public int instanceID;
+            public Type componentType;
+            public CaptureNode parent;
+            public Transform transform;
+            public TransformCapturer transformCapturer;
+            public ComponentCapturer componentCapturer;
+        }
         #endregion
 
 
@@ -578,7 +590,8 @@ namespace UTJ.Alembic
 
         aeContext m_ctx;
         ComponentCapturer m_root;
-        List<ComponentCapturer> m_capturers = new List<ComponentCapturer>();
+        Dictionary<int, CaptureNode> m_nodes;
+
         bool m_recording;
         float m_time;
         float m_elapsed;
@@ -620,105 +633,27 @@ namespace UTJ.Alembic
         }
 
 
-        TransformCapturer CreateComponentCapturer(ComponentCapturer parent, Transform target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new TransformCapturer(\"" + target.name + "\")"); }
-
-            var cap = new TransformCapturer(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        CameraCapturer CreateComponentCapturer(ComponentCapturer parent, Camera target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new CameraCapturer(\"" + target.name + "\")"); }
-
-            var cap = new CameraCapturer(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        MeshCapturer CreateComponentCapturer(ComponentCapturer parent, MeshRenderer target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new MeshCapturer(\"" + target.name + "\")"); }
-
-            var cap = new MeshCapturer(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        SkinnedMeshCapturer CreateComponentCapturer(ComponentCapturer parent, SkinnedMeshRenderer target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new SkinnedMeshCapturer(\"" + target.name + "\")"); }
-
-            var cap = new SkinnedMeshCapturer(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        ParticleCapturer CreateComponentCapturer(ComponentCapturer parent, ParticleSystem target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new ParticleCapturer(\"" + target.name + "\")"); }
-
-            var cap = new ParticleCapturer(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        CustomCapturerHandler CreateComponentCapturer(ComponentCapturer parent, AlembicCustomComponentCapturer target)
-        {
-            if (m_settings.debugLog) { Debug.Log("AlembicRecorder: new CustomCapturerHandler(\"" + target.name + "\")"); }
-
-            target.CreateAbcObject(parent.abcObject);
-            var cap = new CustomCapturerHandler(this, parent, target);
-            m_capturers.Add(cap);
-            return cap;
-        }
-
-        // capture node tree for "Preserve Tree Structure" option.
-        class CaptureNode
-        {
-            public CaptureNode parent;
-            public List<CaptureNode> children = new List<CaptureNode>();
-            public Type componentType;
-
-            public Transform obj;
-            public TransformCapturer transform;
-            public ComponentCapturer component;
-        }
-
-        Dictionary<Transform, CaptureNode> m_capture_node;
-        List<CaptureNode> m_top_nodes;
-
         CaptureNode ConstructTree(Transform node)
         {
             if (node == null) { return null; }
 
+            int iid = node.gameObject.GetInstanceID();
             CaptureNode cn;
-            if (m_capture_node.TryGetValue(node, out cn)) { return cn; }
+            if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
             cn = new CaptureNode();
-            cn.obj = node;
-            m_capture_node.Add(node, cn);
-
-            var parent = ConstructTree(node.parent);
-            if (parent != null)
-            {
-                parent.children.Add(cn);
-            }
-            else
-            {
-                m_top_nodes.Add(cn);
-            }
-
+            cn.instanceID = iid;
+            cn.transform = node;
+            cn.parent = ConstructTree(node.parent);
+            m_nodes.Add(iid, cn);
             return cn;
         }
 
-        void SetupComponentCapturer(CaptureNode parent, CaptureNode node)
+        void SetupComponentCapturer(CaptureNode node)
         {
-            node.parent = parent;
-            node.transform = CreateComponentCapturer(parent == null ? m_root : parent.transform, node.obj);
-            node.transform.inherits = true;
+            var parent = node.parent;
+            node.transformCapturer = new TransformCapturer(this, parent == null ? m_root : parent.transformCapturer, node.transform);
+            node.transformCapturer.inherits = true;
 
             if (node.componentType == null)
             {
@@ -726,37 +661,31 @@ namespace UTJ.Alembic
             }
             else if (node.componentType == typeof(Camera))
             {
-                node.transform.invertForward = true;
-                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<Camera>());
+                node.transformCapturer.invertForward = true;
+                node.componentCapturer = new CameraCapturer(this, node.transformCapturer, node.transform.GetComponent<Camera>());
             }
             else if (node.componentType == typeof(MeshRenderer))
             {
-                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<MeshRenderer>());
+                node.componentCapturer = new MeshCapturer(this, node.transformCapturer, node.transform.GetComponent<MeshRenderer>());
             }
             else if (node.componentType == typeof(SkinnedMeshRenderer))
             {
-                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<SkinnedMeshRenderer>());
+                node.componentCapturer = new SkinnedMeshCapturer(this, node.transformCapturer, node.transform.GetComponent<SkinnedMeshRenderer>());
             }
             else if (node.componentType == typeof(ParticleSystem))
             {
-                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<ParticleSystem>());
+                node.componentCapturer = new ParticleCapturer(this, node.transformCapturer, node.transform.GetComponent<ParticleSystem>());
             }
             else if (node.componentType == typeof(AlembicCustomComponentCapturer))
             {
-                node.component = CreateComponentCapturer(node.transform, node.obj.GetComponent<AlembicCustomComponentCapturer>());
-            }
-
-            foreach (var c in node.children)
-            {
-                SetupComponentCapturer(node, c);
+                node.componentCapturer = new CustomCapturerHandler(this, node.transformCapturer, node.transform.GetComponent<AlembicCustomComponentCapturer>());
             }
         }
 
         void CreateCapturers()
         {
             m_root = new RootCapturer(this, m_ctx.topObject);
-            m_capture_node = new Dictionary<Transform, CaptureNode>();
-            m_top_nodes = new List<CaptureNode>();
+            m_nodes = new Dictionary<int, CaptureNode>();
 
             // construct tree
             // (bottom-up)
@@ -801,15 +730,9 @@ namespace UTJ.Alembic
                 }
             }
 
-            // make component capturers (top-down)
-            foreach (var c in m_top_nodes)
-            {
-                SetupComponentCapturer(null, c);
-            }
-
-
-            m_top_nodes = null;
-            m_capture_node = null;
+            // make component capturers
+            foreach (var c in m_nodes)
+                SetupComponentCapturer(c.Value);
         }
         #endregion
 
@@ -875,7 +798,7 @@ namespace UTJ.Alembic
         {
             if (!m_recording) { return; }
 
-            m_capturers.Clear();
+            m_nodes.Clear();
             m_ctx.Destroy(); // flush archive
             m_recording = false;
 
@@ -890,8 +813,12 @@ namespace UTJ.Alembic
 
             m_ctx.MarkFrameBegin();
             m_ctx.AddTime(m_time);
-            foreach (var recorder in m_capturers)
-                recorder.Capture();
+            foreach (var kvp in m_nodes)
+            {
+                var node = kvp.Value;
+                node.transformCapturer.Capture();
+                node.componentCapturer.Capture();
+            }
             m_ctx.MarkFrameEnd();
 
             m_time += Time.deltaTime;

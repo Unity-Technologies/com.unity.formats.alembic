@@ -11,7 +11,7 @@ namespace UTJ.Alembic
 
         void AbcOnFrameChange(int frame)
         {
-            Debug.Log("AbcOnFrameChange " + frame);
+            //Debug.Log("AbcOnFrameChange " + frame);
             if (m_targetMaterial != null && m_textures != null && frame >= 0 && frame < m_textures.Length)
             {
                 m_targetMaterial.SetTexture(m_texturePropertyName, m_textures[frame]);
