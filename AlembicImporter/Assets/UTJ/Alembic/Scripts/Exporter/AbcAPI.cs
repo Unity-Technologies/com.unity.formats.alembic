@@ -134,25 +134,25 @@ namespace UTJ.Alembic
 
         public IntPtr   normals;          // Vector3*. can be null
         public IntPtr   normalIndices;    // int*. if null, assume same as indices
-        public int      normalCount;      // if 0, assume same as positionCount
+        public int      normalCount;      // if 0, assume same as pointCount
         public int      normalIndexCount; // if 0, assume same as indexCount
 
         public IntPtr   uv0;              // Vector2*. can be null
         public IntPtr   uv0Indices;       // int*. if null, assume same as indices
-        public int      uv0Count;         // if 0, assume same as positionCount
+        public int      uv0Count;         // if 0, assume same as pointCount
         public int      uv0IndexCount;    // if 0, assume same as indexCount
         
         public IntPtr   uv1;              // Vector2*. can be null
         public IntPtr   uv1Indices;       // int*. if null, assume same as indices
-        public int      uv1Count;         // if 0, assume same as positionCount
+        public int      uv1Count;         // if 0, assume same as pointCount
         public int      uv1IndexCount;    // if 0, assume same as indexCount
         
         public IntPtr   colors;           // Vector2*. can be null
         public IntPtr   colorIndices;     // int*. if null, assume same as indices
-        public int      colorCount;       // if 0, assume same as positionCount
+        public int      colorCount;       // if 0, assume same as pointCount
         public int      colorIndexCount;  // if 0, assume same as indexCount
 
-        public IntPtr   submeshes;        // aeSubmeshData*
+        public IntPtr   submeshes;        // aeSubmeshData*. can be null
         public int      submeshCount;
     }
 

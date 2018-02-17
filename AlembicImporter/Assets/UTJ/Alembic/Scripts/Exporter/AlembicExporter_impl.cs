@@ -18,35 +18,6 @@ namespace UTJ.Alembic
         CurrentBranch,
     }
 
-    public abstract class ComponentCapturer
-    {
-        protected AlembicRecorder m_recorder;
-        protected ComponentCapturer m_parent;
-        protected GameObject m_obj;
-        protected aeObject m_abc;
-
-        public ComponentCapturer parent { get { return m_parent; } }
-        public GameObject gameObject { get { return m_obj; } }
-        public aeObject abcObject { get { return m_abc; } }
-
-        public ComponentCapturer() { }
-
-        public virtual void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
-        {
-            m_recorder = rec;
-            m_parent = p;
-            if (c != null)
-                m_obj = c.gameObject;
-        }
-
-        public abstract void Capture();
-
-        public void ForceInvisible()
-        {
-            m_abc.ForceInvisible();
-        }
-    }
-
 
     [Serializable]
     public class AlembicRecorderSettings
@@ -79,6 +50,22 @@ namespace UTJ.Alembic
         public Type componentType;
 
         public CaptureTarget(Type t) { componentType = t; }
+    }
+
+    public abstract class ComponentCapturer
+    {
+        public AlembicRecorder recorder;
+        public ComponentCapturer parent;
+        public aeObject abcObject;
+        public int timeSamplingIndex;
+
+        public abstract void Setup(Component c);
+        public abstract void Capture();
+
+        public void ForceInvisible()
+        {
+            abcObject.ForceInvisible();
+        }
     }
 
 
@@ -279,14 +266,12 @@ namespace UTJ.Alembic
         {
             public RootCapturer(AlembicRecorder rec, aeObject abc)
             {
-                m_recorder = rec;
-                m_abc = abc;
+                recorder = rec;
+                abcObject = abc;
             }
 
-            public override void Capture()
-            {
-                // do nothing
-            }
+            public override void Setup(Component c) { }
+            public override void Capture() { }
         }
 
         public class TransformCapturer : ComponentCapturer
@@ -305,12 +290,10 @@ namespace UTJ.Alembic
             public bool captureRotation { set { m_captureRotation = value; } }
             public bool captureScale { set { m_captureScale = value; } }
 
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+            public override void Setup(Component c)
             {
-                base.Setup(rec, p, c);
-
                 var target = c as Transform;
-                m_abc = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", rec.GetCurrentTimeSamplingIndex());
+                abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
                 m_target = target;
             }
 
@@ -356,16 +339,14 @@ namespace UTJ.Alembic
             AlembicCameraParams m_params;
             aeCameraData m_data = aeCameraData.defaultValue;
 
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+            public override void Setup(Component c)
             {
-                base.Setup(rec, p, c);
-
                 var target = c as Camera;
-                m_abc = parent.abcObject.NewCamera(target.name, rec.GetCurrentTimeSamplingIndex());
+                abcObject = parent.abcObject.NewCamera(target.name, timeSamplingIndex);
                 m_target = target;
                 m_params = target.GetComponent<AlembicCameraParams>();
 
-                var trans = p as TransformCapturer;
+                var trans = parent as TransformCapturer;
                 if (trans != null)
                     trans.invertForward = true;
             }
@@ -406,20 +387,18 @@ namespace UTJ.Alembic
             MeshRenderer m_target;
             MeshBuffer m_mbuf;
 
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+            public override void Setup( Component c)
             {
-                base.Setup(rec, p, c);
-
                 var target = c as MeshRenderer;
                 m_target = target;
                 var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
                 if (mesh == null)
                     return;
 
-                m_abc = parent.abcObject.NewPolyMesh(target.name, rec.GetCurrentTimeSamplingIndex());
+                abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
                 m_mbuf = new MeshBuffer();
-                if (rec.settings.meshSubmeshes)
-                    m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
+                if (recorder.settings.meshSubmeshes)
+                    m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
             }
 
             public override void Capture()
@@ -432,8 +411,8 @@ namespace UTJ.Alembic
                 {
                     m_mbuf.visibility = m_target.gameObject.activeSelf;
                     var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                    if (!m_recorder.m_settings.assumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
-                        m_mbuf.Capture(mesh, m_recorder.m_settings);
+                    if (!recorder.m_settings.assumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
+                        m_mbuf.Capture(mesh, recorder.m_settings);
                 }
                 m_mbuf.WriteSample(abcObject);
             }
@@ -449,20 +428,18 @@ namespace UTJ.Alembic
             MeshBuffer m_mbuf;
             ClothBuffer m_cbuf;
 
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+            public override void Setup(Component c)
             {
-                base.Setup(rec, p, c);
-
                 var target = c as SkinnedMeshRenderer;
                 m_target = target;
                 var mesh = target.sharedMesh;
                 if (mesh == null)
                     return;
 
-                m_abc = parent.abcObject.NewPolyMesh(target.name, rec.GetCurrentTimeSamplingIndex());
+                abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
                 m_mbuf = new MeshBuffer();
-                if (rec.settings.meshSubmeshes)
-                    m_mbuf.SetupSubmeshes(m_abc, mesh, m_target.sharedMaterials);
+                if (recorder.settings.meshSubmeshes)
+                    m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
 
                 m_meshSrc = target.sharedMesh;
                 m_cloth = m_target.GetComponent<Cloth>();
@@ -471,7 +448,7 @@ namespace UTJ.Alembic
                     m_cbuf = new ClothBuffer();
                     m_cbuf.rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
 
-                    var tc = m_parent as TransformCapturer;
+                    var tc = parent as TransformCapturer;
                     if (tc != null)
                     {
                         tc.capturePosition = false;
@@ -492,7 +469,7 @@ namespace UTJ.Alembic
                     m_mbuf.visibility = m_target.gameObject.activeSelf;
                     if (m_cloth != null)
                     {
-                        m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, m_recorder.m_settings);
+                        m_cbuf.Capture(m_meshSrc, m_cloth, m_mbuf, recorder.m_settings);
                     }
                     else
                     {
@@ -501,10 +478,10 @@ namespace UTJ.Alembic
 
                         m_meshBake.Clear();
                         m_target.BakeMesh(m_meshBake);
-                        m_mbuf.Capture(m_meshBake, m_recorder.m_settings);
+                        m_mbuf.Capture(m_meshBake, recorder.m_settings);
                     }
                 }
-                m_mbuf.WriteSample(m_abc);
+                m_mbuf.WriteSample(abcObject);
             }
         }
 
@@ -517,12 +494,10 @@ namespace UTJ.Alembic
             PinnedList<Vector4> m_buf_rotations = new PinnedList<Vector4>();
             aePointsData m_data;
 
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+            public override void Setup(Component c)
             {
-                base.Setup(rec, p, c);
-
                 var target = c as ParticleSystem;
-                m_abc = parent.abcObject.NewPoints(target.name, rec.GetCurrentTimeSamplingIndex());
+                abcObject = parent.abcObject.NewPoints(target.name, timeSamplingIndex);
                 m_target = target;
             }
 
@@ -560,7 +535,7 @@ namespace UTJ.Alembic
                     m_data.positions = m_buf_points;
                     m_data.count = count;
                 }
-                m_abc.WriteSample(ref m_data);
+                abcObject.WriteSample(ref m_data);
             }
         }
 
@@ -593,9 +568,10 @@ namespace UTJ.Alembic
         Dictionary<int, CaptureNode> m_nodes;
         List<int> m_iidToRemove;
         int m_timeSamplingIndex;
+        int m_startFrameOfLastTimeSampling;
 
         bool m_recording;
-        float m_time;
+        float m_time, m_timePrev;
         float m_elapsed;
         int m_frameCount;
 
@@ -644,7 +620,7 @@ namespace UTJ.Alembic
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
         }
 
-        public int GetCurrentTimeSamplingIndex()
+        int GetCurrentTimeSamplingIndex()
         {
             return m_timeSamplingIndex;
         }
@@ -701,8 +677,11 @@ namespace UTJ.Alembic
 
             var parent = node.parent;
             node.transformCapturer = new TransformCapturer();
-            node.transformCapturer.Setup(this, parent == null ? m_root : parent.transformCapturer, node.transform);
+            node.transformCapturer.recorder = this;
+            node.transformCapturer.parent = parent == null ? m_root : parent.transformCapturer;
+            node.transformCapturer.timeSamplingIndex = GetCurrentTimeSamplingIndex();
             node.transformCapturer.inherits = true;
+            node.transformCapturer.Setup(node.transform);
 
             if (node.componentType != null)
             {
@@ -711,7 +690,10 @@ namespace UTJ.Alembic
                 {
                     var cr = m_capturerTable[node.componentType];
                     node.componentCapturer = Activator.CreateInstance(cr.type) as ComponentCapturer;
-                    node.componentCapturer.Setup(this, node.transformCapturer, component);
+                    node.componentCapturer.recorder = this;
+                    node.componentCapturer.parent = node.transformCapturer; ;
+                    node.componentCapturer.timeSamplingIndex = GetCurrentTimeSamplingIndex();
+                    node.componentCapturer.Setup(component);
                 }
             }
 
@@ -791,13 +773,14 @@ namespace UTJ.Alembic
             m_nodes = new Dictionary<int, CaptureNode>();
             m_iidToRemove = new List<int>();
             m_timeSamplingIndex = 1;
+            m_startFrameOfLastTimeSampling = 0;
 
             // create capturers
             SetupCapturerTable();
             UpdateCaptureNodes();
 
             m_recording = true;
-            m_time = 0.0f;
+            m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
             Debug.Log("AlembicRecorder: start " + m_settings.outputPath);
@@ -841,7 +824,8 @@ namespace UTJ.Alembic
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
 
-                m_time += Time.deltaTime;
+            m_timePrev = m_time;
+            m_time += Time.deltaTime;
             ++m_frameCount;
 
             m_elapsed = Time.realtimeSinceStartup - begin_time;
