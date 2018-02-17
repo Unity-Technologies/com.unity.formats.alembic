@@ -4,39 +4,28 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
 
-    [RequireComponent(typeof(ParticleEngine))]
-    public class ParticleEngineCapturer : AlembicCustomComponentCapturer
+    [CaptureTarget(typeof(ParticleEngine))]
+    public class ParticleEngineCapturer : ComponentCapturer
     {
-        public bool m_captureVelocities = true;
-        aeObject m_abc;
+        ParticleEngine m_target;
         aePointsData m_data;
 
-        public override void CreateAbcObject(aeObject parent)
+        public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
         {
-            m_abc = parent.NewPoints(gameObject.name, recorder.GetCurrentTimeSamplingIndex());
+            base.Setup(rec, p, c);
+            m_target = c as ParticleEngine;
+            m_abc = parent.abcObject.NewPoints(gameObject.name, rec.GetCurrentTimeSamplingIndex());
         }
 
         public override void Capture()
         {
-            var target = GetComponent<ParticleEngine>();
-            var positions = target.positionBuffer;
+            var positions = m_target.positionBuffer;
             if (positions == null) { return; }
 
             m_data.visibility = true;
-            m_data.count = positions.Length;
-            m_data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
-            if(m_captureVelocities)
-            {
-                var velocities = target.velocityBuffer;
-                if (velocities != null)
-                {
-                    m_data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
-                }
-            }
-        }
-
-        public override void WriteSample()
-        {
+            m_data.count = positions.Count;
+            m_data.positions = positions;
+            m_data.velocities = m_target.velocityBuffer;
             m_abc.WriteSample(ref m_data);
         }
     }

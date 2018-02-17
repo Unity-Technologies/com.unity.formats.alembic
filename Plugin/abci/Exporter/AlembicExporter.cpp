@@ -21,72 +21,76 @@ abciAPI void aeDestroyContext(aeContext* ctx)
 
 abciAPI void aeSetConfig(aeContext* ctx, const aeConfig *conf)
 {
-    return ctx->setConfig(*conf);
+    if (ctx)
+        ctx->setConfig(*conf);
 }
 
 abciAPI bool aeOpenArchive(aeContext* ctx, const char *path)
 {
-    return ctx->openArchive(path);
+    return ctx ? ctx->openArchive(path) : false;
 }
 
 
 abciAPI aeObject* aeGetTopObject(aeContext* ctx)
 {
-    return ctx->getTopObject();
+    return ctx ? ctx->getTopObject() : nullptr;
 }
 
 abciAPI int aeAddTimeSampling(aeContext* ctx, float start_time)
 {
-    return ctx->addTimeSampling(start_time);
+    return ctx ? ctx->addTimeSampling(start_time) : 0;
 }
 
 abciAPI void aeAddTime(aeContext* ctx, float time, int tsi)
 {
-    ctx->addTime(time, tsi);
+    if (ctx)
+        ctx->addTime(time, tsi);
 }
 
 abciAPI void aeMarkFrameBegin(aeContext* ctx)
 {
-    ctx->markFrameBegin();
+    if (ctx)
+        ctx->markFrameBegin();
 }
 abciAPI void aeMarkFrameEnd(aeContext* ctx)
 {
-    ctx->markFrameEnd();
+    if (ctx)
+        ctx->markFrameEnd();
 }
 
 abciAPI void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-abciAPI aeXform* aeNewXform(aeObject *parent, const char *name, int tsi)
+abciAPI aeXform* aeNewXform(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aeXform>(name, tsi);
+    return obj ? obj->newChild<aeXform>(name, tsi) : nullptr;
 }
-abciAPI aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
+abciAPI aePoints* aeNewPoints(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aePoints>(name, tsi);
+    return obj ? obj->newChild<aePoints>(name, tsi) : nullptr;
 }
-abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi)
+abciAPI aePolyMesh* aeNewPolyMesh(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aePolyMesh>(name, tsi);
+    return obj ? obj->newChild<aePolyMesh>(name, tsi) : nullptr;
 }
-abciAPI aeCamera* aeNewCamera(aeObject *parent, const char *name, int tsi)
+abciAPI aeCamera* aeNewCamera(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aeCamera>(name, tsi);
+    return obj ? obj->newChild<aeCamera>(name, tsi) : nullptr;
 }
 
 abciAPI int aeGetNumChildren(aeObject *obj)
 {
-    return (int)obj->getNumChildren();
+    return obj ? (int)obj->getNumChildren() : 0;
 }
 abciAPI aeObject* aeGetChild(aeObject *obj, int i)
 {
-    return obj->getChild(i);
+    return obj ? obj->getChild(i) : nullptr;
 }
 
 abciAPI aeObject* aeGetParent(aeObject *obj)
 {
-    return obj->getParent();
+    return obj ? obj->getParent() : nullptr;
 }
 
 abciAPI aeXform* aeAsXform(aeObject *obj)
@@ -109,61 +113,76 @@ abciAPI aeCamera* aeAsCamera(aeObject *obj)
 
 abciAPI int aeGetNumSamples(aeSchema *obj)
 {
-    return (int)obj->getNumSamples();
+    return obj ? (int)obj->getNumSamples() : 0;
 }
 abciAPI void aeSetFromPrevious(aeSchema *obj)
 {
-    obj->setFromPrevious();
+    if (obj)
+        obj->setFromPrevious();
+}
+
+abciAPI void aeForceInvisible(aeSchema * obj)
+{
+    if (obj)
+        obj->setForceInvisible(true);
 }
 
 abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
 }
 abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
 }
 abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
 }
 
 abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
 {
-    return obj->addFaceSet(name);
+    return obj ? obj->addFaceSet(name) : 0;
 }
 abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
 }
 abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data)
 {
-    obj->writeFaceSetSample(fsi, *data);
+    if (obj)
+        obj->writeFaceSetSample(fsi, *data);
 }
 
-abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type)
+abciAPI aeProperty* aeNewProperty(aeSchema *obj, const char *name, aePropertyType type)
 {
+    if (!obj)
+        return nullptr;
+
     switch (type) {
         // scalar properties
-    case aePropertyType::Bool:           return parent->newProperty<abcBoolProperty>(name); break;
-    case aePropertyType::Int:            return parent->newProperty<abcIntProperty>(name); break;
-    case aePropertyType::UInt:           return parent->newProperty<abcUIntProperty>(name); break;
-    case aePropertyType::Float:          return parent->newProperty<abcFloatProperty>(name); break;
-    case aePropertyType::Float2:         return parent->newProperty<abcFloat2Property>(name); break;
-    case aePropertyType::Float3:         return parent->newProperty<abcFloat3Property>(name); break;
-    case aePropertyType::Float4:         return parent->newProperty<abcFloat4Property>(name); break;
-    case aePropertyType::Float4x4:       return parent->newProperty<abcFloat4x4Property>(name); break;
+    case aePropertyType::Bool:           return obj->newProperty<abcBoolProperty>(name); break;
+    case aePropertyType::Int:            return obj->newProperty<abcIntProperty>(name); break;
+    case aePropertyType::UInt:           return obj->newProperty<abcUIntProperty>(name); break;
+    case aePropertyType::Float:          return obj->newProperty<abcFloatProperty>(name); break;
+    case aePropertyType::Float2:         return obj->newProperty<abcFloat2Property>(name); break;
+    case aePropertyType::Float3:         return obj->newProperty<abcFloat3Property>(name); break;
+    case aePropertyType::Float4:         return obj->newProperty<abcFloat4Property>(name); break;
+    case aePropertyType::Float4x4:       return obj->newProperty<abcFloat4x4Property>(name); break;
 
         // array properties
-    case aePropertyType::BoolArray:      return parent->newProperty<abcBoolArrayProperty >(name); break;
-    case aePropertyType::IntArray:       return parent->newProperty<abcIntArrayProperty>(name); break;
-    case aePropertyType::UIntArray:      return parent->newProperty<abcUIntArrayProperty>(name); break;
-    case aePropertyType::FloatArray:     return parent->newProperty<abcFloatArrayProperty>(name); break;
-    case aePropertyType::Float2Array:    return parent->newProperty<abcFloat2ArrayProperty>(name); break;
-    case aePropertyType::Float3Array:    return parent->newProperty<abcFloat3ArrayProperty>(name); break;
-    case aePropertyType::Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
-    case aePropertyType::Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
+    case aePropertyType::BoolArray:      return obj->newProperty<abcBoolArrayProperty >(name); break;
+    case aePropertyType::IntArray:       return obj->newProperty<abcIntArrayProperty>(name); break;
+    case aePropertyType::UIntArray:      return obj->newProperty<abcUIntArrayProperty>(name); break;
+    case aePropertyType::FloatArray:     return obj->newProperty<abcFloatArrayProperty>(name); break;
+    case aePropertyType::Float2Array:    return obj->newProperty<abcFloat2ArrayProperty>(name); break;
+    case aePropertyType::Float3Array:    return obj->newProperty<abcFloat3ArrayProperty>(name); break;
+    case aePropertyType::Float4Array:    return obj->newProperty<abcFloat4ArrayProperty>(name); break;
+    case aePropertyType::Float4x4Array:  return obj->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
     DebugLog("aeNewProperty(): unknown type");
     return nullptr;
@@ -171,6 +190,9 @@ abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aeProperty
 
 abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
 {
+    if (!prop)
+        return;
+
     if (!prop->isArray()) {
         DebugLog("aePropertyWriteArraySample(): property is scalar!");
         return;
@@ -180,6 +202,9 @@ abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int 
 
 abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 {
+    if (!prop)
+        return;
+
     if (prop->isArray()) {
         DebugLog("aePropertyWriteScalarSample(): property is array!");
         return;

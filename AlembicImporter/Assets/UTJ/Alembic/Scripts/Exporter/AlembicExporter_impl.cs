@@ -18,6 +18,36 @@ namespace UTJ.Alembic
         CurrentBranch,
     }
 
+    public abstract class ComponentCapturer
+    {
+        protected AlembicRecorder m_recorder;
+        protected ComponentCapturer m_parent;
+        protected GameObject m_obj;
+        protected aeObject m_abc;
+
+        public ComponentCapturer parent { get { return m_parent; } }
+        public GameObject gameObject { get { return m_obj; } }
+        public aeObject abcObject { get { return m_abc; } }
+
+        public ComponentCapturer() { }
+
+        public virtual void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
+        {
+            m_recorder = rec;
+            m_parent = p;
+            if (c != null)
+                m_obj = c.gameObject;
+        }
+
+        public abstract void Capture();
+
+        public void ForceInvisible()
+        {
+            m_abc.ForceInvisible();
+        }
+    }
+
+
     [Serializable]
     public class AlembicRecorderSettings
     {
@@ -245,34 +275,6 @@ namespace UTJ.Alembic
             }
         }
 
-        public abstract class ComponentCapturer
-        {
-            protected AlembicRecorder m_recorder;
-            protected ComponentCapturer m_parent;
-            protected GameObject m_obj;
-            protected aeObject m_abc;
-            protected bool m_stopped = false;
-            protected bool m_forceInvisible = false;
-
-            public ComponentCapturer parent { get { return m_parent; } }
-            public GameObject gameObject { get { return m_obj; } }
-            public aeObject abcObject { get { return m_abc; } }
-            public bool stopped { get { return m_stopped; } }
-            public bool forceInvisible { get { return m_forceInvisible; }  set { m_forceInvisible = value; } }
-
-            public ComponentCapturer() {}
-
-            public virtual void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
-            {
-                m_recorder = rec;
-                m_parent = p;
-                if (c != null)
-                    m_obj = c.gameObject;
-            }
-
-            public abstract void Capture();
-        }
-
         public class RootCapturer : ComponentCapturer
         {
             public RootCapturer(AlembicRecorder rec, aeObject abc)
@@ -314,11 +316,7 @@ namespace UTJ.Alembic
 
             public override void Capture()
             {
-                if (m_stopped)
-                    return;
-
                 if (m_target == null) {
-                    m_stopped = true;
                     m_data.visibility = false;
                 }
                 else
@@ -366,16 +364,16 @@ namespace UTJ.Alembic
                 m_abc = parent.abcObject.NewCamera(target.name, rec.GetCurrentTimeSamplingIndex());
                 m_target = target;
                 m_params = target.GetComponent<AlembicCameraParams>();
+
+                var trans = p as TransformCapturer;
+                if (trans != null)
+                    trans.invertForward = true;
             }
 
             public override void Capture()
             {
-                if (m_stopped)
-                    return;
-
                 if (m_target == null)
                 {
-                    m_stopped = true;
                     m_data.visibility = false;
                 }
                 else
@@ -426,12 +424,8 @@ namespace UTJ.Alembic
 
             public override void Capture()
             {
-                if (m_stopped)
-                    return;
-
                 if (m_target == null)
                 {
-                    m_stopped = true;
                     m_mbuf.visibility = false;
                 }
                 else
@@ -489,12 +483,8 @@ namespace UTJ.Alembic
 
             public override void Capture()
             {
-                if (m_stopped)
-                    return;
-
                 if (m_target == null)
                 {
-                    m_stopped = true;
                     m_mbuf.visibility = false;
                 }
                 else
@@ -538,12 +528,8 @@ namespace UTJ.Alembic
 
             public override void Capture()
             {
-                if (m_stopped)
-                    return;
-
                 if (m_target == null)
                 {
-                    m_stopped = true;
                     m_data.visibility = false;
                 }
                 else
@@ -575,31 +561,6 @@ namespace UTJ.Alembic
                     m_data.count = count;
                 }
                 m_abc.WriteSample(ref m_data);
-            }
-        }
-
-        public class CustomCapturerHandler : ComponentCapturer
-        {
-            AlembicCustomComponentCapturer m_target;
-
-            public override void Setup(AlembicRecorder rec, ComponentCapturer p, Component c)
-            {
-                base.Setup(rec, p, c);
-
-                var target = c as AlembicCustomComponentCapturer;
-                m_target = target;
-                m_target.CreateAbcObject(parent.abcObject);
-            }
-
-            public override void Capture()
-            {
-                if (m_target == null)
-                {
-                    m_stopped = true;
-                    return;
-                }
-
-                m_target.Capture();
             }
         }
 
@@ -867,14 +828,11 @@ namespace UTJ.Alembic
             foreach (var kvp in m_nodes)
             {
                 var node = kvp.Value;
-                node.transformCapturer.Capture();
-                bool stopped = node.transformCapturer.stopped;
+                if (node.transformCapturer != null)
+                    node.transformCapturer.Capture();
                 if (node.componentCapturer != null)
-                {
                     node.componentCapturer.Capture();
-                    stopped = stopped && node.componentCapturer.stopped;
-                }
-                if (stopped)
+                if (node.transform == null)
                     m_iidToRemove.Add(node.instanceID);
             }
             m_ctx.MarkFrameEnd();

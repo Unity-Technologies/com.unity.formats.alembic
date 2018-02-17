@@ -197,7 +197,7 @@ abciAPI void        aeDeleteObject(aeObject *obj);
 abciAPI aeXform*    aeNewXform(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePoints*   aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
-abciAPI aeCamera*   aeNewCamera(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aeCamera*   aeNewCamera(aeObject *obj, const char *name, int tsi = 1);
 
 abciAPI int         aeGetNumChildren(aeObject *obj);
 abciAPI aeObject*   aeGetChild(aeObject *obj, int i);
@@ -209,6 +209,7 @@ abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 
 abciAPI int         aeGetNumSamples(aeSchema *obj);
 abciAPI void        aeSetFromPrevious(aeSchema *obj);
+abciAPI void        aeForceInvisible(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
