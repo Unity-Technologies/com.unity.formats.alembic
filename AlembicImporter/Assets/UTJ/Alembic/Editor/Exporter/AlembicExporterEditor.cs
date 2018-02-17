@@ -84,7 +84,6 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureSkinnedMeshRenderer"), new GUIContent("SkinnedMeshRenderer"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureParticleSystem"), new GUIContent("ParticleSystem"));
                 EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.captureCamera"), new GUIContent("Camera"));
-                EditorGUILayout.PropertyField(so.FindProperty("m_recorder.m_settings.customCapturer"), new GUIContent("Custom Capturer"));
                 EditorGUI.indentLevel--;
             }
 

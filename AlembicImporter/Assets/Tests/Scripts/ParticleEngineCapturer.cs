@@ -9,10 +9,11 @@ namespace UTJ.Alembic
     {
         public bool m_captureVelocities = true;
         aeObject m_abc;
+        aePointsData m_data;
 
         public override void CreateAbcObject(aeObject parent)
         {
-            m_abc = parent.NewPoints(gameObject.name);
+            m_abc = parent.NewPoints(gameObject.name, recorder.GetCurrentTimeSamplingIndex());
         }
 
         public override void Capture()
@@ -21,20 +22,22 @@ namespace UTJ.Alembic
             var positions = target.positionBuffer;
             if (positions == null) { return; }
 
-            var data = default(aePointsData);
-            data.visibility = true;
-            data.count = positions.Length;
-            data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
+            m_data.visibility = true;
+            m_data.count = positions.Length;
+            m_data.positions = Marshal.UnsafeAddrOfPinnedArrayElement(positions, 0);
             if(m_captureVelocities)
             {
                 var velocities = target.velocityBuffer;
                 if (velocities != null)
                 {
-                    data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
+                    m_data.velocities = Marshal.UnsafeAddrOfPinnedArrayElement(velocities, 0);
                 }
             }
-            m_abc.WriteSample(ref data);
         }
 
+        public override void WriteSample()
+        {
+            m_abc.WriteSample(ref m_data);
+        }
     }
 }

@@ -227,10 +227,10 @@ namespace UTJ.Alembic
     {
         public IntPtr self;
 
-        public aeObject NewXform(string name) { return aeNewXform(self, name); }
-        public aeObject NewCamera(string name) { return aeNewCamera(self, name); }
-        public aeObject NewPoints(string name) { return aeNewPoints(self, name); }
-        public aeObject NewPolyMesh(string name) { return aeNewPolyMesh(self, name); }
+        public aeObject NewXform(string name, int tsi) { return aeNewXform(self, name, tsi); }
+        public aeObject NewCamera(string name, int tsi) { return aeNewCamera(self, name, tsi); }
+        public aeObject NewPoints(string name, int tsi) { return aeNewPoints(self, name, tsi); }
+        public aeObject NewPolyMesh(string name, int tsi) { return aeNewPolyMesh(self, name, tsi); }
 
         public void WriteSample(ref aeXformData data) { aeXformWriteSample(self, ref data); }
         public void WriteSample(ref aeCameraData data) { aeCameraWriteSample(self, ref data); }
@@ -243,10 +243,10 @@ namespace UTJ.Alembic
         public aeProperty NewProperty(string name, aePropertyType type) { return aeNewProperty(self, name, type); }
 
         #region internal
-        [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
         [DllImport("abci")] static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
         [DllImport("abci")] static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
         [DllImport("abci")] static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
