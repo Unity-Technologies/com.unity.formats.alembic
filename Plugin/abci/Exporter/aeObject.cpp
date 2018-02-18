@@ -171,7 +171,7 @@ aeSchema::~aeSchema()
     m_properties.clear();
 }
 
-void aeSchema::setForceInvisible(bool v)
+void aeSchema::markForceInvisible()
 {
     m_force_invisible = true;
 }

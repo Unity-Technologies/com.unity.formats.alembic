@@ -242,7 +242,7 @@ namespace UTJ.Alembic
 
         public aeProperty NewProperty(string name, aePropertyType type) { return aeNewProperty(self, name, type); }
 
-        public void ForceInvisible() { aeForceInvisible(self); }
+        public void MarkForceInvisible() { aeMarkForceInvisible(self); }
 
         #region internal
         [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
@@ -255,7 +255,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
         [DllImport("abci")] static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
         [DllImport("abci")] static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
-        [DllImport("abci")] static extern void aeForceInvisible(IntPtr self);
+        [DllImport("abci")] static extern void aeMarkForceInvisible(IntPtr self);
         #endregion
     }
 

@@ -209,7 +209,7 @@ abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 
 abciAPI int         aeGetNumSamples(aeSchema *obj);
 abciAPI void        aeSetFromPrevious(aeSchema *obj);
-abciAPI void        aeForceInvisible(aeSchema *obj);
+abciAPI void        aeMarkForceInvisible(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);

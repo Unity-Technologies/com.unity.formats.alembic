@@ -64,7 +64,7 @@ namespace UTJ.Alembic
 
         public void ForceInvisible()
         {
-            abcObject.ForceInvisible();
+            abcObject.MarkForceInvisible();
         }
     }
 
@@ -387,7 +387,7 @@ namespace UTJ.Alembic
             MeshRenderer m_target;
             MeshBuffer m_mbuf;
 
-            public override void Setup( Component c)
+            public override void Setup(Component c)
             {
                 var target = c as MeshRenderer;
                 m_target = target;
@@ -489,9 +489,9 @@ namespace UTJ.Alembic
         public class ParticleCapturer : ComponentCapturer
         {
             ParticleSystem m_target;
-            ParticleSystem.Particle[] m_buf_particles;
-            PinnedList<Vector3> m_buf_points = new PinnedList<Vector3>();
-            PinnedList<Vector4> m_buf_rotations = new PinnedList<Vector4>();
+            ParticleSystem.Particle[] m_bufParticles;
+            PinnedList<Vector3> m_bufPoints = new PinnedList<Vector3>();
+            PinnedList<Quaternion> m_bufRotations = new PinnedList<Quaternion>();
             aePointsData m_data;
 
             public override void Setup(Component c)
@@ -511,28 +511,24 @@ namespace UTJ.Alembic
                 {
                     // create buffer
                     int count_max = m_target.main.maxParticles;
-                    if (m_buf_particles == null || m_buf_particles.Length != count_max)
+                    if (m_bufParticles == null || m_bufParticles.Length != count_max)
                     {
-                        m_buf_particles = new ParticleSystem.Particle[count_max];
-                        m_buf_points.Resize(count_max);
-                        m_buf_rotations.Resize(count_max);
+                        m_bufParticles = new ParticleSystem.Particle[count_max];
+                        m_bufPoints.Resize(count_max);
+                        m_bufRotations.Resize(count_max);
                     }
 
                     // copy particle positions & rotations to buffer
-                    int count = m_target.GetParticles(m_buf_particles);
+                    int count = m_target.GetParticles(m_bufParticles);
                     for (int i = 0; i < count; ++i)
                     {
-                        m_buf_points[i] = m_buf_particles[i].position;
-                    }
-                    for (int i = 0; i < count; ++i)
-                    {
-                        var a = m_buf_particles[i].axisOfRotation;
-                        m_buf_rotations[i].Set(a.x, a.y, a.z, m_buf_particles[i].rotation);
+                        m_bufPoints[i] = m_bufParticles[i].position;
+                        m_bufRotations[i] = Quaternion.AngleAxis(m_bufParticles[i].rotation, m_bufParticles[i].axisOfRotation);
                     }
 
                     // write!
                     m_data.visibility = m_target.gameObject.activeSelf;
-                    m_data.positions = m_buf_points;
+                    m_data.positions = m_bufPoints;
                     m_data.count = count;
                 }
                 abcObject.WriteSample(ref m_data);
@@ -549,6 +545,22 @@ namespace UTJ.Alembic
             public TransformCapturer transformCapturer;
             public ComponentCapturer componentCapturer;
             public bool setup = false;
+
+            public void ForceInvisible()
+            {
+                if (transformCapturer != null)
+                    transformCapturer.ForceInvisible();
+                if (componentCapturer != null)
+                    componentCapturer.ForceInvisible();
+            }
+
+            public void Capture()
+            {
+                if (transformCapturer != null)
+                    transformCapturer.Capture();
+                if (componentCapturer != null)
+                    componentCapturer.Capture();
+            }
         }
 
         class CapturerRecord
@@ -566,6 +578,7 @@ namespace UTJ.Alembic
         aeContext m_ctx;
         ComponentCapturer m_root;
         Dictionary<int, CaptureNode> m_nodes;
+        List<CaptureNode> m_newNodes;
         List<int> m_iidToRemove;
         int m_timeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
@@ -596,6 +609,9 @@ namespace UTJ.Alembic
             {
                 method.Invoke(null, new object[] { BuildTarget.StandaloneWindows, 0, 0 });
                 method.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, 0, 0 });
+                method.Invoke(null, new object[] { BuildTarget.StandaloneOSX, 0, 0 });
+                method.Invoke(null, new object[] { BuildTarget.StandaloneLinux, 0, 0 });
+                method.Invoke(null, new object[] { BuildTarget.StandaloneLinux64, 0, 0 });
             }
         }
 #endif
@@ -638,6 +654,7 @@ namespace UTJ.Alembic
             cn.transform = node;
             cn.parent = ConstructTree(node.parent);
             m_nodes.Add(iid, cn);
+            m_newNodes.Add(cn);
             return cn;
         }
 
@@ -771,13 +788,13 @@ namespace UTJ.Alembic
 
             m_root = new RootCapturer(this, m_ctx.topObject);
             m_nodes = new Dictionary<int, CaptureNode>();
+            m_newNodes = new List<CaptureNode>();
             m_iidToRemove = new List<int>();
             m_timeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
             // create capturers
             SetupCapturerTable();
-            UpdateCaptureNodes();
 
             m_recording = true;
             m_time = m_timePrev = 0.0f;
@@ -792,6 +809,7 @@ namespace UTJ.Alembic
             if (!m_recording) { return; }
 
             m_iidToRemove = null;
+            m_newNodes = null;
             m_nodes = null;
             m_root = null;
             m_ctx.Destroy(); // flush archive
@@ -806,29 +824,52 @@ namespace UTJ.Alembic
 
             float begin_time = Time.realtimeSinceStartup;
 
+            // check if there are new GameObjects to capture
+            UpdateCaptureNodes();
+            if (m_frameCount > 0 && m_newNodes.Count > 0)
+            {
+                // add invisible sample
+                m_ctx.MarkFrameBegin();
+                foreach (var node in m_newNodes)
+                {
+                    node.ForceInvisible();
+                    node.Capture();
+                }
+                m_ctx.MarkFrameEnd();
+            }
+            m_newNodes.Clear();
+
+            // do capture
             m_ctx.MarkFrameBegin();
             m_ctx.AddTime(m_time);
             foreach (var kvp in m_nodes)
             {
                 var node = kvp.Value;
-                if (node.transformCapturer != null)
-                    node.transformCapturer.Capture();
-                if (node.componentCapturer != null)
-                    node.componentCapturer.Capture();
+                node.Capture();
                 if (node.transform == null)
                     m_iidToRemove.Add(node.instanceID);
             }
             m_ctx.MarkFrameEnd();
 
+            // remove deleted GameObjects
             foreach (int iid in m_iidToRemove)
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
 
-            m_timePrev = m_time;
-            m_time += Time.deltaTime;
+            // advance time
             ++m_frameCount;
-
+            m_timePrev = m_time;
+            switch(m_settings.conf.timeSamplingType)
+            {
+                case aeTimeSamplingType.Uniform:
+                    m_time = (1.0f / m_settings.conf.frameRate) * m_frameCount;
+                    break;
+                case aeTimeSamplingType.Acyclic:
+                    m_time += Time.deltaTime;
+                    break;
+            }
             m_elapsed = Time.realtimeSinceStartup - begin_time;
+
             if (m_settings.detailedLog)
             {
                 Debug.Log("AlembicRecorder: frame " + m_frameCount + " (" + (m_elapsed * 1000.0f) + " ms)");

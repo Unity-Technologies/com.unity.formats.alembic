@@ -59,7 +59,7 @@ public:
     /// T: abcFloatArrayProperty, abcFloatProperty, etc
     template<class T> aeProperty* newProperty(const char *name, uint32_t tsi = 0);
 
-    void setForceInvisible(bool v);
+    void markForceInvisible();
 
 protected:
     void writeVisibility(bool v);

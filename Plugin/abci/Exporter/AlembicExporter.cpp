@@ -121,10 +121,10 @@ abciAPI void aeSetFromPrevious(aeSchema *obj)
         obj->setFromPrevious();
 }
 
-abciAPI void aeForceInvisible(aeSchema * obj)
+abciAPI void aeMarkForceInvisible(aeSchema * obj)
 {
     if (obj)
-        obj->setForceInvisible(true);
+        obj->markForceInvisible();
 }
 
 abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
