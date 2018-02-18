@@ -18,6 +18,21 @@ namespace UTJ.Alembic
         #endregion
 
 
+        #region properties
+        public AlembicRecorderSettings settings
+        {
+            get { return m_recorder.settings; }
+            set { m_recorder.settings = value; }
+        }
+        public bool ignoreFirstFrame
+        {
+            get { return m_ignoreFirstFrame; }
+            set { m_ignoreFirstFrame = value; }
+        }
+
+        #endregion
+
+
         #region impl
         void BeginRecording()
         {

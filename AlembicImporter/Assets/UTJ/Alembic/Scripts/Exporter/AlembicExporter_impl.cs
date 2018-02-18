@@ -22,7 +22,7 @@ namespace UTJ.Alembic
     [Serializable]
     public class AlembicRecorderSettings
     {
-        public string outputPath;
+        public string outputPath  = "Output/Alembic.abc";
         public aeConfig conf = aeConfig.defaultValue;
         public ExportScope scope = ExportScope.EntireScene;
         public bool fixDeltaTime = true;
@@ -593,7 +593,11 @@ namespace UTJ.Alembic
 
 
         #region properties
-        public AlembicRecorderSettings settings { get { return m_settings; } }
+        public AlembicRecorderSettings settings
+        {
+            get { return m_settings; }
+            set { m_settings = value; }
+        }
         public GameObject targetBranch { get { return m_targetBranch; } set { m_targetBranch = value; } }
         public bool recording { get { return m_recording; } }
         public int frameCount { get { return m_frameCount; } }
