@@ -62,7 +62,7 @@ namespace UTJ.Alembic
         public abstract void Setup(Component c);
         public abstract void Capture();
 
-        public void ForceInvisible()
+        public void MarkForceInvisible()
         {
             abcObject.MarkForceInvisible();
         }
@@ -546,12 +546,12 @@ namespace UTJ.Alembic
             public ComponentCapturer componentCapturer;
             public bool setup = false;
 
-            public void ForceInvisible()
+            public void MarkForceInvisible()
             {
                 if (transformCapturer != null)
-                    transformCapturer.ForceInvisible();
+                    transformCapturer.MarkForceInvisible();
                 if (componentCapturer != null)
-                    componentCapturer.ForceInvisible();
+                    componentCapturer.MarkForceInvisible();
             }
 
             public void Capture()
@@ -580,7 +580,7 @@ namespace UTJ.Alembic
         Dictionary<int, CaptureNode> m_nodes;
         List<CaptureNode> m_newNodes;
         List<int> m_iidToRemove;
-        int m_timeSamplingIndex;
+        int m_lastTimeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
 
         bool m_recording;
@@ -638,7 +638,12 @@ namespace UTJ.Alembic
 
         int GetCurrentTimeSamplingIndex()
         {
-            return m_timeSamplingIndex;
+            if (m_frameCount != m_startFrameOfLastTimeSampling)
+            {
+                m_startFrameOfLastTimeSampling = m_frameCount;
+                m_lastTimeSamplingIndex = m_ctx.AddTimeSampling(m_timePrev);
+            }
+            return m_lastTimeSamplingIndex;
         }
 
         CaptureNode ConstructTree(Transform node)
@@ -692,11 +697,12 @@ namespace UTJ.Alembic
             if (node.setup)
                 return;
 
+            int timeSamplingIndex = GetCurrentTimeSamplingIndex();
             var parent = node.parent;
             node.transformCapturer = new TransformCapturer();
             node.transformCapturer.recorder = this;
             node.transformCapturer.parent = parent == null ? m_root : parent.transformCapturer;
-            node.transformCapturer.timeSamplingIndex = GetCurrentTimeSamplingIndex();
+            node.transformCapturer.timeSamplingIndex = timeSamplingIndex;
             node.transformCapturer.inherits = true;
             node.transformCapturer.Setup(node.transform);
 
@@ -709,7 +715,7 @@ namespace UTJ.Alembic
                     node.componentCapturer = Activator.CreateInstance(cr.type) as ComponentCapturer;
                     node.componentCapturer.recorder = this;
                     node.componentCapturer.parent = node.transformCapturer; ;
-                    node.componentCapturer.timeSamplingIndex = GetCurrentTimeSamplingIndex();
+                    node.componentCapturer.timeSamplingIndex = timeSamplingIndex;
                     node.componentCapturer.Setup(component);
                 }
             }
@@ -790,7 +796,7 @@ namespace UTJ.Alembic
             m_nodes = new Dictionary<int, CaptureNode>();
             m_newNodes = new List<CaptureNode>();
             m_iidToRemove = new List<int>();
-            m_timeSamplingIndex = 1;
+            m_lastTimeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
             // create capturers
@@ -832,7 +838,7 @@ namespace UTJ.Alembic
                 m_ctx.MarkFrameBegin();
                 foreach (var node in m_newNodes)
                 {
-                    node.ForceInvisible();
+                    node.MarkForceInvisible();
                     node.Capture();
                 }
                 m_ctx.MarkFrameEnd();

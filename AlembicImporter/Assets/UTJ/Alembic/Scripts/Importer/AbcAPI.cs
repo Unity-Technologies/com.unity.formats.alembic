@@ -527,23 +527,4 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void aiCleanup();
 
     }
-
-    public class AbcUtils
-    {
-    #if UNITY_EDITOR
-        
-        static MethodInfo s_GetBuiltinExtraResourcesMethod;
-
-        public static Material GetDefaultMaterial()
-        {
-            if (s_GetBuiltinExtraResourcesMethod == null)
-            {
-                BindingFlags bfs = BindingFlags.NonPublic | BindingFlags.Static;
-                s_GetBuiltinExtraResourcesMethod = typeof(EditorGUIUtility).GetMethod("GetBuiltinExtraResource", bfs);
-            }
-            return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
-        }
-
-    #endif
-    }
 }
