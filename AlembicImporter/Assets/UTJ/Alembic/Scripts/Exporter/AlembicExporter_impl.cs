@@ -810,6 +810,9 @@ namespace UTJ.Alembic
             m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
+            if (m_settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+                Time.maximumDeltaTime = (1.0f / m_settings.conf.frameRate);
+
             Debug.Log("AlembicRecorder: start " + m_settings.outputPath);
             return true;
         }
@@ -879,6 +882,10 @@ namespace UTJ.Alembic
                     break;
             }
             m_elapsed = Time.realtimeSinceStartup - begin_time;
+
+            // wait maximumDeltaTime if timeSamplingType is uniform
+            if (m_settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+                AbcAPI.aeWaitMaxDeltaTime();
 
             if (m_settings.detailedLog)
             {

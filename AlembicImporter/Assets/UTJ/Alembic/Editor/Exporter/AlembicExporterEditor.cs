@@ -7,13 +7,23 @@ using UnityEditor.SceneManagement;
 
 namespace UTJ.Alembic
 {
-    public class AlembicRecorderSettingsEditor : Editor
-    {
-        protected bool m_foldCaptureComponents;
-        protected bool m_foldMeshComponents;
 
-        protected void DrawAlembicSettings(AlembicRecorderSettings settings, SerializedObject so, string pathSettings)
+    [CustomEditor(typeof(AlembicExporter))]
+    public class AlembicExporterEditor : Editor
+    {
+        bool m_foldCaptureComponents;
+        bool m_foldMeshComponents;
+
+        public override void OnInspectorGUI()
         {
+            var t = target as AlembicExporter;
+            var recorder = t.recorder;
+            var settings = recorder.settings;
+            var so = serializedObject;
+
+            var pathSettings = "m_recorder.m_settings";
+
+            // output path
             GUILayout.Space(5);
             EditorGUILayout.LabelField("Output Path", EditorStyles.boldLabel);
             {
@@ -46,6 +56,8 @@ namespace UTJ.Alembic
             }
             GUILayout.Space(5);
 
+
+            // alembic settings
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".conf.archiveType"));
@@ -64,10 +76,9 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".conf.scaleFactor"));
             }
             GUILayout.Space(5);
-        }
 
-        protected void DrawCaptureSettings(AlembicRecorderSettings settings, SerializedObject so, string pathSettings)
-        {
+
+            // capture settings
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".scope"));
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".assumeNonSkinnedMeshesAreConstant"));
@@ -95,31 +106,6 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".meshSubmeshes"), new GUIContent("Submeshes"));
                 EditorGUI.indentLevel--;
             }
-            GUILayout.Space(5);
-        }
-
-        protected void DrawMiscSettings(AlembicRecorderSettings settings, SerializedObject so, string pathSettings)
-        {
-            EditorGUILayout.LabelField("Misc", EditorStyles.boldLabel);
-            {
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".detailedLog"));
-            }
-        }
-    }
-
-    [CustomEditor(typeof(AlembicExporter))]
-    public class AlembicExporterEditor : AlembicRecorderSettingsEditor
-    {
-        public override void OnInspectorGUI()
-        {
-            var t = target as AlembicExporter;
-            var recorder = t.recorder;
-            var settings = recorder.settings;
-            var so = serializedObject;
-
-            var pathSettings = "m_recorder.m_settings";
-            DrawAlembicSettings(settings, so, pathSettings);
-            DrawCaptureSettings(settings, so, pathSettings);
             {
                 var m_captureOnStart = so.FindProperty("m_captureOnStart");
                 EditorGUILayout.PropertyField(m_captureOnStart);
@@ -130,14 +116,19 @@ namespace UTJ.Alembic
                     EditorGUI.indentLevel--;
                 }
                 EditorGUILayout.PropertyField(so.FindProperty("m_maxCaptureFrame"));
-                GUILayout.Space(5);
             }
-            DrawMiscSettings(settings, so, pathSettings);
+            GUILayout.Space(5);
+
+            // misc settigs
+            EditorGUILayout.LabelField("Misc", EditorStyles.boldLabel);
+            {
+                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".detailedLog"));
+            }
+            GUILayout.Space(10);
 
             so.ApplyModifiedProperties();
 
-            GUILayout.Space(10);
-
+            // capture control
             EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
             if (recorder.recording)
             {
