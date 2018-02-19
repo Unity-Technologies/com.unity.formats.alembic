@@ -91,6 +91,9 @@ namespace UTJ.Alembic
         public Bool interpolateSamples;
         public Bool turnQuadEdges;
         public Bool asyncLoad;
+        public Bool importPointPolygon;
+        public Bool importLinePolygon;
+        public Bool importTrianglePolygon;
 
         public void SetDefaults()
         {
@@ -109,6 +112,9 @@ namespace UTJ.Alembic
             interpolateSamples = true;
             turnQuadEdges = false;
             asyncLoad = true;
+            importPointPolygon = true;
+            importLinePolygon = true;
+            importTrianglePolygon = true;
         }
     }
 

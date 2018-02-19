@@ -28,9 +28,13 @@ namespace UTJ.Alembic
             EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
             EditorGUILayout.Separator();
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importPointPolygon"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importLinePolygon"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importTrianglePolygon"));
             EditorGUILayout.Separator();
 
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
+            EditorGUILayout.Separator();
 
             m_foldComponents = EditorGUILayout.Foldout(m_foldComponents, "Components");
             if(m_foldComponents) {

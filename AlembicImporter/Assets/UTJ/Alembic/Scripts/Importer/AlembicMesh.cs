@@ -302,11 +302,11 @@ namespace UTJ.Alembic
                     if (sum.topology == aiTopology.Triangles)
                         split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Lines)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Lines, sum.submeshIndex);
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Lines, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Points)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Points, sum.submeshIndex);
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Points, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Quads)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Quads, sum.submeshIndex);
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Quads, sum.submeshIndex, false);
                 }
             }
         }

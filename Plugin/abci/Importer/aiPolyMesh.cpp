@@ -731,6 +731,10 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
     refiner.clear();
     refiner.split_unit = config.split_unit;
+    refiner.gen_points = config.import_point_polygon;
+    refiner.gen_lines = config.import_line_polygon;
+    refiner.gen_triangles = config.import_triangle_polygon;
+
     refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };

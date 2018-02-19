@@ -185,6 +185,7 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
         for (size_t fi = 0; fi < num_faces; ++fi) {
             int count = counts[fi];
             if(count >= 3) {
+                if (!gen_triangles)continue;
                 if (count == 4) {
                     int quad[4] = {
                         src[n + 3],
@@ -207,10 +208,12 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
                 }
             }
             else if (count == 2) {
+                if (!gen_lines)continue;
                 for (int ni = 0; ni < 2; ++ni)
                     *(dst_lines++) = src[n + ni];
             }
             else if (count == 1) {
+                if (!gen_points)continue;
                 *(dst_points++) = src[n];
             }
             n += count;
@@ -220,6 +223,7 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
         for (size_t fi = 0; fi < num_faces; ++fi) {
             int count = counts[fi];
             if (count >= 3) {
+                if (!gen_triangles)continue;
                 for (int ni = 0; ni < count - 2; ++ni) {
                     *(dst_tri++) = src[n + 0];
                     *(dst_tri++) = src[n + ni + i1];
@@ -227,10 +231,12 @@ void MeshRefiner::retopology(bool swap_faces, bool turn_quads)
                 }
             }
             else if (count == 2) {
+                if (!gen_lines)continue;
                 for (int ni = 0; ni < 2; ++ni)
                     *(dst_lines++) = src[n + ni];
             }
             else if (count == 1) {
+                if (!gen_points)continue;
                 *(dst_points++) = src[n];
             }
             n += count;
@@ -260,46 +266,48 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
         auto& split = splits[spi];
         int offset_vertices = split.vertex_offset;
 
-        // add triangles submeshes
-        for (int fi = 0; fi < split.face_count; ++fi) {
-            int count = counts[offset_faces + fi];
-            if (count >= 3) {
-                int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
-                while (mid >= (int)tmp_submeshes.size()) {
-                    int id = (int)tmp_submeshes.size();
-                    tmp_submeshes.push_back({});
-                    tmp_submeshes.back().material_id = id - 1;
+        // triangles
+        if (split.index_count_tri > 0) {
+            // gen submeshes by material ids
+            for (int fi = 0; fi < split.face_count; ++fi) {
+                int count = counts[offset_faces + fi];
+                if (count >= 3) {
+                    int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
+                    while (mid >= (int)tmp_submeshes.size()) {
+                        int id = (int)tmp_submeshes.size();
+                        tmp_submeshes.push_back({});
+                        tmp_submeshes.back().material_id = id - 1;
+                    }
+                    tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
                 }
-                tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
+            }
+
+            for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
+                auto& sm = tmp_submeshes[mi];
+                sm.dst_indices = dst_indices;
+                sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
+                dst_indices += sm.index_count;
+            }
+
+            // copy indices
+            for (int fi = 0; fi < split.face_count; ++fi) {
+                int count = counts[offset_faces + fi];
+                if (count >= 3) {
+                    int mid = material_ids[offset_faces + fi] + 1;
+                    int nidx = (count - 2) * 3;
+                    for (int i = 0; i < nidx; ++i)
+                        *(tmp_submeshes[mid].dst_indices++) = *(src_tri++) - offset_vertices;
+                }
+            }
+
+            for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
+                auto& sm = tmp_submeshes[mi];
+                if (sm.index_count > 0) {
+                    ++split.submesh_count;
+                    submeshes.push_back(sm);
+                }
             }
         }
-
-        for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
-            auto& sm = tmp_submeshes[mi];
-            sm.dst_indices = dst_indices;
-            sm.index_offset = (int)std::distance(new_indices_submeshes.data(), dst_indices);
-            dst_indices += sm.index_count;
-        }
-
-        // copy indices
-        for (int fi = 0; fi < split.face_count; ++fi) {
-            int count = counts[offset_faces + fi];
-            if (count >= 3) {
-                int mid = material_ids[offset_faces + fi] + 1;
-                int nidx = (count - 2) * 3;
-                for (int i = 0; i < nidx; ++i)
-                    *(tmp_submeshes[mid].dst_indices++) = *(src_tri++) - offset_vertices;
-            }
-        }
-
-        for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi) {
-            auto& sm = tmp_submeshes[mi];
-            if (sm.index_count > 0) {
-                ++split.submesh_count;
-                submeshes.push_back(sm);
-            }
-        }
-
 
         // lines
         if (split.index_count_lines > 0) {
@@ -502,26 +510,29 @@ void MeshRefiner::refine()
     int offset = 0;
     for (int fi = 0; fi < num_faces_total; ++fi) {
         int count = counts[fi];
+        if ((count >= 3 && gen_triangles) || (count == 2 && gen_lines) || (count == 1 && gen_points))
+        {
+            if (split_unit > 0 && (int)new_points.size() - offset_vertices + count > split_unit) {
+                add_new_split();
 
-        if (split_unit > 0 && (int)new_points.size() - offset_vertices + count > split_unit) {
-            add_new_split();
+                // clear vertex cache
+                memset(old2new_indices.data(), -1, old2new_indices.size() * sizeof(int));
+            }
 
-            // clear vertex cache
-            memset(old2new_indices.data(), -1, old2new_indices.size() * sizeof(int));
+            for (int ci = 0; ci < count; ++ci) {
+                int ii = offset + ci;
+                int vi = indices[ii];
+                new_indices.push_back(find_or_emit_vertex(vi, ii));
+            }
+            ++num_faces;
+            if (count >= 3)
+                num_indices_tri += (count - 2) * 3;
+            else if (count == 2)
+                num_indices_lines += 2;
+            else if (count == 1)
+                num_indices_points += 1;
+
         }
-
-        for (int ci = 0; ci < count; ++ci) {
-            int ii = offset + ci;
-            int vi = indices[ii];
-            new_indices.push_back(find_or_emit_vertex(vi, ii));
-        }
-        ++num_faces;
-        if (count >= 3)
-            num_indices_tri += (count - 2) * 3;
-        else if (count == 2)
-            num_indices_lines += 2;
-        else if (count == 1)
-            num_indices_points += 1;
         offset += count;
     }
     add_new_split();

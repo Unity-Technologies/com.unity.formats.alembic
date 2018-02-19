@@ -134,6 +134,9 @@ namespace UTJ.Alembic
             m_config.tangentsMode = settings.tangents;
             m_config.turnQuadEdges = settings.turnQuadEdges;
             m_config.interpolateSamples = settings.interpolateSamples;
+            m_config.importPointPolygon = settings.importPointPolygon;
+            m_config.importLinePolygon = settings.importLinePolygon;
+            m_config.importTrianglePolygon = settings.importTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
             m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);

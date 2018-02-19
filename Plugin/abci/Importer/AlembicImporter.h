@@ -108,6 +108,10 @@ struct aiConfig
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     bool async_load = false;
+
+    bool import_point_polygon = true;
+    bool import_line_polygon = true;
+    bool import_triangle_polygon = true;
 };
 
 struct aiXformData

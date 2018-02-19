@@ -107,6 +107,10 @@ struct MeshRefiner
 
     // inputs
     int split_unit = 0; // 0 == no split
+    bool gen_points = true;
+    bool gen_lines = true;
+    bool gen_triangles = true;
+
     IArray<int> counts;
     IArray<int> indices;
     IArray<float3> points;
