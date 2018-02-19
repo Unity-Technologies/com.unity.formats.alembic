@@ -260,7 +260,10 @@ namespace UTJ.Alembic
                     if (split.mesh == null)
                         split.mesh = AddMeshComponents(split.host);
                     if (topologyChanged)
+                    {
                         split.mesh.Clear();
+                        split.mesh.subMeshCount = m_splitSummaries[s].submeshCount;
+                    }
 
                     if (split.points.Count > 0)
                         split.mesh.SetVertices(split.points.List);
