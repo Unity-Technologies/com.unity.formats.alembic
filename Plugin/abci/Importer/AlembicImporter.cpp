@@ -99,7 +99,7 @@ abciAPI const char* aiObjectGetName(aiObject* obj)
     return obj ? obj->getName() : "";
 }
 
-abciAPI const char* aiGetFullNameS(aiObject* obj)
+abciAPI const char* aiObjectGetFullName(aiObject* obj)
 {
     return obj ? obj->getFullName() : "";
 }

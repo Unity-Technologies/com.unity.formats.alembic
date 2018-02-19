@@ -284,7 +284,7 @@ namespace UTJ.Alembic
                 var m = meshFilter.sharedMesh;
                 submeshCount = m.subMeshCount;
                 m.name = node.gameObject.name;
-                subassets.Add(m.name, m);
+                subassets.Add(node.abcObject.abcObject.fullname, m);
             }
 
             var renderer = node.gameObject.GetComponent<MeshRenderer>();

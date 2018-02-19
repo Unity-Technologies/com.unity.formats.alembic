@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Reflection;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace UTJ.Alembic
 {
@@ -306,6 +301,7 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
 
         public string name { get { return Marshal.PtrToStringAnsi(aiObjectGetName(self)); } }
+        public string fullname { get { return Marshal.PtrToStringAnsi(aiObjectGetFullName(self)); } }
         public bool enabled { set { aiObjectSetEnabled(self, value); } }
         public int childCount { get { return aiObjectGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
@@ -327,6 +323,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
         [DllImport("abci")] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport("abci")] static extern IntPtr aiObjectGetName(IntPtr obj);
+        [DllImport("abci")] static extern IntPtr aiObjectGetFullName(IntPtr obj);
 
         [DllImport("abci")] static extern aiXform aiObjectAsXform(IntPtr obj);
         [DllImport("abci")] static extern aiCamera aiObjectAsCamera(IntPtr obj);
