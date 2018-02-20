@@ -1,4 +1,5 @@
 {
-	"dependencies": {
-	}
+  "dependencies": {
+    "com.unity.package-manager-ui": "1.7.2"
+  }
 }

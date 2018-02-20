@@ -1,0 +1,12 @@
+{
+    "name": "Unity.Alembic.Runtime",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor",
+        "LinuxStandalone64",
+        "macOSStandalone",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": []
+}

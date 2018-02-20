@@ -1,0 +1,10 @@
+{
+	"name": "com.unity.alembic",
+	"displayName":"Alembic I/O",
+	"version": "0.1.0",
+	"unity": "2017.3",
+	"description": "This package provides support for Alembic files (.abc)",
+	"keywords": [ "alembic", "abc", "animation" ],
+	"dependencies": {
+	}
+}
