@@ -82,7 +82,7 @@ aiTimeSamplingUniform::aiTimeSamplingUniform(double start, double interval, size
 void aiTimeSamplingUniform::getTimeRange(double & begin, double & end) const
 {
     begin = m_start;
-    end = m_start + m_interval * (m_sample_count - 1);
+    end = m_sample_count > 0 ? m_start + m_interval * (m_sample_count - 1) : begin;
 }
 
 size_t aiTimeSamplingUniform::getSampleCount() const
