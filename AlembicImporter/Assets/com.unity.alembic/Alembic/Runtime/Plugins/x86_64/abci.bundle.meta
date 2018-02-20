@@ -1,8 +1,6 @@
 fileFormatVersion: 2
-guid: 351d8e66ee1245c4facf65254c94119a
+guid: 30d3ad42794904a8893d6914c8572ad7
 folderAsset: yes
-timeCreated: 1516348693
-licenseType: Pro
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -12,39 +10,50 @@ PluginImporter:
   isOverridable: 0
   platformData:
   - first:
-      '': OSXIntel
+      '': Any
     second:
       enabled: 0
       settings:
-        CPU: None
+        Exclude Editor: 0
+        Exclude Linux: 1
+        Exclude Linux64: 1
+        Exclude LinuxUniversal: 1
+        Exclude OSXUniversal: 0
+        Exclude Win: 1
+        Exclude Win64: 1
   - first:
-      '': OSXIntel64
-    second:
-      enabled: 1
-      settings:
-        CPU: AnyCPU
-  - first:
-      Any: 
+      '': OSXIntel
     second:
       enabled: 1
       settings: {}
   - first:
-      Editor: Editor
+      '': OSXIntel64
+    second:
+      enabled: 1
+      settings: {}
+  - first:
+      Any: 
     second:
       enabled: 0
+      settings: {}
+  - first:
+      Editor: Editor
+    second:
+      enabled: 1
       settings:
         CPU: x86_64
         DefaultValueInitialized: true
+        OS: OSX
   - first:
       Facebook: Win
     second:
       enabled: 0
       settings:
-        CPU: None
+        CPU: AnyCPU
   - first:
       Facebook: Win64
     second:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
   - first:
@@ -52,35 +61,29 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: None
+        CPU: x86
   - first:
       Standalone: Linux64
     second:
-      enabled: 1
-      settings:
-        CPU: x86_64
-  - first:
-      Standalone: LinuxUniversal
-    second:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: x86_64
   - first:
       Standalone: OSXUniversal
     second:
-      enabled: 0
+      enabled: 1
       settings:
-        CPU: x86_64
+        CPU: AnyCPU
   - first:
       Standalone: Win
     second:
       enabled: 0
       settings:
-        CPU: None
+        CPU: AnyCPU
   - first:
       Standalone: Win64
     second:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
   userData: 

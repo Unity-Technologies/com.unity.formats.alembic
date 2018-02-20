@@ -1,5 +1,5 @@
 file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importer/*.cpp Exporter/*.h Exporter/*.cpp)
-set(plugins_dir "${CMAKE_SOURCE_DIR}/../AlembicImporter/Assets/UTJ/Alembic/Plugins/x86_64")
+set(plugins_dir "${CMAKE_SOURCE_DIR}/../AlembicImporter/Assets/com.unity.alembic/Alembic/Runtime/Plugins/x86_64")
 add_plugin(abci SOURCES ${sources} PLUGINS_DIR ${plugins_dir})
 
 target_include_directories(abci PUBLIC
