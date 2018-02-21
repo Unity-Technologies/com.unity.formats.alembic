@@ -756,12 +756,12 @@ namespace UTJ.Alembic
         {
             if (m_recording)
             {
-                Debug.Log("AlembicRecorder: already recording");
+                Debug.LogWarning("AlembicRecorder: already recording");
                 return false;
             }
             if (m_settings.scope == ExportScope.TargetBranch && targetBranch == null)
             {
-                Debug.Log("AlembicRecorder: target object is not set");
+                Debug.LogWarning("AlembicRecorder: target object is not set");
                 return false;
             }
 
