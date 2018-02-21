@@ -386,18 +386,16 @@ namespace UTJ.Alembic
         public class MeshCapturer : ComponentCapturer
         {
             MeshRenderer m_target;
-            MeshBuffer m_mbuf;
+            MeshBuffer m_mbuf = new MeshBuffer();
 
             public override void Setup(Component c)
             {
-                var target = c as MeshRenderer;
-                m_target = target;
+                m_target = c as MeshRenderer;
                 var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
                 if (mesh == null)
                     return;
 
-                abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
-                m_mbuf = new MeshBuffer();
+                abcObject = parent.abcObject.NewPolyMesh(m_target.name, timeSamplingIndex);
                 if (recorder.settings.meshSubmeshes)
                     m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
             }
@@ -426,7 +424,7 @@ namespace UTJ.Alembic
             Mesh m_meshSrc;
             Mesh m_meshBake;
             Cloth m_cloth;
-            MeshBuffer m_mbuf;
+            MeshBuffer m_mbuf = new MeshBuffer();
             ClothBuffer m_cbuf;
 
             public override void Setup(Component c)
@@ -438,7 +436,6 @@ namespace UTJ.Alembic
                     return;
 
                 abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
-                m_mbuf = new MeshBuffer();
                 if (recorder.settings.meshSubmeshes)
                     m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
 
@@ -497,9 +494,8 @@ namespace UTJ.Alembic
 
             public override void Setup(Component c)
             {
-                var target = c as ParticleSystem;
-                abcObject = parent.abcObject.NewPoints(target.name, timeSamplingIndex);
-                m_target = target;
+                m_target = c as ParticleSystem;
+                abcObject = parent.abcObject.NewPoints(m_target.name, timeSamplingIndex);
             }
 
             public override void Capture()
