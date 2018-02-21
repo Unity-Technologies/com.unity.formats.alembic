@@ -15,16 +15,17 @@ namespace UTJ.Alembic
     public enum ExportScope
     {
         EntireScene,
-        CurrentBranch,
+        TargetBranch,
     }
 
 
     [Serializable]
     public class AlembicRecorderSettings
     {
-        public string outputPath  = "Output/Alembic.abc";
+        public string outputPath  = "Output/Output.abc";
         public aeConfig conf = aeConfig.defaultValue;
         public ExportScope scope = ExportScope.EntireScene;
+        public GameObject targetBranch;
         public bool fixDeltaTime = true;
 
         public bool assumeNonSkinnedMeshesAreConstant = true;
@@ -573,7 +574,6 @@ namespace UTJ.Alembic
 
         #region fields
         [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
-        [SerializeField] GameObject m_targetBranch;
 
         aeContext m_ctx;
         ComponentCapturer m_root;
@@ -598,7 +598,7 @@ namespace UTJ.Alembic
             get { return m_settings; }
             set { m_settings = value; }
         }
-        public GameObject targetBranch { get { return m_targetBranch; } set { m_targetBranch = value; } }
+        public GameObject targetBranch { get { return m_settings.targetBranch; } set { m_settings.targetBranch = value; } }
         public bool recording { get { return m_recording; } }
         public int frameCount { get { return m_frameCount; } }
         #endregion
@@ -622,9 +622,9 @@ namespace UTJ.Alembic
 
         T[] GetTargets<T>() where T : Component
         {
-            if (m_settings.scope == ExportScope.CurrentBranch && m_targetBranch != null)
+            if (m_settings.scope == ExportScope.TargetBranch && targetBranch != null)
             {
-                return m_targetBranch.GetComponentsInChildren<T>();
+                return targetBranch.GetComponentsInChildren<T>();
             }
             else
             {
@@ -634,8 +634,8 @@ namespace UTJ.Alembic
 
         Component[] GetTargets(Type type)
         {
-            if (m_settings.scope == ExportScope.CurrentBranch && m_targetBranch != null)
-                return m_targetBranch.GetComponentsInChildren(type);
+            if (m_settings.scope == ExportScope.TargetBranch && targetBranch != null)
+                return targetBranch.GetComponentsInChildren(type);
             else
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
         }
@@ -763,6 +763,12 @@ namespace UTJ.Alembic
                 Debug.Log("AlembicRecorder: already recording");
                 return false;
             }
+            if (m_settings.scope == ExportScope.TargetBranch && targetBranch == null)
+            {
+                Debug.Log("AlembicRecorder: target object is not set");
+                return false;
+            }
+
 
             {
                 var dir = Path.GetDirectoryName(m_settings.outputPath);

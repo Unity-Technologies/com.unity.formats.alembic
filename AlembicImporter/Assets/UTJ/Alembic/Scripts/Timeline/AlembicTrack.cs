@@ -7,7 +7,16 @@ namespace UTJ.Alembic
     [TrackClipType(typeof(AlembicShotAsset))]
     [TrackMediaType(TimelineAsset.MediaType.Script)]
     [TrackColor(0.53f, 0.0f, 0.08f)]
-    public class AlembicTrack : TrackAsset
+    public class AlembicPlayerTrack : TrackAsset
+    {
+    }
+
+
+    [System.Serializable]
+    [TrackClipType(typeof(AlembicRecorderClip))]
+    [TrackMediaType(TimelineAsset.MediaType.Script)]
+    [TrackColor(0.33f, 0.0f, 0.08f)]
+    public class AlembicRecorderTrack : TrackAsset
     {
     }
 }

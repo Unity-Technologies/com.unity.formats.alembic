@@ -21,15 +21,20 @@ namespace UTJ.Alembic
             var settings = recorder.settings;
             var so = serializedObject;
 
+            bool dirty = false;
             var pathSettings = "m_recorder.m_settings";
 
             // output path
             GUILayout.Space(5);
             EditorGUILayout.LabelField("Output Path", EditorStyles.boldLabel);
             {
-                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.BeginHorizontal();
+
+                EditorGUI.BeginChangeCheck();
                 settings.outputPath = EditorGUILayout.TextField(settings.outputPath);
+                if (EditorGUI.EndChangeCheck())
+                    dirty = true;
+
                 if (GUILayout.Button("...", GUILayout.Width(24)))
                 {
                     var dir = "";
@@ -45,14 +50,10 @@ namespace UTJ.Alembic
                     if (path.Length > 0)
                     {
                         settings.outputPath = path;
+                        dirty = true;
                     }
                 }
                 EditorGUILayout.EndHorizontal();
-                if (EditorGUI.EndChangeCheck())
-                {
-                    EditorUtility.SetDirty(target);
-                    EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-                }
             }
             GUILayout.Space(5);
 
@@ -80,7 +81,18 @@ namespace UTJ.Alembic
 
             // capture settings
             EditorGUILayout.LabelField("Capture Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".scope"));
+            var scope = so.FindProperty(pathSettings + ".scope");
+            var targetBranch = so.FindProperty(pathSettings + ".targetBranch");
+            EditorGUILayout.PropertyField(scope);
+            if (scope.intValue == (int)ExportScope.TargetBranch)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUI.BeginChangeCheck();
+                settings.targetBranch = EditorGUILayout.ObjectField("Target", settings.targetBranch, typeof(GameObject), true) as GameObject;
+                if (EditorGUI.EndChangeCheck())
+                    dirty = true;
+                EditorGUI.indentLevel--;
+            }
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + ".assumeNonSkinnedMeshesAreConstant"));
             GUILayout.Space(5);
 

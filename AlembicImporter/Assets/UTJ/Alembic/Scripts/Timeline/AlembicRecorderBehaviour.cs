@@ -75,9 +75,6 @@ namespace UTJ.Alembic
 
         public override void OnPlayableCreate(Playable playable)
         {
-#if UNITY_EDITOR
-            m_recorder.settings.outputPath = "Output/Output.abc";
-#endif
         }
 
 
