@@ -78,7 +78,7 @@ namespace UTJ.Alembic
             {
                 EditorGUI.indentLevel++;
                 EditorGUI.BeginChangeCheck();
-                settings.targetBranch = EditorGUILayout.ObjectField("Target", settings.targetBranch, typeof(GameObject), true) as GameObject;
+                t.targetBranch = EditorGUILayout.ObjectField("Target", t.targetBranch, typeof(GameObject), true) as GameObject;
                 if (EditorGUI.EndChangeCheck())
                     dirty = true;
                 EditorGUI.indentLevel--;
