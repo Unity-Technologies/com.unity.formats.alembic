@@ -267,50 +267,152 @@ namespace UTJ.Alembic
             aiPropertyType type;
         }
 
+        [DllImport("libdl")] static extern IntPtr dlopen(string filename, int flags);
+        [DllImport("libdl")] static extern IntPtr dlsym(IntPtr handle, string symbol);
+        const int RTLD_LAZY = 1;
+        const int RTLD_NOW = 2;
+        const int RTLD_LOCAL = 4;
+        const int RTLD_GLOBAL = 8;
+        const int RTLD_FIRST = 256;
 
-        [DllImport("abci")] public static extern            aiSampleSelector aiTimeToSampleSelector(float time);
-        [DllImport("abci")] public static extern void       aiCleanup();
-        [DllImport("abci")] public static extern void       clearContextsWithPath(string path);
-        [DllImport("abci")] public static extern aiContext  aiCreateContext(int uid);
-        [DllImport("abci")] public static extern void       aiDestroyContext(aiContext ctx);
-        [DllImport("abci")] public static extern Bool       aiLoad(aiContext ctx, string path);
-        [DllImport("abci")] public static extern void       aiSetConfig(aiContext ctx, ref aiConfig conf);
-        [DllImport("abci")] public static extern float      aiGetStartTime(aiContext ctx);
-        [DllImport("abci")] public static extern float      aiGetEndTime(aiContext ctx);
-        [DllImport("abci")] public static extern int        getFrameCount(aiContext ctx);
-        [DllImport("abci")] public static extern aiObject   aiGetTopObject(aiContext ctx);
-        [DllImport("abci")] public static extern void       aiDestroyObject(aiContext ctx, aiObject obj);
-        [DllImport("abci")] public static extern void       aiUpdateSamples(aiContext ctx, float time);
-        [DllImport("abci")] public static extern void       aiEnumerateChild(aiObject obj, aiNodeEnumerator e, IntPtr userData);
-        [DllImport("abci")] private static extern IntPtr    aiGetNameS(aiObject obj);
+        const string libpath = "UnityPackageManager/com.unity.alembic/Alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
+        static IntPtr s_moduleHandle = dlopen(libpath, RTLD_LAZY|RTLD_LOCAL|RTLD_FIRST);
+        static T Get<T>(string name) where T: class {
+            if(s_moduleHandle == (IntPtr)0) { throw new System.ArgumentException(string.Format("abci not found in `{0}'", libpath)); }
+            var funHandle = dlsym(s_moduleHandle, name);
+            if(funHandle == (IntPtr)0) { throw new System.ArgumentException(string.Format("symbol `{0}' not found in abci", name)); }
+            return Marshal.GetDelegateForFunctionPointer(funHandle, typeof(T)) as T;
+        }
+
+        public delegate void clearContextsWithPathDelegate(string path);
+        public static clearContextsWithPathDelegate clearContextsWithPath = Get<clearContextsWithPathDelegate>("clearContextsWithPath");
+
+        public delegate aiSampleSelector aiTimeToSampleSelectorDelegate(float time);
+        public static aiTimeToSampleSelectorDelegate aiTimeToSampleSelector = Get<aiTimeToSampleSelectorDelegate>("aiTimeToSampleSelector");
+
+        public delegate void       aiCleanupDelegate();
+        public static aiCleanupDelegate aiCleanup = Get<aiCleanupDelegate>("aiCleanup");
+
+        public delegate aiContext  aiCreateContextDelegate(int uid);
+        public static aiCreateContextDelegate aiCreateContext = Get<aiCreateContextDelegate>("aiCreateContext");
+
+        public delegate void       aiDestroyContextDelegate(aiContext ctx);
+        public static aiDestroyContextDelegate aiDestroyContext = Get<aiDestroyContextDelegate>("aiDestroyContext");
+
+        public delegate Bool       aiLoadDelegate(aiContext ctx, string path);
+        public static aiLoadDelegate aiLoad = Get<aiLoadDelegate>("aiLoad");
+
+        public delegate void       aiSetConfigDelegate(aiContext ctx, ref aiConfig conf);
+        public static aiSetConfigDelegate aiSetConfig = Get<aiSetConfigDelegate>("aiSetConfig");
+
+        public delegate float      aiGetStartTimeDelegate(aiContext ctx);
+        public static aiGetStartTimeDelegate aiGetStartTime = Get<aiGetStartTimeDelegate>("aiGetStartTime");
+
+        public delegate float      aiGetEndTimeDelegate(aiContext ctx);
+        public static aiGetEndTimeDelegate aiGetEndTime = Get<aiGetEndTimeDelegate>("aiGetEndTime");
+
+        public delegate int        getFrameCountDelegate(aiContext ctx);
+        public static getFrameCountDelegate getFrameCount = Get<getFrameCountDelegate>("getFrameCount");
+
+        public delegate aiObject   aiGetTopObjectDelegate(aiContext ctx);
+        public static aiGetTopObjectDelegate aiGetTopObject = Get<aiGetTopObjectDelegate>("aiGetTopObject");
+
+        public delegate void       aiDestroyObjectDelegate(aiContext ctx, aiObject obj);
+        public static aiDestroyObjectDelegate aiDestroyObject = Get<aiDestroyObjectDelegate>("aiDestroyObject");
+
+        public delegate void       aiUpdateSamplesDelegate(aiContext ctx, float time);
+        public static aiUpdateSamplesDelegate aiUpdateSamples = Get<aiUpdateSamplesDelegate>("aiUpdateSamples");
+
+        public delegate void       aiEnumerateChildDelegate(aiObject obj, aiNodeEnumerator e, IntPtr userData);
+        public static aiEnumerateChildDelegate aiEnumerateChild = Get<aiEnumerateChildDelegate>("aiEnumerateChild");
+
+        private delegate IntPtr    aiGetNameSDelegate(aiObject obj);
+        private static aiGetNameSDelegate aiGetNameS = Get<aiGetNameSDelegate>("aiGetNameS");
         public static string aiGetName(aiObject obj)      { return Marshal.PtrToStringAnsi(aiGetNameS(obj)); }
-        [DllImport("abci")] public static extern void       aiSchemaSetSampleCallback(aiSchema schema, aiSampleCallback cb, IntPtr arg);
-        [DllImport("abci")] public static extern void       aiSchemaSetConfigCallback(aiSchema schema, aiConfigCallback cb, IntPtr arg);
-        [DllImport("abci")] public static extern aiSample   aiSchemaUpdateSample(aiSchema schema, ref aiSampleSelector ss);
-        [DllImport("abci")] public static extern aiSchema   aiGetXForm(aiObject obj);
-        [DllImport("abci")] public static extern void       aiXFormGetData(aiSample sample, ref aiXFormData data);
-        [DllImport("abci")] public static extern aiSchema   aiGetPolyMesh(aiObject obj);
-        [DllImport("abci")] public static extern void       aiPolyMeshGetSummary(aiSchema schema, ref aiMeshSummary summary);
-        [DllImport("abci")] public static extern void       aiPolyMeshGetSampleSummary(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
-        [DllImport("abci")] public static extern int        aiPolyMeshGetVertexBufferLength(aiSample sample, int splitIndex);
-        [DllImport("abci")] public static extern void       aiPolyMeshFillVertexBuffer(aiSample sample, int splitIndex, ref aiPolyMeshData data);
-        [DllImport("abci")] public static extern int        aiPolyMeshPrepareSubmeshes(aiSample sample, ref aiFacesets facesets);
-        [DllImport("abci")] public static extern int        aiPolyMeshGetSplitSubmeshCount(aiSample sample, int splitIndex);
-        [DllImport("abci")] public static extern Bool       aiPolyMeshGetNextSubmesh(aiSample sample, ref aiSubmeshSummary smi);
-        [DllImport("abci")] public static extern void       aiPolyMeshFillSubmeshIndices(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
-        [DllImport("abci")] public static extern aiSchema   aiGetCamera(aiObject obj);
-        [DllImport("abci")] public static extern void       aiCameraGetData(aiSample sample, ref aiCameraData data);
-        [DllImport("abci")] public static extern aiSchema   aiGetPoints(aiObject obj);
-        [DllImport("abci")] public static extern void       aiPointsSetSort(aiSchema schema, Bool v);
-        [DllImport("abci")] public static extern void       aiPointsSetSortBasePosition(aiSchema schema, Vector3 v);
-        [DllImport("abci")] public static extern void       aiPointsGetSummary(aiSchema schema, ref aiPointsSummary summary);
-        [DllImport("abci")] public static extern void       aiPointsCopyData(aiSample sample, ref aiPointsData data);
-        [DllImport("abci")] public static extern int             aiSchemaGetNumProperties(aiSchema schema);
-        [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByIndex(aiSchema schema, int i);
-        [DllImport("abci")] public static extern aiProperty      aiSchemaGetPropertyByName(aiSchema schema, string name);
-        [DllImport("abci")] public static extern IntPtr          aiPropertyGetNameS(aiProperty prop);
-        [DllImport("abci")] public static extern aiPropertyType  aiPropertyGetType(aiProperty prop);
-        [DllImport("abci")] public static extern void            aiPropertyGetData(aiProperty prop, aiPropertyData oData);
+
+        public delegate void       aiSchemaSetSampleCallbackDelegate(aiSchema schema, aiSampleCallback cb, IntPtr arg);
+        public static aiSchemaSetSampleCallbackDelegate aiSchemaSetSampleCallback = Get<aiSchemaSetSampleCallbackDelegate>("aiSchemaSetSampleCallback");
+
+        public delegate void       aiSchemaSetConfigCallbackDelegate(aiSchema schema, aiConfigCallback cb, IntPtr arg);
+        public static aiSchemaSetConfigCallbackDelegate aiSchemaSetConfigCallback = Get<aiSchemaSetConfigCallbackDelegate>("aiSchemaSetConfigCallback");
+
+        public delegate aiSample   aiSchemaUpdateSampleDelegate(aiSchema schema, ref aiSampleSelector ss);
+        public static aiSchemaUpdateSampleDelegate aiSchemaUpdateSample = Get<aiSchemaUpdateSampleDelegate>("aiSchemaUpdateSample");
+
+        public delegate aiSchema   aiGetXFormDelegate(aiObject obj);
+        public static aiGetXFormDelegate aiGetXForm = Get<aiGetXFormDelegate>("aiGetXForm");
+
+        public delegate void       aiXFormGetDataDelegate(aiSample sample, ref aiXFormData data);
+        public static aiXFormGetDataDelegate aiXFormGetData = Get<aiXFormGetDataDelegate>("aiXFormGetData");
+
+        public delegate aiSchema   aiGetPolyMeshDelegate(aiObject obj);
+        public static aiGetPolyMeshDelegate aiGetPolyMesh = Get<aiGetPolyMeshDelegate>("aiGetPolyMesh");
+
+        public delegate void       aiPolyMeshGetSummaryDelegate(aiSchema schema, ref aiMeshSummary summary);
+        public static aiPolyMeshGetSummaryDelegate aiPolyMeshGetSummary = Get<aiPolyMeshGetSummaryDelegate>("aiPolyMeshGetSummary");
+
+        public delegate void       aiPolyMeshGetSampleSummaryDelegate(aiSample sample, ref aiMeshSampleSummary summary, Bool forceRefresh);
+        public static aiPolyMeshGetSampleSummaryDelegate aiPolyMeshGetSampleSummary = Get<aiPolyMeshGetSampleSummaryDelegate>("aiPolyMeshGetSampleSummary");
+
+        public delegate int        aiPolyMeshGetVertexBufferLengthDelegate(aiSample sample, int splitIndex);
+        public static aiPolyMeshGetVertexBufferLengthDelegate aiPolyMeshGetVertexBufferLength = Get<aiPolyMeshGetVertexBufferLengthDelegate>("aiPolyMeshGetVertexBufferLength");
+
+        public delegate void       aiPolyMeshFillVertexBufferDelegate(aiSample sample, int splitIndex, ref aiPolyMeshData data);
+        public static aiPolyMeshFillVertexBufferDelegate aiPolyMeshFillVertexBuffer = Get<aiPolyMeshFillVertexBufferDelegate>("aiPolyMeshFillVertexBuffer");
+
+        public delegate int        aiPolyMeshPrepareSubmeshesDelegate(aiSample sample, ref aiFacesets facesets);
+        public static aiPolyMeshPrepareSubmeshesDelegate aiPolyMeshPrepareSubmeshes = Get<aiPolyMeshPrepareSubmeshesDelegate>("aiPolyMeshPrepareSubmeshes");
+
+        public delegate int        aiPolyMeshGetSplitSubmeshCountDelegate(aiSample sample, int splitIndex);
+        public static aiPolyMeshGetSplitSubmeshCountDelegate aiPolyMeshGetSplitSubmeshCount = Get<aiPolyMeshGetSplitSubmeshCountDelegate>("aiPolyMeshGetSplitSubmeshCount");
+
+        public delegate Bool       aiPolyMeshGetNextSubmeshDelegate(aiSample sample, ref aiSubmeshSummary smi);
+        public static aiPolyMeshGetNextSubmeshDelegate aiPolyMeshGetNextSubmesh = Get<aiPolyMeshGetNextSubmeshDelegate>("aiPolyMeshGetNextSubmesh");
+
+        public delegate void       aiPolyMeshFillSubmeshIndicesDelegate(aiSample sample, ref aiSubmeshSummary smi, ref aiSubmeshData data);
+        public static aiPolyMeshFillSubmeshIndicesDelegate aiPolyMeshFillSubmeshIndices = Get<aiPolyMeshFillSubmeshIndicesDelegate>("aiPolyMeshFillSubmeshIndices");
+
+        public delegate aiSchema   aiGetCameraDelegate(aiObject obj);
+        public static aiGetCameraDelegate aiGetCamera = Get<aiGetCameraDelegate>("aiGetCamera");
+
+        public delegate void       aiCameraGetDataDelegate(aiSample sample, ref aiCameraData data);
+        public static aiCameraGetDataDelegate aiCameraGetData = Get<aiCameraGetDataDelegate>("aiCameraGetData");
+
+        public delegate aiSchema   aiGetPointsDelegate(aiObject obj);
+        public static aiGetPointsDelegate aiGetPoints = Get<aiGetPointsDelegate>("aiGetPoints");
+
+        public delegate void       aiPointsSetSortDelegate(aiSchema schema, Bool v);
+        public static aiPointsSetSortDelegate aiPointsSetSort = Get<aiPointsSetSortDelegate>("aiPointsSetSort");
+
+        public delegate void       aiPointsSetSortBasePositionDelegate(aiSchema schema, Vector3 v);
+        public static aiPointsSetSortBasePositionDelegate aiPointsSetSortBasePosition = Get<aiPointsSetSortBasePositionDelegate>("aiPointsSetSortBasePosition");
+
+        public delegate void       aiPointsGetSummaryDelegate(aiSchema schema, ref aiPointsSummary summary);
+        public static aiPointsGetSummaryDelegate aiPointsGetSummary = Get<aiPointsGetSummaryDelegate>("aiPointsGetSummary");
+
+        public delegate void       aiPointsCopyDataDelegate(aiSample sample, ref aiPointsData data);
+        public static aiPointsCopyDataDelegate aiPointsCopyData = Get<aiPointsCopyDataDelegate>("aiPointsCopyData");
+
+        public delegate int             aiSchemaGetNumPropertiesDelegate(aiSchema schema);
+        public static aiSchemaGetNumPropertiesDelegate aiSchemaGetNumProperties = Get<aiSchemaGetNumPropertiesDelegate>("aiSchemaGetNumProperties");
+
+        public delegate aiProperty      aiSchemaGetPropertyByIndexDelegate(aiSchema schema, int i);
+        public static aiSchemaGetPropertyByIndexDelegate aiSchemaGetPropertyByIndex = Get<aiSchemaGetPropertyByIndexDelegate>("aiSchemaGetPropertyByIndex");
+
+        public delegate aiProperty      aiSchemaGetPropertyByNameDelegate(aiSchema schema, string name);
+        public static aiSchemaGetPropertyByNameDelegate aiSchemaGetPropertyByName = Get<aiSchemaGetPropertyByNameDelegate>("aiSchemaGetPropertyByName");
+
+        public delegate IntPtr          aiPropertyGetNameSDelegate(aiProperty prop);
+        public static aiPropertyGetNameSDelegate aiPropertyGetNameS = Get<aiPropertyGetNameSDelegate>("aiPropertyGetNameS");
+
+        public delegate aiPropertyType  aiPropertyGetTypeDelegate(aiProperty prop);
+        public static aiPropertyGetTypeDelegate aiPropertyGetType = Get<aiPropertyGetTypeDelegate>("aiPropertyGetType");
+
+/*
+        public delegate void            aiPropertyGetDataDelegate(aiProperty prop, aiPropertyData oData);
+        public static aiPropertyGetDataDelegate aiPropertyGetData = Get<aiPropertyGetDataDelegate>("aiPropertyGetData");
+*/
+
 
         class ImportContext
         {
