@@ -537,7 +537,7 @@ namespace UTJ.Alembic
         const int RTLD_GLOBAL = 8;
         const int RTLD_FIRST = 256;
 
-        const string libpath = "UnityPackageManager/com.unity.alembic/Alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
+        const string libpath = "UnityPackageManager/com.unity.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
         static IntPtr s_moduleHandle = dlopen(libpath, RTLD_LAZY|RTLD_LOCAL|RTLD_FIRST);
         static T Get<T>(string name) where T: class {
             if(s_moduleHandle == (IntPtr)0) { throw new System.ArgumentException(string.Format("abci not found in `{0}'", libpath)); }

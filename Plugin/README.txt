@@ -49,3 +49,18 @@ Building on Linux:
 ==================
 
 Should be similar to building on OSX, but you might need to change the build.sh a bit.
+
+
+==================
+Moving the package
+==================
+
+Paths are hardcoded in two places:
+- abci/CMakeLists.txt says where to install the built module (the swig
+  front-end, basically)
+- AbcAPI.cs says where to find the build module at runtime, relative to the
+  project directory.
+
+Because Unity Package Manager for 2017.3 and 2018.1 doesn't support native
+modules, we need to load the library by hand. Otherwise we could ignore
+that second path and use [DllImport].
