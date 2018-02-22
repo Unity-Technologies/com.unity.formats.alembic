@@ -30,19 +30,26 @@ public:
     void writeFaceSetSample(int faceset_index, const aeFaceSetData &data);
 
 private:
-    void    writeSampleBody();
+    void writeSampleBody();
+
+    struct SubmeshBuffer
+    {
+        RawVector<int> indices;
+        aeTopology topology = aeTopology::Triangles;
+    };
 
     AbcGeom::OPolyMeshSchema m_schema;
-    std::unique_ptr<AbcGeom::OV2fGeomParam> m_uv1_param;
-    std::unique_ptr<AbcGeom::OC4fGeomParam> m_colors_param;
+    AbcGeom::OV2fGeomParam m_uv1_param;
+    AbcGeom::OC4fGeomParam m_colors_param;
     std::vector<aeFaceSetPtr> m_facesets;
 
     bool m_buf_visibility = true;
 
     RawVector<int>   m_buf_faces;
+    RawVector<int>   m_buf_indices;
+
     RawVector<abcV3> m_buf_points;
     RawVector<abcV3> m_buf_velocities;
-    RawVector<int>   m_buf_indices;
 
     RawVector<abcV3> m_buf_normals;
     RawVector<int>   m_buf_normal_indices;
@@ -55,4 +62,7 @@ private:
 
     RawVector<abcV4> m_buf_colors;
     RawVector<int>   m_buf_colors_indices;
+
+    std::vector<SubmeshBuffer> m_buf_submeshes;
+    RawVector<int> m_tmp_facecet;
 };

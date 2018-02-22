@@ -36,6 +36,14 @@ enum class aeXFromType
     TRS,
 };
 
+enum class aeTopology
+{
+    Points,
+    Lines,
+    Triangles,
+    Quads,
+};
+
 enum class aePropertyType
 {
     Unknown,
@@ -71,7 +79,6 @@ struct aeConfig
 {
     aeArchiveType archive_type = aeArchiveType::Ogawa;
     aeTimeSamplingType time_sampling_type = aeTimeSamplingType::Uniform;
-    float start_time = 0.0f;    // start time on Alembic.
     float frame_rate = 30.0f;    // frame rate on Alembic. relevant only if time_sampling_type is uniform
     aeXFromType xform_type = aeXFromType::TRS;
     bool swap_handedness = true; // swap rhs <-> lhs
@@ -88,6 +95,13 @@ struct aeXformData
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
     abcV3 scale = { 1.0f, 1.0f, 1.0f };
     bool inherits = true;
+};
+
+struct aeSubmeshData
+{
+    const int   *indices = nullptr;
+    int         index_count = 0;
+    aeTopology  topology = aeTopology::Triangles;
 };
 
 struct aePolyMeshData
@@ -122,6 +136,9 @@ struct aePolyMeshData
     const int   *colors_indices = nullptr;  // can be null. if null, colors_count must be same as point_count or index_count
     int         colors_count = 0;           // if 0, assume same as position_count
     int         colors_index_count = 0;
+
+    const aeSubmeshData *submeshes = nullptr;
+    int submesh_count = 0;
 };
 
 struct aeFaceSetData
@@ -180,7 +197,7 @@ abciAPI void        aeDeleteObject(aeObject *obj);
 abciAPI aeXform*    aeNewXform(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePoints*   aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
 abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
-abciAPI aeCamera*   aeNewCamera(aeObject *parent, const char *name, int tsi = 1);
+abciAPI aeCamera*   aeNewCamera(aeObject *obj, const char *name, int tsi = 1);
 
 abciAPI int         aeGetNumChildren(aeObject *obj);
 abciAPI aeObject*   aeGetChild(aeObject *obj, int i);
@@ -192,13 +209,15 @@ abciAPI aeCamera*   aeAsCamera(aeObject *obj);
 
 abciAPI int         aeGetNumSamples(aeSchema *obj);
 abciAPI void        aeSetFromPrevious(aeSchema *obj);
+abciAPI void        aeMarkForceInvisible(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
-abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
-abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
-abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
-abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
+abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
+
+abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
+abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
+abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
 
 abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type);
 abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);

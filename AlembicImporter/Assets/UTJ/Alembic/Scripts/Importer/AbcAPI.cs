@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Reflection;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace UTJ.Alembic
 {
@@ -37,12 +32,19 @@ namespace UTJ.Alembic
         Heterogeneous, // both vertices and topology are variant
     }
 
+    public enum aiTopology
+    {
+        Points,
+        Lines,
+        Triangles,
+        Quads,
+    };
+
     public enum aiTimeSamplingType
     {
         Uniform,
         Cyclic,
         Acyclic,
-        Mixed,
     };
 
     public enum aiPropertyType
@@ -89,6 +91,9 @@ namespace UTJ.Alembic
         public Bool interpolateSamples;
         public Bool turnQuadEdges;
         public Bool asyncLoad;
+        public Bool importPointPolygon;
+        public Bool importLinePolygon;
+        public Bool importTrianglePolygon;
 
         public void SetDefaults()
         {
@@ -107,6 +112,9 @@ namespace UTJ.Alembic
             interpolateSamples = true;
             turnQuadEdges = false;
             asyncLoad = true;
+            importPointPolygon = true;
+            importLinePolygon = true;
+            importTrianglePolygon = true;
         }
     }
 
@@ -161,6 +169,7 @@ namespace UTJ.Alembic
         public int splitIndex;
         public int submeshIndex;
         public int indexCount;
+        public aiTopology topology;
     }
 
     public struct aiPolyMeshData
@@ -244,14 +253,6 @@ namespace UTJ.Alembic
         aiPropertyType type;
     }
 
-    public struct aiTimeRange
-    {
-        public aiTimeSamplingType type;
-        public int frameCount;
-        public double startTime;
-        public double endTime;
-    };
-
 
     public struct aiContext
     {
@@ -267,16 +268,9 @@ namespace UTJ.Alembic
         public void UpdateSamples(double time) { aiContextUpdateSamples(self, time); }
 
         public aiObject topObject { get { return aiContextGetTopObject(self); } }
-        public aiTimeRange timeRage {
-            get { var ret = default(aiTimeRange); aiContextGetTimeRange(self, -1, ref ret); return ret; }
-        }
-        public int timeRangeCount { get { return aiContextGetTimeRangeCount(self); } }
-        public aiTimeRange GetTimeRange(int i)
-        {
-            var ret = default(aiTimeRange);
-            aiContextGetTimeRange(self, i, ref ret);
-            return ret;
-        }
+        public int timeSamplingCount { get { return aiContextGetTimeSamplingCount(self); } }
+        public aiTimeSampling GetTimeSampling(int i) { return aiContextGetTimeSampling(self, i); }
+        public void GetTimeRange(ref double begin, ref double end) { aiContextGetTimeRange(self, ref begin, ref end); }
 
         #region internal
         [DllImport("abci")] public static extern void aiClearContextsWithPath(string path);
@@ -284,10 +278,26 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport("abci")] static extern Bool aiContextLoad(IntPtr ctx, string path);
         [DllImport("abci")] static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
-        [DllImport("abci")] static extern int aiContextGetTimeRangeCount(IntPtr ctx);
-        [DllImport("abci")] static extern void aiContextGetTimeRange(IntPtr ctx, int i, ref aiTimeRange dst);
+        [DllImport("abci")] static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
+        [DllImport("abci")] static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
+        [DllImport("abci")] static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
         [DllImport("abci")] static extern aiObject aiContextGetTopObject(IntPtr ctx);
         [DllImport("abci")] static extern void aiContextUpdateSamples(IntPtr ctx, double time);
+        #endregion
+    }
+
+    public struct aiTimeSampling
+    {
+        public IntPtr self;
+
+        public int sampleCount { get { return aiTimeSamplingGetSampleCount(self); } }
+        public double GetTime(int index) { return aiTimeSamplingGetTime(self, index); }
+        public void GetRange(ref double start, ref double end) { aiTimeSamplingGetRange(self, ref start, ref end); }
+
+        #region internal
+        [DllImport("abci")] static extern int aiTimeSamplingGetSampleCount(IntPtr self);
+        [DllImport("abci")] static extern double aiTimeSamplingGetTime(IntPtr self, int index);
+        [DllImport("abci")] static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
         #endregion
     }
 
@@ -297,6 +307,7 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
 
         public string name { get { return Marshal.PtrToStringAnsi(aiObjectGetName(self)); } }
+        public string fullname { get { return Marshal.PtrToStringAnsi(aiObjectGetFullName(self)); } }
         public bool enabled { set { aiObjectSetEnabled(self, value); } }
         public int childCount { get { return aiObjectGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
@@ -318,6 +329,7 @@ namespace UTJ.Alembic
         [DllImport("abci")] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
         [DllImport("abci")] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport("abci")] static extern IntPtr aiObjectGetName(IntPtr obj);
+        [DllImport("abci")] static extern IntPtr aiObjectGetFullName(IntPtr obj);
 
         [DllImport("abci")] static extern aiXform aiObjectAsXform(IntPtr obj);
         [DllImport("abci")] static extern aiCamera aiObjectAsCamera(IntPtr obj);
@@ -517,24 +529,5 @@ namespace UTJ.Alembic
         [DllImport("abci")] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
         [DllImport("abci")] public static extern void aiCleanup();
 
-    }
-
-    public class AbcUtils
-    {
-    #if UNITY_EDITOR
-        
-        static MethodInfo s_GetBuiltinExtraResourcesMethod;
-
-        public static Material GetDefaultMaterial()
-        {
-            if (s_GetBuiltinExtraResourcesMethod == null)
-            {
-                BindingFlags bfs = BindingFlags.NonPublic | BindingFlags.Static;
-                s_GetBuiltinExtraResourcesMethod = typeof(EditorGUIUtility).GetMethod("GetBuiltinExtraResource", bfs);
-            }
-            return (Material)s_GetBuiltinExtraResourcesMethod.Invoke(null, new object[] { typeof(Material), "Default-Material.mat" });
-        }
-
-    #endif
     }
 }

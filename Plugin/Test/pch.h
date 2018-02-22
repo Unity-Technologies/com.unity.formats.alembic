@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <numeric>
 #include <functional>
 #include <memory>
 #include <iostream>

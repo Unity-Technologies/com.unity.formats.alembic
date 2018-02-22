@@ -1,6 +1,4 @@
-﻿#if UNITY_2017_1_OR_NEWER
-
-using UnityEngine.Playables;
+﻿using UnityEngine.Playables;
 
 namespace UTJ.Alembic
 {
@@ -21,5 +19,3 @@ namespace UTJ.Alembic
         }
     }
 }
-
-#endif

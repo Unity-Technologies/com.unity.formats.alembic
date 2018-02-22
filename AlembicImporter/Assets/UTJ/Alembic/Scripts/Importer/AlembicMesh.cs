@@ -26,7 +26,6 @@ namespace UTJ.Alembic
 
             public Mesh mesh;
             public GameObject host;
-            public bool topologyChanged = true;
             public bool active = true;
 
             public Vector3 center;
@@ -120,8 +119,6 @@ namespace UTJ.Alembic
             for (int spi = 0; spi < splitCount; ++spi)
             {
                 var split = m_splits[spi];
-
-                split.topologyChanged = topologyChanged;
                 split.active = true;
 
                 int vertexCount = m_splitSummaries[spi].vertexCount;
@@ -214,14 +211,16 @@ namespace UTJ.Alembic
             var sample = m_abcSchema.sample;
             sample.Sync();
 
-            if(!abcTreeNode.stream.ignoreVisibility)
+            bool topologyChanged = m_sampleSummary.topologyChanged;
+            if (!abcTreeNode.stream.ignoreVisibility)
             {
-                abcTreeNode.gameObject.SetActive(m_sampleSummary.visibility);
-                if (!m_sampleSummary.visibility)
+                var visible = m_sampleSummary.visibility;
+                abcTreeNode.gameObject.SetActive(visible);
+                if (!visible && !topologyChanged)
                     return;
             }
 
-            bool useSubObjects = (m_summary.topologyVariance == aiTopologyVariance.Heterogeneous || m_sampleSummary.splitCount > 1);
+            bool useSubObjects = m_sampleSummary.splitCount > 1;
 
             for (int s = 0; s < m_splits.Count; ++s)
             {
@@ -260,8 +259,11 @@ namespace UTJ.Alembic
                     // Feshly created splits may not have their mesh set yet
                     if (split.mesh == null)
                         split.mesh = AddMeshComponents(split.host);
-                    if (split.topologyChanged)
+                    if (topologyChanged)
+                    {
                         split.mesh.Clear();
+                        split.mesh.subMeshCount = m_splitSummaries[s].submeshCount;
+                    }
 
                     if (split.points.Count > 0)
                         split.mesh.SetVertices(split.points.List);
@@ -282,34 +284,6 @@ namespace UTJ.Alembic
                     var data = m_splitData[s];
                     split.mesh.bounds = new Bounds(data.center, data.extents);
 
-                    if (split.topologyChanged)
-                    {
-                        int submeshCount = m_splitSummaries[s].submeshCount;
-                        split.mesh.subMeshCount = submeshCount;
-                        MeshRenderer renderer = split.host.GetComponent<MeshRenderer>();
-                        Material[] currentMaterials = renderer.sharedMaterials;
-                        int nmat = currentMaterials.Length;
-                        if (nmat != submeshCount)
-                        {
-                            Material[] materials = new Material[submeshCount];
-                            int copyTo = (nmat < submeshCount ? nmat : submeshCount);
-                            for (int i = 0; i < copyTo; ++i)
-                            {
-                                materials[i] = currentMaterials[i];
-                            }
-#if UNITY_EDITOR
-                            for (int i = copyTo; i < submeshCount; ++i)
-                            {
-                                Material material = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-                                material.name = "Material_" + Convert.ToString(i);
-                                materials[i] = material;
-                            }
-#endif
-                            renderer.sharedMaterials = materials;
-                        }
-                    }
-
-                    split.topologyChanged = false;
                     split.host.SetActive(true);
                 }
                 else
@@ -325,45 +299,43 @@ namespace UTJ.Alembic
                 {
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
-                    split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex);
+                    if (sum.topology == aiTopology.Triangles)
+                        split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
+                    else if (sum.topology == aiTopology.Lines)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Lines, sum.submeshIndex, false);
+                    else if (sum.topology == aiTopology.Points)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Points, sum.submeshIndex, false);
+                    else if (sum.topology == aiTopology.Quads)
+                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Quads, sum.submeshIndex, false);
                 }
-                }
+            }
         }
 
         Mesh AddMeshComponents(GameObject go)
         {
             Mesh mesh = null;
-            MeshFilter meshFilter = go.GetComponent<MeshFilter>();
+            var meshFilter = go.GetComponent<MeshFilter>();
             bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
-            if( !hasMesh)
+            if (!hasMesh)
             {
                 mesh = new Mesh {name = "dyn: " + go.name};
 #if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = IndexFormat.UInt32;
 #endif
                 mesh.MarkDynamic();
+
                 if (meshFilter == null)
-                {
                     meshFilter = go.AddComponent<MeshFilter>();
-                }
                 meshFilter.sharedMesh = mesh;
 
-                MeshRenderer renderer = go.GetComponent<MeshRenderer>();
+                var renderer = go.GetComponent<MeshRenderer>();
                 if (renderer == null)
                 {
                     renderer = go.AddComponent<MeshRenderer>();
+                    var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                    renderer.sharedMaterial = material;
                 }
-
-                var mat = go.transform.parent.GetComponentInChildren<MeshRenderer>().sharedMaterial;
-    #if UNITY_EDITOR
-                if (mat == null)
-                {
-                    mat = UnityEngine.Object.Instantiate(AbcUtils.GetDefaultMaterial());
-                    mat.name = "Material_0";    
-                }
-    #endif
-                renderer.sharedMaterial = mat;
             }
             else
             {

@@ -56,12 +56,16 @@ public:
     virtual void    setFromPrevious() = 0;
     virtual abcProperties getAbcProperties() = 0;
 
-    void writeVisibility(bool v);
-
     /// T: abcFloatArrayProperty, abcFloatProperty, etc
     template<class T> aeProperty* newProperty(const char *name, uint32_t tsi = 0);
 
+    void markForceInvisible();
+
 protected:
+    void writeVisibility(bool v);
+
     AbcGeom::OVisibilityProperty m_visibility_prop;
     std::vector<aePropertyPtr> m_properties;
+
+    bool m_force_invisible = false;
 };

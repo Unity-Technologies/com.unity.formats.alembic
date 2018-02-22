@@ -11,34 +11,45 @@ namespace UTJ.Alembic
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     public class AlembicImporterEditor : ScriptedImporterEditor
     {
+        bool m_foldMeshOptions = true;
         bool m_foldComponents = true;
 
         public override void OnInspectorGUI()
         {
             var importer = serializedObject.targetObject as AlembicImporter;
 
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.normals"), Enum.GetNames(typeof(aiNormalsMode)));
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.tangents"), Enum.GetNames(typeof(aiTangentsMode)));
-            DisplayEnumProperty(serializedObject.FindProperty("streamSettings.cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)));
+            var pathSettings = "streamSettings.";
+            DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(aiNormalsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(aiTangentsMode)));
+            DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)));
             EditorGUILayout.Separator();
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.scaleFactor"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapHandedness"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.swapFaceWinding"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.turnQuadEdges"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "scaleFactor"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapHandedness"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "interpolateSamples"));
             EditorGUILayout.Separator();
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.interpolateSamples"));
-            EditorGUILayout.Separator();
-
+            m_foldMeshOptions = EditorGUILayout.Foldout(m_foldMeshOptions, "Mesh Options");
+            if (m_foldMeshOptions)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapFaceWinding"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "turnQuadEdges"));
+                EditorGUILayout.Separator();
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPointPolygon"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importLinePolygon"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
+                EditorGUILayout.Separator();
+                EditorGUI.indentLevel--;
+            }
 
             m_foldComponents = EditorGUILayout.Foldout(m_foldComponents, "Components");
             if(m_foldComponents) {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importXform"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importCamera"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importPolyMesh"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("streamSettings.importPoints"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importXform"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importCamera"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPolyMesh"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPoints"));
                 EditorGUILayout.Separator();
                 EditorGUI.indentLevel--;
             }

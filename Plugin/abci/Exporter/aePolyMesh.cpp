@@ -69,6 +69,14 @@ void aePolyMesh::writeSample(const aePolyMeshData &data)
     m_buf_colors.assign(data.colors, data.colors + (data.colors_count ? data.colors_count : data.point_count));
     m_buf_colors_indices.assign(data.colors_indices, data.colors_indices + data.colors_index_count);
 
+    m_buf_submeshes.resize(data.submesh_count);
+    for (int smi = 0; smi < data.submesh_count; ++smi) {
+        auto& src = data.submeshes[smi];
+        auto& dst = m_buf_submeshes[smi];
+        dst.indices.assign(src.indices, src.indices + src.index_count);
+        dst.topology = src.topology;
+    }
+
     m_ctx->addAsync([this]() { writeSampleBody(); });
 }
 
@@ -110,6 +118,49 @@ void aePolyMesh::writeSampleBody()
     // if face counts are empty, assume all faces are triangles
     if (m_buf_faces.empty()) {
         m_buf_faces.resize((int)(m_buf_indices.size() / 3), 3);
+    }
+
+    // process submesh data if present
+    {
+        int offset_faces = 0;
+        for (size_t smi = 0; smi < m_buf_submeshes.size(); ++smi) {
+            auto& sm = m_buf_submeshes[smi];
+            m_buf_indices.insert(m_buf_indices.end(), sm.indices.begin(), sm.indices.end());
+
+            int ngon = 0;
+            int face_count = 0;
+            switch (sm.topology) {
+            case aeTopology::Lines:
+                ngon = 2;
+                face_count = (int)sm.indices.size() / 2;
+                break;
+            case aeTopology::Triangles:
+                ngon = 3;
+                face_count = (int)sm.indices.size() / 3;
+                break;
+            case aeTopology::Quads:
+                ngon = 4;
+                face_count = (int)sm.indices.size() / 4;
+                break;
+            default: // points
+                ngon = 1;
+                face_count = (int)sm.indices.size();
+                break;
+            }
+            m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
+
+            if (smi < m_facesets.size()) {
+                m_tmp_facecet.resize_discard(face_count);
+                std::iota(m_tmp_facecet.begin(), m_tmp_facecet.end(), offset_faces);
+
+                aeFaceSetData fsd;
+                fsd.faces = m_tmp_facecet.data();
+                fsd.face_count = (int)m_tmp_facecet.size();
+                m_facesets[smi]->writeSample(fsd);
+            }
+
+            offset_faces += face_count;
+        }
     }
 
     // handle swap face option
@@ -165,10 +216,10 @@ void aePolyMesh::writeSampleBody()
     m_schema.set(sample);
 
     if (!m_buf_uv1.empty()) {
-        if (!m_uv1_param) {
+        if (!m_uv1_param.valid()) {
             bool indexed = !m_buf_uv1_indices.empty() || m_buf_uv1.size() == m_buf_points.size();
-            m_uv1_param.reset(new AbcGeom::OV2fGeomParam(
-                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+            m_uv1_param = AbcGeom::OV2fGeomParam(
+                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OV2fGeomParam::Sample sp;
@@ -177,14 +228,14 @@ void aePolyMesh::writeSampleBody()
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv1_indices.data(), m_buf_uv1_indices.size()));
         else if (m_buf_uv1.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        m_uv1_param->set(sp);
+        m_uv1_param.set(sp);
     }
 
     if (!m_buf_colors.empty()) {
-        if (!m_colors_param) {
+        if (!m_colors_param.valid()) {
             bool indexed = !m_buf_colors_indices.empty() || m_buf_colors.size() == m_buf_points.size();
-            m_colors_param.reset(new AbcGeom::OC4fGeomParam(
-                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex()));
+            m_colors_param = AbcGeom::OC4fGeomParam(
+                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OC4fGeomParam::Sample sp;
@@ -193,6 +244,6 @@ void aePolyMesh::writeSampleBody()
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_colors_indices.data(), m_buf_colors_indices.size()));
         else if (m_buf_colors.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
-        m_colors_param->set(sp);
+        m_colors_param.set(sp);
     }
 }

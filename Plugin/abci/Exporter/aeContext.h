@@ -30,10 +30,8 @@ using abcFloat4x4ArrayProperty = Abc::OM44fArrayProperty;
 
 struct aeTimeSamplingData
 {
-    abcChrono start_time;
+    abcChrono start_time = 0.0;
     std::vector<abcChrono> times;
-
-    aeTimeSamplingData() : start_time(0.0) {}
 };
 using aeTimeSamplingPtr = std::shared_ptr<aeTimeSamplingData>;
 

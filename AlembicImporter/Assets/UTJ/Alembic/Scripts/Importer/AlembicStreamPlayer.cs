@@ -46,10 +46,8 @@ namespace UTJ.Alembic
         {
             if (streamDescriptor == null || abcStream == null)
                 return;
-            if (streamDescriptor.abcStartTime == double.MinValue)
-                streamDescriptor.abcStartTime = abcStream.abcTimeRange.startTime;
-            if (streamDescriptor.abcEndTime == double.MaxValue)
-                streamDescriptor.abcEndTime = abcStream.abcTimeRange.endTime;
+            if (streamDescriptor.abcStartTime == double.MinValue || streamDescriptor.abcEndTime == double.MaxValue)
+                abcStream.GetTimeRange(ref streamDescriptor.abcStartTime, ref streamDescriptor.abcEndTime);
             startTime = Mathf.Clamp((float)startTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
             endTime = Mathf.Clamp((float)endTime, (float)startTime, (float)streamDescriptor.abcEndTime);
             ClampTime();

@@ -2,15 +2,16 @@
 
 #include <cstdint>
 
-class   aiContext;
-class   aiObject;
+class aiContext;
+class aiTimeSampling;
+class aiObject;
 #ifdef abciImpl
-    class aiSchema;
+    class aiSchema;         // : aiObject
     class aiSample;
-    class aiXformSample;    // : aiSampleBase
-    class aiCameraSample;   // : aiSampleBase
-    class aiPolyMeshSample; // : aiSampleBase
-    class aiPointsSample;   // : aiSampleBase
+    class aiXformSample;    // : aiSample
+    class aiCameraSample;   // : aiSample
+    class aiPolyMeshSample; // : aiSample
+    class aiPointsSample;   // : aiSample
 #else
     // force make castable
     using aiSchema         = void;
@@ -21,11 +22,11 @@ class   aiObject;
     using aiPointsSample   = void;
 #endif
 
-class   aiXform;    // : aiSchemaBase
-class   aiCamera;   // : aiSchemaBase
-class   aiPolyMesh; // : aiSchemaBase
-class   aiPoints;   // : aiSchemaBase
-class   aiProperty;
+class aiXform;    // : aiSchema
+class aiCamera;   // : aiSchema
+class aiPolyMesh; // : aiSchema
+class aiPoints;   // : aiSchema
+class aiProperty;
 
 enum class aiNormalsMode
 {
@@ -46,7 +47,6 @@ enum class aiTimeSamplingType
     Uniform,
     Cyclic,
     Acyclic,
-    Mixed,
 };
 
 enum class aiTopologyVariance
@@ -54,6 +54,14 @@ enum class aiTopologyVariance
     Constant,
     Homogeneous, // vertices are variant, topology is constant
     Heterogenous, // both vertices and topology are variant
+};
+
+enum class aiTopology
+{
+    Points,
+    Lines,
+    Triangles,
+    Quads,
 };
 
 enum class aiPropertyType
@@ -100,6 +108,10 @@ struct aiConfig
     bool interpolate_samples = true;
     bool turn_quad_edges = false;
     bool async_load = false;
+
+    bool import_point_polygon = true;
+    bool import_line_polygon = true;
+    bool import_triangle_polygon = true;
 };
 
 struct aiXformData
@@ -170,6 +182,7 @@ struct aiSubmeshSummary
     int split_index = 0;
     int submesh_index = 0; // submesh index in split
     int index_count = 0;
+    aiTopology topology = aiTopology::Triangles;
 };
 
 struct aiPolyMeshData
@@ -233,14 +246,6 @@ struct aiPropertyData
     aiPropertyData(void *d, int s, aiPropertyType t) : data(d), size(s), type(t) {}
 };
 
-struct aiTimeRange
-{
-    aiTimeSamplingType type = aiTimeSamplingType::Uniform;
-    int frame_count = 0;
-    double start_time = 0.0f;
-    double end_time = 0.0f;
-};
-
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
@@ -251,12 +256,18 @@ abciAPI aiContext*      aiContextCreate(int uid);
 abciAPI void            aiContextDestroy(aiContext* ctx);
 abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
 abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
-abciAPI int             aiContextGetTimeRangeCount(aiContext* ctx);
-abciAPI void            aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst);
+abciAPI int             aiContextGetTimeSamplingCount(aiContext* ctx);
+abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i);
+abciAPI void            aiContextGetTimeRange(aiContext* ctx, double *begin, double *end);
 abciAPI aiObject*       aiContextGetTopObject(aiContext* ctx);
 abciAPI void            aiContextUpdateSamples(aiContext* ctx, double time);
 
+abciAPI int             aiTimeSamplingGetSampleCount(aiTimeSampling *self);
+abciAPI double          aiTimeSamplingGetTime(aiTimeSampling *self, int index);
+abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end);
+
 abciAPI const char*     aiObjectGetName(aiObject* obj);
+abciAPI const char*     aiObjectGetFullName(aiObject* obj);
 abciAPI int             aiObjectGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiObjectGetChild(aiObject* obj, int i);
 abciAPI aiObject*       aiObjectGetParent(aiObject* obj);

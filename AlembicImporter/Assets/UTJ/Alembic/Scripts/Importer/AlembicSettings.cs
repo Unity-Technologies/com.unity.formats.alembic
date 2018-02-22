@@ -14,6 +14,10 @@ namespace UTJ.Alembic
         [SerializeField] public bool turnQuadEdges = false;
         [SerializeField] public bool interpolateSamples = true;
 
+        [SerializeField] public bool importPointPolygon = true;
+        [SerializeField] public bool importLinePolygon = true;
+        [SerializeField] public bool importTrianglePolygon = true;
+
         [SerializeField] public bool importXform = true;
         [SerializeField] public bool importCamera = true;
         [SerializeField] public bool importPolyMesh = true;

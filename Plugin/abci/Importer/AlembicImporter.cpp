@@ -51,17 +51,20 @@ abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
         ctx->setConfig(*conf);
 }
 
-abciAPI int aiContextGetTimeRangeCount(aiContext* ctx)
+abciAPI int aiContextGetTimeSamplingCount(aiContext* ctx)
 {
-    if (ctx)
-        return ctx->getTimeSamplingCount();
-    return 0;
+    return ctx ? ctx->getTimeSamplingCount() : 0;
 }
 
-abciAPI void aiContextGetTimeRange(aiContext* ctx, int i, aiTimeRange *dst)
+abciAPI aiTimeSampling * aiContextGetTimeSampling(aiContext * ctx, int i)
 {
-    if(ctx && dst)
-        ctx->getTimeRange(i, *dst);
+    return ctx ? ctx->getTimeSampling(i) : nullptr;
+}
+
+abciAPI void aiContextGetTimeRange(aiContext* ctx, double *begin, double *end)
+{
+    if(ctx && begin && end)
+        ctx->getTimeRange(*begin, *end);
 }
 
 abciAPI aiObject* aiContextGetTopObject(aiContext* ctx)
@@ -75,12 +78,28 @@ abciAPI void aiContextUpdateSamples(aiContext* ctx, double time)
         ctx->updateSamples(time);
 }
 
+
+abciAPI int aiTimeSamplingGetSampleCount(aiTimeSampling *self)
+{
+    return self ? (int)self->getSampleCount() : 0;
+}
+abciAPI double aiTimeSamplingGetTime(aiTimeSampling *self, int index)
+{
+    return self ? self->getTime(index) : 0.0;
+}
+abciAPI void aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end)
+{
+    if (self)
+        self->getTimeRange(*start, *end);
+}
+
+
 abciAPI const char* aiObjectGetName(aiObject* obj)
 {
     return obj ? obj->getName() : "";
 }
 
-abciAPI const char* aiGetFullNameS(aiObject* obj)
+abciAPI const char* aiObjectGetFullName(aiObject* obj)
 {
     return obj ? obj->getFullName() : "";
 }

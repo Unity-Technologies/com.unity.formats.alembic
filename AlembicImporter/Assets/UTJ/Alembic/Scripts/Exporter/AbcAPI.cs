@@ -23,6 +23,14 @@ namespace UTJ.Alembic
         TRS,
     };
 
+    public enum aeTopology
+    {
+        Points,
+        Lines,
+        Triangles,
+        Quads,
+    };
+
     public enum aePropertyType
     {
         Unknown,
@@ -59,7 +67,6 @@ namespace UTJ.Alembic
     {
         public aeArchiveType archiveType;
         public aeTimeSamplingType timeSamplingType;
-        public float startTime;
         public float frameRate;
         public aeXformType xformType;
         public Bool swapHandedness;
@@ -74,7 +81,6 @@ namespace UTJ.Alembic
                 {
                     archiveType = aeArchiveType.Ogawa,
                     timeSamplingType = aeTimeSamplingType.Uniform,
-                    startTime = 0.0f,
                     frameRate = 30.0f,
                     xformType = aeXformType.TRS,
                     swapHandedness = true,
@@ -105,6 +111,14 @@ namespace UTJ.Alembic
         public int count;
     }
 
+
+    public struct aeSubmeshData
+    {
+        public IntPtr     indices;
+        public int        indexCount;
+        public aeTopology topology;
+    };
+
     public struct aePolyMeshData
     {
         public Bool visibility;
@@ -120,23 +134,26 @@ namespace UTJ.Alembic
 
         public IntPtr   normals;          // Vector3*. can be null
         public IntPtr   normalIndices;    // int*. if null, assume same as indices
-        public int      normalCount;      // if 0, assume same as positionCount
+        public int      normalCount;      // if 0, assume same as pointCount
         public int      normalIndexCount; // if 0, assume same as indexCount
 
         public IntPtr   uv0;              // Vector2*. can be null
         public IntPtr   uv0Indices;       // int*. if null, assume same as indices
-        public int      uv0Count;         // if 0, assume same as positionCount
+        public int      uv0Count;         // if 0, assume same as pointCount
         public int      uv0IndexCount;    // if 0, assume same as indexCount
         
         public IntPtr   uv1;              // Vector2*. can be null
         public IntPtr   uv1Indices;       // int*. if null, assume same as indices
-        public int      uv1Count;         // if 0, assume same as positionCount
+        public int      uv1Count;         // if 0, assume same as pointCount
         public int      uv1IndexCount;    // if 0, assume same as indexCount
         
         public IntPtr   colors;           // Vector2*. can be null
         public IntPtr   colorIndices;     // int*. if null, assume same as indices
-        public int      colorCount;       // if 0, assume same as positionCount
+        public int      colorCount;       // if 0, assume same as pointCount
         public int      colorIndexCount;  // if 0, assume same as indexCount
+
+        public IntPtr   submeshes;        // aeSubmeshData*. can be null
+        public int      submeshCount;
     }
 
     public struct aeFaceSetData
@@ -210,34 +227,35 @@ namespace UTJ.Alembic
     {
         public IntPtr self;
 
-        public aeObject NewXform(string name) { return aeNewXform(self, name); }
-        public aeObject NewCamera(string name) { return aeNewCamera(self, name); }
-        public aeObject NewPoints(string name) { return aeNewPoints(self, name); }
-        public aeObject NewPolyMesh(string name) { return aeNewPolyMesh(self, name); }
+        public aeObject NewXform(string name, int tsi) { return aeNewXform(self, name, tsi); }
+        public aeObject NewCamera(string name, int tsi) { return aeNewCamera(self, name, tsi); }
+        public aeObject NewPoints(string name, int tsi) { return aeNewPoints(self, name, tsi); }
+        public aeObject NewPolyMesh(string name, int tsi) { return aeNewPolyMesh(self, name, tsi); }
 
         public void WriteSample(ref aeXformData data) { aeXformWriteSample(self, ref data); }
         public void WriteSample(ref aeCameraData data) { aeCameraWriteSample(self, ref data); }
 
         public void WriteSample(ref aePolyMeshData data) { aePolyMeshWriteSample(self, ref data); }
         public void AddFaceSet(string name) { aePolyMeshAddFaceSet(self, name); }
-        public void WriteFaceSetSample(int fsi, ref aeFaceSetData data) { aePolyMeshWriteFaceSetSample(self, fsi, ref data); }
 
         public void WriteSample(ref aePointsData data) { aePointsWriteSample(self, ref data); }
 
         public aeProperty NewProperty(string name, aePropertyType type) { return aeNewProperty(self, name, type); }
 
+        public void MarkForceInvisible() { aeMarkForceInvisible(self); }
+
         #region internal
-        [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi = 1);
-        [DllImport("abci")] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi = 1);
+        [DllImport("abci")] static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
+        [DllImport("abci")] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
         [DllImport("abci")] static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
         [DllImport("abci")] static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
         [DllImport("abci")] static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
         [DllImport("abci")] static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
-        [DllImport("abci")] static extern void aePolyMeshWriteFaceSetSample(IntPtr self, int fsi, ref aeFaceSetData data);
         [DllImport("abci")] static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
         [DllImport("abci")] static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
+        [DllImport("abci")] static extern void aeMarkForceInvisible(IntPtr self);
         #endregion
     }
 

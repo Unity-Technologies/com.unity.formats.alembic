@@ -85,9 +85,7 @@ aiContext::aiContext(int uid)
 
 aiContext::~aiContext()
 {
-    waitAsync();
-    m_top_node.reset();
-    m_archive.reset();
+    reset();
 }
 
 Abc::IArchive aiContext::getArchive() const
@@ -101,23 +99,37 @@ const std::string& aiContext::getPath() const
 }
 
 
-int aiContext::getTimeRangeCount() const
+int aiContext::getTimeSamplingCount() const
 {
-    return (int)m_time_ranges.size();
+    return (int)m_timesamplings.size();
 }
-void aiContext::getTimeRange(int tsi, aiTimeRange & dst) const
+
+aiTimeSampling * aiContext::getTimeSampling(int i)
 {
-    if (tsi >= 0 && tsi < (int)m_time_ranges.size()) {
-        dst = m_time_ranges[tsi];
-    }
-    else {
-        dst = m_time_range_unified;
+    return m_timesamplings[i].get();
+}
+
+void aiContext::getTimeRange(double& begin, double& end) const
+{
+    begin = end = 0.0;
+    for (size_t i = 1; i < m_timesamplings.size(); ++i) {
+        double tmp_begin, tmp_end;
+        m_timesamplings[i]->getTimeRange(tmp_begin, tmp_end);
+
+        if (i == 1) {
+            begin = tmp_begin;
+            end = tmp_end;
+        }
+        else {
+            begin = std::min(begin, tmp_begin);
+            end = std::max(end, tmp_end);
+        }
     }
 }
 
 int aiContext::getTimeSamplingCount()
 {
-    return (int)m_archive.getNumTimeSamplings();
+    return (int)m_timesamplings.size();
 }
 
 int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
@@ -160,13 +172,12 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 
 void aiContext::reset()
 {
+    waitAsync();
     m_top_node.reset();
-    
-    m_path = "";
+    m_timesamplings.clear();
     m_archive.reset();
-
-    m_time_range_unified = {};
-    m_time_ranges.clear();
+    m_path = "";
+    // m_config is not reset intentionally
 }
 
 bool aiContext::load(const char *in_path)
@@ -216,54 +227,10 @@ bool aiContext::load(const char *in_path)
         m_top_node.reset(new aiObject(this, nullptr, abc_top));
         gatherNodesRecursive(m_top_node.get());
 
-        m_time_range_unified = {};
-        m_time_ranges.clear();
+        m_timesamplings.clear();
         auto num_time_samplings = (int)m_archive.getNumTimeSamplings();
-        if (num_time_samplings > 1) {
-            aiTimeRange tr;
-            tr.start_time = std::numeric_limits<float>::max();
-            tr.end_time = -std::numeric_limits<float>::max();
-
-            for (int i = 1; i < num_time_samplings; ++i) {
-                auto ts = m_archive.getTimeSampling(i);
-                auto tst = ts->getTimeSamplingType();
-
-                // Note: alembic guaranties we have at least one stored time
-                if (tst.isCyclic() || tst.isUniform()) {
-                    auto max_num_samples = m_archive.getMaxNumSamplesForTimeSamplingIndex(i);
-                    auto samples_per_cycle = tst.getNumSamplesPerCycle();
-                    auto time_per_cycle = tst.getTimePerCycle();
-                    int num_cycles = int(max_num_samples / samples_per_cycle);
-
-                    if (tst.isUniform()) tr.type = aiTimeSamplingType::Uniform;
-                    else if (tst.isCyclic()) tr.type = aiTimeSamplingType::Cyclic;
-                    tr.start_time = ts->getStoredTimes()[0];
-                    tr.end_time = tr.start_time + (num_cycles - 1) * time_per_cycle;
-                    tr.frame_count = num_cycles;
-                }
-                else if (tst.isAcyclic()) {
-                    tr.type = aiTimeSamplingType::Acyclic;
-                    tr.start_time = ts->getSampleTime(0);
-                    tr.end_time = ts->getSampleTime(ts->getNumStoredTimes() - 1);
-                    tr.frame_count = (int)ts->getNumStoredTimes();
-                }
-
-                if (tr.start_time > tr.end_time) {
-                    tr.start_time = 0.0;
-                    tr.end_time = 0.0;
-                }
-                m_time_ranges.push_back(tr);
-            }
-
-            m_time_range_unified = m_time_ranges.front();
-            for (size_t i = 1; i < m_time_ranges.size(); ++i) {
-                auto& tr = m_time_ranges[i];
-                if (m_time_range_unified.type != tr.type)
-                    m_time_range_unified.type = aiTimeSamplingType::Mixed;
-                m_time_range_unified.start_time = std::min(m_time_range_unified.start_time, tr.start_time);
-                m_time_range_unified.end_time = std::max(m_time_range_unified.end_time, tr.end_time);
-                m_time_range_unified.frame_count = std::max(m_time_range_unified.frame_count, tr.frame_count);
-            }
+        for (int i = 0; i < num_time_samplings; ++i) {
+            m_timesamplings.emplace_back(aiCreateTimeSampling(m_archive, i));
         }
 
         DebugLog("Succeeded");

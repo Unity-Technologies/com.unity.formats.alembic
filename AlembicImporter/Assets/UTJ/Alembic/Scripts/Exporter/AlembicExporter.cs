@@ -55,10 +55,6 @@ namespace UTJ.Alembic
 
             m_recorder.ProcessRecording();
 
-            // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_recorder.settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && m_recorder.settings.fixDeltaTime)
-                AbcAPI.aeWaitMaxDeltaTime();
-
             if (m_maxCaptureFrame > 0 && m_recorder.frameCount >= m_maxCaptureFrame)
                 EndRecording();
         }
@@ -72,14 +68,7 @@ namespace UTJ.Alembic
             m_prevFrame = -1;
 
             m_recorder.targetBranch = gameObject;
-            if (m_recorder.BeginRecording())
-            {
-                var settings = m_recorder.settings;
-                if (settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && settings.fixDeltaTime)
-                {
-                    Time.maximumDeltaTime = (1.0f / settings.conf.frameRate);
-                }
-            }
+            m_recorder.BeginRecording();
         }
 
         public void EndRecording()

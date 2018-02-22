@@ -67,6 +67,9 @@
     <ClCompile Include="abci\Importer\aiAsync.cpp">
       <Filter>abci\Importer</Filter>
     </ClCompile>
+    <ClCompile Include="abci\Importer\aiTimeSampling.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abci\Foundation\aiLogger.h">
@@ -160,6 +163,9 @@
       <Filter>abci\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="abci\Importer\aiAsync.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiTimeSampling.h">
       <Filter>abci\Importer</Filter>
     </ClInclude>
   </ItemGroup>

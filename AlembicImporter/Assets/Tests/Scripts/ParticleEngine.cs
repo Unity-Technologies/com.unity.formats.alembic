@@ -46,13 +46,13 @@ namespace UTJ.Alembic
         ComputeBuffer m_cb_positions;
         ComputeBuffer m_cb_velocities;
         CSParams[] m_csparams;
-        Vector3[] m_buf_positions;
-        Vector3[] m_buf_velocities;
+        PinnedList<Vector3> m_buf_positions = new PinnedList<Vector3>();
+        PinnedList<Vector3> m_buf_velocities = new PinnedList<Vector3>();
         float m_elapsed;
 
 
-        public Vector3[] positionBuffer { get { return m_buf_positions; } }
-        public Vector3[] velocityBuffer { get { return m_buf_velocities; } }
+        public PinnedList<Vector3> positionBuffer { get { return m_buf_positions; } }
+        public PinnedList<Vector3> velocityBuffer { get { return m_buf_velocities; } }
         public float elapsed { get { return m_elapsed; } }
 
 
@@ -65,8 +65,8 @@ namespace UTJ.Alembic
                 m_cb_particles = new ComputeBuffer(m_particle_count, peParticle.size);
                 m_cb_positions = new ComputeBuffer(m_particle_count, 12);
                 m_cb_velocities = new ComputeBuffer(m_particle_count, 12);
-                m_buf_positions = new Vector3[m_particle_count];
-                m_buf_velocities = new Vector3[m_particle_count];
+                m_buf_positions.ResizeDiscard(m_particle_count);
+                m_buf_velocities.ResizeDiscard(m_particle_count);
                 m_csparams = new CSParams[1];
             }
             {
@@ -121,8 +121,8 @@ namespace UTJ.Alembic
                 m_cs_particle_core.Dispatch(i, m_particle_count / KernelBlockSize, 1, 1);
             }
 
-            m_cb_positions.GetData(m_buf_positions);
-            m_cb_velocities.GetData(m_buf_velocities);
+            m_cb_positions.GetData(m_buf_positions.Array);
+            m_cb_velocities.GetData(m_buf_velocities.Array);
 
             m_elapsed = Time.realtimeSinceStartup - begin_time;
             Debug.Log("ParticleEngine.UpdateSimulation(): " + (m_elapsed * 1000.0f) + "ms");

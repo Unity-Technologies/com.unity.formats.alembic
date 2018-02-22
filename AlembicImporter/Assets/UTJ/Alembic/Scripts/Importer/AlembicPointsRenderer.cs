@@ -233,15 +233,22 @@ namespace UTJ.Alembic
             // update argument buffer
             if (m_cbArgs == null || m_cbArgs.Length != submeshCount)
             {
+                if (m_cbArgs != null)
+                {
+                    foreach (var cb in m_cbArgs)
+                        cb.Release();
+                    m_cbArgs = null;
+                }
+
                 m_cbArgs = new ComputeBuffer[submeshCount];
                 for (int si = 0; si < submeshCount; ++si)
-                {
-                    var cbArgs = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-                    m_cbArgs[si] = cbArgs;
-                    m_args[0] = (int)mesh.GetIndexCount(si);
-                    m_args[1] = numInstances;
-                    cbArgs.SetData(m_args);
-                }
+                    m_cbArgs[si] = new ComputeBuffer(1, m_args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+            }
+            for (int si = 0; si < submeshCount; ++si)
+            {
+                m_args[0] = (int)mesh.GetIndexCount(si);
+                m_args[1] = numInstances;
+                m_cbArgs[si].SetData(m_args);
             }
 
             // issue drawcalls
