@@ -15,6 +15,7 @@
 *.tlog
 *.db
 *.opendb
+*.sw[op]
 
 *.exe
 *.dll
@@ -52,3 +53,7 @@ abci.bundle/
 build/
 TestLocal*
 StreamingAssets*
+
+# Ignore npmrc because it has your own personal key. It needs to be next
+# to package.json though.
+.npmrc
