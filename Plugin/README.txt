@@ -6,6 +6,9 @@ Building on any platform:
 4. Install it in the AlembicImporter project
 5. Test by dragging an abc file into the project and into the scene, then scrubbing the "time" on the abc file.
 
+To publish you also need:
+6. Get npm for your platform.
+
 
 ====================
 Building on Windows:
@@ -44,11 +47,19 @@ Building on OSX:
         (a) delete the previous abci plugin
         (b) copy the new abci plugin in its place.
 
+6. Install the latest npm. You'll need to look up the version number:
+        sudo port install npm5
+
 ==================
 Building on Linux:
 ==================
 
-Should be similar to building on OSX, but you might need to change the build.sh a bit.
+Same as OSX, but hdf5 and ilmbase have different install lines:
+
+On Ubuntu:
+        sudo apt install hdf5-dev ilmbase-dev
+On CentOS:
+        sudo yum install hdf5-devel ilmbase-devel
 
 
 ==================
@@ -64,3 +75,24 @@ Paths are hardcoded in two places:
 Because Unity Package Manager for 2017.3 and 2018.1 doesn't support native
 modules, we need to load the library by hand. Otherwise we could ignore
 that second path and use [DllImport].
+
+==================
+Publishing
+==================
+
+0. Set up bintray. 
+  0.a Get your username by asking on slack #devs-packman.
+  0.b Get your API key on bintray.com by hovering over your account
+        (upper-right) and going to 'edit profile', then selecting 'API key'
+  0.c Go to the directory that contains package.json and run:
+    curl -u<USER>@unity:<API_KEY> https://api.bintray.com/npm/unity/unity-dev/auth >> .npmrc
+
+1. Install the binaries for each platform (via sneakernet for now, should
+        do it through git at some point)
+
+2. Go to the directory that holds package.json and on the command-line run 
+    npm publish
+
+That publishes to unity-dev, which is for development. When it's ready for
+QA do the same but for unity-staging. Then when it's cleared QA ask around
+for how to push to production.
