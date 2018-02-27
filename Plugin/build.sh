@@ -27,7 +27,10 @@ set -ex
 # build & install Alembic
 mkdir alembic-build
 pushd alembic-build
-cmake "$alembic" -DUSE_HDF5=ON -DALEMBIC_SHARED_LIBS=OFF -DSTATIC_HDF5=ON -DCMAKE_INSTALL_PREFIX="`pwd`/../alembic-installed"
+cmake "$alembic" \
+        -DUSE_HDF5=ON \
+        -DALEMBIC_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_PREFIX="`pwd`/../alembic-installed"
 make -j4
 make test
 make install
@@ -37,7 +40,9 @@ popd
 # com.unity.alembic package)
 mkdir plugin-build
 pushd plugin-build
-cmake "$plugindir" -DALEMBIC_DIR="`pwd`/../alembic-installed"
+cmake "$plugindir" \
+        -DALEMBIC_DIR="`pwd`/../alembic-installed" \
+        -DUSE_STATIC=ON
 make -j4
 make test
 popd

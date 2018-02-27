@@ -3,6 +3,8 @@ PROJECT(AlembicForUnity)
 
 enable_testing()
 
+OPTION(USE_STATIC "Link with static libraries" ON)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(OpenEXR QUIET)
 FIND_PACKAGE(HDF5 QUIET)
