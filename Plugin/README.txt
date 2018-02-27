@@ -85,7 +85,7 @@ Publishing
   0.b Get your API key on bintray.com by hovering over your account
         (upper-right) and going to 'edit profile', then selecting 'API key'
   0.c Go to the directory that contains package.json and run:
-    curl -u<USER>@unity:<API_KEY> https://api.bintray.com/npm/unity/unity-dev/auth >> .npmrc
+    curl -u<USER>@unity:<API_KEY> https://staging.unity.com/auth >> .npmrc
 
 1. Install the binaries for each platform (via sneakernet for now, should
         do it through git at some point)
@@ -95,12 +95,6 @@ Publishing
 
 2. Go to the directory that holds package.json and on the command-line run
     npm publish
-
-3. Go to bintray, click on your new version.
-        Select Files.
-        Click on the '-' in com.unity.alembic '-'.
-        Find the com.unity.alembic-x.y.z.tgz file but don't click.
-        Hover over the gear for "actions" and click on "Show in download list"
 
 That publishes to unity-dev, which is for development. When it's ready for
 QA do the same but for unity-staging. Then when it's cleared QA ask around
