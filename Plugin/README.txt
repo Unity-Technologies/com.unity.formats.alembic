@@ -80,7 +80,7 @@ that second path and use [DllImport].
 Publishing
 ==================
 
-0. Set up bintray. 
+0. Set up bintray.
   0.a Get your username by asking on slack #devs-packman.
   0.b Get your API key on bintray.com by hovering over your account
         (upper-right) and going to 'edit profile', then selecting 'API key'
@@ -90,8 +90,17 @@ Publishing
 1. Install the binaries for each platform (via sneakernet for now, should
         do it through git at some point)
 
-2. Go to the directory that holds package.json and on the command-line run 
+2. Update the version number (remember to use semver versioning:
+        major.minor.patch with optional -beta)
+
+2. Go to the directory that holds package.json and on the command-line run
     npm publish
+
+3. Go to bintray, click on your new version.
+        Select Files.
+        Click on the '-' in com.unity.alembic '-'.
+        Find the com.unity.alembic-x.y.z.tgz file but don't click.
+        Hover over the gear for "actions" and click on "Show in download list"
 
 That publishes to unity-dev, which is for development. When it's ready for
 QA do the same but for unity-staging. Then when it's cleared QA ask around
