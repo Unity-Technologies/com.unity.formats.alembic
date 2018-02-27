@@ -15,7 +15,6 @@ target_link_libraries(abci
     ${OPENEXR_Iex_LIBRARY}
     ${OPENEXR_IexMath_LIBRARY}
     ${HDF5_C_LIBRARIES}
-    ${HDF5_HL_LIBRARIES}
     ${ALEMBIC_LIBRARY}
 )
 install(TARGETS abci DESTINATION .)
