@@ -42,7 +42,8 @@ mkdir plugin-build
 pushd plugin-build
 cmake "$plugindir" \
         -DALEMBIC_DIR="`pwd`/../alembic-installed" \
-        -DUSE_STATIC=ON
+        -DUSE_STATIC=ON \
+        -DENABLE_ISPC=OFF
 make -j4
 make test
 popd
