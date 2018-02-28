@@ -1,4 +1,4 @@
-﻿Shader "Alembic/Standard Instanced" {
+﻿Shader "Alembic/Points Standard" {
     Properties {
         _Color("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
@@ -8,11 +8,10 @@
 
     SubShader {
         Tags { "RenderType"="Opaque" }
-        LOD 200
-        
+
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows addshadow
-        #pragma target 3.0
+        #pragma target 4.5
         #pragma multi_compile_instancing
         #pragma instancing_options assumeuniformscaling procedural:setup
         #include "PointRenderer.cginc"
@@ -37,7 +36,7 @@
         }
 #endif
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;

@@ -1,36 +1,33 @@
 #pragma once
 
-class aiXFormSample : public aiSampleBase
+class aiXformSample : public aiSample
 {
-typedef aiSampleBase super;
+using super = aiSample;
 public:
-    aiXFormSample(aiXForm *schema);
+    aiXformSample(aiXform *schema);
 
-    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
-
-    void getData(aiXFormData &outData) const;
+    void getData(aiXformData &dst) const;
 
 public:
-    AbcGeom::M44d m_matrix;
-    AbcGeom::M44d m_nextMatrix;
-    bool inherits;
-private:
-    void decomposeXForm(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
+    AbcGeom::XformSample xf_sp, xf_sp2;
+    aiXformData data;
 };
 
 
-struct aiXFormTraits
+struct aiXformTraits
 {
-    typedef aiXFormSample SampleT;
-    typedef AbcGeom::IXformSchema AbcSchemaT;
+    using SampleT = aiXformSample;
+    using AbcSchemaT = AbcGeom::IXformSchema;
 };
 
-class aiXForm : public aiTSchema<aiXFormTraits>
+class aiXform : public aiTSchema<aiXformTraits>
 {
-typedef aiTSchema<aiXFormTraits> super;
+using super = aiTSchema<aiXformTraits>;
 public:
-    aiXForm(aiObject *obj);
+    aiXform(aiObject *parent, const abcObject &abc);
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
+    Sample* newSample() override;
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
+    void decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const;
 };

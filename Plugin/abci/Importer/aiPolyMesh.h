@@ -1,265 +1,147 @@
 #pragma once
+#include "aiMeshOps.h"
 
-typedef std::vector<size_t> Faceset;
-typedef std::vector<Faceset> Facesets;
+using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
+using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
-struct SubmeshKey
+
+struct aiMeshSummaryInternal : public aiMeshSummary
 {
-    int uTile;
-    int vTile;
-    int facesetIndex;
-    int splitIndex;
+    bool has_velocities_prop = false;
+    bool has_normals_prop = false;
+    bool has_uv0_prop = false;
+    bool has_uv1_prop = false;
+    bool has_colors_prop = false;
 
-    inline SubmeshKey(float u, float v, int fi=-1, int si=0)
-        : uTile((int)floor(u))
-        , vTile((int)floor(v))
-        , facesetIndex(fi)
-        , splitIndex(si)
-    {
-    }
-
-    SubmeshKey(const SubmeshKey&) = default;
-    SubmeshKey& operator=(const SubmeshKey&) = default;
-
-    inline bool operator<(const SubmeshKey &rhs) const
-    {
-        if (splitIndex < rhs.splitIndex) return true;
-        if (splitIndex > rhs.splitIndex) return false;
-        
-        if (facesetIndex < rhs.facesetIndex) return true;
-        if (facesetIndex > rhs.facesetIndex) return false;
-        
-        if (uTile < rhs.uTile) return true;
-        if (uTile > rhs.uTile) return false;
-
-        return (vTile < rhs.vTile);
-    }
+    bool interpolate_points = false;
+    bool interpolate_normals = false;
+    bool interpolate_uv0 = false;
+    bool interpolate_uv1 = false;
+    bool interpolate_colors = false;
+    bool compute_normals = false;
+    bool compute_tangents = false;
+    bool compute_velocities = false;
 };
 
-struct SplitInfo
-{
-    size_t firstFace;
-    size_t lastFace;
-    size_t indexOffset;
-    size_t vertexCount;
-    size_t submeshCount;
-
-    inline SplitInfo(size_t ff=0, size_t io=0)
-        : firstFace(ff)
-        , lastFace(ff)
-        , indexOffset(io)
-        , vertexCount(0)
-        , submeshCount(0)
-    {
-    }
-
-    SplitInfo(const SplitInfo&) = default;
-    SplitInfo& operator=(const SplitInfo&) = default;
-};
-
-struct Submesh
-{
-    Faceset faces;
-    std::vector<int> vertexIndices;
-    size_t triangleCount;
-    int facesetIndex;
-    int splitIndex;
-    int index; // submesh index in split
-
-    inline Submesh(int fsi=-1, int si=0)
-        : triangleCount(0)
-        , facesetIndex(fsi)
-        , splitIndex(si)
-        , index(0)
-    {
-    }
-
-    Submesh(const Submesh&) = default;
-    Submesh& operator=(const Submesh&) = default;
-};
-
-typedef std::deque<Submesh> Submeshes;
-
-struct TangentKey
-{
-    Abc::V3f N;
-    Abc::V2f UV;
-    
-    inline TangentKey()
-        : N(0.0f, 0.0f, 0.0f)
-        , UV(0.0f, 0.0f)
-    {
-    }
-    
-    inline TangentKey(const Abc::V3f &iN, const Abc::V2f &iUV)
-        : N(iN)
-        , UV(iUV)
-    {
-    }
-    
-    TangentKey(const TangentKey&) = default;
-    TangentKey& operator=(const TangentKey&) = default;
-    
-    inline bool operator<(const TangentKey &rhs) const
-    {
-        if (N.x < rhs.N.x) return true;
-        if (N.x > rhs.N.x) return false;
-
-        if (N.y < rhs.N.y) return true;
-        if (N.y > rhs.N.y) return false;
-
-        if (N.z < rhs.N.z) return true;
-        if (N.z > rhs.N.z) return false;
-
-        if (UV.x < rhs.UV.x) return true;
-        if (UV.x > rhs.UV.x) return false;
-
-        return (UV.y < rhs.UV.y);
-    }
-
-    std::string toString() const
-    {
-        std::ostringstream oss;
-        oss << "N=" << N << ", UV=" << UV;
-        return oss.str();
-    }
-};
-
-typedef std::map<TangentKey, int> TangentIndexMap;
-
-class Topology
+class aiMeshTopology
 {
 public:
-    Topology();
+    aiMeshTopology();
     void clear();
 
-    int getTriangulatedIndexCount() const;
     int getSplitCount() const;
-    int getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh);
-    void updateSplits(aiPolyMeshSample * meshSample);
+    int getVertexCount() const;
+    int getIndexCount() const;
 
-    int getVertexBufferLength(int splitIndex) const;
-    int prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs, const aiFacesets &inFacesets, aiPolyMeshSample* sample);
-    int getSplitSubmeshCount(int splitIndex) const;
-
-    inline Submeshes::iterator submeshBegin() { return m_submeshes.begin(); }
-    inline Submeshes::iterator submeshEnd() { return m_submeshes.end(); }
-
-    inline Submeshes::const_iterator submeshBegin() const { return m_submeshes.begin(); }
-    inline Submeshes::const_iterator submeshEnd() const { return m_submeshes.end(); }
-
-    inline void EnableVertexSharing(bool value) { m_vertexSharingEnabled = value; }
-    inline void Enable32BitsIndexbuffers(bool value) { m_use32BitsIndexBuffer = value; }
-    inline void TreatVertexExtraDataAsStatic(bool value) { m_TreatVertexExtraDataAsStatic = value; }
+    int getSplitVertexCount(int split_index) const;
+    int getSubmeshCount() const;
+    int getSubmeshCount(int split_index) const;
 
 public:
-    Abc::Int32ArraySamplePtr m_faceIndices;
-    std::vector<int32_t> m_indicesSwapedFaceWinding;
-    std::vector<uint32_t> m_UvIndicesSwapedFaceWinding;
-    Abc::Int32ArraySamplePtr m_vertexCountPerFace;
-    int m_triangulatedIndexCount;
+    Abc::Int32ArraySamplePtr m_indices_sp;
+    Abc::Int32ArraySamplePtr m_counts_sp;
+    abcFaceSetSamples m_faceset_sps;
+    RawVector<int> m_material_ids;
 
-    Submeshes m_submeshes;
-    std::vector<int> m_faceSplitIndices;
-    std::vector<SplitInfo> m_splits;
+    MeshRefiner m_refiner;
+    RawVector<int> m_remap_points;
+    RawVector<int> m_remap_normals;
+    RawVector<int> m_remap_uv0, m_remap_uv1;
+    RawVector<int> m_remap_colors;
 
-    std::vector<int> m_tangentIndices;
-    size_t m_tangentsCount;
-
-    std::vector<uint32_t> m_FixedTopoPositionsIndexes;
-    std::vector<uint32_t> m_FaceIndexingReindexed;
-
-    bool m_vertexSharingEnabled;
-    bool m_FreshlyReadTopologyData;
-    bool m_TreatVertexExtraDataAsStatic;
-    bool m_use32BitsIndexBuffer;
+    int m_vertex_count = 0;
+    int m_index_count = 0; // triangulated
 };
+using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
-// ---
 
-class aiPolyMeshSample : public aiSampleBase
+class aiPolyMeshSample : public aiSample
 {
-typedef aiSampleBase super;
+using super = aiSample;
+using schema_t = aiPolyMesh;
 public:
-    aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo );
-    virtual ~aiPolyMeshSample();
+    aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
+    ~aiPolyMeshSample();
+    void reset();
 
-    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
-    
-    bool hasNormals() const;
-    bool hasUVs() const;
-    bool hasVelocities() const;
-    bool hasTangents() const;
-    bool smoothNormalsRequired() const;
-    bool tangentsRequired() const;
+    void getSummary(aiMeshSampleSummary &dst) const;
+    void getSplitSummaries(aiMeshSplitSummary  *dst) const;
+    void getSubmeshSummaries(aiSubmeshSummary *dst) const;
 
-    void getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const;
-    void getDataPointer(aiPolyMeshData &data) const;
-    void copyData(aiPolyMeshData &data);
-    void copyDataWithTriangulation(aiPolyMeshData &data, bool always_expand_indices);
+    void fillSplitVertices(int split_index, aiPolyMeshData &data) const;
+    void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
+    void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-    void computeTangentIndices(const aiConfig &config, const abcV3 *N, bool Nindexed) const;
-    void computeTangents(const aiConfig &config, const abcV3 *N, bool Nindexed);
-    void computeSmoothNormals(const aiConfig &config);
-
-    int getVertexBufferLength(int splitIndex) const;
-    void fillVertexBuffer(int splitIndex, aiPolyMeshData &data);
-
-    int prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets);
-    int getSplitSubmeshCount(int splitIndex) const;
-    bool getNextSubmesh(aiSubmeshSummary &summary);
-    void fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const;
+    void waitAsync() override;
 
 public:
-    Topology *m_topology;
-    bool m_ownTopology;
-    Abc::P3fArraySamplePtr m_positions;
-    Abc::P3fArraySamplePtr m_nextPositions;
-    Abc::V3fArraySamplePtr m_velocities;
-    AbcGeom::IN3fGeomParam::Sample m_normals;
-    AbcGeom::IV2fGeomParam::Sample m_uvs;
+    Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
+    Abc::V3fArraySamplePtr m_velocities_sp;
+    AbcGeom::IN3fGeomParam::Sample m_normals_sp, m_normals_sp2;
+    AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv0_sp2;
+    AbcGeom::IV2fGeomParam::Sample m_uv1_sp, m_uv1_sp2;
+    AbcGeom::IC4fGeomParam::Sample m_colors_sp, m_colors_sp2;
     Abc::Box3d m_bounds;
 
-    std::vector<abcV3> m_smoothNormals;
-    std::vector<abcV4> m_tangents;
+    IArray<abcV3> m_points_ref;
+    IArray<abcV3> m_velocities_ref;
+    IArray<abcV2> m_uv0_ref, m_uv1_ref;
+    IArray<abcV3> m_normals_ref;
+    IArray<abcV4> m_tangents_ref;
+    IArray<abcC4> m_colors_ref;
 
-    Submeshes::iterator m_curSubmesh;
+    RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
+    RawVector<abcV3> m_velocities;
+    RawVector<abcV2> m_uv0, m_uv02, m_uv0_int;
+    RawVector<abcV2> m_uv1, m_uv12, m_uv1_int;
+    RawVector<abcV3> m_normals, m_normals2, m_normals_int;
+    RawVector<abcV4> m_tangents;
+    RawVector<abcC4> m_colors, m_colors2, m_colors_int;
+
+    TopologyPtr m_topology;
+    bool m_topology_changed = false;
+
+    std::future<void> m_async_copy;
 };
 
 
 struct aiPolyMeshTraits
 {
-    typedef aiPolyMeshSample SampleT;
-    typedef AbcGeom::IPolyMeshSchema AbcSchemaT;
+    using SampleT = aiPolyMeshSample;
+    using AbcSchemaT = AbcGeom::IPolyMeshSchema;
 };
 
 class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 {
-typedef aiTSchema<aiPolyMeshTraits> super;
+using super = aiTSchema<aiPolyMeshTraits>;
 public:
-    aiPolyMesh(aiObject *obj);
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
+    aiPolyMesh(aiObject *parent, const abcObject &abc);
+    ~aiPolyMesh() override;
+    void updateSummary();
+    const aiMeshSummaryInternal& getSummary() const;
 
-    int getPeakIndexCount() const;
-    int getPeakTriangulatedIndexCount() const;
-    int getPeakVertexCount() const;
+    Sample* newSample() override;
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
 
-    void getSummary(aiMeshSummary &summary) const;
+    void onTopologyChange(aiPolyMeshSample& sample);
+    void onTopologyDetermined();
+
+public:
+    RawVector<abcV3> m_constant_points;
+    RawVector<abcV3> m_constant_velocities;
+    RawVector<abcV3> m_constant_normals;
+    RawVector<abcV4> m_constant_tangents;
+    RawVector<abcV2> m_constant_uv0;
+    RawVector<abcV2> m_constant_uv1;
+    RawVector<abcC4> m_constant_colors;
 
 private:
-    void updatePeakIndexCount() const;
-    void GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const;
+    aiMeshSummaryInternal m_summary;
+    AbcGeom::IV2fGeomParam m_uv1_param;
+    AbcGeom::IC4fGeomParam m_colors_param;
 
-private:
-    mutable int m_peakIndexCount;
-    mutable int m_peakTriangulatedIndexCount;
-    mutable int m_peakVertexCount;
-
-    bool m_ignoreNormals;
-    bool m_ignoreUVs;
-
-    Topology m_sharedTopology;
-    AbcGeom::IN3fGeomParam::Sample m_sharedNormals;
-    AbcGeom::IV2fGeomParam::Sample m_sharedUVs;
+    TopologyPtr m_shared_topology;
+    abcFaceSetSchemas m_facesets;
+    bool m_varying_topology = false;
 };

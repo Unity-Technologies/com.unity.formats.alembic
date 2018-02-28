@@ -171,14 +171,20 @@ public:
     template<class FwdIter>
     void assign(FwdIter first, FwdIter last)
     {
-        resize(std::distance(first, last));
+        resize_discard(std::distance(first, last));
         std::copy(first, last, begin());
     }
     void assign(const_pointer first, const_pointer last)
     {
-        resize(std::distance(first, last));
-        // sadly, memcpy() can way faster than std::copy()
-        memcpy(m_data, first, sizeof(value_type) * m_size);
+        if (!first) {
+            clear();
+            return;
+        }
+        else {
+            resize_discard(std::distance(first, last));
+            // sadly, memcpy() can way faster than std::copy()
+            memcpy(m_data, first, sizeof(value_type) * m_size);
+        }
     }
 
     template<class ForwardIter>
@@ -246,11 +252,11 @@ public:
         memset(m_data, 0, sizeof(T)*m_size);
     }
 
-    void copy_to(pointer dst)
+    void copy_to(pointer dst) const
     {
         memcpy(dst, m_data, sizeof(value_type) * m_size);
     }
-    void copy_to(pointer dst, size_t length, size_t offset = 0)
+    void copy_to(pointer dst, size_t length, size_t offset = 0) const
     {
         memcpy(dst, m_data + offset, sizeof(value_type) * length);
     }

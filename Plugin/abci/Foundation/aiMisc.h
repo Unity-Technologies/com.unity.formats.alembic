@@ -76,8 +76,8 @@ inline std::pair<
     typename AbcArrayPropertyType::value_type,
     typename AbcArrayPropertyType::value_type> abcArrayPropertyGetMinMaxValue(AbcArrayPropertyType& prop)
 {
-    typedef typename AbcArrayPropertyType::value_type value_type;
-    typedef typename AbcArrayPropertyType::sample_ptr_type sample_ptr_type;
+    using value_type = typename AbcArrayPropertyType::value_type;
+    using sample_ptr_type = typename AbcArrayPropertyType::sample_ptr_type;
 
     auto ret = std::make_pair(value_type(), value_type());
 

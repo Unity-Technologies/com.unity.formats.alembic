@@ -4,14 +4,12 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
-#include <unordered_map>
 #include "../Foundation/aiMisc.h"
+#include "../Foundation/aiMath.h"
 
 
-#define MAX_VERTEX_SPLIT_COUNT_16 65000
-#define MAX_VERTEX_SPLIT_COUNT_32 2000000000
-
-static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
+template<class Container>
+static inline int CalculateTriangulatedIndexCount(const Container& counts)
 {
     int r = 0;
     size_t n = counts.size();
@@ -23,2239 +21,889 @@ static inline int CalculateTriangulatedIndexCount(Abc::Int32ArraySample &counts)
     return r;
 }
 
-Topology::Topology()
-    : m_triangulatedIndexCount(0)
-    , m_tangentsCount(0)
-    , m_vertexSharingEnabled(false)
-    , m_FreshlyReadTopologyData(false)
-    , m_TreatVertexExtraDataAsStatic(false)
-    , m_use32BitsIndexBuffer(false)
+template<class T, class IndexArray>
+inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
 {
-    m_faceIndices.reset();
-    m_vertexCountPerFace.reset();
-}
-
-void Topology::clear()
-{
-    aiLogger::Info("Topology::clear()");
-    m_faceIndices.reset();
-    m_vertexCountPerFace.reset();
-
-    m_tangentIndices.clear();
-    m_tangentsCount = 0;
-
-    m_submeshes.clear();
-    m_faceSplitIndices.clear();
-    m_splits.clear();
-    m_indicesSwapedFaceWinding.clear();
-    m_UvIndicesSwapedFaceWinding.clear();
-}
-
-int Topology::getTriangulatedIndexCount() const
-{
-    return m_triangulatedIndexCount;
-}
-
-int Topology::getSplitCount() const
-{
-    return (int) m_splits.size();
-}
-
-int Topology::getSplitCount(aiPolyMeshSample * meshSample, bool forceRefresh)
-{
-    if (m_vertexCountPerFace && m_faceIndices)
-    {
-        if (m_faceSplitIndices.size() != m_vertexCountPerFace->size() || forceRefresh)
-        {
-            updateSplits(meshSample);
-        }
-    }
-    else
-    {
-        m_splits.clear();
-        m_faceSplitIndices.clear();
-    }
-
-    return (int) m_splits.size();
-}
-
-void Topology::updateSplits(aiPolyMeshSample * meshSample)
-{
-    DebugLog("Topology::updateSplits()");
-    
-    int splitIndex = 0;
-    size_t indexOffset = 0;
-    size_t faceCount = m_vertexCountPerFace->size();
-
-    m_faceSplitIndices.resize(faceCount); // number of faces
-
-    m_splits.clear();
-
-    if (m_vertexSharingEnabled && meshSample != nullptr && !meshSample->m_ownTopology) // only fixed topologies get this execution path
-    {
-        m_splits.push_back(SplitInfo());
-
-        SplitInfo *curSplit = &(m_splits.back());
-
-        for (size_t i = 0; i<faceCount; ++i)
-            m_faceSplitIndices[i] = 0;
-
-        curSplit->lastFace = faceCount-1;
-        curSplit->vertexCount = m_FixedTopoPositionsIndexes.size();
-    }
-    else
-    {
-        const size_t maxVertexSplitCount = m_use32BitsIndexBuffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
-        m_splits.reserve(1 + m_faceIndices->size() / maxVertexSplitCount);
-        m_splits.push_back(SplitInfo());
-
-        SplitInfo *curSplit = &(m_splits.back());
-
-        for (size_t i = 0; i<faceCount; ++i)
-        {
-            size_t nv = (size_t)m_vertexCountPerFace->get()[i];
-
-            if (curSplit->vertexCount + nv > maxVertexSplitCount)
-            {
-                m_splits.push_back(SplitInfo(i, indexOffset));
-
-                ++splitIndex;
-
-                curSplit = &(m_splits.back());
-            }
-
-            m_faceSplitIndices[i] = splitIndex; // assign a split ID/index to each face
-
-            curSplit->lastFace = i;
-            curSplit->vertexCount += nv;
-
-            indexOffset += nv;
-        }
+    if (!dst || !src) { return; }
+    size_t size = indices.size();
+    for (size_t i = 0; i < (int)size; ++i) {
+        dst[i] = src[indices[i]];
     }
 }
 
-int Topology::getVertexBufferLength(int splitIndex) const
+template<class T, class AbcArraySample>
+inline void Remap(RawVector<T>& dst, const AbcArraySample& src, const RawVector<int>& indices)
 {
-    if (splitIndex < 0 || size_t(splitIndex) >= m_splits.size())
-    {
-        return 0;
+    if (indices.empty()) {
+        dst.assign(src.get(), src.get() + src.size());
     }
-    else
-    {
-        return (int) m_splits[splitIndex].vertexCount;
+    else {
+        dst.resize_discard(indices.size());
+        CopyWithIndices(dst.data(), src.get(), indices);
     }
 }
 
-int Topology::prepareSubmeshes(const AbcGeom::IV2fGeomParam::Sample &uvs,
-                               const aiFacesets &inFacesets,
-                               aiPolyMeshSample* sample)
+template<class T>
+inline void Lerp(RawVector<T>& dst, const RawVector<T>& src1, const RawVector<T>& src2, float w)
 {
-    DebugLog("Topology::prepareSubmeshes()");
-    
-    Facesets facesets;
-    std::vector<int> facesetIndices; // index -> face table
-
-
-    m_submeshes.clear();
-
-    if (inFacesets.count > 0)
-    {
-        int index_count = 0;
-        int max_index = 0;
-        {
-            int n = inFacesets.count;
-            for (int i = 0; i < n; ++i)
-            {
-                int ngon = inFacesets.faceCounts[i];
-                for (int j = 0; j < ngon; ++j)
-                {
-                    max_index = std::max<int>(max_index, inFacesets.faceIndices[index_count++]);
-                }
-            }
-        }
-        facesetIndices.resize(max_index, -1);
-
-
-        size_t index = 0;
-        int defaultFacesetIndex = -1;
-
-        facesets.resize(inFacesets.count);
-
-        for (int i=0; i<inFacesets.count; ++i)
-        {
-            Faceset &faceset = facesets[i];
-
-            if (inFacesets.faceCounts[i] == 0)
-            {
-                defaultFacesetIndex = i;
-            }
-            else
-            {
-                for (int j=0; j<inFacesets.faceCounts[i]; ++j)
-                {
-                    size_t f = size_t(inFacesets.faceIndices[index++]);
-
-                    faceset.push_back(f);
-
-                    facesetIndices[f] = i;
-                }
-            }
-        }
-
-        if (defaultFacesetIndex != -1) {
-            facesetIndices.resize(m_vertexCountPerFace->size(), -1);
-            for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-            {
-                if (facesetIndices[i] == -1) {
-                    facesetIndices[i] = defaultFacesetIndex;
-                }
-            }
-        }
+    if (src1.size() != src2.size()) {
+        DebugError("something is wrong!!");
+        return;
     }
-    else
-    {
-        facesetIndices.resize(m_vertexCountPerFace->size(), -1);
-    }
-
-    int nsplits = getSplitCount(sample, false);
-
-    if (facesets.empty() && nsplits == 1)
-    {
-        // no facesets, no uvs, no splits
-        m_submeshes.push_back(Submesh());
-        
-        Submesh &submesh = m_submeshes.back();
-
-        for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-        {
-            submesh.triangleCount += (m_vertexCountPerFace->get()[i] - 2);
-        }
-
-        m_splits[0].submeshCount = 1;
-    }
-    else
-    {
-        int vertexIndex = 0;
-        Submesh *curMesh;
-        const Util::uint32_t *uvIndices = nullptr;
-        const abcV2 *uvValues = nullptr;
-        
-        std::map<SubmeshKey, size_t> submeshIndices;
-
-        std::vector<int> splitSubmeshIndices(nsplits, 0);
-
-        for (size_t i=0; i<m_vertexCountPerFace->size(); ++i)
-        {
-            int nv = m_vertexCountPerFace->get()[i];
-            
-            if (nv == 0)
-            {
-                continue;
-            }
-
-            int facesetIndex = facesetIndices[i];
-            int splitIndex = m_faceSplitIndices[i];
-
-            SplitInfo &split = m_splits[splitIndex];
-
-            // Compute submesh ID based on face's average UV coordinate and it faceset index
-            float uAcc = 0.0f;
-            float vAcc = 0.0f;
-            float invNv = 1.0f / float(nv);
-
-            if (uvValues)
-            {
-                for (int j=0; j<nv; ++j)
-                {
-                    abcV2 uv = uvValues[uvIndices[vertexIndex + j]];
-                    uAcc += uv.x;
-                    vAcc += uv.y;
-                }
-            }
-
-            SubmeshKey sid(uAcc * invNv, vAcc * invNv, facesetIndex, splitIndex);
-
-            auto submeshIndexIt = submeshIndices.find(sid);
-
-            if (submeshIndexIt == submeshIndices.end())
-            {
-                submeshIndices[sid] = m_submeshes.size();
-
-                m_submeshes.push_back(Submesh(facesetIndex, splitIndex));
-
-                curMesh = &(m_submeshes.back());
-
-                curMesh->index = splitSubmeshIndices[splitIndex]++;
-
-                if(m_vertexSharingEnabled)
-                    curMesh->vertexIndices.reserve(m_FixedTopoPositionsIndexes.size());
-                else
-                    curMesh->vertexIndices.reserve(m_faceIndices->size());
-
-                split.submeshCount = splitSubmeshIndices[splitIndex];
-            }
-            else
-            {
-                curMesh = &(m_submeshes[submeshIndexIt->second]);
-            }
-
-            curMesh->faces.push_back(i);
-            curMesh->triangleCount += (nv - 2);
-
-            if (m_vertexSharingEnabled)
-            {
-                for (int j = 0; j<nv; ++j, ++vertexIndex)
-                {
-                    curMesh->vertexIndices.push_back( (int)( m_FaceIndexingReindexed[vertexIndex] - split.indexOffset) );
-                }
-            }
-            else
-            {
-                for (int j=0; j<nv; ++j, ++vertexIndex)
-                {
-                    curMesh->vertexIndices.push_back(vertexIndex - int(split.indexOffset));
-                }
-            }
-        }
-
-        for (size_t i=0; i<m_submeshes.size(); ++i)
-        {
-            m_submeshes[i].vertexIndices.shrink_to_fit();
-        }
-    }
-
-    return (int) m_submeshes.size();
+    dst.resize_discard(src1.size());
+    Lerp(dst.data(), src1.data(), src2.data(), (int)src1.size(), w);
 }
 
-int Topology::getSplitSubmeshCount(int splitIndex) const
+
+aiMeshTopology::aiMeshTopology()
 {
-    if (splitIndex < 0 || size_t(splitIndex) >= m_splits.size())
-    {
-        return 0;
-    }
-    else
-    {
-        return (int) m_splits[splitIndex].submeshCount;
-    }
 }
 
-// ---
+void aiMeshTopology::clear()
+{
+    DebugLog("Topology::clear()");
+    m_indices_sp.reset();
+    m_counts_sp.reset();
+    m_faceset_sps.clear();
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, Topology *topo, bool ownTopo)
+    m_refiner.clear();
+    m_material_ids.clear();
+    m_vertex_count = 0;
+    m_index_count = 0;
+}
+
+
+int aiMeshTopology::getSplitCount() const
+{
+    return (int)m_refiner.splits.size();
+}
+int aiMeshTopology::getVertexCount() const
+{
+    return m_vertex_count;
+}
+int aiMeshTopology::getIndexCount() const
+{
+    return m_index_count;
+}
+
+int aiMeshTopology::getSplitVertexCount(int split_index) const
+{
+    return (int)m_refiner.splits[split_index].vertex_count;
+}
+
+int aiMeshTopology::getSubmeshCount() const
+{
+    return (int)m_refiner.submeshes.size();
+}
+
+int aiMeshTopology::getSubmeshCount(int split_index) const
+{
+    return (int)m_refiner.splits[split_index].submesh_count;
+}
+
+aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
     : super(schema)
     , m_topology(topo)
-    , m_ownTopology(ownTopo)
 {
 }
 
 aiPolyMeshSample::~aiPolyMeshSample()
 {
-    if (m_topology && m_ownTopology)
-    {
-        delete m_topology;
+    waitAsync();
+}
+
+void aiPolyMeshSample::reset()
+{
+    m_points_sp.reset(); m_points_sp2.reset();
+    m_velocities_sp.reset();
+    m_normals_sp.reset(); m_normals_sp2.reset();
+    m_uv0_sp.reset(); m_uv1_sp.reset();
+    m_colors_sp.reset();
+
+    m_points_ref.reset();
+    m_velocities_ref.reset();
+    m_uv0_ref.reset();
+    m_uv1_ref.reset();
+    m_normals_ref.reset();
+    m_tangents_ref.reset();
+    m_colors_ref.reset();
+}
+
+void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
+{
+    dst.visibility = visibility;
+    dst.split_count   = m_topology->getSplitCount();
+    dst.submesh_count = m_topology->getSubmeshCount();
+    dst.vertex_count  = m_topology->getVertexCount();
+    dst.index_count   = m_topology->getIndexCount();
+    dst.topology_changed = m_topology_changed;
+}
+
+void aiPolyMeshSample::getSplitSummaries(aiMeshSplitSummary  *dst) const
+{
+    auto& refiner = m_topology->m_refiner;
+    for (int i = 0; i < (int)refiner.splits.size(); ++i) {
+        auto& src = refiner.splits[i];
+        dst[i].submesh_count  = src.submesh_count;
+        dst[i].submesh_offset = src.submesh_offset;
+        dst[i].vertex_count   = src.vertex_count;
+        dst[i].vertex_offset  = src.vertex_offset;
+        dst[i].index_count    = src.index_count;
+        dst[i].index_offset   = src.index_offset;
     }
 }
 
-bool aiPolyMeshSample::hasNormals() const
+void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
 {
-    switch (m_config.normalsMode)
-    {
-    case aiNormalsMode::ReadFromFile:
-        return m_normals.valid();
-    case aiNormalsMode::Ignore:
-        return false;
-    default:
-        return (m_normals.valid() || !m_smoothNormals.empty());
+    auto& refiner = m_topology->m_refiner;
+    for (int i = 0; i < (int)refiner.submeshes.size(); ++i) {
+        auto& src = refiner.submeshes[i];
+        dst[i].split_index   = src.split_index;
+        dst[i].submesh_index = src.submesh_index;
+        dst[i].index_count   = src.index_count;
+        dst[i].topology      = (aiTopology)src.topology;
     }
 }
 
-bool aiPolyMeshSample::hasUVs() const
+void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
-    return m_uvs.valid();
-}
-
-bool aiPolyMeshSample::hasVelocities() const
-{
-    return !m_schema->hasVaryingTopology() && m_config.interpolateSamples;
-}
-
-bool aiPolyMeshSample::hasTangents() const
-{
-    return (m_config.tangentsMode != aiTangentsMode::None && hasUVs() && !m_tangents.empty() && !m_topology->m_tangentIndices.empty());
-}
-
-bool aiPolyMeshSample::smoothNormalsRequired() const
-{
-    return (m_config.normalsMode == aiNormalsMode::AlwaysCompute ||
-            m_config.tangentsMode == aiTangentsMode::Smooth ||
-            (!m_normals.valid() && m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
-}
-
-bool aiPolyMeshSample::tangentsRequired() const
-{
-    return (m_config.tangentsMode != aiTangentsMode::None);
-}
-
-void aiPolyMeshSample::computeSmoothNormals(const aiConfig &config)
-{
-    aiLogger::Info("%s: Compute smooth normals", getSchema()->getObject()->getFullName());
-
-    size_t smoothNormalsCount = m_positions->size();
-    m_smoothNormals.resize(smoothNormalsCount);
-    // sadly, memset() is way faster than std::fill() on VC
-    memset(m_smoothNormals.data(), 0, sizeof(m_smoothNormals[0])*m_smoothNormals.size());
-
-
-    const auto &counts = *(m_topology->m_vertexCountPerFace);
-    const auto &indices = *(m_topology->m_faceIndices);
-    const auto &positions = *m_positions;
-
-    size_t nf = counts.size();
-    size_t off = 0;
-    bool ccw = config.swapFaceWinding;
-    int ti1 = ccw ? 2 : 1;
-    int ti2 = ccw ? 1 : 2;
-    abcV3 N, dP1, dP2;
-
-    for (size_t f=0; f<nf; ++f)
-    {
-        int nfv = counts[f];
-
-        if (nfv >= 3)
-        {
-            // Compute average normal for current face
-            N.setValue(0.0f, 0.0f, 0.0f);
-
-            const abcV3 &P0 = positions[indices[off]];
-            
-            for (int fv=0; fv<nfv-2; ++fv)
-            {
-                const abcV3 &P1 = positions[indices[off + fv + ti1]];
-                const abcV3 &P2 = positions[indices[off + fv + ti2]];
-
-                dP1 = P1 - P0;
-                dP2 = P2 - P0;
-                
-                N += dP2.cross(dP1).normalize();
-            }
-
-            if (nfv > 3)
-            {
-                N.normalize();
-            }
-
-            // Accumulate for all vertices participating to this face
-            for (int fv=0; fv<nfv; ++fv)
-            {
-                m_smoothNormals[indices[off + fv]] += N;
-            }
-        }
-
-        off += nfv;
-    }
-
-    // Normalize normal vectors
-    for (abcV3& v : m_smoothNormals) { v.normalize(); }
-}
-
-void aiPolyMeshSample::computeTangentIndices(const aiConfig &config, const abcV3 *inN, bool indexedNormals) const
-{
-    aiLogger::Info("%s: Compute tangent indices...", getSchema()->getObject()->getFullName());
-
-    const auto &counts = *(m_topology->m_vertexCountPerFace);
-    const auto &indices = *(m_topology->m_faceIndices);
-    const auto &uvVals = *(m_uvs.getVals());
-    const auto &uvIdxs = *(m_uvs.getIndices());
-    const Util::uint32_t *Nidxs = (indexedNormals ? m_normals.getIndices()->get() : 0);
-
-    size_t tangentIndicesCount = indices.size();
-    m_topology->m_tangentIndices.resize(tangentIndicesCount);
-    
-    if (config.tangentsMode == aiTangentsMode::Smooth)
-    {
-        for (size_t i=0; i<tangentIndicesCount; ++i)
-        {
-            m_topology->m_tangentIndices[i] = indices[i];
-        }
-
-        m_topology->m_tangentsCount = m_positions->size();
-    }
-    else
-    {
-        TangentIndexMap uniqueIndices;
-        TangentIndexMap::iterator it;
-
-        size_t nf = counts.size();
-
-        for (size_t f=0, v=0; f<nf; ++f)
-        {
-            int nfv = counts[f];
-        
-            for (int fv=0; fv<nfv; ++fv, ++v)
-            {
-                TangentKey key(inN[Nidxs ? Nidxs[v] : indices[v]], uvVals[uvIdxs[v]]);
-                
-                it = uniqueIndices.find(key);
-                
-                if (it == uniqueIndices.end())
-                {
-                    int idx = (int) uniqueIndices.size();
-                    
-                    m_topology->m_tangentIndices[v] = idx;
-                    uniqueIndices[key] = idx;
-                }
-                else
-                {
-                    m_topology->m_tangentIndices[v] = it->second;
-                }
-            }
-        }
-
-        m_topology->m_tangentsCount = uniqueIndices.size(); 
-    }
-    
-    aiLogger::Info("%lu unique tangent(s)", m_topology->m_tangentsCount);
-}
-
-void aiPolyMeshSample::computeTangents(const aiConfig &config, const abcV3 *inN, bool indexedNormals)
-{
-    aiLogger::Info("%s: Compute %stangents", getSchema()->getObject()->getFullName(), (config.tangentsMode == aiTangentsMode::Smooth ? "smooth " : ""));
-
-    const auto &counts = *(m_topology->m_vertexCountPerFace);
-    const auto &indices = *(m_topology->m_faceIndices);
-    const auto &positions = *m_positions;
-    const auto &uvVals = *(m_uvs.getVals());
-    const auto &uvIdxs = *(m_uvs.getIndices());
-    const Util::uint32_t *Nidxs = (indexedNormals ? m_normals.getIndices()->get() : 0);
-
-    size_t nf = counts.size();
-    size_t off = 0;
-    bool ccw = config.swapFaceWinding;
-    int ti1 = (ccw ? 2 : 1);
-    int ti2 = (ccw ? 1 : 2);
-
-    size_t tangentsCount = m_topology->m_tangentsCount;
-    m_tangents.resize(tangentsCount);
-    memset(m_tangents.data(), 0, sizeof(m_tangents[0])*m_tangents.size());
-
-    RawVector<int> tanNidxs(tangentsCount);
-    RawVector<Abc::V3f> tan1(tangentsCount);
-    RawVector<Abc::V3f> tan2(tangentsCount);
-    tanNidxs.zeroclear();
-    tan1.zeroclear();
-    tan2.zeroclear();
-
-    abcV3 T, B, dP1, dP2, tmp;
-    abcV2 dUV1, dUV2;
-
-    for (size_t f=0; f<nf; ++f)
-    {
-        int nfv = counts[f];
-
-        if (nfv >= 3)
-        {
-            // reset face tangent and bitangent
-            T.setValue(0.0f, 0.0f, 0.0f);
-            B.setValue(0.0f, 0.0f, 0.0f);
-
-            const abcV3 &P0 = positions[indices[off]];
-            const abcV2 &UV0 = uvVals[uvIdxs[off]];
-
-            // for each triangle making up current polygon
-            for (int fv=0; fv<nfv-2; ++fv)
-            {
-                const abcV3 &P1 = positions[indices[off + fv + ti1]];
-                const abcV3 &P2 = positions[indices[off + fv + ti2]];
-
-                const abcV2 &UV1 = uvVals[uvIdxs[off + fv + ti1]];
-                const abcV2 &UV2 = uvVals[uvIdxs[off + fv + ti2]];
-
-                dP1 = P1 - P0;
-                dP2 = P2 - P0;
-                
-                dUV1 = UV1 - UV0;
-                dUV2 = UV2 - UV0;
-
-                float r = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
-
-                if (r != 0.0f)
-                {
-                    r = 1.0f / r;
-                    
-                    tmp.setValue(r * (dUV2.y * dP1.x - dUV1.y * dP2.x),
-                                 r * (dUV2.y * dP1.y - dUV1.y * dP2.y),
-                                 r * (dUV2.y * dP1.z - dUV1.y * dP2.z));
-                    tmp.normalize();
-                    // accumulate face tangent
-                    T += tmp;
-
-                    tmp.setValue(r * (dUV1.x * dP2.x - dUV2.x * dP1.x),
-                                 r * (dUV1.x * dP2.y - dUV2.x * dP1.y),
-                                 r * (dUV1.x * dP2.z - dUV2.x * dP1.z));
-                    tmp.normalize();
-                    // accumulte face bitangent
-                    B += tmp;
-                }
-            }
-
-            // normalize face tangent and bitangent if current polygon had to be splitted
-            //   into several triangles
-            if (nfv > 3)
-            {
-                T.normalize();
-                B.normalize();
-            }
-
-            // accumulate normals, tangent and bitangent for each vertex
-            for (int fv=0; fv<nfv; ++fv)
-            {
-                int v = m_topology->m_tangentIndices[off + fv];
-                tan1[v] += T;
-                tan2[v] += B;
-                tanNidxs[v] = (Nidxs ? Nidxs[off + fv] : indices[off + fv]);
-            }
-        }
-
-        off += nfv;
-    }
-
-    // compute final tangent space for each point
-    for (size_t i=0; i<tangentsCount; ++i)
-    {
-        const abcV3 &Nv = inN[tanNidxs[i]];
-        abcV3 &Tv = tan1[i];
-        abcV3 &Bv = tan2[i];
-
-        // Normalize Tv and Bv?
-        
-        T = Tv - Nv * Tv.dot(Nv);
-        T.normalize();
-
-        m_tangents[i].x = T.x;
-        m_tangents[i].y = T.y;
-        m_tangents[i].z = T.z;
-        m_tangents[i].w = (Nv.cross(Tv).dot(Bv) < 0.0f
-                            ? (m_config.swapHandedness ?  1.0f : -1.0f)
-                            : (m_config.swapHandedness ? -1.0f :  1.0f));
-    }
-}
-
-void aiPolyMeshSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
-{
-    DebugLog("aiPolyMeshSample::updateConfig()");
-    
-    topoChanged = (config.swapFaceWinding != m_config.swapFaceWinding);
-    dataChanged = (config.swapHandedness != m_config.swapHandedness);
-
-    bool smoothNormalsRequired = (config.normalsMode == aiNormalsMode::AlwaysCompute ||
-                                  config.tangentsMode == aiTangentsMode::Smooth ||
-                                  (!m_normals.valid() && config.normalsMode == aiNormalsMode::ComputeIfMissing));
-    
-    if (smoothNormalsRequired)
-    {
-        if (m_smoothNormals.empty() || topoChanged)
-        {
-            computeSmoothNormals(config);
-            dataChanged = true;
-        }
-    }
-    else
-    {
-        if (!m_smoothNormals.empty())
-        {
-            aiLogger::Info("%s: Clear smooth normals", getSchema()->getObject()->getFullName());
-            m_smoothNormals.clear();
-            dataChanged = true;
-        }
-    }
-
-    bool tangentsRequired = (m_uvs.valid() && config.tangentsMode != aiTangentsMode::None);
-
-    if (tangentsRequired)
-    {
-        bool tangentsModeChanged = (config.tangentsMode != m_config.tangentsMode);
-
-        const abcV3 *N = nullptr;
-        bool Nindexed = false;
-
-        if (smoothNormalsRequired)
-        {
-            N = m_smoothNormals.data();
-        }
-        else if (m_normals.valid())
-        {
-            N = m_normals.getVals()->get();
-            Nindexed = (m_normals.getScope() == AbcGeom::kFacevaryingScope);
-        }
-
-        if (N)
-        {
-            // do not compute indices if they are cached, constant topology and valid
-            if (m_topology->m_tangentIndices.empty() ||
-                !config.cacheTangentsSplits ||
-                tangentsModeChanged)
-            {
-                computeTangentIndices(config, N, Nindexed);
-            }
-            if (m_tangents.empty() || 
-                tangentsModeChanged ||
-                topoChanged)
-            {
-                computeTangents(config, N, Nindexed);
-                dataChanged = true;
-            }
-        }
-        else
-        {
-            tangentsRequired = false;
-        }
-    }
-    
-    if (!tangentsRequired)
-    {
-        if (!m_tangents.empty())
-        {
-            aiLogger::Info("%s: Clear tangents", getSchema()->getObject()->getFullName());
-            
-            m_tangents.clear();
-            dataChanged = true;
-        }
-
-        if (!m_topology->m_tangentIndices.empty() && (m_ownTopology || !config.cacheTangentsSplits))
-        {
-            aiLogger::Info("%s: Clear tangent indices", getSchema()->getObject()->getFullName());
-            
-            m_topology->m_tangentIndices.clear();
-            m_topology->m_tangentsCount = 0;
-        }
-    }
-
-    if (topoChanged)
-    {
-        dataChanged = true;
-    }
-
-    m_config = config;   
-}
-
-void aiPolyMeshSample::getSummary(bool forceRefresh, aiMeshSampleSummary &summary, aiPolyMeshSample* sample) const
-{
-    DebugLog("aiPolyMeshSample::getSummary(forceRefresh=%s)", forceRefresh ? "true" : "false");
-    
-    summary.splitCount = m_topology->getSplitCount(sample, forceRefresh);
-
-    summary.hasNormals = hasNormals();
-
-    summary.hasUVs = hasUVs();
-    
-    summary.hasTangents = hasTangents();
-
-    summary.hasVelocities = hasVelocities();
-}
-
-
-void aiPolyMeshSample::getDataPointer(aiPolyMeshData &dst) const
-{
-    if (m_positions) {
-        dst.positionCount = m_positions->valid() ? (int)m_positions->size() : 0;
-        dst.positions = (abcV3*)(m_positions->get());
-    }
-
-    if (m_velocities) {
-        dst.velocities = m_velocities->valid() ? (abcV3*)m_velocities->get() : nullptr;
-    }
-
-    if (m_normals) {
-        dst.normalCount = (int)m_normals.getVals()->size();
-        dst.normals = (abcV3*)m_normals.getVals()->get();
-        dst.normalIndexCount = m_normals.isIndexed() ? (int)m_normals.getIndices()->size() : 0;
-        if (dst.normalIndexCount) {
-            dst.normalIndices = (int*)m_normals.getIndices()->get();
-        }
-    }
-
-    if (m_uvs) {
-        dst.uvCount = (int)m_uvs.getVals()->size();
-        dst.uvs = (abcV2*)m_uvs.getVals()->get();
-        dst.uvIndexCount = m_uvs.isIndexed() ? (int)m_uvs.getIndices()->size() : 0;
-        if (dst.uvIndexCount) {
-            dst.uvIndices = (int*)m_uvs.getIndices()->get();
-        }
-    }
-
-    if (m_topology) {
-        if (m_topology->m_faceIndices) {
-            dst.indexCount = (int)m_topology->m_faceIndices->size();
-            dst.indices = (int*)m_topology->m_faceIndices->get();
-        }
-        if (m_topology->m_vertexCountPerFace) {
-            dst.faceCount = (int)m_topology->m_vertexCountPerFace->size();
-            dst.faces = (int*)m_topology->m_vertexCountPerFace->get();
-            dst.triangulatedIndexCount = m_topology->m_triangulatedIndexCount;
-        }
-    }
-
-    dst.center = m_bounds.center();
-    dst.size = m_bounds.size();
-}
-
-
-static inline void SwapHandedness(aiPolyMeshData &dst)
-{
-    auto body = [&](abcV3 *v, int n) {
-        if (v) {
-            for (int i = 0; i < n; ++i) { v[i].x *= -1.0f; }
-        }
-    };
-    body(dst.positions, dst.positionCount);
-    body(dst.velocities, dst.positionCount);
-    body(dst.normals, dst.normalCount);
-}
-
-// return true if position and uv / normal indices are deferent
-static inline bool IsIndicesDivergent(const aiPolyMeshData &dst)
-{
-    if ((dst.normalCount != 0 && dst.positionCount != dst.normalCount) ||
-        (dst.uvCount != 0 && dst.positionCount != dst.uvCount))
-    {
-        return true;
-    }
-
-    // maybe more detailed (=very slow) comparison is needed..
-    return false;
-}
-
-static inline void TriangulateIndices(aiPolyMeshData& src, int *dv, const int *indices, bool swap_face)
-{
-    if (!dv) { return; }
-
-    const int i1 = swap_face ? 2 : 1;
-    const int i2 = swap_face ? 1 : 2;
-
-    int n = 0;
-    int i = 0;
-    if (indices) {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = indices[n + 0];
-                dv[i + 1] = indices[n + ni + i1];
-                dv[i + 2] = indices[n + ni + i2];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-    else {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = n + 0;
-                dv[i + 1] = n + ni + i1;
-                dv[i + 2] = n + ni + i2;
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-}
-
-template<class T>
-static inline void ExpandWithTriangulation(aiPolyMeshData& src, T *dv, const T *sv, const int *indices, bool swap_face)
-{
-    if (!dv || !sv) { return; }
-
-    const int i1 = swap_face ? 2 : 1;
-    const int i2 = swap_face ? 1 : 2;
-
-    int n = 0;
-    int i = 0;
-    if (indices) {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = sv[indices[n + 0]];
-                dv[i + 1] = sv[indices[n + ni + i1]];
-                dv[i + 2] = sv[indices[n + ni + i2]];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-    else {
-        for (int fi = 0; fi < src.faceCount; ++fi) {
-            int ngon = src.faces[fi];
-            for (int ni = 0; ni < ngon - 2; ++ni) {
-                dv[i + 0] = sv[n + 0];
-                dv[i + 1] = sv[n + ni + i1];
-                dv[i + 2] = sv[n + ni + i2];
-                i += 3;
-            }
-            n += ngon;
-        }
-    }
-}
-
-void aiPolyMeshSample::copyData(aiPolyMeshData &dst)
-{
-    aiPolyMeshData src;
-    getDataPointer(src);
-
-    // sadly, memcpy() is way faster than std::copy() on VC
-
-    if (src.faces && dst.faces && dst.faceCount >= src.faceCount) {
-        memcpy(dst.faces, src.faces, src.faceCount * sizeof(*dst.faces));
-        dst.faceCount = src.faceCount;
-    }
-    else {
-        dst.faceCount = 0;
-    }
-
-    if (src.positions && dst.positions && dst.positionCount >= src.positionCount) {
-        memcpy(dst.positions, src.positions, src.positionCount * sizeof(*dst.positions));
-        dst.positionCount = src.positionCount;
-    }
-    else {
-        dst.positionCount = 0;
-    }
-
-    if (src.velocities && dst.velocities && dst.positionCount >= src.positionCount) {
-        memcpy(dst.velocities, src.velocities, src.positionCount * sizeof(*dst.velocities));
-    }
-
-    if (src.interpolatedVelocitiesXY && dst.interpolatedVelocitiesXY && dst.positionCount >= src.positionCount)
-    {
-        memcpy(dst.interpolatedVelocitiesXY, src.interpolatedVelocitiesXY, src.positionCount * sizeof(*dst.interpolatedVelocitiesXY));
-    }
-
-    if (src.interpolatedVelocitiesZ && dst.interpolatedVelocitiesZ && dst.positionCount >= src.positionCount)
-    {
-        memcpy(dst.interpolatedVelocitiesZ, src.interpolatedVelocitiesZ, src.positionCount * sizeof(*dst.interpolatedVelocitiesZ));
-    }
-    
-
-    if (src.normals && dst.normals && dst.normalCount >= src.normalCount) {
-        memcpy(dst.normals, src.normals, src.normalCount * sizeof(*dst.normals));
-        dst.normalCount = src.normalCount;
-    }
-    else {
-        dst.normalCount = 0;
-    }
-
-    if (src.uvs && dst.uvs && dst.uvCount >= src.uvCount) {
-        memcpy(dst.uvs, src.uvs, src.uvCount * sizeof(*dst.uvs));
-        dst.uvCount = src.uvCount;
-    }
-    else {
-        dst.uvCount = 0;
-    }
-
-    if (m_config.swapHandedness) {
-        SwapHandedness(dst);
-    }
-
-
-    auto copy_indices = [&](int *d, const int *s, int n) {
-        // swap faces if needed
-        if (m_config.swapFaceWinding) {
-            int i = 0;
-            for (int fi = 0; fi < src.faceCount; ++fi) {
-                int ngon = src.faces[i];
-                for (int ni = 0; ni < ngon; ++ni) {
-                    int ini = ngon - ni - 1;
-                    d[i + ni] = s[i + ini];
-                }
-                i += ngon;
-            }
-        }
-        else {
-            memcpy(d, s, n * sizeof(int));
-        }
-    };
-
-    if (src.indices && dst.indices && dst.indexCount >= src.indexCount) {
-        copy_indices(dst.indices, src.indices, src.indexCount);
-        dst.indexCount = src.indexCount;
-    }
-    if (src.normalIndices && dst.normalIndices && dst.normalIndexCount >= src.normalIndexCount) {
-        copy_indices(dst.normalIndices, src.normalIndices, src.normalIndexCount);
-        dst.normalIndexCount = src.normalIndexCount;
-    }
-    if (src.uvIndices && dst.uvIndices && dst.uvIndexCount >= src.uvIndexCount) {
-        copy_indices(dst.uvIndices, src.uvIndices, src.uvIndexCount);
-        dst.uvIndexCount = src.uvIndexCount;
-    }
-
-    dst.center = dst.center;
-    dst.size = dst.size;
-}
-
-
-void aiPolyMeshSample::copyDataWithTriangulation(aiPolyMeshData &dst, bool always_expand_indices)
-{
-    aiPolyMeshData src;
-    getDataPointer(src);
-
-    bool needs_expand = IsIndicesDivergent(src) || always_expand_indices;
-
-    // triangulated mesh has one index buffer
-    dst.normalIndices = nullptr;
-    dst.normalIndexCount = 0;
-    dst.uvIndices = nullptr;
-    dst.uvIndexCount = 0;
-
-    // todo: generate normals and tangents if required
-
-    if (needs_expand) {
-        if (src.positions && dst.positions && dst.positionCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.positions, src.positions, src.indices, m_config.swapFaceWinding);
-            dst.positionCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.positionCount = 0;
-        }
-
-        if (src.velocities && dst.velocities && dst.positionCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.velocities, src.velocities, src.indices, m_config.swapFaceWinding);
-        }
-
-        if (src.normals && dst.normals && dst.normalCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.normals, src.normals, src.normalIndices, m_config.swapFaceWinding);
-            dst.normalCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.normalCount = 0;
-        }
-
-        if (src.uvs && dst.uvs && dst.uvCount >= src.triangulatedIndexCount) {
-            ExpandWithTriangulation(src, dst.uvs, src.uvs, src.uvIndices, m_config.swapFaceWinding);
-            dst.uvCount = src.triangulatedIndexCount;
-        }
-        else {
-            dst.uvCount = 0;
-        }
-
-        if (dst.indices && dst.indexCount >= src.triangulatedIndexCount) {
-            for (int i = 0; i < src.triangulatedIndexCount; ++i) {
-                dst.indices[i] = i;
-            }
-        }
-    }
-    else {
-        int *indices = dst.indices;
-        dst.indices = nullptr;      // skip needless copy
-        copyData(dst);
-        dst.indices = indices;
-        TriangulateIndices(src, dst.indices, src.indices, m_config.swapFaceWinding);
-    }
-
-    {
-        dst.triangulatedIndexCount = src.triangulatedIndexCount;
-        int num_triangles = src.triangulatedIndexCount / 3;
-        if (dst.faces && dst.faceCount >= num_triangles) {
-            std::fill(dst.faces, dst.faces + num_triangles, 3);
-            dst.faceCount = num_triangles;
-        }
-        else {
-            dst.faceCount = 0;
-        }
-    }
-
-    dst.center = dst.center;
-    dst.size = dst.size;
-}
-
-
-int aiPolyMeshSample::getVertexBufferLength(int splitIndex) const
-{
-    DebugLog("aiPolyMeshSample::getVertexBufferLength(splitIndex=%d)", splitIndex);
-    
-    return m_topology->getVertexBufferLength(splitIndex);
-}
-
-void aiPolyMeshSample::fillVertexBuffer(int splitIndex, aiPolyMeshData &data)
-{
-    DebugLog("aiPolyMeshSample::fillVertexBuffer(splitIndex=%d)", splitIndex);
-    
-    if (splitIndex < 0 || size_t(splitIndex) >= m_topology->m_splits.size() || m_topology->m_splits[splitIndex].vertexCount == 0)
-    {
+    auto& schema = *dynamic_cast<schema_t*>(getSchema());
+    auto& summary = schema.getSummary();
+    auto& splits = m_topology->m_refiner.splits;
+    if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].vertex_count == 0)
         return;
+
+    auto& refiner = m_topology->m_refiner;
+    auto& split = refiner.splits[split_index];
+
+    if (data.points) {
+        m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
+
+        // bounds
+        abcV3 bbmin, bbmax;
+        MinMax(bbmin, bbmax, data.points, split.vertex_count);
+        data.center = (bbmin + bbmax) * 0.5f;
+        data.extents = bbmax - bbmin;
     }
-
-    bool copyNormals = (hasNormals() && data.normals);
-    bool copyUvs = (hasUVs() && data.uvs);
-    bool copyTangents = (hasTangents() && data.tangents);
-    
-    bool useAbcNormals = (m_normals.valid() && (m_config.normalsMode == aiNormalsMode::ReadFromFile || m_config.normalsMode == aiNormalsMode::ComputeIfMissing));
-    float xScale = (m_config.swapHandedness ? -1.0f : 1.0f);
-    bool interpolatePositions = hasVelocities() && m_nextPositions != nullptr;
-    float timeOffset = static_cast<float>(m_currentTimeOffset);
-    float timeInterval = static_cast<float>(m_currentTimeInterval);
-    float vertexMotionScale = static_cast<float>(m_config.vertexMotionScale);
-    
-    const SplitInfo &split = m_topology->m_splits[splitIndex];
-    const auto &faceCount = *(m_topology->m_vertexCountPerFace);
-    const auto &indices = m_config.turnQuadEdges ? m_topology->m_indicesSwapedFaceWinding.data() : m_topology->m_faceIndices->get();
-    const auto &positions = *m_positions;
-    const auto &nextPositions = *m_nextPositions;
-
-    size_t k = 0;
-    size_t o = split.indexOffset;
-    
-    // reset unused data arrays
-
-    if (data.normals && !copyNormals)
-    {
-        aiLogger::Info("%s: Reset normals", getSchema()->getObject()->getFullName());
-        memset(data.normals, 0, split.vertexCount * sizeof(abcV3));
-    }
-    
-    if (data.uvs && !copyUvs)
-    {
-        aiLogger::Info("%s: Reset UVs", getSchema()->getObject()->getFullName());
-        memset(data.uvs, 0, split.vertexCount * sizeof(abcV2));
-    }
-    
-    if (data.tangents && !copyTangents)
-    {
-        aiLogger::Info("%s: Reset tangents", getSchema()->getObject()->getFullName());
-        memset(data.tangents, 0, split.vertexCount * sizeof(abcV4));
-    }
-
-    abcV3 bbmin = positions[indices[o]];
-    abcV3 bbmax = bbmin;
-
-#define UPDATE_POSITIONS_AND_BOUNDS(srcIdx, dstIdx) \
-    abcV3 &cP = data.positions[dstIdx]; \
-    cP = positions[srcIdx]; \
-    if (interpolatePositions) \
-    {\
-        abcV3 distance = nextPositions[srcIdx] - positions[srcIdx]; \
-        abcV3 velocity = (distance / timeInterval) * vertexMotionScale; \
-        cP+= distance * timeOffset; \
-        data.interpolatedVelocitiesXY[dstIdx].x = velocity.x*xScale; \
-        data.interpolatedVelocitiesXY[dstIdx].y = velocity.y; \
-        data.interpolatedVelocitiesZ[dstIdx].x = velocity.z; \
-    }\
-    cP.x *= xScale; \
-    if (cP.x < bbmin.x) bbmin.x = cP.x; \
-    else if (cP.x > bbmax.x) bbmax.x = cP.x; \
-    if (cP.y < bbmin.y) bbmin.y = cP.y; \
-    else if (cP.y > bbmax.y) bbmax.y = cP.y; \
-    if (cP.z < bbmin.z) bbmin.z = cP.z; \
-    else if (cP.z > bbmax.z) bbmax.z = cP.z
-
-    
-    // fill data arrays
-    if ( m_topology->m_vertexSharingEnabled && m_topology->m_TreatVertexExtraDataAsStatic && !m_topology->m_FreshlyReadTopologyData && m_topology->m_FixedTopoPositionsIndexes.size())
-    {
-        for (size_t i = 0; i < m_topology->m_FixedTopoPositionsIndexes.size(); i++)
-        {
-            UPDATE_POSITIONS_AND_BOUNDS(m_topology->m_FixedTopoPositionsIndexes[i], i);
+    if (data.velocities) {
+        // velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
+        if (summary.has_velocities && !m_velocities_ref.empty()) {
+            m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
+        }
+        else {
+            memset(data.velocities, 0, split.vertex_count * sizeof(abcV3));
         }
     }
-    else
-    {
-        m_topology->m_FreshlyReadTopologyData = false;
-        if (copyNormals)
-        {
-            if (useAbcNormals)
-            {
-                const auto &normals = *(m_normals.getVals());
 
-                if (m_normals.getScope() == AbcGeom::kFacevaryingScope)
-                {
-                    const auto &nIndices = *(m_normals.getIndices());
-                
-                    if (copyUvs)
-                    {
-                        const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
-                    
-                        if (copyTangents)
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
-                                int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
-                                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                        data.normals[dstNdx] = normals[nIndices[o]];
-                                        data.normals[dstNdx].x *= xScale;
-                                        data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                        data.tangents[dstNdx].x *= xScale;
-                                        data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                    }
-                                    else
-                                    {
-                                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                        data.normals[k] = normals[nIndices[o]];
-                                        data.normals[k].x *= xScale;
-                                        data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                        data.tangents[k].x *= xScale;
-                                        data.uvs[k] = uvs[uvIndices[o]];
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
-                                int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
-                                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                        data.normals[dstNdx] = normals[nIndices[o]];
-                                        data.normals[dstNdx].x *= xScale;
-                                        data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                    }
-                                    else
-                                    {
-                                        UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                        data.normals[k] = normals[nIndices[o]];
-                                        data.normals[k].x *= xScale;
-                                        data.uvs[k] = uvs[uvIndices[o]];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = normals[nIndices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                    data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[dstNdx].x *= xScale;
-                                }
-                                else
-                                {
-                                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                    data.normals[k] = normals[nIndices[o]];
-                                    data.normals[k].x *= xScale;
-                                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[k].x *= xScale;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = normals[nIndices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                }
-                                else
-                                {
-                                    UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                    data.normals[k] = normals[nIndices[o]];
-                                    data.normals[k].x *= xScale;
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (copyUvs)
-                    {
-                        const auto &uvs = *(m_uvs.getVals());
-                        const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
-                    
-                        if (copyTangents)
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
-                                int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if (m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
-                                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                        data.normals[dstNdx] = normals[indices[o]];
-                                        data.normals[dstNdx].x *= xScale;
-                                        data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                        data.tangents[dstNdx].x *= xScale;
-                                        data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                    }
-                                    else
-                                    {
-                                        int v = indices[o];
-                                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                        data.normals[k] = normals[v];
-                                        data.normals[k].x *= xScale;
-                                        data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                        data.tangents[k].x *= xScale;
-                                        data.uvs[k] = uvs[uvIndices[o]];
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                            {
-                                int nv = faceCount[i];
-                                for (int j = 0; j < nv; ++j, ++o, ++k)
-                                {
-                                    if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                    {
-                                        size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                        size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                        UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                        data.normals[dstNdx] = normals[indices[o]];
-                                        data.normals[dstNdx].x *= xScale;
-                                        data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                    }
-                                    else
-                                    {
-                                        int v = indices[o];
-                                        UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                        data.normals[k] = normals[v];
-                                        data.normals[k].x *= xScale;
-                                        data.uvs[k] = uvs[uvIndices[o]];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = normals[indices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                    data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[dstNdx].x *= xScale;
-                                }
-                                else
-                                {
-                                    int v = indices[o];
-                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                    data.normals[k] = normals[v];
-                                    data.normals[k].x *= xScale;
-                                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[k].x *= xScale;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = normals[indices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                }
-                                else
-                                {
-                                    int v = indices[o];
-                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                    data.normals[k] = normals[v];
-                                    data.normals[k].x *= xScale;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (copyUvs)
-                {
-                    const auto &uvs = *(m_uvs.getVals());
-                    const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
-                
-                    if (copyTangents)
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = m_smoothNormals[indices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                    data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[dstNdx].x *= xScale;
-                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                }
-                                else
-                                {
-                                    int v = indices[o];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                    data.normals[k] = m_smoothNormals[v];
-                                    data.normals[k].x *= xScale;
-                                    data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                    data.tangents[k].x *= xScale;
-                                    data.uvs[k] = uvs[uvIndices[o]];
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                        {
-                            int nv = faceCount[i];
-                            for (int j = 0; j < nv; ++j, ++o, ++k)
-                            {
-                                if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                                {
-                                    size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                    size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                    UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                    data.normals[dstNdx] = m_smoothNormals[indices[o]];
-                                    data.normals[dstNdx].x *= xScale;
-                                    data.uvs[dstNdx] = uvs[uvIndices[o]];
-                                }
-                                else
-                                {
-                                    int v = indices[o];
-                                    UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                    data.normals[k] = m_smoothNormals[v];
-                                    data.normals[k].x *= xScale;
-                                    data.uvs[k] = uvs[uvIndices[o]];
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (copyTangents)
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
-                        int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
-                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                data.normals[dstNdx] = m_smoothNormals[indices[o]];
-                                data.normals[dstNdx].x *= xScale;
-                                data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[dstNdx].x *= xScale;
-                            }
-                            else
-                            {
-                                int v = indices[o];
-                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                data.normals[k] = m_smoothNormals[v];
-                                data.normals[k].x *= xScale;
-                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[k].x *= xScale;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
-                        int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if ( m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
-                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                data.normals[dstNdx] = m_smoothNormals[indices[o]];
-                                data.normals[dstNdx].x *= xScale;
-                            }
-                            else
-                            {
-                                int v = indices[o];
-                                UPDATE_POSITIONS_AND_BOUNDS(v, k);
-                                data.normals[k] = m_smoothNormals[v];
-                                data.normals[k].x *= xScale;
-                            }
-                        }
-                    }
-                }
-            }
+    if (data.normals) {
+        if (summary.has_normals) {
+            m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
         }
+        else {
+            memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
+        }
+    }
+
+    if (data.tangents) {
+        if(summary.has_tangents) {
+            m_tangents_ref.copy_to(data.tangents, split.vertex_count, split.vertex_offset);
+        }
+        else {
+            memset(data.tangents, 0, split.vertex_count * sizeof(abcV4));
+        }
+    }
+
+    if (data.uv0) {
+        if (!m_uv0_ref.empty())
+            m_uv0_ref.copy_to(data.uv0, split.vertex_count, split.vertex_offset);
         else
-        {
-            if (copyUvs)
-            {
-                const auto &uvs = *(m_uvs.getVals());
-                const auto &uvIndices = m_config.turnQuadEdges ? m_topology->m_UvIndicesSwapedFaceWinding : *m_uvs.getIndices();
-            
-                if (copyTangents)
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
-                        int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if (m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
-                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[dstNdx].x *= xScale;
-                                data.uvs[dstNdx] = uvs[uvIndices[o]];
-                            }
-                            else
-                            {
-                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                                data.tangents[k].x *= xScale;
-                                data.uvs[k] = uvs[uvIndices[o]];
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                    {
-                        int nv = faceCount[i];
-                        for (int j = 0; j < nv; ++j, ++o, ++k)
-                        {
-                            if (m_topology->m_FixedTopoPositionsIndexes.size())
-                            {
-                                size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                                size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                                UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                                data.uvs[dstNdx] = uvs[uvIndices[o]];
-                            }
-                            else
-                            {
-                                UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                                data.uvs[k] = uvs[uvIndices[o]];
-                            }
-                        }
-                    }
-                }
-            }
-            else if (copyTangents)
-            {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
-                    int nv = faceCount[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        if (m_topology->m_FixedTopoPositionsIndexes.size())
-                        {
-                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                            data.tangents[dstNdx] = m_tangents[m_topology->m_tangentIndices[o]];
-                            data.tangents[dstNdx].x *= xScale;
-                        }
-                        else
-                        {
-                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                            data.tangents[k] = m_tangents[m_topology->m_tangentIndices[o]];
-                            data.tangents[k].x *= xScale;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for (size_t i=split.firstFace; i<=split.lastFace; ++i)
-                {
-                    int nv = faceCount[i];
-                    for (int j = 0; j < nv; ++j, ++o, ++k)
-                    {
-                        if (m_topology->m_FixedTopoPositionsIndexes.size())
-                        {
-                            size_t dstNdx = m_topology->m_FaceIndexingReindexed[o];
-                            size_t srcNdx = m_topology->m_FixedTopoPositionsIndexes[dstNdx];
-
-                            UPDATE_POSITIONS_AND_BOUNDS(srcNdx, dstNdx);
-                        }
-                        else
-                        {
-                            UPDATE_POSITIONS_AND_BOUNDS(indices[o], k);
-                        }
-                    }
-                }
-            }
-        }
+            memset(data.uv0, 0, split.vertex_count * sizeof(abcV2));
     }
 
-#undef UPDATE_POSITIONS_AND_BOUNDS
-
-    data.center = 0.5f * (bbmin + bbmax);
-    data.size = bbmax - bbmin;
-}
-
-int aiPolyMeshSample::prepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets &inFacesets)
-{
-    DebugLog("aiPolyMeshSample::prepateSubmeshes()");
-    
-    int rv = m_topology->prepareSubmeshes(m_uvs, inFacesets, sample);
-
-    m_curSubmesh = m_topology->submeshBegin();
-
-    return rv;
-}
-
-int aiPolyMeshSample::getSplitSubmeshCount(int splitIndex) const
-{
-    DebugLog("aiPolyMeshSample::getSplitSubmeshCount()");
-    
-    return m_topology->getSplitSubmeshCount(splitIndex);
-}
-
-bool aiPolyMeshSample::getNextSubmesh(aiSubmeshSummary &summary)
-{
-    DebugLog("aiPolyMeshSample::getNextSubmesh()");
-    
-    if (m_curSubmesh == m_topology->submeshEnd())
-    {
-        return false;
-    }
-    else
-    {
-        Submesh &submesh = *m_curSubmesh;
-
-        summary.index = int(m_curSubmesh - m_topology->submeshBegin());
-        summary.splitIndex = submesh.splitIndex;
-        summary.splitSubmeshIndex = submesh.index;
-        summary.facesetIndex = submesh.facesetIndex;
-        summary.triangleCount = int(submesh.triangleCount);
-
-        ++m_curSubmesh;
-
-        return true;
-    }
-}
-
-void aiPolyMeshSample::fillSubmeshIndices(const aiSubmeshSummary &summary, aiSubmeshData &data) const
-{
-    DebugLog("aiPolyMeshSample::fillSubmeshIndices()");
-    
-    Submeshes::const_iterator it = m_topology->submeshBegin() + summary.index;
-    
-    if (it != m_topology->submeshEnd())
-    {
-        bool ccw = m_config.swapFaceWinding;
-        const auto &counts = *(m_topology->m_vertexCountPerFace);
-        const Submesh &submesh = *it;
-
-        int index = 0;
-        int i1 = (ccw ? 2 : 1);
-        int i2 = (ccw ? 1 : 2);
-        int offset = 0;
-        
-        if (submesh.faces.empty() && submesh.vertexIndices.empty())
-        {
-            // single submesh case, faces and vertexIndices not populated
-
-            for (size_t i=0; i<counts.size(); ++i)
-            {
-                int nv = counts[i];
-                
-                int nt = nv - 2;
-                if (m_topology->m_FixedTopoPositionsIndexes.size() > 0)
-                {
-                    for (int ti = 0; ti<nt; ++ti)
-                    {
-                        data.indices[offset + 0] = m_topology->m_FaceIndexingReindexed[index];
-                        data.indices[offset + 1] = m_topology->m_FaceIndexingReindexed[index + ti + i1];
-                        data.indices[offset + 2] = m_topology->m_FaceIndexingReindexed[index + ti + i2];
-                        offset += 3;
-                    }
-                }
-                else
-                {
-                    for (int ti = 0; ti<nt; ++ti)
-                    {
-                        data.indices[offset + 0] = index;
-                        data.indices[offset + 1] = index + ti + i1;
-                        data.indices[offset + 2] = index + ti + i2;
-                        offset += 3;
-                    }
-                }
-
-                index += nv;
-            }
-        }
+    if (data.uv1) {
+        if (!m_uv1_ref.empty())
+            m_uv1_ref.copy_to(data.uv1, split.vertex_count, split.vertex_offset);
         else
-        {
-            for (const size_t& f : submesh.faces)
-            {
-                int nv = counts[f];
-                
-                // Triangle faning
-                int nt = nv - 2;
-                for (int ti = 0; ti < nt; ++ti)
-                {
-                    data.indices[offset + 0] = submesh.vertexIndices[index];
-                    data.indices[offset + 1] = submesh.vertexIndices[index + ti + i1];
-                    data.indices[offset + 2] = submesh.vertexIndices[index + ti + i2];
-                    offset += 3;
-                }
+            memset(data.uv1, 0, split.vertex_count * sizeof(abcV2));
+    }
 
-                index += nv;
-            }
-        }
+    if (data.colors) {
+        if (!m_colors_ref.empty())
+            m_colors_ref.copy_to((abcC4*)data.colors, split.vertex_count, split.vertex_offset);
+        else
+            memset(data.colors, 0, split.vertex_count * sizeof(abcV4));
     }
 }
 
-// ---
-
-aiPolyMesh::aiPolyMesh(aiObject *obj)
-    : super(obj)
-    , m_peakIndexCount(0)
-    , m_peakTriangulatedIndexCount(0)
-    , m_peakVertexCount(0)
-    , m_ignoreNormals(false)
-    , m_ignoreUVs(false)
+void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
 {
+    if (!data.indices)
+        return;
+
+    auto& refiner = m_topology->m_refiner;
+    auto& submesh = refiner.submeshes[submesh_index];
+    refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
+}
+
+void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
+{
+    auto body = [this, vbs, ibs]() {
+        auto& refiner = m_topology->m_refiner;
+        for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
+            fillSplitVertices(spi, vbs[spi]);
+        for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
+            fillSubmeshIndices(smi, ibs[smi]);
+    };
+
+    if (m_force_sync || !getConfig().async_load)
+        body();
+    else
+        m_async_copy = std::async(std::launch::async, body);
+}
+
+void aiPolyMeshSample::waitAsync()
+{
+    if (m_async_copy.valid())
+        m_async_copy.wait();
+    m_force_sync = false;
+}
+
+
+
+aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
+{
+    // find color and uv1 params (Maya's extension)
+    auto geom_params = m_schema.getArbGeomParams();
+    if (geom_params.valid()) {
+        size_t num_geom_params = geom_params.getNumProperties();
+        for (size_t i = 0; i < num_geom_params; ++i) {
+            auto& header = geom_params.getPropertyHeader(i);
+            if (header.getName() == "rgba" && AbcGeom::IC4fGeomParam::matches(header)) {
+                // colors
+                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, "rgba");
+            }
+            else if (header.getName() == "uv1" && AbcGeom::IV2fGeomParam::matches(header)) {
+                // uv1
+                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, "uv1");
+            }
+        }
+    }
+
+    // find face set schema in children
+    size_t num_children = getAbcObject().getNumChildren();
+    for (size_t i = 0; i < num_children; ++i) {
+        auto child = getAbcObject().getChild(i);
+        if (child.valid() && AbcGeom::IFaceSetSchema::matches(child.getMetaData())) {
+            auto so = Abc::ISchemaObject<AbcGeom::IFaceSetSchema>(child, Abc::kWrapExisting);
+            auto& fs = so.getSchema();
+            if (fs.valid() && fs.getNumSamples() > 0)
+                m_facesets.push_back(fs);
+        }
+    }
+
+    updateSummary();
+}
+
+aiPolyMesh::~aiPolyMesh()
+{
+    waitAsync();
+}
+
+void aiPolyMesh::updateSummary()
+{
+    m_summary.topology_variance = (aiTopologyVariance)m_schema.getTopologyVariance();
+    m_varying_topology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+    auto& summary = m_summary;
+    auto& config = getConfig();
+
+    summary = {};
     m_constant = m_schema.isConstant();
 
+    // m_schema.isConstant() doesn't consider custom properties. check them
+    if (m_visibility_prop.valid() && !m_visibility_prop.isConstant()) {
+        m_constant = false;
+    }
+
+    // points
+    auto points = m_schema.getPositionsProperty();
+    if (points.valid()) {
+        summary.constant_points = points.isConstant();
+        if (!summary.constant_points)
+            m_constant = false;
+    }
+
+    // normals
     auto normals = m_schema.getNormalsParam();
-    if (normals.valid())
-    {
-        auto scope = normals.getScope();
-        if (scope != AbcGeom::kUnknownScope)
-        {
-            if (!normals.isConstant())
-            {
-                m_constant = false;
-            }
-        }
-        else
-        {
-            m_ignoreNormals = true;
-        }
+    if (normals.valid() && normals.getNumSamples() > 0 && normals.getScope() != AbcGeom::kUnknownScope) {
+        summary.has_normals_prop = true;
+        summary.has_normals = true;
+        summary.constant_normals = normals.isConstant();
+        if (!summary.constant_normals)
+            m_constant = false;
     }
 
+    // uv0
     auto uvs = m_schema.getUVsParam();
-    if (uvs.valid())
-    {
-        auto scope = uvs.getScope();
-        if (scope != AbcGeom::kUnknownScope)
-        {
-            if (!uvs.isConstant())
-            {
-                m_constant = false;
-            }
-        }
-        else
-        {
-            m_ignoreUVs = true;
+    if (uvs.valid() && uvs.getNumSamples() > 0 && uvs.getScope() != AbcGeom::kUnknownScope) {
+        summary.has_uv0_prop = true;
+        summary.has_uv0 = true;
+        summary.constant_uv0 = uvs.isConstant();
+        if (!summary.constant_uv0)
+            m_constant = false;
+    }
+
+    // uv1
+    if (m_uv1_param.valid() && m_uv1_param.getNumSamples() > 0) {
+        summary.has_uv1_prop = true;
+        summary.has_uv1 = true;
+        summary.constant_uv1 = m_uv1_param.isConstant();
+        if (!summary.constant_uv1)
+            m_constant = false;
+    }
+
+    // colors
+    if (m_colors_param.valid() && m_colors_param.getNumSamples() > 0) {
+        summary.has_colors_prop = true;
+        summary.has_colors = true;
+        summary.constant_colors = m_colors_param.isConstant();
+        if (!summary.constant_colors)
+            m_constant = false;
+    }
+
+
+    bool interpolate = config.interpolate_samples && !m_constant && !m_varying_topology;
+    summary.interpolate_points = interpolate && !summary.constant_points;
+
+    // velocities
+    if (interpolate) {
+        summary.has_velocities = true;
+        summary.compute_velocities = true;
+    }
+    else {
+        auto velocities = m_schema.getVelocitiesProperty();
+        if (velocities.valid() && velocities.getNumSamples() > 0) {
+            summary.has_velocities_prop = true;
+            summary.has_velocities = true;
+            summary.constant_velocities = velocities.isConstant();
         }
     }
 
-    m_varyingTopology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+    // normals - interpolate or compute?
+    if (!summary.constant_normals) {
+        if (summary.has_normals && config.normals_mode != aiNormalsMode::AlwaysCompute) {
+            summary.interpolate_normals = interpolate;
+        }
+        else {
+            summary.compute_normals =
+                config.normals_mode == aiNormalsMode::AlwaysCompute ||
+                (!summary.has_normals && config.normals_mode == aiNormalsMode::ComputeIfMissing);
+            if (summary.compute_normals) {
+                summary.has_normals = true;
+                summary.constant_normals = summary.constant_points;
+            }
+        }
+    }
 
-    DebugLog("aiPolyMesh::aiPolyMesh(constant=%s, varyingTopology=%s)",
-             (m_constant ? "true" : "false"),
-             (m_varyingTopology ? "true" : "false"));
+    // tangents
+    if (config.tangents_mode == aiTangentsMode::Compute && summary.has_normals && summary.has_uv0) {
+        summary.has_tangents = true;
+        summary.compute_tangents = true;
+        if (summary.constant_points && summary.constant_normals && summary.constant_uv0) {
+            summary.constant_tangents = true;
+        }
+    }
+
+    if (interpolate) {
+        if (summary.has_uv0_prop && !summary.constant_uv0)
+            summary.interpolate_uv0 = true;
+        if (summary.has_uv1_prop && !summary.constant_uv1)
+            summary.interpolate_uv1 = true;
+        if (summary.has_colors_prop && !summary.constant_colors)
+            summary.interpolate_colors = true;
+    }
+}
+
+const aiMeshSummaryInternal& aiPolyMesh::getSummary() const
+{
+    return m_summary;
 }
 
 aiPolyMesh::Sample* aiPolyMesh::newSample()
 {
-    Sample *sample = getSample();
-    
-    if (!sample)
-    {
-        if (dontUseCache() || !m_varyingTopology)
-        {
-            sample = new Sample(this, &m_sharedTopology, false);
-        }
-        else
-        {
-            sample = new Sample(this, new Topology(), true);
-        }
+    if (!m_varying_topology) {
+        if (!m_shared_topology)
+            m_shared_topology.reset(new aiMeshTopology());
+        return new Sample(this, m_shared_topology);
     }
-    else
-    {
-        if (m_varyingTopology)
-        {
-            sample->m_topology->clear();
-        }
+    else {
+        return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
-    
-    return sample;
 }
 
-aiPolyMesh::Sample* aiPolyMesh::readSample(const uint64_t idx, bool &topologyChanged)
+void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 {
-    
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    DebugLog("aiPolyMesh::readSample(t=%d)", idx);
+
+    readVisibility(sample, ss);
     
-    Sample *sample = newSample();
-    auto topology = sample->m_topology;
+    auto& topology = *sample.m_topology;
+    auto& refiner = topology.m_refiner;
+    auto& summary = m_summary;
 
-    topologyChanged = m_varyingTopology;
-    topology->EnableVertexSharing(m_config.shareVertices && !m_varyingTopology);
-    topology->Enable32BitsIndexbuffers(m_config.use32BitsIndexBuffer);
-    topology->TreatVertexExtraDataAsStatic(m_config.treatVertexExtraDataAsStatic && !m_varyingTopology);
+    bool topology_changed = m_varying_topology || m_force_update_local;
 
-    if (!topology->m_vertexCountPerFace || m_varyingTopology)
-    {
-        DebugLog("  Read face counts");
-        m_schema.getFaceCountsProperty().get(topology->m_vertexCountPerFace, ss);
-        topology->m_triangulatedIndexCount = CalculateTriangulatedIndexCount(*topology->m_vertexCountPerFace);
-        topologyChanged = true;
+    if (topology_changed)
+        topology.clear();
+
+    // topology
+    if (!topology.m_counts_sp || topology_changed) {
+        m_schema.getFaceCountsProperty().get(topology.m_counts_sp, ss);
+        topology_changed = true;
+    }
+    if (!topology.m_indices_sp || topology_changed) {
+        m_schema.getFaceIndicesProperty().get(topology.m_indices_sp, ss);
+        topology_changed = true;
     }
 
-    if (!topology->m_faceIndices || m_varyingTopology)
-    {
-        DebugLog("  Read face indices");
-        m_schema.getFaceIndicesProperty().get(topology->m_faceIndices, ss);
-        topologyChanged = true;
+    // face sets
+    if (!m_facesets.empty() && topology_changed) {
+        topology.m_faceset_sps.resize(m_facesets.size());
+        for (size_t fi = 0; fi < m_facesets.size(); ++fi) {
+            m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
+        }
     }
 
-    DebugLog("  Read positions");
-    m_schema.getPositionsProperty().get(sample->m_positions, ss);
-
-    if (!m_varyingTopology && m_config.interpolateSamples)
-    {
-        DebugLog("  Read last positions");
-        
-        m_schema.getPositionsProperty().get(sample->m_nextPositions, ss2);
-    }
-
-    sample->m_velocities.reset();
-    auto velocitiesProp = m_schema.getVelocitiesProperty();
-    if (velocitiesProp.valid())
-    {
-        DebugLog("  Read velocities");
-        velocitiesProp.get(sample->m_velocities, ss);
-    }
-
-    bool smoothNormalsRequired = sample->smoothNormalsRequired();
-
-    sample->m_normals.reset();
-    auto normalsParam = m_schema.getNormalsParam();
-    if (!m_ignoreNormals && normalsParam.valid())
-    {
-        if (normalsParam.isConstant())
-        {
-            if (!m_sharedNormals.valid())
-            {
-                DebugLog("  Read normals (constant)");
-                normalsParam.getIndexed(m_sharedNormals, ss);
+    // points
+    if (m_constant_points.empty()) {
+        auto param = m_schema.getPositionsProperty();
+        param.get(sample.m_points_sp, ss);
+        if (summary.interpolate_points) {
+            param.get(sample.m_points_sp2, ss2);
+        }
+        else {
+            if (summary.has_velocities_prop) {
+                m_schema.getVelocitiesProperty().get(sample.m_velocities_sp, ss);
             }
-
-            sample->m_normals = m_sharedNormals;
-        }
-        else
-        {
-            DebugLog("  Read normals");
-            normalsParam.getIndexed(sample->m_normals, ss);
         }
     }
 
-    sample->m_uvs.reset();
-    auto uvsParam = m_schema.getUVsParam();
-    if (!m_ignoreUVs && uvsParam.valid())
-    {
-        if (uvsParam.isConstant())
-        {
-            if (!m_sharedUVs.valid())
-            {
-                DebugLog("  Read uvs (constant)");
-                uvsParam.getIndexed(m_sharedUVs, ss);
+    // normals
+    if (m_constant_normals.empty() && summary.has_normals_prop && !summary.compute_normals) {
+        auto param = m_schema.getNormalsParam();
+        param.getIndexed(sample.m_normals_sp, ss);
+        if (summary.interpolate_normals) {
+            param.getIndexed(sample.m_normals_sp2, ss2);
+        }
+    }
+
+    // uv0
+    if (m_constant_uv0.empty() && summary.has_uv0_prop) {
+        auto param = m_schema.getUVsParam();
+        param.getIndexed(sample.m_uv0_sp, ss);
+        if (summary.interpolate_uv0) {
+            param.getIndexed(sample.m_uv0_sp2, ss2);
+        }
+    }
+
+    // uv1
+    if (m_constant_uv1.empty() && summary.has_uv1_prop) {
+        m_uv1_param.getIndexed(sample.m_uv1_sp, ss);
+        if (summary.interpolate_uv1) {
+            m_uv1_param.getIndexed(sample.m_uv1_sp2, ss2);
+        }
+    }
+
+    // colors
+    if (m_constant_colors.empty() && summary.has_colors_prop) {
+        m_colors_param.getIndexed(sample.m_colors_sp, ss);
+        if (summary.interpolate_colors) {
+            m_colors_param.getIndexed(sample.m_colors_sp2, ss2);
+        }
+    }
+
+    auto bounds_param = m_schema.getSelfBoundsProperty();
+    if (bounds_param)
+        bounds_param.get(sample.m_bounds, ss);
+
+    sample.m_topology_changed = topology_changed;
+}
+
+void aiPolyMesh::cookSampleBody(Sample& sample)
+{
+    auto& topology = *sample.m_topology;
+    auto& refiner = topology.m_refiner;
+    auto& config = getConfig();
+    auto& summary = getSummary();
+
+    // interpolation can't work with varying topology
+    if (m_varying_topology && !m_sample_index_changed)
+        return;
+
+    if (sample.m_topology_changed) {
+        onTopologyChange(sample);
+    }
+    else if(m_sample_index_changed) {
+        onTopologyDetermined();
+
+        // make remapped vertex buffer
+        if (!m_constant_points.empty()) {
+            sample.m_points_ref = m_constant_points;
+        }
+        else {
+            Remap(sample.m_points, *sample.m_points_sp, topology.m_remap_points);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_points.data(), (int)sample.m_points.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(sample.m_points.data(), (int)sample.m_points.size(), config.scale_factor);
+            sample.m_points_ref = sample.m_points;
+        }
+
+        if (!m_constant_normals.empty()) {
+            sample.m_normals_ref = m_constant_normals;
+        }
+        else if (!summary.compute_normals && summary.has_normals_prop) {
+            Remap(sample.m_normals, *sample.m_normals_sp.getVals(), topology.m_remap_normals);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_normals.data(), (int)sample.m_normals.size());
+            sample.m_normals_ref = sample.m_normals;
+        }
+
+        if (!m_constant_tangents.empty()) {
+            sample.m_tangents_ref = m_constant_tangents;
+        }
+
+        if (!m_constant_uv0.empty()) {
+            sample.m_uv0_ref = m_constant_uv0;
+        }
+        else if (summary.has_uv0_prop) {
+            Remap(sample.m_uv0, *sample.m_uv0_sp.getVals(), topology.m_remap_uv0);
+            sample.m_uv0_ref = sample.m_uv0;
+        }
+
+        if (!m_constant_uv1.empty()) {
+            sample.m_uv1_ref = m_constant_uv1;
+        }
+        else if (summary.has_uv1_prop) {
+            Remap(sample.m_uv1, *sample.m_uv1_sp.getVals(), topology.m_remap_uv1);
+            sample.m_uv1_ref = sample.m_uv1;
+        }
+
+        if (!m_constant_colors.empty()) {
+            sample.m_colors_ref = m_constant_colors;
+        }
+        else if (summary.has_colors_prop) {
+            Remap(sample.m_colors, *sample.m_colors_sp.getVals(), topology.m_remap_colors);
+            sample.m_colors_ref = sample.m_colors;
+        }
+    }
+    else {
+        onTopologyDetermined();
+    }
+
+    if (m_sample_index_changed) {
+        // both in the case of topology changed or sample index changed
+
+        if (summary.interpolate_points) {
+            Remap(sample.m_points2, *sample.m_points_sp2, topology.m_remap_points);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_points2.data(), (int)sample.m_points2.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(sample.m_points2.data(), (int)sample.m_points2.size(), config.scale_factor);
+        }
+
+        if (summary.interpolate_normals) {
+            Remap(sample.m_normals2, *sample.m_normals_sp2.getVals(), topology.m_remap_normals);
+            if (config.swap_handedness)
+                SwapHandedness(sample.m_normals2.data(), (int)sample.m_normals2.size());
+        }
+
+        if (summary.interpolate_uv0) {
+            Remap(sample.m_uv02, *sample.m_uv0_sp2.getVals(), topology.m_remap_uv0);
+        }
+
+        if (summary.interpolate_uv1) {
+            Remap(sample.m_uv12, *sample.m_uv1_sp2.getVals(), topology.m_remap_uv1);
+        }
+
+        if (summary.interpolate_colors) {
+            Remap(sample.m_colors2, *sample.m_colors_sp2.getVals(), topology.m_remap_colors);
+        }
+
+        if (!m_constant_velocities.empty()) {
+            sample.m_velocities_ref = m_constant_velocities;
+        }
+        else if (!summary.compute_velocities && summary.has_velocities_prop) {
+            auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
+            Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
+            if (config.swap_handedness)
+                SwapHandedness(dst.data(), (int)dst.size());
+            if (config.scale_factor != 1.0f)
+                ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
+            sample.m_velocities_ref = dst;
+        }
+    }
+
+    // interpolate or compute data
+
+    // points
+    if (summary.interpolate_points) {
+        if (summary.compute_velocities)
+            sample.m_points_int.swap(sample.m_points_prev);
+
+        Lerp(sample.m_points_int, sample.m_points, sample.m_points2, m_current_time_offset);
+        sample.m_points_ref = sample.m_points_int;
+
+        if (summary.compute_velocities) {
+            sample.m_velocities.resize_discard(sample.m_points.size());
+            if (sample.m_points_int.size() == sample.m_points_prev.size()) {
+                GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
+                    (int)sample.m_points_int.size(), config.vertex_motion_scale);
             }
-
-            sample->m_uvs = m_sharedUVs;
-        }
-        else
-        {
-            DebugLog("  Read uvs");
-            uvsParam.getIndexed(sample->m_uvs, ss);
-        }
-    }
-
-    auto boundsParam = m_schema.getSelfBoundsProperty();
-    if (boundsParam) {
-        boundsParam.get(sample->m_bounds, ss);
-    }
-
-    if (smoothNormalsRequired)
-    {
-        sample->computeSmoothNormals(m_config);
-    }
-
-    if (sample->tangentsRequired())
-    {
-        const abcV3 *normals = nullptr;
-        bool indexedNormals = false;
-        
-        if (smoothNormalsRequired)
-        {
-            normals = sample->m_smoothNormals.data();
-        }
-        else if (sample->m_normals.valid())
-        {
-            normals = sample->m_normals.getVals()->get();
-            indexedNormals = (sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
-        }
-
-        if (normals && sample->m_uvs.valid())
-        {
-            // topology may be shared, check tangent indices
-            if (topology->m_tangentIndices.empty() || !m_config.cacheTangentsSplits)
-            {
-                sample->computeTangentIndices(m_config, normals, indexedNormals);
+            else {
+                sample.m_velocities.zeroclear();
             }
-
-            sample->computeTangents(m_config, normals, indexedNormals);
+            sample.m_velocities_ref = sample.m_velocities;
         }
     }
 
-    if (m_config.turnQuadEdges)
-    {
-        if (m_varyingTopology || topology->m_indicesSwapedFaceWinding.size() == 0)
-        {
-            auto faces = topology->m_vertexCountPerFace;
-            auto totalFaces = faces->size();
-            
-            auto * facesIndices = topology->m_faceIndices->get();
-            topology->m_indicesSwapedFaceWinding.reserve(topology->m_faceIndices->size());
-            
-            auto index = 0;
-            const uint32_t indexRemap[4] = {3,0,1,2};
-            for (uint32_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
-            {
-                auto faceSize = faces->get()[faceIndex];
-                if (faceSize == 4)
-                {
-                    for (auto i = 0; i < faceSize; i++)
-                    {
-                        topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index + indexRemap[i]]);
-                    }
+    // normals
+    if (!m_constant_normals.empty()) {
+        // do nothing
+    }
+    else if(summary.interpolate_normals) {
+        Lerp(sample.m_normals_int, sample.m_normals, sample.m_normals2, (float)m_current_time_offset);
+        Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
+        sample.m_normals_ref = sample.m_normals_int;
+    }
+    else if (summary.compute_normals && (m_sample_index_changed || summary.interpolate_points)) {
+        if (sample.m_points_ref.empty()) {
+            DebugError("something is wrong!!");
+        }
+        const auto &indices = topology.m_refiner.new_indices_tri;
+        sample.m_normals.resize_discard(sample.m_points_ref.size());
+        GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
+            (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+        sample.m_normals_ref = sample.m_normals;
+    }
+
+    // tangents
+    if (!m_constant_tangents.empty()) {
+        // do nothing
+    }
+    else if (summary.compute_tangents && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals)) {
+        if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
+            DebugError("something is wrong!!");
+        }
+        const auto &indices = topology.m_refiner.new_indices_tri;
+        sample.m_tangents.resize_discard(sample.m_points_ref.size());
+        GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
+            indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+        sample.m_tangents_ref = sample.m_tangents;
+    }
+
+    // uv0
+    if (summary.interpolate_uv0) {
+        Lerp(sample.m_uv0_int, sample.m_uv0, sample.m_uv02, m_current_time_offset);
+        sample.m_uv0_ref = sample.m_uv0_int;
+    }
+
+    // uv1
+    if (summary.interpolate_uv1) {
+        Lerp(sample.m_uv1_int, sample.m_uv1, sample.m_uv12, m_current_time_offset);
+        sample.m_uv1_ref = sample.m_uv1_int;
+    }
+
+    // colors
+    if (summary.interpolate_colors) {
+        Lerp(sample.m_colors_int, sample.m_colors, sample.m_colors2, m_current_time_offset);
+        sample.m_colors_ref = sample.m_colors_int;
+    }
+}
+
+void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
+{
+    auto& summary = m_summary;
+    auto& topology = *sample.m_topology;
+    auto& refiner = topology.m_refiner;
+    auto& config = getConfig();
+
+    refiner.clear();
+    refiner.split_unit = config.split_unit;
+    refiner.gen_points = config.import_point_polygon;
+    refiner.gen_lines = config.import_line_polygon;
+    refiner.gen_triangles = config.import_triangle_polygon;
+
+    refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
+    refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
+    refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
+
+    bool weld_normals = false;
+    bool weld_uv0 = false;
+    bool weld_uv1 = false;
+    bool weld_colors = false;
+
+    if (sample.m_normals_sp.valid() && !summary.compute_normals) {
+        IArray<abcV3> src{ sample.m_normals_sp.getVals()->get(), sample.m_normals_sp.getVals()->size() };
+        auto& dst = summary.constant_normals ? m_constant_normals : sample.m_normals;
+
+        weld_normals = true;
+        if (sample.m_normals_sp.isIndexed()) {
+            IArray<int> indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV3>(src, indices, dst, topology.m_remap_normals);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV3>(src, dst, topology.m_remap_normals);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV3>(src, refiner.indices, dst, topology.m_remap_normals);
+        }
+        else {
+            DebugLog("Invalid attribute");
+            weld_normals = false;
+        }
+    }
+
+    if (sample.m_uv0_sp.valid()) {
+        IArray<abcV2> src{ sample.m_uv0_sp.getVals()->get(), sample.m_uv0_sp.getVals()->size() };
+        auto& dst = summary.constant_uv0 ? m_constant_uv0 : sample.m_uv0;
+
+        weld_uv0 = true;
+        if (sample.m_uv0_sp.isIndexed()) {
+            IArray<int> indices{ (int*)sample.m_uv0_sp.getIndices()->get(), sample.m_uv0_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(src, indices, dst, topology.m_remap_uv0);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(src, dst, topology.m_remap_uv0);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv0);
+        }
+        else {
+            DebugLog("Invalid attribute");
+            weld_uv0 = false;
+        }
+    }
+
+    if (sample.m_uv1_sp.valid()) {
+        IArray<abcV2> src{ sample.m_uv1_sp.getVals()->get(), sample.m_uv1_sp.getVals()->size() };
+        auto& dst = summary.constant_uv1 ? m_constant_uv1 : sample.m_uv1;
+
+        weld_uv1 = true;
+        if (sample.m_uv1_sp.isIndexed()) {
+            IArray<int> uv1_indices{ (int*)sample.m_uv1_sp.getIndices()->get(), sample.m_uv1_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcV2>(src, dst, topology.m_remap_uv1);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv1);
+        }
+        else {
+            DebugLog("Invalid attribute");
+            weld_uv1 = false;
+        }
+    }
+
+    if (sample.m_colors_sp.valid()) {
+        IArray<abcC4> src{ sample.m_colors_sp.getVals()->get(), sample.m_colors_sp.getVals()->size() };
+        auto& dst = summary.constant_colors ? m_constant_colors : sample.m_colors;
+
+        weld_colors = true;
+        if (sample.m_colors_sp.isIndexed()) {
+            IArray<int> colors_indices{ (int*)sample.m_colors_sp.getIndices()->get(), sample.m_colors_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcC4>(src, colors_indices, dst, topology.m_remap_colors);
+        }
+        else if (src.size() == refiner.indices.size()) {
+            refiner.addExpandedAttribute<abcC4>(src, dst, topology.m_remap_colors);
+        }
+        else if (src.size() == refiner.points.size()) {
+            refiner.addIndexedAttribute<abcC4>(src, refiner.indices, dst, topology.m_remap_colors);
+        }
+        else {
+            DebugLog("Invalid attribute");
+            weld_colors = false;
+        }
+    }
+
+
+    refiner.refine();
+    refiner.retopology(config.swap_face_winding, config.turn_quad_edges);
+
+    // generate submeshes
+    if (!topology.m_faceset_sps.empty()) {
+        // use face set index as material id
+        topology.m_material_ids.resize(refiner.counts.size(), -1);
+        for (size_t fsi = 0; fsi < topology.m_faceset_sps.size(); ++fsi) {
+            auto& fsp = topology.m_faceset_sps[fsi];
+            if (fsp.valid()) {
+                auto& faces = *fsp.getFaces();
+                size_t num_faces = faces.size();
+                for (size_t fi = 0; fi < num_faces; ++fi) {
+                    topology.m_material_ids[faces[fi]] = (int)fsi;
                 }
-                else
-                {
-                    for (auto i = 0; i < faceSize; i++)
-                    {
-                        topology->m_indicesSwapedFaceWinding.push_back(facesIndices[index + i]);
-                    }
-                }
-                index += faceSize;
-            }
-
-            if (sample->m_uvs.valid())
-            {
-                index = 0;
-                const auto& uvIndices = *sample->m_uvs.getIndices();
-                topology->m_UvIndicesSwapedFaceWinding.reserve(sample->m_uvs.getIndices()->size());
-
-                for (size_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
-                {
-                    auto faceSize = faces->get()[faceIndex];
-                    if (faceSize == 4)
-                    {
-                        for (auto i = 0; i < faceSize; i++)
-                        {
-                            topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index + indexRemap[i]]);
-                        }
-                    }
-                    else
-                    {
-                        for (auto i = 0; i < faceSize; i++)
-                        {
-                            topology->m_UvIndicesSwapedFaceWinding.push_back(uvIndices[index+i]);
-                        }
-                    }
-                    index += faceSize;
-                }
             }
         }
+        refiner.genSubmeshes(topology.m_material_ids);
     }
-    else if (topology->m_indicesSwapedFaceWinding.size()>0)
+    else {
+        // no face sets present. one split == one submesh
+        refiner.genSubmeshes();
+    }
+
+    topology.m_index_count = (int)refiner.new_indices_tri.size();
+    topology.m_vertex_count = (int)refiner.new_points.size();
+    onTopologyDetermined();
+
+
+    topology.m_remap_points.swap(refiner.new2old_points);
     {
-        topology->m_indicesSwapedFaceWinding.clear();
+        auto& points = summary.constant_points ? m_constant_points : sample.m_points;
+        points.swap((RawVector<abcV3>&)refiner.new_points);
+        if (config.swap_handedness)
+            SwapHandedness(points.data(), (int)points.size());
+        if (config.scale_factor != 1.0f)
+            ApplyScale(points.data(), (int)points.size(), config.scale_factor);
+        sample.m_points_ref = points;
     }
 
-    if (m_config.shareVertices && !m_varyingTopology && sample != NULL && !sample->m_ownTopology && topologyChanged)
-        GenerateVerticesToFacesLookup(sample);
+    if (weld_normals) {
+        sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
+        if (config.swap_handedness)
+            SwapHandedness(sample.m_normals_ref.data(), (int)sample.m_normals_ref.size());
+    }
 
-    return sample;
+    if (weld_uv0)
+        sample.m_uv0_ref = !m_constant_uv0.empty() ? m_constant_uv0 : sample.m_uv0;
+
+    if (weld_uv1)
+        sample.m_uv1_ref = !m_constant_uv1.empty() ? m_constant_uv1 : sample.m_uv1;
+
+    if (weld_colors)
+        sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
+
+    if (summary.constant_normals && summary.compute_normals) {
+        const auto &indices = topology.m_refiner.new_indices_tri;
+        m_constant_normals.resize_discard(m_constant_points.size());
+        GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
+        sample.m_normals_ref = m_constant_normals;
+    }
+    if (summary.constant_tangents && summary.compute_tangents) {
+        const auto &indices = topology.m_refiner.new_indices_tri;
+        m_constant_tangents.resize_discard(m_constant_points.size());
+        GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
+            indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
+        sample.m_tangents_ref = m_constant_tangents;
+    }
+
+    // velocities are done in later part of cookSampleBody()
 }
 
-// generates two lookup tables:
-//  m_FaceIndexingReindexed         : for each face in the abc sample, hold an index value to lookup in m_FixedTopoPositionsIndexes, that will give final position index.
-//  m_FixedTopoPositionsIndexes     : list of resulting positions. value is index into the abc "position" vector. size is greter than or equal to "position" array.
-void aiPolyMesh::GenerateVerticesToFacesLookup(aiPolyMeshSample *sample) const
+void aiPolyMesh::onTopologyDetermined()
 {
-    auto topology = sample->m_topology;
-    auto  faces = topology->m_vertexCountPerFace;
-
-    auto * facesIndices = m_config.turnQuadEdges ?
-        topology->m_indicesSwapedFaceWinding.data() : topology->m_faceIndices->get();
-    uint32_t totalFaces = static_cast<uint32_t>(faces->size());
-
-    // 1st, figure out which face uses which vertices (for sharing identification)
-    std::unordered_map< uint32_t, std::vector<uint32_t>> indexesOfFacesValues;
-    uint32_t facesIndicesCursor = 0;
-    for (uint32_t faceIndex = 0; faceIndex < totalFaces; faceIndex++)
-    {
-        uint32_t faceSize = (uint32_t)(faces->get()[faceIndex]);
-        for (uint32_t i = 0; i < faceSize; ++i, ++facesIndicesCursor)
-            indexesOfFacesValues[ facesIndices[facesIndicesCursor] ].push_back(facesIndicesCursor);
-    }
-
-    // 2nd, figure out which vertex can be merged, which cannot.
-    // If all faces targetting a vertex give it the same normal and UV, then it can be shared.
-    const abcV3 * normals = sample->m_smoothNormals.empty() && sample->m_normals.valid() ?  sample->m_normals.getVals()->get() : sample->m_smoothNormals.data();
-    bool normalsIndexed = !sample->m_smoothNormals.empty() ? false : sample->m_normals.valid() && (sample->m_normals.getScope() == AbcGeom::kFacevaryingScope);
-    const uint32_t *Nidxs = normalsIndexed ? sample->m_normals.getIndices()->get() : (uint32_t*)(topology->m_faceIndices->get());
-    
-    bool hasUVs = sample->m_uvs.valid();
-    const auto &uvVals = *(sample->m_uvs.getVals()); 
-    const auto &uvIdxs = m_config.turnQuadEdges || !hasUVs ? topology->m_UvIndicesSwapedFaceWinding : *sample->m_uvs.getIndices();
-
-    topology->m_FixedTopoPositionsIndexes.clear();
-    topology->m_FaceIndexingReindexed.clear();
-    topology->m_FaceIndexingReindexed.resize(topology->m_faceIndices->size() );
-    topology->m_FixedTopoPositionsIndexes.reserve(sample->m_positions->size());
-    topology->m_FreshlyReadTopologyData = true;
-
-    std::unordered_map< uint32_t, std::vector<uint32_t>>::iterator itr = indexesOfFacesValues.begin();
-    while (itr != indexesOfFacesValues.end())
-    {
-        std::vector<uint32_t>& vertexUsages = itr->second;
-        uint32_t vertexUsageIndex = 0;
-        size_t vertexUsageMaxIndex = itr->second.size();
-        const Abc::V2f * prevUV = nullptr;
-        const abcV3 * prevN = nullptr;
-        bool share = true;
-        do
-        {
-            uint32_t index = vertexUsages[vertexUsageIndex];
-            // same Normal?
-            if( normals )
-            {
-                const abcV3 & N = normals[Nidxs ? Nidxs[index] : index];
-                if (prevN == nullptr)
-                    prevN = &N;
-                else
-                    share = N == *prevN;
-            }
-            // Same UV?
-            if (hasUVs)
-            {
-                const Abc::V2f & uv = uvVals[uvIdxs[index]];
-                if (prevUV == nullptr)
-                    prevUV = &uv;
-                else
-                    share = uv == *prevUV;
-            }
-        }
-        while (share && ++vertexUsageIndex < vertexUsageMaxIndex);
-
-        // Verdict is in for this vertex.
-        if (share)
-            topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
-
-        std::vector<uint32_t>::iterator indexItr = itr->second.begin();
-        while( indexItr != itr->second.end() )
-        {
-            if (!share)
-                topology->m_FixedTopoPositionsIndexes.push_back(itr->first);
-
-            topology->m_FaceIndexingReindexed[*indexItr] = (uint32_t)topology->m_FixedTopoPositionsIndexes.size() - 1;
-
-            ++indexItr;
-        }
-        ++itr;
-    }
-
-    // We now have a lookup for face value indexes that re-routes to shared indexes when possible!
-    // Splitting does not work with shared vertices, if the resulting mesh still exceeds the splitting threshold, then disable vertex sharing.
-    const int maxVertexSplitCount = topology->m_use32BitsIndexBuffer ? MAX_VERTEX_SPLIT_COUNT_32 : MAX_VERTEX_SPLIT_COUNT_16;
-    if(topology->m_FixedTopoPositionsIndexes.size() / maxVertexSplitCount>0)
-    {
-        topology->m_vertexSharingEnabled = false;
-        topology->m_FixedTopoPositionsIndexes.clear();
-        topology->m_FaceIndexingReindexed.clear();
-    }
-}
-
-void aiPolyMesh::updatePeakIndexCount() const
-{
-    if (m_peakIndexCount != 0) { return; }
-
-    DebugLog("aiPolyMesh::updateMaxIndex()");
-
-    Util::Dimensions dim;
-    Abc::Int32ArraySamplePtr counts;
-
-    auto indicesProp = m_schema.getFaceIndicesProperty();
-    auto countsProp = m_schema.getFaceCountsProperty();
-
-    int numSamples = static_cast<int>(indicesProp.getNumSamples());
-    if (numSamples == 0) { return; }
-
-    size_t cMax = 0;
-    if (indicesProp.isConstant())
-    {
-        auto ss = Abc::ISampleSelector(int64_t(0));
-        countsProp.get(counts, ss);
-        indicesProp.getDimensions(dim, ss);
-        cMax = dim.numPoints();
-    }
-    else
-    {
-        aiLogger::Info("Checking %d sample(s)", numSamples);
-
-        int iMax = 0;
-
-        for (int i = 0; i < numSamples; ++i)
-        {
-            indicesProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
-
-            size_t numIndices = dim.numPoints();
-
-            if (numIndices > cMax)
-            {
-                cMax = numIndices;
-                iMax = i;
-            }
-        }
-
-        countsProp.get(counts, Abc::ISampleSelector(int64_t(iMax)));
-    }
-
-    m_peakIndexCount = (int)cMax;
-    m_peakTriangulatedIndexCount = CalculateTriangulatedIndexCount(*counts);
-}
-
-int aiPolyMesh::getPeakIndexCount() const
-{
-    updatePeakIndexCount();
-    return m_peakTriangulatedIndexCount;
-}
-
-int aiPolyMesh::getPeakTriangulatedIndexCount() const
-{
-    updatePeakIndexCount();
-    return m_peakTriangulatedIndexCount;
-}
-
-int aiPolyMesh::getPeakVertexCount() const
-{
-    if (m_peakVertexCount == 0)
-    {
-        DebugLog("aiPolyMesh::getPeakVertexCount()");
-        
-        Util::Dimensions dim;
-
-        auto positionsProp = m_schema.getPositionsProperty();
-
-        int numSamples = (int)positionsProp.getNumSamples();
-
-        if (numSamples == 0)
-        {
-            return 0;
-        }
-        else if (positionsProp.isConstant())
-        {
-            positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(0)));
-            
-            m_peakVertexCount = (int)dim.numPoints();
-        }
-        else
-        {
-            m_peakVertexCount = 0;
-
-            for (int i = 0; i < numSamples; ++i)
-            {
-                positionsProp.getDimensions(dim, Abc::ISampleSelector(int64_t(i)));
-                
-                size_t numVertices = dim.numPoints();
-
-                if (numVertices > size_t(m_peakVertexCount))
-                {
-                    m_peakVertexCount = int(numVertices);
-                }
-            }
-        }
-    }
-
-    return m_peakVertexCount;
-}
-
-void aiPolyMesh::getSummary(aiMeshSummary &summary) const
-{
-    DebugLog("aiPolyMesh::getSummary()");
-    
-    summary.topologyVariance = static_cast<int>(m_schema.getTopologyVariance());
-    summary.peakVertexCount = getPeakVertexCount();
-    summary.peakIndexCount = getPeakIndexCount();
-    summary.peakTriangulatedIndexCount = getPeakTriangulatedIndexCount();
-    summary.peakSubmeshCount = ceildiv(summary.peakIndexCount, 64998);
+    // nothing to do for now
+    // maybe I will need to notify C# side for optimization
 }
 

@@ -4,40 +4,27 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
-    [RequireComponent(typeof(AlembicPointsRenderer))]
     public class AlembicPointsCloud : MonoBehaviour
     {
         // members
-        [ReadOnly] public PinnedList<Vector3> m_abcPositions = new PinnedList<Vector3>();
-        [ReadOnly] public PinnedList<Vector3> m_abcVelocities = new PinnedList<Vector3>();
-        [ReadOnly] public PinnedList<ulong> m_abcIDs = new PinnedList<ulong>();
+        [ReadOnly] public PinnedList<Vector3> m_points = new PinnedList<Vector3>();
+        [ReadOnly] public PinnedList<Vector3> m_velocities = new PinnedList<Vector3>();
+        [ReadOnly] public PinnedList<uint> m_ids = new PinnedList<uint>();
 
         [ReadOnly] public Vector3 m_boundsCenter;
         [ReadOnly] public Vector3 m_boundsExtents;
-        [ReadOnly] public int m_peakVertexCount;
-        [ReadOnly] public int m_count;
 
-        AlembicPoints m_abc;
+        public AlembicPoints m_abc;
 
         [Tooltip("Sort points by distance from sortFrom object")]
         public bool m_sort = false;
         public Transform m_sortFrom;
 
         // properties
-        public PinnedList<Vector3> abcPositions
-        {
-            get { return m_abcPositions; }
-        }
-
-        public PinnedList<Vector3> abcVelocities
-        {
-            get { return m_abcVelocities; }
-        }
-
-        public PinnedList<ulong> abcIDs
-        {
-            get { return m_abcIDs; }
-        }
+        public AlembicPoints abcPoints { get { return m_abc; } }
+        public PinnedList<Vector3> points { get { return m_points; } }
+        public PinnedList<Vector3> velocities { get { return m_velocities; } }
+        public PinnedList<uint> ids { get { return m_ids; } }
 
 
         void Reset()

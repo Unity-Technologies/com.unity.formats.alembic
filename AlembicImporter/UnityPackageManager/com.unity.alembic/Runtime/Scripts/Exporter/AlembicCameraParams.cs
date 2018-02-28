@@ -14,7 +14,7 @@ namespace UTJ.Alembic
             WidthPerHeight,
         };
 
-        public AspectRatioMode m_aspectRatioMode = AspectRatioMode.Ratio_16_9;
+        public AspectRatioMode m_cameraSspectRatio = AspectRatioMode.Ratio_16_9;
 
         [Tooltip("in cm")]
         public float m_focusDistance = 5.0f;
@@ -27,7 +27,7 @@ namespace UTJ.Alembic
 
         public float GetAspectRatio()
         {
-            switch (m_aspectRatioMode)
+            switch (m_cameraSspectRatio)
             {
                 case AspectRatioMode.Ratio_16_9:  return 16.0f / 9.0f;
                 case AspectRatioMode.Ratio_16_10: return 16.0f / 10.0f;

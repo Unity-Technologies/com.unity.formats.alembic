@@ -1,47 +1,58 @@
 #pragma once
 
-class aiPointsSample : public aiSampleBase
+struct aiPointsSummaryInternal : public aiPointsSummary
 {
-typedef aiSampleBase super;
-public:
-    aiPointsSample(aiPoints *schema);
-    virtual ~aiPointsSample();
-
-    void updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged) override;
-    void getDataPointer(aiPointsData &data);
-    void copyData(aiPointsData &data);
-
-public:
-    void createSortData();
-
-    Abc::P3fArraySamplePtr m_positions;
-    Abc::V3fArraySamplePtr m_velocities;
-    Abc::UInt64ArraySamplePtr m_ids;
-    Abc::Box3d m_bounds;
-
-    RawVector<std::pair<float, int>> m_sort_data;
-    RawVector<abcV3> m_tmp_positions;
-    RawVector<abcV3> m_tmp_velocities;
-    RawVector<uint64_t> m_tmp_ids;
+    bool interpolate_points = false;
+    bool compute_velocities = false;
 };
 
 
+class aiPointsSample : public aiSample
+{
+using super = aiSample;
+public:
+    aiPointsSample(aiPoints *schema);
+    ~aiPointsSample();
+    void fillData(aiPointsData &dst);
+    void getSummary(aiPointsSampleSummary &dst);
+
+    void waitAsync() override;
+
+public:
+    Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
+    Abc::V3fArraySamplePtr m_velocities_sp;
+    Abc::UInt64ArraySamplePtr m_ids_sp;
+
+    IArray<abcV3> m_points_ref;
+
+    RawVector<std::pair<float, int>> m_sort_data;
+    RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
+    RawVector<abcV3> m_velocities;
+    RawVector<uint32_t> m_ids;
+    abcV3 m_bb_center, m_bb_size;
+
+    std::future<void> m_async_copy;
+};
+
 struct aiPointsTraits
 {
-    typedef aiPointsSample SampleT;
-    typedef AbcGeom::IPointsSchema AbcSchemaT;
+    using SampleT = aiPointsSample;
+    using AbcSchemaT = AbcGeom::IPointsSchema;
 };
 
 class aiPoints : public aiTSchema<aiPointsTraits>
 {
-typedef aiTSchema<aiPointsTraits> super;
+using super = aiTSchema<aiPointsTraits>;
 public:
-    aiPoints(aiObject *obj);
+    aiPoints(aiObject *parent, const abcObject &abc);
+    ~aiPoints();
 
-    Sample* newSample();
-    Sample* readSample(const uint64_t idx, bool &topologyChanged) override;
+    void updateSummary();
+    const aiPointsSummaryInternal& getSummary() const;
 
-    const aiPointsSummary& getSummary() const;
+    Sample* newSample() override;
+    void readSampleBody(Sample& sample, uint64_t idx) override;
+    void cookSampleBody(Sample& sample) override;
 
     void setSort(bool v);
     bool getSort() const;
@@ -49,7 +60,7 @@ public:
     const abcV3& getSortPosition() const;
 
 private:
-    mutable aiPointsSummary m_summary;
+    aiPointsSummaryInternal m_summary;
     bool m_sort = false;
     abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
 };
