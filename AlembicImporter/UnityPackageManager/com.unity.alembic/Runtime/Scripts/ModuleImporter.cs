@@ -1,3 +1,6 @@
+using System;
+using System.Runtime.InteropServices;
+
 namespace UTJ.Alembic
 {
 
@@ -31,7 +34,7 @@ namespace UTJ.Alembic
         static IntPtr s_moduleHandle = dlopen(libpath, RTLD_LAZY|RTLD_LOCAL|RTLD_FIRST);
 #endif
 
-        internal static T GetFunction<T>(string name) where T: class {
+        internal static T Resolve<T>(string name) where T: class {
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX || UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
             if(s_moduleHandle == (IntPtr)0) { throw new System.ArgumentException(string.Format("abci not found in `{0}'", libpath)); }
             var funHandle = dlsym(s_moduleHandle, name);
