@@ -6,6 +6,7 @@
 #include "aePoints.h"
 #include "aePolyMesh.h"
 #include "aeCamera.h"
+#include "../Foundation/aiMeshOps.h"
 
 
 abciAPI aeContext* aeCreateContext()
@@ -20,69 +21,81 @@ abciAPI void aeDestroyContext(aeContext* ctx)
 
 abciAPI void aeSetConfig(aeContext* ctx, const aeConfig *conf)
 {
-    return ctx->setConfig(*conf);
+    if (ctx)
+        ctx->setConfig(*conf);
 }
 
 abciAPI bool aeOpenArchive(aeContext* ctx, const char *path)
 {
-    return ctx->openArchive(path);
+    return ctx ? ctx->openArchive(path) : false;
 }
 
 
 abciAPI aeObject* aeGetTopObject(aeContext* ctx)
 {
-    return ctx->getTopObject();
+    return ctx ? ctx->getTopObject() : nullptr;
 }
 
 abciAPI int aeAddTimeSampling(aeContext* ctx, float start_time)
 {
-    return ctx->addTimeSampling(start_time);
+    return ctx ? ctx->addTimeSampling(start_time) : 0;
 }
 
 abciAPI void aeAddTime(aeContext* ctx, float time, int tsi)
 {
-    ctx->addTime(time, tsi);
+    if (ctx)
+        ctx->addTime(time, tsi);
 }
 
+abciAPI void aeMarkFrameBegin(aeContext* ctx)
+{
+    if (ctx)
+        ctx->markFrameBegin();
+}
+abciAPI void aeMarkFrameEnd(aeContext* ctx)
+{
+    if (ctx)
+        ctx->markFrameEnd();
+}
 
 abciAPI void aeDeleteObject(aeObject *obj)
 {
     delete obj;
 }
-abciAPI aeXForm* aeNewXForm(aeObject *parent, const char *name, int tsi)
+abciAPI aeXform* aeNewXform(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aeXForm>(name, tsi);
+    return obj ? obj->newChild<aeXform>(name, tsi) : nullptr;
 }
-abciAPI aePoints* aeNewPoints(aeObject *parent, const char *name, int tsi)
+abciAPI aePoints* aeNewPoints(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aePoints>(name, tsi);
+    return obj ? obj->newChild<aePoints>(name, tsi) : nullptr;
 }
-abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi)
+abciAPI aePolyMesh* aeNewPolyMesh(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aePolyMesh>(name, tsi);
+    return obj ? obj->newChild<aePolyMesh>(name, tsi) : nullptr;
 }
-abciAPI aeCamera* aeNewCamera(aeObject *parent, const char *name, int tsi)
+abciAPI aeCamera* aeNewCamera(aeObject *obj, const char *name, int tsi)
 {
-    return parent->newChild<aeCamera>(name, tsi);
+    return obj ? obj->newChild<aeCamera>(name, tsi) : nullptr;
 }
 
 abciAPI int aeGetNumChildren(aeObject *obj)
 {
-    return (int)obj->getNumChildren();
+    return obj ? (int)obj->getNumChildren() : 0;
 }
 abciAPI aeObject* aeGetChild(aeObject *obj, int i)
 {
-    return obj->getChild(i);
+    return obj ? obj->getChild(i) : nullptr;
 }
 
 abciAPI aeObject* aeGetParent(aeObject *obj)
 {
-    return obj->getParent();
+    return obj ? obj->getParent() : nullptr;
 }
 
-abciAPI aeXForm* aeAsXForm(aeObject *obj)
+abciAPI aeXform* aeAsXform(aeObject *obj)
 {
-    return dynamic_cast<aeXForm*>(obj);
+    return dynamic_cast<aeXform*>(obj);
 }
 abciAPI aePoints* aeAsPoints(aeObject *obj)
 {
@@ -98,63 +111,90 @@ abciAPI aeCamera* aeAsCamera(aeObject *obj)
 }
 
 
-abciAPI int aeGetNumSamples(aeObject *obj)
+abciAPI int aeGetNumSamples(aeSchema *obj)
 {
-    return (int)obj->getNumSamples();
+    return obj ? (int)obj->getNumSamples() : 0;
 }
-abciAPI void aeSetFromPrevious(aeObject *obj)
+abciAPI void aeSetFromPrevious(aeSchema *obj)
 {
-    obj->setFromPrevious();
+    if (obj)
+        obj->setFromPrevious();
 }
 
-abciAPI void aeXFormWriteSample(aeXForm *obj, const aeXFormData *data)
+abciAPI void aeMarkForceInvisible(aeSchema * obj)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->markForceInvisible();
 }
-abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
+
+abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
 {
-    obj->writeSample(*data);
-}
-abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
-{
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
 }
 abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
 {
-    obj->writeSample(*data);
+    if (obj)
+        obj->writeSample(*data);
+}
+abciAPI void aePointsWriteSample(aePoints *obj, const aePointsData *data)
+{
+    if (obj)
+        obj->writeSample(*data);
 }
 
-abciAPI aeProperty* aeNewProperty(aeObject *parent, const char *name, aePropertyType type)
+abciAPI int aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name)
 {
+    return obj ? obj->addFaceSet(name) : 0;
+}
+abciAPI void aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data)
+{
+    if (obj)
+        obj->writeSample(*data);
+}
+abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data)
+{
+    if (obj)
+        obj->writeFaceSetSample(fsi, *data);
+}
+
+abciAPI aeProperty* aeNewProperty(aeSchema *obj, const char *name, aePropertyType type)
+{
+    if (!obj)
+        return nullptr;
+
     switch (type) {
         // scalar properties
-    case aePropertyType::Bool:           return parent->newProperty<abcBoolProperty>(name); break;
-    case aePropertyType::Int:            return parent->newProperty<abcIntProperty>(name); break;
-    case aePropertyType::UInt:           return parent->newProperty<abcUIntProperty>(name); break;
-    case aePropertyType::Float:          return parent->newProperty<abcFloatProperty>(name); break;
-    case aePropertyType::Float2:         return parent->newProperty<abcFloat2Property>(name); break;
-    case aePropertyType::Float3:         return parent->newProperty<abcFloat3Property>(name); break;
-    case aePropertyType::Float4:         return parent->newProperty<abcFloat4Property>(name); break;
-    case aePropertyType::Float4x4:       return parent->newProperty<abcFloat4x4Property>(name); break;
+    case aePropertyType::Bool:           return obj->newProperty<abcBoolProperty>(name); break;
+    case aePropertyType::Int:            return obj->newProperty<abcIntProperty>(name); break;
+    case aePropertyType::UInt:           return obj->newProperty<abcUIntProperty>(name); break;
+    case aePropertyType::Float:          return obj->newProperty<abcFloatProperty>(name); break;
+    case aePropertyType::Float2:         return obj->newProperty<abcFloat2Property>(name); break;
+    case aePropertyType::Float3:         return obj->newProperty<abcFloat3Property>(name); break;
+    case aePropertyType::Float4:         return obj->newProperty<abcFloat4Property>(name); break;
+    case aePropertyType::Float4x4:       return obj->newProperty<abcFloat4x4Property>(name); break;
 
         // array properties
-    case aePropertyType::BoolArray:      return parent->newProperty<abcBoolArrayProperty >(name); break;
-    case aePropertyType::IntArray:       return parent->newProperty<abcIntArrayProperty>(name); break;
-    case aePropertyType::UIntArray:      return parent->newProperty<abcUIntArrayProperty>(name); break;
-    case aePropertyType::FloatArray:     return parent->newProperty<abcFloatArrayProperty>(name); break;
-    case aePropertyType::Float2Array:    return parent->newProperty<abcFloat2ArrayProperty>(name); break;
-    case aePropertyType::Float3Array:    return parent->newProperty<abcFloat3ArrayProperty>(name); break;
-    case aePropertyType::Float4Array:    return parent->newProperty<abcFloat4ArrayProperty>(name); break;
-    case aePropertyType::Float4x4Array:  return parent->newProperty<abcFloat4x4ArrayProperty>(name); break;
+    case aePropertyType::BoolArray:      return obj->newProperty<abcBoolArrayProperty >(name); break;
+    case aePropertyType::IntArray:       return obj->newProperty<abcIntArrayProperty>(name); break;
+    case aePropertyType::UIntArray:      return obj->newProperty<abcUIntArrayProperty>(name); break;
+    case aePropertyType::FloatArray:     return obj->newProperty<abcFloatArrayProperty>(name); break;
+    case aePropertyType::Float2Array:    return obj->newProperty<abcFloat2ArrayProperty>(name); break;
+    case aePropertyType::Float3Array:    return obj->newProperty<abcFloat3ArrayProperty>(name); break;
+    case aePropertyType::Float4Array:    return obj->newProperty<abcFloat4ArrayProperty>(name); break;
+    case aePropertyType::Float4x4Array:  return obj->newProperty<abcFloat4x4ArrayProperty>(name); break;
     }
-    abciDebugLog("aeNewProperty(): unknown type");
+    DebugLog("aeNewProperty(): unknown type");
     return nullptr;
 }
 
 abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data)
 {
+    if (!prop)
+        return;
+
     if (!prop->isArray()) {
-        abciDebugLog("aePropertyWriteArraySample(): property is scalar!");
+        DebugLog("aePropertyWriteArraySample(): property is scalar!");
         return;
     }
     prop->writeSample(data, num_data);
@@ -162,72 +202,34 @@ abciAPI void aePropertyWriteArraySample(aeProperty *prop, const void *data, int 
 
 abciAPI void aePropertyWriteScalarSample(aeProperty *prop, const void *data)
 {
+    if (!prop)
+        return;
+
     if (prop->isArray()) {
-        abciDebugLog("aePropertyWriteScalarSample(): property is array!");
+        DebugLog("aePropertyWriteScalarSample(): property is array!");
         return;
     }
     prop->writeSample(data, 1);
 }
 
 
-inline uint32_t hash(const abcV3& value)
-{
-    auto* h = (const uint32_t*)(&value);
-    uint32_t f = (h[0] + h[1] * 11 - (h[2] * 17)) & 0x7fffffff;
-    return (f >> 22) ^ (f >> 12) ^ (f);
-}
-inline int next_power_of_two(uint32_t v)
-{
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v + (v == 0);
-}
 abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weights, int vertex_count)
 {
-    const int NIL = -1;
-    int output_count = 0;
-    int hash_size = next_power_of_two(vertex_count);
-    RawVector<int> hash_table(hash_size + vertex_count);
-    int* next = &hash_table[hash_size];
+    int ret = 0;
 
-    memset(hash_table.data(), NIL, (hash_size) * sizeof(int));
-
-    for (int i = 0; i < vertex_count; i++)
-    {
-        auto& v = points[i];
-        uint32_t hash_value = hash(v) & (hash_size - 1);
-        int offset = hash_table[hash_value];
-        while (offset != NIL)
-        {
-            if (points[offset] == v)
-            {
-                if (!weights || weights[i] == weights[offset])
-                    break;
-            }
-            offset = next[offset];
-        }
-
-        if (offset == NIL)
-        {
-            remap[i] = output_count;
-            points[output_count] = v;
-            if (weights)
-                weights[output_count] = weights[i];
-
-            next[output_count] = hash_table[hash_value];
-            hash_table[hash_value] = output_count++;
-        }
-        else
-        {
-            remap[i] = offset;
-        }
+    MeshWelder welder;
+    if (weights) {
+        auto compare_op = [&](int vi, int ni) { return weights[vi] == weights[ni]; };
+        auto weld_op = [&](int vi, int ni) { weights[ni] = weights[vi]; };
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
     }
-    return output_count;
+    else {
+        auto compare_op = [&](int vi, int ni) { return true; };
+        auto weld_op = [&](int vi, int ni) {};
+        ret = welder.weld(points, vertex_count, compare_op, weld_op);
+    }
+    welder.getRemapTable().copy_to(remap);
+    return ret;
 }
 
 abciAPI void aeApplyMatrixP(abcV3 *dst_points, int num, const abcM44 *matrix)

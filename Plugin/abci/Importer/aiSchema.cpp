@@ -6,96 +6,51 @@
 #include "aiProperty.h"
 
 
-aiSampleBase::aiSampleBase(aiSchemaBase *schema)
-    : m_currentTimeOffset(0)
-    , m_currentTimeInterval(0)
-    , m_schema(schema)
-{
-    m_config = schema->getConfig();
-}
-
-aiSampleBase::~aiSampleBase()
+aiSample::aiSample(aiSchema *schema)
+    :  m_schema(schema)
 {
 }
 
-
-aiSchemaBase::aiSchemaBase(aiObject *obj)
-    : m_obj(obj)
+aiSample::~aiSample()
 {
-    // start with base config
-    m_config = obj->getContext()->getConfig();
 }
 
-aiSchemaBase::~aiSchemaBase()
+const aiConfig & aiSample::getConfig() const
+{
+    return m_schema->getConfig();
+}
+
+void aiSample::markForceSync() { m_force_sync = true; }
+
+
+aiSchema::aiSchema(aiObject *parent, const abcObject &abc)
+    : super(parent->getContext(), parent, abc)
+{
+}
+
+aiSchema::~aiSchema()
 {
     m_properties.clear();
 }
 
-aiObject* aiSchemaBase::getObject() const
-{
-    return m_obj;
-}
+bool aiSchema::isConstant() const { return m_constant; }
+bool aiSchema::isDataUpdated() const { return m_data_updated; }
+void aiSchema::markForceUpdate() { m_force_update = true; }
+void aiSchema::markForceSync() { m_force_sync = true; }
 
-const aiConfig& aiSchemaBase::getConfig() const
-{
-    return m_config;
-}
-
-void aiSchemaBase::setConfigCallback(aiConfigCallback cb, void *arg)
-{
-    m_configCb = cb;
-    m_configCbArg = arg;
-}
-
-void aiSchemaBase::setSampleCallback(aiSampleCallback cb, void *arg)
-{
-    m_sampleCb = cb;
-    m_sampleCbArg = arg;
-}
-
-void aiSchemaBase::invokeConfigCallback(aiConfig *config) const
-{
-    if (m_configCb)
-    {
-        m_configCb(m_configCbArg, config);
-    }
-}
-
-void aiSchemaBase::invokeSampleCallback(aiSampleBase *sample, bool topologyChanged) const
-{
-    if (m_sampleCb)
-    {
-        m_sampleCb(m_sampleCbArg, sample, topologyChanged);
-    }
-}
-
-void aiSchemaBase::readConfig()
-{
-    DebugLog("aiSchemaBase::readConfig");
-
-    m_config = m_obj->getContext()->getConfig();
-
-    DebugLog("  Original config: %s", ToString(m_config).c_str());
-
-    // get object config overrides (if any)
-    invokeConfigCallback(&m_config);
-
-    DebugLog("  Override config: %s", ToString(m_config).c_str());
-}
-
-int aiSchemaBase::getNumProperties() const
+int aiSchema::getNumProperties() const
 {
     return static_cast<int>(m_properties.size());
 }
 
-aiProperty* aiSchemaBase::getPropertyByIndex(int i)
+aiProperty* aiSchema::getPropertyByIndex(int i)
 {
     auto& r = m_properties[i];
     if (r != nullptr) { r->setActive(true); }
     return r.get();
 }
 
-aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
+aiProperty* aiSchema::getPropertyByName(const std::string& name)
 {
     auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
         [](const aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
@@ -106,7 +61,7 @@ aiProperty* aiSchemaBase::getPropertyByName(const std::string& name)
     return nullptr;
 }
 
-void aiSchemaBase::setupProperties()
+void aiSchema::setupProperties()
 {
     auto cpro = getAbcProperties();
     if (!cpro.valid()) { return; }
@@ -123,7 +78,7 @@ void aiSchemaBase::setupProperties()
         [](const aiPropertyPtr& a, const aiPropertyPtr& b) { return a->getName() < b->getName(); });
 }
 
-void aiSchemaBase::updateProperties(const abcSampleSelector& ss)
+void aiSchema::updateProperties(const abcSampleSelector& ss)
 {
     for (auto &prop : m_properties) {
         prop->updateSample(ss);

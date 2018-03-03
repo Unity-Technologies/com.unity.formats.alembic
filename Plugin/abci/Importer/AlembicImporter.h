@@ -2,51 +2,31 @@
 
 #include <cstdint>
 
-struct  aiConfig;
-struct  aiCameraData;
-struct  aiXFormData;
-struct  aiMeshSummary;
-struct  aiMeshSampleSummary;
-struct  aiPolyMeshData;
-struct  aiSubmeshSummary;
-struct  aiSubmeshData;
-struct  aiFacesets;
-
-class   aiContext;
-class   aiObject;
+class aiContext;
+class aiTimeSampling;
+class aiObject;
 #ifdef abciImpl
-    class aiSchemaBase;
-    class aiSampleBase;
-    class aiXFormSample;    // : aiSampleBase
-    class aiCameraSample;   // : aiSampleBase
-    class aiPolyMeshSample; // : aiSampleBase
-    class aiPointsSample;   // : aiSampleBase
-    class aiCurvesSample;   // : aiSampleBase
-    class aiSubDSample;     // : aiSampleBase
+    class aiSchema;         // : aiObject
+    class aiSample;
+    class aiXformSample;    // : aiSample
+    class aiCameraSample;   // : aiSample
+    class aiPolyMeshSample; // : aiSample
+    class aiPointsSample;   // : aiSample
 #else
     // force make castable
-    typedef void aiSchemaBase;
-    typedef void aiSampleBase;
-    typedef void aiXFormSample;
-    typedef void aiCameraSample;
-    typedef void aiPolyMeshSample;
-    typedef void aiPointsSample;
-    typedef void aiCurvesSample;
-    typedef void aiSubDSample;
+    using aiSchema         = void;
+    using aiSample         = void;
+    using aiXformSample    = void;
+    using aiCameraSample   = void;
+    using aiPolyMeshSample = void;
+    using aiPointsSample   = void;
 #endif
 
-class   aiXForm;    // : aiSchemaBase
-class   aiCamera;   // : aiSchemaBase
-class   aiPolyMesh; // : aiSchemaBase
-class   aiPoints;   // : aiSchemaBase
-class   aiCurves;   // : aiSchemaBase
-class   aiSubD;     // : aiSchemaBase
-class   aiProperty;
-
-struct  aiPolyMeshData;
-struct  aiPointsData;
-struct  aiCurvesSampleData;
-struct  aiSubDSampleData;
+class aiXform;    // : aiSchema
+class aiCamera;   // : aiSchema
+class aiPolyMesh; // : aiSchema
+class aiPoints;   // : aiSchema
+class aiProperty;
 
 enum class aiNormalsMode
 {
@@ -59,8 +39,7 @@ enum class aiNormalsMode
 enum class aiTangentsMode
 {
     None,
-    Smooth,
-    Split
+    Compute,
 };
 
 enum class aiTimeSamplingType
@@ -68,6 +47,21 @@ enum class aiTimeSamplingType
     Uniform,
     Cyclic,
     Acyclic,
+};
+
+enum class aiTopologyVariance
+{
+    Constant,
+    Homogeneous, // vertices are variant, topology is constant
+    Heterogenous, // both vertices and topology are variant
+};
+
+enum class aiTopology
+{
+    Points,
+    Lines,
+    Triangles,
+    Quads,
 };
 
 enum class aiPropertyType
@@ -103,34 +97,27 @@ enum class aiPropertyType
 
 struct aiConfig
 {
-    bool swapHandedness = true;
-    bool swapFaceWinding = false;
-    aiNormalsMode normalsMode = aiNormalsMode::ComputeIfMissing;
-    aiTangentsMode tangentsMode = aiTangentsMode::None;
-    bool cacheTangentsSplits = true;
-    float aspectRatio = -1.0f;
-    bool forceUpdate = false;
-    bool cacheSamples = false;
-    bool shareVertices = true;
-    bool treatVertexExtraDataAsStatic = false;
-    bool interpolateSamples = true;
-    bool turnQuadEdges = false;
-    float vertexMotionScale = 1.0f;
-    bool use32BitsIndexBuffer = false;
+    aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
+    aiTangentsMode tangents_mode = aiTangentsMode::None;
+    float scale_factor = 1.0f;
+    float aspect_ratio = -1.0f;
+    float vertex_motion_scale = 1.0f;
+    int split_unit = 0x7fffffff;
+    bool swap_handedness = true;
+    bool swap_face_winding = false;
+    bool interpolate_samples = true;
+    bool turn_quad_edges = false;
+    bool async_load = false;
+
+    bool import_point_polygon = true;
+    bool import_line_polygon = true;
+    bool import_triangle_polygon = true;
 };
 
-struct aiTimeSamplingData
+struct aiXformData
 {
-    aiTimeSamplingType type = aiTimeSamplingType::Uniform;
-    float startTime = 0.0f;
-    float endTime = 0.0f;
-    float interval = 1.0f / 30.0f;  // relevant only if type is Uniform or Cyclic
-    int numTimes = 0;               // relevant only if type is Acyclic
-    double *times = nullptr;        // relevant only if type is Acyclic
-};
+    bool visibility = true;
 
-struct aiXFormData
-{
     abcV3 translation = { 0.0f, 0.0f, 0.0f };
     abcV4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f }; // quaternion
     abcV3 scale = { 1.0f, 1.0f, 1.0f };
@@ -139,104 +126,110 @@ struct aiXFormData
 
 struct aiCameraData
 {
-    float nearClippingPlane = 0.3f;
-    float farClippingPlane = 1000.0f;
-    float fieldOfView = 60.0f;      // in degree. vertical one
-    float aspectRatio = 16.0f / 9.0f;
+    bool visibility = true;
 
-    float focusDistance = 5.0f;     // in cm
-    float focalLength = 0.0f;       // in mm
+    float near_clipping_plane = 0.3f;
+    float far_clipping_plane = 1000.0f;
+    float field_of_view = 60.0f;      // in degree. vertical one
+    float aspect_ratio = 16.0f / 9.0f;
+
+    float focus_distance = 5.0f;     // in cm
+    float focal_length = 0.0f;       // in mm
     float aperture = 2.4f;          // in cm. vertical one
 };
 
 struct aiMeshSummary
 {
-    int32_t topologyVariance = 0;
-    int32_t peakVertexCount = 0;
-    int32_t peakIndexCount = 0;
-    int32_t peakTriangulatedIndexCount = 0;
-    int32_t peakSubmeshCount = 0;
+    aiTopologyVariance topology_variance = aiTopologyVariance::Constant;
+    bool has_velocities = false;
+    bool has_normals = false;
+    bool has_tangents = false;
+    bool has_uv0 = false;
+    bool has_uv1 = false;
+    bool has_colors = false;
+    bool constant_points = false;
+    bool constant_velocities = false;
+    bool constant_normals = false;
+    bool constant_tangents = false;
+    bool constant_uv0 = false;
+    bool constant_uv1 = false;
+    bool constant_colors = false;
 };
 
 struct aiMeshSampleSummary
 {
-    int32_t splitCount = 0;
-    bool hasNormals = false;
-    bool hasUVs = false;
-    bool hasTangents = false;
-    bool hasVelocities = false;
+    bool visibility = true;
+
+    int split_count = 0;
+    int submesh_count = 0;
+    int vertex_count = 0;
+    int index_count = 0;
+    bool topology_changed = false;
 };
 
-struct aiPolyMeshData
+struct aiMeshSplitSummary
 {
-    abcV3 *positions = nullptr;
-    abcV3 *velocities = nullptr;
-    abcV2 *interpolatedVelocitiesXY = nullptr;
-    abcV2 *interpolatedVelocitiesZ = nullptr;
-    abcV3 *normals = nullptr;
-    abcV2 *uvs = nullptr;
-    abcV4 *tangents = nullptr;
-
-    int *indices = nullptr;
-    int *normalIndices = nullptr;
-    int *uvIndices = nullptr;
-    int *faces = nullptr;
-
-    int positionCount = 0;
-    int normalCount = 0;
-    int uvCount = 0;
-
-    int indexCount = 0;
-    int normalIndexCount = 0;
-    int uvIndexCount = 0;
-    int faceCount = 0;
-
-    int triangulatedIndexCount = 0;
-
-    abcV3 center = { 0.0f, 0.0f, 0.0f };
-    abcV3 size = { 0.0f, 0.0f, 0.0f };
+    int submesh_count = 0;
+    int submesh_offset = 0;
+    int vertex_count = 0;
+    int vertex_offset = 0;
+    int index_count = 0;
+    int index_offset = 0;
 };
 
 struct aiSubmeshSummary
 {
-    int32_t index = 0;
-    int32_t splitIndex = 0;
-    int32_t splitSubmeshIndex = 0;
-    int32_t facesetIndex = -1;
-    int32_t triangleCount = 0;
+    int split_index = 0;
+    int submesh_index = 0; // submesh index in split
+    int index_count = 0;
+    aiTopology topology = aiTopology::Triangles;
+};
+
+struct aiPolyMeshData
+{
+    abcV3 *points = nullptr;
+    abcV3 *velocities = nullptr;
+    abcV3 *normals = nullptr;
+    abcV4 *tangents = nullptr;
+    abcV2 *uv0 = nullptr;
+    abcV2 *uv1 = nullptr;
+    abcV4 *colors = nullptr;
+    int *indices = nullptr;
+
+    int vertex_count = 0;
+    int index_count = 0;
+
+    abcV3 center = { 0.0f, 0.0f, 0.0f };
+    abcV3 extents = { 0.0f, 0.0f, 0.0f };
 };
 
 struct aiSubmeshData
 {
-    int32_t *indices = nullptr;
+    int *indices = nullptr;
 
 };
-
-struct aiFacesets
-{
-    int32_t count = 0;
-    int32_t *faceCounts = nullptr;
-    int32_t *faceIndices = nullptr;
-};
-
 
 struct aiPointsSummary
 {
-    bool hasVelocity = false;
-    bool positionIsConstant = false;
-    bool idIsConstant = false;
-    int32_t peakCount = 0;
-    uint64_t minID = 0;
-    uint64_t maxID = 0;
-    abcV3 boundsCenter = { 0.0f, 0.0f, 0.0f };
-    abcV3 boundsExtents = { 0.0f, 0.0f, 0.0f };
+    bool has_velocities = false;
+    bool has_ids = false;
+    bool constant_points = false;
+    bool constant_velocities = false;
+    bool constant_ids = false;
+};
+
+struct aiPointsSampleSummary
+{
+    int count = 0;
 };
 
 struct aiPointsData
 {
-    abcV3       *positions = nullptr;
+    bool        visibility = true;
+
+    abcV3       *points = nullptr;
     abcV3       *velocities = nullptr;
-    uint64_t    *ids = nullptr;
+    uint32_t    *ids = nullptr;
     int32_t     count = 0;
 
     abcV3       center = { 0.0f, 0.0f, 0.0f };
@@ -254,72 +247,63 @@ struct aiPropertyData
 };
 
 
-using aiNodeEnumerator = void (abciSTDCall*)(aiObject *node, void *userData);
-using aiConfigCallback =  void (abciSTDCall*)(void *csObj, aiConfig *config);
-using aiSampleCallback = void (abciSTDCall*)(void *csObj, aiSampleBase *sample, bool topologyChanged);
-
-abciAPI abcSampleSelector aiTimeToSampleSelector(float time);
+abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
 abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
-abciAPI void            clearContextsWithPath(const char *path);
-abciAPI aiContext*      aiCreateContext(int uid);
-abciAPI void            aiDestroyContext(aiContext* ctx);
+abciAPI void            aiClearContextsWithPath(const char *path);
 
-abciAPI bool            aiLoad(aiContext* ctx, const char *path);
-abciAPI void            aiSetConfig(aiContext* ctx, const aiConfig* conf);
-abciAPI float           aiGetStartTime(aiContext* ctx);
-abciAPI float           aiGetEndTime(aiContext* ctx);
-abciAPI int             getFrameCount(aiContext* ctx);
-abciAPI aiObject*       aiGetTopObject(aiContext* ctx);
-abciAPI void            aiDestroyObject(aiContext* ctx, aiObject* obj);
-abciAPI int             aiGetNumTimeSamplings(aiContext* ctx);
-abciAPI void            aiGetTimeSampling(aiContext* ctx, int i, aiTimeSamplingData *dst);
-abciAPI void            aiUpdateSamples(aiContext* ctx, float time);
+abciAPI aiContext*      aiContextCreate(int uid);
+abciAPI void            aiContextDestroy(aiContext* ctx);
+abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
+abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
+abciAPI int             aiContextGetTimeSamplingCount(aiContext* ctx);
+abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i);
+abciAPI void            aiContextGetTimeRange(aiContext* ctx, double *begin, double *end);
+abciAPI aiObject*       aiContextGetTopObject(aiContext* ctx);
+abciAPI void            aiContextUpdateSamples(aiContext* ctx, double time);
 
-abciAPI void            aiEnumerateChild(aiObject *obj, aiNodeEnumerator e, void *userData);
-abciAPI const char*     aiGetNameS(aiObject* obj);
-abciAPI int             aiGetNumChildren(aiObject* obj);
-abciAPI aiObject*       aiGetChild(aiObject* obj, int i);
+abciAPI int             aiTimeSamplingGetSampleCount(aiTimeSampling *self);
+abciAPI double          aiTimeSamplingGetTime(aiTimeSampling *self, int index);
+abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end);
 
-abciAPI void            aiSchemaSetSampleCallback(aiSchemaBase* schema, aiSampleCallback cb, void* arg);
-abciAPI void            aiSchemaSetConfigCallback(aiSchemaBase* schema, aiConfigCallback cb, void* arg);
-abciAPI aiSampleBase*   aiSchemaUpdateSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI aiSampleBase*   aiSchemaGetSample(aiSchemaBase* schema, const abcSampleSelector *ss);
-abciAPI int             aiSchemaGetNumSamples(aiSchemaBase* schema);
-abciAPI aiXForm*        aiGetXForm(aiObject* obj);
-abciAPI void            aiXFormGetData(aiXFormSample* sample, aiXFormData *outData);
+abciAPI const char*     aiObjectGetName(aiObject* obj);
+abciAPI const char*     aiObjectGetFullName(aiObject* obj);
+abciAPI int             aiObjectGetNumChildren(aiObject* obj);
+abciAPI aiObject*       aiObjectGetChild(aiObject* obj, int i);
+abciAPI aiObject*       aiObjectGetParent(aiObject* obj);
+abciAPI void            aiObjectSetEnabled(aiObject* obj, bool v);
+abciAPI aiXform*        aiObjectAsXform(aiObject* obj);
+abciAPI aiPolyMesh*     aiObjectAsPolyMesh(aiObject* obj);
+abciAPI aiCamera*       aiObjectAsCamera(aiObject* obj);
+abciAPI aiPoints*       aiObjectAsPoints(aiObject* obj);
 
-abciAPI aiPolyMesh*     aiGetPolyMesh(aiObject* obj);
-abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* summary);
-abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* summary, bool forceRefresh=false);
-// return pointers to actual data. no conversions (swap handedness / faces) are applied.
-abciAPI void            aiPolyMeshGetDataPointer(aiPolyMeshSample* sample, aiPolyMeshData* data);
-// copy mesh data without splitting. swap handedness / faces are applied.
-// if triangulate is true, triangulation is applied. in this case:
-// - if position indices and normal / uv indices are deferent, index expanding is applied inevitably.
-// - if position indices and normal / uv indices are same and always_expand_indices is false, expanding is not applied.
-abciAPI void            aiPolyMeshCopyData(aiPolyMeshSample* sample, aiPolyMeshData* data, int triangulate = false, int always_expand_indices = false);
-// all these below aiPolyMesh* are mesh splitting functions
-abciAPI int             aiPolyMeshGetVertexBufferLength(aiPolyMeshSample* sample, int splitIndex);
-abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, int splitIndex, aiPolyMeshData* data);
-abciAPI int             aiPolyMeshPrepareSubmeshes(aiPolyMeshSample* sample, const aiFacesets* facesets);
-abciAPI int             aiPolyMeshGetSplitSubmeshCount(aiPolyMeshSample* sample, int splitIndex);
-abciAPI bool            aiPolyMeshGetNextSubmesh(aiPolyMeshSample* sample, aiSubmeshSummary* summary);
-abciAPI void            aiPolyMeshFillSubmeshIndices(aiPolyMeshSample* sample, const aiSubmeshSummary* summary, aiSubmeshData* data);
+abciAPI aiSample*       aiSchemaGetSample(aiSchema* schema);
+abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss);
+abciAPI void            aiSchemaSync(aiSchema* schema);
+abciAPI bool            aiSchemaIsConstant(aiSchema* schema);
+abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
+abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
+abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
+abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
 
-abciAPI aiCamera*       aiGetCamera(aiObject* obj);
-abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *outData);
+abciAPI void            aiSampleSync(aiSample* sample);
 
-abciAPI aiPoints*       aiGetPoints(aiObject* obj);
-abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *summary);
+abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
+
+abciAPI void            aiPolyMeshGetSummary(aiPolyMesh* schema, aiMeshSummary* dst);
+abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSummary* dst);
+abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
+abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
+abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
+
+abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);
+
+abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
-abciAPI void            aiPointsGetDataPointer(aiPointsSample* sample, aiPointsData *outData);
-abciAPI void            aiPointsCopyData(aiPointsSample* sample, aiPointsData *outData);
+abciAPI void            aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary *dst);
+abciAPI void            aiPointsFillData(aiPointsSample* sample, aiPointsData *dst);
 
-abciAPI int             aiSchemaGetNumProperties(aiSchemaBase* schema);
-abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchemaBase* schema, int i);
-abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchemaBase* schema, const char *name);
-abciAPI const char*     aiPropertyGetNameS(aiProperty* prop);
+abciAPI const char*     aiPropertyGetName(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
-abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data);
+abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);

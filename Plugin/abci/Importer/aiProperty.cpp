@@ -46,15 +46,15 @@ template<> struct aiGetPropertyTypeID<abcFloat4x4ArrayProperty> { static const a
 template<class T>
 class aiTScalarProprty : public aiProperty
 {
-    typedef aiProperty super;
+using super = aiProperty;
 public:
-    typedef T property_type;
-    typedef typename T::value_type value_type;
+    using property_type = T;
+    using value_type = typename T::value_type;
 
-    aiTScalarProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
+    aiTScalarProprty(aiSchema *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
@@ -62,7 +62,7 @@ public:
 
     int getTimeSamplingIndex() const override
     {
-        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+        return m_schema->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
     }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
@@ -90,7 +90,7 @@ public:
     }
 
 private:
-    aiSchemaBase *m_schema;
+    aiSchema *m_schema;
     std::unique_ptr<property_type> m_abcprop;
     value_type m_value;
     aiPropertyData m_data;
@@ -116,10 +116,10 @@ public:
     using value_type = typename T::value_type;
     using sample_ptr_type = typename T::sample_ptr_type;
 
-    aiTArrayProprty(aiSchemaBase *schema, abcProperties cprop, const std::string &name)
+    aiTArrayProprty(aiSchema *schema, abcProperties cprop, const std::string &name)
         : m_schema(schema), m_abcprop(new property_type(cprop, name))
     {
-        abciDebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
+        DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
@@ -127,7 +127,7 @@ public:
 
     int getTimeSamplingIndex() const override
     {
-        return m_schema->getObject()->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
+        return m_schema->getContext()->getTimeSamplingIndex(m_abcprop->getTimeSampling());
     }
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
@@ -155,7 +155,7 @@ public:
     }
 
 private:
-    aiSchemaBase *m_schema;
+    aiSchema *m_schema;
     std::unique_ptr<property_type> m_abcprop;
     sample_ptr_type m_value;
     aiPropertyData m_data;
@@ -178,7 +178,7 @@ struct aiMakePropertyImpl;
 template<class T>
 struct aiMakePropertyImpl<T, false>
 {
-    static aiProperty* make(aiSchemaBase *schema, abcProperties cp, const std::string &name)
+    static aiProperty* make(aiSchema *schema, abcProperties cp, const std::string &name)
     {
         return new aiTScalarProprty<T>(schema, cp, name);
     }
@@ -186,7 +186,7 @@ struct aiMakePropertyImpl<T, false>
 template<class T>
 struct aiMakePropertyImpl<T, true>
 {
-    static aiProperty* make(aiSchemaBase *schema, abcProperties cp, const std::string &name)
+    static aiProperty* make(aiSchema *schema, abcProperties cp, const std::string &name)
     {
         return new aiTArrayProprty<T>(schema, cp, name);
     }
@@ -250,7 +250,7 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
     return aiPropertyType::Unknown;
 }
 
-aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header)
+aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyHeader header)
 {
     aiPropertyType ptype = aiGetPropertyType(header);
     if (ptype == aiPropertyType::Unknown) { return nullptr; } // not supported type

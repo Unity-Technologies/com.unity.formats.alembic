@@ -27,4 +27,4 @@ protected:
     bool m_active = false;
 };
 
-aiProperty* aiMakeProperty(aiSchemaBase *schema, abcProperties cprop, Abc::PropertyHeader header);
+aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyHeader header);

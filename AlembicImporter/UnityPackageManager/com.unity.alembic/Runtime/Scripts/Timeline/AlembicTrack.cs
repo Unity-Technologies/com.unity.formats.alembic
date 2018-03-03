@@ -1,5 +1,4 @@
-﻿#if UNITY_2017_1_OR_NEWER
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Timeline;
 
 namespace UTJ.Alembic
@@ -12,5 +11,3 @@ namespace UTJ.Alembic
     {
     }
 }
-
-#endif

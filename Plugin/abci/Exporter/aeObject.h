@@ -24,28 +24,48 @@ public:
     aeObject*   getChild(int i);
     aeObject*   getParent();
 
-    aeContext*          getContext();
-    const aeConfig&     getConfig() const;
-    virtual abcObject&  getAbcObject();
-    virtual abcProperties getAbcProperties();
+    aeContext* getContext();
+    const aeConfig& getConfig() const;
+    virtual abcObject& getAbcObject();
 
-    /// T: aeCamera, aeXForm, aePoint, aePolyMesh
-    template<class T> T*    newChild(const char *name, uint32_t tsi = 1);
+    /// T: aeCamera, aeXform, aePoint, aePolyMesh
+    template<class T> T*    newChild(const char *name, uint32_t tsi = 0);
     void                    removeChild(aeObject *c);
 
-    /// T: abcFloatArrayProperty, abcFloatProperty, etc
-    template<class T>
-    aeProperty*             newProperty(const char *name, uint32_t tsi = 1);
+protected:
+    using aePropertyPtr = std::unique_ptr<aeProperty>;
+    using abcObjectPtr = std::unique_ptr<abcObject>;
+    using ObjectPtr = std::unique_ptr<aeObject>;
 
-    virtual size_t  getNumSamples();
-    virtual void    setFromPrevious();
+    aeContext       *m_ctx = nullptr;
+    aeObject        *m_parent = nullptr;
+    uint32_t        m_tsi = 0;
+    abcObjectPtr    m_abc;
+    std::vector<ObjectPtr> m_children;
+};
+
+
+class aeSchema : public aeObject
+{
+using super = aeObject;
+public:
+    aeSchema(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t tsi);
+    ~aeSchema();
+
+    virtual size_t  getNumSamples() = 0;
+    virtual void    setFromPrevious() = 0;
+    virtual abcProperties getAbcProperties() = 0;
+
+    /// T: abcFloatArrayProperty, abcFloatProperty, etc
+    template<class T> aeProperty* newProperty(const char *name, uint32_t tsi = 0);
+
+    void markForceInvisible();
 
 protected:
-    typedef std::unique_ptr<aeProperty> aePropertyPtr;
-    aeContext                   *m_ctx = nullptr;
-    aeObject                    *m_parent = nullptr;
-    uint32_t                    m_tsi = 0;
-    std::unique_ptr<abcObject>  m_abc;
-    std::vector<aePropertyPtr>  m_properties;
-    std::vector<aeObject*>      m_children;
+    void writeVisibility(bool v);
+
+    AbcGeom::OVisibilityProperty m_visibility_prop;
+    std::vector<aePropertyPtr> m_properties;
+
+    bool m_force_invisible = false;
 };

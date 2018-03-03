@@ -1,201 +1,288 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UTJ.Alembic
 {
     public class AlembicStream : IDisposable
     {
-        static List<AlembicStream> s_Streams = new List<AlembicStream>();
+        static List<AlembicStream> s_streams = new List<AlembicStream>();
 
         public static void DisconnectStreamsWithPath(string path)
         {
             var fullPath = Application.streamingAssetsPath + path;
-            AbcAPI.clearContextsWithPath(fullPath);
-            s_Streams.ForEach(s => {
-                if (s.m_StreamDesc.pathToAbc == path)
+            aiContext.DestroyByPath(fullPath);
+            s_streams.ForEach(s => {
+                if (s.m_streamDesc.pathToAbc == path)
                 {
-                    s.m_StreamInterupted = true;
-                    s.m_Context = default(AbcAPI.aiContext);
-                    s.m_Loaded = false;   
+                    s.m_streamInterupted = true;
+                    s.m_context = default(aiContext);
+                    s.m_loaded = false;
                 }
             });
-        } 
+        }
 
-        public static void RemapStreamsWithPath(string oldPath , string newPath)
+        public static void RemapStreamsWithPath(string oldPath, string newPath)
         {
-            s_Streams.ForEach(s =>
+            s_streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == oldPath)
+                if (s.m_streamDesc.pathToAbc == oldPath)
                 {
-                    s.m_StreamInterupted = true;
-                    s.m_StreamDesc.pathToAbc = newPath;
+                    s.m_streamInterupted = true;
+                    s.m_streamDesc.pathToAbc = newPath;
                 }
-            } );
-        } 
+            });
+        }
 
         public static void ReconnectStreamsWithPath(string path)
         {
-            s_Streams.ForEach(s =>
+            s_streams.ForEach(s =>
             {
-                if (s.m_StreamDesc.pathToAbc == path)
+                if (s.m_streamDesc.pathToAbc == path)
                 {
-                    s.m_StreamInterupted = false;
+                    s.m_streamInterupted = false;
                 }
-                    
-            } );
+            });
         }
 
-        public AlembicTreeNode alembicTreeRoot;
-        private AlembicStreamDescriptor m_StreamDesc;
-        private AbcAPI.aiConfig m_Config;
-        private AbcAPI.aiContext m_Context;
-        private float m_Time;
-        private bool m_Loaded;
-        private bool m_StreamInterupted;
+        AlembicStreamDescriptor m_streamDesc;
+        AlembicTreeNode m_abcTreeRoot;
+        aiConfig m_config;
+        aiContext m_context;
+        double m_time;
+        bool m_ignoreVisibility;
+        bool m_loaded;
+        bool m_streamInterupted;
+
+        public AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
+        public aiContext abcContext { get { return m_context; } }
+        public bool abcIsValid { get { return m_context; } }
+        public aiConfig config { get { return m_config; } }
+        public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
+        public bool asyncLoad { set { m_config.asyncLoad = value; } }
+        public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
+
+        public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
+
 
         public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
-            m_Config.SetDefaults();
-            alembicTreeRoot = new AlembicTreeNode() { streamDescriptor = streamDesc, linkedGameObj = rootGo };
-            m_StreamDesc = streamDesc;
+            m_config.SetDefaults();
+            m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
+            m_streamDesc = streamDesc;
         }
 
-        public bool AbcIsValid()
+        void AbcBeforeUpdateSamples(AlembicTreeNode node)
         {
-            return (m_Context.ptr != (IntPtr)0);
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcPrepareSample();
+            foreach (var child in node.children)
+                AbcBeforeUpdateSamples(child);
         }
 
-        public void AbcUpdateConfigElements(AlembicTreeNode node = null)
+        void AbcBeginSyncData(AlembicTreeNode node)
         {
-            if (node == null)
-                node = alembicTreeRoot;
-            using (var o = node.alembicObjects.GetEnumerator())
-            {
-                while (o.MoveNext())
-                {
-                    o.Current.Value.AbcUpdateConfig();
-                }
-            }
-            using (var c = node.children.GetEnumerator())
-            {
-                while (c.MoveNext())
-                {
-                    AbcUpdateConfigElements(c.Current);
-                }
-            }
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataBegin();
+            foreach (var child in node.children)
+                AbcBeginSyncData(child);
         }
 
-        public void AbcUpdateElements( AlembicTreeNode node = null )
+        void AbcEndSyncData(AlembicTreeNode node)
         {
-            if (node == null)
-                node = alembicTreeRoot;
-            using (var o = node.alembicObjects.GetEnumerator())
-            {
-                while (o.MoveNext())
-                {
-                    o.Current.Value.AbcUpdate();
-                }
-            }
-            using (var c = node.children.GetEnumerator())
-            {
-                while (c.MoveNext())
-                {
-                    AbcUpdateElements(c.Current);
-                }
-            }
-        }
-
-        public float AbcStartTime
-        {
-            get {
-                return AbcIsValid() ? AbcAPI.aiGetStartTime(m_Context) : 0;
-            }
-        }
-        public int AbcFrameCount
-        {
-            get {
-                return AbcIsValid() ? AbcAPI.getFrameCount(m_Context) : 0;
-            }
-        }
-
-        public float AbcEndTime
-        {
-            get
-            {
-                return AbcIsValid() ? AbcAPI.aiGetEndTime(m_Context) : 0;
-            }
+            if (node.abcObject != null && node.gameObject != null)
+                node.abcObject.AbcSyncDataEnd();
+            foreach (var child in node.children)
+                AbcEndSyncData(child);
         }
 
         // returns false if the context needs to be recovered.
-        public bool AbcUpdate(float time,float motionScale,bool interpolateSamples)
+        public bool AbcUpdateBegin(double time)
         {
-            if (m_StreamInterupted) return true;
-            
-            if (!AbcIsValid() || !m_Loaded) return false;
+            if (m_streamInterupted) return true;
+            if (!abcIsValid || !m_loaded) return false;
 
-            m_Time = time;
-            m_Config.interpolateSamples = interpolateSamples;
-            m_Config.vertexMotionScale = motionScale;
-            AbcAPI.aiSetConfig(m_Context, ref m_Config);
-            AbcUpdateConfigElements();
-                   
-            AbcAPI.aiUpdateSamples(m_Context, m_Time);
-            AbcUpdateElements();
-
+            m_time = time;
+            m_context.SetConfig(ref m_config);
+            AbcBeforeUpdateSamples(m_abcTreeRoot);
+            m_context.UpdateSamples(m_time);
             return true;
         }
-   
-        public void AbcLoad()
+
+        // returns false if the context needs to be recovered.
+        public void AbcUpdateEnd()
         {
-            m_Time = 0.0f;
+            AbcBeginSyncData(m_abcTreeRoot);
+            AbcEndSyncData(m_abcTreeRoot);
+        }
 
-            m_Context = AbcAPI.aiCreateContext(alembicTreeRoot.linkedGameObj.GetInstanceID());
+        public void AbcLoad(bool createMissingNodes)
+        {
+            m_time = 0.0f;
+            m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
 
-            var settings = m_StreamDesc.settings;
-            m_Config.swapHandedness = settings.swapHandedness;
-            m_Config.shareVertices = settings.shareVertices;
-            m_Config.swapFaceWinding = settings.swapFaceWinding;
-            m_Config.normalsMode = settings.normalsMode;
-            m_Config.tangentsMode = settings.tangentsMode;
-            m_Config.cacheSamples = settings.cacheSamples;
-            m_Config.treatVertexExtraDataAsStatics = settings.treatVertexExtraDataAsStatics;
-            m_Config.turnQuadEdges = settings.turnQuadEdges;
-            m_Config.aspectRatio = AbcAPI.GetAspectRatio(settings.aspectRatioMode);
-            m_Config.cacheTangentsSplits = true;
-#if UNITY_2017_3_OR_NEWER
-            m_Config.use32BitsIndexBuffer = settings.use32BitsIndexBuffer;
-#else 
-            m_Config.use32BitsIndexBuffer = false;
-#endif
-                AbcAPI.aiSetConfig(m_Context, ref m_Config);
+            var settings = m_streamDesc.settings;
+            m_config.swapHandedness = settings.swapHandedness;
+            m_config.swapFaceWinding = settings.swapFaceWinding;
+            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
+            m_config.scaleFactor = settings.scaleFactor;
+            m_config.normalsMode = settings.normals;
+            m_config.tangentsMode = settings.tangents;
+            m_config.turnQuadEdges = settings.turnQuadEdges;
+            m_config.interpolateSamples = settings.interpolateSamples;
+            m_config.importPointPolygon = settings.importPointPolygon;
+            m_config.importLinePolygon = settings.importLinePolygon;
+            m_config.importTrianglePolygon = settings.importTrianglePolygon;
 
-            m_Loaded = AbcAPI.aiLoad(m_Context,Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
+            m_context.SetConfig(ref m_config);
+            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);
 
-            if (m_Loaded)
+            if (m_loaded)
             {
-                AbcAPI.UpdateAbcTree(m_Context, alembicTreeRoot, m_Time);
-                AlembicStream.s_Streams.Add(this);
+                UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes);
+                AlembicStream.s_streams.Add(this);
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_StreamDesc.pathToAbc);
+                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.pathToAbc);
             }
         }
 
         public void Dispose()
         {
-            AlembicStream.s_Streams.Remove(this);
-            if (alembicTreeRoot != null)
+            AlembicStream.s_streams.Remove(this);
+            if (m_abcTreeRoot != null)
             {
-                alembicTreeRoot.Dispose();
-                alembicTreeRoot = null;
+                m_abcTreeRoot.Dispose();
+                m_abcTreeRoot = null;
             }
 
-            if (AbcIsValid())
+            if (abcIsValid)
             {
-                AbcAPI.aiDestroyContext(m_Context);
-                m_Context = default(AbcAPI.aiContext);
+                m_context.Destroy();
+            }
+        }
+
+
+
+        class ImportContext
+        {
+            public AlembicTreeNode alembicTreeNode;
+            public aiSampleSelector ss;
+            public bool createMissingNodes;
+        }
+
+        ImportContext m_importContext;
+        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes)
+        {
+            var top = ctx.topObject;
+            if (!top)
+                return;
+
+            m_importContext = new ImportContext
+            {
+                alembicTreeNode = node,
+                ss = AbcAPI.aiTimeToSampleSelector(time),
+                createMissingNodes = createMissingNodes,
+            };
+            top.EachChild(ImportCallback);
+            m_importContext = null;
+        }
+
+        void ImportCallback(aiObject obj)
+        {
+            var ic = m_importContext;
+            AlembicTreeNode treeNode = ic.alembicTreeNode;
+            AlembicTreeNode childTreeNode = null;
+
+            aiSchema schema = obj.AsXform();
+            if (!schema) schema = obj.AsPolyMesh();
+            if (!schema) schema = obj.AsCamera();
+            if (!schema) schema = obj.AsPoints();
+
+            if (schema)
+            {
+                // Get child. create if needed and allowed.
+                string childName = obj.name;
+
+                // Find targetted child GameObj
+                GameObject childGO = null;
+
+                var childTransf = treeNode.gameObject == null ? null : treeNode.gameObject.transform.Find(childName);
+                if (childTransf == null)
+                {
+                    if (!ic.createMissingNodes)
+                    {
+                        obj.enabled = false;
+                        return;
+                    }
+                    else
+                    {
+                        obj.enabled = true;
+                    }
+
+                    childGO = new GameObject { name = childName };
+                    childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
+                }
+                else
+                    childGO = childTransf.gameObject;
+
+                childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
+                treeNode.children.Add(childTreeNode);
+
+                // Update
+                AlembicElement elem = null;
+
+                if (obj.AsXform() && m_streamDesc.settings.importXform)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
+                else if (obj.AsCamera() && m_streamDesc.settings.importCamera)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
+                else if (obj.AsPolyMesh() && m_streamDesc.settings.importPolyMesh)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
+
+                if (elem != null)
+                {
+                    elem.AbcSetup(obj, schema);
+                    elem.AbcPrepareSample();
+                    schema.UpdateSample(ref ic.ss);
+                    elem.AbcSyncDataBegin();
+                    elem.AbcSyncDataEnd();
+                }
+            }
+            else
+            {
+                obj.enabled = false;
+            }
+
+            ic.alembicTreeNode = childTreeNode;
+            obj.EachChild(ImportCallback);
+            ic.alembicTreeNode = treeNode;
+        }
+
+        public static float GetAspectRatio(aiAspectRatioMode mode)
+        {
+            if (mode == aiAspectRatioMode.CameraAperture)
+            {
+                return 0.0f;
+            }
+            else if (mode == aiAspectRatioMode.CurrentResolution)
+            {
+                return (float)Screen.width / (float)Screen.height;
+            }
+            else
+            {
+#if UNITY_EDITOR
+                return (float)PlayerSettings.defaultScreenWidth / (float)PlayerSettings.defaultScreenHeight;
+#else
+                // fallback on current resoltution
+                return (float) Screen.width / (float) Screen.height;
+#endif
             }
         }
     }

@@ -6,109 +6,92 @@
 #include "aiXForm.h"
 
 
-aiXFormSample::aiXFormSample(aiXForm *schema)
-    : super(schema), inherits(true)
+aiXformSample::aiXformSample(aiXform *schema)
+    : super(schema)
 {
 }
 
-void aiXFormSample::updateConfig(const aiConfig &config, bool &topoChanged, bool &dataChanged)
+void aiXformSample::getData(aiXformData &dst) const
 {
-    DebugLog("aiXFormSample::updateConfig()");
-    
-    topoChanged = false;
-    dataChanged = (config.swapHandedness != m_config.swapHandedness);
-    m_config = config;
+    dst = data;
 }
 
-void aiXFormSample::decomposeXForm(const Imath::M44d &mat,Imath::V3d &scale,Imath::V3d &shear,Imath::Quatd &rotation,Imath::V3d &translation) const
+
+aiXform::aiXform(aiObject *parent, const abcObject &abc)
+    : super(parent, abc)
 {
-    Imath::M44d mat_remainder(mat);
-
-    // Extract Scale, Shear
-    Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear);
-
-    // Extract translation
-    translation.x = mat_remainder[3][0];
-    translation.y = mat_remainder[3][1];
-    translation.z = mat_remainder[3][2];
-
-    // Extract rotation
-    rotation = extractQuat(mat_remainder);
 }
 
-void aiXFormSample::getData(aiXFormData &outData) const
+aiXform::Sample* aiXform::newSample()
 {
-    DebugLog("aiXFormSample::getData()");
+    return new Sample(this);
+}
+
+void aiXform::readSampleBody(Sample& sample, uint64_t idx)
+{
+    auto ss = aiIndexToSampleSelector(idx);
+    auto ss2 = aiIndexToSampleSelector(idx + 1);
+
+    readVisibility(sample, ss);
+    m_schema.get(sample.xf_sp, ss);
+    m_schema.get(sample.xf_sp2, ss2);
+}
+
+void aiXform::cookSampleBody(Sample& sample)
+{
+    auto& config = getConfig();
 
     Imath::V3d scale;
     Imath::V3d shear;
     Imath::Quatd rot;
     Imath::V3d trans;
-    decomposeXForm(m_matrix, scale, shear, rot, trans);
+    decompose(sample.xf_sp.getMatrix(), scale, shear, rot, trans);
 
-    if (m_config.interpolateSamples && m_currentTimeOffset!=0)
+    if (config.interpolate_samples && m_current_time_offset != 0)
     {
         Imath::V3d scale2;
         Imath::Quatd rot2;
         Imath::V3d trans2;
-        decomposeXForm(m_nextMatrix, scale2, shear, rot2, trans2);
-        scale += (scale2 - scale)* m_currentTimeOffset;
-        trans += (trans2 - trans)* m_currentTimeOffset;
-        rot = slerpShortestArc(rot, rot2, m_currentTimeOffset);
+        decompose(sample.xf_sp2.getMatrix(), scale2, shear, rot2, trans2);
+        scale += (scale2 - scale)* m_current_time_offset;
+        trans += (trans2 - trans)* m_current_time_offset;
+        rot = Imath::slerpShortestArc(rot, rot2, (double)m_current_time_offset);
     }
 
-    auto rotFinal = abcV4(
+    auto rot_final = abcV4(
         static_cast<float>(rot.v[0]),
         static_cast<float>(rot.v[1]),
         static_cast<float>(rot.v[2]),
         static_cast<float>(rot.r)
     );
 
-    if (m_config.swapHandedness)
+    if (config.swap_handedness)
     {
         trans.x *= -1.0f;
-        rotFinal.x = -rotFinal.x;
-        rotFinal.w = -rotFinal.w;
+        rot_final.x = -rot_final.x;
+        rot_final.w = -rot_final.w;
     }
-    outData.inherits = inherits;
-    outData.translation = trans;
-    outData.rotation = rotFinal;
-    outData.scale = scale;
+    auto& dst = sample.data;
+    dst.visibility = sample.visibility;
+    dst.inherits = sample.xf_sp.getInheritsXforms();
+    dst.translation = trans;
+    dst.rotation = rot_final;
+    dst.scale = scale;
 }
 
-aiXForm::aiXForm(aiObject *obj)
-    : super(obj)
+void aiXform::decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const
 {
-}
+    Imath::M44d mat_remainder(mat);
 
-aiXForm::Sample* aiXForm::newSample()
-{
-    Sample *sample = getSample();
-    
-    if (!sample)
-    {
-        sample = new Sample(this);
-    }
-    
-    return sample;
-}
+    // Extract Scale, Shear
+    Imath::extractAndRemoveScalingAndShear(mat_remainder, scale, shear, false);
 
-aiXForm::Sample* aiXForm::readSample(const uint64_t idx, bool &topologyChanged)
-{
-    DebugLog("aiXForm::readSample(t=%d)", idx);
-    Sample *ret = newSample();
+    // Extract translation
+    translation.x = mat_remainder[3][0];
+    translation.y = mat_remainder[3][1];
+    translation.z = mat_remainder[3][2];
+    translation *= getConfig().scale_factor;
 
-    auto ss = aiIndexToSampleSelector(idx);
-    AbcGeom::XformSample matSample;
-    m_schema.get(matSample, ss);
-    ret->m_matrix = matSample.getMatrix();
-    
-    ret->inherits = matSample.getInheritsXforms();
-
-    auto ss2 = aiIndexToSampleSelector(idx + 1);
-    AbcGeom::XformSample nextMatSample;
-    m_schema.get(nextMatSample, ss2 );
-    ret->m_nextMatrix = nextMatSample.getMatrix();
-    
-    return ret;
+    // Extract rotation
+    rotation = extractQuat(mat_remainder);
 }

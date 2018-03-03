@@ -1,16 +1,5 @@
 #pragma once
 
-#if defined(_M_IX86) || defined(__i386__)
-    #ifdef _MSC_VER
-        #define abciSTDCall __stdcall
-        #pragma warning(disable: 4190)
-    #else // _MSC_VER
-        #define abciSTDCall __attribute__((stdcall))
-    #endif // _MSC_VER
-#else
-    #define abciSTDCall
-#endif
-
 #ifdef abciImpl
     #ifndef abciStaticLink
         #ifdef _WIN32
@@ -34,29 +23,10 @@
         #define abciAPI extern "C"
     #endif
 
-    struct abcV2
-    {
-        float x, y;
-
-        abcV2() {}
-        abcV2(float _x, float _y) : x(_x), y(_y) {}
-    };
-
-    struct abcV3
-    {
-        float x, y, z;
-
-        abcV3() {}
-        abcV3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-    };
-
-    struct abcV4
-    {
-        float x, y, z, w;
-
-        abcV4() {}
-        abcV4(float _x, float _y, float _z, float _w) : x(_x), y(_y), w(_w) {}
-    };
+    struct abcV2 { float x, y; };
+    struct abcV3 { float x, y, z; };
+    struct abcV4 { float x, y, z, w; };
+    using abcC4 = abcV4;
 
     struct abcSampleSelector
     {

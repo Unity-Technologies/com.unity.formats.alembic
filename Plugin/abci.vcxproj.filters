@@ -4,9 +4,6 @@
     <ClCompile Include="abci\Foundation\aiLogger.cpp">
       <Filter>abci\Foundation</Filter>
     </ClCompile>
-    <ClCompile Include="abci\Foundation\aiThreadPool.cpp">
-      <Filter>abci\Foundation</Filter>
-    </ClCompile>
     <ClCompile Include="abci\Importer\aiPolyMesh.cpp">
       <Filter>abci\Importer</Filter>
     </ClCompile>
@@ -61,11 +58,20 @@
     <ClCompile Include="abci\Foundation\Allocator.cpp">
       <Filter>abci\Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="abci\Foundation\aiMath.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Foundation\aiMeshOps.cpp">
+      <Filter>abci\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiAsync.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
+    <ClCompile Include="abci\Importer\aiTimeSampling.cpp">
+      <Filter>abci\Importer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="abci\Foundation\aiThreadPool.h">
-      <Filter>abci\Foundation</Filter>
-    </ClInclude>
     <ClInclude Include="abci\Foundation\aiLogger.h">
       <Filter>abci\Foundation</Filter>
     </ClInclude>
@@ -138,6 +144,30 @@
     <ClInclude Include="abci\Exporter\aeInternal.h">
       <Filter>abci\Exporter</Filter>
     </ClInclude>
+    <ClInclude Include="abci\Foundation\aiMath.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\ispcmath.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiMeshOps.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\IntrusiveArray.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiIterator.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Foundation\aiIntrusiveArray.h">
+      <Filter>abci\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiAsync.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
+    <ClInclude Include="abci\Importer\aiTimeSampling.h">
+      <Filter>abci\Importer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="abci">
@@ -152,5 +182,10 @@
     <Filter Include="abci\Importer">
       <UniqueIdentifier>{c94f82d9-acb1-49f5-85b5-aed90514a514}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="abci\Foundation\aiSIMD.ispc">
+      <Filter>abci\Foundation</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
