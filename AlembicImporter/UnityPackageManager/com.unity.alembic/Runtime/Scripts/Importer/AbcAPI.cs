@@ -253,6 +253,15 @@ namespace UTJ.Alembic
         aiPropertyType type;
     }
 
+    static class Abci {
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
+#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/libabci.so";
+#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/abci.dll";
+#endif
+    }
 
     public struct aiContext
     {
@@ -273,35 +282,16 @@ namespace UTJ.Alembic
         public void GetTimeRange(ref double begin, ref double end) { aiContextGetTimeRange(self, ref begin, ref end); }
 
         #region internal
-        public delegate void aiClearContextsWithPathDelegate(string path);
-        public static aiClearContextsWithPathDelegate aiClearContextsWithPath = ModuleImporter.Resolve<aiClearContextsWithPathDelegate>("aiClearContextsWithPath");
-
-        public delegate aiContext aiContextCreateDelegate(int uid);
-        public static aiContextCreateDelegate aiContextCreate = ModuleImporter.Resolve<aiContextCreateDelegate>("aiContextCreate");
-
-        public delegate void aiContextDestroyDelegate(IntPtr ctx);
-        public static aiContextDestroyDelegate aiContextDestroy = ModuleImporter.Resolve<aiContextDestroyDelegate>("aiContextDestroy");
-
-        public delegate Bool aiContextLoadDelegate(IntPtr ctx, string path);
-        public static aiContextLoadDelegate aiContextLoad = ModuleImporter.Resolve<aiContextLoadDelegate>("aiContextLoad");
-
-        public delegate void aiContextSetConfigDelegate(IntPtr ctx, ref aiConfig conf);
-        public static aiContextSetConfigDelegate aiContextSetConfig = ModuleImporter.Resolve<aiContextSetConfigDelegate>("aiContextSetConfig");
-
-        public delegate int aiContextGetTimeSamplingCountDelegate(IntPtr ctx);
-        public static aiContextGetTimeSamplingCountDelegate aiContextGetTimeSamplingCount = ModuleImporter.Resolve<aiContextGetTimeSamplingCountDelegate>("aiContextGetTimeSamplingCount");
-
-        public delegate aiTimeSampling aiContextGetTimeSamplingDelegate(IntPtr ctx, int i);
-        public static aiContextGetTimeSamplingDelegate aiContextGetTimeSampling = ModuleImporter.Resolve<aiContextGetTimeSamplingDelegate>("aiContextGetTimeSampling");
-
-        public delegate void aiContextGetTimeRangeDelegate(IntPtr ctx, ref double begin, ref double end);
-        public static aiContextGetTimeRangeDelegate aiContextGetTimeRange = ModuleImporter.Resolve<aiContextGetTimeRangeDelegate>("aiContextGetTimeRange");
-
-        public delegate aiObject aiContextGetTopObjectDelegate(IntPtr ctx);
-        public static aiContextGetTopObjectDelegate aiContextGetTopObject = ModuleImporter.Resolve<aiContextGetTopObjectDelegate>("aiContextGetTopObject");
-
-        public delegate void aiContextUpdateSamplesDelegate(IntPtr ctx, double time);
-        public static aiContextUpdateSamplesDelegate aiContextUpdateSamples = ModuleImporter.Resolve<aiContextUpdateSamplesDelegate>("aiContextUpdateSamples");
+        [DllImport(Abci.Lib)] public static extern  void aiClearContextsWithPath(string path);
+        [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
+        [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
+        [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
+        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
+        [DllImport(Abci.Lib)] public static extern aiObject aiContextGetTopObject(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern void aiContextUpdateSamples(IntPtr ctx, double time);
         #endregion
     }
 
@@ -314,14 +304,9 @@ namespace UTJ.Alembic
         public void GetRange(ref double start, ref double end) { aiTimeSamplingGetRange(self, ref start, ref end); }
 
         #region internal
-        delegate int aiTimeSamplingGetSampleCountDelegate(IntPtr self);
-        static aiTimeSamplingGetSampleCountDelegate aiTimeSamplingGetSampleCount = ModuleImporter.Resolve<aiTimeSamplingGetSampleCountDelegate>("aiTimeSamplingGetSampleCount");
-
-        delegate double aiTimeSamplingGetTimeDelegate(IntPtr self, int index);
-        static aiTimeSamplingGetTimeDelegate aiTimeSamplingGetTime = ModuleImporter.Resolve<aiTimeSamplingGetTimeDelegate>("aiTimeSamplingGetTime");
-
-        delegate void aiTimeSamplingGetRangeDelegate(IntPtr self, ref double start, ref double end);
-        static aiTimeSamplingGetRangeDelegate aiTimeSamplingGetRange = ModuleImporter.Resolve<aiTimeSamplingGetRangeDelegate>("aiTimeSamplingGetRange");
+        [DllImport(Abci.Lib)] static extern int aiTimeSamplingGetSampleCount(IntPtr self);
+        [DllImport(Abci.Lib)] static extern double aiTimeSamplingGetTime(IntPtr self, int index);
+        [DllImport(Abci.Lib)] static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
         #endregion
     }
 
@@ -349,32 +334,15 @@ namespace UTJ.Alembic
         }
 
         #region internal
-        delegate int aiObjectGetNumChildrenDelegate(IntPtr obj);
-        static aiObjectGetNumChildrenDelegate aiObjectGetNumChildren = ModuleImporter.Resolve<aiObjectGetNumChildrenDelegate>("aiObjectGetNumChildren");
-
-        delegate aiObject aiObjectGetChildDelegate(IntPtr obj, int i);
-        static aiObjectGetChildDelegate aiObjectGetChild = ModuleImporter.Resolve<aiObjectGetChildDelegate>("aiObjectGetChild");
-
-        delegate void aiObjectSetEnabledDelegate(IntPtr obj, Bool v);
-        static aiObjectSetEnabledDelegate aiObjectSetEnabled = ModuleImporter.Resolve<aiObjectSetEnabledDelegate>("aiObjectSetEnabled");
-
-        delegate IntPtr aiObjectGetNameDelegate(IntPtr obj);
-        static aiObjectGetNameDelegate aiObjectGetName = ModuleImporter.Resolve<aiObjectGetNameDelegate>("aiObjectGetName");
-
-        delegate IntPtr aiObjectGetFullNameDelegate(IntPtr obj);
-        static aiObjectGetFullNameDelegate aiObjectGetFullName = ModuleImporter.Resolve<aiObjectGetFullNameDelegate>("aiObjectGetFullName");
-
-        delegate aiXform aiObjectAsXformDelegate(IntPtr obj);
-        static aiObjectAsXformDelegate aiObjectAsXform = ModuleImporter.Resolve<aiObjectAsXformDelegate>("aiObjectAsXform");
-
-        delegate aiCamera aiObjectAsCameraDelegate(IntPtr obj);
-        static aiObjectAsCameraDelegate aiObjectAsCamera = ModuleImporter.Resolve<aiObjectAsCameraDelegate>("aiObjectAsCamera");
-
-        delegate aiPoints aiObjectAsPointsDelegate(IntPtr obj);
-        static aiObjectAsPointsDelegate aiObjectAsPoints = ModuleImporter.Resolve<aiObjectAsPointsDelegate>("aiObjectAsPoints");
-
-        delegate aiPolyMesh aiObjectAsPolyMeshDelegate(IntPtr obj);
-        static aiObjectAsPolyMeshDelegate aiObjectAsPolyMesh = ModuleImporter.Resolve<aiObjectAsPolyMeshDelegate>("aiObjectAsPolyMesh");
+        [DllImport(Abci.Lib)] static extern int aiObjectGetNumChildren(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
+        [DllImport(Abci.Lib)] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
+        [DllImport(Abci.Lib)] static extern IntPtr aiObjectGetName(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern IntPtr aiObjectGetFullName(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern aiXform aiObjectAsXform(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern aiCamera aiObjectAsCamera(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern aiPoints aiObjectAsPoints(IntPtr obj);
+        [DllImport(Abci.Lib)] static extern aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
         #endregion
     }
 
@@ -394,29 +362,14 @@ namespace UTJ.Alembic
         public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
 
         #region internal
-        delegate void aiSchemaUpdateSampleDelegate(IntPtr schema, ref aiSampleSelector ss);
-        static aiSchemaUpdateSampleDelegate aiSchemaUpdateSample = ModuleImporter.Resolve<aiSchemaUpdateSampleDelegate>("aiSchemaUpdateSample");
-
-        delegate void aiSchemaSyncDelegate(IntPtr schema);
-        static aiSchemaSyncDelegate aiSchemaSync = ModuleImporter.Resolve<aiSchemaSyncDelegate>("aiSchemaSync");
-
-        delegate aiSample aiSchemaGetSampleDelegate(IntPtr schema);
-        static aiSchemaGetSampleDelegate aiSchemaGetSample = ModuleImporter.Resolve<aiSchemaGetSampleDelegate>("aiSchemaGetSample");
-
-        delegate Bool aiSchemaIsConstantDelegate(IntPtr schema);
-        static aiSchemaIsConstantDelegate aiSchemaIsConstant = ModuleImporter.Resolve<aiSchemaIsConstantDelegate>("aiSchemaIsConstant");
-
-        delegate Bool aiSchemaIsDataUpdatedDelegate(IntPtr schema);
-        static aiSchemaIsDataUpdatedDelegate aiSchemaIsDataUpdated = ModuleImporter.Resolve<aiSchemaIsDataUpdatedDelegate>("aiSchemaIsDataUpdated");
-
-        delegate int aiSchemaGetNumPropertiesDelegate(IntPtr schema);
-        static aiSchemaGetNumPropertiesDelegate aiSchemaGetNumProperties = ModuleImporter.Resolve<aiSchemaGetNumPropertiesDelegate>("aiSchemaGetNumProperties");
-
-        delegate aiProperty aiSchemaGetPropertyByIndexDelegate(IntPtr schema, int i);
-        static aiSchemaGetPropertyByIndexDelegate aiSchemaGetPropertyByIndex = ModuleImporter.Resolve<aiSchemaGetPropertyByIndexDelegate>("aiSchemaGetPropertyByIndex");
-
-        delegate aiProperty aiSchemaGetPropertyByNameDelegate(IntPtr schema, string name);
-        static aiSchemaGetPropertyByNameDelegate aiSchemaGetPropertyByName = ModuleImporter.Resolve<aiSchemaGetPropertyByNameDelegate>("aiSchemaGetPropertyByName");
+        [DllImport(Abci.Lib)] static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
+        [DllImport(Abci.Lib)] static extern void aiSchemaSync(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern aiSample aiSchemaGetSample(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern Bool aiSchemaIsConstant(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern int aiSchemaGetNumProperties(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);
+        [DllImport(Abci.Lib)] static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
         #endregion
     }
 
@@ -431,8 +384,7 @@ namespace UTJ.Alembic
         public aiXformSample sample { get { return aiSchemaGetSample(self); } }
 
         #region internal
-        delegate aiXformSample aiSchemaGetSampleDelegate(IntPtr schema);
-        static aiSchemaGetSampleDelegate aiSchemaGetSample = ModuleImporter.Resolve<aiSchemaGetSampleDelegate>("aiSchemaGetSample");
+        [DllImport(Abci.Lib)] static extern aiXformSample aiSchemaGetSample(IntPtr schema);
         #endregion
     }
 
@@ -447,8 +399,7 @@ namespace UTJ.Alembic
         public aiCameraSample sample { get { return aiSchemaGetSample(self); } }
 
         #region internal
-        delegate aiCameraSample aiSchemaGetSampleDelegate(IntPtr schema);
-        static aiSchemaGetSampleDelegate aiSchemaGetSample = ModuleImporter.Resolve<aiSchemaGetSampleDelegate>("aiSchemaGetSample");
+        [DllImport(Abci.Lib)] static extern aiCameraSample aiSchemaGetSample(IntPtr schema);
         #endregion
     }
 
@@ -464,11 +415,8 @@ namespace UTJ.Alembic
         public void GetSummary(ref aiMeshSummary dst) { aiPolyMeshGetSummary(self, ref dst); }
 
         #region internal
-        delegate void aiPolyMeshGetSummaryDelegate(IntPtr schema, ref aiMeshSummary dst);
-        static aiPolyMeshGetSummaryDelegate aiPolyMeshGetSummary = ModuleImporter.Resolve<aiPolyMeshGetSummaryDelegate>("aiPolyMeshGetSummary");
-
-        delegate aiPolyMeshSample aiSchemaGetSampleDelegate(IntPtr schema);
-        static aiSchemaGetSampleDelegate aiSchemaGetSample = ModuleImporter.Resolve<aiSchemaGetSampleDelegate>("aiSchemaGetSample");
+        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
+        [DllImport(Abci.Lib)] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
         #endregion
     }
 
@@ -487,17 +435,10 @@ namespace UTJ.Alembic
         public void GetSummary(ref aiPointsSummary dst) { aiPointsGetSummary(self, ref dst); }
 
         #region internal
-        delegate aiPointsSample aiSchemaGetSampleDelegate(IntPtr schema);
-        static aiSchemaGetSampleDelegate aiSchemaGetSample = ModuleImporter.Resolve<aiSchemaGetSampleDelegate>("aiSchemaGetSample");
-
-        delegate void aiPointsSetSortDelegate(IntPtr schema, Bool v);
-        static aiPointsSetSortDelegate aiPointsSetSort = ModuleImporter.Resolve<aiPointsSetSortDelegate>("aiPointsSetSort");
-
-        delegate void aiPointsSetSortBasePositionDelegate(IntPtr schema, Vector3 v);
-        static aiPointsSetSortBasePositionDelegate aiPointsSetSortBasePosition = ModuleImporter.Resolve<aiPointsSetSortBasePositionDelegate>("aiPointsSetSortBasePosition");
-
-        delegate void aiPointsGetSummaryDelegate(IntPtr schema, ref aiPointsSummary dst);
-        static aiPointsGetSummaryDelegate aiPointsGetSummary = ModuleImporter.Resolve<aiPointsGetSummaryDelegate>("aiPointsGetSummary");
+        [DllImport(Abci.Lib)] static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
+        [DllImport(Abci.Lib)] static extern void aiPointsSetSort(IntPtr schema, Bool v);
+        [DllImport(Abci.Lib)] static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
+        [DllImport(Abci.Lib)] static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
         #endregion
     }
 
@@ -521,8 +462,7 @@ namespace UTJ.Alembic
         public void GetData(ref aiXformData dst) { aiXformGetData(self, ref dst); }
 
         #region internal
-        public delegate void aiXformGetDataDelegate(IntPtr sample, ref aiXformData data);
-        public static aiXformGetDataDelegate aiXformGetData = ModuleImporter.Resolve<aiXformGetDataDelegate>("aiXformGetData");
+        [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
         #endregion
     }
 
@@ -535,8 +475,7 @@ namespace UTJ.Alembic
         public void GetData(ref aiCameraData dst) { aiCameraGetData(self, ref dst); }
 
         #region internal
-        public delegate void aiCameraGetDataDelegate(IntPtr sample, ref aiCameraData dst);
-        public static aiCameraGetDataDelegate aiCameraGetData = ModuleImporter.Resolve<aiCameraGetDataDelegate>("aiCameraGetData");
+        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref aiCameraData dst);
         #endregion
     }
 
@@ -553,20 +492,11 @@ namespace UTJ.Alembic
         public void Sync() { aiSampleSync(self); }
 
         #region internal
-        delegate void aiPolyMeshGetSampleSummaryDelegate(IntPtr sample, ref aiMeshSampleSummary dst);
-        static aiPolyMeshGetSampleSummaryDelegate aiPolyMeshGetSampleSummary = ModuleImporter.Resolve<aiPolyMeshGetSampleSummaryDelegate>("aiPolyMeshGetSampleSummary");
-
-        delegate int aiPolyMeshGetSplitSummariesDelegate(IntPtr sample, IntPtr dst);
-        static aiPolyMeshGetSplitSummariesDelegate aiPolyMeshGetSplitSummaries = ModuleImporter.Resolve<aiPolyMeshGetSplitSummariesDelegate>("aiPolyMeshGetSplitSummaries");
-
-        delegate void aiPolyMeshGetSubmeshSummariesDelegate(IntPtr sample, IntPtr dst);
-        static aiPolyMeshGetSubmeshSummariesDelegate aiPolyMeshGetSubmeshSummaries = ModuleImporter.Resolve<aiPolyMeshGetSubmeshSummariesDelegate>("aiPolyMeshGetSubmeshSummaries");
-
-        delegate void aiPolyMeshFillVertexBufferDelegate(IntPtr sample, IntPtr vbs, IntPtr ibs);
-        static aiPolyMeshFillVertexBufferDelegate aiPolyMeshFillVertexBuffer = ModuleImporter.Resolve<aiPolyMeshFillVertexBufferDelegate>("aiPolyMeshFillVertexBuffer");
-
-        delegate void aiSampleSyncDelegate(IntPtr sample);
-        static aiSampleSyncDelegate aiSampleSync = ModuleImporter.Resolve<aiSampleSyncDelegate>("aiSampleSync");
+        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSampleSummary(IntPtr sample, ref aiMeshSampleSummary dst);
+        [DllImport(Abci.Lib)] static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);
+        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSubmeshSummaries(IntPtr sample, IntPtr dst);
+        [DllImport(Abci.Lib)] static extern void aiPolyMeshFillVertexBuffer(IntPtr sample, IntPtr vbs, IntPtr ibs);
+        [DllImport(Abci.Lib)] static extern void aiSampleSync(IntPtr sample);
         #endregion
     }
 
@@ -581,14 +511,9 @@ namespace UTJ.Alembic
         public void Sync() { aiSampleSync(self); }
 
         #region internal
-        delegate void aiPointsGetSampleSummaryDelegate(IntPtr sample, ref aiPointsSampleSummary dst);
-        static aiPointsGetSampleSummaryDelegate aiPointsGetSampleSummary = ModuleImporter.Resolve<aiPointsGetSampleSummaryDelegate>("aiPointsGetSampleSummary");
-
-        delegate void aiPointsFillDataDelegate(IntPtr sample, IntPtr dst);
-        static aiPointsFillDataDelegate aiPointsFillData = ModuleImporter.Resolve<aiPointsFillDataDelegate>("aiPointsFillData");
-
-        delegate void aiSampleSyncDelegate(IntPtr sample);
-        static aiSampleSyncDelegate aiSampleSync = ModuleImporter.Resolve<aiSampleSyncDelegate>("aiSampleSync");
+        [DllImport(Abci.Lib)] static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
+        [DllImport(Abci.Lib)] static extern void aiPointsFillData(IntPtr sample, IntPtr dst);
+        [DllImport(Abci.Lib)] static extern void aiSampleSync(IntPtr sample);
         #endregion
     }
 
@@ -599,23 +524,15 @@ namespace UTJ.Alembic
         public static implicit operator bool(aiProperty v) { return v.self != IntPtr.Zero; }
 
         #region internal
-        delegate IntPtr aiPropertyGetNameDelegate(IntPtr prop);
-        static aiPropertyGetNameDelegate aiPropertyGetName = ModuleImporter.Resolve<aiPropertyGetNameDelegate>("aiPropertyGetName");
-
-        delegate aiPropertyType aiPropertyGetTypeDelegate(IntPtr prop);
-        static aiPropertyGetTypeDelegate aiPropertyGetType = ModuleImporter.Resolve<aiPropertyGetTypeDelegate>("aiPropertyGetType");
-
-        delegate void aiPropertyGetDataDelegate(IntPtr prop, aiPropertyData oData);
-        static aiPropertyGetDataDelegate aiPropertyGetData = ModuleImporter.Resolve<aiPropertyGetDataDelegate>("aiPropertyGetData");
+        [DllImport(Abci.Lib)] static extern IntPtr aiPropertyGetName(IntPtr prop);
+        [DllImport(Abci.Lib)] static extern aiPropertyType aiPropertyGetType(IntPtr prop);
+        [DllImport(Abci.Lib)] static extern void aiPropertyGetData(IntPtr prop, aiPropertyData oData);
         #endregion
     }
 
     public partial class AbcAPI
     {
-        public delegate aiSampleSelector aiTimeToSampleSelectorDelegate(double time);
-        public static aiTimeToSampleSelectorDelegate aiTimeToSampleSelector = ModuleImporter.Resolve<aiTimeToSampleSelectorDelegate>("aiTimeToSampleSelector");
-
-        public delegate void aiCleanupDelegate();
-        public static aiCleanupDelegate aiCleanup = ModuleImporter.Resolve<aiCleanupDelegate>("aiCleanup");
+        [DllImport(Abci.Lib)] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
+        [DllImport(Abci.Lib)] public static extern void aiCleanup();
     }
 }
