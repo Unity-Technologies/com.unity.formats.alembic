@@ -1,14 +1,12 @@
+if(ISPC_FOUND)
+    return()
+endif()
+
 include(CMakeParseArguments)
 
-option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
-set(ISPC "/usr/local/bin/ispc" CACHE PATH "Path to Intel ISPC")
-mark_as_advanced(FORCE ISPC)
+find_program(ISPC ispc)
 
-function(setup_ispc)
-    if(EXISTS ${ISPC})
-        return()
-    endif()
-    
+if (NOT EXISTS ${ISPC})
     set(ISPC_VERSION 1.9.2)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-linux")
@@ -29,7 +27,7 @@ function(setup_ispc)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMAND tar -xf ${ISPC_ARCHIVE_PATH}
     )
-endfunction()
+endif()
 
 # e.g:
 #add_ispc_targets(
@@ -71,3 +69,5 @@ function(add_ispc_targets)
         endif()
     endforeach()
 endfunction()
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ISPC DEFAULT_MSG ISPC)

@@ -1,5 +1,7 @@
+option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
+
 if(ENABLE_ISPC)
-    setup_ispc()
+    FIND_PACKAGE(ISPC REQUIRED)
 
     set(ISPC_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/ISPC)
     set(ISPC_HEADERS
@@ -29,11 +31,11 @@ if(ENABLE_ISPC)
 endif()
 
 target_link_libraries(abci
+    ${ALEMBIC_LIBRARY}
     ${OPENEXR_Half_LIBRARY}
     ${OPENEXR_Iex_LIBRARY}
     ${OPENEXR_IexMath_LIBRARY}
     ${HDF5_C_LIBRARIES}
-    ${ALEMBIC_LIBRARY}
 )
 install(TARGETS abci DESTINATION .)
 
