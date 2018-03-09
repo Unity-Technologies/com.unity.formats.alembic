@@ -1,5 +1,7 @@
+option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
+
 if(ENABLE_ISPC)
-    setup_ispc()
+    FIND_PACKAGE(ISPC REQUIRED)
 
     set(ISPC_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/ISPC)
     set(ISPC_HEADERS
