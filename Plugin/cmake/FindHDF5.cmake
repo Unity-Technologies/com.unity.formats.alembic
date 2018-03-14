@@ -29,8 +29,13 @@ endif()
 # need to find the *static* HDF5.
 find_library(STATIC_HDF5_C_LIBRARY NAMES libhdf5.a hdf5.lib)
 find_library(STATIC_LIBZ NAMES libz.a libz.lib)
-
 set(HDF5_C_LIBRARIES ${STATIC_HDF5_C_LIBRARY} ${STATIC_LIBZ})
+
+# On linux we need to link to libdl
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  find_library(LIBDL dl)
+  list(APPEND HDF5_C_LIBRARIES ${LIBDL})
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args("StaticHDF5" DEFAULT_MSG HDF5_C_LIBRARIES)

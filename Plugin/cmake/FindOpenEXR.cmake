@@ -24,7 +24,7 @@
 
 if (APPLE)
     find_path(OPENEXR_LIBRARY_DIR
-            libHalf.dylib
+            libHalf.dylib libHalf.a
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"
@@ -36,7 +36,7 @@ if (APPLE)
     )
 elseif (UNIX)
     find_path(OPENEXR_LIBRARY_DIR
-            libHalf.so
+            libHalf.so libHalf.a
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"
