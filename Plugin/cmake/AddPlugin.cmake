@@ -67,16 +67,24 @@ function(add_plugin name)
         add_library(${name}_test_lib ALIAS ${name})
     endif()
 
+    # With the GNU toolchain we can hide the symbols from static libraries
+    # we link in, which lets us save a bit of space after stripping.
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        target_link_libraries(${name} "-Wl,--exclude-libs,ALL")
+    endif()
 
     if(ENABLE_DEPLOY)
         if(ENABLE_OSX_BUNDLE)
             SET(target_filename "${name}.bundle")
+            SET(strip_filename "${name}.bundle/Contents/MacOS/${name}")
         else()
             SET(target_filename $<TARGET_FILE:${name}>)
+            SET(strip_filename $<TARGET_FILE_NAME:${name}>)
         endif()
         add_custom_target("Deploy${name}" ALL
-            COMMAND rm -rf ${arg_PLUGINS_DIR}/${target_filename}
-            COMMAND cp -r ${target_filename} ${arg_PLUGINS_DIR}
+            COMMAND rm -rf "${arg_PLUGINS_DIR}/${target_filename}"
+            COMMAND cp -rp "${target_filename}" "${arg_PLUGINS_DIR}"
+            COMMAND strip -x "${arg_PLUGINS_DIR}/${strip_filename}"
             DEPENDS ${name}
         )
     endif()
