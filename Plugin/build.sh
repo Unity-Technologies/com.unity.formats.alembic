@@ -29,7 +29,7 @@ message() {
 
 # Find ISPC, either in the path or unpack it and put it in the path
 message "ispc"
-if command -v ipsc > /dev/null 2>&1 ; then
+if command -v ispc > /dev/null 2>&1 ; then
 	echo "using built-in ispc"
 else
 	if [ ! -d "${ISPC}" ] ; then
