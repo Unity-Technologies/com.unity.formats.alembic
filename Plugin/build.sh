@@ -112,8 +112,7 @@ else
 		-DHDF5_USE_STATIC_LIBRARIES=ON \
 		-DUSE_STATIC_HDF5=ON \
 		-DHDF5_LIBRARIES="${builddir}/lib/libhdf5.a;-ldl;-lpthread" \
-		-DHDF5_ROOT="${builddir}" \
-		-DCMAKE_PREFIX_PATH="${builddir}"
+		-DHDF5_ROOT="${builddir}"
 	make -j4
 	make test
 	make install
@@ -131,9 +130,7 @@ else
 		-DCMAKE_INSTALL_PREFIX="${builddir}" \
 		-DCMAKE_PREFIX_PATH="${builddir}" \
 		-DALEMBIC_DIR="${buildir}" \
-		-DUSE_HDF5=ON \
 		-DHDF5_USE_STATIC_LIBRARIES=ON \
-		-DUSE_STATIC_HDF5=ON \
 		-DHDF5_LIBRARIES="${builddir}/lib/libhdf5.a;-ldl;-lpthread" \
 		-DHDF5_ROOT="${builddir}" \
 		-DUSE_STATIC=ON
