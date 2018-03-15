@@ -1,6 +1,10 @@
 # Changes in Alembic for Unity
 
-## [0.0.9-preview] - 2018-03-13
+## [0.0.10-preview] - 2018-03-15
+
+- Update licensing information
+
+## [0.0.9-preview] - 2018-03-15
 
 - Document the package
 - Fix warnings about missing .meta files
