@@ -90,7 +90,7 @@ ENDCG
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma target 4.5
+            #pragma target 3.0
             ENDCG
         }
     }
