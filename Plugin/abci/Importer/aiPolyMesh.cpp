@@ -186,31 +186,25 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         data.extents = bbmax - bbmin;
     }
     if (data.velocities) {
-        // velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
-        if (summary.has_velocities && !m_velocities_ref.empty()) {
+        // note: velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
+        if (!m_velocities_ref.empty())
             m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
-        }
-        else {
+        else
             memset(data.velocities, 0, split.vertex_count * sizeof(abcV3));
-        }
     }
 
     if (data.normals) {
-        if (summary.has_normals) {
+        if (!m_normals_ref.empty())
             m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
-        }
-        else {
+        else
             memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
-        }
     }
 
     if (data.tangents) {
-        if(summary.has_tangents) {
+        if(!m_tangents_ref.empty())
             m_tangents_ref.copy_to(data.tangents, split.vertex_count, split.vertex_offset);
-        }
-        else {
+        else
             memset(data.tangents, 0, split.vertex_count * sizeof(abcV4));
-        }
     }
 
     if (data.uv0) {
@@ -739,17 +733,17 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
 
-    bool weld_normals = false;
-    bool weld_uv0 = false;
-    bool weld_uv1 = false;
-    bool weld_colors = false;
+    bool has_valid_normals = false;
+    bool has_valid_uv0 = false;
+    bool has_valid_uv1 = false;
+    bool has_valid_colors = false;
 
     if (sample.m_normals_sp.valid() && !summary.compute_normals) {
         IArray<abcV3> src{ sample.m_normals_sp.getVals()->get(), sample.m_normals_sp.getVals()->size() };
         auto& dst = summary.constant_normals ? m_constant_normals : sample.m_normals;
 
-        weld_normals = true;
-        if (sample.m_normals_sp.isIndexed() && sample.m_normals_sp.getIndices()->size() > 0) {
+        has_valid_normals = true;
+        if (sample.m_normals_sp.isIndexed() && sample.m_normals_sp.getIndices()->size() == refiner.indices.size()) {
             IArray<int> indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV3>(src, indices, dst, topology.m_remap_normals);
         }
@@ -761,7 +755,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
         else {
             DebugLog("Invalid attribute");
-            weld_normals = false;
+            has_valid_normals = false;
         }
     }
 
@@ -769,8 +763,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         IArray<abcV2> src{ sample.m_uv0_sp.getVals()->get(), sample.m_uv0_sp.getVals()->size() };
         auto& dst = summary.constant_uv0 ? m_constant_uv0 : sample.m_uv0;
 
-        weld_uv0 = true;
-        if (sample.m_uv0_sp.isIndexed() && sample.m_uv0_sp.getIndices()->size() > 0) {
+        has_valid_uv0 = true;
+        if (sample.m_uv0_sp.isIndexed() && sample.m_uv0_sp.getIndices()->size() == refiner.indices.size()) {
             IArray<int> indices{ (int*)sample.m_uv0_sp.getIndices()->get(), sample.m_uv0_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV2>(src, indices, dst, topology.m_remap_uv0);
         }
@@ -782,7 +776,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
         else {
             DebugLog("Invalid attribute");
-            weld_uv0 = false;
+            has_valid_uv0 = false;
         }
     }
 
@@ -790,8 +784,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         IArray<abcV2> src{ sample.m_uv1_sp.getVals()->get(), sample.m_uv1_sp.getVals()->size() };
         auto& dst = summary.constant_uv1 ? m_constant_uv1 : sample.m_uv1;
 
-        weld_uv1 = true;
-        if (sample.m_uv1_sp.isIndexed() && sample.m_uv1_sp.getIndices()->size() > 0) {
+        has_valid_uv1 = true;
+        if (sample.m_uv1_sp.isIndexed() && sample.m_uv1_sp.getIndices()->size() == refiner.indices.size()) {
             IArray<int> uv1_indices{ (int*)sample.m_uv1_sp.getIndices()->get(), sample.m_uv1_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
         }
@@ -803,7 +797,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
         else {
             DebugLog("Invalid attribute");
-            weld_uv1 = false;
+            has_valid_uv1 = false;
         }
     }
 
@@ -811,8 +805,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         IArray<abcC4> src{ sample.m_colors_sp.getVals()->get(), sample.m_colors_sp.getVals()->size() };
         auto& dst = summary.constant_colors ? m_constant_colors : sample.m_colors;
 
-        weld_colors = true;
-        if (sample.m_colors_sp.isIndexed() && sample.m_colors_sp.getIndices()->size() > 0) {
+        has_valid_colors = true;
+        if (sample.m_colors_sp.isIndexed() && sample.m_colors_sp.getIndices()->size() == refiner.indices.size()) {
             IArray<int> colors_indices{ (int*)sample.m_colors_sp.getIndices()->get(), sample.m_colors_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcC4>(src, colors_indices, dst, topology.m_remap_colors);
         }
@@ -824,7 +818,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
         else {
             DebugLog("Invalid attribute");
-            weld_colors = false;
+            has_valid_colors = false;
         }
     }
 
@@ -869,20 +863,29 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_points_ref = points;
     }
 
-    if (weld_normals) {
+    if (has_valid_normals) {
         sample.m_normals_ref = !m_constant_normals.empty() ? m_constant_normals : sample.m_normals;
         if (config.swap_handedness)
             SwapHandedness(sample.m_normals_ref.data(), (int)sample.m_normals_ref.size());
     }
+    else {
+        sample.m_normals_ref.reset();
+    }
 
-    if (weld_uv0)
+    if (has_valid_uv0)
         sample.m_uv0_ref = !m_constant_uv0.empty() ? m_constant_uv0 : sample.m_uv0;
+    else
+        sample.m_uv0_ref.reset();
 
-    if (weld_uv1)
+    if (has_valid_uv1)
         sample.m_uv1_ref = !m_constant_uv1.empty() ? m_constant_uv1 : sample.m_uv1;
+    else
+        sample.m_uv1_ref.reset();
 
-    if (weld_colors)
+    if (has_valid_colors)
         sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
+    else
+        sample.m_colors_ref.reset();
 
     if (summary.constant_normals && summary.compute_normals) {
         const auto &indices = topology.m_refiner.new_indices_tri;
