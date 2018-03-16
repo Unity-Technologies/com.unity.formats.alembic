@@ -183,6 +183,7 @@ abciAPI aeProperty* aeNewProperty(aeSchema *obj, const char *name, aePropertyTyp
     case aePropertyType::Float3Array:    return obj->newProperty<abcFloat3ArrayProperty>(name); break;
     case aePropertyType::Float4Array:    return obj->newProperty<abcFloat4ArrayProperty>(name); break;
     case aePropertyType::Float4x4Array:  return obj->newProperty<abcFloat4x4ArrayProperty>(name); break;
+    default: break;
     }
     DebugLog("aeNewProperty(): unknown type");
     return nullptr;

@@ -274,6 +274,7 @@ aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyH
     case aiPropertyType::Float3Array: return aiMakePropertyImpl<abcFloat3ArrayProperty>::make(schema, cprop, header.getName());
     case aiPropertyType::Float4Array: return aiMakePropertyImpl<abcFloat4ArrayProperty>::make(schema, cprop, header.getName());
     case aiPropertyType::Float4x4Array: return aiMakePropertyImpl<abcFloat4x4ArrayProperty>::make(schema, cprop, header.getName());
+    default: break;
     }
     return nullptr;
 }
