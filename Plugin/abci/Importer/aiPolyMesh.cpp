@@ -749,7 +749,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         auto& dst = summary.constant_normals ? m_constant_normals : sample.m_normals;
 
         weld_normals = true;
-        if (sample.m_normals_sp.isIndexed()) {
+        if (sample.m_normals_sp.isIndexed() && sample.m_normals_sp.getIndices()->size() > 0) {
             IArray<int> indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV3>(src, indices, dst, topology.m_remap_normals);
         }
@@ -770,7 +770,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         auto& dst = summary.constant_uv0 ? m_constant_uv0 : sample.m_uv0;
 
         weld_uv0 = true;
-        if (sample.m_uv0_sp.isIndexed()) {
+        if (sample.m_uv0_sp.isIndexed() && sample.m_uv0_sp.getIndices()->size() > 0) {
             IArray<int> indices{ (int*)sample.m_uv0_sp.getIndices()->get(), sample.m_uv0_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV2>(src, indices, dst, topology.m_remap_uv0);
         }
@@ -791,7 +791,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         auto& dst = summary.constant_uv1 ? m_constant_uv1 : sample.m_uv1;
 
         weld_uv1 = true;
-        if (sample.m_uv1_sp.isIndexed()) {
+        if (sample.m_uv1_sp.isIndexed() && sample.m_uv1_sp.getIndices()->size() > 0) {
             IArray<int> uv1_indices{ (int*)sample.m_uv1_sp.getIndices()->get(), sample.m_uv1_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
         }
@@ -812,7 +812,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         auto& dst = summary.constant_colors ? m_constant_colors : sample.m_colors;
 
         weld_colors = true;
-        if (sample.m_colors_sp.isIndexed()) {
+        if (sample.m_colors_sp.isIndexed() && sample.m_colors_sp.getIndices()->size() > 0) {
             IArray<int> colors_indices{ (int*)sample.m_colors_sp.getIndices()->get(), sample.m_colors_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcC4>(src, colors_indices, dst, topology.m_remap_colors);
         }
