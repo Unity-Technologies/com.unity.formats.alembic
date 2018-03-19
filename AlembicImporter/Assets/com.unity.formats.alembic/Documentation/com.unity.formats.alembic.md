@@ -4,7 +4,7 @@ Use the com.unity.formats.alembic package to import [Alembic](http://www.alembic
 
 ## Requirements
 
-Version 0.1.0-preview is compatible with Unity Editor 2018.1. See below to use Alembic for Unity in an earlier version of Unity.
+Version 0.1.1-preview is compatible with Unity Editor 2018.1. See below to use Alembic for Unity in an earlier version of Unity.
 
 The package is available on 64-bit desktop platforms:
 * Windows 10
@@ -13,7 +13,7 @@ The package is available on 64-bit desktop platforms:
 
 ## Known Limitations
 
-Version 0.1.0-preview is a preview release. Expect APIs and functionality to change in incompatible ways.
+Version 0.1.1-preview is a preview release. Expect APIs and functionality to change in incompatible ways.
 
 We welcome hearing about your experience on [this forum thread](https://forum.unity.com/threads/alembic-for-unity.521649/).
 
@@ -24,7 +24,7 @@ Because Alembic for Unity is in preview, to install the package, you will need t
 ```
 {
     "dependencies": {
-        "com.unity.formats.alembic": "0.1.0-preview"
+        "com.unity.formats.alembic": "0.1.1-preview"
     }
 }
 ```
@@ -52,4 +52,4 @@ To animate using Timeline, create a timeline and animate the time:
 
 |Date|Reason|
 |---|---|
-|2018-03-13|Created. Matches package version 0.1.0-preview.|
+|2018-03-13|Created. Matches package version 0.1.1-preview.|
