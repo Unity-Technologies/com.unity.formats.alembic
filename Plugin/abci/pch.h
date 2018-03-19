@@ -12,7 +12,10 @@
 #include <functional>
 #include <limits>
 #include <sstream>
+#include <fstream>
 #include <type_traits>
+#include <locale>
+#include <codecvt>
 #include <Alembic/AbcCoreAbstract/All.h>
 #include <Alembic/AbcCoreHDF5/All.h>
 #include <Alembic/AbcCoreOgawa/All.h>
