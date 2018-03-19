@@ -198,56 +198,54 @@ void aiContext::reset()
 bool aiContext::load(const char *in_path)
 {
     auto path = NormalizePath(in_path);
+    auto wpath = L(in_path);
 
-    DebugLog("aiContext::load: '%s'", path.c_str());
+    DebugLogW(L"aiContext::load: '%s'", wpath.c_str());
     if (path == m_path && m_archive) {
         DebugLog("Context already loaded for gameObject with id %d", m_uid);
         return true;
     }
 
-    DebugLog("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
-
     reset();
-
-    if (path.length() == 0) {
+    if (path.empty()) {
         return false;
     }
 
     m_path = path;
-    
     if (!m_archive.valid()) {
-        DebugLog("Archive '%s' not yet opened", in_path);
-
         try {
-            DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
-
-            // open archive with wstring path and pass it to Abc::IArchive (Abc::IArchive can not use wstring path...)
-            auto wpath = L(path);
-            auto ifs = new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary);
-            m_streams.push_back(ifs);
+            // Abc::IArchive doesn't accept wide string path. so create file stream with wide string path and pass it.
+            // (VisualC++'s std::ifstream accepts wide string)
+            m_streams.push_back(
+#ifdef WIN32
+                new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary)
+#else
+                new std::ifstream(path.c_str(), std::ios::in | std::ios::binary)
+#endif
+            );
 
             Alembic::AbcCoreOgawa::ReadArchive archive_reader(m_streams);
             m_archive = Abc::IArchive(archive_reader(m_path), Abc::kWrapExisting, Abc::ErrorHandler::kThrowPolicy);
+            DebugLog("Successfully opened Ogawa archive");
         }
         catch (Alembic::Util::Exception e) {
-            DebugLog("Failed (%s)", e.what());
-
-            // hdf5 archive can not use external stream
-            // (that means if path contains wide characters, we can't open it. I couldn't find solution..)
+            // HDF5 archive doesn't accept external stream. so close it.
+            // (that means if path contains wide characters, it can't be opened. I couldn't find solution..)
             for (auto s : m_streams) { delete s; }
             m_streams.clear();
 
             try {
-                DebugLog("Trying to open AbcCoreHDF5::ReadArchive...");
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
+                DebugLog("Successfully opened HDF5 archive");
             }
             catch (Alembic::Util::Exception e2) {
-                DebugLog("Failed (%s)", e2.what());
+                auto message = L(e2.what());
+                DebugLogW(L"Failed to open archive: %s", message.c_str());
             }
         }
     }
     else {
-        DebugLog("Archive '%s' already opened", in_path);
+        DebugLogW(L"Archive '%s' already opened", wpath.c_str());
     }
 
     if (m_archive.valid()) {
@@ -260,12 +258,9 @@ bool aiContext::load(const char *in_path)
         for (int i = 0; i < num_time_samplings; ++i) {
             m_timesamplings.emplace_back(aiCreateTimeSampling(m_archive, i));
         }
-
-        DebugLog("Succeeded");
         return true;
     }
     else {
-        DebugError("Invalid archive '%s'", in_path);
         reset();
         return false;
     }

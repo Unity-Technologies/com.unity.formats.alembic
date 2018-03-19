@@ -61,7 +61,6 @@ aiMeshTopology::aiMeshTopology()
 
 void aiMeshTopology::clear()
 {
-    DebugLog("Topology::clear()");
     m_indices_sp.reset();
     m_counts_sp.reset();
     m_faceset_sps.clear();

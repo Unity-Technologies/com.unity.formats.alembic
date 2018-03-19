@@ -27,13 +27,20 @@
 
 #if defined(aiDebug)
     void aiLogPrint(const char* fmt, ...);
-    #define DebugLog(...)       aiLogPrint("[Log] " __VA_ARGS__)
-    #define DebugWarning(...)   aiLogPrint("[Warning]" __VA_ARGS__)
-    #define DebugError(...)     aiLogPrint("[Error] "  __VA_ARGS__)
+    void aiLogPrint(const wchar_t* fmt, ...);
+    #define DebugLog(...)       aiLogPrint("abci Log: " __VA_ARGS__)
+    #define DebugWarning(...)   aiLogPrint("abci Warning: " __VA_ARGS__)
+    #define DebugError(...)     aiLogPrint("abci Error: "  __VA_ARGS__)
+    #define DebugLogW(...)      aiLogPrint(L"abci Log: " __VA_ARGS__)
+    #define DebugWarningW(...)  aiLogPrint(L"abci Warning: " __VA_ARGS__)
+    #define DebugErrorW(...)    aiLogPrint(L"abci Error: "  __VA_ARGS__)
 #else
     #define DebugLog(...)
     #define DebugWarning(...)
     #define DebugError(...)
+    #define DebugLogW(...)
+    #define DebugWarningW(...)
+    #define DebugErrorW(...)
 #endif
 
 #ifdef _WIN32
