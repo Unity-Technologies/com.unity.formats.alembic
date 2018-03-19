@@ -1,6 +1,6 @@
 # About Alembic for Unity
 
-Use the com.unity.alembic package to import [Alembic](http://www.alembic.io/) files into your Unity scene. This lets you bring in for example facial animation and cloth simulation from other software packages and have it reproduce exactly the same way in Unity.
+Use the com.unity.formats.alembic package to import [Alembic](http://www.alembic.io/) files into your Unity scene. This lets you bring in for example facial animation and cloth simulation from other software packages and have it reproduce exactly the same way in Unity.
 
 ## Requirements
 
@@ -19,12 +19,12 @@ We welcome hearing about your experience on [this forum thread](https://forum.un
 
 # Installing Alembic for Unity
 
-Because Alembic for Unity is in preview, to install the package, you will need to edit your [project manifest](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@1.8/manual/index.html#PackManManifestsProject). Add a reference to the `com.unity.alembic` package. For example:
+Because Alembic for Unity is in preview, to install the package, you will need to edit your [project manifest](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@1.8/manual/index.html#PackManManifestsProject). Add a reference to the `com.unity.formats.alembic` package. For example:
 
 ```
 {
     "dependencies": {
-        "com.unity.alembic": "0.1.0-preview"
+        "com.unity.formats.alembic": "0.1.0-preview"
     }
 }
 ```

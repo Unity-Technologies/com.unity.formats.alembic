@@ -1,5 +1,5 @@
 {
-	"name": "com.unity.alembic",
+	"name": "com.unity.formats.alembic",
 	"displayName":"Alembic for Unity",
 	"version": "0.1.0-preview",
 	"unity": "2018.1",

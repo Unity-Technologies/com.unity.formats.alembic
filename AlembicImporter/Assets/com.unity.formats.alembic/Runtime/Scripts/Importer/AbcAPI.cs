@@ -253,13 +253,13 @@ namespace UTJ.Alembic
         aiPropertyType type;
     }
 
-    static class Abci {
+    internal static class Abci {
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
-        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
+        internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
 #elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
-        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/libabci.so";
+        internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/libabci.so";
 #elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        internal const string Lib = "Packages/com.unity.alembic/Runtime/Plugins/x86_64/abci.dll";
+        internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll";
 #endif
     }
 
