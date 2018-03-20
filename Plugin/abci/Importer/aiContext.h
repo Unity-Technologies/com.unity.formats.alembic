@@ -49,9 +49,6 @@ private:
 class aiContext
 {
 public:
-    static std::string normalizePath(const char *path);
-
-public:
     explicit aiContext(int uid=-1);
     ~aiContext();
 
@@ -85,6 +82,8 @@ private:
     void reset();
 
     std::string m_path;
+    std::vector<std::istream*> m_streams;
+
     Abc::IArchive m_archive;
     std::unique_ptr<aiObject> m_top_node;
     std::vector<aiTimeSamplingPtr> m_timesamplings;

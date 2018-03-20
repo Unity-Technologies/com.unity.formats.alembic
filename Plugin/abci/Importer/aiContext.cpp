@@ -5,6 +5,42 @@
 #include "aiAsync.h"
 
 
+static std::wstring L(const std::string& s)
+{
+    return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(s);
+}
+
+static std::string S(const std::wstring& w)
+{
+    return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().to_bytes(w);
+}
+
+static std::string NormalizePath(const char *in_path)
+{
+    std::wstring path;
+
+    if (in_path != nullptr) {
+        path = L(in_path);
+
+#ifdef _WIN32
+        size_t n = path.length();
+        for (size_t i = 0; i < n; ++i) {
+            auto c = path[i];
+            if (c == L'\\') {
+                path[i] = L'/';
+            }
+            else if (c >= L'A' && c <= L'Z') {
+                path[i] = L'a' + (c - L'A');
+            }
+        }
+#endif
+    }
+
+    return S(path);
+}
+
+
+
 aiContextManager aiContextManager::s_instance;
 
 aiContext* aiContextManager::getContext(int uid)
@@ -32,7 +68,7 @@ void aiContextManager::destroyContext(int uid)
 
 void aiContextManager::destroyContextsWithPath(const char* asset_path)
 {
-    auto path = aiContext::normalizePath(asset_path);
+    auto path = NormalizePath(asset_path);
     for (auto it = s_instance.m_contexts.begin(); it != s_instance.m_contexts.end();) {
         if (it->second->getPath() == path) {
             DebugLog("Unregister context for gameObject with ID %s", it->second->getPath().c_str());
@@ -50,31 +86,6 @@ aiContextManager::~aiContextManager()
         DebugWarning("%lu remaining context(s) registered", m_contexts.size());
     }
     m_contexts.clear();
-}
-
-
-std::string aiContext::normalizePath(const char *in_path)
-{
-    std::string path;
-
-    if (in_path != nullptr) {
-        path = in_path;
-
-#ifdef _WIN32
-        size_t n = path.length();
-        for (size_t i = 0; i < n; ++i) {
-            char c = path[i];
-            if (c == '\\') {
-                path[i] = '/';
-            }
-            else if (c >= 'A' && c <= 'Z') {
-                path[i] = 'a' + (c - 'A');
-            }
-        }
-#endif
-    }
-
-    return path;
 }
 
 
@@ -176,50 +187,65 @@ void aiContext::reset()
     m_top_node.reset();
     m_timesamplings.clear();
     m_archive.reset();
-    m_path = "";
+
+    m_path.clear();
+    for (auto s : m_streams) { delete s; }
+    m_streams.clear();
+
     // m_config is not reset intentionally
 }
 
 bool aiContext::load(const char *in_path)
 {
-    std::string path = normalizePath(in_path);
+    auto path = NormalizePath(in_path);
+    auto wpath = L(in_path);
 
-    DebugLog("aiContext::load: '%s'", path.c_str());
+    DebugLogW(L"aiContext::load: '%s'", wpath.c_str());
     if (path == m_path && m_archive) {
         DebugLog("Context already loaded for gameObject with id %d", m_uid);
         return true;
     }
 
-    DebugLog("Alembic file path changed from '%s' to '%s'. Reset context.", m_path.c_str(), path.c_str());
-
     reset();
-
-    if (path.length() == 0) {
+    if (path.empty()) {
         return false;
     }
 
     m_path = path;
-    
     if (!m_archive.valid()) {
-        DebugLog("Archive '%s' not yet opened", in_path);
-
         try {
-            DebugLog("Trying to open AbcCoreOgawa::ReadArchive...");
-            m_archive = Abc::IArchive(AbcCoreOgawa::ReadArchive(std::thread::hardware_concurrency()), path);
+            // Abc::IArchive doesn't accept wide string path. so create file stream with wide string path and pass it.
+            // (VisualC++'s std::ifstream accepts wide string)
+            m_streams.push_back(
+#ifdef WIN32
+                new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary)
+#else
+                new std::ifstream(path.c_str(), std::ios::in | std::ios::binary)
+#endif
+            );
+
+            Alembic::AbcCoreOgawa::ReadArchive archive_reader(m_streams);
+            m_archive = Abc::IArchive(archive_reader(m_path), Abc::kWrapExisting, Abc::ErrorHandler::kThrowPolicy);
+            DebugLog("Successfully opened Ogawa archive");
         }
         catch (Alembic::Util::Exception e) {
-            DebugLog("Failed (%s)", e.what());
+            // HDF5 archive doesn't accept external stream. so close it.
+            // (that means if path contains wide characters, it can't be opened. I couldn't find solution..)
+            for (auto s : m_streams) { delete s; }
+            m_streams.clear();
+
             try {
-                DebugLog("Trying to open AbcCoreHDF5::ReadArchive...");
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
+                DebugLog("Successfully opened HDF5 archive");
             }
             catch (Alembic::Util::Exception e2) {
-                DebugLog("Failed (%s)", e2.what());
+                auto message = L(e2.what());
+                DebugLogW(L"Failed to open archive: %s", message.c_str());
             }
         }
     }
     else {
-        DebugLog("Archive '%s' already opened", in_path);
+        DebugLogW(L"Archive '%s' already opened", wpath.c_str());
     }
 
     if (m_archive.valid()) {
@@ -232,12 +258,9 @@ bool aiContext::load(const char *in_path)
         for (int i = 0; i < num_time_samplings; ++i) {
             m_timesamplings.emplace_back(aiCreateTimeSampling(m_archive, i));
         }
-
-        DebugLog("Succeeded");
         return true;
     }
     else {
-        DebugError("Invalid archive '%s'", in_path);
         reset();
         return false;
     }

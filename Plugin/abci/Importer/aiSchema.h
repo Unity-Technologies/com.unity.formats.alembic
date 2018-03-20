@@ -142,7 +142,7 @@ public:
             m_async_load.m_cook = body;
     }
 
-    virtual void waitAsync()
+    void waitAsync() override
     {
         m_async_load.wait();
     }

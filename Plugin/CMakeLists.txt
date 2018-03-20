@@ -9,6 +9,6 @@ include(AddPlugin)
 include(ISPC)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -Wno-deprecated-register -Wno-return-type-c-linkage")
 
 add_subdirectory(abci)
