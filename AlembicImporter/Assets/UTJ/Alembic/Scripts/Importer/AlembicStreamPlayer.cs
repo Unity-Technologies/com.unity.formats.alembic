@@ -54,7 +54,7 @@ namespace UTJ.Alembic
             forceUpdate = true;
         }
 
-        void Update()
+        public void Update()
         {
             if (abcStream == null || streamDescriptor == null)
                 return;
