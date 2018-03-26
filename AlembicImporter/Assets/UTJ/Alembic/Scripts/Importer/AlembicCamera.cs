@@ -19,6 +19,9 @@ namespace UTJ.Alembic
             m_abcSchema = (aiCamera)abcSchema;
 
             m_camera = GetOrAddComponent<Camera>();
+
+            // flip forward direction (camera in Alembic has inverted forward direction)
+            abcTreeNode.gameObject.transform.localEulerAngles = new Vector3(0, 180, 0);
         }
 
         public override void AbcSyncDataEnd()
@@ -31,7 +34,6 @@ namespace UTJ.Alembic
             if (!abcTreeNode.stream.ignoreVisibility)
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
-            abcTreeNode.gameObject.transform.forward = -abcTreeNode.gameObject.transform.parent.forward;
             m_camera.fieldOfView = m_abcData.fieldOfView;
 
             if (!m_ignoreClippingPlanes)
