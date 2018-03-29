@@ -266,19 +266,21 @@ void aiPolyMeshSample::waitAsync()
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
     : super(parent, abc)
 {
-    // find color and uv1 params (Maya's extension)
+    // find vertex color and additional uv params
     auto geom_params = m_schema.getArbGeomParams();
     if (geom_params.valid()) {
         size_t num_geom_params = geom_params.getNumProperties();
         for (size_t i = 0; i < num_geom_params; ++i) {
             auto& header = geom_params.getPropertyHeader(i);
-            if (header.getName() == "rgba" && AbcGeom::IC4fGeomParam::matches(header)) {
-                // colors
-                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, "rgba");
+
+            // vertex color
+            if (AbcGeom::IC4fGeomParam::matches(header)) {
+                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
             }
-            else if (header.getName() == "uv1" && AbcGeom::IV2fGeomParam::matches(header)) {
-                // uv1
-                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, "uv1");
+
+            // uv
+            if (AbcGeom::IV2fGeomParam::matches(header)) {
+                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, header.getName());
             }
         }
     }
