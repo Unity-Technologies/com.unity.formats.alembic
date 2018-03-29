@@ -675,12 +675,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     else if (summary.compute_normals && (m_sample_index_changed || summary.interpolate_points)) {
         if (sample.m_points_ref.empty()) {
             DebugError("something is wrong!!");
+            sample.m_normals_ref.reset();
         }
-        const auto &indices = topology.m_refiner.new_indices_tri;
-        sample.m_normals.resize_discard(sample.m_points_ref.size());
-        GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
-            (int)sample.m_points_ref.size(), (int)indices.size() / 3);
-        sample.m_normals_ref = sample.m_normals;
+        else {
+            const auto &indices = topology.m_refiner.new_indices_tri;
+            sample.m_normals.resize_discard(sample.m_points_ref.size());
+            GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
+                (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            sample.m_normals_ref = sample.m_normals;
+        }
     }
 
     // tangents
@@ -690,12 +693,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     else if (summary.compute_tangents && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals)) {
         if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
             DebugError("something is wrong!!");
+            sample.m_tangents_ref.reset();
         }
-        const auto &indices = topology.m_refiner.new_indices_tri;
-        sample.m_tangents.resize_discard(sample.m_points_ref.size());
-        GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
-            indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
-        sample.m_tangents_ref = sample.m_tangents;
+        else {
+            const auto &indices = topology.m_refiner.new_indices_tri;
+            sample.m_tangents.resize_discard(sample.m_points_ref.size());
+            GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
+                indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            sample.m_tangents_ref = sample.m_tangents;
+        }
     }
 
     // uv0
