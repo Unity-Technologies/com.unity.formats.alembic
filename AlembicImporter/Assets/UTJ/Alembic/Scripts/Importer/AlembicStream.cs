@@ -127,7 +127,7 @@ namespace UTJ.Alembic
 
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
-            m_config.swapFaceWinding = settings.swapFaceWinding;
+            m_config.flipFaces = settings.flipFaces;
             m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
             m_config.scaleFactor = settings.scaleFactor;
             m_config.normalsMode = settings.normals;

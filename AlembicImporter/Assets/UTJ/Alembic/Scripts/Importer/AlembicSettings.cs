@@ -10,7 +10,7 @@ namespace UTJ.Alembic
         [SerializeField] public aiAspectRatioMode cameraAspectRatio = aiAspectRatioMode.CameraAperture;
         [SerializeField] public float scaleFactor = 0.01f;
         [SerializeField] public bool swapHandedness = true;
-        [SerializeField] public bool swapFaceWinding = false;
+        [SerializeField] public bool flipFaces = false;
         [SerializeField] public bool turnQuadEdges = false;
         [SerializeField] public bool interpolateSamples = true;
 

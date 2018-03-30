@@ -314,7 +314,7 @@ namespace UTJ.Alembic
         bool AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
         {
             int n = ts.sampleCount;
-            if (n == -1)
+            if (n <= 0)
                 return false;
 
             var events = new AnimationEvent[n];

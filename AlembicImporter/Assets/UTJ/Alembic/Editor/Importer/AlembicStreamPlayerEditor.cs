@@ -86,13 +86,16 @@ namespace UTJ.Alembic
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("ignoreVisibility"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("asyncLoad"));
 
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Space(16);
-                if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                if (PrefabUtility.GetPrefabType(streamPlayer.gameObject) == PrefabType.DisconnectedModelPrefabInstance)
                 {
-                    streamPlayer.LoadStream(true);
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Space(16);
+                    if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                    {
+                        streamPlayer.LoadStream(true);
+                    }
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
                 EditorGUI.indentLevel--;
             }
 

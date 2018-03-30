@@ -33,20 +33,21 @@ namespace UTJ.Alembic
             if (m_foldMeshOptions)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapFaceWinding"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "flipFaces"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "turnQuadEdges"));
                 EditorGUILayout.Separator();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPointPolygon"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importLinePolygon"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
-                EditorGUILayout.Separator();
+                // revive this if needed
+                //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPointPolygon"));
+                //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importLinePolygon"));
+                //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
+                //EditorGUILayout.Separator();
                 EditorGUI.indentLevel--;
             }
 
             m_foldComponents = EditorGUILayout.Foldout(m_foldComponents, "Components");
             if(m_foldComponents) {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importXform"));
+                //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importXform"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importCamera"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPolyMesh"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPoints"));

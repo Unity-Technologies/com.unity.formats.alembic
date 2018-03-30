@@ -87,7 +87,7 @@ namespace UTJ.Alembic
         public float vertexMotionScale;
         public int splitUnit;
         public Bool swapHandedness;
-        public Bool swapFaceWinding;
+        public Bool flipFaces;
         public Bool interpolateSamples;
         public Bool turnQuadEdges;
         public Bool asyncLoad;
@@ -108,7 +108,7 @@ namespace UTJ.Alembic
             splitUnit = 65000;
 #endif
             swapHandedness = true;
-            swapFaceWinding = false;
+            flipFaces = false;
             interpolateSamples = true;
             turnQuadEdges = false;
             asyncLoad = true;
