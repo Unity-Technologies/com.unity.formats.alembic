@@ -1,18 +1,31 @@
-job:
-  only:
-    - /^v\d*$/
-  except:
-    - branches
+# build needs to be able to find OpenEXR(libHalf.dylib libHalf.a), HDF5(hdf5.a) and Alembic (libAlembic.a) installed.
 
 image: node:6.10.0
 
 stages:
+  - build
+  - test 
   - push_to_packman_staging
+
+build:
+  stage: build
+  script: 
+  - rm -rf build 
+  - mkdir build
+  - cd build
+  - cmake ../Plugin
+  - make
+
+test:
+  stage: test
+  script: make test
 
 push_to_packman_staging:
   stage: push_to_packman_staging
   only:
-    - tags
+    - /^v\d*$/
+  except:
+    - branches
   script:
     - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
     - npm publish
