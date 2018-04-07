@@ -10,6 +10,10 @@ To publish you also need:
 6. Get npm for your platform.
 
 
+NOTE: source tree requires submodules
+
+    git submodule update --init --recursive
+
 ====================
 Building on Windows:
 ====================
