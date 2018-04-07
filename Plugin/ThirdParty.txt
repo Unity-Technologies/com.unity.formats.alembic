@@ -1,0 +1,421 @@
+total 0
+drwxr-xr-x  3 inwoods  staff  102  7 Apr 18:37 .
+drwxr-xr-x  6 inwoods  staff  204  7 Apr 15:45 ..
+drwxr-xr-x  3 inwoods  staff  102  7 Apr 17:43 Deploy
+
+external/ThirdParty/Deploy:
+total 0
+drwxr-xr-x  3 inwoods  staff  102  7 Apr 17:43 .
+drwxr-xr-x  3 inwoods  staff  102  7 Apr 18:37 ..
+drwxr-xr-x  6 inwoods  staff  204  7 Apr 17:43 MacOS
+
+external/ThirdParty/Deploy/MacOS:
+total 0
+drwxr-xr-x   6 inwoods  staff   204  7 Apr 17:43 .
+drwxr-xr-x   3 inwoods  staff   102  7 Apr 17:43 ..
+drwxr-xr-x   9 inwoods  staff   306  7 Apr 17:43 bin
+drwxr-xr-x  78 inwoods  staff  2652  7 Apr 17:43 include
+drwxr-xr-x  17 inwoods  staff   578  7 Apr 17:43 lib
+drwxr-xr-x   6 inwoods  staff   204  7 Apr 17:43 share
+
+external/ThirdParty/Deploy/MacOS/bin:
+total 72320
+drwxr-xr-x  9 inwoods  staff      306  7 Apr 17:43 .
+drwxr-xr-x  6 inwoods  staff      204  7 Apr 17:43 ..
+-rwxr-xr-x  1 inwoods  staff  5041652  7 Apr 17:43 abcconvert
+-rwxr-xr-x  1 inwoods  staff  5072756  7 Apr 17:43 abcdiff
+-rwxr-xr-x  1 inwoods  staff  4987372  7 Apr 17:43 abcecho
+-rwxr-xr-x  1 inwoods  staff  5460156  7 Apr 17:43 abcechobounds
+-rwxr-xr-x  1 inwoods  staff  5043696  7 Apr 17:43 abcls
+-rwxr-xr-x  1 inwoods  staff  6408248  7 Apr 17:43 abcstitcher
+-rwxr-xr-x  1 inwoods  staff  4997296  7 Apr 17:43 abctree
+
+external/ThirdParty/Deploy/MacOS/include:
+total 2696
+drwxr-xr-x  78 inwoods  staff    2652  7 Apr 17:43 .
+drwxr-xr-x   6 inwoods  staff     204  7 Apr 17:43 ..
+drwxr-xr-x  12 inwoods  staff     408  7 Apr 17:43 Alembic
+-rw-r--r--   1 inwoods  staff   21862  7 Apr 17:43 H5ACpkg.h
+-rw-r--r--   1 inwoods  staff   25178  7 Apr 17:43 H5ACpublic.h
+-rw-r--r--   1 inwoods  staff   12737  7 Apr 17:43 H5Apkg.h
+-rw-r--r--   1 inwoods  staff    5471  7 Apr 17:43 H5Apublic.h
+-rw-r--r--   1 inwoods  staff   24608  7 Apr 17:43 H5B2pkg.h
+-rw-r--r--   1 inwoods  staff    1768  7 Apr 17:43 H5B2public.h
+-rw-r--r--   1 inwoods  staff    3575  7 Apr 17:43 H5Bpkg.h
+-rw-r--r--   1 inwoods  staff    1508  7 Apr 17:43 H5Bpublic.h
+-rw-r--r--   1 inwoods  staff  273255  7 Apr 17:43 H5Cpkg.h
+-rw-r--r--   1 inwoods  staff    1760  7 Apr 17:43 H5Cpublic.h
+-rw-r--r--   1 inwoods  staff   41440  7 Apr 17:43 H5Dpkg.h
+-rw-r--r--   1 inwoods  staff    7890  7 Apr 17:43 H5Dpublic.h
+-rw-r--r--   1 inwoods  staff   25228  7 Apr 17:43 H5EApkg.h
+-rw-r--r--   1 inwoods  staff   13092  7 Apr 17:43 H5Edefin.h
+-rw-r--r--   1 inwoods  staff   57318  7 Apr 17:43 H5Einit.h
+-rw-r--r--   1 inwoods  staff    5552  7 Apr 17:43 H5Epkg.h
+-rw-r--r--   1 inwoods  staff   21490  7 Apr 17:43 H5Epubgen.h
+-rw-r--r--   1 inwoods  staff    9023  7 Apr 17:43 H5Epublic.h
+-rw-r--r--   1 inwoods  staff    5104  7 Apr 17:43 H5Eterm.h
+-rw-r--r--   1 inwoods  staff   15813  7 Apr 17:43 H5FApkg.h
+-rw-r--r--   1 inwoods  staff    1490  7 Apr 17:43 H5FDcore.h
+-rw-r--r--   1 inwoods  staff    1955  7 Apr 17:43 H5FDdirect.h
+-rw-r--r--   1 inwoods  staff    1506  7 Apr 17:43 H5FDfamily.h
+-rw-r--r--   1 inwoods  staff    3322  7 Apr 17:43 H5FDlog.h
+-rw-r--r--   1 inwoods  staff    2573  7 Apr 17:43 H5FDmpi.h
+-rw-r--r--   1 inwoods  staff    2440  7 Apr 17:43 H5FDmpio.h
+-rw-r--r--   1 inwoods  staff    1800  7 Apr 17:43 H5FDmulti.h
+-rw-r--r--   1 inwoods  staff    2363  7 Apr 17:43 H5FDpkg.h
+-rw-r--r--   1 inwoods  staff   16640  7 Apr 17:43 H5FDpublic.h
+-rw-r--r--   1 inwoods  staff    1339  7 Apr 17:43 H5FDsec2.h
+-rw-r--r--   1 inwoods  staff    1368  7 Apr 17:43 H5FDstdio.h
+-rw-r--r--   1 inwoods  staff    1414  7 Apr 17:43 H5FDwindows.h
+-rw-r--r--   1 inwoods  staff   12241  7 Apr 17:43 H5FSpkg.h
+-rw-r--r--   1 inwoods  staff    1773  7 Apr 17:43 H5FSpublic.h
+-rw-r--r--   1 inwoods  staff   25675  7 Apr 17:43 H5Fpkg.h
+-rw-r--r--   1 inwoods  staff   14166  7 Apr 17:43 H5Fpublic.h
+-rw-r--r--   1 inwoods  staff   23846  7 Apr 17:43 H5Gpkg.h
+-rw-r--r--   1 inwoods  staff    7233  7 Apr 17:43 H5Gpublic.h
+-rw-r--r--   1 inwoods  staff   46755  7 Apr 17:43 H5HFpkg.h
+-rw-r--r--   1 inwoods  staff    1771  7 Apr 17:43 H5HFpublic.h
+-rw-r--r--   1 inwoods  staff    5641  7 Apr 17:43 H5HGpkg.h
+-rw-r--r--   1 inwoods  staff    1226  7 Apr 17:43 H5HGpublic.h
+-rw-r--r--   1 inwoods  staff    6819  7 Apr 17:43 H5HLpkg.h
+-rw-r--r--   1 inwoods  staff    1505  7 Apr 17:43 H5HLpublic.h
+-rw-r--r--   1 inwoods  staff    2668  7 Apr 17:43 H5Ipkg.h
+-rw-r--r--   1 inwoods  staff    4519  7 Apr 17:43 H5Ipublic.h
+-rw-r--r--   1 inwoods  staff    2279  7 Apr 17:43 H5Lpkg.h
+-rw-r--r--   1 inwoods  staff    9172  7 Apr 17:43 H5Lpublic.h
+-rw-r--r--   1 inwoods  staff    1775  7 Apr 17:43 H5MMpublic.h
+-rw-r--r--   1 inwoods  staff    4303  7 Apr 17:43 H5MPpkg.h
+-rw-r--r--   1 inwoods  staff   31567  7 Apr 17:43 H5Opkg.h
+-rw-r--r--   1 inwoods  staff   10349  7 Apr 17:43 H5Opublic.h
+-rw-r--r--   1 inwoods  staff   18677  7 Apr 17:43 H5Oshared.h
+-rw-r--r--   1 inwoods  staff    2232  7 Apr 17:43 H5PBpkg.h
+-rw-r--r--   1 inwoods  staff    1548  7 Apr 17:43 H5PLextern.h
+-rw-r--r--   1 inwoods  staff    1706  7 Apr 17:43 H5PLpkg.h
+-rw-r--r--   1 inwoods  staff    2295  7 Apr 17:43 H5PLpublic.h
+-rw-r--r--   1 inwoods  staff   10715  7 Apr 17:43 H5Ppkg.h
+-rw-r--r--   1 inwoods  staff   28614  7 Apr 17:43 H5Ppublic.h
+-rw-r--r--   1 inwoods  staff    2261  7 Apr 17:43 H5Rpkg.h
+-rw-r--r--   1 inwoods  staff    3625  7 Apr 17:43 H5Rpublic.h
+-rw-r--r--   1 inwoods  staff   12489  7 Apr 17:43 H5SMpkg.h
+-rw-r--r--   1 inwoods  staff   14986  7 Apr 17:43 H5Spkg.h
+-rw-r--r--   1 inwoods  staff    7526  7 Apr 17:43 H5Spublic.h
+-rw-r--r--   1 inwoods  staff   67377  7 Apr 17:43 H5Tpkg.h
+-rw-r--r--   1 inwoods  staff   27251  7 Apr 17:43 H5Tpublic.h
+-rw-r--r--   1 inwoods  staff    1886  7 Apr 17:43 H5Zpkg.h
+-rw-r--r--   1 inwoods  staff   11104  7 Apr 17:43 H5Zpublic.h
+-rw-r--r--   1 inwoods  staff    9720  7 Apr 17:43 H5api_adpt.h
+-rw-r--r--   1 inwoods  staff  116154  7 Apr 17:43 H5overflow.h
+-rw-r--r--   1 inwoods  staff   21833  7 Apr 17:43 H5pubconf.h
+-rw-r--r--   1 inwoods  staff   12169  7 Apr 17:43 H5public.h
+-rw-r--r--   1 inwoods  staff   16541  7 Apr 17:43 H5version.h
+drwxr-xr-x  59 inwoods  staff    2006  7 Apr 17:43 OpenEXR
+-rw-r--r--   1 inwoods  staff    2561  7 Apr 17:43 hdf5.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic:
+total 0
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 .
+drwxr-xr-x  78 inwoods  staff  2652  7 Apr 17:43 ..
+drwxr-xr-x  33 inwoods  staff  1122  7 Apr 17:43 Abc
+drwxr-xr-x   6 inwoods  staff   204  7 Apr 17:43 AbcCollection
+drwxr-xr-x  27 inwoods  staff   918  7 Apr 17:43 AbcCoreAbstract
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 AbcCoreFactory
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 AbcCoreHDF5
+drwxr-xr-x   5 inwoods  staff   170  7 Apr 17:43 AbcCoreLayer
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 AbcCoreOgawa
+drwxr-xr-x  37 inwoods  staff  1258  7 Apr 17:43 AbcGeom
+drwxr-xr-x   8 inwoods  staff   272  7 Apr 17:43 AbcMaterial
+drwxr-xr-x  15 inwoods  staff   510  7 Apr 17:43 Util
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/Abc:
+total 640
+drwxr-xr-x  33 inwoods  staff   1122  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff    408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff   3158  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff   6247  7 Apr 17:43 ArchiveInfo.h
+-rw-r--r--   1 inwoods  staff  11171  7 Apr 17:43 Argument.h
+-rw-r--r--   1 inwoods  staff   3266  7 Apr 17:43 Base.h
+-rw-r--r--   1 inwoods  staff   8056  7 Apr 17:43 ErrorHandler.h
+-rw-r--r--   1 inwoods  staff   8399  7 Apr 17:43 Foundation.h
+-rw-r--r--   1 inwoods  staff   8202  7 Apr 17:43 IArchive.h
+-rw-r--r--   1 inwoods  staff   6695  7 Apr 17:43 IArrayProperty.h
+-rw-r--r--   1 inwoods  staff   8564  7 Apr 17:43 IBaseProperty.h
+-rw-r--r--   1 inwoods  staff   6781  7 Apr 17:43 ICompoundProperty.h
+-rw-r--r--   1 inwoods  staff  12292  7 Apr 17:43 IObject.h
+-rw-r--r--   1 inwoods  staff   3451  7 Apr 17:43 ISampleSelector.h
+-rw-r--r--   1 inwoods  staff   5837  7 Apr 17:43 IScalarProperty.h
+-rw-r--r--   1 inwoods  staff   8296  7 Apr 17:43 ISchema.h
+-rw-r--r--   1 inwoods  staff   9861  7 Apr 17:43 ISchemaObject.h
+-rw-r--r--   1 inwoods  staff  12970  7 Apr 17:43 ITypedArrayProperty.h
+-rw-r--r--   1 inwoods  staff  12274  7 Apr 17:43 ITypedScalarProperty.h
+-rw-r--r--   1 inwoods  staff   8202  7 Apr 17:43 OArchive.h
+-rw-r--r--   1 inwoods  staff   6170  7 Apr 17:43 OArrayProperty.h
+-rw-r--r--   1 inwoods  staff   8989  7 Apr 17:43 OBaseProperty.h
+-rw-r--r--   1 inwoods  staff   7260  7 Apr 17:43 OCompoundProperty.h
+-rw-r--r--   1 inwoods  staff  10137  7 Apr 17:43 OObject.h
+-rw-r--r--   1 inwoods  staff   7046  7 Apr 17:43 OScalarProperty.h
+-rw-r--r--   1 inwoods  staff  11575  7 Apr 17:43 OSchema.h
+-rw-r--r--   1 inwoods  staff   8814  7 Apr 17:43 OSchemaObject.h
+-rw-r--r--   1 inwoods  staff  13274  7 Apr 17:43 OTypedArrayProperty.h
+-rw-r--r--   1 inwoods  staff  12682  7 Apr 17:43 OTypedScalarProperty.h
+-rw-r--r--   1 inwoods  staff   2369  7 Apr 17:43 Reference.h
+-rw-r--r--   1 inwoods  staff   2404  7 Apr 17:43 SourceName.h
+-rw-r--r--   1 inwoods  staff  13277  7 Apr 17:43 TypedArraySample.h
+-rw-r--r--   1 inwoods  staff   8939  7 Apr 17:43 TypedPropertyTraits.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCollection:
+total 48
+drwxr-xr-x   6 inwoods  staff   204  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2110  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff  5026  7 Apr 17:43 ICollections.h
+-rw-r--r--   1 inwoods  staff  5281  7 Apr 17:43 OCollections.h
+-rw-r--r--   1 inwoods  staff  2425  7 Apr 17:43 SchemaInfoDeclarations.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCoreAbstract:
+total 408
+drwxr-xr-x  27 inwoods  staff    918  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff    408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff   3237  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff   6003  7 Apr 17:43 ArchiveReader.h
+-rw-r--r--   1 inwoods  staff   6455  7 Apr 17:43 ArchiveWriter.h
+-rw-r--r--   1 inwoods  staff   7196  7 Apr 17:43 ArrayPropertyReader.h
+-rw-r--r--   1 inwoods  staff   4205  7 Apr 17:43 ArrayPropertyWriter.h
+-rw-r--r--   1 inwoods  staff   8074  7 Apr 17:43 ArraySample.h
+-rw-r--r--   1 inwoods  staff   4806  7 Apr 17:43 ArraySampleKey.h
+-rw-r--r--   1 inwoods  staff   7100  7 Apr 17:43 BasePropertyReader.h
+-rw-r--r--   1 inwoods  staff   7489  7 Apr 17:43 BasePropertyWriter.h
+-rw-r--r--   1 inwoods  staff   5688  7 Apr 17:43 CompoundPropertyReader.h
+-rw-r--r--   1 inwoods  staff   5770  7 Apr 17:43 CompoundPropertyWriter.h
+-rw-r--r--   1 inwoods  staff   5585  7 Apr 17:43 DataType.h
+-rw-r--r--   1 inwoods  staff   4471  7 Apr 17:43 ForwardDeclarations.h
+-rw-r--r--   1 inwoods  staff   4520  7 Apr 17:43 Foundation.h
+-rw-r--r--   1 inwoods  staff  11664  7 Apr 17:43 MetaData.h
+-rw-r--r--   1 inwoods  staff   4070  7 Apr 17:43 ObjectHeader.h
+-rw-r--r--   1 inwoods  staff   8317  7 Apr 17:43 ObjectReader.h
+-rw-r--r--   1 inwoods  staff   9081  7 Apr 17:43 ObjectWriter.h
+-rw-r--r--   1 inwoods  staff   7975  7 Apr 17:43 PropertyHeader.h
+-rw-r--r--   1 inwoods  staff   5804  7 Apr 17:43 ReadArraySampleCache.h
+-rw-r--r--   1 inwoods  staff   5281  7 Apr 17:43 ScalarPropertyReader.h
+-rw-r--r--   1 inwoods  staff   4287  7 Apr 17:43 ScalarPropertyWriter.h
+-rw-r--r--   1 inwoods  staff   7287  7 Apr 17:43 ScalarSample.h
+-rw-r--r--   1 inwoods  staff   5735  7 Apr 17:43 TimeSampling.h
+-rw-r--r--   1 inwoods  staff   6321  7 Apr 17:43 TimeSamplingType.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCoreFactory:
+total 24
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2061  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff  5566  7 Apr 17:43 IFactory.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCoreHDF5:
+total 16
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2505  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff  3959  7 Apr 17:43 ReadWrite.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCoreLayer:
+total 24
+drwxr-xr-x   5 inwoods  staff   170  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2856  7 Apr 17:43 Foundation.h
+-rw-r--r--   1 inwoods  staff  2717  7 Apr 17:43 Read.h
+-rw-r--r--   1 inwoods  staff  3106  7 Apr 17:43 Util.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcCoreOgawa:
+total 16
+drwxr-xr-x   4 inwoods  staff   136  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2051  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff  3866  7 Apr 17:43 ReadWrite.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcGeom:
+total 768
+drwxr-xr-x  37 inwoods  staff   1258  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff    408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff   3165  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff   3081  7 Apr 17:43 ArchiveBounds.h
+-rw-r--r--   1 inwoods  staff   2553  7 Apr 17:43 Basis.h
+-rw-r--r--   1 inwoods  staff   9748  7 Apr 17:43 CameraSample.h
+-rw-r--r--   1 inwoods  staff   2337  7 Apr 17:43 CurveType.h
+-rw-r--r--   1 inwoods  staff   2572  7 Apr 17:43 FaceSetExclusivity.h
+-rw-r--r--   1 inwoods  staff   4440  7 Apr 17:43 FilmBackXformOp.h
+-rw-r--r--   1 inwoods  staff   6123  7 Apr 17:43 Foundation.h
+-rw-r--r--   1 inwoods  staff  10531  7 Apr 17:43 GeometryScope.h
+-rw-r--r--   1 inwoods  staff   7294  7 Apr 17:43 ICamera.h
+-rw-r--r--   1 inwoods  staff  10955  7 Apr 17:43 ICurves.h
+-rw-r--r--   1 inwoods  staff   8739  7 Apr 17:43 IFaceSet.h
+-rw-r--r--   1 inwoods  staff  14117  7 Apr 17:43 IGeomBase.h
+-rw-r--r--   1 inwoods  staff  19927  7 Apr 17:43 IGeomParam.h
+-rw-r--r--   1 inwoods  staff   6462  7 Apr 17:43 ILight.h
+-rw-r--r--   1 inwoods  staff  13572  7 Apr 17:43 INuPatch.h
+-rw-r--r--   1 inwoods  staff   9461  7 Apr 17:43 IPoints.h
+-rw-r--r--   1 inwoods  staff  10807  7 Apr 17:43 IPolyMesh.h
+-rw-r--r--   1 inwoods  staff  14467  7 Apr 17:43 ISubD.h
+-rw-r--r--   1 inwoods  staff   7667  7 Apr 17:43 IXform.h
+-rw-r--r--   1 inwoods  staff   7488  7 Apr 17:43 OCamera.h
+-rw-r--r--   1 inwoods  staff  16264  7 Apr 17:43 OCurves.h
+-rw-r--r--   1 inwoods  staff   9337  7 Apr 17:43 OFaceSet.h
+-rw-r--r--   1 inwoods  staff   7869  7 Apr 17:43 OGeomBase.h
+-rw-r--r--   1 inwoods  staff  15405  7 Apr 17:43 OGeomParam.h
+-rw-r--r--   1 inwoods  staff   7457  7 Apr 17:43 OLight.h
+-rw-r--r--   1 inwoods  staff  18990  7 Apr 17:43 ONuPatch.h
+-rw-r--r--   1 inwoods  staff  11315  7 Apr 17:43 OPoints.h
+-rw-r--r--   1 inwoods  staff  13069  7 Apr 17:43 OPolyMesh.h
+-rw-r--r--   1 inwoods  staff  19821  7 Apr 17:43 OSubD.h
+-rw-r--r--   1 inwoods  staff   8628  7 Apr 17:43 OXform.h
+-rw-r--r--   1 inwoods  staff   6394  7 Apr 17:43 SchemaInfoDeclarations.h
+-rw-r--r--   1 inwoods  staff   5436  7 Apr 17:43 Visibility.h
+-rw-r--r--   1 inwoods  staff   9100  7 Apr 17:43 XformOp.h
+-rw-r--r--   1 inwoods  staff   5738  7 Apr 17:43 XformSample.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/AbcMaterial:
+total 96
+drwxr-xr-x   8 inwoods  staff   272  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff   408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  2164  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff  8944  7 Apr 17:43 IMaterial.h
+-rw-r--r--   1 inwoods  staff  6091  7 Apr 17:43 MaterialAssignment.h
+-rw-r--r--   1 inwoods  staff  8632  7 Apr 17:43 MaterialFlatten.h
+-rw-r--r--   1 inwoods  staff  6394  7 Apr 17:43 OMaterial.h
+-rw-r--r--   1 inwoods  staff  2408  7 Apr 17:43 SchemaInfoDeclarations.h
+
+external/ThirdParty/Deploy/MacOS/include/Alembic/Util:
+total 216
+drwxr-xr-x  15 inwoods  staff    510  7 Apr 17:43 .
+drwxr-xr-x  12 inwoods  staff    408  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff   2322  7 Apr 17:43 All.h
+-rw-r--r--   1 inwoods  staff   2218  7 Apr 17:43 Config.h
+-rw-r--r--   1 inwoods  staff   4170  7 Apr 17:43 Digest.h
+-rw-r--r--   1 inwoods  staff   5847  7 Apr 17:43 Dimensions.h
+-rw-r--r--   1 inwoods  staff   4592  7 Apr 17:43 Exception.h
+-rw-r--r--   1 inwoods  staff   2434  7 Apr 17:43 Export.h
+-rw-r--r--   1 inwoods  staff   6500  7 Apr 17:43 Foundation.h
+-rw-r--r--   1 inwoods  staff   2485  7 Apr 17:43 Murmur3.h
+-rw-r--r--   1 inwoods  staff   2550  7 Apr 17:43 Naming.h
+-rw-r--r--   1 inwoods  staff   3559  7 Apr 17:43 OperatorBool.h
+-rw-r--r--   1 inwoods  staff  19434  7 Apr 17:43 PlainOldDataType.h
+-rw-r--r--   1 inwoods  staff  13860  7 Apr 17:43 SpookyV2.h
+-rw-r--r--   1 inwoods  staff  12882  7 Apr 17:43 TokenMap.h
+
+external/ThirdParty/Deploy/MacOS/include/OpenEXR:
+total 1296
+drwxr-xr-x  59 inwoods  staff   2006  7 Apr 17:43 .
+drwxr-xr-x  78 inwoods  staff   2652  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff   2396  7 Apr 17:43 Iex.h
+-rw-r--r--   1 inwoods  staff   9279  7 Apr 17:43 IexBaseExc.h
+-rw-r--r--   1 inwoods  staff   7545  7 Apr 17:43 IexErrnoExc.h
+-rw-r--r--   1 inwoods  staff   2134  7 Apr 17:43 IexExport.h
+-rw-r--r--   1 inwoods  staff   5220  7 Apr 17:43 IexForward.h
+-rw-r--r--   1 inwoods  staff   5760  7 Apr 17:43 IexMacros.h
+-rw-r--r--   1 inwoods  staff   2466  7 Apr 17:43 IexMathExc.h
+-rw-r--r--   1 inwoods  staff   4687  7 Apr 17:43 IexMathFloatExc.h
+-rw-r--r--   1 inwoods  staff   3375  7 Apr 17:43 IexMathFpu.h
+-rw-r--r--   1 inwoods  staff   2354  7 Apr 17:43 IexMathIeeeExc.h
+-rw-r--r--   1 inwoods  staff   4405  7 Apr 17:43 IexNamespace.h
+-rw-r--r--   1 inwoods  staff   3480  7 Apr 17:43 IexThrowErrnoExc.h
+-rw-r--r--   1 inwoods  staff    711  7 Apr 17:43 IlmBaseConfig.h
+-rw-r--r--   1 inwoods  staff   4898  7 Apr 17:43 IlmThread.h
+-rw-r--r--   1 inwoods  staff   2204  7 Apr 17:43 IlmThreadExport.h
+-rw-r--r--   1 inwoods  staff   2129  7 Apr 17:43 IlmThreadForward.h
+-rw-r--r--   1 inwoods  staff   4421  7 Apr 17:43 IlmThreadMutex.h
+-rw-r--r--   1 inwoods  staff   4651  7 Apr 17:43 IlmThreadNamespace.h
+-rw-r--r--   1 inwoods  staff   5333  7 Apr 17:43 IlmThreadPool.h
+-rw-r--r--   1 inwoods  staff   3466  7 Apr 17:43 IlmThreadSemaphore.h
+-rw-r--r--   1 inwoods  staff  17021  7 Apr 17:43 ImathBox.h
+-rw-r--r--   1 inwoods  staff  22886  7 Apr 17:43 ImathBoxAlgo.h
+-rw-r--r--   1 inwoods  staff  15227  7 Apr 17:43 ImathColor.h
+-rw-r--r--   1 inwoods  staff   7254  7 Apr 17:43 ImathColorAlgo.h
+-rw-r--r--   1 inwoods  staff  23428  7 Apr 17:43 ImathEuler.h
+-rw-r--r--   1 inwoods  staff   2892  7 Apr 17:43 ImathExc.h
+-rw-r--r--   1 inwoods  staff   2176  7 Apr 17:43 ImathExport.h
+-rw-r--r--   1 inwoods  staff   2746  7 Apr 17:43 ImathForward.h
+-rw-r--r--   1 inwoods  staff   6758  7 Apr 17:43 ImathFrame.h
+-rw-r--r--   1 inwoods  staff  22791  7 Apr 17:43 ImathFrustum.h
+-rw-r--r--   1 inwoods  staff  15128  7 Apr 17:43 ImathFrustumTest.h
+-rw-r--r--   1 inwoods  staff   6132  7 Apr 17:43 ImathFun.h
+-rw-r--r--   1 inwoods  staff   4633  7 Apr 17:43 ImathGL.h
+-rw-r--r--   1 inwoods  staff   2222  7 Apr 17:43 ImathGLU.h
+-rw-r--r--   1 inwoods  staff   2532  7 Apr 17:43 ImathHalfLimits.h
+-rw-r--r--   1 inwoods  staff   2458  7 Apr 17:43 ImathInt64.h
+-rw-r--r--   1 inwoods  staff   5473  7 Apr 17:43 ImathInterval.h
+-rw-r--r--   1 inwoods  staff   7950  7 Apr 17:43 ImathLimits.h
+-rw-r--r--   1 inwoods  staff   4854  7 Apr 17:43 ImathLine.h
+-rw-r--r--   1 inwoods  staff   7864  7 Apr 17:43 ImathLineAlgo.h
+-rw-r--r--   1 inwoods  staff   7347  7 Apr 17:43 ImathMath.h
+-rw-r--r--   1 inwoods  staff  84402  7 Apr 17:43 ImathMatrix.h
+-rw-r--r--   1 inwoods  staff  38880  7 Apr 17:43 ImathMatrixAlgo.h
+-rw-r--r--   1 inwoods  staff   4489  7 Apr 17:43 ImathNamespace.h
+-rw-r--r--   1 inwoods  staff   6913  7 Apr 17:43 ImathPlane.h
+-rw-r--r--   1 inwoods  staff   3307  7 Apr 17:43 ImathPlatform.h
+-rw-r--r--   1 inwoods  staff  21447  7 Apr 17:43 ImathQuat.h
+-rw-r--r--   1 inwoods  staff  10081  7 Apr 17:43 ImathRandom.h
+-rw-r--r--   1 inwoods  staff   5758  7 Apr 17:43 ImathRoots.h
+-rw-r--r--   1 inwoods  staff  14182  7 Apr 17:43 ImathShear.h
+-rw-r--r--   1 inwoods  staff   4797  7 Apr 17:43 ImathSphere.h
+-rw-r--r--   1 inwoods  staff  45226  7 Apr 17:43 ImathVec.h
+-rw-r--r--   1 inwoods  staff   4752  7 Apr 17:43 ImathVecAlgo.h
+-rw-r--r--   1 inwoods  staff  17630  7 Apr 17:43 half.h
+-rw-r--r--   1 inwoods  staff    757  7 Apr 17:43 halfExport.h
+-rw-r--r--   1 inwoods  staff   4944  7 Apr 17:43 halfFunction.h
+-rw-r--r--   1 inwoods  staff   3818  7 Apr 17:43 halfLimits.h
+
+external/ThirdParty/Deploy/MacOS/lib:
+total 25072
+drwxr-xr-x  17 inwoods  staff      578  7 Apr 17:43 .
+drwxr-xr-x   6 inwoods  staff      204  7 Apr 17:43 ..
+drwxr-xr-x   3 inwoods  staff      102  7 Apr 17:43 cmake
+-rw-r--r--   1 inwoods  staff  6920504  7 Apr 17:43 libAlembic.a
+-rw-r--r--   1 inwoods  staff   269624  7 Apr 17:43 libHalf.a
+-rw-r--r--   1 inwoods  staff     1014  7 Apr 17:43 libHalf.la
+-rw-r--r--   1 inwoods  staff    88704  7 Apr 17:43 libIex.a
+-rw-r--r--   1 inwoods  staff     1008  7 Apr 17:43 libIex.la
+-rw-r--r--   1 inwoods  staff     9496  7 Apr 17:43 libIexMath.a
+-rw-r--r--   1 inwoods  staff     1032  7 Apr 17:43 libIexMath.la
+-rw-r--r--   1 inwoods  staff    33624  7 Apr 17:43 libIlmThread.a
+-rw-r--r--   1 inwoods  staff     1044  7 Apr 17:43 libIlmThread.la
+-rw-r--r--   1 inwoods  staff    72608  7 Apr 17:43 libImath.a
+-rw-r--r--   1 inwoods  staff     1020  7 Apr 17:43 libImath.la
+-rw-r--r--   1 inwoods  staff  5404712  7 Apr 17:43 libhdf5.a
+-rw-r--r--   1 inwoods  staff     3023  7 Apr 17:43 libhdf5.settings
+drwxr-xr-x   3 inwoods  staff      102  7 Apr 17:43 pkgconfig
+
+external/ThirdParty/Deploy/MacOS/lib/cmake:
+total 0
+drwxr-xr-x   3 inwoods  staff  102  7 Apr 17:43 .
+drwxr-xr-x  17 inwoods  staff  578  7 Apr 17:43 ..
+drwxr-xr-x   6 inwoods  staff  204  7 Apr 17:43 Alembic
+
+external/ThirdParty/Deploy/MacOS/lib/cmake/Alembic:
+total 32
+drwxr-xr-x  6 inwoods  staff   204  7 Apr 17:43 .
+drwxr-xr-x  3 inwoods  staff   102  7 Apr 17:43 ..
+-rw-r--r--  1 inwoods  staff   244  7 Apr 17:43 AlembicConfig.cmake
+-rw-r--r--  1 inwoods  staff  1269  7 Apr 17:43 AlembicConfigVersion.cmake
+-rw-r--r--  1 inwoods  staff  1336  7 Apr 17:43 AlembicTargets-release.cmake
+-rw-r--r--  1 inwoods  staff  3332  7 Apr 17:43 AlembicTargets.cmake
+
+external/ThirdParty/Deploy/MacOS/lib/pkgconfig:
+total 8
+drwxr-xr-x   3 inwoods  staff  102  7 Apr 17:43 .
+drwxr-xr-x  17 inwoods  staff  578  7 Apr 17:43 ..
+-rw-r--r--   1 inwoods  staff  373  7 Apr 17:43 IlmBase.pc
+
+external/ThirdParty/Deploy/MacOS/share:
+total 112
+drwxr-xr-x  6 inwoods  staff    204  7 Apr 17:43 .
+drwxr-xr-x  6 inwoods  staff    204  7 Apr 17:43 ..
+-rw-r--r--  1 inwoods  staff    558  7 Apr 17:43 COPYING
+-rw-r--r--  1 inwoods  staff  29446  7 Apr 17:43 RELEASE.txt
+-rw-r--r--  1 inwoods  staff  17404  7 Apr 17:43 USING_HDF5_CMake.txt
+drwxr-xr-x  6 inwoods  staff    204  7 Apr 17:43 cmake
+
+external/ThirdParty/Deploy/MacOS/share/cmake:
+total 48
+drwxr-xr-x  6 inwoods  staff   204  7 Apr 17:43 .
+drwxr-xr-x  6 inwoods  staff   204  7 Apr 17:43 ..
+-rw-r--r--  1 inwoods  staff  2181  7 Apr 17:43 hdf5-config-version.cmake
+-rw-r--r--  1 inwoods  staff  8350  7 Apr 17:43 hdf5-config.cmake
+-rw-r--r--  1 inwoods  staff   840  7 Apr 17:43 hdf5-targets-release.cmake
+-rw-r--r--  1 inwoods  staff  3394  7 Apr 17:43 hdf5-targets.cmake

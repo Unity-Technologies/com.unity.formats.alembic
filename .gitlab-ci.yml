@@ -1,22 +1,81 @@
-# build needs to be able to find OpenEXR(libHalf.dylib libHalf.a), HDF5(hdf5.a) and Alembic (libAlembic.a) installed.
+# build needs to be able to find the following libraries:
+# - OpenEXR(libHalf.dylib libHalf.a)
+# - HDF5(hdf5.a) 
+# - Alembic (libAlembic.a)
+
+# sourcedir needs submodule initialization (to compile googletest)
+# - git submodule update --init --recursive
 
 image: node:6.10.0
 
 stages:
   - build
-  - test 
+  - test
   - push_to_packman_staging
 
-build:
+build:osx:
   stage: build
-  script: 
-  - rm -rf build 
-  - mkdir build
-  - cd build
-  - cmake ../Plugin
-  - make
+  tags:
+    - buildfarm
+    - darwin
+  script:
+    - if [ -d build ] ; then rm -rf build ; fi
+    - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/MacOS
+    - mkdir build
+    - cd build
+    - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=`pwd` -DCMAKE_PREFIX_PATH=`pwd` \
+        -DALEMBIC_DIR=${deploydir} \
+        -DHDF5_USE_STATIC_LIBRARIES=ON \
+        -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' \
+        -DHDF5_ROOT=${deploydir} \
+        -DOPENEXR_LOCATION=${deploydir} \
+        -DUSE_STATIC=ON \
+        -DENABLE_DEPLOY=OFF
+    - make
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
 
-test:
+build:windows:
+  stage: build
+  tags:
+    - buildfarm
+    - windows
+  script:
+    - rmdir /s /q build
+    - md build
+    - cd build
+    - cmake ../Plugin
+    - make
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - C:\Users\builduser\post_build_script.bat
+
+build:linux:
+  stage: build
+  tags:
+    - buildfarm
+    - darwin
+  script:
+    - rm -rf build
+    - mkdir build
+    - cd build
+    - cmake ../Plugin
+    - make
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
+
+test:osx:
+  stage: test
+  script: make test
+
+test:windows:
+  stage: test
+  script: make test
+
+test:linux:
   stage: test
   script: make test
 

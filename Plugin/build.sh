@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -x
 
 set -e
 
@@ -55,7 +55,11 @@ fi
 # Build HDF5.
 message "HDF5"
 if [ ! -d "${HDF5}" ] ; then
-	bzip2 -cd "${srcdir}/external/sources/${HDF5}.tar.bz2" | tar xvf -
+        if [ -f "${srcdir}/external/sources/${HDF5}.tar.bz2" ] ; then
+	    bzip2 -cd "${srcdir}/external/sources/${HDF5}.tar.bz2" | tar xvf -
+        elif [ -f "${srcdir}/external/sources/${HDF5}.tar.gz" ] ; then
+            tar xzvf "${srcdir}/external/sources/${HDF5}.tar.gz"
+        fi
 fi
 if [ -d hdf5-build ] ; then
 	echo "Already built"
