@@ -47,11 +47,12 @@ function(add_ispc_targets)
             ${object}
             "${arg_OUTDIR}/${name}_sse4${CMAKE_CXX_OUTPUT_EXTENSION}"
             "${arg_OUTDIR}/${name}_avx${CMAKE_CXX_OUTPUT_EXTENSION}"
+            "${arg_OUTDIR}/${name}_avx512skx${CMAKE_CXX_OUTPUT_EXTENSION}"
         )
         set(outputs ${header} ${objects})
         add_custom_command(
             OUTPUT ${outputs}
-            COMMAND ${ISPC} ${source} -o ${object} -h ${header} --pic --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
+            COMMAND ${ISPC} ${source} -o ${object} -h ${header} --pic --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
             DEPENDS ${source} ${arg_HEADERS}
         )
 
