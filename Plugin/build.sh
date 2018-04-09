@@ -7,14 +7,27 @@ pushd `dirname $0`
 srcdir=`pwd`
 popd
 
+# You need cmake 3.2 or later to compile some of the dependences.
+# You can change the cmake binary using e.g. 'CMAKE=/bin/cmake3 build.sh'
 CMAKE=${CMAKE:-cmake}
+#
+# Go to https://www.hdfgroup.org/downloads/ and put the tarball in external/sources/ then update the version number here:
 HDF5=${HDF5:-hdf5-1.10.1}
+#
+# Go to http://www.openexr.com/downloads.html and download ilmbase; put the tarball into external/sources/ then update the version number here:
 ILMBASE=${ILMBASE:-ilmbase-2.2.1}
+#
+# Go to https://github.com/alembic/alembic/releases and download Alembic; put the tarball into external/sources/ then update the version number here:
 ALEMBIC=${ALEMBIC:-alembic-1.7.5}
+#
+# Install ispc with your fave package manager e.g. on OSX:
+#       sudo port install ispc
+# If that doesn't work, go to https://ispc.github.io/downloads.html and download ISPC binaries; put the tarball into external/sources/ then update the version number here:
 ISPC=${ISPC:-ispc-v1.9.2-linux}
 
-# Produce fast and small code (but not debuggable), and produce it to be relocatable
-# since in the end we'll link it all together in a shared object.
+# Produce fast and small code (but not debuggable), and produce it to be
+# relocatable since in the end we'll link it all together in a shared object.
+# Note that cmake seems to clobber the -O3 with a -O2, but we can dream.
 export CXXFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export CFLAGS="-O3 -fomit-frame-pointer -fPIC"
 
@@ -44,7 +57,7 @@ message "HDF5"
 if [ ! -d "${HDF5}" ] ; then
 	bzip2 -cd "${srcdir}/external/sources/${HDF5}.tar.bz2" | tar xvf -
 fi
-if [ -d hdf5-build ] ; then 
+if [ -d hdf5-build ] ; then
 	echo "Already built"
 else
 	mkdir hdf5-build
