@@ -28,11 +28,13 @@ struct TestEntry
     std::function<void()> body;
 };
 
-static std::vector<TestEntry> g_tests;
+static std::vector<TestEntry> *g_tests;
 
 void RegisterTestEntryImpl(const char *name, const std::function<void()>& body)
 {
-    g_tests.push_back({name, body});
+    if (g_tests == nullptr)
+        g_tests = new std::vector<TestEntry>();
+    g_tests->push_back({name, body});
 }
 
 static void RunTestImpl(const TestEntry& v)
@@ -52,7 +54,7 @@ testExport const char* GetLogMessage()
 testExport void RunTest(char *name)
 {
     g_log.clear();
-    for (auto& entry : g_tests) {
+    for (auto& entry : *g_tests) {
         if (entry.name == name) {
             RunTestImpl(entry);
         }
@@ -62,7 +64,7 @@ testExport void RunTest(char *name)
 testExport void RunAllTests()
 {
     g_log.clear();
-    for (auto& entry : g_tests) {
+    for (auto& entry : *g_tests) {
         RunTestImpl(entry);
     }
 }
