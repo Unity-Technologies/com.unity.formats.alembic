@@ -19,16 +19,23 @@ namespace UTJ.Alembic
             EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "scaleFactor"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapHandedness"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "interpolateSamples"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "scaleFactor"),
+                    new GUIContent("Scale Factor", "How much to scale the models compared to what is in the source file."));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapHandedness"),
+                    new GUIContent("Swap Handedness", "Swap X coordinate"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "interpolateSamples"),
+                    new GUIContent("Interpolate Samples", "Interpolate transforms and vertices (if topology is constant)."));
                 EditorGUILayout.Separator();
 
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importVisibility"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importVisibility"),
+                    new GUIContent("Import Visibility", "Import visibility animation."));
                 //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importXform"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importCameras"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importMeshes"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPoints"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importCameras"),
+                    new GUIContent("Import Cameras", ""));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importMeshes"),
+                    new GUIContent("Import Meshes", ""));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPoints"),
+                    new GUIContent("Import Points", ""));
                 EditorGUILayout.Separator();
 
                 // time range
@@ -91,7 +98,8 @@ namespace UTJ.Alembic
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)));
+                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)),
+                    new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
@@ -106,17 +114,24 @@ namespace UTJ.Alembic
             base.ApplyRevertGUI();
         }
 
-        static void DisplayEnumProperty(SerializedProperty normalsMode,string[] displayNames)
+        static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
         {
+            if (guicontent == null)
+                guicontent = new GUIContent(prop.displayName);
+
             var rect = EditorGUILayout.GetControlRect();
-            EditorGUI.BeginProperty(rect, new GUIContent(normalsMode.displayName), normalsMode);
-            EditorGUI.showMixedValue = normalsMode.hasMultipleDifferentValues;
+            EditorGUI.BeginProperty(rect, guicontent, prop);
+            EditorGUI.showMixedValue = prop.hasMultipleDifferentValues;
             EditorGUI.BeginChangeCheck();
-            var normalsModeNew = EditorGUI.Popup(rect, normalsMode.displayName, normalsMode.intValue, displayNames.Select(ObjectNames.NicifyVariableName).ToArray());
+
+            GUIContent[] options = new GUIContent[displayNames.Length];
+            for (int i = 0; i < options.Length; ++i)
+                options[i] = new GUIContent(ObjectNames.NicifyVariableName(displayNames[i]), "");
+
+            var normalsModeNew = EditorGUI.Popup(rect, guicontent, prop.intValue, options);
             if (EditorGUI.EndChangeCheck())
-            {
-                normalsMode.intValue = normalsModeNew;
-            }
+                prop.intValue = normalsModeNew;
+
             EditorGUI.showMixedValue = false;
             EditorGUI.EndProperty();
         }
