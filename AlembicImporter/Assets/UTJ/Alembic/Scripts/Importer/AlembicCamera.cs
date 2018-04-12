@@ -31,7 +31,7 @@ namespace UTJ.Alembic
 
             m_abcSchema.sample.GetData(ref m_abcData);
 
-            if (!abcTreeNode.stream.ignoreVisibility)
+            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
             m_camera.fieldOfView = m_abcData.fieldOfView;

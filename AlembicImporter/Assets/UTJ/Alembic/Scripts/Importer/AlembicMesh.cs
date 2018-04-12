@@ -212,7 +212,7 @@ namespace UTJ.Alembic
             sample.Sync();
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
-            if (!abcTreeNode.stream.ignoreVisibility)
+            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
             {
                 var visible = m_sampleSummary.visibility;
                 abcTreeNode.gameObject.SetActive(visible);

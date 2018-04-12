@@ -6,23 +6,23 @@ namespace UTJ.Alembic
 {
     public enum aiAspectRatioMode
     {
-        CurrentResolution = 0,
-        DefaultResolution = 1,
+        CurrentResolution,
+        DefaultResolution,
         CameraAperture
     };
 
     public enum aiNormalsMode
     {
-        ReadFromFile = 0,
-        ComputeIfMissing,
-        AlwaysCompute,
-        Ignore
+        Import,
+        CalculateIfMissing,
+        AlwaysCalculate,
+        None
     }
 
     public enum aiTangentsMode
     {
-        None = 0,
-        Compute,
+        None,
+        Calculate,
     }
 
     public enum aiTopologyVariance
@@ -97,7 +97,7 @@ namespace UTJ.Alembic
 
         public void SetDefaults()
         {
-            normalsMode = aiNormalsMode.ComputeIfMissing;
+            normalsMode = aiNormalsMode.CalculateIfMissing;
             tangentsMode = aiTangentsMode.None;
             scaleFactor = 0.01f;
             aspectRatio = -1.0f;

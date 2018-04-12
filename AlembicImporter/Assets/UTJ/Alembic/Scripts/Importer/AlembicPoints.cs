@@ -81,7 +81,7 @@ namespace UTJ.Alembic
 
             var data = m_abcData[0];
 
-            if (!abcTreeNode.stream.ignoreVisibility)
+            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
                 abcTreeNode.gameObject.SetActive(data.visibility);
 
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
