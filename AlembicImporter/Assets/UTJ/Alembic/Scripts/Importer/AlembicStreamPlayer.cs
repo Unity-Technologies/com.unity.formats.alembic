@@ -80,6 +80,10 @@ namespace UTJ.Alembic
 
         void LateUpdate()
         {
+            // currentTime maybe updated after Update() by other GameObjects
+            if (!updateStarted && lastUpdateTime != currentTime)
+                Update();
+
             if (!updateStarted)
                 return;
             updateStarted = false;
