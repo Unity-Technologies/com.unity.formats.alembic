@@ -9,7 +9,7 @@ Shader "Hidden/Alembic/MotionVectors"
 
             Cull [_CullMode]
             ZTest LEqual
-            ZWrite Off
+            ZWrite On
 
             CGPROGRAM
             #pragma vertex VertMotionVectors

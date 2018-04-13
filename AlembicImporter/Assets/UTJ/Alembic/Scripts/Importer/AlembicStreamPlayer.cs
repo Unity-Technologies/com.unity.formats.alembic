@@ -13,7 +13,6 @@ namespace UTJ.Alembic
         public float currentTime;
         public float vertexMotionScale = 1.0f;
         public bool asyncLoad = true;
-        public bool ignoreVisibility = false;
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
@@ -54,7 +53,7 @@ namespace UTJ.Alembic
             forceUpdate = true;
         }
 
-        void Update()
+        public void Update()
         {
             if (abcStream == null || streamDescriptor == null)
                 return;
@@ -64,7 +63,6 @@ namespace UTJ.Alembic
             {
                 abcStream.vertexMotionScale = vertexMotionScale;
                 abcStream.asyncLoad = asyncLoad;
-                abcStream.ignoreVisibility = ignoreVisibility;
                 if (abcStream.AbcUpdateBegin(startTime + currentTime))
                 {
                     lastUpdateTime = currentTime;
@@ -82,6 +80,10 @@ namespace UTJ.Alembic
 
         void LateUpdate()
         {
+            // currentTime maybe updated after Update() by other GameObjects
+            if (!updateStarted && lastUpdateTime != currentTime)
+                Update();
+
             if (!updateStarted)
                 return;
             updateStarted = false;

@@ -1,8 +1,15 @@
-if(ABCI_ENABLE_TESTS)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
-    file(GLOB sources *.cpp *.h)
+if(APPLE)
+    option(ENABLE_TESTS "Build tests" OFF)
+else()
+    option(ENABLE_TESTS "Build tests" ON)
+endif()
 
+if(ENABLE_TESTS)
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
+
+    file(GLOB sources *.cpp *.h)
     add_executable(Test ${sources})
     add_dependencies(Test abci)
     target_link_libraries(Test abci)
+    install(TARGETS Test DESTINATION .)
 endif()

@@ -53,7 +53,6 @@ namespace UTJ.Alembic
         aiConfig m_config;
         aiContext m_context;
         double m_time;
-        bool m_ignoreVisibility;
         bool m_loaded;
         bool m_streamInterupted;
 
@@ -64,7 +63,6 @@ namespace UTJ.Alembic
         public aiConfig config { get { return m_config; } }
         public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
         public bool asyncLoad { set { m_config.asyncLoad = value; } }
-        public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
 
         public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
 
@@ -127,7 +125,7 @@ namespace UTJ.Alembic
 
             var settings = m_streamDesc.settings;
             m_config.swapHandedness = settings.swapHandedness;
-            m_config.swapFaceWinding = settings.swapFaceWinding;
+            m_config.flipFaces = settings.flipFaces;
             m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
             m_config.scaleFactor = settings.scaleFactor;
             m_config.normalsMode = settings.normals;
@@ -239,9 +237,9 @@ namespace UTJ.Alembic
 
                 if (obj.AsXform() && m_streamDesc.settings.importXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsCamera() && m_streamDesc.settings.importCamera)
+                else if (obj.AsCamera() && m_streamDesc.settings.importCameras)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPolyMesh() && m_streamDesc.settings.importPolyMesh)
+                else if (obj.AsPolyMesh() && m_streamDesc.settings.importMeshes)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
                 else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();

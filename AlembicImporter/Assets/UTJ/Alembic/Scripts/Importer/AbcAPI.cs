@@ -6,23 +6,23 @@ namespace UTJ.Alembic
 {
     public enum aiAspectRatioMode
     {
-        CurrentResolution = 0,
-        DefaultResolution = 1,
+        CurrentResolution,
+        DefaultResolution,
         CameraAperture
     };
 
     public enum aiNormalsMode
     {
-        ReadFromFile = 0,
-        ComputeIfMissing,
-        AlwaysCompute,
-        Ignore
+        Import,
+        CalculateIfMissing,
+        AlwaysCalculate,
+        None
     }
 
     public enum aiTangentsMode
     {
-        None = 0,
-        Compute,
+        None,
+        Calculate,
     }
 
     public enum aiTopologyVariance
@@ -87,7 +87,7 @@ namespace UTJ.Alembic
         public float vertexMotionScale;
         public int splitUnit;
         public Bool swapHandedness;
-        public Bool swapFaceWinding;
+        public Bool flipFaces;
         public Bool interpolateSamples;
         public Bool turnQuadEdges;
         public Bool asyncLoad;
@@ -97,7 +97,7 @@ namespace UTJ.Alembic
 
         public void SetDefaults()
         {
-            normalsMode = aiNormalsMode.ComputeIfMissing;
+            normalsMode = aiNormalsMode.CalculateIfMissing;
             tangentsMode = aiTangentsMode.None;
             scaleFactor = 0.01f;
             aspectRatio = -1.0f;
@@ -108,7 +108,7 @@ namespace UTJ.Alembic
             splitUnit = 65000;
 #endif
             swapHandedness = true;
-            swapFaceWinding = false;
+            flipFaces = false;
             interpolateSamples = true;
             turnQuadEdges = false;
             asyncLoad = true;

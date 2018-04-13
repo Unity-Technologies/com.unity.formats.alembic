@@ -20,6 +20,7 @@
             #pragma comment(lib, "abci_s.lib")
         #endif
     #else
+        #define abciAPI extern "C"
     #endif
 
     struct abcV2 { float x, y; };

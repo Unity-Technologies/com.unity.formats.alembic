@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
-using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace UTJ.Alembic
@@ -247,13 +246,14 @@ namespace UTJ.Alembic
                     for (int i = 1; i < n; ++i)
                     {
                         var clip = new AnimationClip();
-                        AddFrameEvents(clip, abc.GetTimeSampling(i));
-
-                        var name = root.gameObject.name + "_Frames";
-                        if (n > 2)
-                            name += i.ToString();
-                        clip.name = name;
-                        subassets.Add(clip.name, clip);
+                        if (AddFrameEvents(clip, abc.GetTimeSampling(i)))
+                        {
+                            var name = root.gameObject.name + "_Frames";
+                            if (n > 2)
+                                name += i.ToString();
+                            clip.name = name;
+                            subassets.Add(clip.name, clip);
+                        }
                     }
                 }
             }
@@ -311,9 +311,12 @@ namespace UTJ.Alembic
                 CollectSubAssets(subassets, child);
         }
 
-        void AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
+        bool AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
         {
             int n = ts.sampleCount;
+            if (n <= 0)
+                return false;
+
             var events = new AnimationEvent[n];
             for (int i = 0; i < n; ++i)
             {
@@ -324,6 +327,7 @@ namespace UTJ.Alembic
                 events[i] = ev;
             }
             AnimationUtility.SetAnimationEvents(clip, events);
+            return true;
         }
     }
 }

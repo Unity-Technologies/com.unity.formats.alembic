@@ -164,6 +164,17 @@ void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
     }
 }
 
+template<class T>
+static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner::Split& split)
+{
+    if (dst) {
+        if (!src.empty())
+            src.copy_to(dst, split.vertex_count, split.vertex_offset);
+        else
+            memset(dst, 0, split.vertex_count * sizeof(T));
+    }
+}
+
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
@@ -184,48 +195,14 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
         data.center = (bbmin + bbmax) * 0.5f;
         data.extents = bbmax - bbmin;
     }
-    if (data.velocities) {
-        // note: velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
-        if (!m_velocities_ref.empty())
-            m_velocities_ref.copy_to(data.velocities, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.velocities, 0, split.vertex_count * sizeof(abcV3));
-    }
 
-    if (data.normals) {
-        if (!m_normals_ref.empty())
-            m_normals_ref.copy_to(data.normals, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.normals, 0, split.vertex_count * sizeof(abcV3));
-    }
-
-    if (data.tangents) {
-        if(!m_tangents_ref.empty())
-            m_tangents_ref.copy_to(data.tangents, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.tangents, 0, split.vertex_count * sizeof(abcV4));
-    }
-
-    if (data.uv0) {
-        if (!m_uv0_ref.empty())
-            m_uv0_ref.copy_to(data.uv0, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.uv0, 0, split.vertex_count * sizeof(abcV2));
-    }
-
-    if (data.uv1) {
-        if (!m_uv1_ref.empty())
-            m_uv1_ref.copy_to(data.uv1, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.uv1, 0, split.vertex_count * sizeof(abcV2));
-    }
-
-    if (data.colors) {
-        if (!m_colors_ref.empty())
-            m_colors_ref.copy_to((abcC4*)data.colors, split.vertex_count, split.vertex_offset);
-        else
-            memset(data.colors, 0, split.vertex_count * sizeof(abcV4));
-    }
+    // note: velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
+    copy_or_clear(data.velocities, m_velocities_ref, split);
+    copy_or_clear(data.normals, m_normals_ref, split);
+    copy_or_clear(data.tangents, m_tangents_ref, split);
+    copy_or_clear(data.uv0, m_uv0_ref, split);
+    copy_or_clear(data.uv1, m_uv1_ref, split);
+    copy_or_clear((abcC4*)data.colors, m_colors_ref, split);
 }
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
@@ -266,19 +243,21 @@ void aiPolyMeshSample::waitAsync()
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
     : super(parent, abc)
 {
-    // find color and uv1 params (Maya's extension)
+    // find vertex color and additional uv params
     auto geom_params = m_schema.getArbGeomParams();
     if (geom_params.valid()) {
         size_t num_geom_params = geom_params.getNumProperties();
         for (size_t i = 0; i < num_geom_params; ++i) {
             auto& header = geom_params.getPropertyHeader(i);
-            if (header.getName() == "rgba" && AbcGeom::IC4fGeomParam::matches(header)) {
-                // colors
-                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, "rgba");
+
+            // vertex color
+            if (AbcGeom::IC4fGeomParam::matches(header)) {
+                m_colors_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
             }
-            else if (header.getName() == "uv1" && AbcGeom::IV2fGeomParam::matches(header)) {
-                // uv1
-                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, "uv1");
+
+            // uv
+            if (AbcGeom::IV2fGeomParam::matches(header)) {
+                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, header.getName());
             }
         }
     }
@@ -673,12 +652,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     else if (summary.compute_normals && (m_sample_index_changed || summary.interpolate_points)) {
         if (sample.m_points_ref.empty()) {
             DebugError("something is wrong!!");
+            sample.m_normals_ref.reset();
         }
-        const auto &indices = topology.m_refiner.new_indices_tri;
-        sample.m_normals.resize_discard(sample.m_points_ref.size());
-        GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
-            (int)sample.m_points_ref.size(), (int)indices.size() / 3);
-        sample.m_normals_ref = sample.m_normals;
+        else {
+            const auto &indices = topology.m_refiner.new_indices_tri;
+            sample.m_normals.resize_discard(sample.m_points_ref.size());
+            GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
+                (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            sample.m_normals_ref = sample.m_normals;
+        }
     }
 
     // tangents
@@ -688,12 +670,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     else if (summary.compute_tangents && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals)) {
         if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty()) {
             DebugError("something is wrong!!");
+            sample.m_tangents_ref.reset();
         }
-        const auto &indices = topology.m_refiner.new_indices_tri;
-        sample.m_tangents.resize_discard(sample.m_points_ref.size());
-        GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
-            indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
-        sample.m_tangents_ref = sample.m_tangents;
+        else {
+            const auto &indices = topology.m_refiner.new_indices_tri;
+            sample.m_tangents.resize_discard(sample.m_points_ref.size());
+            GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
+                indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            sample.m_tangents_ref = sample.m_tangents;
+        }
     }
 
     // uv0

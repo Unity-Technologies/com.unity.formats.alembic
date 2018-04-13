@@ -103,35 +103,28 @@ namespace UTJ.Alembic
     }
 
 
-    // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
-    // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
-    public class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
+    #region dirty
+    public static class PinnedListImpl
     {
-        List<T> m_list;
-        T[] m_data;
-        GCHandle m_gch;
-
-        #region dirty
-
         class ListData
         {
-            public T[] items;
+            public object items;
             public int size;
         }
         [StructLayout(LayoutKind.Explicit)]
         struct Caster
         {
-            [FieldOffset(0)] public List<T> list;
+            [FieldOffset(0)] public object list;
             [FieldOffset(0)] public ListData data;
         }
 
-        public static T[] ListGetInternalArray(List<T> list)
+        public static T[] GetInternalArray<T>(List<T> list) where T : struct
         {
             var caster = new Caster();
             caster.list = list;
-            return caster.data.items;
+            return (T[])caster.data.items;
         }
-        public static List<T> ListCreateIntrusive(T[] data)
+        public static List<T> CreateIntrusiveList<T>(T[] data) where T : struct
         {
             var ret = new List<T>();
             var caster = new Caster();
@@ -140,31 +133,40 @@ namespace UTJ.Alembic
             caster.data.size = data.Length;
             return ret;
         }
-        public static void ListSetCount(List<T> list, int count)
+        public static void SetCount<T>(List<T> list, int count) where T : struct
         {
             var caster = new Caster();
             caster.list = list;
             caster.data.size = count;
         }
-        #endregion
+    }
+    #endregion
 
+
+    // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
+    // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
+    public class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
+    {
+        List<T> m_list;
+        T[] m_data;
+        GCHandle m_gch;
 
         public PinnedList(int size = 0)
         {
             m_data = new T[size];
-            m_list = ListCreateIntrusive(m_data);
+            m_list = PinnedListImpl.CreateIntrusiveList(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
         public PinnedList(T[] data, bool clone = false)
         {
             m_data = clone ? (T[])data.Clone() : data;
-            m_list = ListCreateIntrusive(m_data);
+            m_list = PinnedListImpl.CreateIntrusiveList(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
         public PinnedList(List<T> data, bool clone = false)
         {
             m_list = clone ? new List<T>(data) : data;
-            m_data = ListGetInternalArray(m_list);
+            m_data = PinnedListImpl.GetInternalArray(m_list);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
 
@@ -185,7 +187,7 @@ namespace UTJ.Alembic
             if (m_gch.IsAllocated)
                 m_gch.Free();
             body(m_list);
-            m_data = ListGetInternalArray(m_list);
+            m_data = PinnedListImpl.GetInternalArray(m_list);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
 
@@ -197,7 +199,7 @@ namespace UTJ.Alembic
                     l.Capacity = size;
                 });
             }
-            ListSetCount(m_list, size);
+            PinnedListImpl.SetCount(m_list, size);
         }
 
         public void ResizeDiscard(int size)
@@ -207,19 +209,19 @@ namespace UTJ.Alembic
                 if (m_gch.IsAllocated)
                     m_gch.Free();
                 m_data = new T[size];
-                m_list = ListCreateIntrusive(m_data);
+                m_list = PinnedListImpl.CreateIntrusiveList(m_data);
                 m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
             }
             else
             {
-                ListSetCount(m_list, size);
+                PinnedListImpl.SetCount(m_list, size);
             }
         }
 
         public void Clear()
         {
             if (m_data.Length > 0)
-                ListSetCount(m_list, 0);
+                PinnedListImpl.SetCount(m_list, 0);
         }
 
         public PinnedList<T> Clone()
@@ -234,7 +236,7 @@ namespace UTJ.Alembic
         }
         public void Assign(List<T> sourceList)
         {
-            var sourceData = ListGetInternalArray(sourceList);
+            var sourceData = PinnedListImpl.GetInternalArray(sourceList);
             var count = sourceList.Count;
             ResizeDiscard(count);
             System.Array.Copy(sourceData, m_data, count);
