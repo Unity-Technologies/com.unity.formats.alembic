@@ -818,7 +818,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
             auto& fsp = topology.m_faceset_sps[fsi];
             if (fsp.valid()) {
                 auto& faces = *fsp.getFaces();
-                size_t num_faces = faces.size();
+                size_t num_faces = std::min(topology.m_material_ids.size(), faces.size());
                 for (size_t fi = 0; fi < num_faces; ++fi) {
                     topology.m_material_ids[faces[fi]] = (int)fsi;
                 }
