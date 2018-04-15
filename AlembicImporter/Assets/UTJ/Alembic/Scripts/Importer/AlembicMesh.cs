@@ -212,7 +212,7 @@ namespace UTJ.Alembic
             sample.Sync();
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
-            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
+            if (abcStreamSettings.importVisibility)
             {
                 var visible = m_sampleSummary.visibility;
                 abcTreeNode.gameObject.SetActive(visible);
@@ -343,6 +343,14 @@ namespace UTJ.Alembic
                 meshFilter.sharedMesh = mesh;
                 mesh.name = "dyn: " + go.name;
             }
+
+            // update serialize flag
+            int hideFlags = (int)mesh.hideFlags;
+            if (abcStreamSettings.serializeDynamicMeshes)
+                hideFlags &= ~(int)HideFlags.DontSaveInEditor;
+            else
+                hideFlags |= (int)HideFlags.DontSaveInEditor;
+            mesh.hideFlags = (HideFlags)hideFlags;
 
             return mesh;
         }

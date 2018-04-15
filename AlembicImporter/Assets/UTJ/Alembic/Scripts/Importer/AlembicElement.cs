@@ -9,6 +9,7 @@ namespace UTJ.Alembic
         protected aiObject m_abcObj;
 
         public AlembicTreeNode abcTreeNode { get; set; }
+        public AlembicStreamSettings abcStreamSettings { get { return abcTreeNode.stream.streamDescriptor.settings; } }
         public aiObject abcObject { get { return m_abcObj; } }
         public abstract aiSchema abcSchema { get; }
         public abstract bool visibility { get; }

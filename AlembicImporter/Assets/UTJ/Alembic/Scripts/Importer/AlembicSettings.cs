@@ -22,7 +22,8 @@ namespace UTJ.Alembic
         [SerializeField] public bool importCameras = true;
         [SerializeField] public bool importMeshes = true;
         [SerializeField] public bool importPoints = true;
-
         [SerializeField] public bool importVisibility = true;
+
+        [SerializeField] public bool serializeDynamicMeshes = false;
     }
 }
