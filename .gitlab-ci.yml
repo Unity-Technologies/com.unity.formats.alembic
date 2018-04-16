@@ -19,17 +19,16 @@ build:osx:
     - buildfarm
     - darwin
   script:
-    - if [ -d build ] ; then rm -rf build ; fi
+    - rm -rf build
     - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/MacOS
     - mkdir build
     - cd build
     - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=`pwd` -DCMAKE_PREFIX_PATH=`pwd` \
+        -DCMAKE_PREFIX_PATH=${deploydir} \
         -DALEMBIC_DIR=${deploydir} \
         -DHDF5_USE_STATIC_LIBRARIES=ON \
         -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' \
         -DHDF5_ROOT=${deploydir} \
-        -DOPENEXR_LOCATION=${deploydir} \
         -DUSE_STATIC=ON \
         -DENABLE_DEPLOY=OFF
     - make

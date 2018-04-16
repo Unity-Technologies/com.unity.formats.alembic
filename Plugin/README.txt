@@ -5,11 +5,12 @@ Building on any platform:
         Alembic - the package we're wrapping
         ispc - a compiler for vectorized math routines (gives a 3x speedup)
 2. Build the dependences.
+
 3. Build the abci plugin
 4. Test by dragging an abc file into the project and into the scene, then scrubbing the "time" on the abc file.
 
 To publish you also need:
-5. Get npm for your platform.
+5. Get npm for your platform. So that you can publish
 
 NOTE: source tree requires submodules
 
