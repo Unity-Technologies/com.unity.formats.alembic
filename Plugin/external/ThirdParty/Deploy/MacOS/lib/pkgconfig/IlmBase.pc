@@ -1,0 +1,11 @@
+prefix=/Users/inwoods/Development/alembic-importer-build/build
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+OpenEXR_includedir=${prefix}/include/OpenEXR
+
+Name: IlmBase
+Description: Base math and exception libraries
+Version: 2.2.1
+Libs: -L${libdir} -lImath -lIexMath -lHalf -lIex -lIlmThread -pthread
+Cflags: -pthread -I${OpenEXR_includedir}
