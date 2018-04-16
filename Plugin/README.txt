@@ -1,18 +1,20 @@
 Building on any platform:
-1. Get Alembic.
+
+1. Get Alembic source code
         Get Alembic releases at https://github.com/alembic/alembic/releases
-2. Get HDF5 (needed for legacy alembic files)
-3. Build the abci plugin
-4. Install it in the AlembicImporter project
-5. Test by dragging an abc file into the project and into the scene, then scrubbing the "time" on the abc file.
-
-To publish you also need:
+2. Get HDF5 
+        Needed for legacy alembic files
+3. Get Unity Alemic package source code
+        Get Unity Alembic Plugin at https://github.com/unity3d-jp/AlembicForUnity
+4. Fetch submodules
+        git submodule update --init --recursive
+5. Build the abci plugin
+6. Install it in the AlembicImporter project
+7. Test abc file
+    Drag an abc file into the project and into the scene
+    Scrub the "time" property in the abc's property inspector
 6. Get npm for your platform.
-
-
-NOTE: source tree requires submodules
-
-    git submodule update --init --recursive
+    So that you can publish
 
 ====================
 Building on Windows:
