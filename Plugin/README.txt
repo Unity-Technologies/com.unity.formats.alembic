@@ -6,7 +6,7 @@ Building on any platform:
         Alembic - the package we're wrapping at https://github.com/alembic/alembic/releases
         ispc - a compiler for vectorized math routines (gives a 3x speedup)
 2. Build dependencies
-3. Get Unity Alemic package source code
+3. Get Unity Alembic package source code
         Get Unity Alembic Plugin at https://github.com/unity3d-jp/AlembicForUnity
 4. Fetch submodules
         git submodule update --init --recursive
@@ -15,7 +15,7 @@ Building on any platform:
 7. Test abc file
     Drag an abc file into the project and into the scene
     Scrub the "time" property in the abc's property inspector
-6. Get npm for your platform.
+8. Get npm for your platform.
     So that you can publish
 
 ====================
