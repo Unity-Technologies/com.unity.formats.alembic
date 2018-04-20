@@ -294,6 +294,11 @@ namespace UTJ.Alembic
             public override void Setup(Component c)
             {
                 var target = c as Transform;
+                if (parent == null || target == null)
+				{
+					m_target = null;
+					return;
+				}
                 abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
                 m_target = target;
             }
