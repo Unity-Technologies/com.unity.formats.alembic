@@ -67,7 +67,6 @@ namespace UTJ.Alembic
             m_firstFrame = true;
             m_prevFrame = -1;
 
-            m_recorder.targetBranch = gameObject;
             m_recorder.BeginRecording();
         }
 
