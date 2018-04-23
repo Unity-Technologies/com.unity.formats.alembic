@@ -57,3 +57,9 @@ StreamingAssets*
 # Ignore npmrc because it has your own personal key. It needs to be next
 # to package.json though.
 .npmrc
+
+# Unignore specific folders
+!Plugin/external/ThirdParty/Deploy/MacOS/include
+!Plugin/external/ThirdParty/Deploy/MacOS/lib
+
+
