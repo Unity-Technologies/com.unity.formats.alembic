@@ -294,6 +294,15 @@ namespace UTJ.Alembic
             public override void Setup(Component c)
             {
                 var target = c as Transform;
+                if (parent == null || target == null)
+				{
+					if (parent == null)
+						Debug.LogWarning("parent was null");
+					else
+						Debug.LogWarning("target was null");
+					m_target = null;
+					return;
+				}
                 abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
                 m_target = target;
             }
@@ -703,6 +712,17 @@ namespace UTJ.Alembic
 
             int timeSamplingIndex = GetCurrentTimeSamplingIndex();
             var parent = node.parent;
+
+			if (parent != null && parent.transformCapturer == null)
+			{
+				SetupComponentCapturer(parent);
+				if (!m_nodes.ContainsKey(parent.instanceID) || !m_newNodes.Contains(parent))
+				{
+					m_nodes.Add(parent.instanceID, parent);
+					m_newNodes.Add(parent);
+				}
+			}
+
             node.transformCapturer = new TransformCapturer();
             node.transformCapturer.recorder = this;
             node.transformCapturer.parent = parent == null ? m_root : parent.transformCapturer;
@@ -744,8 +764,8 @@ namespace UTJ.Alembic
             }
 
             // make component capturers
-            foreach (var c in m_nodes)
-                SetupComponentCapturer(c.Value);
+			foreach (var c in m_newNodes)
+				SetupComponentCapturer(c);
         }
         #endregion
 
