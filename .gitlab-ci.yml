@@ -45,8 +45,12 @@ build:windows:
     - rmdir /s /q build
     - md build
     - cd build
-    #- cmake ../Plugin
-    #- make
+	- set builddir %cd%
+	- for /f "usebackq tokens=*" %i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" /latest /property installationPath`) do (set VSDIR=%i)
+    - call "%VSDIR%\Common7\Tools\VsDevCmd.bat"
+	- cd /d %builddir%
+	- msbuild ..\Plugin\abci.sln /t:Build /p:Configuration=Master /p:Platform=x64 /m /nologo /p:OutDir=%builddir%\_out\ /p:IntDir=%builddir%\_tmp\
+
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - C:\Users\builduser\post_build_script.bat
