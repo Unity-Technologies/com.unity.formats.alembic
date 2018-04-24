@@ -1,15 +1,22 @@
 Building on any platform:
+
 1. Get the dependences:
         HDF5 - a legacy file format
         ilmbase - utilities related to openexr
-        Alembic - the package we're wrapping
+        Alembic - the package we're wrapping at https://github.com/alembic/alembic/releases
         ispc - a compiler for vectorized math routines (gives a 3x speedup)
-2. Build the dependences.
-3. Build the abci plugin
-4. Test by dragging an abc file into the project and into the scene, then scrubbing the "time" on the abc file.
-
-To publish you also need:
-5. Get npm for your platform.
+2. Build dependencies
+3. Get Unity Alembic package source code
+        Get Unity Alembic Plugin at https://github.com/unity3d-jp/AlembicForUnity
+4. Fetch submodules
+        git submodule update --init --recursive
+5. Build the abci plugin
+6. Install it in the AlembicImporter project
+7. Test abc file
+    Drag an abc file into the project and into the scene
+    Scrub the "time" property in the abc's property inspector
+8. Get npm for your platform.
+    So that you can publish
 
 ====================
 Building on Windows:
