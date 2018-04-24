@@ -61,5 +61,6 @@ StreamingAssets*
 # Unignore specific folders
 !Plugin/external/ThirdParty/Deploy/MacOS/include
 !Plugin/external/ThirdParty/Deploy/MacOS/lib
+!Plugin/external/ThirdParty/Deploy/Windows/
 
 

@@ -91,6 +91,8 @@
       <Command Condition="'$(Platform)'=='Win32'">External\ispc %(FullPath) -o $(IntDir)%(Filename).obj -h $(IntDir)%(Filename).h --target=sse4,avx --arch=x86 --opt=fast-masked-vload --opt=fast-math</Command>
       <Outputs>$(IntDir)%(Filename).obj;$(IntDir)%(Filename)_sse4.obj;$(IntDir)%(Filename)_avx.obj</Outputs>
       <AdditionalInputs>$(SolutionDir)abci\Foundation\ispcmath.h</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Master|x64'">..\Plugin\external\ThirdParty\Deploy\Windows\ispc %(FullPath) -o $(IntDir)%(Filename).obj -h $(IntDir)%(Filename).h --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Compiling ISPC files</Message>
     </CustomBuild>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -122,14 +124,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib64;$(SolutionDir)external\HDF5\lib64;$(SolutionDir)external\Alembic\lib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\ThirdParty\Deploy\Windows\Alembic\include;external\ThirdParty\Deploy\Windows\ilmbase\include\OpenEXR;external\ThirdParty\Deploy\Windows\HDF5\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\ThirdParty\Deploy\Windows\ilmbase\lib64;$(SolutionDir)external\ThirdParty\Deploy\Windows\HDF5\lib64;$(SolutionDir)external\ThirdParty\Deploy\Windows\Alembic\lib64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
-    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\alembic\include;external\ilmbase\include\OpenEXR;external\HDF5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\ilmbase\lib32;$(SolutionDir)external\HDF5\lib32;$(SolutionDir)external\Alembic\lib32;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)abci;$(ProjectDir)abci\Foundation;$(IntDir);external\ThirdParty\Deploy\Windows\Alembic\include;external\ThirdParty\Deploy\Windows\ilmbase\include\OpenEXR;external\ThirdParty\Deploy\Windows\HDF5\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)external\ThirdParty\Deploy\Windows\ilmbase\lib32;$(SolutionDir)external\ThirdParty\Deploy\Windows\HDF5\lib32;$(SolutionDir)external\ThirdParty\Deploy\Windows\Alembic\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_out\$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_tmp\$(ProjectName)_$(Platform)_$(Configuration)\</IntDir>
   </PropertyGroup>
