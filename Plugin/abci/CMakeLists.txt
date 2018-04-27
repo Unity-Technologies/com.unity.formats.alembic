@@ -21,6 +21,10 @@ target_link_libraries(abci
     ${OPENEXR_Iex_LIBRARY}
     ${OPENEXR_IexMath_LIBRARY}
 )
+if(LINUX)
+    target_link_libraries(abci pthread dl)
+endif()
+
 install(TARGETS abci DESTINATION .)
 
 if(ENABLE_ISPC)
