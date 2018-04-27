@@ -28,7 +28,7 @@ namespace UTJ.Alembic
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
             var trans = abcTreeNode.gameObject.GetComponent<Transform>();
-            if (m_abcData.inherits)
+            if (m_abcData.inherits || m_abcObj.parent == m_abcObj.context.topObject)
             {
                 trans.localPosition = m_abcData.translation;
                 trans.localRotation = m_abcData.rotation;

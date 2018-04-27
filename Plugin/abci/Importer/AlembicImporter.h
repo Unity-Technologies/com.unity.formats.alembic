@@ -266,6 +266,7 @@ abciAPI int             aiTimeSamplingGetSampleCount(aiTimeSampling *self);
 abciAPI double          aiTimeSamplingGetTime(aiTimeSampling *self, int index);
 abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end);
 
+abciAPI aiContext*      aiObjectGetContext(aiObject* obj);
 abciAPI const char*     aiObjectGetName(aiObject* obj);
 abciAPI const char*     aiObjectGetFullName(aiObject* obj);
 abciAPI int             aiObjectGetNumChildren(aiObject* obj);

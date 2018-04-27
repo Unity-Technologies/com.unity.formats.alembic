@@ -306,9 +306,11 @@ namespace UTJ.Alembic
         public IntPtr self;
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
 
+        public aiContext context { get { return aiObjectGetContext(self); } }
         public string name { get { return Marshal.PtrToStringAnsi(aiObjectGetName(self)); } }
         public string fullname { get { return Marshal.PtrToStringAnsi(aiObjectGetFullName(self)); } }
         public bool enabled { set { aiObjectSetEnabled(self, value); } }
+        public aiObject parent { get { return aiObjectGetParent(self); } }
         public int childCount { get { return aiObjectGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
 
@@ -325,8 +327,10 @@ namespace UTJ.Alembic
         }
 
         #region internal
+        [DllImport("abci")] static extern aiContext aiObjectGetContext(IntPtr obj);
         [DllImport("abci")] static extern int aiObjectGetNumChildren(IntPtr obj);
         [DllImport("abci")] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
+        [DllImport("abci")] static extern aiObject aiObjectGetParent(IntPtr obj);
         [DllImport("abci")] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport("abci")] static extern IntPtr aiObjectGetName(IntPtr obj);
         [DllImport("abci")] static extern IntPtr aiObjectGetFullName(IntPtr obj);
