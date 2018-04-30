@@ -74,11 +74,13 @@ test:osx:
 test:windows:
   stage: test
   script: 
+    - @%COMSPEC% /C exit 1 >nul
     #- make test
 
 test:linux:
   stage: test
   script: 
+    - (exit 0)
     #- make test
 
 push_to_packman_staging:
