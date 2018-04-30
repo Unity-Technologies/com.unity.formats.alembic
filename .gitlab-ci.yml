@@ -8,6 +8,9 @@
 
 image: node:6.10.0
 
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    
 stages:
   - build
   - test
