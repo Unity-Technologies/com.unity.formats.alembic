@@ -65,16 +65,19 @@ build:linux:
 test:osx:
   stage: test
   script: 
+    - cd build
     - make test
 
 test:windows:
   stage: test
   script: 
+    - cd build
     - make test
 
 test:linux:
   stage: test
   script: 
+    - cd build
     - make test
 
 push_to_packman_staging:
