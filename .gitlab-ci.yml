@@ -42,7 +42,6 @@ build:windows:
     - buildfarm
     - windows
   script:
-    - rmdir /s /q build
     - md build
     - cd build
     #- cmake ../Plugin
@@ -62,7 +61,6 @@ build:linux:
     - buildfarm
     - darwin
   script:
-    - rm -rf build
     - mkdir build
     - cd build
     #- cmake ../Plugin
