@@ -76,6 +76,9 @@ build:linux:
 
 test:osx:
   stage: test
+  tags:
+    - buildfarm
+    - darwin
   script: 
     - cd build
     - cmake --build . --target test
