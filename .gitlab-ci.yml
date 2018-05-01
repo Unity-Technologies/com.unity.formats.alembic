@@ -77,7 +77,7 @@ build:linux:
 test:osx:
   stage: test
   script: 
-    - cd target
+    - cd build
     - make test
   dependencies:
   - build:osx
