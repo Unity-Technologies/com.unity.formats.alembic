@@ -87,6 +87,9 @@ test:osx:
   
 test:windows:
   stage: test
+  tags:
+    - buildfarm
+    - windows
   script: 
     - cd build
     - cmake --build . --target test
