@@ -22,12 +22,16 @@ build:osx:
     - buildfarm
     - darwin
   script:
-    - rm -rf build
     - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/MacOS
     - mkdir build
     - cd build
     - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
     - make
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    expire_in: 15m
+    paths:
+      - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
@@ -38,11 +42,15 @@ build:windows:
     - buildfarm
     - windows
   script:
-    - rmdir /s /q build
     - md build
     - cd build
     #- cmake ../Plugin
     #- make
+  artifacts:
+    name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
+    expire_in: 15m
+    paths:
+      - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - C:\Users\builduser\post_build_script.bat
@@ -53,11 +61,15 @@ build:linux:
     - buildfarm
     - darwin
   script:
-    - rm -rf build
     - mkdir build
     - cd build
     #- cmake ../Plugin
     #- make
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    expire_in: 15m
+    paths:
+      - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
@@ -67,19 +79,25 @@ test:osx:
   script: 
     - cd build
     - make test
-
+  dependencies:
+  - build:osx
+  
 test:windows:
   stage: test
   script: 
     - cd build
     - make test
-
+  dependencies:
+  - build:windows
+  
 test:linux:
   stage: test
   script: 
     - cd build
     - make test
-
+  dependencies:
+  - build:linux
+  
 push_to_packman_staging:
   stage: push_to_packman_staging
   only:
