@@ -67,10 +67,13 @@ function(add_plugin name)
         add_library(${name}_test_lib ALIAS ${name})
     endif()
 
-    # With the GNU toolchain we can hide the symbols from static libraries
-    # we link in, which lets us save a bit of space after stripping.
+    # Hide symbols so they can be stripped.
+    # The -x and --gc-sections removes some stuff but strip -x removes yet more
+    # (at least on Centos7).
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        target_link_libraries(${name} "-Wl,--exclude-libs,ALL")
+        target_link_libraries(${name} "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script.txt -Wl,-x,--gc-sections")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        target_link_libraries(${name} "-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/version-script-macos.txt -Wl,-x,-dead_strip")
     endif()
 
     if(ENABLE_DEPLOY)
