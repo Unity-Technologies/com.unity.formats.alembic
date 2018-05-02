@@ -29,7 +29,7 @@ build:osx:
     - make
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 15m
+    expire_in: 30m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
@@ -48,7 +48,7 @@ build:windows:
     #- make
   artifacts:
     name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
-    expire_in: 15m
+    expire_in: 30m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
@@ -67,7 +67,7 @@ build:linux:
     #- make
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 15m
+    expire_in: 30m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
