@@ -13,6 +13,7 @@ variables:
     
 stages:
   - build
+  - test
   - push_to_packman_staging
 
 build:osx:
@@ -45,7 +46,7 @@ build:windows:
     - md build
     - cd build
     #- cmake ../Plugin
-    #- make
+    #- make -j4
   artifacts:
     name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
     expire_in: 15m
@@ -65,7 +66,7 @@ build:linux:
     - mkdir build
     - cd build
     - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
-    - make
+    - make -j4
     - make test VERBOSE=1
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
