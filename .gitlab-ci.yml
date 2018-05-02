@@ -81,7 +81,7 @@ test:osx:
     - darwin
   script: 
     - cd build
-    - cmake --build . --target test
+    - make test
   dependencies:
   - build:osx
   
@@ -92,7 +92,7 @@ test:windows:
     - windows
   script: 
     - cd build
-    - cmake --build . --target test
+    - make test
   dependencies:
   - build:windows
   
@@ -100,7 +100,7 @@ test:linux:
   stage: test
   script: 
     - cd build
-    - cmake --build . --target test
+    - make test
   dependencies:
   - build:linux
   
