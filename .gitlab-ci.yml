@@ -13,7 +13,6 @@ variables:
     
 stages:
   - build
-  - test
   - push_to_packman_staging
 
 build:osx:
@@ -27,9 +26,10 @@ build:osx:
     - cd build
     - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
     - make
+    - make test
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 30m
+    expire_in: 15m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
@@ -48,7 +48,7 @@ build:windows:
     #- make
   artifacts:
     name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
-    expire_in: 30m
+    expire_in: 15m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
@@ -61,13 +61,15 @@ build:linux:
     - buildfarm
     - darwin
   script:
+    - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/Linux
     - mkdir build
     - cd build
-    #- cmake ../Plugin
-    #- make
+    - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
+    - make
+    - make test VERBOSE=1
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 30m
+    expire_in: 15m
     paths:
       - build/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
@@ -80,8 +82,7 @@ test:osx:
     - buildfarm
     - darwin
   script: 
-    - cd build
-    - ctest --debug
+    - npm test
   dependencies:
   - build:osx
   
@@ -91,16 +92,14 @@ test:windows:
     - buildfarm
     - windows
   script: 
-    - cd build
-    - make test VERBOSE=1
+    - npm test
   dependencies:
   - build:windows
   
 test:linux:
   stage: test
   script: 
-    - cd build
-    - make test VERBOSE=1
+    - npm test
   dependencies:
   - build:linux
   
