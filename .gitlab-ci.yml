@@ -13,6 +13,7 @@ variables:
     
 stages:
   - build
+  - package
   - test
   - push_to_packman_staging
 
@@ -32,7 +33,7 @@ build:osx:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     expire_in: 15m
     paths:
-      - build/
+      - target/
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
@@ -60,7 +61,7 @@ build:linux:
   stage: build
   tags:
     - buildfarm
-    - darwin
+    - linux
   script:
     - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/Linux
     - mkdir build
@@ -77,32 +78,34 @@ build:linux:
   after_script:
     - /opt/post_build_script.sh
 
-test:osx:
-  stage: test
+package:all:
+  state: package
+  script:
+    #- copy -r AlembicImporter/Assets/com.unity.formats.alembic target/
+    #- copy -r platform bins target/...
+    - md target 
+    - false
   tags:
     - buildfarm
     - darwin
-  script: 
-    - npm test
   dependencies:
-  - build:osx
+    - build:osx
+    #- build:windows
+    #- build:linux
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    expire_in: 15m
+    paths:
+      - target/
   
-test:windows:
+test:all:
   stage: test
   tags:
     - buildfarm
-    - windows
   script: 
     - npm test
   dependencies:
-  - build:windows
-  
-test:linux:
-  stage: test
-  script: 
-    - npm test
-  dependencies:
-  - build:linux
+  - package:all
   
 push_to_packman_staging:
   stage: push_to_packman_staging
@@ -113,3 +116,6 @@ push_to_packman_staging:
   script:
     - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
     - npm publish
+  dependencies:
+    - test:all
+    
