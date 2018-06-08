@@ -25,7 +25,9 @@ NOTE: source tree requires submodules
 Building on Windows:
 ====================
 
-???
+1. run setup.bat or download and unzip manually
+2. run build.bat or open abci.sln and build from visual studio
+3. copy abci.dll from _out into package (com.unity.formats.alembic/Runtime/Plugins/x86[_64]/)
 
 
 ================
