@@ -6,8 +6,15 @@ namespace UTJ.Alembic
     [CustomPropertyDrawer(typeof(Bool))]
     class BoolDrawer : PropertyDrawer
     {
+        private BoolDrawer() { }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if(property == null)
+            {
+                return;
+            }
+
             EditorGUI.BeginProperty(position, label, property);
             position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
