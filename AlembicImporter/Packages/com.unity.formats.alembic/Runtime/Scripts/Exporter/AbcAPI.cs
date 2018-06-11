@@ -65,13 +65,48 @@ namespace UTJ.Alembic
     [Serializable]
     public struct aeConfig
     {
-        public aeArchiveType archiveType;
-        public aeTimeSamplingType timeSamplingType;
-        public float frameRate;
-        public aeXformType xformType;
-        public Bool swapHandedness;
-        public Bool swapFaces;
-        public float scaleFactor;
+        private aeArchiveType archiveType;
+        public aeArchiveType ArchiveType
+        {
+            get { return archiveType; }
+            set { archiveType = value; }
+        }
+        private aeTimeSamplingType timeSamplingType;
+        public aeTimeSamplingType TimeSamplingType
+        {
+            get { return timeSamplingType; }
+            set { timeSamplingType = value; }
+        }
+        private float frameRate;
+        public float FrameRate
+        {
+            get { return frameRate; }
+            set { frameRate = value; }
+        }
+        private aeXformType xformType;
+        public aeXformType XformType
+        {
+            get { return xformType; }
+            set { xformType = value; }
+        }
+        private Bool swapHandedness;
+        public Bool SwapHandedness
+        {
+            get { return swapHandedness; }
+            set { swapHandedness = value; }
+        }
+        private Bool swapFaces;
+        public Bool SwapFaces
+        {
+            get { return swapFaces; }
+            set { swapFaces = value; }
+        }
+        private float scaleFactor;
+        public float ScaleFactor
+        {
+            get { return scaleFactor; }
+            set { scaleFactor = value; }
+        }
 
         public static aeConfig defaultValue
         {
@@ -79,13 +114,13 @@ namespace UTJ.Alembic
             {
                 return new aeConfig
                 {
-                    archiveType = aeArchiveType.Ogawa,
-                    timeSamplingType = aeTimeSamplingType.Uniform,
-                    frameRate = 30.0f,
-                    xformType = aeXformType.TRS,
-                    swapHandedness = true,
-                    swapFaces = false,
-                    scaleFactor = 100.0f,
+                    ArchiveType = aeArchiveType.Ogawa,
+                    TimeSamplingType = aeTimeSamplingType.Uniform,
+                    FrameRate = 30.0f,
+                    XformType = aeXformType.TRS,
+                    SwapHandedness = true,
+                    SwapFaces = false,
+                    ScaleFactor = 100.0f,
                 };
             }
         }
@@ -93,44 +128,149 @@ namespace UTJ.Alembic
 
     public struct aeXformData
     {
-        public Bool visibility;
+        private Bool visibility;
+        public Bool Visibility
+        {
+            get { return visibility; }
+            set { visibility = value; }
+        }
 
-        public Vector3 translation;
-        public Quaternion rotation;
-        public Vector3 scale;
-        public Bool inherits;
+        private Vector3 translation;
+        public Vector3 Translation
+        {
+            get { return translation; }
+            set { translation = value; }
+        }
+
+        private Quaternion rotation;
+        public Quaternion Rotation
+        {
+            get { return rotation; }
+            set { rotation = value; }
+        }
+
+        private Vector3 scale;
+        public Vector3 Scale
+        {
+            get { return scale; }
+            set { scale = value; }
+        }
+        private Bool inherits;
+        public Bool Inherits
+        {
+            get { return inherits; }
+            set { inherits = value; }
+        }
     }
 
     public struct aePointsData
     {
-        public Bool visibility;
+        private Bool visibility;
+        public Bool Visibility
+        {
+            get { return visibility; }
+            set { visibility = value; }
+        }
 
-        public IntPtr positions; // Vector3*
-        public IntPtr velocities; // Vector3*. can be null
-        public IntPtr ids; // uint*. can be null
-        public int count;
+        private IntPtr positions; // Vector3*
+        public IntPtr Positions
+        {
+            get { return positions; }
+            set { positions = value; }
+        }
+
+        private IntPtr velocities; // Vector3*. can be null
+        public IntPtr Velocities
+        {
+            get { return velocities; }
+            set { velocities = value; }
+        }
+
+        private IntPtr ids; // uint*. can be null
+        public IntPtr Ids
+        {
+            get { return ids; }
+            set { ids = value; }
+        }
+
+        private int count;
+        public int Count
+        {
+            get { return count; }
+            set { count = value; }
+        }
     }
 
 
     public struct aeSubmeshData
     {
-        public IntPtr     indices;
-        public int        indexCount;
-        public aeTopology topology;
+        private IntPtr indexes;
+        public IntPtr Indexes
+        {
+            get { return indexes; }
+            set { indexes = value; }
+        }
+
+        private int indexCount;
+        public int IndexCount
+        {
+            get { return IndexCount; }
+            set { indexCount = value; }
+        }
+
+        private aeTopology topology;
+        public aeTopology Topology
+        {
+            get { return topology; }
+            set { topology = value; }
+        }
     };
 
     public struct aePolyMeshData
     {
-        public Bool visibility;
+        private Bool visibility;
+        public Bool Visibility { get; set; }
 
-        public IntPtr   faces;            // int*. if null, assume all faces are triangles
-        public IntPtr   indices;          // int*. 
-        public int      faceCount;
-        public int      indexCount;
+        private IntPtr faces; // int*. if null, assume all faces are triangles
+        public IntPtr Faces { get; set; }
 
-        public IntPtr   points;           // Vector3*
-        public IntPtr   velocities;       // Vector3*. can be null
-        public int      pointCount;
+        private IntPtr indexes; // int*. 
+        public IntPtr  Indexes { get; set; }
+
+        private int faceCount;
+        public int FaceCount
+        {
+            get { return faceCount; }
+            set { faceCount = value; }
+        }
+
+        private int indexCount;
+        public int IndexCount
+        {
+            get { return indexCount; }
+            set { indexCount = value; }
+        }
+
+        private IntPtr points; // Vector3*
+        public IntPtr   Points
+        {
+            get { return points; }
+            set { points = value; }
+        }
+
+        private IntPtr velocities; // Vector3*. can be null
+        public IntPtr   Velocities
+        {
+            get { return velocities; }
+            set { velocities = value; }
+        }
+
+        private int pointCount;
+        public int PointCount
+        {
+            get { return pointCount; }
+            set { pointCount = value; }
+        }
 
         public IntPtr   normals;          // Vector3*. can be null
         public IntPtr   normalIndices;    // int*. if null, assume same as indices
