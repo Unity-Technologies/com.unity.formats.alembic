@@ -4,9 +4,10 @@ using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
 using UnityEditor.Experimental.AssetImporters;
 
-namespace UTJ.Alembic
+namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     public class AlembicImporterEditor : ScriptedImporterEditor

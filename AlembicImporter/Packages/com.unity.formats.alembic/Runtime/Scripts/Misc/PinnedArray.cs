@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
 
     public class PinnedObject<T> : IDisposable
@@ -102,7 +102,10 @@ namespace UTJ.Alembic
         public static implicit operator IntPtr(PinnedArray<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
     }
 
+}
 
+namespace UnityEngine.Formats.Alembic.Sdk
+{
     #region dirty
     public static class PinnedListImpl
     {

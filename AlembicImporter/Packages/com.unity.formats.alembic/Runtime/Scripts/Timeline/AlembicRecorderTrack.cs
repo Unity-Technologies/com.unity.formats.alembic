@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Timeline;
 
-namespace UTJ.Alembic
+
+namespace UnityEngine.Formats.Alembic.Importer
 {
     [System.Serializable]
     [TrackClipType(typeof(AlembicRecorderClip))]

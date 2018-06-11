@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
     [ExecuteInEditMode]
     public class AlembicCamera : AlembicElement

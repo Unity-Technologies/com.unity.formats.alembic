@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Playables;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
     public class AlembicShotPlayable : PlayableBehaviour
     {

@@ -1,8 +1,10 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
 
-namespace UTJ.Alembic
+
+namespace UnityEngine.Formats.Alembic.Importer
 {
     public abstract class AlembicElement : IDisposable 
     {
