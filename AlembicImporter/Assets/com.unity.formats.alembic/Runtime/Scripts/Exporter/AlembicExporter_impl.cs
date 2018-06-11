@@ -149,13 +149,13 @@ namespace UTJ.Alembic
 
                     aeSubmeshData smd;
                     switch (mesh.GetTopology(smi)) {
-                        case MeshTopology.Triangles: smd.topology = aeTopology.Triangles; break;
-                        case MeshTopology.Lines: smd.topology = aeTopology.Lines; break;
-                        case MeshTopology.Quads: smd.topology = aeTopology.Quads; break;
-                        default: smd.topology = aeTopology.Points; break;
+                        case MeshTopology.Triangles: smd.Topology = aeTopology.Triangles; break;
+                        case MeshTopology.Lines: smd.Topology = aeTopology.Lines; break;
+                        case MeshTopology.Quads: smd.Topology = aeTopology.Quads; break;
+                        default: smd.Topology = aeTopology.Points; break;
                     }
-                    smd.indices = indices;
-                    smd.indexCount = indices.Count;
+                    smd.Indexes = indices;
+                    smd.IndexCount = indices.Count;
                     submeshData[smi] = smd;
                 }
             }
@@ -169,9 +169,9 @@ namespace UTJ.Alembic
             public void WriteSample(aeObject abc)
             {
                 var data = default(aePolyMeshData);
-                data.visibility = visibility;
-                data.points = points;
-                data.pointCount = points.Count;
+                data.Visibility = visibility;
+                data.Points = points;
+                data.PointCount = points.Count;
                 data.normals = normals;
                 data.uv0 = uv0;
                 data.uv1 = uv1;
@@ -301,7 +301,7 @@ namespace UTJ.Alembic
             public override void Capture()
             {
                 if (m_target == null) {
-                    m_data.visibility = false;
+                    m_data.Visibility = false;
                 }
                 else
                 {
@@ -314,20 +314,20 @@ namespace UTJ.Alembic
             {
                 var src = m_target;
 
-                dst.visibility = src.gameObject.activeSelf;
-                dst.inherits = m_inherits;
+                dst.Visibility = src.gameObject.activeSelf;
+                dst.Inherits = m_inherits;
                 if (m_invertForward) { src.forward = src.forward * -1.0f; }
                 if (m_inherits)
                 {
-                    dst.translation = m_capturePosition ? src.localPosition : Vector3.zero;
-                    dst.rotation = m_captureRotation ? src.localRotation : Quaternion.identity;
-                    dst.scale = m_captureScale ? src.localScale : Vector3.one;
+                    dst.Translation = m_capturePosition ? src.localPosition : Vector3.zero;
+                    dst.Rotation = m_captureRotation ? src.localRotation : Quaternion.identity;
+                    dst.Scale = m_captureScale ? src.localScale : Vector3.one;
                 }
                 else
                 {
-                    dst.translation = m_capturePosition ? src.position : Vector3.zero;
-                    dst.rotation = m_captureRotation ? src.rotation : Quaternion.identity;
-                    dst.scale = m_captureScale ? src.lossyScale : Vector3.one;
+                    dst.Translation = m_capturePosition ? src.position : Vector3.zero;
+                    dst.Rotation = m_captureRotation ? src.rotation : Quaternion.identity;
+                    dst.Scale = m_captureScale ? src.lossyScale : Vector3.one;
                 }
                 if (m_invertForward) { src.forward = src.forward * -1.0f; }
             }
@@ -502,7 +502,7 @@ namespace UTJ.Alembic
             {
                 if (m_target == null)
                 {
-                    m_data.visibility = false;
+                    m_data.Visibility = false;
                 }
                 else
                 {
@@ -524,9 +524,9 @@ namespace UTJ.Alembic
                     }
 
                     // write!
-                    m_data.visibility = m_target.gameObject.activeSelf;
-                    m_data.positions = m_bufPoints;
-                    m_data.count = count;
+                    m_data.Visibility = m_target.gameObject.activeSelf;
+                    m_data.Positions = m_bufPoints;
+                    m_data.Count = count;
                 }
                 abcObject.WriteSample(ref m_data);
             }
@@ -816,8 +816,8 @@ namespace UTJ.Alembic
             m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
-            if (m_settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
-                Time.maximumDeltaTime = (1.0f / m_settings.conf.frameRate);
+            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+                Time.maximumDeltaTime = (1.0f / m_settings.conf.FrameRate);
 
             Debug.Log("AlembicRecorder: start " + m_settings.outputPath);
             return true;
@@ -878,10 +878,10 @@ namespace UTJ.Alembic
             // advance time
             ++m_frameCount;
             m_timePrev = m_time;
-            switch(m_settings.conf.timeSamplingType)
+            switch(m_settings.conf.TimeSamplingType)
             {
                 case aeTimeSamplingType.Uniform:
-                    m_time = (1.0f / m_settings.conf.frameRate) * m_frameCount;
+                    m_time = (1.0f / m_settings.conf.FrameRate) * m_frameCount;
                     break;
                 case aeTimeSamplingType.Acyclic:
                     m_time += Time.deltaTime;
@@ -890,7 +890,7 @@ namespace UTJ.Alembic
             m_elapsed = Time.realtimeSinceStartup - begin_time;
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
                 AbcAPI.aeWaitMaxDeltaTime();
 
             if (m_settings.detailedLog)
