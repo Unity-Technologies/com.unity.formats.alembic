@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
     [System.ComponentModel.DisplayName("Alembic Shot")]
     public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset

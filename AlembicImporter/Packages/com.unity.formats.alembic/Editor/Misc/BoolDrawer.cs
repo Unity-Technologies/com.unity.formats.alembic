@@ -1,7 +1,8 @@
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
 using UnityEditor;
 
-namespace UTJ.Alembic
+namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomPropertyDrawer(typeof(Bool))]
     class BoolDrawer : PropertyDrawer

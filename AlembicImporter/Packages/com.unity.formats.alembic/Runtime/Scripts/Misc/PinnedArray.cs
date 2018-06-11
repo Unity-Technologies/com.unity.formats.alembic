@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
 
     public class PinnedObject<T> : IDisposable
@@ -103,6 +103,10 @@ namespace UTJ.Alembic
     }
 
 
+}
+
+namespace UnityEngine.Formats.Alembic.Sdk
+{
     // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
     // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
     public class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct

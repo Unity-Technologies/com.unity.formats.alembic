@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Util
 {
     [AddComponentMenu("UTJ/Alembic/Camera Params")]
     [RequireComponent(typeof(Camera))]

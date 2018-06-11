@@ -7,7 +7,7 @@ using UnityEditor;
 #endif
 
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
     public static class VPMatrices
     {

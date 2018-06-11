@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Importer
 {
     public class AlembicStreamDescriptor : ScriptableObject
     {
