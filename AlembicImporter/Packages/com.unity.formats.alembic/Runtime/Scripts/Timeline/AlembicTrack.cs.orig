@@ -1,0 +1,28 @@
+<<<<<<< HEAD:AlembicImporter/Assets/com.unity.formats.alembic/Runtime/Scripts/Timeline/AlembicTrack.cs
+﻿using UnityEngine;
+using UnityEngine.Timeline;
+
+namespace UTJ.Alembic
+{
+    [System.Serializable]
+    [TrackClipType(typeof(AlembicShotAsset))]
+    [TrackColor(0.53f, 0.0f, 0.08f)]
+    public class AlembicTrack : TrackAsset
+    {
+    }
+}
+=======
+﻿using UnityEngine;
+using UnityEngine.Timeline;
+
+namespace UTJ.Alembic
+{
+    [System.Serializable]
+    [TrackClipType(typeof(AlembicShotAsset))]
+    [TrackMediaType(TimelineAsset.MediaType.Script)]
+    [TrackColor(0.53f, 0.0f, 0.08f)]
+    public class AlembicTrack : TrackAsset
+    {
+    }
+}
+>>>>>>> dev-packman:AlembicImporter/Packages/com.unity.formats.alembic/Runtime/Scripts/Timeline/AlembicTrack.cs
