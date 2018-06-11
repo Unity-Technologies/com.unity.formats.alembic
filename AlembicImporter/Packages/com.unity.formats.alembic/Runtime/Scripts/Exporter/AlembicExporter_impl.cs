@@ -53,7 +53,7 @@ namespace UTJ.Alembic
         public CaptureTarget(Type t) { componentType = t; }
     }
 
-    public abstract class ComponentCapturer
+    internal abstract class ComponentCapturer
     {
         public AlembicRecorder recorder;
         public ComponentCapturer parent;
@@ -98,7 +98,7 @@ namespace UTJ.Alembic
                 submeshIndices.Clear();
             }
 
-            public void SetupSubmeshes(aeObject abc, Mesh mesh, Material[] materials)
+            internal void SetupSubmeshes(aeObject abc, Mesh mesh, Material[] materials)
             {
                 for (int smi = 0; smi < mesh.subMeshCount; ++smi)
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
@@ -147,7 +147,7 @@ namespace UTJ.Alembic
                     var indices = submeshIndices[smi];
                     indices.LockList(l => { mesh.GetIndices(l, smi); });
 
-                    aeSubmeshData smd;
+                    aeSubmeshData smd = new aeSubmeshData();
                     switch (mesh.GetTopology(smi)) {
                         case MeshTopology.Triangles: smd.Topology = aeTopology.Triangles; break;
                         case MeshTopology.Lines: smd.Topology = aeTopology.Lines; break;
@@ -166,7 +166,7 @@ namespace UTJ.Alembic
             }
 
 
-            public void WriteSample(aeObject abc)
+            internal void WriteSample(aeObject abc)
             {
                 var data = default(aePolyMeshData);
                 data.Visibility = visibility;
@@ -263,7 +263,7 @@ namespace UTJ.Alembic
             }
         }
 
-        public class RootCapturer : ComponentCapturer
+        internal class RootCapturer : ComponentCapturer
         {
             public RootCapturer(AlembicRecorder rec, aeObject abc)
             {
@@ -275,7 +275,7 @@ namespace UTJ.Alembic
             public override void Capture() { }
         }
 
-        public class TransformCapturer : ComponentCapturer
+        internal class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
             bool m_inherits = false;
@@ -334,7 +334,7 @@ namespace UTJ.Alembic
         }
 
         [CaptureTarget(typeof(Camera))]
-        public class CameraCapturer : ComponentCapturer
+        internal class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
             AlembicCameraParams m_params;
@@ -383,7 +383,7 @@ namespace UTJ.Alembic
         }
 
         [CaptureTarget(typeof(MeshRenderer))]
-        public class MeshCapturer : ComponentCapturer
+        internal class MeshCapturer : ComponentCapturer
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf = new MeshBuffer();
@@ -418,7 +418,7 @@ namespace UTJ.Alembic
         }
 
         [CaptureTarget(typeof(SkinnedMeshRenderer))]
-        public class SkinnedMeshCapturer : ComponentCapturer
+        internal class SkinnedMeshCapturer : ComponentCapturer
         {
             SkinnedMeshRenderer m_target;
             Mesh m_meshSrc;
@@ -484,7 +484,7 @@ namespace UTJ.Alembic
         }
 
         [CaptureTarget(typeof(ParticleSystem))]
-        public class ParticleCapturer : ComponentCapturer
+        internal class ParticleCapturer : ComponentCapturer
         {
             ParticleSystem m_target;
             ParticleSystem.Particle[] m_bufParticles;

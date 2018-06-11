@@ -226,7 +226,7 @@ namespace UTJ.Alembic
         }
     };
 
-    public struct aePolyMeshData
+    internal struct aePolyMeshData
     {
         private Bool visibility;
         public Bool Visibility { get; set; }
@@ -296,7 +296,7 @@ namespace UTJ.Alembic
         public int      submeshCount;
     }
 
-    public struct aeFaceSetData
+    internal struct aeFaceSetData
     {
         public IntPtr faces;
         public int faceCount;
@@ -333,7 +333,7 @@ namespace UTJ.Alembic
         }
     }
 
-    public struct aeContext
+    internal struct aeContext
     {
         public IntPtr self;
 
@@ -363,7 +363,7 @@ namespace UTJ.Alembic
         #endregion
     }
 
-    public struct aeObject
+    internal struct aeObject
     {
         public IntPtr self;
 
