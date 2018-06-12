@@ -24,6 +24,11 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         public static GameObject FindObjectByPath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
             var names = path.Split('/');
             Transform ret = null;
             foreach (var name in names)

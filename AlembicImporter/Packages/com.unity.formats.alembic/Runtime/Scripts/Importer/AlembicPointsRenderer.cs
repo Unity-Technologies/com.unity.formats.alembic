@@ -11,19 +11,24 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     public static class VPMatrices
     {
-        static Dictionary<Camera, Matrix4x4> m_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
-        static Dictionary<Camera, Matrix4x4> m_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
-        static int m_frameCount;
+        static Dictionary<Camera, Matrix4x4> s_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
+        static Dictionary<Camera, Matrix4x4> s_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
+        static int s_frameCount;
 
         public static Matrix4x4 Get(Camera camera)
         {
-            if (Time.frameCount != m_frameCount) SwapMatrixMap();
+            if (Time.frameCount != s_frameCount) SwapMatrixMap();
+
+            if (!camera)
+            {
+                return new Matrix4x4();
+            }
 
             Matrix4x4 m;
-            if (!m_currentVPMatrix.TryGetValue(camera, out m))
+            if (!s_currentVPMatrix.TryGetValue(camera, out m))
             {
                 m = camera.nonJitteredProjectionMatrix * camera.worldToCameraMatrix;
-                m_currentVPMatrix.Add(camera, m);
+                s_currentVPMatrix.Add(camera, m);
             }
 
             return m;
@@ -31,10 +36,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public static Matrix4x4 GetPrevious(Camera camera)
         {
-            if (Time.frameCount != m_frameCount) SwapMatrixMap();
+            if (Time.frameCount != s_frameCount) SwapMatrixMap();
 
             Matrix4x4 m;
-            if (m_previousVPMatrix.TryGetValue(camera, out m))
+            if (s_previousVPMatrix.TryGetValue(camera, out m))
                 return m;
             else
                 return Get(camera);
@@ -42,11 +47,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         static void SwapMatrixMap()
         {
-            var temp = m_previousVPMatrix;
-            m_previousVPMatrix = m_currentVPMatrix;
+            var temp = s_previousVPMatrix;
+            s_previousVPMatrix = s_currentVPMatrix;
             temp.Clear();
-            m_currentVPMatrix = temp;
-            m_frameCount = Time.frameCount;
+            s_currentVPMatrix = temp;
+            s_frameCount = Time.frameCount;
         }
     }
 
@@ -84,11 +89,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             set { m_mesh = value; }
         }
 
-        public Material[] sharedMaterials
-        {
-            get { return m_materials; }
-            set { m_materials = value; }
-        }
+        public Material[] GetsharedMaterials() { return m_materials; }
+        public void SetsharedMaterials(Material[] value) { m_materials = value; }
 
         public Material motionVectorMaterial
         {

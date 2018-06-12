@@ -8,7 +8,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public class AlembicStream : IDisposable
+    public sealed class AlembicStream : IDisposable
     {
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
@@ -17,7 +17,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var fullPath = Application.streamingAssetsPath + path;
             aiContext.DestroyByPath(fullPath);
             s_streams.ForEach(s => {
-                if (s.m_streamDesc.pathToAbc == path)
+                if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = true;
                     s.m_context = default(aiContext);
@@ -30,10 +30,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             s_streams.ForEach(s =>
             {
-                if (s.m_streamDesc.pathToAbc == oldPath)
+                if (s.m_streamDesc.PathToAbc == oldPath)
                 {
                     s.m_streamInterupted = true;
-                    s.m_streamDesc.pathToAbc = newPath;
+                    s.m_streamDesc.PathToAbc = newPath;
                 }
             });
         }
@@ -42,7 +42,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             s_streams.ForEach(s =>
             {
-                if (s.m_streamDesc.pathToAbc == path)
+                if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = false;
                 }
@@ -62,8 +62,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         public aiContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context; } }
         public aiConfig config { get { return m_config; } }
-        public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
-        public bool asyncLoad { set { m_config.asyncLoad = value; } }
+
+        public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
+        public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
 
         public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
 
@@ -79,7 +80,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcPrepareSample();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcBeforeUpdateSamples(child);
         }
 
@@ -87,7 +88,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataBegin();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcBeginSyncData(child);
         }
 
@@ -95,7 +96,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataEnd();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcEndSyncData(child);
         }
 
@@ -124,21 +125,21 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
 
-            var settings = m_streamDesc.settings;
-            m_config.swapHandedness = settings.swapHandedness;
-            m_config.flipFaces = settings.flipFaces;
-            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
-            m_config.scaleFactor = settings.scaleFactor;
-            m_config.normalsMode = settings.normals;
-            m_config.tangentsMode = settings.tangents;
-            m_config.turnQuadEdges = settings.turnQuadEdges;
-            m_config.interpolateSamples = settings.interpolateSamples;
-            m_config.importPointPolygon = settings.importPointPolygon;
-            m_config.importLinePolygon = settings.importLinePolygon;
-            m_config.importTrianglePolygon = settings.importTrianglePolygon;
+            var settings = m_streamDesc.Settings;
+            m_config.swapHandedness = settings.SwapHandedness;
+            m_config.flipFaces = settings.FlipFaces;
+            m_config.aspectRatio = GetAspectRatio(settings.CameraAspectRatio);
+            m_config.scaleFactor = settings.ScaleFactor;
+            m_config.normalsMode = settings.Normals;
+            m_config.tangentsMode = settings.Tangents;
+            m_config.turnQuadEdges = settings.TurnQuadEdges;
+            m_config.interpolateSamples = settings.InterpolateSamples;
+            m_config.importPointPolygon = settings.ImportPointPolygon;
+            m_config.importLinePolygon = settings.ImportLinePolygon;
+            m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
-            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);
+            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.PathToAbc);
 
             if (m_loaded)
             {
@@ -147,7 +148,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.pathToAbc);
+                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.PathToAbc);
             }
         }
 
@@ -165,8 +166,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 m_context.Destroy();
             }
         }
-
-
 
         class ImportContext
         {
@@ -231,18 +230,18 @@ namespace UnityEngine.Formats.Alembic.Importer
                     childGO = childTransf.gameObject;
 
                 childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
-                treeNode.children.Add(childTreeNode);
+                treeNode.Children.Add(childTreeNode);
 
                 // Update
                 AlembicElement elem = null;
 
-                if (obj.AsXform() && m_streamDesc.settings.importXform)
+                if (obj.AsXform() && m_streamDesc.Settings.ImportXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsCamera() && m_streamDesc.settings.importCameras)
+                else if (obj.AsCamera() && m_streamDesc.settings.ImportCameras)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPolyMesh() && m_streamDesc.settings.importMeshes)
+                else if (obj.AsPolyMesh() && m_streamDesc.settings.ImportMeshes)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
+                else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
 
                 if (elem != null)

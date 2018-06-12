@@ -9,13 +9,18 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     public class AlembicMesh : AlembicElement
     {
-        public class Submesh
+        internal class Submesh : IDisposable
         {
-            public PinnedList<int> indices = new PinnedList<int>();
+            public PinnedList<int> indexes = new PinnedList<int>();
             public bool update = true;
+
+            public void Dispose()
+            {
+                indexes.Dispose();
+            }
         }
 
-        public class Split
+        internal class Split : IDisposable
         {
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
             public PinnedList<Vector3> velocities = new PinnedList<Vector3>();
@@ -31,6 +36,17 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public Vector3 center;
             public Vector3 size;
+
+            public void Dispose()
+            {
+                points.Dispose();
+                velocities.Dispose();
+                normals.Dispose();
+                tangents.Dispose();
+                uv0.Dispose();
+                uv1.Dispose();
+                colors.Dispose();
+            }
         }
 
         aiPolyMesh m_abcSchema;
@@ -180,8 +196,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     var submesh = m_submeshes[smi];
                     m_submeshes[smi].update = true;
-                    submesh.indices.ResizeDiscard(m_submeshSummaries[smi].indexCount);
-                    submeshData.indexes = submesh.indices;
+                    submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
+                    submeshData.indexes = submesh.indexes;
                     m_submeshData[smi] = submeshData;
                 }
             }
@@ -301,13 +317,13 @@ namespace UnityEngine.Formats.Alembic.Importer
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
                     if (sum.topology == aiTopology.Triangles)
-                        split.mesh.SetTriangles(submesh.indices.List, sum.submeshIndex, false);
+                        split.mesh.SetTriangles(submesh.indexes.List, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Lines)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Lines, sum.submeshIndex, false);
+                        split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Lines, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Points)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Points, sum.submeshIndex, false);
+                        split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Points, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Quads)
-                        split.mesh.SetIndices(submesh.indices.Array, MeshTopology.Quads, sum.submeshIndex, false);
+                        split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
             }
         }
