@@ -175,8 +175,8 @@ namespace UTJ.Alembic
             
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.pathToAbc = shortAssetPath;
-            streamDescriptor.settings = StreamSettings;
+            streamDescriptor.PathToAbc = shortAssetPath;
+            streamDescriptor.Settings = StreamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
@@ -188,8 +188,8 @@ namespace UTJ.Alembic
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.streamDescriptor = streamDescriptor;
-                streamPlayer.startTime = StartTime;
-                streamPlayer.endTime = EndTime;
+                streamPlayer.StartTime = StartTime;
+                streamPlayer.EndTime = EndTime;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
@@ -321,7 +321,7 @@ namespace UTJ.Alembic
 
             CollectSubAssets(subassets, root);
 
-            streamDescr.hasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
+            streamDescr.HasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
         }
 
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
@@ -362,11 +362,11 @@ namespace UTJ.Alembic
                 apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.sharedMaterials = new Material[] { subassets.pointsMaterial };
+                apr.SetsharedMaterials(new Material[] { subassets.pointsMaterial });
                 apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
-            foreach ( var child in node.children)
+            foreach ( var child in node.Children)
                 CollectSubAssets(subassets, child);
         }
 

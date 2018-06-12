@@ -37,8 +37,8 @@ namespace UTJ.Alembic
 
             var abcStart = (float)targetStreamDesc.abcStartTime;
             var abcEnd = (float)targetStreamDesc.abcEndTime;
-            var start = (float)streamPlayer.startTime;
-            var end = (float)streamPlayer.endTime;
+            var start = (float)streamPlayer.StartTime;
+            var end = (float)streamPlayer.EndTime;
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
             if (EditorGUI.EndChangeCheck())

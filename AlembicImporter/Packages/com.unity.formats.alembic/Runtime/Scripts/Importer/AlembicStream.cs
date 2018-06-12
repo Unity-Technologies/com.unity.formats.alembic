@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace UTJ.Alembic
 {
-    public class AlembicStream : IDisposable
+    public sealed class AlembicStream : IDisposable
     {
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
@@ -16,7 +16,7 @@ namespace UTJ.Alembic
             var fullPath = Application.streamingAssetsPath + path;
             aiContext.DestroyByPath(fullPath);
             s_streams.ForEach(s => {
-                if (s.m_streamDesc.pathToAbc == path)
+                if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = true;
                     s.m_context = default(aiContext);
@@ -29,10 +29,10 @@ namespace UTJ.Alembic
         {
             s_streams.ForEach(s =>
             {
-                if (s.m_streamDesc.pathToAbc == oldPath)
+                if (s.m_streamDesc.PathToAbc == oldPath)
                 {
                     s.m_streamInterupted = true;
-                    s.m_streamDesc.pathToAbc = newPath;
+                    s.m_streamDesc.PathToAbc = newPath;
                 }
             });
         }
@@ -41,7 +41,7 @@ namespace UTJ.Alembic
         {
             s_streams.ForEach(s =>
             {
-                if (s.m_streamDesc.pathToAbc == path)
+                if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = false;
                 }
@@ -62,8 +62,9 @@ namespace UTJ.Alembic
         public aiContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context; } }
         public aiConfig config { get { return m_config; } }
-        public float vertexMotionScale { set { m_config.vertexMotionScale = value; } }
-        public bool asyncLoad { set { m_config.asyncLoad = value; } }
+
+        public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
+        public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
         public bool ignoreVisibility { get { return m_ignoreVisibility; } set { m_ignoreVisibility = value; } }
 
         public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
@@ -80,7 +81,7 @@ namespace UTJ.Alembic
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcPrepareSample();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcBeforeUpdateSamples(child);
         }
 
@@ -88,7 +89,7 @@ namespace UTJ.Alembic
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataBegin();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcBeginSyncData(child);
         }
 
@@ -96,7 +97,7 @@ namespace UTJ.Alembic
         {
             if (node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataEnd();
-            foreach (var child in node.children)
+            foreach (var child in node.Children)
                 AbcEndSyncData(child);
         }
 
@@ -125,21 +126,21 @@ namespace UTJ.Alembic
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
 
-            var settings = m_streamDesc.settings;
-            m_config.swapHandedness = settings.swapHandedness;
-            m_config.swapFaceWinding = settings.swapFaceWinding;
-            m_config.aspectRatio = GetAspectRatio(settings.cameraAspectRatio);
-            m_config.scaleFactor = settings.scaleFactor;
-            m_config.normalsMode = settings.normals;
-            m_config.tangentsMode = settings.tangents;
-            m_config.turnQuadEdges = settings.turnQuadEdges;
-            m_config.interpolateSamples = settings.interpolateSamples;
-            m_config.importPointPolygon = settings.importPointPolygon;
-            m_config.importLinePolygon = settings.importLinePolygon;
-            m_config.importTrianglePolygon = settings.importTrianglePolygon;
+            var settings = m_streamDesc.Settings;
+            m_config.swapHandedness = settings.SwapHandedness;
+            m_config.swapFaceWinding = settings.SwapFaceWinding;
+            m_config.aspectRatio = GetAspectRatio(settings.CameraAspectRatio);
+            m_config.scaleFactor = settings.ScaleFactor;
+            m_config.normalsMode = settings.Normals;
+            m_config.tangentsMode = settings.Tangents;
+            m_config.turnQuadEdges = settings.TurnQuadEdges;
+            m_config.interpolateSamples = settings.InterpolateSamples;
+            m_config.importPointPolygon = settings.ImportPointPolygon;
+            m_config.importLinePolygon = settings.ImportLinePolygon;
+            m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
-            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.pathToAbc);
+            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.PathToAbc);
 
             if (m_loaded)
             {
@@ -148,7 +149,7 @@ namespace UTJ.Alembic
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.pathToAbc);
+                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.PathToAbc);
             }
         }
 
@@ -166,8 +167,6 @@ namespace UTJ.Alembic
                 m_context.Destroy();
             }
         }
-
-
 
         class ImportContext
         {
@@ -232,18 +231,18 @@ namespace UTJ.Alembic
                     childGO = childTransf.gameObject;
 
                 childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
-                treeNode.children.Add(childTreeNode);
+                treeNode.Children.Add(childTreeNode);
 
                 // Update
                 AlembicElement elem = null;
 
-                if (obj.AsXform() && m_streamDesc.settings.importXform)
+                if (obj.AsXform() && m_streamDesc.Settings.ImportXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsCamera() && m_streamDesc.settings.importCamera)
+                else if (obj.AsCamera() && m_streamDesc.Settings.ImportCamera)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPolyMesh() && m_streamDesc.settings.importPolyMesh)
+                else if (obj.AsPolyMesh() && m_streamDesc.Settings.ImportPolyMesh)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
-                else if (obj.AsPoints() && m_streamDesc.settings.importPoints)
+                else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
 
                 if (elem != null)

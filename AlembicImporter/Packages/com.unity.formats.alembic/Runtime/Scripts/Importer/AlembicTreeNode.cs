@@ -6,12 +6,17 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
 
-    public class AlembicTreeNode : IDisposable
+    public sealed class AlembicTreeNode : IDisposable
     {
-        public AlembicStream stream;
-        public GameObject gameObject;
-        public AlembicElement abcObject;
-        public List<AlembicTreeNode> children = new List<AlembicTreeNode>();
+        public AlembicStream stream { get; set; }
+        public GameObject gameObject { get; set; }
+        public AlembicElement abcObject { get; set; }
+
+        private List<AlembicTreeNode> children = new List<AlembicTreeNode>();
+        public List<AlembicTreeNode> Children
+        {
+            get { return children; }
+        }
 
         public void Dispose()
         {
@@ -21,9 +26,9 @@ namespace UTJ.Alembic
 
         public void ResetTree()
         {
-            foreach (var c in children)
+            foreach (var c in Children)
                 c.Dispose();
-            children.Clear();
+            Children.Clear();
 
             if (abcObject != null)
             {
@@ -61,7 +66,7 @@ namespace UTJ.Alembic
             if (go == gameObject)
                 return this;
 
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 var x = child.FindNode(go);
                 if (x != null)

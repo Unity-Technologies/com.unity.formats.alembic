@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace UTJ.Alembic
 {
-    public class AlembicRecorderBehaviour : PlayableBehaviour
+    public class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
     {
         #region fields
         AlembicRecorder m_recorder = new AlembicRecorder();
@@ -131,6 +131,11 @@ namespace UTJ.Alembic
         public void OnFrameEnd()
         {
             ProcessRecording();
+        }
+
+        public void Dispose()
+        {
+            m_recorder.Dispose();
         }
         #endregion
     }

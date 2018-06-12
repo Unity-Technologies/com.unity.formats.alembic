@@ -1,8 +1,10 @@
 using UnityEngine;
+using System;
 
 namespace UTJ.Alembic
 {
-    public class ReadOnlyAttribute : PropertyAttribute
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public sealed class ReadOnlyAttribute : PropertyAttribute
     {
     }
 }

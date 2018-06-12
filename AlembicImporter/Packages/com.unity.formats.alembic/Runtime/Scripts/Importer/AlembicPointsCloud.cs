@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UTJ.Alembic
 {
     [ExecuteInEditMode]
-    public class AlembicPointsCloud : MonoBehaviour
+    internal class AlembicPointsCloud : MonoBehaviour
     {
         // members
         [ReadOnly] public PinnedList<Vector3> m_points = new PinnedList<Vector3>();
