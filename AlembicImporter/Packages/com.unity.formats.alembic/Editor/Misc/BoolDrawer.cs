@@ -7,8 +7,6 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomPropertyDrawer(typeof(Bool))]
     class BoolDrawer : PropertyDrawer
     {
-        private BoolDrawer() { }
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if(property == null)
