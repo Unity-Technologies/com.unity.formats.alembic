@@ -190,50 +190,50 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 extents;
     }
 
-    public struct aiSubmeshData
+    internal struct aiSubmeshData
     {
-        public IntPtr indices;
+        public IntPtr indexes;
     }
 
     public struct aiXformData
     {
-        public Bool visibility;
+        public Bool visibility { get; set; }
 
-        public Vector3 translation;
-        public Quaternion rotation;
-        public Vector3 scale;
-        public Bool inherits;
+        public Vector3 translation { get; set; }
+        public Quaternion rotation { get; set; }
+        public Vector3 scale { get; set; }
+        public Bool inherits { get; set; }
     }
 
     public struct aiCameraData
     {
-        public Bool visibility;
+        public Bool visibility { get; set; }
 
-        public float nearClippingPlane;
-        public float farClippingPlane;
-        public float fieldOfView;   // in degree. vertical one
-        public float aspectRatio;
+        public float nearClippingPlane { get; set; }
+        public float farClippingPlane { get; set; }
+        public float fieldOfView { get; set; }   // in degree. vertical one
+        public float aspectRatio { get; set; }
 
-        public float focusDistance; // in cm
-        public float focalLength;   // in mm
-        public float aperture;      // in cm. vertical one
+        public float focusDistance { get; set; } // in cm
+        public float focalLength { get; set; }   // in mm
+        public float aperture { get; set; }      // in cm. vertical one
     }
 
     public struct aiPointsSummary
     {
-        public Bool hasVelocities;
-        public Bool hasIDs;
-        public Bool constantPoints;
-        public Bool constantVelocities;
-        public Bool constantIDs;
+        public Bool hasVelocities { get; set; }
+        public Bool hasIDs { get; set; }
+        public Bool constantPoints { get; set; }
+        public Bool constantVelocities { get; set; }
+        public Bool constantIDs { get; set; }
     };
 
     public struct aiPointsSampleSummary
     {
-        public int count;
+        public int count { get; set; }
     }
 
-    public struct aiPointsData
+    internal struct aiPointsData
     {
         public Bool visibility;
 
@@ -276,7 +276,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void SetConfig(ref aiConfig conf) { aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { aiContextUpdateSamples(self, time); }
 
-        public aiObject topObject { get { return aiContextGetTopObject(self); } }
+        internal aiObject topObject { get { return aiContextGetTopObject(self); } }
         public int timeSamplingCount { get { return aiContextGetTimeSamplingCount(self); } }
         public aiTimeSampling GetTimeSampling(int i) { return aiContextGetTimeSampling(self, i); }
         public void GetTimeRange(ref double begin, ref double end) { aiContextGetTimeRange(self, ref begin, ref end); }
@@ -321,10 +321,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int childCount { get { return aiObjectGetNumChildren(self); } }
         public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
 
-        public aiXform AsXform() { return aiObjectAsXform(self); }
-        public aiCamera AsCamera() { return aiObjectAsCamera(self); }
-        public aiPoints AsPoints() { return aiObjectAsPoints(self); }
-        public aiPolyMesh AsPolyMesh() { return aiObjectAsPolyMesh(self); }
+        internal aiXform AsXform() { return aiObjectAsXform(self); }
+        internal aiCamera AsCamera() { return aiObjectAsCamera(self); }
+        internal aiPoints AsPoints() { return aiObjectAsPoints(self); }
+        internal aiPolyMesh AsPolyMesh() { return aiObjectAsPolyMesh(self); }
 
         public void EachChild(Action<aiObject> act)
         {
@@ -346,7 +346,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         #endregion
     }
 
-    public struct aiSchema
+    internal struct aiSchema
     {
         public IntPtr self;
         public static implicit operator bool(aiSchema v) { return v.self != IntPtr.Zero; }
@@ -357,7 +357,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public bool isConstant { get { return aiSchemaIsConstant(self); } }
         public bool isDataUpdated { get { aiSchemaSync(self); return aiSchemaIsDataUpdated(self); } }
-        public aiSample sample { get { return aiSchemaGetSample(self); } }
+        internal aiSample sample { get { return aiSchemaGetSample(self); } }
 
         public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
 
@@ -374,7 +374,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct aiXform
+    internal struct aiXform
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -389,7 +389,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct aiCamera
+    internal struct aiCamera
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -404,7 +404,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct aiPolyMesh
+    internal struct aiPolyMesh
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -421,14 +421,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct aiPoints
+    internal struct aiPoints
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
         public static implicit operator bool(aiPoints v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSchema(aiPoints v) { return v.schema; }
 
-        public aiPointsSample sample { get { return aiSchemaGetSample(self); } }
+        internal aiPointsSample sample { get { return aiSchemaGetSample(self); } }
         public bool sort { set { aiPointsSetSort(self, value); } }
         public Vector3 sortBasePosition { set { aiPointsSetSortBasePosition(self, value); } }
 
@@ -443,7 +443,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    public struct aiSample
+    internal struct aiSample
     {
         public IntPtr self;
         public static implicit operator bool(aiSample v) { return v.self != IntPtr.Zero; }
@@ -453,7 +453,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiPointsSample(aiSample v) { aiPointsSample tmp; tmp.self = v.self; return tmp; }
     }
 
-    public struct aiXformSample
+    internal struct aiXformSample
     {
         public IntPtr self;
         public static implicit operator bool(aiXformSample v) { return v.self != IntPtr.Zero; }
@@ -466,7 +466,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         #endregion
     }
 
-    public struct aiCameraSample
+    internal struct aiCameraSample
     {
         public IntPtr self;
         public static implicit operator bool(aiCameraSample v) { return v.self != IntPtr.Zero; }
@@ -479,7 +479,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         #endregion
     }
 
-    public struct aiPolyMeshSample
+    internal struct aiPolyMeshSample
     {
         public IntPtr self;
         public static implicit operator bool(aiPolyMeshSample v) { return v.self != IntPtr.Zero; }
@@ -500,7 +500,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         #endregion
     }
 
-    public struct aiPointsSample
+    internal struct aiPointsSample
     {
         public IntPtr self;
         public static implicit operator bool(aiPointsSample v) { return v.self != IntPtr.Zero; }

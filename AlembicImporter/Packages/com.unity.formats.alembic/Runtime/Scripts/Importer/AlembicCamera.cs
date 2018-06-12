@@ -4,17 +4,17 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [ExecuteInEditMode]
-    public class AlembicCamera : AlembicElement
+    internal class AlembicCamera : AlembicElement
     {
         aiCamera m_abcSchema;
         aiCameraData m_abcData;
         Camera m_camera;
         bool m_ignoreClippingPlanes = false;
 
-        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        internal override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_abcData.visibility; } }
 
-        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+        internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup( abcObj, abcSchema);
             m_abcSchema = (aiCamera)abcSchema;

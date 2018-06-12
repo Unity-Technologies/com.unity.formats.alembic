@@ -15,14 +15,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         [ReadOnly] public Vector3 m_boundsCenter;
         [ReadOnly] public Vector3 m_boundsExtents;
 
-        public AlembicPoints m_abc;
+        internal AlembicPoints m_abc;
 
         [Tooltip("Sort points by distance from sortFrom object")]
         public bool m_sort = false;
         public Transform m_sortFrom;
 
         // properties
-        public AlembicPoints abcPoints { get { return m_abc; } }
+        internal AlembicPoints abcPoints { get { return m_abc; } }
         public PinnedList<Vector3> points { get { return m_points; } }
         public PinnedList<Vector3> velocities { get { return m_velocities; } }
         public PinnedList<uint> ids { get { return m_ids; } }

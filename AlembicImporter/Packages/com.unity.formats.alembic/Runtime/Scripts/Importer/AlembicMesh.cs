@@ -44,7 +44,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         List<Split> m_splits = new List<Split>();
         List<Submesh> m_submeshes = new List<Submesh>();
 
-        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        internal override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_sampleSummary.visibility; } }
 
         public aiMeshSummary summary { get { return m_summary; } }
@@ -84,7 +84,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 m_splits[i].active = false;
         }
 
-        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+        internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup(abcObj, abcSchema);
             m_abcSchema = (aiPolyMesh)abcSchema;
@@ -181,7 +181,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     var submesh = m_submeshes[smi];
                     m_submeshes[smi].update = true;
                     submesh.indices.ResizeDiscard(m_submeshSummaries[smi].indexCount);
-                    submeshData.indices = submesh.indices;
+                    submeshData.indexes = submesh.indices;
                     m_submeshData[smi] = submeshData;
                 }
             }

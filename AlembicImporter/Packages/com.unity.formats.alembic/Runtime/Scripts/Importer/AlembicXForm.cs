@@ -3,15 +3,15 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public class AlembicXform : AlembicElement
+    internal class AlembicXform : AlembicElement
     {
         aiXform m_abcSchema;
         aiXformData m_abcData;
 
-        public override aiSchema abcSchema { get { return m_abcSchema; } }
+        internal override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_abcData.visibility; } }
 
-        public override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+        internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup(abcObj, abcSchema);
 
