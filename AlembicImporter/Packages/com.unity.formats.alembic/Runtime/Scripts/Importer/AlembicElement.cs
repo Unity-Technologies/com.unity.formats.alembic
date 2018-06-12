@@ -10,7 +10,7 @@ namespace UTJ.Alembic
 
         public AlembicTreeNode abcTreeNode { get; set; }
         public aiObject abcObject { get { return m_abcObj; } }
-        public abstract aiSchema abcSchema { get; }
+        internal abstract aiSchema abcSchema { get; }
         public abstract bool visibility { get; }
 
         public T GetOrAddComponent<T>() where T : Component
@@ -27,7 +27,7 @@ namespace UTJ.Alembic
                 abcTreeNode.RemoveAlembicObject(this);
         }
 
-        public virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+        internal virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             m_abcObj = abcObj;
         }
