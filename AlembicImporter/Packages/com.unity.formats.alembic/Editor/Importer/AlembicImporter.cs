@@ -364,7 +364,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.SetsharedMaterials(new Material[] { subassets.pointsMaterial });
+                apr.SetSharedMaterials(new Material[] { subassets.pointsMaterial });
                 apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 

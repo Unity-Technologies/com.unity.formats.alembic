@@ -89,8 +89,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             set { m_mesh = value; }
         }
 
-        public Material[] GetsharedMaterials() { return m_materials; }
-        public void SetsharedMaterials(Material[] value) { m_materials = value; }
+        public Material[] GetSharedMaterials() { return m_materials; }
+        public void SetSharedMaterials(Material[] value) { m_materials = value; }
 
         public Material motionVectorMaterial
         {
