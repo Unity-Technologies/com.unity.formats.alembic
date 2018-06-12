@@ -1,6 +1,7 @@
-﻿using UnityEngine.Playables;
+﻿using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.Playables;
 
-namespace UnityEngine.Formats.Alembic.Importer
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     public class AlembicShotPlayable : PlayableBehaviour
     {

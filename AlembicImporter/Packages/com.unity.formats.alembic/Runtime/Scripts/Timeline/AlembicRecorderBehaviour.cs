@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Util;
 
-namespace UnityEngine.Formats.Alembic.Util
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     public class AlembicRecorderBehaviour : PlayableBehaviour
     {

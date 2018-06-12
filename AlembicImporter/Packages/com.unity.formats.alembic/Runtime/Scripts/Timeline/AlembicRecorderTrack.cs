@@ -3,7 +3,7 @@ using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Timeline;
 
 
-namespace UnityEngine.Formats.Alembic.Importer
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.Serializable]
     [TrackClipType(typeof(AlembicRecorderClip))]

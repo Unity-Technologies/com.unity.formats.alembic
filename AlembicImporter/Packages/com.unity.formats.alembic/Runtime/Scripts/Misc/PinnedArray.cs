@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace UnityEngine.Formats.Alembic.Importer
+namespace UnityEngine.Formats.Alembic.Sdk
 {
 
     public class PinnedObject<T> : IDisposable
@@ -102,11 +102,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         public static implicit operator IntPtr(PinnedArray<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
     }
 
-
-}
-
-namespace UnityEngine.Formats.Alembic.Sdk
-{
     // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
     // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
     public class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
