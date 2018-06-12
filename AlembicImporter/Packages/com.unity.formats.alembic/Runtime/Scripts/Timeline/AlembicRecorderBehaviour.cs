@@ -135,9 +135,15 @@ namespace UnityEngine.Formats.Alembic.Timeline
             ProcessRecording();
         }
 
-        public void Dispose()
+        protected virtual void Dispose(bool v)
         {
             m_recorder.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

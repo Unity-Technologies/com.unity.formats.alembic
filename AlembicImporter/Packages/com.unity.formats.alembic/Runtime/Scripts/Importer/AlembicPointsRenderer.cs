@@ -340,5 +340,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_rotation = m_rotationOld = trans.rotation;
             m_scale = m_scaleOld = trans.lossyScale;
         }
+
+        private void OnDestroy()
+        {
+            m_cbPoints.Dispose();
+            m_cbVelocities.Dispose();
+            m_cbIDs.Dispose();
+            m_cmdMotionVector.Dispose();
+            Array.ForEach<ComputeBuffer>(m_cbArgs, cb => cb.Dispose());
+        }
     }
 }
