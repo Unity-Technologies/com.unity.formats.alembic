@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityEngine.Formats.Alembic.Util
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     [ExecuteInEditMode]
     class AlembicWaitForEndOfFrame: MonoBehaviour

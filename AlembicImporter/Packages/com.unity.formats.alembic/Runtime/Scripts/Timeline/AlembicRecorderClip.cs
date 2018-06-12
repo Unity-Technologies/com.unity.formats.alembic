@@ -4,7 +4,7 @@ using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-namespace UnityEngine.Formats.Alembic.Util
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName("Alembic Recorder Clip")]
     public class AlembicRecorderClip : PlayableAsset, ITimelineClipAsset

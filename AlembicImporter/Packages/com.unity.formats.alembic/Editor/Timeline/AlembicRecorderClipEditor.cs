@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Timeline;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.Timeline;
 
-namespace UnityEditor.Formats.Alembic.Importer
+namespace UnityEditor.Formats.Alembic.Timeline
 {
     [CustomEditor(typeof(AlembicRecorderClip))]
     public class AlembicRecorderClipEditor : Editor
