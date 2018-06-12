@@ -446,7 +446,7 @@ namespace UTJ.Alembic
         [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern void aiClearContextsWithPath(string path);
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
