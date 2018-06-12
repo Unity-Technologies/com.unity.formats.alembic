@@ -7,7 +7,7 @@ using UnityEngine.Timeline;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName("Alembic Recorder Clip")]
-    public class AlembicRecorderClip : PlayableAsset, ITimelineClipAsset
+    internal class AlembicRecorderClip : PlayableAsset, ITimelineClipAsset
     {
         [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
         [SerializeField] bool m_ignoreFirstFrame = true;

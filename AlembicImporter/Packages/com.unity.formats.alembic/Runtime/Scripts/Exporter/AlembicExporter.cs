@@ -5,13 +5,11 @@ using UnityEditor;
 #endif
 using UnityEngine.Formats.Alembic.Util;
 
-
-
 namespace UnityEngine.Formats.Alembic.Exporter
 {
     [ExecuteInEditMode]
     [AddComponentMenu("UTJ/Alembic/Exporter")]
-    public class AlembicExporter : MonoBehaviour
+    internal class AlembicExporter : MonoBehaviour
     {
         #region fields
         [SerializeField] AlembicRecorder m_recorder = new AlembicRecorder();

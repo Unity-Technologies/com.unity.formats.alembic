@@ -6,7 +6,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
     [System.Serializable]
     [TrackClipType(typeof(AlembicShotAsset))]
     [TrackColor(0.53f, 0.0f, 0.08f)]
-    public class AlembicTrack : TrackAsset
+    internal class AlembicTrack : TrackAsset
     {
     }
 }

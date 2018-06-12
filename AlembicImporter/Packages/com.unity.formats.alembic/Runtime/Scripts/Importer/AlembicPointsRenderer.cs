@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public static class VPMatrices
+    internal static class VPMatrices
     {
         static Dictionary<Camera, Matrix4x4> s_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
         static Dictionary<Camera, Matrix4x4> s_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
@@ -57,7 +57,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
     [ExecuteInEditMode]
     [RequireComponent(typeof(AlembicPointsCloud))]
-    public class AlembicPointsRenderer : MonoBehaviour
+    internal class AlembicPointsRenderer : MonoBehaviour
     {
         [SerializeField] Mesh m_mesh;
         [SerializeField] Material[] m_materials;

@@ -7,7 +7,7 @@ using UnityEngine.Timeline;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName("Alembic Shot")]
-    public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset
+    internal class AlembicShotAsset : PlayableAsset, ITimelineClipAsset
     {
         AlembicStreamPlayer m_stream;
 

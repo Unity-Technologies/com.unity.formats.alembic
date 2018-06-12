@@ -1,0 +1,78 @@
+﻿#pragma kernel UpdateVelocity
+#pragma kernel UpdatePosition
+
+#define KernelBlockSize 256
+
+
+struct Params
+{
+    int particle_count;
+    float particle_size;
+    float rcp_particle_size2;
+    float pressure_stiffness;
+    float wall_stiffness;
+    float timestep;
+    float pad[2];
+};
+
+struct Particle
+{
+    float4 position;
+    float4 velocity;
+};
+
+StructuredBuffer<Params>        g_params;
+RWStructuredBuffer<Particle>    g_particles;
+RWStructuredBuffer<float3>      g_positions;
+RWStructuredBuffer<float3>      g_velocities;
+
+
+[numthreads(KernelBlockSize,1,1)]
+void UpdateVelocity(uint3 dtid : SV_DispatchThreadID)
+{
+    uint tid = dtid.x;
+
+    float particle_size2 = g_params[0].particle_size * 2.0f;
+
+    // particle-particle collision
+    float3 pos = g_particles[tid].position.xyz;
+    float3 accel = { 0.0f, 0.0f, 0.0f };
+    for (int j = 0; j < g_params[0].particle_count; ++j) {
+        float3 pos2 = g_particles[j].position.xyz;
+        float3 diff = pos2 - pos;
+        float dist = length(diff);
+        float3 dir = diff * g_params[0].rcp_particle_size2;
+        float3 a = dir * (min(0.0f, dist - particle_size2) * g_params[0].pressure_stiffness);
+        accel = accel + a * (dist > 0.0, 1.0);
+    }
+
+    // particle-floor collision
+    const float3 floor_normal = { 0.0f, 1.0f, 0.0f };
+    const float floor_distance = -g_params[0].particle_size;
+    {
+        float d = dot(pos, floor_normal) + floor_distance;
+        accel += floor_normal * (-min(0.0f, d) * g_params[0].wall_stiffness);
+    }
+
+    // apply graviy
+    const float3 gravity_direction = { 0.0f, -1.0f, 0.0f };
+    const float gravity_strength = 5.0f;
+    accel += gravity_direction * gravity_strength;
+
+    g_particles[tid].velocity.xyz += accel * g_params[0].timestep;
+}
+
+
+[numthreads(KernelBlockSize,1,1)]
+void UpdatePosition(uint3 dtid : SV_DispatchThreadID)
+{
+    uint tid = dtid.x;
+
+    float3 vel = g_particles[tid].velocity.xyz;
+    float3 pos = g_particles[tid].position.xyz;
+    pos = pos + vel * g_params[0].timestep;
+
+    g_particles[tid].position.xyz = pos;
+    g_positions[tid] = pos;
+    g_velocities[tid] = vel;
+}
