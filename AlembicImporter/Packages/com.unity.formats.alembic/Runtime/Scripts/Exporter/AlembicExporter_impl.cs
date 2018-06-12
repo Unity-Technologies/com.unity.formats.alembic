@@ -614,6 +614,7 @@ namespace UTJ.Alembic
             public void Dispose()
             {
                 m_mbuf.Dispose();
+                m_cbuf.Dispose();
             }
         }
 

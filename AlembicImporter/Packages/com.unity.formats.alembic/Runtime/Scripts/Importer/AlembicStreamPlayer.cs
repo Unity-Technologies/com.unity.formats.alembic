@@ -102,7 +102,7 @@ namespace UTJ.Alembic
 
         void OnApplicationQuit()
         {
-            AbcAPI.aiCleanup();
+            NativeMethods.aiCleanup();
         }
         #endregion
     }

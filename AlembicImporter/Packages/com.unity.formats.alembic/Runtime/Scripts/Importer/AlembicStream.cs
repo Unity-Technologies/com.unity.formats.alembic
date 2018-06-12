@@ -186,7 +186,7 @@ namespace UTJ.Alembic
             m_importContext = new ImportContext
             {
                 alembicTreeNode = node,
-                ss = AbcAPI.aiTimeToSampleSelector(time),
+                ss = NativeMethods.aiTimeToSampleSelector(time),
                 createMissingNodes = createMissingNodes,
             };
             top.EachChild(ImportCallback);
@@ -217,12 +217,12 @@ namespace UTJ.Alembic
                 {
                     if (!ic.createMissingNodes)
                     {
-                        obj.enabled = false;
+                        obj.SetEnabled(false);
                         return;
                     }
                     else
                     {
-                        obj.enabled = true;
+                        obj.SetEnabled(true);
                     }
 
                     childGO = new GameObject { name = childName };
@@ -257,7 +257,7 @@ namespace UTJ.Alembic
             }
             else
             {
-                obj.enabled = false;
+                obj.SetEnabled(false);
             }
 
             ic.alembicTreeNode = childTreeNode;
