@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public class AlembicStreamDescriptor : ScriptableObject
+    internal class AlembicStreamDescriptor : ScriptableObject
     {
         [SerializeField]
         private string pathToAbc;

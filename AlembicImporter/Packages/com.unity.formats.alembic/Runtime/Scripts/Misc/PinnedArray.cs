@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace UnityEngine.Formats.Alembic.Sdk
 {
 
-    public class PinnedObject<T> : IDisposable
+    internal class PinnedObject<T> : IDisposable
     {
         T m_data;
         GCHandle m_gch;
@@ -42,7 +42,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    public class PinnedArray<T> : IDisposable, IEnumerable<T> where T : struct
+    internal class PinnedArray<T> : IDisposable, IEnumerable<T> where T : struct
     {
         T[] m_data;
         GCHandle m_gch;
