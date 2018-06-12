@@ -74,7 +74,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
-            m_settings.targetBranch = targetBranch;
+            m_settings.TargetBranch = targetBranch;
 
             var ret = ScriptPlayable<AlembicRecorderBehaviour>.Create(graph);
             var behaviour = ret.GetBehaviour();

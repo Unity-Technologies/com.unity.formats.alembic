@@ -80,20 +80,20 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     public struct aiConfig
     {
-        public aiNormalsMode normalsMode;
-        public aiTangentsMode tangentsMode;
-        public float scaleFactor;
-        public float aspectRatio;
-        public float vertexMotionScale;
-        public int splitUnit;
-        public Bool swapHandedness;
-        public Bool flipFaces;
-        public Bool interpolateSamples;
-        public Bool turnQuadEdges;
-        public Bool asyncLoad;
-        public Bool importPointPolygon;
-        public Bool importLinePolygon;
-        public Bool importTrianglePolygon;
+        public aiNormalsMode normalsMode { get; set; }
+        public aiTangentsMode tangentsMode { get; set; }
+        public float scaleFactor { get; set; }
+        public float aspectRatio { get; set; }
+        public float vertexMotionScale { get; set; }
+        public int splitUnit { get; set; }
+        public Bool swapHandedness { get; set; }
+        public Bool flipFaces { get; set; }
+        public Bool interpolateSamples { get; set; }
+        public Bool turnQuadEdges { get; set; }
+        public Bool asyncLoad { get; set; }
+        public Bool importPointPolygon { get; set; }
+        public Bool importLinePolygon { get; set; }
+        public Bool importTrianglePolygon { get; set; }
 
         public void SetDefaults()
         {
@@ -120,59 +120,59 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     public struct aiSampleSelector
     {
-        public ulong requestedIndex;
-        public double requestedTime;
-        public int requestedTimeIndexType;
+        public ulong requestedIndex { get; set; }
+        public double requestedTime { get; set; }
+        public int requestedTimeIndexType { get; set; }
     }
 
     public struct aiMeshSummary
     {
-        public aiTopologyVariance topologyVariance;
-        public Bool hasVelocities;
-        public Bool hasNormals;
-        public Bool hasTangents;
-        public Bool hasUV0;
-        public Bool hasUV1;
-        public Bool hasColors;
-        public Bool constantPoints;
-        public Bool constantVelocities;
-        public Bool constantNormals;
-        public Bool constantTangents;
-        public Bool constantUV0;
-        public Bool constantUV1;
-        public Bool constantColors;
+        public aiTopologyVariance topologyVariance { get; set; }
+        public Bool hasVelocities { get; set; }
+        public Bool hasNormals { get; set; }
+        public Bool hasTangents { get; set; }
+        public Bool hasUV0 { get; set; }
+        public Bool hasUV1 { get; set; }
+        public Bool hasColors { get; set; }
+        public Bool constantPoints { get; set; }
+        public Bool constantVelocities { get; set; }
+        public Bool constantNormals { get; set; }
+        public Bool constantTangents { get; set; }
+        public Bool constantUV0 { get; set; }
+        public Bool constantUV1 { get; set; }
+        public Bool constantColors { get; set; }
     }
 
     public struct aiMeshSampleSummary
     {
-        public Bool visibility;
+        public Bool visibility { get; set; }
 
-        public int splitCount;
-        public int submeshCount;
-        public int vertexCount;
-        public int indexCount;
-        public Bool topologyChanged;
+        public int splitCount { get; set; }
+        public int submeshCount { get; set; }
+        public int vertexCount { get; set; }
+        public int indexCount { get; set; }
+        public Bool topologyChanged { get; set; }
     }
 
     public struct aiMeshSplitSummary
     {
-        public int submeshCount;
-        public int submeshOffset;
-        public int vertexCount;
-        public int vertexOffset;
-        public int indexCount;
-        public int indexOffset;
+        public int submeshCount { get; set; }
+        public int submeshOffset { get; set; }
+        public int vertexCount { get; set; }
+        public int vertexOffset { get; set; }
+        public int indexCount { get; set; }
+        public int indexOffset { get; set; }
     }
 
     public struct aiSubmeshSummary
     {
-        public int splitIndex;
-        public int submeshIndex;
-        public int indexCount;
-        public aiTopology topology;
+        public int splitIndex { get; set; }
+        public int submeshIndex { get; set; }
+        public int indexCount { get; set; }
+        public aiTopology topology { get; set; }
     }
 
-    public struct aiPolyMeshData
+    internal struct aiPolyMeshData
     {
         public IntPtr positions;
         public IntPtr velocities;
@@ -488,7 +488,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetSummary(ref aiMeshSampleSummary dst) { aiPolyMeshGetSampleSummary(self, ref dst); }
         public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { aiPolyMeshGetSplitSummaries(self, dst); }
         public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { aiPolyMeshGetSubmeshSummaries(self, dst); }
-        public void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
+        internal void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
         public void Sync() { aiSampleSync(self); }
 
         #region internal

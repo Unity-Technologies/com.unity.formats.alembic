@@ -23,33 +23,142 @@ namespace UnityEngine.Formats.Alembic.Util
     [Serializable]
     public class AlembicRecorderSettings
     {
-        public string outputPath  = "Output/Output.abc";
+        [SerializeField]
+        private string outputPath = "Output/Output.abc";
+        public string OutputPath
+        {
+            get { return outputPath; }
+            set { outputPath = value; }
+        }
+
+        [SerializeField]
         public aeConfig conf = aeConfig.defaultValue;
-        public ExportScope scope = ExportScope.EntireScene;
-        public GameObject targetBranch;
-        public bool fixDeltaTime = true;
 
-        public bool assumeNonSkinnedMeshesAreConstant = true;
+        [SerializeField]
+        private ExportScope scope = ExportScope.EntireScene;
+        public ExportScope Scope
+        {
+            get { return scope; }
+            set { scope = value; }
+        }
 
-        public bool captureMeshRenderer = true;
-        public bool captureSkinnedMeshRenderer = true;
-        public bool captureParticleSystem = true;
-        public bool captureCamera = true;
+        [SerializeField]
+        private GameObject targetBranch;
+        public GameObject TargetBranch
+        {
+            get { return targetBranch; }
+            set { targetBranch = value; }
+        }
 
-        public bool meshNormals = true;
-        public bool meshUV0 = true;
-        public bool meshUV1 = true;
-        public bool meshColors = true;
-        public bool meshSubmeshes = true;
+        [SerializeField]
+        private bool fixDeltaTime = true;
+        public bool FixDeltaTime
+        {
+            get { return fixDeltaTime; }
+            set { fixDeltaTime = value; }
+        }
 
-        public bool detailedLog = true;
-        public bool debugLog = false;
+        [SerializeField]
+        private bool assumeNonSkinnedMeshesAreConstant = true;
+        public bool AssumeNonSkinnedMeshesAreConstant
+        {
+            get { return assumeNonSkinnedMeshesAreConstant; }
+            set { assumeNonSkinnedMeshesAreConstant = value; }
+        }
+
+        [SerializeField]
+        private bool captureMeshRenderer = true;
+        public bool CaptureMeshRenderer
+        {
+            get { return captureMeshRenderer; }
+            set { captureMeshRenderer = value; }
+        }
+
+        [SerializeField]
+        private bool captureSkinnedMeshRenderer = true;
+        public bool CaptureSkinnedMeshRenderer
+        {
+            get { return captureSkinnedMeshRenderer; }
+            set { captureSkinnedMeshRenderer = value; }
+        }
+
+        [SerializeField]
+        private bool captureParticleSystem = true;
+        public bool CaptureParticleSystem
+        {
+            get { return captureParticleSystem; }
+            set { captureParticleSystem = value; }
+        }
+
+        [SerializeField]
+        private bool captureCamera = true;
+        public bool CaptureCamera
+        {
+            get { return captureCamera; }
+            set { captureCamera = value; }
+        }
+
+        [SerializeField]
+        private bool meshNormals = true;
+        public bool MeshNormals
+        {
+            get { return meshNormals; }
+            set { meshNormals = value; }
+        }
+
+        [SerializeField]
+        private bool meshUV0 = true;
+        public bool MeshUV0
+        {
+            get { return meshUV0; }
+            set { meshUV0 = value; }
+        }
+
+        [SerializeField]
+        private bool meshUV1 = true;
+        public bool MeshUV1
+        {
+            get { return meshUV1; }
+            set { meshUV1 = value; }
+        }
+
+        [SerializeField]
+        private bool meshColors = true;
+        public bool MeshColors
+        {
+            get { return meshColors; }
+            set { meshColors = value; }
+        }
+
+        [SerializeField]
+        private bool meshSubmeshes = true;
+        public bool MeshSubmeshes
+        {
+            get { return meshSubmeshes; }
+            set { meshSubmeshes = value; }
+        }
+
+        [SerializeField]
+        private bool detailedLog = true;
+        public bool DetailedLog
+        {
+            get { return detailedLog; }
+            set { detailedLog = value; }
+        }
+
+        [SerializeField]
+        private bool debugLog = false;
+        public bool DebugLog
+        {
+            get { return debugLog; }
+            set { debugLog = value; }
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class CaptureTarget : Attribute
+    public sealed class CaptureTarget : Attribute
     {
-        public Type componentType;
+        public Type componentType { get; set; }
 
         public CaptureTarget(Type t) { componentType = t; }
     }
@@ -72,10 +181,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public class AlembicRecorder : IDisposable
+    public sealed class AlembicRecorder : IDisposable
     {
         #region internal types
-        public class MeshBuffer
+        internal class MeshBuffer : IDisposable
         {
             public bool visibility = true;
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
@@ -99,7 +208,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 submeshIndices.Clear();
             }
 
-            internal void SetupSubmeshes(aeObject abc, Mesh mesh, Material[] materials)
+            internal void SetupSubmeshes(aeObject abc, Mesh mesh)
             {
                 for (int smi = 0; smi < mesh.subMeshCount; ++smi)
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
@@ -163,7 +272,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Capture(Mesh mesh, AlembicRecorderSettings settings)
             {
-                Capture(mesh, settings.meshNormals, settings.meshUV0, settings.meshUV1, settings.meshColors);
+                Capture(mesh, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
 
@@ -181,9 +290,20 @@ namespace UnityEngine.Formats.Alembic.Util
                 data.submeshCount = submeshData.Count;
                 abc.WriteSample(ref data);
             }
+
+            public void Dispose()
+            {
+                points.Dispose();
+                normals.Dispose();
+                uv0.Dispose();
+                uv1.Dispose();
+                colors.Dispose();
+                submeshData.Dispose();
+                submeshIndices.ForEach(i => i.Dispose());
+            }
         }
 
-        public class ClothBuffer
+        internal class ClothBuffer : IDisposable
         {
             public PinnedList<int> remap = new PinnedList<int>();
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
@@ -191,9 +311,6 @@ namespace UnityEngine.Formats.Alembic.Util
             public Transform rootBone;
             public int numRemappedVertices;
 
-            [DllImport("abci")] static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
-            [DllImport("abci")] static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
-            [DllImport("abci")] static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
                 mbuf.Capture(mesh, false, false, false, false);
@@ -201,10 +318,10 @@ namespace UnityEngine.Formats.Alembic.Util
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
                 remap.Resize(mbuf.points.Count);
-                numRemappedVertices = aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
+                numRemappedVertices = NativeMethods.aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
             }
 
-            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicRecorderSettings settings)
+            internal void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicRecorderSettings settings)
             {
                 if (mesh == null || cloth == null)
                 {
@@ -223,7 +340,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 
-                if (settings.meshNormals)
+                if (settings.MeshNormals)
                     normals.Assign(cloth.normals);
                 else
                     normals.Clear();
@@ -232,8 +349,8 @@ namespace UnityEngine.Formats.Alembic.Util
                 if (rootBone != null)
                 {
                     var mat = Matrix4x4.TRS(rootBone.localPosition, rootBone.localRotation, Vector3.one);
-                    aeApplyMatrixP(vertices, vertices.Count, ref mat);
-                    aeApplyMatrixV(normals, normals.Count, ref mat);
+                    NativeMethods.aeApplyMatrixP(vertices, vertices.Count, ref mat);
+                    NativeMethods.aeApplyMatrixV(normals, normals.Count, ref mat);
                 }
 
                 // remap vertices and normals
@@ -247,20 +364,27 @@ namespace UnityEngine.Formats.Alembic.Util
                 }
 
                 // capture other components
-                if (settings.meshUV0)
+                if (settings.MeshUV0)
                     mbuf.uv0.LockList(ls => mesh.GetUVs(0, ls));
                 else
                     mbuf.uv0.Clear();
 
-                if (settings.meshUV1)
+                if (settings.MeshUV1)
                     mbuf.uv1.LockList(ls => mesh.GetUVs(1, ls));
                 else
                     mbuf.uv1.Clear();
 
-                if (settings.meshColors)
+                if (settings.MeshColors)
                     mbuf.colors.LockList(ls => mesh.GetColors(ls));
                 else
                     mbuf.colors.Clear();
+            }
+
+            public void Dispose()
+            {
+                remap.Dispose();
+                vertices.Dispose();
+                normals.Dispose();
             }
         }
 
@@ -378,13 +502,13 @@ namespace UnityEngine.Formats.Alembic.Util
                     dst.focalLength = m_params.m_focalLength;
                     dst.focusDistance = m_params.m_focusDistance;
                     dst.aperture = m_params.m_aperture;
-                    dst.aspectRatio = m_params.GetAspectRatio();
+                    dst.aspectRatio = m_params.AspectRatio;
                 }
             }
         }
 
         [CaptureTarget(typeof(MeshRenderer))]
-        internal class MeshCapturer : ComponentCapturer
+        internal class MeshCapturer : ComponentCapturer, IDisposable
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf = new MeshBuffer();
@@ -397,8 +521,8 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
 
                 abcObject = parent.abcObject.NewPolyMesh(m_target.name, timeSamplingIndex);
-                if (recorder.settings.meshSubmeshes)
-                    m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
+                if (recorder.settings.MeshSubmeshes)
+                    m_mbuf.SetupSubmeshes(abcObject, mesh);
             }
 
             public override void Capture()
@@ -411,15 +535,20 @@ namespace UnityEngine.Formats.Alembic.Util
                 {
                     m_mbuf.visibility = m_target.gameObject.activeSelf;
                     var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                    if (!recorder.m_settings.assumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
+                    if (!recorder.m_settings.AssumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
                         m_mbuf.Capture(mesh, recorder.m_settings);
                 }
                 m_mbuf.WriteSample(abcObject);
             }
+
+            public void Dispose()
+            {
+                m_mbuf.Dispose();
+            }
         }
 
         [CaptureTarget(typeof(SkinnedMeshRenderer))]
-        internal class SkinnedMeshCapturer : ComponentCapturer
+        internal class SkinnedMeshCapturer : ComponentCapturer, IDisposable
         {
             SkinnedMeshRenderer m_target;
             Mesh m_meshSrc;
@@ -437,8 +566,8 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
 
                 abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
-                if (recorder.settings.meshSubmeshes)
-                    m_mbuf.SetupSubmeshes(abcObject, mesh, m_target.sharedMaterials);
+                if (recorder.settings.MeshSubmeshes)
+                    m_mbuf.SetupSubmeshes(abcObject, mesh);
 
                 m_meshSrc = target.sharedMesh;
                 m_cloth = m_target.GetComponent<Cloth>();
@@ -482,10 +611,15 @@ namespace UnityEngine.Formats.Alembic.Util
                 }
                 m_mbuf.WriteSample(abcObject);
             }
+
+            public void Dispose()
+            {
+                m_mbuf.Dispose();
+            }
         }
 
         [CaptureTarget(typeof(ParticleSystem))]
-        internal class ParticleCapturer : ComponentCapturer
+        internal class ParticleCapturer : ComponentCapturer, IDisposable
         {
             ParticleSystem m_target;
             ParticleSystem.Particle[] m_bufParticles;
@@ -530,6 +664,13 @@ namespace UnityEngine.Formats.Alembic.Util
                     m_data.Count = count;
                 }
                 abcObject.WriteSample(ref m_data);
+            }
+
+            public void Dispose()
+            {
+                m_bufPoints.Dispose();
+                m_bufRotations.Dispose();
+                
             }
         }
 
@@ -595,7 +736,7 @@ namespace UnityEngine.Formats.Alembic.Util
             get { return m_settings; }
             set { m_settings = value; }
         }
-        public GameObject targetBranch { get { return m_settings.targetBranch; } set { m_settings.targetBranch = value; } }
+        public GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
         public bool recording { get { return m_recording; } }
         public int frameCount { get { return m_frameCount; } }
         #endregion
@@ -623,7 +764,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 T[] GetTargets<T>() where T : Component
         {
-            if (m_settings.scope == ExportScope.TargetBranch && targetBranch != null)
+            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch != null)
             {
                 return targetBranch.GetComponentsInChildren<T>();
             }
@@ -635,7 +776,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         Component[] GetTargets(Type type)
         {
-            if (m_settings.scope == ExportScope.TargetBranch && targetBranch != null)
+            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch != null)
                 return targetBranch.GetComponentsInChildren(type);
             else
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
@@ -686,13 +827,13 @@ namespace UnityEngine.Formats.Alembic.Util
                 }
             }
 
-            if (!m_settings.captureCamera)
+            if (!m_settings.CaptureCamera)
                 m_capturerTable[typeof(Camera)].enabled = false;
-            if (!m_settings.captureMeshRenderer)
+            if (!m_settings.CaptureMeshRenderer)
                 m_capturerTable[typeof(MeshRenderer)].enabled = false;
-            if (!m_settings.captureSkinnedMeshRenderer)
+            if (!m_settings.CaptureSkinnedMeshRenderer)
                 m_capturerTable[typeof(SkinnedMeshRenderer)].enabled = false;
-            if (!m_settings.captureParticleSystem)
+            if (!m_settings.CaptureParticleSystem)
                 m_capturerTable[typeof(ParticleSystem)].enabled = false;
         }
 
@@ -764,7 +905,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 Debug.LogWarning("AlembicRecorder: already recording");
                 return false;
             }
-            if (m_settings.scope == ExportScope.TargetBranch && targetBranch == null)
+            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch == null)
             {
                 Debug.LogWarning("AlembicRecorder: target object is not set");
                 return false;
@@ -772,7 +913,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
             {
-                var dir = Path.GetDirectoryName(m_settings.outputPath);
+                var dir = Path.GetDirectoryName(m_settings.OutputPath);
                 if (!Directory.Exists(dir))
                 {
                     try
@@ -796,9 +937,9 @@ namespace UnityEngine.Formats.Alembic.Util
             }
 
             m_ctx.SetConfig(ref m_settings.conf);
-            if (!m_ctx.OpenArchive(m_settings.outputPath))
+            if (!m_ctx.OpenArchive(m_settings.OutputPath))
             {
-                Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.outputPath);
+                Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.OutputPath);
                 m_ctx.Destroy();
                 return false;
             }
@@ -817,10 +958,10 @@ namespace UnityEngine.Formats.Alembic.Util
             m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
-            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.FixDeltaTime)
                 Time.maximumDeltaTime = (1.0f / m_settings.conf.FrameRate);
 
-            Debug.Log("AlembicRecorder: start " + m_settings.outputPath);
+            Debug.Log("AlembicRecorder: start " + m_settings.OutputPath);
             return true;
         }
 
@@ -835,7 +976,7 @@ namespace UnityEngine.Formats.Alembic.Util
             m_ctx.Destroy(); // flush archive
             m_recording = false;
 
-            Debug.Log("AlembicRecorder: end: " + m_settings.outputPath);
+            Debug.Log("AlembicRecorder: end: " + m_settings.OutputPath);
         }
 
         public void ProcessRecording()
@@ -891,10 +1032,10 @@ namespace UnityEngine.Formats.Alembic.Util
             m_elapsed = Time.realtimeSinceStartup - begin_time;
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.fixDeltaTime)
+            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.FixDeltaTime)
                 AbcAPI.aeWaitMaxDeltaTime();
 
-            if (m_settings.detailedLog)
+            if (m_settings.DetailedLog)
             {
                 Debug.Log("AlembicRecorder: frame " + m_frameCount + " (" + (m_elapsed * 1000.0f) + " ms)");
             }
