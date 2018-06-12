@@ -3,10 +3,11 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine.Formats.Alembic.Util;
 
 
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Exporter
 {
     [ExecuteInEditMode]
     [AddComponentMenu("UTJ/Alembic/Exporter")]

@@ -6,10 +6,12 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
+using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
-namespace UTJ.Alembic
+namespace UnityEditor.Formats.Alembic.Importer
 {
     public class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
     {

@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Util;
 
 namespace UTJ.Alembic
 {

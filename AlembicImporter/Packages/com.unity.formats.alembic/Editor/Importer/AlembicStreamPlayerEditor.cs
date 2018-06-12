@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Formats.Alembic.Importer;
 
-namespace UTJ.Alembic
+namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicStreamPlayer)),CanEditMultipleObjects]
     public class AlembicStreamPlayerEditor : Editor

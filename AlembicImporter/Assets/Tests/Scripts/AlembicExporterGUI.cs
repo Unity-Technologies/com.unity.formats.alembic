@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Exporter;
+using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.UI;
 
 namespace UTJ.Alembic

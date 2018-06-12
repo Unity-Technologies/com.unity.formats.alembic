@@ -1,9 +1,10 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName("Alembic Shot")]
     public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset

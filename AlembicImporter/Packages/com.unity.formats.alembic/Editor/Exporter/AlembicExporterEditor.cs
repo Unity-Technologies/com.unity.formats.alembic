@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.Formats.Alembic.Exporter;
+using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Util;
 
-namespace UTJ.Alembic
+namespace UnityEditor.Formats.Alembic.Exporter
 {
 
     [CustomEditor(typeof(AlembicExporter))]

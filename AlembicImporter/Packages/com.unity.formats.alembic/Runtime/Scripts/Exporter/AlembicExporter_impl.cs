@@ -7,10 +7,11 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine.Formats.Alembic.Sdk;
 
 
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Util
 {
     public enum ExportScope
     {

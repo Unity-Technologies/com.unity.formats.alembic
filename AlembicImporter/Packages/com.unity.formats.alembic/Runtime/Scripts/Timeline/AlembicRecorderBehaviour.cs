@@ -4,8 +4,10 @@ using UnityEngine.Playables;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Util;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Timeline
 {
     public class AlembicRecorderBehaviour : PlayableBehaviour
     {

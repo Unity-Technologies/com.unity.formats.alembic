@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace UTJ.Alembic
+namespace UnityEngine.Formats.Alembic.Sdk
 {
     public enum aeArchiveType
     {
