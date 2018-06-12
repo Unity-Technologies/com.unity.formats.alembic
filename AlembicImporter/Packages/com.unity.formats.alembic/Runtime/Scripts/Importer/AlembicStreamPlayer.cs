@@ -8,8 +8,9 @@ namespace UnityEngine.Formats.Alembic.Importer
     {
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         public AlembicStream abcStream { get; set; }
-        public AlembicStreamDescriptor streamDescriptor { get; set; }
+        public AlembicStreamDescriptor streamDescriptor;
 
+        [SerializeField]
         private double startTime = double.MinValue;
         public double StartTime
         {
@@ -17,6 +18,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             set { startTime = value; }
         }
 
+        [SerializeField]
         private double endTime = double.MaxValue;
         public double EndTime
         {
@@ -24,8 +26,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             set { endTime = value; }
         }
 
-        public float currentTime { get; set; }
+        [SerializeField]
+        private float currentTime;
+        public float CurrentTime
+        {
+            get { return currentTime; }
+            set { currentTime = value; }
+        }
 
+        [SerializeField]
         private float vertexMotionScale = 1.0f;
         public float VertexMotionScale
         {
@@ -33,6 +42,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             set { vertexMotionScale = value; }
         }
 
+        [SerializeField]
         private bool asyncLoad = true;
         public bool AsyncLoad
         {
@@ -48,7 +58,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void ClampTime()
         {
-            currentTime = Mathf.Clamp((float)currentTime, 0.0f, (float)duration);
+            CurrentTime = Mathf.Clamp((float)CurrentTime, 0.0f, (float)duration);
         }
 
         public void LoadStream(bool createMissingNodes)
@@ -85,13 +95,13 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return;
 
             ClampTime();
-            if (lastUpdateTime != currentTime || forceUpdate)
+            if (lastUpdateTime != CurrentTime || forceUpdate)
             {
                 abcStream.SetVertexMotionScale(VertexMotionScale);
                 abcStream.SetAsyncLoad(AsyncLoad);
-                if (abcStream.AbcUpdateBegin(StartTime + currentTime))
+                if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
-                    lastUpdateTime = currentTime;
+                    lastUpdateTime = CurrentTime;
                     forceUpdate = false;
                     updateStarted = true;
                 }
