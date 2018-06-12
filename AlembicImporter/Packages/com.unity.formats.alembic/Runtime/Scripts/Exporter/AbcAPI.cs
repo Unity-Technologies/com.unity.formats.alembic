@@ -65,42 +65,49 @@ namespace UTJ.Alembic
     [Serializable]
     public struct aeConfig
     {
+        [SerializeField]
         private aeArchiveType archiveType;
         public aeArchiveType ArchiveType
         {
             get { return archiveType; }
             set { archiveType = value; }
         }
+        [SerializeField]
         private aeTimeSamplingType timeSamplingType;
         public aeTimeSamplingType TimeSamplingType
         {
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
         }
+        [SerializeField]
         private float frameRate;
         public float FrameRate
         {
             get { return frameRate; }
             set { frameRate = value; }
         }
+        [SerializeField]
         private aeXformType xformType;
         public aeXformType XformType
         {
             get { return xformType; }
             set { xformType = value; }
         }
+        [SerializeField]
         private Bool swapHandedness;
         public Bool SwapHandedness
         {
             get { return swapHandedness; }
             set { swapHandedness = value; }
         }
+        [SerializeField]
         private Bool swapFaces;
         public Bool SwapFaces
         {
             get { return swapFaces; }
             set { swapFaces = value; }
         }
+        [SerializeField]
         private float scaleFactor;
         public float ScaleFactor
         {
