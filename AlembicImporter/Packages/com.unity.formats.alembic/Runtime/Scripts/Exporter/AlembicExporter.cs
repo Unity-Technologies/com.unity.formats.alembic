@@ -35,9 +35,9 @@ namespace UTJ.Alembic
         void InitializeOutputPath()
         {
             var settings = m_recorder.settings;
-            if (settings.outputPath == null || settings.outputPath == "")
+            if (string.IsNullOrEmpty(settings.OutputPath))
             {
-                settings.outputPath = "Output/" + gameObject.name + ".abc";
+                settings.OutputPath = "Output/" + gameObject.name + ".abc";
             }
         }
 

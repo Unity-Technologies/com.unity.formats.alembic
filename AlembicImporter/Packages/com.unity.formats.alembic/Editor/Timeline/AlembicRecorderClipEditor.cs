@@ -31,7 +31,7 @@ namespace UTJ.Alembic
                 EditorGUILayout.BeginHorizontal();
 
                 EditorGUI.BeginChangeCheck();
-                settings.outputPath = EditorGUILayout.TextField(settings.outputPath);
+                settings.OutputPath = EditorGUILayout.TextField(settings.OutputPath);
                 if (EditorGUI.EndChangeCheck())
                     dirty = true;
 
@@ -41,15 +41,15 @@ namespace UTJ.Alembic
                     var filename = "";
                     try
                     {
-                        dir = Path.GetDirectoryName(settings.outputPath);
-                        filename = Path.GetFileName(settings.outputPath);
+                        dir = Path.GetDirectoryName(settings.OutputPath);
+                        filename = Path.GetFileName(settings.OutputPath);
                     }
                     catch (Exception) { }
 
                     var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
                     if (path.Length > 0)
                     {
-                        settings.outputPath = path;
+                        settings.OutputPath = path;
                         dirty = true;
                     }
                 }

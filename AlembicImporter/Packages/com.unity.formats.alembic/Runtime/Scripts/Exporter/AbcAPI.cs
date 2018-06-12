@@ -214,7 +214,7 @@ namespace UTJ.Alembic
         private int indexCount;
         public int IndexCount
         {
-            get { return IndexCount; }
+            get { return indexCount; }
             set { indexCount = value; }
         }
 
@@ -302,7 +302,7 @@ namespace UTJ.Alembic
         public int faceCount;
     }
 
-    public struct aeCameraData
+    internal struct aeCameraData
     {
         public Bool visibility;
 
@@ -337,99 +337,58 @@ namespace UTJ.Alembic
     {
         public IntPtr self;
 
-        public aeObject topObject { get { return aeGetTopObject(self); } }
+        public aeObject topObject { get { return NativeMethods.aeGetTopObject(self); } }
 
-        public static aeContext Create() { return aeCreateContext(); }
-        public void Destroy() { aeDestroyContext(self); self = IntPtr.Zero; }
-        public void SetConfig(ref aeConfig conf) { aeSetConfig(self, ref conf); }
-        public bool OpenArchive(string path) { return aeOpenArchive(self, path); }
-        public int AddTimeSampling(float start_time) { return aeAddTimeSampling(self, start_time); }
-        public void AddTime(float start_time) { aeAddTime(self, start_time); }
-        public void MarkFrameBegin() { aeMarkFrameBegin(self); }
-        public void MarkFrameEnd() { aeMarkFrameEnd(self); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aeContext aeCreateContext();
-        [DllImport(Abci.Lib)] static extern void aeDestroyContext(IntPtr ctx);
-
-        [DllImport(Abci.Lib)] static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
-        [DllImport(Abci.Lib)] static extern Bool aeOpenArchive(IntPtr ctx, string path);
-        [DllImport(Abci.Lib)] static extern aeObject aeGetTopObject(IntPtr ctx);
-        [DllImport(Abci.Lib)] static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
-        // relevant only if plingType is acyclic. if tsi==-1, add time to all time samplings.
-        [DllImport(Abci.Lib)] static extern void aeAddTime(IntPtr ctx, float time, int tsi = -1);
-        [DllImport(Abci.Lib)] static extern void aeMarkFrameBegin(IntPtr ctx);
-        [DllImport(Abci.Lib)] static extern void aeMarkFrameEnd(IntPtr ctx);
-        #endregion
+        public static aeContext Create() { return NativeMethods.aeCreateContext(); }
+        public void Destroy() { NativeMethods.aeDestroyContext(self); self = IntPtr.Zero; }
+        public void SetConfig(ref aeConfig conf) { NativeMethods.aeSetConfig(self, ref conf); }
+        public bool OpenArchive(string path) { return NativeMethods.aeOpenArchive(self, path); }
+        public int AddTimeSampling(float start_time) { return NativeMethods.aeAddTimeSampling(self, start_time); }
+        public void AddTime(float start_time) { NativeMethods.aeAddTime(self, start_time); }
+        public void MarkFrameBegin() { NativeMethods.aeMarkFrameBegin(self); }
+        public void MarkFrameEnd() { NativeMethods.aeMarkFrameEnd(self); }
     }
 
     internal struct aeObject
     {
         public IntPtr self;
 
-        public aeObject NewXform(string name, int tsi) { return aeNewXform(self, name, tsi); }
-        public aeObject NewCamera(string name, int tsi) { return aeNewCamera(self, name, tsi); }
-        public aeObject NewPoints(string name, int tsi) { return aeNewPoints(self, name, tsi); }
-        public aeObject NewPolyMesh(string name, int tsi) { return aeNewPolyMesh(self, name, tsi); }
+        public aeObject NewXform(string name, int tsi) { return NativeMethods.aeNewXform(self, name, tsi); }
+        public aeObject NewCamera(string name, int tsi) { return NativeMethods.aeNewCamera(self, name, tsi); }
+        public aeObject NewPoints(string name, int tsi) { return NativeMethods.aeNewPoints(self, name, tsi); }
+        public aeObject NewPolyMesh(string name, int tsi) { return NativeMethods.aeNewPolyMesh(self, name, tsi); }
 
-        public void WriteSample(ref aeXformData data) { aeXformWriteSample(self, ref data); }
-        public void WriteSample(ref aeCameraData data) { aeCameraWriteSample(self, ref data); }
+        public void WriteSample(ref aeXformData data) { NativeMethods.aeXformWriteSample(self, ref data); }
+        public void WriteSample(ref aeCameraData data) { NativeMethods.aeCameraWriteSample(self, ref data); }
 
-        public void WriteSample(ref aePolyMeshData data) { aePolyMeshWriteSample(self, ref data); }
-        public void AddFaceSet(string name) { aePolyMeshAddFaceSet(self, name); }
+        public void WriteSample(ref aePolyMeshData data) { NativeMethods.aePolyMeshWriteSample(self, ref data); }
+        public void AddFaceSet(string name) { NativeMethods.aePolyMeshAddFaceSet(self, name); }
 
-        public void WriteSample(ref aePointsData data) { aePointsWriteSample(self, ref data); }
+        public void WriteSample(ref aePointsData data) { NativeMethods.aePointsWriteSample(self, ref data); }
 
-        public aeProperty NewProperty(string name, aePropertyType type) { return aeNewProperty(self, name, type); }
+        public aeProperty NewProperty(string name, aePropertyType type) { return NativeMethods.aeNewProperty(self, name, type); }
 
-        public void MarkForceInvisible() { aeMarkForceInvisible(self); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib)] static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib)] static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib)] static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib)] static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
-        [DllImport(Abci.Lib)] static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
-        [DllImport(Abci.Lib)] static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
-        [DllImport(Abci.Lib)] static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
-        [DllImport(Abci.Lib)] static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
-        [DllImport(Abci.Lib)] static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
-        [DllImport(Abci.Lib)] static extern void aeMarkForceInvisible(IntPtr self);
-        #endregion
+        public void MarkForceInvisible() { NativeMethods.aeMarkForceInvisible(self); }
     }
 
-    public struct aeProperty
+    internal struct aeProperty
     {
         public IntPtr self;
 
-        public void WriteArraySample(IntPtr data, int num_data) { aePropertyWriteArraySample(self, data, num_data); }
+        public void WriteArraySample(IntPtr data, int numData) { NativeMethods.aePropertyWriteArraySample(self, data, numData); }
 
-        public void WriteScalarSample(ref float data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref int data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref Bool data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref Vector2 data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref Vector3 data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref Vector4 data) { aePropertyWriteScalarSample(self, ref data); }
-        public void WriteScalarSample(ref Matrix4x4 data) { aePropertyWriteScalarSample(self, ref data); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteArraySample(IntPtr self, IntPtr data, int num_data);
-
-        // all of these are  IntPtr version. just for convenience.
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref float data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref int data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref Bool data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector2 data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector3 data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector4 data);
-        [DllImport(Abci.Lib)] static extern void aePropertyWriteScalarSample(IntPtr self, ref Matrix4x4 data);
-        #endregion
+        public void WriteScalarSample(ref float data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref int data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Bool data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector2 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector3 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Vector4 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
+        public void WriteScalarSample(ref Matrix4x4 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
     }
 
 
 
-    public partial class AbcAPI
+    public static partial class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {
@@ -437,5 +396,50 @@ namespace UTJ.Alembic
             while (Time.realtimeSinceStartup < next)
                 System.Threading.Thread.Sleep(1);
         }
+    }
+
+    internal static class NativeMethods
+    {
+        [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
+        [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
+
+        [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
+        // relevant only if plingType is acyclic. if tsi==-1, add time to all time samplings.
+        [DllImport(Abci.Lib)] public static extern void aeAddTime(IntPtr ctx, float time, int tsi = -1);
+        [DllImport(Abci.Lib)] public static extern void aeMarkFrameBegin(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern void aeMarkFrameEnd(IntPtr ctx);
+
+
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib)] public static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
+        [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
+        [DllImport(Abci.Lib)] public static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
+        [DllImport(Abci.Lib)] public static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
+        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
+        [DllImport(Abci.Lib)] public static extern void aeMarkForceInvisible(IntPtr self);
+
+
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteArraySample(IntPtr self, IntPtr data, int num_data);
+
+        // all of these are  IntPtr version. just for convenience.
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref float data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref int data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref Bool data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector2 data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector3 data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref Vector4 data);
+        [DllImport(Abci.Lib)] public static extern void aePropertyWriteScalarSample(IntPtr self, ref Matrix4x4 data);
+
+
+        [DllImport("abci")] public static extern int aeGenerateRemapIndices(IntPtr dstIndices, IntPtr points, IntPtr weights4, int numPoints);
+        [DllImport("abci")] public static extern void aeApplyMatrixP(IntPtr dstPoints, int num, ref Matrix4x4 mat);
+        [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
     }
 }

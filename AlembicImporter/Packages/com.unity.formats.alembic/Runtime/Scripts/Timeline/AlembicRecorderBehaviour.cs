@@ -42,7 +42,7 @@ namespace UTJ.Alembic
             if (m_recorder.BeginRecording())
             {
                 var settings = m_recorder.settings;
-                if (settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && settings.fixDeltaTime)
+                if (settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && settings.FixDeltaTime)
                 {
                     Time.maximumDeltaTime = (1.0f / settings.conf.FrameRate);
                 }

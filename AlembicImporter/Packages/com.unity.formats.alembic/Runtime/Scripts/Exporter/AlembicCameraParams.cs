@@ -8,13 +8,13 @@ namespace UTJ.Alembic
     {
         public enum AspectRatioMode
         {
-            Ratio_16_9,
-            Ratio_16_10,
-            Ratio_4_3,
+            Ratio16x9,
+            Ratio16x10,
+            Ratio4x3,
             WidthPerHeight,
         };
 
-        public AspectRatioMode m_cameraSspectRatio = AspectRatioMode.Ratio_16_9;
+        public AspectRatioMode m_cameraAspectRatio = AspectRatioMode.Ratio16x9;
 
         [Tooltip("in cm")]
         public float m_focusDistance = 5.0f;
@@ -25,17 +25,20 @@ namespace UTJ.Alembic
         [Tooltip("in cm")]
         public float m_aperture = 2.4f;
 
-        public float GetAspectRatio()
+        public float AspectRatio
         {
-            switch (m_cameraSspectRatio)
+            get
             {
-                case AspectRatioMode.Ratio_16_9:  return 16.0f / 9.0f;
-                case AspectRatioMode.Ratio_16_10: return 16.0f / 10.0f;
-                case AspectRatioMode.Ratio_4_3:   return 4.0f / 3.0f;
-            }
+                switch (m_cameraAspectRatio)
+                {
+                    case AspectRatioMode.Ratio16x9: return 16.0f / 9.0f;
+                    case AspectRatioMode.Ratio16x10: return 16.0f / 10.0f;
+                    case AspectRatioMode.Ratio4x3: return 4.0f / 3.0f;
+                }
 
-            var cam = GetComponent<Camera>();
-            return (float)cam.pixelWidth / (float)cam.pixelHeight;
+                var cam = GetComponent<Camera>();
+                return (float)cam.pixelWidth / (float)cam.pixelHeight;
+            }
         }
     }
 }
