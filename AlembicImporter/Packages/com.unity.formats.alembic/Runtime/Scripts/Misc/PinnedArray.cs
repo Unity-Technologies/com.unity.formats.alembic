@@ -38,7 +38,7 @@ namespace UTJ.Alembic
         public static implicit operator IntPtr(PinnedObject<T> v) {
             return v == null ? IntPtr.Zero : v.Pointer;
         }
-        public static IntPtr ToIntPtr(PinnedObject<T> v) { return v; }
+        internal static IntPtr ToIntPtr(PinnedObject<T> v) { return v; }
     }
 
 
@@ -105,7 +105,7 @@ namespace UTJ.Alembic
         }
 
         public static implicit operator IntPtr(PinnedArray<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
-        public static IntPtr ToIntPtr(PinnedArray<T> v) { return v; }
+        internal static IntPtr ToIntPtr(PinnedArray<T> v) { return v; }
     }
 
 
@@ -304,7 +304,7 @@ namespace UTJ.Alembic
         }
 
         public static implicit operator IntPtr(PinnedList<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
-        public static IntPtr ToIntPtr(PinnedList<T> v) { return v; }
+        internal static IntPtr ToIntPtr(PinnedList<T> v) { return v; }
     }
 
 }

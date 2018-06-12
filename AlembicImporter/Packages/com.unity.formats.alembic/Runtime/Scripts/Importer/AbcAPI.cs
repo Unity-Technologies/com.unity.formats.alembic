@@ -274,13 +274,13 @@ namespace UTJ.Alembic
 
         public void Destroy() { NativeMethods.aiContextDestroy(self); self = IntPtr.Zero; }
         public bool Load(string path) { return NativeMethods.aiContextLoad(self, path); }
-        public void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
+        internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 
         internal aiObject topObject { get { return NativeMethods.aiContextGetTopObject(self); } }
         public int timeSamplingCount { get { return NativeMethods.aiContextGetTimeSamplingCount(self); } }
         public aiTimeSampling GetTimeSampling(int i) { return NativeMethods.aiContextGetTimeSampling(self, i); }
-        public void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
+        internal void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
     }
 
     public struct aiTimeSampling
@@ -289,7 +289,7 @@ namespace UTJ.Alembic
 
         public int sampleCount { get { return NativeMethods.aiTimeSamplingGetSampleCount(self); } }
         public double GetTime(int index) { return NativeMethods.aiTimeSamplingGetTime(self, index); }
-        public void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
+        internal void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
     }
 
     public struct aiObject

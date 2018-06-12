@@ -35,5 +35,12 @@ namespace UTJ.Alembic
                 m_sortFrom = cam.GetComponent<Transform>();
             }
         }
+
+        private void OnDestroy()
+        {
+            m_points.Dispose();
+            m_velocities.Dispose();
+            m_ids.Dispose();
+        }
     }
 }

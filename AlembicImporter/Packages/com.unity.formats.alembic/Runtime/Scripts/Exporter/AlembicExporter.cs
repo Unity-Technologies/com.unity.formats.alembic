@@ -123,6 +123,11 @@ namespace UTJ.Alembic
         {
             EndRecording();
         }
+
+        private void OnDestroy()
+        {
+            recorder.Dispose();
+        }
         #endregion
     }
 }
