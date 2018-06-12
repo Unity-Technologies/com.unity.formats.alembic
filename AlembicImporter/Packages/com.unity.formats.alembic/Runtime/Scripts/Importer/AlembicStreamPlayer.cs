@@ -105,7 +105,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnApplicationQuit()
         {
-            AbcAPI.aiCleanup();
+            NativeMethods.aiCleanup();
         }
         #endregion
     }

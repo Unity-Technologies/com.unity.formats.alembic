@@ -615,6 +615,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public void Dispose()
             {
                 m_mbuf.Dispose();
+                m_cbuf.Dispose();
             }
         }
 

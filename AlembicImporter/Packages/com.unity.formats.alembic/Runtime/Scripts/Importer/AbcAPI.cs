@@ -246,7 +246,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 boundsExtents;
     }
 
-    public struct aiPropertyData
+    internal struct aiPropertyData
     {
         public IntPtr data;
         public int size;
@@ -265,85 +265,61 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     public struct aiContext
     {
-        public IntPtr self;
+        internal IntPtr self;
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
+        public static bool ToBool(aiContext v) { return v; }
 
-        public static aiContext Create(int uid) { return aiContextCreate(uid); }
-        public static void DestroyByPath(string path) { aiClearContextsWithPath(path); }
+        public static aiContext Create(int uid) { return NativeMethods.aiContextCreate(uid); }
+        public static void DestroyByPath(string path) { NativeMethods.aiClearContextsWithPath(path); }
 
-        public void Destroy() { aiContextDestroy(self); self = IntPtr.Zero; }
-        public bool Load(string path) { return aiContextLoad(self, path); }
-        public void SetConfig(ref aiConfig conf) { aiContextSetConfig(self, ref conf); }
-        public void UpdateSamples(double time) { aiContextUpdateSamples(self, time); }
+        public void Destroy() { NativeMethods.aiContextDestroy(self); self = IntPtr.Zero; }
+        public bool Load(string path) { return NativeMethods.aiContextLoad(self, path); }
+        public void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
+        public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 
-        internal aiObject topObject { get { return aiContextGetTopObject(self); } }
-        public int timeSamplingCount { get { return aiContextGetTimeSamplingCount(self); } }
-        public aiTimeSampling GetTimeSampling(int i) { return aiContextGetTimeSampling(self, i); }
-        public void GetTimeRange(ref double begin, ref double end) { aiContextGetTimeRange(self, ref begin, ref end); }
-
-        #region internal
-        [DllImport(Abci.Lib)] public static extern  void aiClearContextsWithPath(string path);
-        [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
-        [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
-        [DllImport(Abci.Lib)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
-        [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
-        [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
-        [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
-        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
-        [DllImport(Abci.Lib)] public static extern aiObject aiContextGetTopObject(IntPtr ctx);
-        [DllImport(Abci.Lib)] public static extern void aiContextUpdateSamples(IntPtr ctx, double time);
-        #endregion
+        internal aiObject topObject { get { return NativeMethods.aiContextGetTopObject(self); } }
+        public int timeSamplingCount { get { return NativeMethods.aiContextGetTimeSamplingCount(self); } }
+        public aiTimeSampling GetTimeSampling(int i) { return NativeMethods.aiContextGetTimeSampling(self, i); }
+        public void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
     }
 
     public struct aiTimeSampling
     {
-        public IntPtr self;
+        internal IntPtr self;
 
-        public int sampleCount { get { return aiTimeSamplingGetSampleCount(self); } }
-        public double GetTime(int index) { return aiTimeSamplingGetTime(self, index); }
-        public void GetRange(ref double start, ref double end) { aiTimeSamplingGetRange(self, ref start, ref end); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern int aiTimeSamplingGetSampleCount(IntPtr self);
-        [DllImport(Abci.Lib)] static extern double aiTimeSamplingGetTime(IntPtr self, int index);
-        [DllImport(Abci.Lib)] static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
-        #endregion
+        public int sampleCount { get { return NativeMethods.aiTimeSamplingGetSampleCount(self); } }
+        public double GetTime(int index) { return NativeMethods.aiTimeSamplingGetTime(self, index); }
+        public void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
     }
 
     public struct aiObject
     {
-        public IntPtr self;
+        internal IntPtr self;
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
+        public static bool ToBool(aiObject v) { return v; }
 
-        public string name { get { return Marshal.PtrToStringAnsi(aiObjectGetName(self)); } }
-        public string fullname { get { return Marshal.PtrToStringAnsi(aiObjectGetFullName(self)); } }
-        public bool enabled { set { aiObjectSetEnabled(self, value); } }
-        public int childCount { get { return aiObjectGetNumChildren(self); } }
-        public aiObject GetChild(int i) { return aiObjectGetChild(self, i); }
+        public string name { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetName(self)); } }
+        public string fullname { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetFullName(self)); } }
 
-        internal aiXform AsXform() { return aiObjectAsXform(self); }
-        internal aiCamera AsCamera() { return aiObjectAsCamera(self); }
-        internal aiPoints AsPoints() { return aiObjectAsPoints(self); }
-        internal aiPolyMesh AsPolyMesh() { return aiObjectAsPolyMesh(self); }
+        public void SetEnabled(bool value) { NativeMethods.aiObjectSetEnabled(self, value); }
+        public int childCount { get { return NativeMethods.aiObjectGetNumChildren(self); } }
+        public aiObject GetChild(int i) { return NativeMethods.aiObjectGetChild(self, i); }
+
+        internal aiXform AsXform() { return NativeMethods.aiObjectAsXform(self); }
+        internal aiCamera AsCamera() { return NativeMethods.aiObjectAsCamera(self); }
+        internal aiPoints AsPoints() { return NativeMethods.aiObjectAsPoints(self); }
+        internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
 
         public void EachChild(Action<aiObject> act)
         {
+            if(act == null)
+            {
+                return;
+            }
             int n = childCount;
             for (int ci = 0; ci < n; ++ci)
                 act.Invoke(GetChild(ci));
         }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern int aiObjectGetNumChildren(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern aiObject aiObjectGetChild(IntPtr obj, int i);
-        [DllImport(Abci.Lib)] static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
-        [DllImport(Abci.Lib)] static extern IntPtr aiObjectGetName(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern IntPtr aiObjectGetFullName(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern aiXform aiObjectAsXform(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern aiCamera aiObjectAsCamera(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern aiPoints aiObjectAsPoints(IntPtr obj);
-        [DllImport(Abci.Lib)] static extern aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
-        #endregion
     }
 
     internal struct aiSchema
@@ -355,22 +331,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiPolyMesh(aiSchema v) { var tmp = default(aiPolyMesh); tmp.self = v.self; return tmp; }
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
 
-        public bool isConstant { get { return aiSchemaIsConstant(self); } }
-        public bool isDataUpdated { get { aiSchemaSync(self); return aiSchemaIsDataUpdated(self); } }
-        internal aiSample sample { get { return aiSchemaGetSample(self); } }
+        public bool isConstant { get { return NativeMethods.aiSchemaIsConstant(self); } }
+        public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
+        internal aiSample sample { get { return NativeMethods.aiSchemaGetSample(self); } }
 
-        public void UpdateSample(ref aiSampleSelector ss) { aiSchemaUpdateSample(self, ref ss); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
-        [DllImport(Abci.Lib)] static extern void aiSchemaSync(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern aiSample aiSchemaGetSample(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern Bool aiSchemaIsConstant(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern int aiSchemaGetNumProperties(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);
-        [DllImport(Abci.Lib)] static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
-        #endregion
+        public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -412,10 +377,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator aiSchema(aiPolyMesh v) { return v.schema; }
 
         public aiPolyMeshSample sample { get { return aiSchemaGetSample(self); } }
-        public void GetSummary(ref aiMeshSummary dst) { aiPolyMeshGetSummary(self, ref dst); }
+        public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiPolyMeshGetSummary(self, ref dst); }
 
         #region internal
-        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport(Abci.Lib)] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
         #endregion
     }
@@ -429,16 +393,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator aiSchema(aiPoints v) { return v.schema; }
 
         internal aiPointsSample sample { get { return aiSchemaGetSample(self); } }
-        public bool sort { set { aiPointsSetSort(self, value); } }
-        public Vector3 sortBasePosition { set { aiPointsSetSortBasePosition(self, value); } }
+        public bool sort { set { NativeMethods.aiPointsSetSort(self, value); } }
+        public Vector3 sortBasePosition { set { NativeMethods.aiPointsSetSortBasePosition(self, value); } }
 
-        public void GetSummary(ref aiPointsSummary dst) { aiPointsGetSummary(self, ref dst); }
+        public void GetSummary(ref aiPointsSummary dst) { NativeMethods.aiPointsGetSummary(self, ref dst); }
 
         #region internal
         [DllImport(Abci.Lib)] static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
-        [DllImport(Abci.Lib)] static extern void aiPointsSetSort(IntPtr schema, Bool v);
-        [DllImport(Abci.Lib)] static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
-        [DllImport(Abci.Lib)] static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
         #endregion
     }
 
@@ -459,11 +420,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiXformSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiXformSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetData(ref aiXformData dst) { aiXformGetData(self, ref dst); }
-
-        #region internal
-        [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
-        #endregion
+        public void GetData(ref aiXformData dst) { NativeMethods.aiXformGetData(self, ref dst); }
     }
 
     internal struct aiCameraSample
@@ -472,11 +429,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiCameraSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiCameraSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetData(ref aiCameraData dst) { aiCameraGetData(self, ref dst); }
-
-        #region internal
-        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref aiCameraData dst);
-        #endregion
+        public void GetData(ref aiCameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
     }
 
     internal struct aiPolyMeshSample
@@ -485,19 +438,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiPolyMeshSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiPolyMeshSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetSummary(ref aiMeshSampleSummary dst) { aiPolyMeshGetSampleSummary(self, ref dst); }
-        public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { aiPolyMeshGetSplitSummaries(self, dst); }
-        public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { aiPolyMeshGetSubmeshSummaries(self, dst); }
-        internal void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
-        public void Sync() { aiSampleSync(self); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSampleSummary(IntPtr sample, ref aiMeshSampleSummary dst);
-        [DllImport(Abci.Lib)] static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);
-        [DllImport(Abci.Lib)] static extern void aiPolyMeshGetSubmeshSummaries(IntPtr sample, IntPtr dst);
-        [DllImport(Abci.Lib)] static extern void aiPolyMeshFillVertexBuffer(IntPtr sample, IntPtr vbs, IntPtr ibs);
-        [DllImport(Abci.Lib)] static extern void aiSampleSync(IntPtr sample);
-        #endregion
+        public void GetSummary(ref aiMeshSampleSummary dst) { NativeMethods.aiPolyMeshGetSampleSummary(self, ref dst); }
+        public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { NativeMethods.aiPolyMeshGetSplitSummaries(self, dst); }
+        public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { NativeMethods.aiPolyMeshGetSubmeshSummaries(self, dst); }
+        internal void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { NativeMethods.aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
+        public void Sync() { NativeMethods.aiSampleSync(self); }
     }
 
     internal struct aiPointsSample
@@ -506,33 +451,16 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiPointsSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiPointsSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetSummary(ref aiPointsSampleSummary dst) { aiPointsGetSampleSummary(self, ref dst); }
-        public void FillData(PinnedList<aiPointsData> dst) { aiPointsFillData(self, dst); }
-        public void Sync() { aiSampleSync(self); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
-        [DllImport(Abci.Lib)] static extern void aiPointsFillData(IntPtr sample, IntPtr dst);
-        [DllImport(Abci.Lib)] static extern void aiSampleSync(IntPtr sample);
-        #endregion
+        public void GetSummary(ref aiPointsSampleSummary dst) { NativeMethods.aiPointsGetSampleSummary(self, ref dst); }
+        public void FillData(PinnedList<aiPointsData> dst) { NativeMethods.aiPointsFillData(self, dst); }
+        public void Sync() { NativeMethods.aiSampleSync(self); }
     }
 
 
-    public struct aiProperty
+    internal struct aiProperty
     {
         public IntPtr self;
         public static implicit operator bool(aiProperty v) { return v.self != IntPtr.Zero; }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern IntPtr aiPropertyGetName(IntPtr prop);
-        [DllImport(Abci.Lib)] static extern aiPropertyType aiPropertyGetType(IntPtr prop);
-        [DllImport(Abci.Lib)] static extern void aiPropertyGetData(IntPtr prop, aiPropertyData oData);
-        #endregion
-    }
-
-    public partial class AbcAPI
-    {
-        [DllImport(Abci.Lib)] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
-        [DllImport(Abci.Lib)] public static extern void aiCleanup();
+        public static bool ToBool(aiProperty v) { return v; }
     }
 }
