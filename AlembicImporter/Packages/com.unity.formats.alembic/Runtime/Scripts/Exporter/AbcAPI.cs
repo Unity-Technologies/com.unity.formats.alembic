@@ -411,7 +411,7 @@ namespace UTJ.Alembic
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
 
         [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
         // relevant only if plingType is acyclic. if tsi==-1, add time to all time samplings.
@@ -453,7 +453,7 @@ namespace UTJ.Alembic
         [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern void aiClearContextsWithPath(string path);
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
-        [DllImport(Abci.Lib)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
