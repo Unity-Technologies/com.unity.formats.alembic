@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             SerializedProperty endTime = serializedObject.FindProperty("endTime");
 
             var streamPlayer = target as AlembicStreamPlayer;
-            var targetStreamDesc = streamPlayer.streamDescriptor;
+            var targetStreamDesc = streamPlayer.StreamDescriptor;
             var multipleTimeRanges = false;
             foreach (AlembicStreamPlayer player in targets)
             {

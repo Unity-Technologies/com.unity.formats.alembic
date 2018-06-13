@@ -8,7 +8,13 @@ namespace UnityEngine.Formats.Alembic.Importer
     {
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         public AlembicStream abcStream { get; set; }
-        public AlembicStreamDescriptor streamDescriptor;
+        [SerializeField]
+        private AlembicStreamDescriptor streamDescriptor;
+        public AlembicStreamDescriptor StreamDescriptor
+        {
+            get { return streamDescriptor; }
+            set { streamDescriptor = value; }
+        }
 
         [SerializeField]
         private double startTime = double.MinValue;
@@ -63,9 +69,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public void LoadStream(bool createMissingNodes)
         {
-            if (streamDescriptor == null)
+            if (StreamDescriptor == null)
                 return;
-            abcStream = new AlembicStream(gameObject, streamDescriptor);
+            abcStream = new AlembicStream(gameObject, StreamDescriptor);
             abcStream.AbcLoad(createMissingNodes);
             forceUpdate = true;
         }
@@ -79,19 +85,19 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnValidate()
         {
-            if (streamDescriptor == null || abcStream == null)
+            if (StreamDescriptor == null || abcStream == null)
                 return;
-            if (streamDescriptor.abcStartTime == double.MinValue || streamDescriptor.abcEndTime == double.MaxValue)
-                abcStream.GetTimeRange(ref streamDescriptor.abcStartTime, ref streamDescriptor.abcEndTime);
-            StartTime = Mathf.Clamp((float)StartTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
-            EndTime = Mathf.Clamp((float)EndTime, (float)StartTime, (float)streamDescriptor.abcEndTime);
+            if (StreamDescriptor.abcStartTime == double.MinValue || StreamDescriptor.abcEndTime == double.MaxValue)
+                abcStream.GetTimeRange(ref StreamDescriptor.abcStartTime, ref StreamDescriptor.abcEndTime);
+            StartTime = Mathf.Clamp((float)StartTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
+            EndTime = Mathf.Clamp((float)EndTime, (float)StartTime, (float)StreamDescriptor.abcEndTime);
             ClampTime();
             forceUpdate = true;
         }
 
         public void Update()
         {
-            if (abcStream == null || streamDescriptor == null)
+            if (abcStream == null || StreamDescriptor == null)
                 return;
 
             ClampTime();
