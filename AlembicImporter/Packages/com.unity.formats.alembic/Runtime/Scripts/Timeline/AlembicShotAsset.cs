@@ -12,10 +12,22 @@ namespace UnityEngine.Formats.Alembic.Timeline
         AlembicStreamPlayer m_stream;
 
         [Tooltip("Alembic asset to play")]
-        public ExposedReference<AlembicStreamPlayer> streamPlayer;
+        [SerializeField]
+        private ExposedReference<AlembicStreamPlayer> streamPlayer;
+        public ExposedReference<AlembicStreamPlayer> StreamPlayer
+        {
+            get { return streamPlayer; }
+            set { streamPlayer = value; }
+        }
 
         [Tooltip("Amount of time to clip off the end of the alembic asset from playback.")]
-        [SerializeField] public float endOffset;
+        [SerializeField]
+        private float endOffset;
+        public float EndOffset
+        {
+            get { return endOffset; }
+            set { endOffset = value; }
+        }
 
         public ClipCaps clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
 
@@ -23,7 +35,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
         {
             var playable = ScriptPlayable<AlembicShotPlayable>.Create(graph);
             var behaviour = playable.GetBehaviour();
-            m_stream = streamPlayer.Resolve(graph.GetResolver());
+            m_stream = StreamPlayer.Resolve(graph.GetResolver());
             behaviour.streamPlayer = m_stream;
             return playable;
         }

@@ -24,6 +24,11 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         public static GameObject FindObjectByPath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
             var names = path.Split('/');
             Transform ret = null;
             foreach (var name in names)
@@ -74,7 +79,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
-            m_settings.targetBranch = targetBranch;
+            m_settings.TargetBranch = targetBranch;
 
             var ret = ScriptPlayable<AlembicRecorderBehaviour>.Create(graph);
             var behaviour = ret.GetBehaviour();

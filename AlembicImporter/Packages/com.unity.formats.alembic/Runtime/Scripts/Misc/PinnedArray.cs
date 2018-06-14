@@ -35,7 +35,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             }
         }
 
-        public static implicit operator IntPtr(PinnedObject<T> v) { return v.Pointer; }
+        public static implicit operator IntPtr(PinnedObject<T> v) {
+            return v == null ? IntPtr.Zero : v.Pointer;
+        }
+        internal static IntPtr ToIntPtr(PinnedObject<T> v) { return v; }
     }
 
 
@@ -51,6 +54,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         public PinnedArray(T[] data, bool clone = false)
         {
+            if(data == null) { return; }
             m_data = clone ? (T[])data.Clone() : data;
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
@@ -61,7 +65,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return m_data[i]; }
             set { m_data[i] = value; }
         }
-        public T[] Array { get { return m_data; } }
+
+        public T[] GetArray() { return m_data; }
         public IntPtr Pointer { get { return m_data.Length == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
 
         public PinnedArray<T> Clone() { return new PinnedArray<T>((T[])m_data.Clone()); }
@@ -100,6 +105,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
 
         public static implicit operator IntPtr(PinnedArray<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
+        internal static IntPtr ToIntPtr(PinnedArray<T> v) { return v; }
     }
 
     // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
@@ -124,14 +130,23 @@ namespace UnityEngine.Formats.Alembic.Sdk
             [FieldOffset(0)] public ListData data;
         }
 
-        public static T[] ListGetInternalArray(List<T> list)
+        internal static T[] ListGetInternalArray(List<T> list)
         {
+            if(list == null)
+            {
+                return null;
+            }
             var caster = new Caster();
             caster.list = list;
             return caster.data.items;
         }
-        public static List<T> ListCreateIntrusive(T[] data)
+        internal static List<T> ListCreateIntrusive(T[] data)
         {
+            if(data == null)
+            {
+                return null;
+            }
+
             var ret = new List<T>();
             var caster = new Caster();
             caster.list = ret;
@@ -139,8 +154,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
             caster.data.size = data.Length;
             return ret;
         }
-        public static void ListSetCount(List<T> list, int count)
+        internal static void ListSetCount(List<T> list, int count)
         {
+            if(list == null)
+            {
+                return;
+            }
+
             var caster = new Caster();
             caster.list = list;
             caster.data.size = count;
@@ -156,6 +176,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         public PinnedList(T[] data, bool clone = false)
         {
+            if(data == null)
+            {
+                return;
+            }
+
             m_data = clone ? (T[])data.Clone() : data;
             m_list = ListCreateIntrusive(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
@@ -175,12 +200,18 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return m_data[i]; }
             set { m_data[i] = value; }
         }
-        public T[] Array { get { return m_data; } }
+
+        public T[] GetArray() { return m_data; }
         public List<T> List { get { return m_list; } }
         public IntPtr Pointer { get { return Count == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
 
         public void LockList(Action<List<T>> body)
         {
+            if(body == null)
+            {
+                return;
+            }
+
             if (m_gch.IsAllocated)
                 m_gch.Free();
             body(m_list);
@@ -228,11 +259,19 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void Assign(T[] source)
         {
+            if(source == null)
+            {
+                return;
+            }
             ResizeDiscard(source.Length);
             System.Array.Copy(source, m_data, source.Length);
         }
         public void Assign(List<T> sourceList)
         {
+            if(sourceList == null)
+            {
+                return;
+            }
             var sourceData = ListGetInternalArray(sourceList);
             var count = sourceList.Count;
             ResizeDiscard(count);
@@ -264,6 +303,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
 
         public static implicit operator IntPtr(PinnedList<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
+        internal static IntPtr ToIntPtr(PinnedList<T> v) { return v; }
     }
 
 }

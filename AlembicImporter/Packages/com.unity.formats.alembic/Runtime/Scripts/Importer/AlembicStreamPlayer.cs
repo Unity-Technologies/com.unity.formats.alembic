@@ -7,31 +7,79 @@ namespace UnityEngine.Formats.Alembic.Importer
     public class AlembicStreamPlayer : MonoBehaviour
     {
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
-        public AlembicStream abcStream;
-        public AlembicStreamDescriptor streamDescriptor;
-        public double startTime = double.MinValue;
-        public double endTime = double.MaxValue;
-        public float currentTime;
-        public float vertexMotionScale = 1.0f;
-        public bool asyncLoad = true;
-        public bool ignoreVisibility = false;
+        public AlembicStream abcStream { get; set; }
+        [SerializeField]
+        private AlembicStreamDescriptor streamDescriptor;
+        public AlembicStreamDescriptor StreamDescriptor
+        {
+            get { return streamDescriptor; }
+            set { streamDescriptor = value; }
+        }
+
+        [SerializeField]
+        private double startTime = double.MinValue;
+        public double StartTime
+        {
+            get { return startTime; }
+            set { startTime = value; }
+        }
+
+        [SerializeField]
+        private double endTime = double.MaxValue;
+        public double EndTime
+        {
+            get { return endTime; }
+            set { endTime = value; }
+        }
+
+        [SerializeField]
+        private float currentTime;
+        public float CurrentTime
+        {
+            get { return currentTime; }
+            set { currentTime = value; }
+        }
+
+        [SerializeField]
+        private float vertexMotionScale = 1.0f;
+        public float VertexMotionScale
+        {
+            get { return vertexMotionScale; }
+            set { vertexMotionScale = value; }
+        }
+
+        [SerializeField]
+        private bool asyncLoad = true;
+        public bool AsyncLoad
+        {
+            get { return asyncLoad; }
+            set { asyncLoad = value; }
+        }
+
+        [SerializeField]
+        private bool ignoreVisibility = false;
+        public bool IgnoreVisibility
+        {
+            get { return ignoreVisibility; }
+            set { ignoreVisibility = value; }
+        }
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
 
-        public double duration { get { return endTime - startTime; } }
+        public double duration { get { return EndTime - StartTime; } }
 
 
         void ClampTime()
         {
-            currentTime = Mathf.Clamp((float)currentTime, 0.0f, (float)duration);
+            CurrentTime = Mathf.Clamp((float)CurrentTime, 0.0f, (float)duration);
         }
 
         public void LoadStream(bool createMissingNodes)
         {
-            if (streamDescriptor == null)
+            if (StreamDescriptor == null)
                 return;
-            abcStream = new AlembicStream(gameObject, streamDescriptor);
+            abcStream = new AlembicStream(gameObject, StreamDescriptor);
             abcStream.AbcLoad(createMissingNodes);
             forceUpdate = true;
         }
@@ -45,30 +93,30 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnValidate()
         {
-            if (streamDescriptor == null || abcStream == null)
+            if (StreamDescriptor == null || abcStream == null)
                 return;
-            if (streamDescriptor.abcStartTime == double.MinValue || streamDescriptor.abcEndTime == double.MaxValue)
-                abcStream.GetTimeRange(ref streamDescriptor.abcStartTime, ref streamDescriptor.abcEndTime);
-            startTime = Mathf.Clamp((float)startTime, (float)streamDescriptor.abcStartTime, (float)streamDescriptor.abcEndTime);
-            endTime = Mathf.Clamp((float)endTime, (float)startTime, (float)streamDescriptor.abcEndTime);
+            if (StreamDescriptor.abcStartTime == double.MinValue || StreamDescriptor.abcEndTime == double.MaxValue)
+                abcStream.GetTimeRange(ref StreamDescriptor.abcStartTime, ref StreamDescriptor.abcEndTime);
+            StartTime = Mathf.Clamp((float)StartTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
+            EndTime = Mathf.Clamp((float)EndTime, (float)StartTime, (float)StreamDescriptor.abcEndTime);
             ClampTime();
             forceUpdate = true;
         }
 
         void Update()
         {
-            if (abcStream == null || streamDescriptor == null)
+            if (abcStream == null || StreamDescriptor == null)
                 return;
 
             ClampTime();
-            if (lastUpdateTime != currentTime || forceUpdate)
+            if (lastUpdateTime != CurrentTime || forceUpdate)
             {
-                abcStream.vertexMotionScale = vertexMotionScale;
-                abcStream.asyncLoad = asyncLoad;
-                abcStream.ignoreVisibility = ignoreVisibility;
-                if (abcStream.AbcUpdateBegin(startTime + currentTime))
+                abcStream.SetVertexMotionScale(VertexMotionScale);
+                abcStream.SetAsyncLoad(AsyncLoad);
+                abcStream.ignoreVisibility = IgnoreVisibility;
+                if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
-                    lastUpdateTime = currentTime;
+                    lastUpdateTime = CurrentTime;
                     forceUpdate = false;
                     updateStarted = true;
                 }
@@ -103,7 +151,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnApplicationQuit()
         {
-            AbcAPI.aiCleanup();
+            NativeMethods.aiCleanup();
         }
         #endregion
     }

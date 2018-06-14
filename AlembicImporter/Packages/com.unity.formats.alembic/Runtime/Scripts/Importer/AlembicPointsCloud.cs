@@ -5,7 +5,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [ExecuteInEditMode]
-    public class AlembicPointsCloud : MonoBehaviour
+    internal class AlembicPointsCloud : MonoBehaviour
     {
         // members
         [ReadOnly] public PinnedList<Vector3> m_points = new PinnedList<Vector3>();
@@ -15,14 +15,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         [ReadOnly] public Vector3 m_boundsCenter;
         [ReadOnly] public Vector3 m_boundsExtents;
 
-        public AlembicPoints m_abc;
+        internal AlembicPoints m_abc = null;
 
         [Tooltip("Sort points by distance from sortFrom object")]
         public bool m_sort = false;
         public Transform m_sortFrom;
 
         // properties
-        public AlembicPoints abcPoints { get { return m_abc; } }
+        internal AlembicPoints abcPoints { get { return m_abc; } }
         public PinnedList<Vector3> points { get { return m_points; } }
         public PinnedList<Vector3> velocities { get { return m_velocities; } }
         public PinnedList<uint> ids { get { return m_ids; } }
@@ -35,6 +35,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 m_sortFrom = cam.GetComponent<Transform>();
             }
+        }
+
+        private void OnDestroy()
+        {
+            m_points.Dispose();
+            m_velocities.Dispose();
+            m_ids.Dispose();
         }
     }
 }

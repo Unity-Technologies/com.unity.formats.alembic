@@ -45,8 +45,8 @@ namespace UTJ.Alembic
             {
                 e.maxCaptureFrame = 0;
                 var settings = e.recorder.settings;
-                settings.conf.timeSamplingType = time_sampling_type;
-                settings.conf.frameRate = frame_rate;
+                settings.conf.TimeSamplingType = time_sampling_type;
+                settings.conf.FrameRate = frame_rate;
                 e.BeginRecording();
             }
 

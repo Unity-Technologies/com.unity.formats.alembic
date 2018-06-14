@@ -59,8 +59,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             var endTimeProp = serializedObject.FindProperty("endTime");
             if (startTimeProp.doubleValue == endTimeProp.doubleValue)
             {
-                startTimeProp.doubleValue = importer.abcStartTime;
-                endTimeProp.doubleValue = importer.abcEndTime;
+                startTimeProp.doubleValue = importer.AbcStartTime;
+                endTimeProp.doubleValue = importer.AbcEndTime;
             }
 
             var startTime = (float)startTimeProp.doubleValue;
@@ -68,7 +68,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
+            EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
 
             EditorGUILayout.BeginHorizontal();
             EditorGUI.showMixedValue = startTimeProp.hasMultipleDifferentValues;
@@ -80,9 +80,9 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (EditorGUI.EndChangeCheck())
             {
                 if (startTime != newStartTime)
-                    newStartTime = Mathf.Clamp(newStartTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
+                    newStartTime = Mathf.Clamp(newStartTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
                 if (endTime != newEndTime)
-                    newEndTime = Mathf.Clamp(newEndTime, (float)importer.abcStartTime, (float)importer.abcEndTime);
+                    newEndTime = Mathf.Clamp(newEndTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
                 startTimeProp.doubleValue = newStartTime;
                 endTimeProp.doubleValue = newEndTime;
             }

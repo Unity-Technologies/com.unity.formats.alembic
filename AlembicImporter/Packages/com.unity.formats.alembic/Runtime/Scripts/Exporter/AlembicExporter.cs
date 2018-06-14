@@ -36,9 +36,9 @@ namespace UnityEngine.Formats.Alembic.Exporter
         void InitializeOutputPath()
         {
             var settings = m_recorder.settings;
-            if (settings.outputPath == null || settings.outputPath == "")
+            if (string.IsNullOrEmpty(settings.OutputPath))
             {
-                settings.outputPath = "Output/" + gameObject.name + ".abc";
+                settings.OutputPath = "Output/" + gameObject.name + ".abc";
             }
         }
 
@@ -123,6 +123,11 @@ namespace UnityEngine.Formats.Alembic.Exporter
         void OnDisable()
         {
             EndRecording();
+        }
+
+        private void OnDestroy()
+        {
+            recorder.Dispose();
         }
         #endregion
     }

@@ -17,6 +17,11 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
         {
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                return AssetDeleteResult.DidNotDelete;
+            }
+
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
             var streamingAssetPath = AlembicImporter.MakeShortAssetPath(assetPath);
@@ -40,6 +45,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public static AssetMoveResult OnWillMoveAsset(string from, string to)
         {
+            if (string.IsNullOrEmpty(from))
+            {
+                return AssetMoveResult.DidNotMove;
+            }
+
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
             var streamDstPath = AlembicImporter.MakeShortAssetPath(to);
@@ -85,14 +95,58 @@ namespace UnityEditor.Formats.Alembic.Importer
     [ScriptedImporter(2, "abc")]
     public class AlembicImporter : ScriptedImporter
     {
-        [SerializeField] public AlembicStreamSettings streamSettings = new AlembicStreamSettings();
-        [SerializeField] public double abcStartTime; // read only
-        [SerializeField] public double abcEndTime;   // read only
-        [SerializeField] public double startTime = double.MinValue;
-        [SerializeField] public double endTime = double.MaxValue;
-        [SerializeField] public string importWarning;
-        [SerializeField] public List<string> varyingTopologyMeshNames = new List<string>();
-        [SerializeField] public List<string> splittingMeshNames = new List<string>();
+        [SerializeField]
+        private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
+        public AlembicStreamSettings StreamSettings
+        {
+            get { return streamSettings; }
+            set { streamSettings = value; }
+        }
+        [SerializeField]
+        private double abcStartTime; // read only
+        public double AbcStartTime
+        {
+            get { return abcStartTime; }
+        }
+        [SerializeField]
+        private double abcEndTime; // read only
+        public double AbcEndTime
+        {
+            get { return abcEndTime; }
+        }
+        [SerializeField]
+        private double startTime = double.MinValue;
+        public double StartTime
+        {
+            get { return startTime; }
+            set { startTime = value; }
+        }
+        [SerializeField]
+        private double endTime = double.MaxValue;
+        public double EndTime
+        {
+            get { return endTime; }
+            set { endTime = value; }
+        }
+        [SerializeField]
+        private string importWarning;
+        public string ImportWarning
+        {
+            get { return importWarning; }
+            set { importWarning = value; }
+        }
+        [SerializeField]
+        private List<string> varyingTopologyMeshNames = new List<string>();
+        public List<string> VaryingTopologyMeshNames
+        {
+            get { return varyingTopologyMeshNames; }
+        }
+        [SerializeField]
+        private List<string> splittingMeshNames = new List<string>();
+        public List<string> SplittingMeshNames
+        {
+            get { return splittingMeshNames; }
+        }
 
         public static string MakeShortAssetPath(string assetPath)
         {
@@ -102,6 +156,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
+            if(ctx == null)
+            {
+                return;
+            }
+
             var shortAssetPath = MakeShortAssetPath(ctx.assetPath);
             AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
             var sourcePath = Application.dataPath + shortAssetPath;
@@ -118,21 +177,21 @@ namespace UnityEditor.Formats.Alembic.Importer
             
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.pathToAbc = shortAssetPath;
-            streamDescriptor.settings = streamSettings;
+            streamDescriptor.PathToAbc = shortAssetPath;
+            streamDescriptor.Settings = StreamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
                 abcStream.AbcLoad(true);
 
                 abcStream.GetTimeRange(ref startTime, ref endTime);
-                streamDescriptor.abcStartTime = abcStartTime = startTime;
-                streamDescriptor.abcEndTime = abcEndTime = endTime;
+                streamDescriptor.abcStartTime = abcStartTime = StartTime;
+                streamDescriptor.abcEndTime = abcEndTime = EndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
-                streamPlayer.streamDescriptor = streamDescriptor;
-                streamPlayer.startTime = startTime;
-                streamPlayer.endTime = endTime;
+                streamPlayer.StreamDescriptor = streamDescriptor;
+                streamPlayer.StartTime = StartTime;
+                streamPlayer.EndTime = EndTime;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
@@ -264,7 +323,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             CollectSubAssets(subassets, root);
 
-            streamDescr.hasVaryingTopology = varyingTopologyMeshNames.Count > 0;
+            streamDescr.HasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
         }
 
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
@@ -274,9 +333,9 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 var sum = mesh.summary;
                 if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
-                    varyingTopologyMeshNames.Add(node.gameObject.name);
+                    VaryingTopologyMeshNames.Add(node.gameObject.name);
                 else if (mesh.sampleSummary.splitCount > 1)
-                    splittingMeshNames.Add(node.gameObject.name);
+                    SplittingMeshNames.Add(node.gameObject.name);
             }
 
             int submeshCount = 0;
@@ -305,11 +364,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.sharedMaterials = new Material[] { subassets.pointsMaterial };
+                apr.SetSharedMaterials(new Material[] { subassets.pointsMaterial });
                 apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
-            foreach ( var child in node.children)
+            foreach ( var child in node.Children)
                 CollectSubAssets(subassets, child);
         }
 

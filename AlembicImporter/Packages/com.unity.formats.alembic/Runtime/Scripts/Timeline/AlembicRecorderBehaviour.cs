@@ -9,7 +9,7 @@ using UnityEngine.Formats.Alembic.Util;
 
 namespace UnityEngine.Formats.Alembic.Timeline
 {
-    public class AlembicRecorderBehaviour : PlayableBehaviour
+    public class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
     {
         #region fields
         AlembicRecorder m_recorder = new AlembicRecorder();
@@ -44,9 +44,9 @@ namespace UnityEngine.Formats.Alembic.Timeline
             if (m_recorder.BeginRecording())
             {
                 var settings = m_recorder.settings;
-                if (settings.conf.timeSamplingType == aeTimeSamplingType.Uniform && settings.fixDeltaTime)
+                if (settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && settings.FixDeltaTime)
                 {
-                    Time.maximumDeltaTime = (1.0f / settings.conf.frameRate);
+                    Time.maximumDeltaTime = (1.0f / settings.conf.FrameRate);
                 }
             }
         }
@@ -133,6 +133,17 @@ namespace UnityEngine.Formats.Alembic.Timeline
         public void OnFrameEnd()
         {
             ProcessRecording();
+        }
+
+        protected virtual void Dispose(bool v)
+        {
+            m_recorder.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

@@ -16,7 +16,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
             var duration = streamPlayer.duration;
             var time = playable.GetTime();
-            streamPlayer.currentTime = (float)(time == duration ? duration : time % duration);
+            streamPlayer.CurrentTime = (float)(time == duration ? duration : time % duration);
         }
     }
 }

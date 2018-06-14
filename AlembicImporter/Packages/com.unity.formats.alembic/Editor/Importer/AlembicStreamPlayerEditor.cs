@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             SerializedProperty endTime = serializedObject.FindProperty("endTime");
 
             var streamPlayer = target as AlembicStreamPlayer;
-            var targetStreamDesc = streamPlayer.streamDescriptor;
+            var targetStreamDesc = streamPlayer.StreamDescriptor;
             var multipleTimeRanges = false;
             foreach (AlembicStreamPlayer player in targets)
             {
@@ -38,8 +38,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var abcStart = (float)targetStreamDesc.abcStartTime;
             var abcEnd = (float)targetStreamDesc.abcEndTime;
-            var start = (float)streamPlayer.startTime;
-            var end = (float)streamPlayer.endTime;
+            var start = (float)streamPlayer.StartTime;
+            var end = (float)streamPlayer.EndTime;
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
             if (EditorGUI.EndChangeCheck())

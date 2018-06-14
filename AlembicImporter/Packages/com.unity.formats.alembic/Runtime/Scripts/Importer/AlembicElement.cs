@@ -8,11 +8,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     public abstract class AlembicElement : IDisposable 
     {
-        protected aiObject m_abcObj;
+        private aiObject m_abcObj;
 
         public AlembicTreeNode abcTreeNode { get; set; }
         public aiObject abcObject { get { return m_abcObj; } }
-        public abstract aiSchema abcSchema { get; }
+        internal abstract aiSchema abcSchema { get; }
         public abstract bool visibility { get; }
 
         public T GetOrAddComponent<T>() where T : Component
@@ -23,13 +23,19 @@ namespace UnityEngine.Formats.Alembic.Importer
             return c;
         }
 
-        public void Dispose()
+        protected virtual void Dispose(bool v)
         {
-            if (abcTreeNode != null )
+            if (abcTreeNode != null)
                 abcTreeNode.RemoveAlembicObject(this);
         }
 
-        public virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        internal virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             m_abcObj = abcObj;
         }
