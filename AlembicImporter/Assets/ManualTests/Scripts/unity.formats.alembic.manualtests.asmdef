@@ -1,0 +1,6 @@
+{
+  "name": "Unity.Formats.Alembic.ManualTests",
+  "references": [
+    "Unity.Formats.Alembic.Runtime"
+  ]
+}
