@@ -14,7 +14,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Util
 {
-    public enum ExportScope
+    internal enum ExportScope
     {
         EntireScene,
         TargetBranch,
@@ -22,7 +22,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public class AlembicRecorderSettings
+    internal class AlembicRecorderSettings
     {
         [SerializeField]
         private string outputPath = "Output/Output.abc";

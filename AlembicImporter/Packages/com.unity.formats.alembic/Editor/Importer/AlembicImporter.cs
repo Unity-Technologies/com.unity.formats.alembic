@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    public class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
+    internal class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
         {
@@ -93,7 +93,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     }
 
     [ScriptedImporter(2, "abc")]
-    public class AlembicImporter : ScriptedImporter
+    internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
