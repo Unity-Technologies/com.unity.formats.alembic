@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    public enum aiAspectRatioMode
+    internal enum aiAspectRatioMode
     {
         CurrentResolution = 0,
         DefaultResolution = 1,
         CameraAperture
     };
 
-    public enum aiNormalsMode
+    internal enum aiNormalsMode
     {
         ReadFromFile = 0,
         ComputeIfMissing,
@@ -19,20 +19,20 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Ignore
     }
 
-    public enum aiTangentsMode
+    internal enum aiTangentsMode
     {
         None = 0,
         Compute,
     }
 
-    public enum aiTopologyVariance
+    internal enum aiTopologyVariance
     {
         Constant,
         Homogeneous, // vertices are variant, topology is constant
         Heterogeneous, // both vertices and topology are variant
     }
 
-    public enum aiTopology
+    internal enum aiTopology
     {
         Points,
         Lines,
@@ -40,14 +40,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    public enum aiTimeSamplingType
+    internal enum aiTimeSamplingType
     {
         Uniform,
         Cyclic,
         Acyclic,
     };
 
-    public enum aiPropertyType
+    internal enum aiPropertyType
     {
         Unknown,
 
@@ -78,7 +78,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         ArrayTypeEnd = Float4x4Array,
     };
 
-    public struct aiConfig
+    internal struct aiConfig
     {
         public aiNormalsMode normalsMode { get; set; }
         public aiTangentsMode tangentsMode { get; set; }
@@ -118,14 +118,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aiSampleSelector
+    internal struct aiSampleSelector
     {
         public ulong requestedIndex { get; set; }
         public double requestedTime { get; set; }
         public int requestedTimeIndexType { get; set; }
     }
 
-    public struct aiMeshSummary
+    internal struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance { get; set; }
         public Bool hasVelocities { get; set; }
@@ -143,7 +143,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantColors { get; set; }
     }
 
-    public struct aiMeshSampleSummary
+    internal struct aiMeshSampleSummary
     {
         public Bool visibility { get; set; }
 
@@ -154,7 +154,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool topologyChanged { get; set; }
     }
 
-    public struct aiMeshSplitSummary
+    internal struct aiMeshSplitSummary
     {
         public int submeshCount { get; set; }
         public int submeshOffset { get; set; }
@@ -164,7 +164,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int indexOffset { get; set; }
     }
 
-    public struct aiSubmeshSummary
+    internal struct aiSubmeshSummary
     {
         public int splitIndex { get; set; }
         public int submeshIndex { get; set; }
@@ -215,7 +215,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr indexes;
     }
 
-    public struct aiXformData
+    internal struct aiXformData
     {
         public Bool visibility { get; set; }
 
@@ -225,7 +225,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool inherits { get; set; }
     }
 
-    public struct aiCameraData
+    internal struct aiCameraData
     {
         public Bool visibility { get; set; }
 
@@ -239,7 +239,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public float aperture { get; set; }      // in cm. vertical one
     }
 
-    public struct aiPointsSummary
+    internal struct aiPointsSummary
     {
         public Bool hasVelocities { get; set; }
         public Bool hasIDs { get; set; }
@@ -248,7 +248,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantIDs { get; set; }
     };
 
-    public struct aiPointsSampleSummary
+    internal struct aiPointsSampleSummary
     {
         public int count { get; set; }
     }
@@ -303,7 +303,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 #endif
     }
 
-    public struct aiContext
+    internal struct aiContext
     {
         internal IntPtr self;
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
@@ -323,7 +323,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
     }
 
-    public struct aiTimeSampling
+    internal struct aiTimeSampling
     {
         internal IntPtr self;
 
@@ -337,7 +337,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
     }
 
-    public struct aiObject
+    internal struct aiObject
     {
         internal IntPtr self;
 

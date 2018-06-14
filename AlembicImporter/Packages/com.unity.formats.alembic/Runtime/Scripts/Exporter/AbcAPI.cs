@@ -1,29 +1,32 @@
 using System;
+using System.Runtime.CompilerServices;  
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.ManualTests")]  
+
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    public enum aeArchiveType
+    internal enum aeArchiveType
     {
         HDF5,
         Ogawa,
     };
 
-    public enum aeTimeSamplingType
+    internal enum aeTimeSamplingType
     {
         Uniform = 0,
         // Cyclic = 1,
         Acyclic = 2,
     };
 
-    public enum aeXformType
+    internal enum aeXformType
     {
         Matrix,
         TRS,
     };
 
-    public enum aeTopology
+    internal enum aeTopology
     {
         Points,
         Lines,
@@ -31,7 +34,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    public enum aePropertyType
+    internal enum aePropertyType
     {
         Unknown,
 
@@ -63,7 +66,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    public struct aeConfig
+    internal struct aeConfig
     {
         [SerializeField]
         private aeArchiveType archiveType;
@@ -133,7 +136,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aeXformData
+    internal struct aeXformData
     {
         private Bool visibility;
         public Bool Visibility
@@ -170,7 +173,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aePointsData
+    internal struct aePointsData
     {
         private Bool visibility;
         public Bool Visibility
@@ -209,7 +212,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    public struct aeSubmeshData
+    internal struct aeSubmeshData
     {
         private IntPtr indexes;
         public IntPtr Indexes

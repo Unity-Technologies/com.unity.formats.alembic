@@ -10,7 +10,7 @@ using UnityEditor.Experimental.AssetImporters;
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
-    public class AlembicImporterEditor : ScriptedImporterEditor
+    internal class AlembicImporterEditor : ScriptedImporterEditor
     {
         bool m_foldMeshOptions = true;
         bool m_foldComponents = true;

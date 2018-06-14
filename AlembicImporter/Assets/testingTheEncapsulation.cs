@@ -12,10 +12,6 @@ public class testingTheEncapsulation : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 //        UnityEngine.Formats.Alembic.Util;
-        UnityEngine.Formats.Alembic.Sdk;
-        UnityEngine.Formats.Alembic.Imported;
-        UnityEngine.Formats.Alembic.Exporter;
 
-		
 	}
 }

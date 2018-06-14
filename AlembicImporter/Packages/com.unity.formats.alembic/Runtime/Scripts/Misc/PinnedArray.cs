@@ -110,7 +110,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
     // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
-    public class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
+    internal class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
     {
         List<T> m_list;
         T[] m_data;
