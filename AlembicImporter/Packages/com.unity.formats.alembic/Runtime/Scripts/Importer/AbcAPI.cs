@@ -188,6 +188,26 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public Vector3 center;
         public Vector3 extents;
+
+        public aiPolyMeshData(
+            IntPtr positions, IntPtr velocities, IntPtr normals,
+            IntPtr tangents, IntPtr uv0, IntPtr uv1, IntPtr colors,
+            IntPtr indices, int vertexCount, int indexCount, 
+            Vector3 center, Vector3 extents)
+        {
+            this.positions = positions;
+            this.velocities = velocities;
+            this.normals = normals;
+            this.tangents = tangents;
+            this.uv0 = uv0;
+            this.uv1 = uv1;
+            this.colors = colors;
+            this.indices = indices;
+            this.vertexCount = vertexCount;
+            this.indexCount = indexCount;
+            this.center = center;
+            this.extents = extents;
+        }
     }
 
     internal struct aiSubmeshData
@@ -244,6 +264,19 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public Vector3 boundsCenter;
         public Vector3 boundsExtents;
+
+        public aiPointsData(
+            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids, 
+            int count, Vector3 boundsCenter, Vector3 boundsExtents)
+        {
+            this.visibility = visibility;
+            this.points = points;
+            this.velocities = velocities;
+            this.ids = ids;
+            this.count = count;
+            this.boundsCenter = boundsCenter;
+            this.boundsExtents = boundsExtents;
+        }
     }
 
     internal struct aiPropertyData
@@ -251,6 +284,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr data;
         public int size;
         aiPropertyType type;
+
+        public aiPropertyData(IntPtr data, int size, aiPropertyType type)
+        {
+            this.data = data;
+            this.size = size;
+            this.type = type;
+        }
     }
 
     internal static class Abci {
@@ -287,6 +327,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         internal IntPtr self;
 
+        internal aiTimeSampling(IntPtr self)
+        {
+            this.self = self;
+        }
+
         public int sampleCount { get { return NativeMethods.aiTimeSamplingGetSampleCount(self); } }
         public double GetTime(int index) { return NativeMethods.aiTimeSamplingGetTime(self, index); }
         internal void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
@@ -295,6 +340,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
     public struct aiObject
     {
         internal IntPtr self;
+
+        internal aiObject(IntPtr self)
+        {
+            this.self = self;
+        }
+
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
         public static bool ToBool(aiObject v) { return v; }
 
@@ -325,6 +376,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
     internal struct aiSchema
     {
         public IntPtr self;
+
+        public aiSchema(IntPtr self)
+        {
+            this.self = self;
+        }
+
         public static implicit operator bool(aiSchema v) { return v.self != IntPtr.Zero; }
         public static explicit operator aiXform(aiSchema v) { var tmp = default(aiXform); tmp.self = v.self; return tmp; }
         public static explicit operator aiCamera(aiSchema v) { var tmp = default(aiCamera); tmp.self = v.self; return tmp; }
@@ -460,6 +517,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
     internal struct aiProperty
     {
         public IntPtr self;
+
+        public aiProperty(IntPtr self)
+        {
+            this.self = self;
+        }
+
         public static implicit operator bool(aiProperty v) { return v.self != IntPtr.Zero; }
         public static bool ToBool(aiProperty v) { return v; }
     }

@@ -34,8 +34,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             public GameObject host;
             public bool active = true;
 
-            public Vector3 center;
-            public Vector3 size;
+            public Vector3 center = Vector3.zero;
+            public Vector3 size = Vector3.zero;
 
             public void Dispose()
             {

@@ -307,6 +307,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public IntPtr faces;
         public int faceCount;
+
+        public aeFaceSetData(IntPtr faces, int faceCount)
+        {
+            this.faces = faces;
+            this.faceCount = faceCount;
+        }
     }
 
     internal struct aeCameraData
@@ -360,6 +366,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public IntPtr self;
 
+        public aeObject(IntPtr self)
+        {
+            this.self = self;
+        }
+
         public aeObject NewXform(string name, int tsi) { return NativeMethods.aeNewXform(self, name, tsi); }
         public aeObject NewCamera(string name, int tsi) { return NativeMethods.aeNewCamera(self, name, tsi); }
         public aeObject NewPoints(string name, int tsi) { return NativeMethods.aeNewPoints(self, name, tsi); }
@@ -381,6 +392,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
     internal struct aeProperty
     {
         public IntPtr self;
+
+        public aeProperty(IntPtr self)
+        {
+            this.self = self;
+        }
 
         public void WriteArraySample(IntPtr data, int numData) { NativeMethods.aePropertyWriteArraySample(self, data, numData); }
 

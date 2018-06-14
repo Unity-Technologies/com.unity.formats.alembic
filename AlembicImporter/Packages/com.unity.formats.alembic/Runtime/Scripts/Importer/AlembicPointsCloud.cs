@@ -15,7 +15,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [ReadOnly] public Vector3 m_boundsCenter;
         [ReadOnly] public Vector3 m_boundsExtents;
 
-        internal AlembicPoints m_abc;
+        internal AlembicPoints m_abc = null;
 
         [Tooltip("Sort points by distance from sortFrom object")]
         public bool m_sort = false;
