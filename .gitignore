@@ -64,3 +64,5 @@ StreamingAssets*
 # Unignore specific .abc files
 !AlembicImporter/Assets/ManualTests/MVPCloth.abc
 
+# We keep the plug-in libraries in the repo
+!AlembicImporter/Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll
