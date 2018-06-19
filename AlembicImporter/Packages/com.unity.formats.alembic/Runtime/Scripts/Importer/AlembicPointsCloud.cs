@@ -39,9 +39,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         private void OnDestroy()
         {
-            m_points.Dispose();
-            m_velocities.Dispose();
-            m_ids.Dispose();
+            if(m_points != null) m_points.Dispose();
+            if(m_velocities != null) m_velocities.Dispose();
+            if(m_ids != null) m_ids.Dispose();
         }
     }
 }
