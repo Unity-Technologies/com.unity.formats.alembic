@@ -260,13 +260,13 @@ namespace UnityEngine.Formats.Alembic.Util
 
                     aeSubmeshData smd = new aeSubmeshData();
                     switch (mesh.GetTopology(smi)) {
-                        case MeshTopology.Triangles: smd.Topology = aeTopology.Triangles; break;
-                        case MeshTopology.Lines: smd.Topology = aeTopology.Lines; break;
-                        case MeshTopology.Quads: smd.Topology = aeTopology.Quads; break;
-                        default: smd.Topology = aeTopology.Points; break;
+                        case MeshTopology.Triangles: smd.topology = aeTopology.Triangles; break;
+                        case MeshTopology.Lines: smd.topology = aeTopology.Lines; break;
+                        case MeshTopology.Quads: smd.topology = aeTopology.Quads; break;
+                        default: smd.topology = aeTopology.Points; break;
                     }
-                    smd.Indexes = indices;
-                    smd.IndexCount = indices.Count;
+                    smd.indexes = indices;
+                    smd.indexCount = indices.Count;
                     submeshData[smi] = smd;
                 }
             }
@@ -280,9 +280,9 @@ namespace UnityEngine.Formats.Alembic.Util
             internal void WriteSample(aeObject abc)
             {
                 var data = default(aePolyMeshData);
-                data.Visibility = visibility;
-                data.Points = points;
-                data.PointCount = points.Count;
+                data.visibility = visibility;
+                data.points = points;
+                data.pointCount = points.Count;
                 data.normals = normals;
                 data.uv0 = uv0;
                 data.uv1 = uv1;
@@ -427,7 +427,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Capture()
             {
                 if (m_target == null) {
-                    m_data.Visibility = false;
+                    m_data.visibility = false;
                 }
                 else
                 {
@@ -440,20 +440,20 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 var src = m_target;
 
-                dst.Visibility = src.gameObject.activeSelf;
-                dst.Inherits = m_inherits;
+                dst.visibility = src.gameObject.activeSelf;
+                dst.inherits = m_inherits;
                 if (m_invertForward) { src.forward = src.forward * -1.0f; }
                 if (m_inherits)
                 {
-                    dst.Translation = m_capturePosition ? src.localPosition : Vector3.zero;
-                    dst.Rotation = m_captureRotation ? src.localRotation : Quaternion.identity;
-                    dst.Scale = m_captureScale ? src.localScale : Vector3.one;
+                    dst.translation = m_capturePosition ? src.localPosition : Vector3.zero;
+                    dst.rotation = m_captureRotation ? src.localRotation : Quaternion.identity;
+                    dst.scale = m_captureScale ? src.localScale : Vector3.one;
                 }
                 else
                 {
-                    dst.Translation = m_capturePosition ? src.position : Vector3.zero;
-                    dst.Rotation = m_captureRotation ? src.rotation : Quaternion.identity;
-                    dst.Scale = m_captureScale ? src.lossyScale : Vector3.one;
+                    dst.translation = m_capturePosition ? src.position : Vector3.zero;
+                    dst.rotation = m_captureRotation ? src.rotation : Quaternion.identity;
+                    dst.scale = m_captureScale ? src.lossyScale : Vector3.one;
                 }
                 if (m_invertForward) { src.forward = src.forward * -1.0f; }
             }
@@ -639,7 +639,7 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 if (m_target == null)
                 {
-                    m_data.Visibility = false;
+                    m_data.visibility = false;
                 }
                 else
                 {
@@ -661,9 +661,9 @@ namespace UnityEngine.Formats.Alembic.Util
                     }
 
                     // write!
-                    m_data.Visibility = m_target.gameObject.activeSelf;
-                    m_data.Positions = m_bufPoints;
-                    m_data.Count = count;
+                    m_data.visibility = m_target.gameObject.activeSelf;
+                    m_data.positions = m_bufPoints;
+                    m_data.count = count;
                 }
                 abcObject.WriteSample(ref m_data);
             }

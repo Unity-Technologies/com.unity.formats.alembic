@@ -135,149 +135,49 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     public struct aeXformData
     {
-        private Bool visibility;
-        public Bool Visibility
-        {
-            get { return visibility; }
-            set { visibility = value; }
-        }
-
-        private Vector3 translation;
-        public Vector3 Translation
-        {
-            get { return translation; }
-            set { translation = value; }
-        }
-
-        private Quaternion rotation;
-        public Quaternion Rotation
-        {
-            get { return rotation; }
-            set { rotation = value; }
-        }
-
-        private Vector3 scale;
-        public Vector3 Scale
-        {
-            get { return scale; }
-            set { scale = value; }
-        }
-        private Bool inherits;
-        public Bool Inherits
-        {
-            get { return inherits; }
-            set { inherits = value; }
-        }
+        public Bool visibility { get; set; }
+        public Vector3 translation { get; set; }
+        public Quaternion rotation { get; set; }
+        public Vector3 scale { get; set; }
+        public Bool inherits { get; set; }
     }
 
     public struct aePointsData
     {
-        private Bool visibility;
-        public Bool Visibility
-        {
-            get { return visibility; }
-            set { visibility = value; }
-        }
+        public Bool visibility { get; set; }
+        public IntPtr positions { get; set; } // Vector3*
 
-        private IntPtr positions; // Vector3*
-        public IntPtr Positions
-        {
-            get { return positions; }
-            set { positions = value; }
-        }
+        public IntPtr velocities { get; set; } // Vector3*. can be null
 
-        private IntPtr velocities; // Vector3*. can be null
-        public IntPtr Velocities
-        {
-            get { return velocities; }
-            set { velocities = value; }
-        }
+        public IntPtr ids { get; set; } // uint*. can be null
 
-        private IntPtr ids; // uint*. can be null
-        public IntPtr Ids
-        {
-            get { return ids; }
-            set { ids = value; }
-        }
-
-        private int count;
-        public int Count
-        {
-            get { return count; }
-            set { count = value; }
-        }
+        public int count { get; set; }
     }
 
 
     public struct aeSubmeshData
     {
-        private IntPtr indexes;
-        public IntPtr Indexes
-        {
-            get { return indexes; }
-            set { indexes = value; }
-        }
-
-        private int indexCount;
-        public int IndexCount
-        {
-            get { return indexCount; }
-            set { indexCount = value; }
-        }
-
-        private aeTopology topology;
-        public aeTopology Topology
-        {
-            get { return topology; }
-            set { topology = value; }
-        }
+        internal IntPtr indexes { get; set; }
+        public int indexCount { get; set; }
+        public aeTopology topology { get; set; }
     };
 
     internal struct aePolyMeshData
     {
-        private Bool visibility;
-        public Bool Visibility { get; set; }
+        public Bool visibility { get; set; }
 
-        private IntPtr faces; // int*. if null, assume all faces are triangles
-        public IntPtr Faces { get; set; }
+        public IntPtr faces { get; set; } // int*. if null, assume all faces are triangles
 
-        private IntPtr indexes; // int*. 
-        public IntPtr  Indexes { get; set; }
+        public IntPtr indexes { get; set; } // int*.
 
-        private int faceCount;
-        public int FaceCount
-        {
-            get { return faceCount; }
-            set { faceCount = value; }
-        }
+        public int faceCount { get; set; }
 
-        private int indexCount;
-        public int IndexCount
-        {
-            get { return indexCount; }
-            set { indexCount = value; }
-        }
+        public int indexCount { get; set; }
+        public IntPtr points { get; set; }  // Vector3*
 
-        private IntPtr points; // Vector3*
-        public IntPtr   Points
-        {
-            get { return points; }
-            set { points = value; }
-        }
+        public IntPtr velocities { get; set; } // Vector3*. can be null
 
-        private IntPtr velocities; // Vector3*. can be null
-        public IntPtr   Velocities
-        {
-            get { return velocities; }
-            set { velocities = value; }
-        }
-
-        private int pointCount;
-        public int PointCount
-        {
-            get { return pointCount; }
-            set { pointCount = value; }
-        }
+        public int pointCount { get; set; }
 
         public IntPtr   normals;          // Vector3*. can be null
         public IntPtr   normalIndices;    // int*. if null, assume same as indices
