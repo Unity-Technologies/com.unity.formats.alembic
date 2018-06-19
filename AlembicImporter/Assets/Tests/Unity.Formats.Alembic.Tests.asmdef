@@ -4,9 +4,10 @@
     "Unity.Formats.Alembic.Runtime"
   ],
     "includePlatforms": [
-    "LinuxStandalone64",
-    "macOSStandalone",
-    "WindowsStandalone64"
+        "Editor",
+        "LinuxStandalone64",
+        "macOSStandalone",
+        "WindowsStandalone64"
     ],
     "excludePlatforms": []
 }
