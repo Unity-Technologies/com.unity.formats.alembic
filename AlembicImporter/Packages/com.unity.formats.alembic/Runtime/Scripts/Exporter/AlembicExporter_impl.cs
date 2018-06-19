@@ -10,8 +10,6 @@ using UnityEditor;
 #endif
 using UnityEngine.Formats.Alembic.Sdk;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
-
 namespace UnityEngine.Formats.Alembic.Util
 {
     internal enum ExportScope

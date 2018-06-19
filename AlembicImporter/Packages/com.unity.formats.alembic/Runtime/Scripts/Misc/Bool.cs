@@ -2,8 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")] 
-
 namespace UnityEngine.Formats.Alembic.Sdk
 {
     // bool is marshal as int (4 byte) by default and you need ugly [MarshalAs(UnmanagedType.U1)] to pass to (or receive from) C++ code.
