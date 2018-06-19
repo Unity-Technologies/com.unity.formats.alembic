@@ -21,7 +21,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
 
         #region properties
-        public AlembicRecorderSettings settings
+        internal AlembicRecorderSettings settings
         {
             get { return m_recorder.settings; }
             set { m_recorder.settings = value; }
