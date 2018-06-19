@@ -343,11 +343,26 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         private void OnDestroy()
         {
-            m_cbPoints.Dispose();
-            m_cbVelocities.Dispose();
-            m_cbIDs.Dispose();
-            m_cmdMotionVector.Dispose();
-            Array.ForEach<ComputeBuffer>(m_cbArgs, cb => cb.Dispose());
+            if (m_cbPoints != null)
+            {
+                m_cbPoints.Dispose();
+            }
+            if (m_cbVelocities != null)
+            {
+                m_cbVelocities.Dispose();
+            }
+            if (m_cbIDs != null)
+            {
+                m_cbIDs.Dispose();
+            }
+            if (m_cmdMotionVector != null)
+            {
+                m_cmdMotionVector.Dispose();
+            }
+            if (m_cbArgs != null)
+            {
+                Array.ForEach<ComputeBuffer>(m_cbArgs, cb => { if (cb != null) cb.Dispose(); });
+            }
         }
     }
 }

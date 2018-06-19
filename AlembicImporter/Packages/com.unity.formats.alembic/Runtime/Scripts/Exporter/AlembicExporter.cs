@@ -127,7 +127,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         private void OnDestroy()
         {
-            recorder.Dispose();
+            if(recorder != null) recorder.Dispose();
         }
         #endregion
     }
