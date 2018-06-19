@@ -157,7 +157,7 @@ namespace UnityEngine.Formats.Alembic.Util
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class CaptureTarget : Attribute
+    internal sealed class CaptureTarget : Attribute
     {
         public Type componentType { get; set; }
 

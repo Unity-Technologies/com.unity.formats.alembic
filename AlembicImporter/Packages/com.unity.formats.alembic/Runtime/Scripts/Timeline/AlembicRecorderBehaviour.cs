@@ -9,7 +9,7 @@ using UnityEngine.Formats.Alembic.Util;
 
 namespace UnityEngine.Formats.Alembic.Timeline
 {
-    public class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
+    internal class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
     {
         #region fields
         AlembicRecorder m_recorder = new AlembicRecorder();

@@ -314,7 +314,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
 
 
-    public static partial class AbcAPI
+    internal static partial class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {
