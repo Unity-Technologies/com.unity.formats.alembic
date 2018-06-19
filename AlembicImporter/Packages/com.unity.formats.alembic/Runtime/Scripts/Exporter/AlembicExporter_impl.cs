@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using UnityEngine;
+using System.Runtime.CompilerServices;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine.Formats.Alembic.Sdk;
 
-
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
 
 namespace UnityEngine.Formats.Alembic.Util
 {
