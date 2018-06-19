@@ -6,11 +6,11 @@ using UnityEngine;
 namespace UnityEngine.Formats.Alembic.Importer
 {
 
-    public sealed class AlembicTreeNode : IDisposable
+    internal sealed class AlembicTreeNode : IDisposable
     {
         public AlembicStream stream { get; set; }
         public GameObject gameObject { get; set; }
-        public AlembicElement abcObject { get; set; }
+        internal AlembicElement abcObject { get; set; }
 
         private List<AlembicTreeNode> children = new List<AlembicTreeNode>();
         public List<AlembicTreeNode> Children
@@ -37,7 +37,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
         }
 
-        public T GetOrAddAlembicObj<T>() where T : AlembicElement, new()
+        internal T GetOrAddAlembicObj<T>() where T : AlembicElement, new()
         {
             var o = abcObject as T;
             if (o == null)
@@ -48,12 +48,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             return o;
         }
 
-        public T GetAlembicObj<T>() where T : AlembicElement, new()
+        internal T GetAlembicObj<T>() where T : AlembicElement, new()
         {
             return abcObject as T;
         }
 
-        public void RemoveAlembicObject(AlembicElement obj)
+        internal void RemoveAlembicObject(AlembicElement obj)
         {
             if (obj != null && obj == abcObject)
             {

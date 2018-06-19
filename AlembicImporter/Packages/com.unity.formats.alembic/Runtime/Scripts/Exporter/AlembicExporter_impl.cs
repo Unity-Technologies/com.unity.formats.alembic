@@ -182,7 +182,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public sealed class AlembicRecorder : IDisposable
+    internal sealed class AlembicRecorder : IDisposable
     {
         #region internal types
         internal class MeshBuffer : IDisposable
