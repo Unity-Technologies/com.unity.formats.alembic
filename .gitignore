@@ -65,4 +65,3 @@ StreamingAssets*
 # Unignore specific .abc files
 !AlembicImporter/Assets/ManualTests/MVPCloth.abc
 
-

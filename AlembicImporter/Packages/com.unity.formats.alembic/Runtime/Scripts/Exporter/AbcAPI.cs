@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.ManualTests")]  
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]  
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
