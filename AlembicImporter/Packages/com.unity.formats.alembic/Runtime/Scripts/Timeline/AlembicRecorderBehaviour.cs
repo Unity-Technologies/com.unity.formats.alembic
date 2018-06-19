@@ -137,7 +137,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         protected virtual void Dispose(bool v)
         {
-            m_recorder.Dispose();
+            if(m_recorder != null) m_recorder.Dispose();
         }
 
         public void Dispose()

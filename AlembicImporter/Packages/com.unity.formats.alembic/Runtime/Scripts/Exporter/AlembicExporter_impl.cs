@@ -294,13 +294,13 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                points.Dispose();
-                normals.Dispose();
-                uv0.Dispose();
-                uv1.Dispose();
-                colors.Dispose();
-                submeshData.Dispose();
-                submeshIndices.ForEach(i => i.Dispose());
+                if(points != null) points.Dispose();
+                if(normals != null) normals.Dispose();
+                if(uv0 != null) uv0.Dispose();
+                if(uv1 != null) uv1.Dispose();
+                if(colors != null) colors.Dispose();
+                if(submeshData != null) submeshData.Dispose();
+                if(submeshIndices != null) submeshIndices.ForEach(i => { if (i != null) i.Dispose(); });
             }
         }
 
@@ -383,9 +383,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                remap.Dispose();
-                vertices.Dispose();
-                normals.Dispose();
+                if(remap != null) remap.Dispose();
+                if(vertices != null) vertices.Dispose();
+                if(normals != null) normals.Dispose();
             }
         }
 
@@ -544,7 +544,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                m_mbuf.Dispose();
+                if(m_mbuf != null) m_mbuf.Dispose();
             }
         }
 
@@ -615,8 +615,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                m_mbuf.Dispose();
-                m_cbuf.Dispose();
+                if(m_mbuf != null) m_mbuf.Dispose();
+                if(m_cbuf != null) m_cbuf.Dispose();
             }
         }
 
@@ -670,9 +670,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                m_bufPoints.Dispose();
-                m_bufRotations.Dispose();
-                
+                if(m_bufPoints != null) m_bufPoints.Dispose();
+                if(m_bufRotations != null) m_bufRotations.Dispose();
             }
         }
 

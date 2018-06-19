@@ -16,7 +16,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Dispose()
             {
-                indexes.Dispose();
+               if(indexes != null) indexes.Dispose();
             }
         }
 
@@ -39,13 +39,13 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Dispose()
             {
-                points.Dispose();
-                velocities.Dispose();
-                normals.Dispose();
-                tangents.Dispose();
-                uv0.Dispose();
-                uv1.Dispose();
-                colors.Dispose();
+                if(points != null) points.Dispose();
+                if(velocities != null) velocities.Dispose();
+                if(normals != null) normals.Dispose();
+                if(tangents != null) tangents.Dispose();
+                if(uv0 != null) uv0.Dispose();
+                if(uv1 != null) uv1.Dispose();
+                if(colors != null) colors.Dispose();
             }
         }
 
