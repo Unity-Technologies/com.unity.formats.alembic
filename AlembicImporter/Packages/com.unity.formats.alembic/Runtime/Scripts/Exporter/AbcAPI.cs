@@ -436,16 +436,16 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aeMarkFrameEnd(IntPtr ctx);
 
 
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
         [DllImport(Abci.Lib)] public static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
         [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
         [DllImport(Abci.Lib)] public static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
         [DllImport(Abci.Lib)] public static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
         [DllImport(Abci.Lib)] public static extern void aeMarkForceInvisible(IntPtr self);
 
 
@@ -466,7 +466,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport("abci")] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
 
 
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern void aiClearContextsWithPath(string path);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern void aiClearContextsWithPath(string path);
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
@@ -498,7 +498,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
         [DllImport(Abci.Lib)] public static extern int aiSchemaGetNumProperties(IntPtr schema);
         [DllImport(Abci.Lib)] public static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);
-        [DllImport(Abci.Lib, CharSet = CharSet.Unicode)] public static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
+        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
 
