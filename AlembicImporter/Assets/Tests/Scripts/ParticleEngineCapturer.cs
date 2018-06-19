@@ -24,17 +24,17 @@ namespace UTJ.Alembic
         {
             if(m_target == null)
             {
-                m_data.Visibility = false;
+                m_data.visibility = false;
             }
             else
             {
                 m_points = m_target.positionBuffer;
                 m_velocities = m_target.velocityBuffer;
 
-                m_data.Visibility = m_target.gameObject.activeSelf;
-                m_data.Count = m_points.Count;
-                m_data.Positions = m_points;
-                m_data.Velocities = m_velocities;
+                m_data.visibility = m_target.gameObject.activeSelf;
+                m_data.count = m_points.Count;
+                m_data.positions = m_points;
+                m_data.velocities = m_velocities;
             }
             abcObject.WriteSample(ref m_data);
         }
