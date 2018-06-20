@@ -66,3 +66,7 @@ StreamingAssets*
 
 # We keep the plug-in libraries in the repo
 !AlembicImporter/Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll
+
+# The CHANGELOG.md should not be tracked. Use the ones from Packages/Documentation/com.unity.formats.alembic instead
+AlembicImporter/Packages/com.unity.formats.alembic/CHANGELOG.md
+AlembicImporter/Packages/com.unity.formats.alembic/CHANGELOG.md.meta
