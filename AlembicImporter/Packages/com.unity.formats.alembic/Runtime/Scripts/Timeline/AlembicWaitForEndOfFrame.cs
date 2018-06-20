@@ -47,4 +47,4 @@ namespace UnityEngine.Formats.Alembic.Timeline
         }
     }
 }
-#endif
+#endif // ENABLE_ALEMBIC_TIMELINE_RECORDER

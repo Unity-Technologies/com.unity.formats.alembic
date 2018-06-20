@@ -43,4 +43,4 @@ namespace UnityEngine.Formats.Alembic.Util
         }
     }
 }
-#endif
+#endif // ENABLE_ALEMBIC_CAMERA_PARAMS

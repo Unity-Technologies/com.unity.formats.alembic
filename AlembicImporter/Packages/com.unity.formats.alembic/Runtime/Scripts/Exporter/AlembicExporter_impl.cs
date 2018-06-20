@@ -462,7 +462,7 @@ namespace UnityEngine.Formats.Alembic.Util
             Camera m_target;
 #if ENABLE_ALEMBIC_CAMERA_PARAMS
             AlembicCameraParams m_params;
-#endif
+#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
             aeCameraData m_data = aeCameraData.defaultValue;
 
             public override void Setup(Component c)
@@ -472,7 +472,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 m_target = target;
 #if ENABLE_ALEMBIC_CAMERA_PARAMS
                 m_params = target.GetComponent<AlembicCameraParams>();
-#endif
+#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
 
                 var trans = parent as TransformCapturer;
                 if (trans != null)
@@ -507,7 +507,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     dst.aperture = m_params.m_aperture;
                     dst.aspectRatio = m_params.AspectRatio;
                 }
-#endif
+#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
             }
         }
 
