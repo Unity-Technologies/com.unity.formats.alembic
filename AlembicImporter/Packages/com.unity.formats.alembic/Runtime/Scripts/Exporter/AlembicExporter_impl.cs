@@ -460,7 +460,9 @@ namespace UnityEngine.Formats.Alembic.Util
         internal class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
+#if ENABLE_ALEMBIC_CAMERA_PARAMS
             AlembicCameraParams m_params;
+#endif
             aeCameraData m_data = aeCameraData.defaultValue;
 
             public override void Setup(Component c)
@@ -468,7 +470,9 @@ namespace UnityEngine.Formats.Alembic.Util
                 var target = c as Camera;
                 abcObject = parent.abcObject.NewCamera(target.name, timeSamplingIndex);
                 m_target = target;
+#if ENABLE_ALEMBIC_CAMERA_PARAMS
                 m_params = target.GetComponent<AlembicCameraParams>();
+#endif
 
                 var trans = parent as TransformCapturer;
                 if (trans != null)
@@ -495,6 +499,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 dst.nearClippingPlane = src.nearClipPlane;
                 dst.farClippingPlane = src.farClipPlane;
                 dst.fieldOfView = src.fieldOfView;
+#if ENABLE_ALEMBIC_CAMERA_PARAMS
                 if (m_params != null)
                 {
                     dst.focalLength = m_params.m_focalLength;
@@ -502,6 +507,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     dst.aperture = m_params.m_aperture;
                     dst.aspectRatio = m_params.AspectRatio;
                 }
+#endif
             }
         }
 
@@ -705,10 +711,10 @@ namespace UnityEngine.Formats.Alembic.Util
             public bool enabled = true;
             public Type type;
         }
-        #endregion
+#endregion
 
 
-        #region fields
+#region fields
         [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
 
         aeContext m_ctx;
@@ -725,10 +731,10 @@ namespace UnityEngine.Formats.Alembic.Util
         int m_frameCount;
 
         Dictionary<Type, CapturerRecord> m_capturerTable = new Dictionary<Type, CapturerRecord>();
-        #endregion
+#endregion
 
 
-        #region properties
+#region properties
         public AlembicRecorderSettings settings
         {
             get { return m_settings; }
@@ -737,10 +743,10 @@ namespace UnityEngine.Formats.Alembic.Util
         public GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
         public bool recording { get { return m_recording; } }
         public int frameCount { get { return m_frameCount; } }
-        #endregion
+#endregion
 
 
-        #region impl
+#region impl
 #if UNITY_EDITOR
         public static void ForceDisableBatching()
         {
@@ -887,10 +893,10 @@ namespace UnityEngine.Formats.Alembic.Util
             foreach (var c in m_nodes)
                 SetupComponentCapturer(c.Value);
         }
-        #endregion
+#endregion
 
 
-        #region public methods
+#region public methods
         public void Dispose()
         {
             m_ctx.Destroy();
@@ -1038,6 +1044,6 @@ namespace UnityEngine.Formats.Alembic.Util
                 Debug.Log("AlembicRecorder: frame " + m_frameCount + " (" + (m_elapsed * 1000.0f) + " ms)");
             }
         }
-        #endregion
+#endregion
     }
 }
