@@ -390,10 +390,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetName(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetFullName(IntPtr obj);
-        [DllImport(Abci.Lib)] public static extern aiXform aiObjectAsXform(IntPtr obj);
-        [DllImport(Abci.Lib)] public static extern aiCamera aiObjectAsCamera(IntPtr obj);
-        [DllImport(Abci.Lib)] public static extern aiPoints aiObjectAsPoints(IntPtr obj);
-        [DllImport(Abci.Lib)] public static extern aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiXform aiObjectAsXform(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiCamera aiObjectAsCamera(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiPoints aiObjectAsPoints(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
 
         [DllImport(Abci.Lib)] public static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
         [DllImport(Abci.Lib)] public static extern void aiSchemaSync(IntPtr schema);
@@ -429,5 +429,22 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
         [DllImport(Abci.Lib)] public static extern void aiCleanup();
+
+        internal struct aiXform
+        {
+            [DllImport(Abci.Lib)] public static extern aiXformSample aiSchemaGetSample(IntPtr schema);
+        }
+        internal struct aiCamera
+        {
+            [DllImport(Abci.Lib)] public static extern aiCameraSample aiSchemaGetSample(IntPtr schema);
+        }
+        internal struct aiPolyMesh
+        {
+            [DllImport(Abci.Lib)] public static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
+        }
+        internal struct aiPoints
+        {
+            [DllImport(Abci.Lib)] public static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
+        }
     }
 }

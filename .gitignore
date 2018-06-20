@@ -70,3 +70,9 @@ StreamingAssets*
 # The CHANGELOG.md should not be tracked. Use the ones from Packages/Documentation/com.unity.formats.alembic instead
 AlembicImporter/Packages/com.unity.formats.alembic/CHANGELOG.md
 AlembicImporter/Packages/com.unity.formats.alembic/CHANGELOG.md.meta
+
+# Package Validation Suite files are not tracked
+AlembicImporter/ValidationSuiteResults/*
+
+# Rulesets in this location should not be tracked
+AlembicImporter/*.ruleset

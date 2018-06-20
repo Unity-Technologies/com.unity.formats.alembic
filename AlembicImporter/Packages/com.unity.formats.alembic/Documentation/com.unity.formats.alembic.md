@@ -4,7 +4,7 @@ Use the Alembic package to import [Alembic](http://www.alembic.io/) files into y
 
 ## Requirements
 
-Version 0.2.0-preview is compatible with Unity Editor 2018.2
+Version 0.2.0-preview is compatible with Unity Editor 2018.1
 
 The package is available on 64-bit desktop platforms:
 * Windows 10
