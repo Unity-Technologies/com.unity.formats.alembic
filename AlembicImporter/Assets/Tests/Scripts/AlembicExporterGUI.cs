@@ -37,7 +37,8 @@ namespace UTJ.Alembic
         {
             if(m_recording) { return; }
 
-            var time_sampling_type = (aeTimeSamplingType)m_dropdown_simesampling.value;
+            // in the enum acyclic is 2, and uniform is 1
+            var time_sampling_type = (aeTimeSamplingType)(m_dropdown_simesampling.value == 1? 2 : 0);
             var frame_rate = int.Parse(m_input_fps.text);
 
             m_exporters = FindObjectsOfType<AlembicExporter>();
