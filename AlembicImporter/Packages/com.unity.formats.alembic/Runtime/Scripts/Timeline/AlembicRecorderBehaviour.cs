@@ -149,4 +149,4 @@ namespace UnityEngine.Formats.Alembic.Timeline
 #endregion
     }
 }
-#endif
+#endif // ENABLE_ALEMBIC_TIMELINE_RECORDER
