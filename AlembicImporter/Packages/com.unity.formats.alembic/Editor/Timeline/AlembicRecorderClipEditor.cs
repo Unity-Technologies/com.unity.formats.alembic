@@ -11,7 +11,7 @@ using UnityEngine.Timeline;
 namespace UnityEditor.Formats.Alembic.Timeline
 {
     [CustomEditor(typeof(AlembicRecorderClip))]
-    public class AlembicRecorderClipEditor : Editor
+    internal class AlembicRecorderClipEditor : Editor
     {
         TimelineAsset m_timelineAsset;
         bool m_foldCaptureComponents;

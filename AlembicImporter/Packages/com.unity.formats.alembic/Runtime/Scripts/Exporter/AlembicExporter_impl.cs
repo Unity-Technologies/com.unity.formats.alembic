@@ -4,17 +4,14 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using UnityEngine;
-using System.Runtime.CompilerServices;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine.Formats.Alembic.Sdk;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
-
 namespace UnityEngine.Formats.Alembic.Util
 {
-    public enum ExportScope
+    internal enum ExportScope
     {
         EntireScene,
         TargetBranch,
@@ -22,7 +19,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public class AlembicRecorderSettings
+    internal class AlembicRecorderSettings
     {
         [SerializeField]
         private string outputPath = "Output/Output.abc";
@@ -157,7 +154,7 @@ namespace UnityEngine.Formats.Alembic.Util
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class CaptureTarget : Attribute
+    internal sealed class CaptureTarget : Attribute
     {
         public Type componentType { get; set; }
 
@@ -182,7 +179,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public sealed class AlembicRecorder : IDisposable
+    internal sealed class AlembicRecorder : IDisposable
     {
         #region internal types
         internal class MeshBuffer : IDisposable

@@ -4,7 +4,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [ExecuteInEditMode]
-    public class AlembicStreamPlayer : MonoBehaviour
+    internal class AlembicStreamPlayer : MonoBehaviour
     {
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         public AlembicStream abcStream { get; set; }

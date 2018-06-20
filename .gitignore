@@ -62,4 +62,6 @@ StreamingAssets*
 !Plugin/external/ThirdParty/Deploy/MacOS/include
 !Plugin/external/ThirdParty/Deploy/MacOS/lib
 
+# Unignore specific .abc files
+!AlembicImporter/Assets/ManualTests/MVPCloth.abc
 
