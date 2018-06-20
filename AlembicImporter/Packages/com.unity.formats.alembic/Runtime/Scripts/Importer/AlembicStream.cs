@@ -8,7 +8,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public sealed class AlembicStream : IDisposable
+    internal sealed class AlembicStream : IDisposable
     {
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
@@ -57,11 +57,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         bool m_loaded;
         bool m_streamInterupted;
 
-        public AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
-        public aiContext abcContext { get { return m_context; } }
+        internal aiContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context; } }
-        public aiConfig config { get { return m_config; } }
+        internal aiConfig config { get { return m_config; } }
 
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
         public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
@@ -69,7 +69,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
 
 
-        public AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
+        internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
             m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
@@ -263,7 +263,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             ic.alembicTreeNode = treeNode;
         }
 
-        public static float GetAspectRatio(aiAspectRatioMode mode)
+        internal static float GetAspectRatio(aiAspectRatioMode mode)
         {
             if (mode == aiAspectRatioMode.CameraAperture)
             {

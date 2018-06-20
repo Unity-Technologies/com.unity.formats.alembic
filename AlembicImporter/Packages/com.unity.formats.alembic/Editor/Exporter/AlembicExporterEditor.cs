@@ -12,7 +12,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
 {
 
     [CustomEditor(typeof(AlembicExporter))]
-    public class AlembicExporterEditor : Editor
+    internal class AlembicExporterEditor : Editor
     {
         bool m_foldCaptureComponents;
         bool m_foldMeshComponents;

@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public class AlembicMesh : AlembicElement
+    internal class AlembicMesh : AlembicElement
     {
         internal class Submesh : IDisposable
         {

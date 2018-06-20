@@ -3,7 +3,7 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Formats.Alembic.Timeline
 {
-    public class AlembicShotPlayable : PlayableBehaviour
+    internal class AlembicShotPlayable : PlayableBehaviour
     {
         public AlembicStreamPlayer streamPlayer { get; set; }
 

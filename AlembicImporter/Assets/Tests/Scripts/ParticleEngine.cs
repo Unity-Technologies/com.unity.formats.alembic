@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 
@@ -51,8 +51,8 @@ namespace UTJ.Alembic
         float m_elapsed;
 
 
-        public PinnedList<Vector3> positionBuffer { get { return m_buf_positions; } }
-        public PinnedList<Vector3> velocityBuffer { get { return m_buf_velocities; } }
+        internal PinnedList<Vector3> positionBuffer { get { return m_buf_positions; } }
+        internal PinnedList<Vector3> velocityBuffer { get { return m_buf_velocities; } }
         public float elapsed { get { return m_elapsed; } }
 
 

@@ -6,7 +6,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public abstract class AlembicElement : IDisposable 
+    internal abstract class AlembicElement : IDisposable 
     {
         private aiObject m_abcObj;
 

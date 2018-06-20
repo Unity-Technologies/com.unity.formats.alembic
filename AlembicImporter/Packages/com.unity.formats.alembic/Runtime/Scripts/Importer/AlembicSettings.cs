@@ -4,7 +4,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [System.Serializable]
-    public class AlembicStreamSettings
+    internal class AlembicStreamSettings
     {
         [SerializeField]
         private aiNormalsMode normals = aiNormalsMode.ComputeIfMissing;

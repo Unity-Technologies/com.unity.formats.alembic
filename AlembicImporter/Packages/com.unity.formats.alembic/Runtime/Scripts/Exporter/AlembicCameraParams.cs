@@ -4,7 +4,7 @@ namespace UnityEngine.Formats.Alembic.Util
 {
     [AddComponentMenu("UTJ/Alembic/Camera Params")]
     [RequireComponent(typeof(Camera))]
-    public class AlembicCameraParams : MonoBehaviour
+    internal class AlembicCameraParams : MonoBehaviour
     {
         public enum AspectRatioMode
         {

@@ -6,7 +6,7 @@ using UnityEngine.Formats.Alembic.Importer;
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicStreamPlayer)),CanEditMultipleObjects]
-    public class AlembicStreamPlayerEditor : Editor
+    internal class AlembicStreamPlayerEditor : Editor
     {
         bool m_foldMisc = false;
 
