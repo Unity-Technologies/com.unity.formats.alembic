@@ -7,20 +7,21 @@ using UnityEditor;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Util;
 
+#if ENABLE_ALEMBIC_TIMELINE_RECORDER
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     internal class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
     {
-        #region fields
+#region fields
         AlembicRecorder m_recorder = new AlembicRecorder();
         bool m_ignoreFirstFrame = true;
         int m_prevFrame = 0;
         bool m_firstFrame;
         PlayState m_playState = PlayState.Paused;
-        #endregion
+#endregion
 
 
-        #region properties
+#region properties
         internal AlembicRecorderSettings settings
         {
             get { return m_recorder.settings; }
@@ -32,10 +33,10 @@ namespace UnityEngine.Formats.Alembic.Timeline
             set { m_ignoreFirstFrame = value; }
         }
 
-        #endregion
+#endregion
 
 
-        #region impl
+#region impl
         void BeginRecording()
         {
             m_firstFrame = true;
@@ -70,10 +71,10 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
             m_recorder.ProcessRecording();
         }
-        #endregion
+#endregion
 
 
-        #region messsages
+#region messsages
 
         public override void OnPlayableCreate(Playable playable)
         {
@@ -145,6 +146,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
+#endregion
     }
 }
+#endif
