@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.Timeline;
 
+#if ENABLE_ALEMBIC_TIMELINE_RECORDER
 namespace UnityEditor.Formats.Alembic.Timeline
 {
     [CustomEditor(typeof(AlembicRecorderClip))]
@@ -156,3 +157,4 @@ namespace UnityEditor.Formats.Alembic.Timeline
         }
     }
 }
+#endif

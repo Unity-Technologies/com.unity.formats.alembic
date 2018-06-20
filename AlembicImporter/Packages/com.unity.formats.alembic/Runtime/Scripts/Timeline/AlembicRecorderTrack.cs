@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Timeline;
 
-
+#if ENABLE_ALEMBIC_TIMELINE_RECORDER
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.Serializable]
@@ -12,3 +12,4 @@ namespace UnityEngine.Formats.Alembic.Timeline
     {
     }
 }
+#endif

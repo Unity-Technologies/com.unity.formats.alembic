@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if ENABLE_ALEMBIC_TIMELINE_RECORDER
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [ExecuteInEditMode]
@@ -46,3 +47,4 @@ namespace UnityEngine.Formats.Alembic.Timeline
         }
     }
 }
+#endif
