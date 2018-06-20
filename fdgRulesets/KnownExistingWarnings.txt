@@ -6,7 +6,7 @@ Warning	CA1801	Parameter 'rao' of 'AlembicAssetModificationProcessor.OnWillDelet
 
 
 Warning	CA1812 (x7) ['AlembicExporterEditor', 'AlembicAssetModificationProcessor', 'AlembicImporterEditor', 'AlembicRecorderClipEditor', 'AlembicStreamDescriptorEditor', 'AlembicStreamPlayerEditor', 'BoolDrawer'] is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.	Unity.Alembic.Editor	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Misc	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Misc\BoolDrawer.cs	7	Active
-> these classes is instantiated by Unity and requires a default public constructor
+> These classes are instantiated by Unity and requires a default public constructor
 
 Runtime
 -------
