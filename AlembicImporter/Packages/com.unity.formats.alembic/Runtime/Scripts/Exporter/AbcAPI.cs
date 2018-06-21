@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]  
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")] 
 

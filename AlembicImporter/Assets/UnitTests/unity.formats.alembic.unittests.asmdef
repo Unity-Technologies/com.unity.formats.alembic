@@ -1,6 +1,8 @@
 {
-    "name": "unity.formats.alembic.unittests",
-    "references": [],
+    "name": "Unity.Formats.Alembic.UnitTests",
+    "references": [
+        "Unity.Formats.Alembic.Runtime"
+    ],
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
