@@ -283,7 +283,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public IntPtr data;
         public int size;
-        aiPropertyType type;
+        public aiPropertyType type;
 
         public aiPropertyData(IntPtr data, int size, aiPropertyType type)
         {
