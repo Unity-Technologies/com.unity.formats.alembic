@@ -137,7 +137,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool detailedLog = true;
+        private bool detailedLog = false;
         public bool DetailedLog
         {
             get { return detailedLog; }
