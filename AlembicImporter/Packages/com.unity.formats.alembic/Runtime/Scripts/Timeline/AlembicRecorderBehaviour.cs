@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Util;
 
-#if ENABLE_ALEMBIC_TIMELINE_RECORDER
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     internal class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
@@ -149,4 +148,3 @@ namespace UnityEngine.Formats.Alembic.Timeline
 #endregion
     }
 }
-#endif // ENABLE_ALEMBIC_TIMELINE_RECORDER
