@@ -49,7 +49,6 @@ ipch/
 
 *.abc
 *.abc.meta
-abci.bundle/
 build/
 TestLocal*
 StreamingAssets*

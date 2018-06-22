@@ -1,5 +1,6 @@
 using UnityEngine;
 
+#if ENABLE_ALEMBIC_CAMERA_PARAMS
 namespace UnityEngine.Formats.Alembic.Util
 {
     [AddComponentMenu("UTJ/Alembic/Camera Params")]
@@ -42,3 +43,4 @@ namespace UnityEngine.Formats.Alembic.Util
         }
     }
 }
+#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
