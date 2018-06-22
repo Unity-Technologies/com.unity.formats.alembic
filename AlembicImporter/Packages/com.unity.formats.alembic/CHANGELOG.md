@@ -2,6 +2,11 @@
 
 ## [0.1.3] - 2018-06-08
 
+- Internalized the API
+- Updated Documentation
+- Changed namespaces to Unity[Editor|Engine].Formats.Alembic.[Exporter|Importer]
+- Removed Alembic Camera Params component
+
 ## [0.1.2] - 2018-03-19
 
 - Initial version for Package Manager
