@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Timeline;
 
-
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.Serializable]
