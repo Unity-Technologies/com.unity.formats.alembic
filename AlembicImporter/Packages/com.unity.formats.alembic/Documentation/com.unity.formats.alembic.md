@@ -6,7 +6,7 @@ The Alembic package supports the import and playback of Meshes, Points and Camer
 
 ## Requirements
 
-Version 0.2.0-preview is compatible with Unity Editor 2018.2
+The Alembic Package is compatible with Unity Editor 2018.2 and above.
 
 The package is available on 64-bit desktop platforms:
 * Windows 10
@@ -31,11 +31,11 @@ Then drag the ABC asset into the scene and scrub the Time property on the compon
 
 ![Scrub the time](images/scrub-time.png)
 
-To animate using Timeline Editor, can create a Timeline. You can  animate the time property directly as shown below. 
+To animate using Timeline Editor first can create a Timeline. You can then animate the time property using an Infinite clip as shown below. 
 
 ![Timeline](images/timeline.png)
 
-Alternatively, you can drag and drop the scene object with the ABC asset onto an empty area on Timeline area and create an Alembic Track with an Alembic Clip. If you are starting from an empty Timeline you will need to create the Alembic track first.
+Alternatively, you can drag and drop the scene object with the ABC asset onto an empty area within Timeline's Clip Editor this will create an Alembic Track with an Alembic Clip. If you are starting from an empty Timeline you will need to manual create the Alembic track first by right clicking the Timeline's Track view which is on the left hand side of the editor.
 
 ![Timeline](images/timeline2.png)
 
@@ -47,9 +47,9 @@ When you put ABC files in the Assets folder under your Unity Project, Unity auto
 
 | Property:| Function: |
 |:---|:---| 
-|__Normals__  <br/>"Read From File",<br/>"Compute If Missing",<br/> "Always Compute",<br/> "Ignore" |Defines if the normals from .abc file are used or calculate based on vertex position. The default "Compute If Missing" will use abc file normals, otherwise they will be calculated. |
-|__Tangents__ <br/> "Compute" <br/> "None"| Defines if the tangents are computed and is enabled by default. Since the ABC file has no tangent data, there are only 2 choices. However, please note that the calculation of tangents requires normals and UV data, and if these are missing the tangent cannot be computed.  Please note that the calculation of tangentsis expensive, so if not require then disabling of this option will increase the speed of playback.|
-|__Camera Aspect Ratio__ <br/> "Camera Aperture",<br/>"Default Resolution",<br/>"Current Resolution"| Defines whether to set the Unity Camera's aspect ratio. By default the ABC file will set the camera aspect ratio. The Alembic Importer uses the default resolution from the Player Settings. The Current Resolution refers to the aspect ratio define by the Screen. |
+|__Normals__  <br/>"Read From File",<br/>"Compute If Missing",<br/> "Always Compute",<br/> "Ignore" |Defines if the normals from .abc file are used or whether they are calculate based on vertex position. The default "Compute If Missing" will use abc file normals, otherwise they will be calculated. |
+|__Tangents__ <br/> "Compute" <br/> "None"| Defines if the tangents are computed and is enabled by default. Since the ABC file has no tangent data, there are only 2 choices. However, please note that the calculation of tangents requires normals and UV data, and if these are missing the tangent cannot be computed.  Please note that the calculation of tangents is expensive, so if not require then disabling of this option will increase the speed of playback.|
+|__Camera Aspect Ratio__ <br/> "Camera Aperture",<br/>"Default Resolution",<br/>"Current Resolution"| Defines whether to set the Unity Camera's aspect ratio. By default the ABC file will set the camera aspect ratio. The Alembic Importer uses the default resolution from the Player Settings. The Current Resolution refers to the aspect ratio define by the screen. |
 |__Scale Factor__ |{TODO}|
 |__Swap Handedness__ | Choose swap handedness to invert the X direction |
 |__Interpolate Samples__ | Define whether to interpolate animation. If enabled then the animation will be interpolated for Transform, Camera, and Mesh where the topology does not change such that the number of vertices and indices are immutable.<br/><br/>If Interpolate Samples is enabled, or velocity data is included in the .abc file, you can pass velocity data to an Alembic shader. 
@@ -69,9 +69,9 @@ The Alembic exporter supports exporting single frame and multi-frame Alembic fil
 * ParticleSystem
 * Camera
 
-To configure a scene to export ABC file, add the AlembicExporter component to the appropriate game objects. The component can be configure to export the entire scene or individual objects.
+To configure a scene to export an ABC file, add the AlembicExporter component to the GameObjects. The component can be configure to export the entire scene or individual object branches.
 
-Using the AlembicExporter component automatically disable Draw Call Batching. If the Mesh group is valid after being batched then it the  will be exported, in some cases the data will be batched multiplied times and the results may change.  If you want to control the Batch settings they can be found in the Rendering section of Player Settings.
+Using the AlembicExporter component automatically disables Draw Call Batching. If the Mesh group is valid after being batched then it will be exported. In some cases the data will be batched multiplied times and the results may change.  If you want to control the Batch settings they can be found in the Rendering section of Player Settings.
 
 The Alembic exporter can be customized by setting the properties on this component:
 
