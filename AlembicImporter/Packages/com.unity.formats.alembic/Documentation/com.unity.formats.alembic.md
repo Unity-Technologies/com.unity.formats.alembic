@@ -107,6 +107,18 @@ The Alembic exporter can be customized by setting the properties on this compone
 |__Begin Recording__ |In play mode, click button to begin recording. Use if **Capture On Start** is disabled|
 |__One Shot__|Button to export the current frame to the ABC file.|
 
+> ***Note:*** The current capture target object is determined at the start of capture, and does not change in the middle. Enabling or disabling the object does not affect the capture.
+> Also, any objects generated after the start of the capture are not captured.
+
+> ***Note:*** Be careful when deleting the target object in the middle of capture. In this case, the capture of that object will be interrupted, and the Alembic file may have a non-uniform number of samples as a result. Some software may not handle this properly.
+
+> ***Note:*** An ID (e.g. "(0000283C)") is given to the name of the Alembic node on export. This is a measure to avoid name conflicts as Alembic has a rule that each node in a hierarchy should have a unique name. 
+
+
+## Known Issues
+
+* Material export is currently not supported
+
 # Controlling Alembic playback
 
 The import and playback of Alembic data is controlled by the `Alembic Stream Player` component.
@@ -211,7 +223,7 @@ The Alembic package includes the following Shaders:
 |__Points Motion Vectors__      |{TODO} |
 |__Standard__                   |Standard PBR material with motionblur support added |
 |__Standard (Roughness setup)__ |Standard (Roughness setup) PBR with roughness material with motionblur support added |
-|__Standard__(Specular setup)   |Standard (Specular setup) material with motionblur support added |
+|__Standard (Specular setup)__   |Standard (Specular setup) material with motionblur support added |
 
 ## Motion Blur
 
