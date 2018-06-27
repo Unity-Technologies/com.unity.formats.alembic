@@ -83,28 +83,28 @@ The Alembic exporter can be customized by setting the properties on this compone
 |__Output Path__ |Specify the location where the Alembic Exporter will save the ABC file. By default the output path is relative to the current Unity project path. |
 |__Archive Type__ |Choose the Alembic format specification, the default is Ogawa and provides smaller and better performance than HDF5.|
 |__Xform Type__ |Choose the transform type. The default is TRS and records the TRS channels for position, rotation, scale of an object. The alternative is matrix (Matrix).|
-|__Time Sampling Type__ |Choose between Uniform and Acyclic time sampling. Uniform time sampling will |
-|__Time Sampling Frame Rate__ |{TODO}|
-|__Time Sampling Fix Delta Time__ |{TODO}|
+|__Time Sampling Type__ |Choose between Uniform and Acyclic time sampling. In the case of Uniform, the interval between frames on the Alembic side is always constant (1 / Frame Rate seconds). In the case of Acyclic, the delta time on the Unity side is directly the interval between the frames on the Alembic side. The interval is not constant, but the impact on the game progress will be minimal. It is a mode mainly assuming 3D recording of games.|
+|__Time Sampling Frame Rate__ |The frame rate to use for uniform sampling |
+|__Time Sampling Fix Delta Time__ |If enabled, Time.maximumDeltaTime will be set using the frame rate to ensure fixed delta time. In the case of video production this should be the desired behavior, but be careful if you are managing Time.maxDeltaTime yourself. |
 |__Swap Handedness__ |Choose swap handedness to change from a left hand coordinate system (Unity) to a right hand coordinate system (Maya).|
 |__Swap Faces__ |Choose swap faces to reverse the front and back of a face.|
 |__Swap Factor__ |Choose swap factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
-|__Capture Scope__<br/>"Entire Scene",<br/>"Target Branch" | Choose the scope of the export. By default the entire scene will be exported but it can be configured to export just a branch of the scene. ![Alembic Export Target](images/abc_export_target.png) |
-|__Assume None Skinned Meshes Are Constant__ |{TODO}|
-|__Capture MeshRenderer__ |{TODO}|
-|__Capture SkinnedMeshRenderer__ |{TODO}|
-|__Capture Particle__ |{TODO}|
-|__Capture Camera__ |{TODO}|
-|__Mesh Components Normals__ |{TODO}|
-|__Mesh Components UV1__ |{TODO}|
-|__Mesh Components UV2__ |{TODO}|
-|__Mesh Components Vertex Color__ |{TODO}|
-|__Mesh Components Submeshes__ |{TODO}|
-|__Capture On Start__ |{TODO}|
-|__Ignore First Frame__ |{TODO}|
-|__Max Capture Frame__ |{TODO}|
-|__Detailed Log__ |{TODO}|
-|__Begin Recording__ |{TODO}|
+|__Capture Scope__<br/>"Entire Scene",<br/>"Target Branch" | Choose the scope of the export. By default the entire scene will be exported but it can be configured to export just a branch (or hierarchy) of the scene. ![Alembic Export Target](images/abc_export_target.png) |
+|__Assume Non Skinned Meshes Are Constant__ | If enabled, will not capture animation on static meshes |
+|__Capture MeshRenderer__ |Enable to record MeshRenderer components|
+|__Capture SkinnedMeshRenderer__ |Enable to record SkinnedMeshRenderer components|
+|__Capture Particle__ |Enable to record ParticleSystem components|
+|__Capture Camera__ |Enable to record Camera components|
+|__Mesh Components Normals__ |Enable to record mesh normals|
+|__Mesh Components UV1__ |Enable to record mesh UV1|
+|__Mesh Components UV2__ |Enable to record mesh UV2|
+|__Mesh Components Vertex Color__ |Enable to record vertex colors|
+|__Mesh Components Submeshes__ |Enable to record submeshes|
+|__Capture On Start__ |Begin capturing in Start() when scene with AlembicExporter component is loaded|
+|__Ignore First Frame__ |If enabled, do not capture first frame. Only available if **Capture On Start** enabled|
+|__Max Capture Frame__ |The frame to stop capturing at|
+|__Detailed Log__ |Provide detailed Debug logs of each frame that is captured|
+|__Begin Recording__ |In play mode, click button to begin recording. Use if **Capture On Start** is disabled|
 |__One Shot__|Button to export the current frame to the ABC file.|
 
 # Controlling Alembic playback
