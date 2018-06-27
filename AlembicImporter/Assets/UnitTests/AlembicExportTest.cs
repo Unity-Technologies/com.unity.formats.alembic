@@ -4,6 +4,12 @@ using UnityEngine.TestTools;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Exporter;
 using System.IO;
+using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Timeline;
+using UnityEngine.Timeline;
+using UnityEngine.Formats.Alembic.Util;
+using UnityEngine.Playables;
+using System.Linq;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -144,6 +150,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     public class AlembicExportTest : AlembicTestBase
     {
         private const string c_scene = "TestCloth";
+        private const string cd_scene = "TestCreateAndDelete";
+        private const string cc_scene = "TestCustomCapturer";
+        private const string ce_scene = "TestExport";
+        private const string cgui_scene = "TestGUI";
 
         private AlembicExporter GetAlembicExporter()
         {
@@ -215,7 +225,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var exportPath = GetRandomAbcFilePath();
 
             alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
-            alembicExporter.maxCaptureFrame = 300;
+            alembicExporter.maxCaptureFrame = 150;
 
             alembicExporter.BeginRecording();
 
@@ -230,6 +240,359 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             }
 
             TestAbcImported(exportPath);
+        }
+        //Create And Delete
+        [UnityTest]
+        public IEnumerator TestCreateAndDelete()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cd_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            yield return new WaitForSeconds(9f);
+            //  EditorApplication.isPlaying = false;
+            yield return null;
+            TestAbcImported("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
+        }
+        //Test Export
+        [UnityTest]
+        public IEnumerator TestExport()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(ce_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        //CustomCapturer
+        [UnityTest]
+        public IEnumerator TestCustomCapturer()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cc_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 100;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+            yield return null;
+            TestAbcImported(exportPath);
+            yield return null;
+        }
+        // GUI  Linear
+        [UnityTest]
+        public IEnumerator TestGUIUniform()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cgui_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType)0;
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        // GUI  Acyclic
+        [UnityTest]
+        public IEnumerator TestAcyclic()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cgui_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType)2;
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+
+//           ____     __                  __                    ____          __                  __         
+//         / __ )   / /  ____   _____   / /__         ____    / __/         / /_  ___    _____  / /_   _____
+//        / __  |  / /  / __ \ / ___/  / //_/        / __ \  / /_          / __/ / _ \  / ___/ / __/  / ___/
+//       / /_/ /  / /  / /_/ // /__   / ,<          / /_/ / / __/         / /_  /  __/ (__  ) / /_   (__  ) 
+//      /_____/  /_/   \____/ \___/  /_/|_|         \____/ /_/            \__/  \___/ /____/  \__/  /____/
+
+
+
+
+               [UnityTest]
+        public IEnumerator TestXform()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(c_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            // export one shot
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.recorder.settings.conf.XformType = (aeXformType)aeXformType.Matrix;
+            alembicExporter.OneShot();
+
+            yield return null;
+
+            TestAbcImported(exportPath);
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TestHDF5()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(c_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+            alembicExporter.recorder.settings.conf.ArchiveType = (aeArchiveType)aeArchiveType.HDF5;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        [UnityTest]
+        public IEnumerator TestSwapHandedness()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(ce_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.recorder.settings.conf.SwapHandedness = false;
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        //CustomCapturer
+        [UnityTest]
+        public IEnumerator TestScaleFactor()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cc_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 100;
+            alembicExporter.recorder.settings.conf.ScaleFactor = 1;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+            yield return null;
+            TestAbcImported(exportPath);
+            yield return null;
+        }
+        // GUI  Linear
+        [UnityTest]
+        public IEnumerator TestLowFrameRate()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cgui_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType)0;
+     alembicExporter.recorder.settings.conf.FrameRate = 12;
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        // GUI  Acyclic
+        [UnityTest]
+        public IEnumerator TestHighFrameRate()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cgui_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType)0;
+            alembicExporter.recorder.settings.conf.FrameRate = 120;
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.maxCaptureFrame = 150;
+
+            alembicExporter.BeginRecording();
+
+            while (!alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            while (alembicExporter.recorder.recording)
+            {
+                yield return null;
+            }
+
+            TestAbcImported(exportPath);
+        }
+        ////////// ONE BATCH
+
+               [UnityTest]
+        public IEnumerator TestSwapFaces()
+        {
+            // open scene
+            SceneManagement.EditorSceneManager.LoadScene(cc_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            // yield once while scene loads
+            yield return null;
+
+            // export one shot
+            var alembicExporter = GetAlembicExporter();
+            var exportPath = GetRandomAbcFilePath();
+
+            alembicExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath(exportPath);
+            alembicExporter.recorder.settings.conf.SwapFaces = true;
+            alembicExporter.OneShot();
+
+            yield return null;
+
+            TestAbcImported(exportPath);
+
+            yield return null;
         }
     }
 }
