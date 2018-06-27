@@ -111,23 +111,22 @@ The Alembic exporter can be customized by setting the properties on this compone
 
 The import and playback of Alembic data is controlled by the `Alembic Stream Player` component.
 
-If you change the Time parameter you can see that Mesh animate. To play the animation this parameter can be controlled from the Timeline, Animator component or via scripts.
+If you change the Time parameter you can see the Mesh animate. To play the animation this parameter can be controlled from the Timeline, Animator component or via scripts.
 
 Vertex Motion Scale is a magnification factor when calculating velocity. The greater the velocity and motion scale, the more blurring will be applied by the MotionBlur post processing effect.
 
-You can customized import and playback through the properties on this component:
+You can customize import and playback through the properties on this component:
 
 ![The Stream Player Settings window](images/abc_stream_player.png)
 
 | Property:| Function: |
 |:---|:---| 
-|__Time Range__ | {TODO}|
-|__seconds__ | {TODO}|
-|__Time__ | {TODO}|
-|__Vertex Motion Scale__ | {TODO}|
-|__Ignore Visibility__ |{TODO} |
-|__Async Load__ |{TODO} |
-|__Recreate Missing Nodes__ |{TODO} |
+|__Time Range__ |Select the range of the imported animation in seconds to be able to play back. By default this is the entire animation.|
+|__Time__ |The time in seconds of the animation that is currently displayed on the screen. Scrub or animate this parameter to play the animation. Range of values is from 0 to animation length. |
+|__Vertex Motion Scale__ | Set the magnification factor when calculating velocity. Greater velocity means more blurring when used with MotionBlur.|
+|__Ignore Visibility__ |Ignore import of animated visibility from the ABC file when playing|
+|__Async Load__ |Select to load file Asynchronously when playing|
+|__Recreate Missing Nodes__ |Recreate nodes from the ABC file that have been deleted from the Unity hierarchy|
 
 > ***Note:*** Please note that copies of .abc files are created under `Assets / StreamingAssets`. This is necessary for streaming data since it requires that the .abc file remain after building the project.
 
@@ -137,11 +136,11 @@ The Timeline can be used to playback and record Alembic animation including:
 
 * Playback of Alembic animation by controlling the `Alembic Stream Player`
 * Create sequences using Alembic clips with the ability to trim times and adjust clip-ins
-* Record Alembic data directly from the Timeline to an ABC files
+* Record Alembic data directly from the Timeline to an ABC file
 
 ## Record and playback the Alembic using an `Infinite Clip`
 
-You can control the playback of Alembic using an `Infinite Clip` on a Timeline `Animation Track` bound to the game object with the Alembic Stream Player component. In the recording mode any animatable parameters that are changed will be recorded to as an animation source. This infinite clip can then be converted into Animation Clip which can then be used with the object's Animation State Machine.
+You can control the playback of Alembic using an `Infinite Clip` on a Timeline `Animation Track` bound to the game object with the Alembic Stream Player component. In the recording mode any animatable parameters that are changed will be recorded as an animation source. This infinite clip can then be converted into an Animation Clip which can then be used with the object's Animation State Machine.
 
 ![Controlling Stream Player With Infinite Clip](images/abc_infinite_clip.png)
 
@@ -149,7 +148,7 @@ You can control the playback of Alembic using an `Infinite Clip` on a Timeline `
 
 ![Alembic Shot Clip](images/abc_shot_clip.gif)
 
-You can playback Alembic as a `Alembic Shot` on a `Alembic Track`. To create an Alembic Shot drag an scene object with an Alembic Stream Player componet on the Clips view portion of the Timeline Editor. If the Timeline editor is empty create an temporary track so that you can see the Clips view portion.
+You can playback Alembic as an `Alembic Shot` on an `Alembic Track`. To create an Alembic Shot drag a scene object with an Alembic Stream Player component on the Clips view portion of the Timeline Editor. If the Timeline editor is empty create an temporary track so that you can see the Clips view portion.
 
 ![Alembic Clip Editor](images/abc_clip_editor.png)
 
@@ -161,33 +160,33 @@ You can record to Alembic ABC files using the Alembic Recorder Clip. The followi
 * Particle (ParticleSystem)
 * Cameras (Camera)
 
-To configure the Timeline to record an object to Alembic you need to define the scope of the recording. By default the entire scene will be recorded but you can scope it to a object by setting the object as a Scope Target by setting the properties on Alembic Recorder Clip component:
+To configure the Timeline to record an object to Alembic you need to define the scope of the recording. By default the entire scene will be recorded but you can scope it to a hierarchy by setting the root object as a Scope Target in the properties on the Alembic Recorder Clip component:
 
 ![Alembic Shot Clip](images/abc_recorder_clip.png)
 
 | Property:| Function: |
 |:---|:---| 
-|__Output Path__ |{TODO}|
-|__Archive Type__ |{TODO} |
-|__Xform Type__ |{TODO} |
-|__Swap Handedness__ |{TODO} |
-|__Swap Faces__ |{TODO} |
-|__Swap Factor__ |{TODO} |
-|__Capture Scope__ |{TODO} |
-|__Assume None Skinned Meshes Are Constant__ |{TODO} |
-|__Capture MeshRenderer__ |{TODO} |
-|__Capture SkinnedMeshRenderer__ |{TODO} |
-|__Capture Particle__ |{TODO} |
-|__Capture Camera__ |{TODO} |
-|__Mesh Components Normals__ |{TODO} |
-|__Mesh Components UV1__ |{TODO} |
-|__Mesh Components UV2__ |{TODO} |
-|__Mesh Components Vertex Color__ |{TODO} |
-|__Mesh Components Submeshes__ |{TODO} |
-|__Ignore First Frame__ |{TODO} |
-|__Detailed Log__ |{TODO} |
+|__Output Path__ |Specify the location where the Alembic Exporter will save the ABC file. By default the output path is relative to the current Unity project path. |
+|__Archive Type__ |Choose the Alembic format specification, the default is Ogawa and provides smaller and better performance than HDF5.|
+|__Xform Type__ |Choose the transform type. The default is TRS and records the TRS channels for position, rotation, scale of an object. The alternative is matrix (Matrix).|
+|__Swap Handedness__ |Choose swap handedness to change from a left hand coordinate system (Unity) to a right hand coordinate system (Maya).|
+|__Swap Faces__ |Choose swap faces to reverse the front and back of a face.|
+|__Swap Factor__ |Choose swap factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
+|__Capture Scope__<br/>"Entire Scene",<br/>"Target Branch" | Choose the scope of the export. By default the entire scene will be exported but it can be configured to export just a branch (or hierarchy) of the scene. ![Alembic Export Target](images/abc_export_target.png) |
+|__Assume Non Skinned Meshes Are Constant__ | If enabled, will not capture animation on static meshes |
+|__Capture MeshRenderer__ |Enable to record MeshRenderer components|
+|__Capture SkinnedMeshRenderer__ |Enable to record SkinnedMeshRenderer components|
+|__Capture Particle__ |Enable to record ParticleSystem components|
+|__Capture Camera__ |Enable to record Camera components|
+|__Mesh Components Normals__ |Enable to record mesh normals|
+|__Mesh Components UV1__ |Enable to record mesh UV1|
+|__Mesh Components UV2__ |Enable to record mesh UV2|
+|__Mesh Components Vertex Color__ |Enable to record vertex colors|
+|__Mesh Components Submeshes__ |Enable to record submeshes|
+|__Ignore First Frame__ |If enabled, do not capture first frame. Only available if **Capture On Start** enabled|
+|__Detailed Log__ |Provide detailed Debug logs of each frame that is captured|
 
-The effect the recording press "Play". The ABC file will be recorded to the output path which by default is outside the Project Asset folder. You can then bring the Alembic file back into the Project and play it back using the Timeline.
+To begin recording press "Play". The ABC file will be recorded to the output path which by default is relative to the Project Root folder. You can then bring the Alembic file back into the Project and play it back using the Timeline.
 
 ![Alembic Shot Clip](images/abc_recorded_clip.png)
 
