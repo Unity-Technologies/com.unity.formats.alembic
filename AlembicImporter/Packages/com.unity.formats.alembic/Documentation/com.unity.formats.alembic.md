@@ -195,13 +195,13 @@ To begin recording press "Play". The ABC file will be recorded to the output pat
 
 ## Assigning Materials on Import
 
-By default the Alembic will import Meshes using the `Default Material`. So, you will need to manually reassign your Materials for each object.
+By default Unity will assign the `Default Material` to imported Alembic Meshes. You will need to manually reassign your Materials for each object.
 
 The Alembic package does not support remapping Face Set names to Materials or creating Materials from Face Set names.
 
-## Alembic Materials
+## Alembic Shaders
 
-The Alembic package includes the following Materials:
+The Alembic package includes the following Shaders:
 
 | Property:                     | Function: |
 |:------------------------------|:----------| 
@@ -218,12 +218,12 @@ The Alembic package includes the following Materials:
 The Alembic shaders included add motion vector generation. This is useful for rendering that requires motion vectors, such as the post processing effect MotionBlur. If you want to add the motion vector generation function to your own shader, add the line `UsePass "Hidden / Alembic / MotionVectors / MOTIONVECTORS"` into SubShader. Please see AlembicMotionVectors.cginc for details. Since the velocity data is passed to the fourth UV, the apex position of the previous frame is calculated based on it. Left is unprocessed, right is output of motion vector and MotionBlur applied by the Post Processing Stack.<br/>![Alembic MotionBlur](images/abc_motionblur.png)|
 
 <a name="dccs"></a>
-# Working with Autodesk Maya® 
+# Working with Autodesk® Maya® 
 
-Maya's shading group can be imported as submesh. Maya needs to export with "Write Face Sets" option enabled. Please note that this option is off by default.
+Maya's shading group can be imported as a submesh. Maya needs to export with "Write Face Sets" option enabled. Please note that this option is off by default.
 
 The Alembic import supports Maya's vertex color and multiple UV sets. It is necessary to export from Maya by setting "Write Color Sets" and "Write UV Sets" option. Please note these are off by default.
 
-To export from Autodesk Maya® with materials and vertex colors you will need the following highlighted Alembic export settings:
+To export from Autodesk® Maya® with materials and vertex colors you will need the following highlighted Alembic export settings:
 
 ![Autodesk Maya Alembic Settings](images/abc_maya_options.png)|
