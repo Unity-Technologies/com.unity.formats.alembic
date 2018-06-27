@@ -6,7 +6,7 @@ The Alembic package supports the import and playback of Meshes, Points and Camer
 
 ## Requirements
 
-The Alembic Package is compatible with Unity Editor 2018.2 and above.
+The Alembic Package is compatible with Unity Editor 2018.1 and above.
 
 The package is available on 64-bit desktop platforms:
 * Windows 10
@@ -35,7 +35,7 @@ To animate using Timeline Editor first can create a Timeline. You can then anima
 
 ![Timeline](images/timeline.png)
 
-Alternatively, you can drag and drop the scene object with the ABC asset onto an empty area within Timeline's Clip Editor this will create an Alembic Track with an Alembic Clip. If you are starting from an empty Timeline you will need to manual create the Alembic track first by right clicking the Timeline's Track view which is on the left hand side of the editor.
+Alternatively, you can drag and drop the scene object with the ABC asset onto an empty area within Timeline's Clip Editor this will create an Alembic Track with an Alembic Clip. If you are starting from an empty Timeline you may need to manually create the Alembic track first by right clicking the Timeline's Track view on the left hand side of the editor.
 
 ![Timeline](images/timeline2.png)
 
@@ -49,8 +49,8 @@ When you put ABC files in the Assets folder under your Unity Project, Unity auto
 |:---|:---| 
 |__Normals__  <br/>"Read From File",<br/>"Compute If Missing",<br/> "Always Compute",<br/> "Ignore" |Defines if the normals from .abc file are used or whether they are calculate based on vertex position. The default "Compute If Missing" will use abc file normals, otherwise they will be calculated. |
 |__Tangents__ <br/> "Compute" <br/> "None"| Defines if the tangents are computed and is enabled by default. Since the ABC file has no tangent data, there are only 2 choices. However, please note that the calculation of tangents requires normals and UV data, and if these are missing the tangent cannot be computed.  Please note that the calculation of tangents is expensive, so if not require then disabling of this option will increase the speed of playback.|
-|__Camera Aspect Ratio__ <br/> "Camera Aperture",<br/>"Default Resolution",<br/>"Current Resolution"| Defines whether to set the Unity Camera's aspect ratio. By default the ABC file will set the camera aspect ratio. The Alembic Importer uses the default resolution from the Player Settings. The Current Resolution refers to the aspect ratio define by the screen. |
-|__Scale Factor__ |{TODO}|
+|__Camera Aspect Ratio__ <br/> "Camera Aperture",<br/>"Default Resolution",<br/>"Current Resolution"| Defines whether to set the Unity Camera's aspect ratio. By default the ABC file will set the camera aspect ratio. The Alembic Importer uses the default resolution from the Player Settings. The Current Resolution refers to the aspect ratio defined by the screen. |
+|__Scale Factor__ | Sets the scale factor to scale the points and velocities by |
 |__Swap Handedness__ | Choose swap handedness to invert the X direction |
 |__Interpolate Samples__ | Define whether to interpolate animation. If enabled then the animation will be interpolated for Transform, Camera, and Mesh where the topology does not change such that the number of vertices and indices are immutable.<br/><br/>If Interpolate Samples is enabled, or velocity data is included in the .abc file, you can pass velocity data to an Alembic shader. 
 |__Swap Face Winding__ | Choose swap face winding to invert the orientation of the polygon. |
@@ -63,13 +63,14 @@ When you put ABC files in the Assets folder under your Unity Project, Unity auto
 
 # Exporting Alembic Files
 
-The Alembic exporter supports exporting single frame and multi-frame Alembic files and can export game objects with the following components:
+The Alembic exporter supports exporting single frame and multi-frame Alembic files and can export GameObjects with the following components:
 * MeshRenderer
 * SkinnedMeshRenderer
 * ParticleSystem
 * Camera
 
-To configure a scene to export an ABC file, add the AlembicExporter component to the GameObjects. The component can be configure to export the entire scene or individual object branches.
+To configure a scene to export an ABC file, add the AlembicExporter component to a GameObject in the scene. It does not need to be added to the objects being exported, but can be added to an empty object for example.
+The component can be configured to export the entire scene or individual object hierarchies.
 
 Using the AlembicExporter component automatically disables Draw Call Batching. If the Mesh group is valid after being batched then it will be exported. In some cases the data will be batched multiplied times and the results may change.  If you want to control the Batch settings they can be found in the Rendering section of Player Settings.
 
@@ -79,9 +80,10 @@ The Alembic exporter can be customized by setting the properties on this compone
 
 | Property:| Function: |
 |:---|:---| 
-|__Output Path__ |Specify the location where the Alembic Exporter will save the ABC file. |
+|__Output Path__ |Specify the location where the Alembic Exporter will save the ABC file. By default the output path is relative to the current Unity project path. |
 |__Archive Type__ |Choose the Alembic format specification, the default is Ogawa and provides smaller and better performance than HDF5.|
 |__Xform Type__ |Choose the transform type. The default is TRS and records the TRS channels for position, rotation, scale of an object. The alternative is matrix (Matrix).|
+|__Time Sampling Type__ |Choose between Uniform and Acyclic time sampling. Uniform time sampling will |
 |__Time Sampling Frame Rate__ |{TODO}|
 |__Time Sampling Fix Delta Time__ |{TODO}|
 |__Swap Handedness__ |Choose swap handedness to change from a left hand coordinate system (Unity) to a right hand coordinate system (Maya).|
