@@ -50,7 +50,7 @@ When you put ABC files in the Assets folder under your Unity Project, Unity auto
 |__Normals__  <br/>"Read From File",<br/>"Compute If Missing",<br/> "Always Compute",<br/> "Ignore" |Defines if the normals from .abc file are used or whether they are calculate based on vertex position. The default "Compute If Missing" will use abc file normals, otherwise they will be calculated. |
 |__Tangents__ <br/> "Compute" <br/> "None"| Defines if the tangents are computed and is enabled by default. Since the ABC file has no tangent data, there are only 2 choices. However, please note that the calculation of tangents requires normals and UV data, and if these are missing the tangent cannot be computed.  Please note that the calculation of tangents is expensive, so if not require then disabling of this option will increase the speed of playback.|
 |__Camera Aspect Ratio__ <br/> "Camera Aperture",<br/>"Default Resolution",<br/>"Current Resolution"| Defines whether to set the Unity Camera's aspect ratio. By default the ABC file will set the camera aspect ratio. The Alembic Importer uses the default resolution from the Player Settings. The Current Resolution refers to the aspect ratio defined by the screen. |
-|__Scale Factor__ | Sets the scale factor to scale the points and velocities by |
+|__Scale Factor__ |Choose scale factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
 |__Swap Handedness__ | Choose swap handedness to invert the X direction |
 |__Interpolate Samples__ | Define whether to interpolate animation. If enabled then the animation will be interpolated for Transform, Camera, and Mesh where the topology does not change such that the number of vertices and indices are immutable.<br/><br/>If Interpolate Samples is enabled, or velocity data is included in the .abc file, you can pass velocity data to an Alembic shader. 
 |__Swap Face Winding__ | Choose swap face winding to invert the orientation of the polygon. |
@@ -88,7 +88,7 @@ The Alembic exporter can be customized by setting the properties on this compone
 |__Time Sampling Fix Delta Time__ |If enabled, Time.maximumDeltaTime will be set using the frame rate to ensure fixed delta time. In the case of video production this should be the desired behavior, but be careful if you are managing Time.maxDeltaTime yourself. |
 |__Swap Handedness__ |Choose swap handedness to change from a left hand coordinate system (Unity) to a right hand coordinate system (Maya).|
 |__Swap Faces__ |Choose swap faces to reverse the front and back of a face.|
-|__Swap Factor__ |Choose swap factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
+|__Scale Factor__ |Choose scale factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
 |__Capture Scope__<br/>"Entire Scene",<br/>"Target Branch" | Choose the scope of the export. By default the entire scene will be exported but it can be configured to export just a branch (or hierarchy) of the scene. ![Alembic Export Target](images/abc_export_target.png) |
 |__Assume Non Skinned Meshes Are Constant__ | If enabled, will not capture animation on static meshes |
 |__Capture MeshRenderer__ |Enable to record MeshRenderer components|
@@ -183,7 +183,7 @@ To configure the Timeline to record an object to Alembic you need to define the 
 |__Xform Type__ |Choose the transform type. The default is TRS and records the TRS channels for position, rotation, scale of an object. The alternative is matrix (Matrix).|
 |__Swap Handedness__ |Choose swap handedness to change from a left hand coordinate system (Unity) to a right hand coordinate system (Maya).|
 |__Swap Faces__ |Choose swap faces to reverse the front and back of a face.|
-|__Swap Factor__ |Choose swap factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
+|__Scale Factor__ |Choose scale factor to convert system units, for example 0.1, converts it to 1/10 size. This also affects position and speed.|
 |__Capture Scope__<br/>"Entire Scene",<br/>"Target Branch" | Choose the scope of the export. By default the entire scene will be exported but it can be configured to export just a branch (or hierarchy) of the scene. ![Alembic Export Target](images/abc_export_target.png) |
 |__Assume Non Skinned Meshes Are Constant__ | If enabled, will not capture animation on static meshes |
 |__Capture MeshRenderer__ |Enable to record MeshRenderer components|
