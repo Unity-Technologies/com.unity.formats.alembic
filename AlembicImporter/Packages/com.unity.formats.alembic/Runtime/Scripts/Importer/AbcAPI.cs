@@ -403,11 +403,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiXform v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSchema(aiXform v) { return v.schema; }
 
-        public aiXformSample sample { get { return aiSchemaGetSample(self); } }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aiXformSample aiSchemaGetSample(IntPtr schema);
-        #endregion
+        public aiXformSample sample { get { return NativeMethods.aiXform.aiSchemaGetSample(self); } }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -418,11 +414,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiCamera v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSchema(aiCamera v) { return v.schema; }
 
-        public aiCameraSample sample { get { return aiSchemaGetSample(self); } }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aiCameraSample aiSchemaGetSample(IntPtr schema);
-        #endregion
+        public aiCameraSample sample { get { return NativeMethods.aiCamera.aiSchemaGetSample(self); } }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -433,12 +425,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiPolyMesh v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSchema(aiPolyMesh v) { return v.schema; }
 
-        public aiPolyMeshSample sample { get { return aiSchemaGetSample(self); } }
+        public aiPolyMeshSample sample { get { return NativeMethods.aiPolyMesh.aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiPolyMeshGetSummary(self, ref dst); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
-        #endregion
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -449,15 +437,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiPoints v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSchema(aiPoints v) { return v.schema; }
 
-        internal aiPointsSample sample { get { return aiSchemaGetSample(self); } }
+        internal aiPointsSample sample { get { return NativeMethods.aiPoints.aiSchemaGetSample(self); } }
         public bool sort { set { NativeMethods.aiPointsSetSort(self, value); } }
         public Vector3 sortBasePosition { set { NativeMethods.aiPointsSetSortBasePosition(self, value); } }
 
         public void GetSummary(ref aiPointsSummary dst) { NativeMethods.aiPointsGetSummary(self, ref dst); }
-
-        #region internal
-        [DllImport(Abci.Lib)] static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
-        #endregion
     }
 
 
