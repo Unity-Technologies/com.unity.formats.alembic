@@ -217,10 +217,10 @@ The Alembic package includes the following Shaders:
 
 | Property:                     | Function: |
 |:------------------------------|:----------| 
-|__Overlay__                    |{TODO} |
-|__Points Standard__            |{TODO} |
-|__Points Transparent__         |{TODO} |
-|__Points Motion Vectors__      |{TODO} |
+|__Overlay__                    |Alembic visualization shader. Use it to visualize the normals, tangents, UV Spaces and vertex colors of your mesh. |
+|__Points Standard__            |When importing Alembic Point Caches (or using the ones generated when you record a Unity particle system) you can assign a mesh of your choosing to each point to achieve effects such as a flock of birds or falling rubble. For optimization purposes, Alembic Points in Unity use a dedicated, simplified version of the Standard Shader.|
+|__Points Transparent__         |With this shader, you can use transparency on meshes acting as Alembic Points and customize both their blending mode and how they interact with the Depth Buffer.|
+|__Points Motion Vectors__      |For proper conveyance of motion vectors with Point Caches, Alembic Points components need a dedicated shader. These shaders and their associated materials are created and assigned automatically.|
 |__Standard__                   |Standard PBR material with motionblur support added |
 |__Standard (Roughness setup)__ |Standard (Roughness setup) PBR with roughness material with motionblur support added |
 |__Standard (Specular setup)__   |Standard (Specular setup) material with motionblur support added |
