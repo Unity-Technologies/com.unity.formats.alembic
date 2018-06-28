@@ -1,7 +1,6 @@
 # Changes in Alembic for Unity
 
-## [0.1.3] - 2018-06-08
-
+## [0.2.0] - 2018-06-22
 - Internalized the API
 - Updated Documentation
 - Changed namespaces to Unity[Editor|Engine].Formats.Alembic.[Exporter|Importer]
