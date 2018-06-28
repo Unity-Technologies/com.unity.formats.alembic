@@ -168,317 +168,216 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         }
 
         // Loads a given scene, generates a random export path and sends out the alembic exporter
-        void GenericSceneLoader (string sceneToLoad) {
+        IEnumerator SceneLoader (string sceneToLoad) {
             SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+            yield return null;
         }
 
-        // Selects the Exporter in the scene and creates a path for it
-        void GenericExporterSelector () {
-            selectedExporter = GetAlembicExporter ();
+        string SetupExporter (AlembicExporter exporter = null) {
+            if (exporter == null) {
+                exporter = GetAlembicExporter ();
+            }
             var exportPath = GetRandomAbcFilePath ();
-            selectedExportPath = exportPath;
-            selectedExporter.recorder.settings.OutputPath = GetAssetsAbsolutePath (selectedExportPath);
+            exporter.recorder.settings.OutputPath = GetAssetsAbsolutePath (exportPath);
+            return exportPath;
+        }
+
+        IEnumerator RecordAlembic (AlembicExporter exporter = null) {
+            if (exporter == null) {
+                exporter = GetAlembicExporter ();
+            }
+            exporter.BeginRecording ();
+
+            while (!exporter.recorder.recording) {
+                yield return null;
+            }
+
+            while (exporter.recorder.recording) {
+                yield return null;
+            }
+
+        }
+
+        // Loads ands runs generic scenes with vanilla recorder settings
+        IEnumerator TestScene (string scene) {
+            yield return SceneLoader (scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
+
+            // set test specific exporter settings here
+            exporter.maxCaptureFrame = 150;
+
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // One shot export
         [UnityTest]
         public IEnumerator TestOneShotExport () {
 
-            GenericSceneLoader (c_scene);
+            yield return SceneLoader (c_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
+
+            exporter.OneShot ();
             yield return null;
-            GenericExporterSelector ();
-            yield return null;
-            selectedExporter.OneShot ();
-            yield return null;
-            TestAbcImported (selectedExportPath);
+            TestAbcImported (exportFile);
         }
 
         // Export Cloth
         [UnityTest]
         public IEnumerator TestClothExport () {
-            GenericSceneLoader (c_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
-
-            selectedExporter.maxCaptureFrame = 150;
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
-        }
-
-        //Create And Delete
-        [UnityTest]
-        public IEnumerator TestCreateAndDelete () {
-            GenericSceneLoader (cd_scene);
-            // yield while the timeline recorder track plays
-            yield return new WaitForSeconds (9f);
-            // yield for a few seconds more so the test asset can get registered into the assetdatabase
-            yield return null;
-            // Afaik, there is no programmatical way of manually accessing Alembic recorder clip settings, thus the path has to be set manually
-            TestAbcImported ("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
-            Debug.Log (Application.dataPath + "/UnitTests/RecorderUnitTests/Recorder.abc");
-            File.Delete (Application.dataPath + "/UnitTests/RecorderUnitTests/Recorder.abc");
+            yield return TestScene (c_scene);
         }
 
         //Test Export
         [UnityTest]
         public IEnumerator TestExport () {
-            GenericSceneLoader (ce_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
-
-            selectedExporter.maxCaptureFrame = 150;
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return TestScene (ce_scene);
         }
 
         //CustomCapturer
         [UnityTest]
         public IEnumerator TestCustomCapturer () {
-            GenericSceneLoader (cc_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
-
-            selectedExporter.maxCaptureFrame = 100;
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-            yield return null;
-            TestAbcImported (selectedExportPath);
-            yield return null;
+            yield return TestScene (cc_scene);
         }
 
         // GUI  Linear
         [UnityTest]
         public IEnumerator TestGUIUniform () {
-            GenericSceneLoader (cgui_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cgui_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
-            selectedExporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
+            exporter.maxCaptureFrame = 150;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // GUI  Acyclic
         [UnityTest]
         public IEnumerator TestAcyclic () {
-            GenericSceneLoader (cgui_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cgui_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 2;
-            selectedExporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 2;
+            exporter.maxCaptureFrame = 150;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // Swap xform test
         [UnityTest]
         public IEnumerator TestXform () {
-            GenericSceneLoader (c_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (c_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.XformType = (aeXformType) aeXformType.Matrix;
-            selectedExporter.OneShot ();
+            exporter.recorder.settings.conf.XformType = (aeXformType) aeXformType.Matrix;
 
+            exporter.OneShot ();
             yield return null;
-
-            TestAbcImported (selectedExportPath);
-
-            yield return null;
+            TestAbcImported (exportFile);
         }
 
         // Other file format test
         [UnityTest]
         public IEnumerator TestHDF5 () {
-            GenericSceneLoader (c_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (c_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.maxCaptureFrame = 150;
-            selectedExporter.recorder.settings.conf.ArchiveType = (aeArchiveType) aeArchiveType.HDF5;
+            exporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.ArchiveType = (aeArchiveType) aeArchiveType.HDF5;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // Swap handedness test
         [UnityTest]
         public IEnumerator TestSwapHandedness () {
-            GenericSceneLoader (ce_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (ce_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.SwapHandedness = false;
-            selectedExporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.SwapHandedness = false;
+            exporter.maxCaptureFrame = 150;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         //Small Scale Recording
         [UnityTest]
         public IEnumerator TestScaleFactor () {
-            GenericSceneLoader (cc_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cc_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.maxCaptureFrame = 100;
-            selectedExporter.recorder.settings.conf.ScaleFactor = 1;
+            exporter.maxCaptureFrame = 100;
+            exporter.recorder.settings.conf.ScaleFactor = 1;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-            yield return null;
-            TestAbcImported (selectedExportPath);
-            yield return null;
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // Low Frame Rate
         [UnityTest]
         public IEnumerator TestLowFrameRate () {
-            GenericSceneLoader (cgui_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cgui_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
-            selectedExporter.recorder.settings.conf.FrameRate = 12;
-            selectedExporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
+            exporter.recorder.settings.conf.FrameRate = 12;
+            exporter.maxCaptureFrame = 150;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // High Frame Rate
         [UnityTest]
         public IEnumerator TestHighFrameRate () {
-            GenericSceneLoader (cgui_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cgui_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
-            selectedExporter.recorder.settings.conf.FrameRate = 120;
-            selectedExporter.maxCaptureFrame = 150;
+            exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
+            exporter.recorder.settings.conf.FrameRate = 120;
+            exporter.maxCaptureFrame = 150;
 
-            selectedExporter.BeginRecording ();
-
-            while (!selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            while (selectedExporter.recorder.recording) {
-                yield return null;
-            }
-
-            TestAbcImported (selectedExportPath);
+            yield return RecordAlembic (exporter);
+            TestAbcImported (exportFile);
         }
 
         // Swap Faces
         [UnityTest]
         public IEnumerator TestSwapFaces () {
-            GenericSceneLoader (cc_scene);
-            yield return null;
-            GenericExporterSelector ();
-            yield return null;
+            yield return SceneLoader (cc_scene);
+            var exporter = GetAlembicExporter ();
+            var exportFile = SetupExporter (exporter);
 
-            selectedExporter.recorder.settings.conf.SwapFaces = true;
-            selectedExporter.OneShot ();
+            exporter.recorder.settings.conf.SwapFaces = true;
 
+            exporter.OneShot ();
             yield return null;
+            TestAbcImported (exportFile);
+        }
 
-            TestAbcImported (selectedExportPath);
-
-            yield return null;
+        [Ignore ("You can't access Alembic Timeline recorder clip settings programatically - so there's functionally no way of customizing the settings via code")]
+        [UnityTest]
+        public IEnumerator TestCreateAndDelete () {
+            SceneManagement.EditorSceneManager.LoadScene (cd_scene, UnityEngine.SceneManagement.LoadSceneMode.Single);
+            yield return new WaitForSeconds (9f);
+            // Afaik, there is no programmatical way of manually accessing Alembic recorder clip settings, thus the path has to be set manually
+            TestAbcImported ("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
+            File.Delete (Application.dataPath + "/UnitTests/RecorderUnitTests/Recorder.abc");
         }
     }
 }
