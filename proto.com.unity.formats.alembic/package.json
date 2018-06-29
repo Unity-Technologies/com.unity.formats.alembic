@@ -1,7 +1,7 @@
 {
 	"name": "com.unity.formats.alembic",
 	"displayName":"Alembic",
-	"version": "0.2.0-preview",
+	"version": "1.0.0-preview",
 	"unity": "2018.1",
 	"description": "The Alembic package provides support to import and export Alembic files (.abc). Alembic is a format commonly used in animation to transfer facial, cloth, and other simulation between applications.",
 	"keywords": [ "alembic", "abc", "animation", "facial", "cloth", "simulation" ],
