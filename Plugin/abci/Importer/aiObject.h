@@ -50,12 +50,11 @@ public:
 protected:
     using ObjectPtr = std::unique_ptr<aiObject>;
 
-#ifdef aiDebug
-    std::string m_fullname; // just for convenience to debug
-#endif
     aiContext   *m_ctx = nullptr;
     abcObject   m_abc;
     aiObject    *m_parent = nullptr;
     std::vector<ObjectPtr> m_children;
+    std::string m_name;     //
+    std::string m_fullname; // sanitized
     bool m_enabled = true;
 };

@@ -8,6 +8,32 @@
 #include "aiCamera.h"
 #include "aiPoints.h"
 
+
+static std::string SanitizeNodeName(const std::string& src)
+{
+    std::string ret;
+    char buf[32];
+
+    size_t len = src.size();
+    for (size_t i = 0; i < len;) {
+        char c = src[i];
+        if (std::isprint(c, std::locale::classic())) {
+            ret += c;
+            ++i;
+        }
+        else {
+            for (int j = 0; j < 2; ++j) {
+                sprintf(buf, "%02x", (uint32_t)(uint8_t)src[i]);
+                ret += buf;
+                ++i;
+                if (i == len - 1)
+                    break;
+            }
+        }
+    }
+    return ret;
+}
+
 aiObject::aiObject()
 {
 }
@@ -17,9 +43,8 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     , m_abc(abc)
     , m_parent(parent)
 {
-#ifdef aiDebug
-    m_fullname = getFullName();
-#endif
+    m_name = SanitizeNodeName(m_abc.getName());
+    m_fullname = SanitizeNodeName(m_abc.getFullName());
 }
 
 aiObject::~aiObject()
@@ -72,8 +97,8 @@ void aiObject::removeChild(aiObject *c)
 aiContext*  aiObject::getContext() const    { return m_ctx; }
 const aiConfig& aiObject::getConfig() const { return m_ctx->getConfig(); }
 abcObject&  aiObject::getAbcObject()        { return m_abc; }
-const char* aiObject::getName() const       { return m_abc.getName().c_str(); }
-const char* aiObject::getFullName() const   { return m_abc.getFullName().c_str(); }
+const char* aiObject::getName() const       { return m_name.c_str(); }
+const char* aiObject::getFullName() const   { return m_fullname.c_str(); }
 uint32_t    aiObject::getNumChildren() const{ return (uint32_t)m_children.size(); }
 aiObject*   aiObject::getChild(int i)       { return m_children[i].get(); }
 aiObject*   aiObject::getParent() const     { return m_parent; }
