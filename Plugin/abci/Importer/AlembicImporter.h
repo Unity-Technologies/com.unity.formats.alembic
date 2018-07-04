@@ -141,6 +141,9 @@ struct aiCameraData
 struct aiMeshSummary
 {
     aiTopologyVariance topology_variance = aiTopologyVariance::Constant;
+    bool has_counts = false;
+    bool has_indices = false;
+    bool has_points = false;
     bool has_velocities = false;
     bool has_normals = false;
     bool has_tangents = false;
@@ -211,6 +214,7 @@ struct aiSubmeshData
 
 struct aiPointsSummary
 {
+    bool has_points = false;
     bool has_velocities = false;
     bool has_ids = false;
     bool constant_points = false;

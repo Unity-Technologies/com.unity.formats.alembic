@@ -102,13 +102,15 @@ void aiPoints::updateSummary()
     auto velocities = m_schema.getVelocitiesProperty();
     auto ids = m_schema.getIdsProperty();
 
-    m_summary.constant_points = points.isConstant();
-
-    m_summary.has_velocities = velocities.valid();
-    if(m_summary.has_velocities)
+    m_summary.has_points = points.valid() && points.getNumSamples() > 0;
+    if (m_summary.has_points)
         m_summary.constant_points = points.isConstant();
 
-    m_summary.has_ids = velocities.valid();
+    m_summary.has_velocities = velocities.valid() && velocities.getNumSamples() > 0;
+    if (m_summary.has_velocities)
+        m_summary.constant_velocities = velocities.isConstant();
+
+    m_summary.has_ids = ids.valid() && ids.getNumSamples() > 0;
     if (m_summary.has_ids) {
         m_summary.constant_ids = ids.isConstant();
         if (m_summary.constant_ids && getConfig().interpolate_samples && !m_summary.constant_points) {
@@ -138,23 +140,24 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
     readVisibility(sample, ss);
 
     // points
-    m_schema.getPositionsProperty().get(sample.m_points_sp, ss);
-    if (summary.interpolate_points) {
-        m_schema.getPositionsProperty().get(sample.m_points_sp2, ss2);
+    if (m_summary.has_points) {
+        auto prop = m_schema.getPositionsProperty();
+        prop.get(sample.m_points_sp, ss);
+        if (summary.interpolate_points) {
+            prop.get(sample.m_points_sp2, ss2);
+        }
     }
 
     // velocities
     sample.m_velocities_sp.reset();
-    auto velocities_prop = m_schema.getVelocitiesProperty();
-    if (velocities_prop.valid()) {
-        velocities_prop.get(sample.m_velocities_sp, ss);
+    if (m_summary.has_velocities) {
+        m_schema.getVelocitiesProperty().get(sample.m_velocities_sp, ss);
     }
 
     // IDs
     sample.m_ids_sp.reset();
-    auto ids_prop = m_schema.getIdsProperty();
-    if (ids_prop.valid()) {
-        ids_prop.get(sample.m_ids_sp, ss);
+    if (m_summary.has_ids) {
+        m_schema.getIdsProperty().get(sample.m_ids_sp, ss);
     }
 }
 

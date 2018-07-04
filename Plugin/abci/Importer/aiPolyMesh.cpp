@@ -284,7 +284,6 @@ aiPolyMesh::~aiPolyMesh()
 
 void aiPolyMesh::updateSummary()
 {
-    m_summary.topology_variance = (aiTopologyVariance)m_schema.getTopologyVariance();
     m_varying_topology = (m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
     auto& summary = m_summary;
     auto& config = getConfig();
@@ -297,50 +296,81 @@ void aiPolyMesh::updateSummary()
         m_constant = false;
     }
 
+    summary.topology_variance = (aiTopologyVariance)m_schema.getTopologyVariance();
+
+    // counts
+    {
+        auto prop = m_schema.getFaceCountsProperty();
+        if (prop.valid() && prop.getNumSamples() > 0) {
+            summary.has_counts = true;
+        }
+    }
+
+    // indices
+    {
+        auto prop = m_schema.getFaceIndicesProperty();
+        if (prop.valid() && prop.getNumSamples() > 0) {
+            summary.has_indices = true;
+        }
+    }
+
     // points
-    auto points = m_schema.getPositionsProperty();
-    if (points.valid()) {
-        summary.constant_points = points.isConstant();
-        if (!summary.constant_points)
-            m_constant = false;
+    {
+        auto prop = m_schema.getPositionsProperty();
+        if (prop.valid() && prop.getNumSamples() > 0) {
+            summary.has_points = true;
+            summary.constant_points = prop.isConstant();
+            if (!summary.constant_points)
+                m_constant = false;
+        }
     }
 
     // normals
-    auto normals = m_schema.getNormalsParam();
-    if (normals.valid() && normals.getNumSamples() > 0 && normals.getScope() != AbcGeom::kUnknownScope) {
-        summary.has_normals_prop = true;
-        summary.has_normals = true;
-        summary.constant_normals = normals.isConstant();
-        if (!summary.constant_normals)
-            m_constant = false;
+    {
+        auto param = m_schema.getNormalsParam();
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+            summary.has_normals_prop = true;
+            summary.has_normals = true;
+            summary.constant_normals = param.isConstant();
+            if (!summary.constant_normals)
+                m_constant = false;
+        }
     }
 
     // uv0
-    auto uvs = m_schema.getUVsParam();
-    if (uvs.valid() && uvs.getNumSamples() > 0 && uvs.getScope() != AbcGeom::kUnknownScope) {
-        summary.has_uv0_prop = true;
-        summary.has_uv0 = true;
-        summary.constant_uv0 = uvs.isConstant();
-        if (!summary.constant_uv0)
-            m_constant = false;
+    {
+        auto param = m_schema.getUVsParam();
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+            summary.has_uv0_prop = true;
+            summary.has_uv0 = true;
+            summary.constant_uv0 = param.isConstant();
+            if (!summary.constant_uv0)
+                m_constant = false;
+        }
     }
 
     // uv1
-    if (m_uv1_param.valid() && m_uv1_param.getNumSamples() > 0) {
-        summary.has_uv1_prop = true;
-        summary.has_uv1 = true;
-        summary.constant_uv1 = m_uv1_param.isConstant();
-        if (!summary.constant_uv1)
-            m_constant = false;
+    {
+        auto& param = m_uv1_param;
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+            summary.has_uv1_prop = true;
+            summary.has_uv1 = true;
+            summary.constant_uv1 = param.isConstant();
+            if (!summary.constant_uv1)
+                m_constant = false;
+        }
     }
 
     // colors
-    if (m_colors_param.valid() && m_colors_param.getNumSamples() > 0) {
-        summary.has_colors_prop = true;
-        summary.has_colors = true;
-        summary.constant_colors = m_colors_param.isConstant();
-        if (!summary.constant_colors)
-            m_constant = false;
+    {
+        auto& param = m_colors_param;
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+            summary.has_colors_prop = true;
+            summary.has_colors = true;
+            summary.constant_colors = param.isConstant();
+            if (!summary.constant_colors)
+                m_constant = false;
+        }
     }
 
 
@@ -430,11 +460,11 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
         topology.clear();
 
     // topology
-    if (!topology.m_counts_sp || topology_changed) {
+    if (summary.has_counts && (!topology.m_counts_sp || topology_changed)) {
         m_schema.getFaceCountsProperty().get(topology.m_counts_sp, ss);
         topology_changed = true;
     }
-    if (!topology.m_indices_sp || topology_changed) {
+    if (summary.has_indices && (!topology.m_indices_sp || topology_changed)) {
         m_schema.getFaceIndicesProperty().get(topology.m_indices_sp, ss);
         topology_changed = true;
     }
@@ -448,7 +478,7 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     }
 
     // points
-    if (m_constant_points.empty()) {
+    if (summary.has_points && m_constant_points.empty()) {
         auto param = m_schema.getPositionsProperty();
         param.get(sample.m_points_sp, ss);
         if (summary.interpolate_points) {
@@ -496,7 +526,7 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     }
 
     auto bounds_param = m_schema.getSelfBoundsProperty();
-    if (bounds_param)
+    if (bounds_param && bounds_param.getNumSamples() > 0)
         bounds_param.get(sample.m_bounds, ss);
 
     sample.m_topology_changed = topology_changed;
@@ -706,6 +736,9 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& config = getConfig();
+
+    if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp)
+        return;
 
     refiner.clear();
     refiner.split_unit = config.split_unit;

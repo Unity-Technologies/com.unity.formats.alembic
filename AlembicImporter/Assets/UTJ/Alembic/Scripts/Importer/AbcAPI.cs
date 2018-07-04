@@ -128,6 +128,9 @@ namespace UTJ.Alembic
     public struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance;
+        public Bool hasCounts;
+        public Bool hasIndsices;
+        public Bool hasPoints;
         public Bool hasVelocities;
         public Bool hasNormals;
         public Bool hasTangents;
@@ -221,6 +224,7 @@ namespace UTJ.Alembic
 
     public struct aiPointsSummary
     {
+        public Bool hasPoints;
         public Bool hasVelocities;
         public Bool hasIDs;
         public Bool constantPoints;
