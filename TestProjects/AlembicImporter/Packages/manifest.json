@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"com.unity.formats.alembic": "file:../../../com.unity.formats.alembic"
+	}
+}
