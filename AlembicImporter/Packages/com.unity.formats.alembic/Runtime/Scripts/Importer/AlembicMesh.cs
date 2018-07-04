@@ -229,7 +229,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             sample.Sync();
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
-            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
+            if (abcTreeNode.stream.streamDescriptor.Settings.importVisibility)
             {
                 var visible = m_sampleSummary.visibility;
                 abcTreeNode.gameObject.SetActive(visible);

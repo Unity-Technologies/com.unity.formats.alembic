@@ -237,9 +237,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                 if (obj.AsXform() && m_streamDesc.Settings.ImportXform)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicXform>();
-                else if (obj.AsCamera() && m_streamDesc.settings.ImportCameras)
+                else if (obj.AsCamera() && m_streamDesc.Settings.ImportCameras)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
-                else if (obj.AsPolyMesh() && m_streamDesc.settings.ImportMeshes)
+                else if (obj.AsPolyMesh() && m_streamDesc.Settings.ImportMeshes)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
                 else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();

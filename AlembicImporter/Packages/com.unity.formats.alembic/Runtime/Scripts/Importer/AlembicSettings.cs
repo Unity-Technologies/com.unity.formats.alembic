@@ -7,13 +7,12 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal class AlembicStreamSettings
     {
         [SerializeField]
-        private aiNormalsMode normals = aiNormalsMode.ComputeIfMissing;
+        private aiNormalsMode normals = aiNormalsMode.CalculateIfMissing;
         public aiNormalsMode Normals
         {
             get { return normals; }
             set { normals = value; }
         }
-        [SerializeField] public bool flipFaces = false;
 
         [SerializeField]
         private aiTangentsMode tangents = aiTangentsMode.Calculate;
@@ -48,11 +47,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool swapFaceWinding = false;
-        public bool SwapFaceWinding
+        private bool flipFaces = false;
+        public bool FlipFaces
         {
-            get { return swapFaceWinding; }
-            set { swapFaceWinding = value; }
+            get { return flipFaces; }
+            set { flipFaces = value; }
         }
 
         [SerializeField]

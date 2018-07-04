@@ -82,7 +82,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var data = m_abcData[0];
 
-            if (abcTreeNode.stream.streamDescriptor.settings.importVisibility)
+            if (abcTreeNode.stream.streamDescriptor.Settings.importVisibility)
                 abcTreeNode.gameObject.SetActive(data.visibility);
 
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
