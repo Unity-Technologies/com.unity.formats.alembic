@@ -22,30 +22,21 @@ PluginImporter:
         Exclude Win: 0
         Exclude Win64: 0
   - first:
+      '': OSXIntel
     second:
       enabled: 0
       settings:
-        Exclude Editor: 0
-        Exclude Linux: 1
-        Exclude Linux64: 1
-        Exclude LinuxUniversal: 1
-        Exclude OSXUniversal: 0
-        Exclude Win: 1
-        Exclude Win64: 1
-  - first:
-      '': OSXIntel
-    second:
-      enabled: 1
-      settings: {}
+        CPU: None
   - first:
       '': OSXIntel64
     second:
       enabled: 1
-      settings: {}
+      settings:
+        CPU: AnyCPU
   - first:
       Any: 
     second:
-      enabled: 0
+      enabled: 1
       settings: {}
   - first:
       Editor: Editor
@@ -54,17 +45,17 @@ PluginImporter:
       settings:
         CPU: x86_64
         DefaultValueInitialized: true
-        OS: OSX
+        OS: AnyOS
   - first:
       Facebook: Win
     second:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
   - first:
       Facebook: Win64
     second:
-      enabled: 0
+      enabled: 1
       settings:
         CPU: AnyCPU
   - first:
@@ -72,35 +63,35 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: x86
+        CPU: None
   - first:
       Standalone: Linux64
     second:
-      enabled: 0
-      settings:
-        CPU: x86_64
-  - first:
-      Standalone: OSXUniversal
-    second:
       enabled: 1
       settings:
         CPU: x86_64
   - first:
-      Standalone: OSXUniversal
-    second:
-      enabled: 1
-      settings:
-        CPU: x86_64
-  - first:
-      Standalone: Win
+      Standalone: LinuxUniversal
     second:
       enabled: 1
       settings:
         CPU: AnyCPU
   - first:
+      Standalone: OSXUniversal
+    second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+  - first:
+      Standalone: Win
+    second:
+      enabled: 1
+      settings:
+        CPU: None
+  - first:
       Standalone: Win64
     second:
-      enabled: 0
+      enabled: 1
       settings:
         CPU: AnyCPU
   userData: 
