@@ -255,7 +255,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultPointsMotionVectorMaterial == null)
                     {
-                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/PointsMotionVectors"));
+                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/Points Motion Vectors"));
                         m_defaultPointsMotionVectorMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
                         Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
