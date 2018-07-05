@@ -32,7 +32,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_abcSchema.sample.GetData(ref m_abcData);
 
-            if (abcTreeNode.stream.streamDescriptor.Settings.importVisibility)
+            if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
             m_camera.fieldOfView = m_abcData.fieldOfView;

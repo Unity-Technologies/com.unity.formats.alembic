@@ -29,7 +29,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return cameraAspectRatio; }
             set { cameraAspectRatio = value; }
         }
-        [SerializeField] public bool importVisibility = true;
+
+        [SerializeField]
+        private bool importVisibility = true;
+        public bool ImportVisibility
+        {
+            get { return importVisibility; }
+            set { importVisibility = value; }
+        }
+
         [SerializeField]
         private float scaleFactor = 0.01f;
         public float ScaleFactor
