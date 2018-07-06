@@ -1,7 +1,7 @@
 option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
 
 if(ENABLE_ISPC)
-    FIND_PACKAGE(ISPC REQUIRED)
+    find_package(ISPC REQUIRED)
 
     set(ISPC_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/ISPC)
     set(ISPC_HEADERS
@@ -13,26 +13,36 @@ if(ENABLE_ISPC)
 endif()
 
 file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importer/*.cpp Exporter/*.h Exporter/*.cpp ${ISPC_OUTPUTS})
-set(plugins_dir "${CMAKE_SOURCE_DIR}/../AlembicImporter/Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64")
 
-add_plugin(abci SOURCES ${sources} PLUGINS_DIR ${plugins_dir})
-
-target_include_directories(abci PUBLIC
-    .
-    ./Foundation
-    ${OPENEXR_INCLUDE_DIR}
-    ${OPENEXR_INCLUDE_DIR}/OpenEXR
-    ${ALEMBIC_INCLUDE_DIR}
+add_plugin(abci
+    SOURCES ${sources}
+    PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64
 )
+
+target_include_directories(abci
+    PRIVATE
+        .
+        ./Foundation
+        ${OPENEXR_INCLUDE_DIR}
+        ${OPENEXR_INCLUDE_DIR}/OpenEXR
+        ${ALEMBIC_INCLUDE_DIR}
+)
+
+if(ENABLE_ISPC)
+    target_compile_definitions(abci PRIVATE -DaiEnableISPC)
+    target_include_directories(abci PRIVATE ${ISPC_OUTDIR})
+endif()
 
 target_link_libraries(abci
-    ${ALEMBIC_LIBRARY}
-    ${OPENEXR_Half_LIBRARY}
-    ${OPENEXR_Iex_LIBRARY}
-    ${OPENEXR_IexMath_LIBRARY}
-    ${HDF5_LIBRARIES}
+    PRIVATE
+        ${ALEMBIC_LIBRARY}
+        ${OPENEXR_Half_LIBRARY}
+        ${OPENEXR_Iex_LIBRARY}
+        ${OPENEXR_IexMath_LIBRARY}
+        ${HDF5_LIBRARIES}
 )
-install(TARGETS abci DESTINATION .)
+
+install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
 
 if(ENABLE_ISPC)
     add_definitions(-DaiEnableISPC)
@@ -41,7 +51,7 @@ endif()
 
 ########################################
 # Unit tests
-add_subdirectory(googletest)
-include_directories(./googletest/googletest/include)
-enable_testing()
-add_subdirectory(test)
+#add_subdirectory(googletest)
+#include_directories(./googletest/googletest/include)
+#enable_testing()
+#add_subdirectory(test)

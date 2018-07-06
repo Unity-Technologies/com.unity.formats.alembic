@@ -22,12 +22,7 @@ build:osx:
     - buildfarm
     - darwin
   script:
-    - deploydir=`pwd`/Source/external/ThirdParty/Deploy/MacOS
-    - mkdir -p build
-    - cd build
-    - cmake ../Source -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
-    - make -j4
-    - make test
+    - ./build.sh install
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     expire_in: 15m

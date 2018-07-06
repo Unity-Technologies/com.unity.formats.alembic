@@ -1,6 +1,3 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(AlembicForUnity)
-
 enable_testing()
 
 OPTION(USE_STATIC "Link with static libraries" ON)
