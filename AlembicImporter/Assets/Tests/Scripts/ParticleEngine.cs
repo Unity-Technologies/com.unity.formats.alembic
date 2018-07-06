@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using UnityEngine;
-
+using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UTJ.Alembic
 {
@@ -51,8 +51,8 @@ namespace UTJ.Alembic
         float m_elapsed;
 
 
-        public PinnedList<Vector3> positionBuffer { get { return m_buf_positions; } }
-        public PinnedList<Vector3> velocityBuffer { get { return m_buf_velocities; } }
+        internal PinnedList<Vector3> positionBuffer { get { return m_buf_positions; } }
+        internal PinnedList<Vector3> velocityBuffer { get { return m_buf_velocities; } }
         public float elapsed { get { return m_elapsed; } }
 
 
@@ -121,8 +121,8 @@ namespace UTJ.Alembic
                 m_cs_particle_core.Dispatch(i, m_particle_count / KernelBlockSize, 1, 1);
             }
 
-            m_cb_positions.GetData(m_buf_positions.Array);
-            m_cb_velocities.GetData(m_buf_velocities.Array);
+            m_cb_positions.GetData(m_buf_positions.GetArray());
+            m_cb_velocities.GetData(m_buf_velocities.GetArray());
 
             m_elapsed = Time.realtimeSinceStartup - begin_time;
             Debug.Log("ParticleEngine.UpdateSimulation(): " + (m_elapsed * 1000.0f) + "ms");

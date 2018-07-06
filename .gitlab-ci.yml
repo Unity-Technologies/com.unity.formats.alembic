@@ -1,0 +1,115 @@
+# build needs to be able to find the following libraries:
+# - OpenEXR(libHalf.dylib libHalf.a)
+# - HDF5(hdf5.a) 
+# - Alembic (libAlembic.a)
+
+# sourcedir needs submodule initialization (to compile googletest)
+# - git submodule update --init --recursive
+
+image: node:6.10.0
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    
+stages:
+  - build
+  - test
+  - push_to_packman_staging
+
+build:osx:
+  stage: build
+  tags:
+    - buildfarm
+    - darwin
+  script:
+    - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/MacOS
+    - mkdir build
+    - cd build
+    - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
+    - make -j4
+    - make test
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    expire_in: 15m
+    paths:
+      - build/
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
+
+build:windows:
+  stage: build
+  tags:
+    - buildfarm
+    - windows
+  script:
+    - md build
+    - cd build
+    #- cmake ../Plugin
+    #- make -j4
+  artifacts:
+    name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
+    expire_in: 15m
+    paths:
+      - build/
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - C:\Users\builduser\post_build_script.bat
+
+build:linux:
+  stage: build
+  tags:
+    - buildfarm
+    - darwin
+  script:
+    - deploydir=`pwd`/Plugin/external/ThirdParty/Deploy/Linux
+    - mkdir build
+    - cd build
+    - cmake ../Plugin -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
+    - make -j4
+    - make test VERBOSE=1
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    expire_in: 15m
+    paths:
+      - build/
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
+
+test:osx:
+  stage: test
+  tags:
+    - buildfarm
+    - darwin
+  script: 
+    - npm test
+  dependencies:
+  - build:osx
+  
+test:windows:
+  stage: test
+  tags:
+    - buildfarm
+    - windows
+  script: 
+    - npm test
+  dependencies:
+  - build:windows
+  
+test:linux:
+  stage: test
+  script: 
+    - npm test
+  dependencies:
+  - build:linux
+  
+push_to_packman_staging:
+  stage: push_to_packman_staging
+  only:
+    - /^v\d*$/
+  except:
+    - branches
+  script:
+    - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
+    - npm publish

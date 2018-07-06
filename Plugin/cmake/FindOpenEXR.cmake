@@ -24,7 +24,7 @@
 
 if (APPLE)
     find_path(OPENEXR_LIBRARY_DIR
-            libHalf.dylib
+            libHalf.dylib libHalf.a
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"
@@ -36,7 +36,7 @@ if (APPLE)
     )
 elseif (UNIX)
     find_path(OPENEXR_LIBRARY_DIR
-            libHalf.so
+            libHalf.so libHalf.a
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"
@@ -91,9 +91,14 @@ foreach(OPENEXR_LIB
     IlmImf
     IlmThread
     )
+    if (USE_STATIC AND UNIX)
+        set(_openexr_libname "lib${OPENEXR_LIB}.a")
+    else()
+        set(_openexr_libname "${OPENEXR_LIB}")
+    endif()
 
     find_library(OPENEXR_${OPENEXR_LIB}_LIBRARY
-            ${OPENEXR_LIB}
+            ${_openexr_libname}
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"

@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Exporter;
+using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.UI;
 
 namespace UTJ.Alembic
@@ -35,7 +37,8 @@ namespace UTJ.Alembic
         {
             if(m_recording) { return; }
 
-            var time_sampling_type = (aeTimeSamplingType)m_dropdown_simesampling.value;
+            // in the enum acyclic is 2, and uniform is 1
+            var time_sampling_type = (aeTimeSamplingType)(m_dropdown_simesampling.value == 1? 2 : 0);
             var frame_rate = int.Parse(m_input_fps.text);
 
             m_exporters = FindObjectsOfType<AlembicExporter>();
@@ -43,8 +46,8 @@ namespace UTJ.Alembic
             {
                 e.maxCaptureFrame = 0;
                 var settings = e.recorder.settings;
-                settings.conf.timeSamplingType = time_sampling_type;
-                settings.conf.frameRate = frame_rate;
+                settings.conf.TimeSamplingType = time_sampling_type;
+                settings.conf.FrameRate = frame_rate;
                 e.BeginRecording();
             }
 

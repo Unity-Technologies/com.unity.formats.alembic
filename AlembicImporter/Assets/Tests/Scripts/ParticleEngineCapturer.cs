@@ -1,11 +1,13 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Util;
 
 namespace UTJ.Alembic
 {
 
     [CaptureTarget(typeof(ParticleEngine))]
-    public class ParticleEngineCapturer : ComponentCapturer
+    internal class ParticleEngineCapturer : ComponentCapturer
     {
         ParticleEngine m_target;
         PinnedList<Vector3> m_points;
