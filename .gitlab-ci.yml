@@ -19,15 +19,14 @@ stages:
 build:osx:
   stage: build
   tags:
-    - buildfarm
-    - darwin
+    - mac
   script:
     - ./build.sh install
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 15m
     paths:
-      - build/
+      - ./build/install
+    expire_in: 1 hour
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
@@ -75,12 +74,11 @@ build:linux:
 test:osx:
   stage: test
   tags:
-    - buildfarm
-    - darwin
+    - mac
   script: 
     - npm test
   dependencies:
-  - build:osx
+  - build:mac
   
 test:windows:
   stage: test
