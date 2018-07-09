@@ -97,6 +97,7 @@ test:linux:
   dependencies:
   - build:linux
   
+<<<<<<< HEAD
 push_to_packman_staging:
   stage: push_to_packman_staging
   only:
@@ -106,3 +107,12 @@ push_to_packman_staging:
   script:
     - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
     - npm publish
+#push_to_packman_staging:
+#  stage: push_to_packman_staging
+#  only:
+#    - /^v\d*$/
+#  except:
+#    - branches
+#  script:
+#    - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
+#    - npm publish
