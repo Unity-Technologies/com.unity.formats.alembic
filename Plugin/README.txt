@@ -31,14 +31,20 @@ Make sure to add this option when running cmake as 32 bit is often the default: 
 
 Building HDF5:
 
-1. follow instructions at https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
+1. follow instructions (Build Instructions 1-7) at https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
 
-- make sure to build in Release mode
+Note: make sure the binary is built in Release mode and is 64-bit
+
+2. This will generate a zip file. Unzip the file. The binaries will be located under lib/ and header files under include/
+
+3. copy the include/ directory into Plugin/external/HDF5
+
+4. copy the following library files to Plugin/external/HDF5/lib64: libhdf5.lib, libhdf5_hl.lib, libszip.lib
 
 Building ilmbase:
 
-1. follow instructions at README.cmake.txt that comes with ilmbase
-2. When running cmake, make sure to also use the options found in build.sh:
+1. follow instructions at README.cmake.txt (steps 1-2) that comes with ilmbase
+Note: When running cmake, make sure to also use the following options (taken from build.sh):
 
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX="${builddir}" \
@@ -46,13 +52,20 @@ Building ilmbase:
 -DNAMESPACE_VERSIONING=OFF \
 -DBUILD_SHARED_LIBS=OFF
 
-- make sure to build in release mode
+Note: make sure to build in release mode and 64-bit (confirm when opening in visual studio)
+Note: should not need to build OpenEXR (steps 3-5 in README.cmake.txt)
+
+3. copy *.lib files from ${builddir}/lib to Plugin/external/ilmbase/lib64
+4. rename *.lib files (except for Half.lib) to *-2_2.lib
+5. copy ${builddir}/include directory to Plugin/external/ilmbase/
 
 Building Alembic:
 
 1. download and build zlib (v1.2.11): http://www.zlib.net/ (use cmake to build, no special args needed)
-2. make sure HDF5 and ilmbase are already built
-3. use options found in build.sh:
+2. after building zlib, copy zlibstatic.lib from {builddir}/Release/ to Plugin/external/HDF5/lib64
+3. make sure HDF5 and ilmbase are already built before continuing
+4. follow instructions in README.txt (steps 1-3) that comes with Alembic
+Note: use the following cmake options (taken from build.sh):
 
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX="${builddir}" \
@@ -66,6 +79,9 @@ Building Alembic:
 -DALEMBIC_ILMBASE_LINK_STATIC=ON \
 -DZLIB_ROOT="path/to/zlib/lib" \ #(folder containing built dlls)
 -DILMBASE_ROOT="path/to/ilmbase/root" # (folder containing lib (built dlls) and include folders)
+
+4. copy header files from Alembic directory {AlembicRoot}/lib/Alembic to Plugin/external/Alembic/include/Alembic (make sure to keep same directory structure)
+5. copy Alembic.lib file from ${builddir}/ to Plugin/external/Alembic/lib64/
     
 ====================
 Building abci on Windows:
