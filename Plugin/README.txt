@@ -1,10 +1,10 @@
 Building on any platform:
 1. Get the dependences:
-        HDF5 - a legacy file format
-        ilmbase - utilities related to openexr
-        Alembic - the package we're wrapping
-        ispc - a compiler for vectorized math routines (gives a 3x speedup)
-2. Build the dependences.
+        HDF5 - a legacy file format (v1.10.1)
+        ilmbase - utilities related to openexr (v2.2.1)
+        Alembic - the package we're wrapping (v1.7.5)
+        ispc - a compiler for vectorized math routines (gives a 3x speedup) (v1.9.2)
+2. Build the dependences. (see Building the Dependencies)
 
 3. Get Unity Alembic package source code
         Get Unity Alembic Plugin at https://github.com/unity3d-jp/AlembicForUnity
@@ -22,7 +22,53 @@ NOTE: source tree requires submodules
     git submodule update --init --recursive
 
 ====================
-Building on Windows:
+Building the Dependencies:
+====================    
+    
+On Windows:
+
+Make sure to add this option when running cmake as 32 bit is often the default: -G"Visual Studio 14 2015 Win64"
+
+Building HDF5:
+
+1. follow instructions at https://portal.hdfgroup.org/display/support/Building+HDF5+with+CMake
+
+- make sure to build in Release mode
+
+Building ilmbase:
+
+1. follow instructions at README.cmake.txt that comes with ilmbase
+2. When running cmake, make sure to also use the options found in build.sh:
+
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX="${builddir}" \
+-DCMAKE_PREFIX_PATH="${builddir}" \
+-DNAMESPACE_VERSIONING=OFF \
+-DBUILD_SHARED_LIBS=OFF
+
+- make sure to build in release mode
+
+Building Alembic:
+
+1. download and build zlib (v1.2.11): http://www.zlib.net/ (use cmake to build, no special args needed)
+2. make sure HDF5 and ilmbase are already built
+3. use options found in build.sh:
+
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX="${builddir}" \
+-DCMAKE_PREFIX_PATH="${builddir}" \
+-DALEMBIC_SHARED_LIBS=OFF \
+-DUSE_HDF5=ON \
+-DHDF5_USE_STATIC_LIBRARIES=ON \
+-DUSE_STATIC_HDF5=ON \
+-DHDF5_LIBRARIES="path/to/lib/libhdf5.lib" \
+-DHDF5_ROOT="path/to/HDF5/root" \
+-DALEMBIC_ILMBASE_LINK_STATIC=ON \
+-DZLIB_ROOT="path/to/zlib/lib" \ #(folder containing built dlls)
+-DILMBASE_ROOT="path/to/ilmbase/root" # (folder containing lib (built dlls) and include folders)
+    
+====================
+Building abci on Windows:
 ====================
 
 1. run setup.bat or download and unzip manually
@@ -31,7 +77,7 @@ Building on Windows:
 
 
 ================
-Building on OSX and linux (from source):
+Building abci on OSX and linux (from source):
 ================
 
 0. On linux, build on centos7. That'll produce a binary compatible with later distros. The limiting factor is the g++ ABI version.
