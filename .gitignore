@@ -53,6 +53,8 @@ artifacts/**
 # Unignore specific folders
 !Plugin/external/ThirdParty/Deploy/MacOS/include
 !Plugin/external/ThirdParty/Deploy/MacOS/lib
+!Plugin/external/ThirdParty/Deploy/Windows/include
+!Plugin/external/ThirdParty/Deploy/Windows/lib*
 
 # Package Validation Suite files are not tracked
 AlembicImporter/ValidationSuiteResults/*

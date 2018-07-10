@@ -33,6 +33,12 @@ if(ENABLE_ISPC)
     target_include_directories(abci PRIVATE ${ISPC_OUTDIR})
 endif()
 
+if(WIN32)
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};${HDF5_ROOT}/lib/libszip.lib;${HDF5_ROOT}/lib/zlibstatic.lib")
+else()
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread")
+endif()
+
 target_link_libraries(abci
     PRIVATE
         ${ALEMBIC_LIBRARY}

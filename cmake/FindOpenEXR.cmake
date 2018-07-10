@@ -73,13 +73,13 @@ DOC
     "OpenEXR headers path"
 )
 
-if(OPENEXR_INCLUDE_DIR AND EXISTS "${OPENEXR_INCLUDE_DIR}/OpenEXR/OpenEXRConfig.h")
+if(OPENEXR_INCLUDE_DIR AND EXISTS "${OPENEXR_INCLUDE_DIR}/OpenEXR/IlmBaseConfig.h")
   file(STRINGS
-       ${OPENEXR_INCLUDE_DIR}/OpenEXR/OpenEXRConfig.h
+       ${OPENEXR_INCLUDE_DIR}/OpenEXR/IlmBaseConfig.h
        TMP
-       REGEX "#define OPENEXR_VERSION_STRING.*$")
-  string(REGEX MATCHALL "[0-9.]+" OPENEXR_VERSION ${TMP})
-  mark_as_advanced(OPENEXR_INCLUDE_DIR)
+       REGEX "#define ILMBASE_VERSION_STRING.*$")
+  string(REGEX MATCHALL "[0-9].[0-9]" TMP2 ${TMP})
+  string(REPLACE "." "_" OPENEXR_VERSION ${TMP2})
 endif()
 
 
@@ -92,13 +92,17 @@ foreach(OPENEXR_LIB
     IlmThread
     )
     if (USE_STATIC AND UNIX)
-        set(_openexr_libname "lib${OPENEXR_LIB}.a")
+        set(_openexr_libprefix lib)
+        set(_openexr_libsuffix .a)
     else()
-        set(_openexr_libname "${OPENEXR_LIB}")
+        set(_openexr_libprefix "")
+        set(_openexr_libsuffix "")
     endif()
 
     find_library(OPENEXR_${OPENEXR_LIB}_LIBRARY
-            ${_openexr_libname}
+        NAMES
+            "${_openexr_libprefix}${OPENEXR_LIB}${_openexr_libsuffix}"
+            "${_openexr_libprefix}${OPENEXR_LIB}-${OPENEXR_VERSION}${_openexr_libsuffix}"
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"

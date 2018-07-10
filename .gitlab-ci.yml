@@ -21,7 +21,7 @@ build:osx:
   tags:
     - mac
   script:
-    - ./build.sh install
+    - ./build.sh
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     paths:
@@ -36,7 +36,7 @@ build:windows:
   tags:
     - win
   script:
-    - build.cmd install
+    - build.cmd
   artifacts:
     name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
     paths:
