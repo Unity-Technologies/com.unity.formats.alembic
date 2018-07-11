@@ -1,5 +1,5 @@
-SET deploydir=%cd%/Source/external/ThirdParty/Deploy/Windows
-SET installdir=%cd%/build/install
+SET deploydir=%cd%\Source\external\ThirdParty\Deploy\Windows
+SET installdir=%cd%\build\install
 echo %deploydir%
 md build
 cd build

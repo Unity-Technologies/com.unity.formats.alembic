@@ -78,8 +78,10 @@ if(OPENEXR_INCLUDE_DIR AND EXISTS "${OPENEXR_INCLUDE_DIR}/OpenEXR/IlmBaseConfig.
        ${OPENEXR_INCLUDE_DIR}/OpenEXR/IlmBaseConfig.h
        TMP
        REGEX "#define ILMBASE_VERSION_STRING.*$")
-  string(REGEX MATCHALL "[0-9].[0-9]" TMP2 ${TMP})
-  string(REPLACE "." "_" OPENEXR_VERSION ${TMP2})
+  string(REGEX MATCHALL "[0-9.]+" OPENEXR_VERSION ${TMP})
+
+  string(REGEX MATCHALL "[0-9].[0-9]" TMP2 ${OPENEXR_VERSION})
+  string(REPLACE "." "_" OPENEXR_VERSION_TAG ${TMP2})
 endif()
 
 
@@ -102,7 +104,7 @@ foreach(OPENEXR_LIB
     find_library(OPENEXR_${OPENEXR_LIB}_LIBRARY
         NAMES
             "${_openexr_libprefix}${OPENEXR_LIB}${_openexr_libsuffix}"
-            "${_openexr_libprefix}${OPENEXR_LIB}-${OPENEXR_VERSION}${_openexr_libsuffix}"
+            "${_openexr_libprefix}${OPENEXR_LIB}-${OPENEXR_VERSION_TAG}${_openexr_libsuffix}"
         HINTS
             "${OPENEXR_LOCATION}"
             "$ENV{OPENEXR_LOCATION}"
