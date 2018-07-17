@@ -2,18 +2,17 @@ option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significan
 
 if(ENABLE_ISPC)
     find_package(ISPC REQUIRED)
-
     set(ISPC_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/ISPC)
     set(ISPC_HEADERS
         "${CMAKE_CURRENT_SOURCE_DIR}/Foundation/ispcmath.h"
     )
-    file(GLOB ISPC_SOURCES Foundation/*.ispc)
+    file(GLOB ISPC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Foundation/*.ispc)
     add_ispc_targets(SOURCES ${ISPC_SOURCES} HEADERS ${ISPC_HEADERS} OUTDIR ${ISPC_OUTDIR})
     set(ISPC_OUTPUTS ${_ispc_outputs})
 endif()
 
-file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importer/*.cpp Exporter/*.h Exporter/*.cpp ${ISPC_OUTPUTS})
-
+file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importer/*.cpp Exporter/*.h Exporter/*.cpp)
+list(APPEND sources ${ISPC_OUTPUTS})
 add_plugin(abci
     SOURCES ${sources}
     PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64

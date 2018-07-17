@@ -16,7 +16,7 @@ stages:
   - test
   #- push_to_packman_staging
 
-build:osx:
+build:mac:
   stage: build
   tags:
     - mac
@@ -25,13 +25,14 @@ build:osx:
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
     paths:
-      - build/install
+    - External/install
+    - build/install
     expire_in: 1 hour
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
 
-build:windows:
+build:win:
   stage: build
   tags:
     - win
@@ -40,69 +41,56 @@ build:windows:
   artifacts:
     name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
     paths:
-    - build/install
+      - External/install
+      - build/install
     expire_in: 1 hour
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - C:\Users\builduser\post_build_script.bat
 
-build:linux:
+build:lin:
   stage: build
   tags:
-    - buildfarm
-    - darwin
+    - lin
   script:
-    - deploydir=`pwd`/Source/external/ThirdParty/Deploy/Linux
-    - mkdir build
-    - cd build
-    - cmake ../Source -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${deploydir} -DALEMBIC_DIR=${deploydir} -DHDF5_USE_STATIC_LIBRARIES=ON -DHDF5_LIBRARIES=${deploydir}/lib/libhdf5.a';-ldl;-lpthread' -DHDF5_ROOT=${deploydir} -DUSE_STATIC=ON -DENABLE_DEPLOY=OFF
-    - make -j4
-    - make test VERBOSE=1
+  - ./build.sh
   artifacts:
     name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
-    expire_in: 15m
     paths:
-      - build/
+      - External/install
+      - build/install
+    expire_in: 1 hour
 # Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
   after_script:
     - /opt/post_build_script.sh
 
-test:osx:
+test:mac:
   stage: test
   tags:
     - mac
   script: 
     - npm test
   dependencies:
-  - build:mac
+    - build:mac
   
-test:windows:
+test:win:
   stage: test
   tags:
-    - buildfarm
-    - windows
+    - win
   script: 
     - npm test
   dependencies:
-  - build:windows
+    - build:win
   
-test:linux:
+test:lin:
   stage: test
-  script: 
+  tags:
+    - lin
+  script:
     - npm test
   dependencies:
-  - build:linux
+    - build:lin
   
-<<<<<<< HEAD
-push_to_packman_staging:
-  stage: push_to_packman_staging
-  only:
-    - /^v\d*$/
-  except:
-    - branches
-  script:
-    - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
-    - npm publish
 #push_to_packman_staging:
 #  stage: push_to_packman_staging
 #  only:

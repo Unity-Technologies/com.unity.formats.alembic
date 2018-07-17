@@ -30,18 +30,18 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 option(ENABLE_DEPLOY "Copy built binaries to plugins directory." ON)
 
-macro(fix_default_compiler_settings_)
-    if (MSVC AND NOT BUILD_SHARED_LIBS)
-        # For MSVC, CMake sets certain flags to defaults we want to override.
-        # This replacement code is taken from sample in the CMake Wiki at
-        # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
-        foreach (flag_var
-                CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-                CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-            string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
-        endforeach()
-    endif()
-endmacro()
+#macro(fix_default_compiler_settings_)
+#    if (MSVC AND NOT BUILD_SHARED_LIBS)
+#        # For MSVC, CMake sets certain flags to defaults we want to override.
+#        # This replacement code is taken from sample in the CMake Wiki at
+#        # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
+#        foreach (flag_var
+#                CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+#                CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+#            string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+#        endforeach()
+#    endif()
+#endmacro()
 
 # We create a ${name} target, which gets installed appropriately.
 # We create a ${name}_test_lib target, which does *not* get installed.
@@ -107,4 +107,4 @@ function(add_plugin name)
     endif()
 endfunction()
 
-fix_default_compiler_settings_()
+#fix_default_compiler_settings_()

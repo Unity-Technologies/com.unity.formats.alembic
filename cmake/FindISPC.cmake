@@ -5,7 +5,7 @@ endif()
 include(CMakeParseArguments)
 
 find_program(ISPC ispc)
-find_program(7ZA 7za HINTS ${CMAKE_SOURCE_DIR}/Source/external/7z)
+find_program(7ZA 7za HINTS ${CMAKE_SOURCE_DIR}/External/7z)
 
 if (NOT EXISTS ${ISPC})
     set(ISPC_VERSION 1.9.2)
@@ -66,25 +66,23 @@ function(add_ispc_targets)
         set(outputs ${header} ${objects})
         add_custom_command(
             OUTPUT ${outputs}
-            COMMAND ${ISPC} ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
+            COMMAND ${ISPC}
+            ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
             DEPENDS ${source} ${arg_HEADERS}
+            MAIN_DEPENDENCY ${source}
+            COMMENT "Building ISPC header ${header} and objects ${object} from ${source}"
         )
 
         list(APPEND _ispc_headers ${header})
         list(APPEND _ispc_objects ${objects})
         list(APPEND _ispc_outputs ${outputs})
     endforeach()
-    
+
     set(_ispc_headers ${_ispc_headers} PARENT_SCOPE)
     set(_ispc_objects ${_ispc_objects} PARENT_SCOPE)
     set(_ispc_outputs ${_ispc_outputs} PARENT_SCOPE)
-    
-    execute_process(COMMAND mkdir -p ${arg_OUTDIR})
-    foreach(f ${_ispc_outputs})
-        if(NOT EXISTS ${f})
-            execute_process(COMMAND touch -t 200001010000 ${f})
-        endif()
-    endforeach()
+
+    file(MAKE_DIRECTORY ${arg_OUTDIR})
 endfunction()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ISPC DEFAULT_MSG ISPC)

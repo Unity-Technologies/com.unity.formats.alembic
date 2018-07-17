@@ -9,9 +9,9 @@ FIND_PACKAGE(Alembic REQUIRED)
 include(AddPlugin)
 
 if(WIN32)
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};${HDF5_ROOT}/lib/libszip.lib;${HDF5_ROOT}/lib/zlibstatic.lib")
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES}") #;${HDF5_ROOT}/lib/libszip.lib;${HDF5_ROOT}/lib/libzlib.lib")
 else()
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread")
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
 endif()
 
 if(APPLE OR UNIX)
