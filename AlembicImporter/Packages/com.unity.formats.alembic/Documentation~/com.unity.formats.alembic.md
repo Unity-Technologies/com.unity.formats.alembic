@@ -2,6 +2,8 @@
 
 Use the Alembic package to import [Alembic](http://www.alembic.io/) files into your Unity Scenes. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a tremendous amount of resources, as the modeling and animating does not happen directly inside Unity.
 
+> Consider briefly mentioning that you can also export as Alembic in the first few lines since it's never mentioned until you get to that section.
+
 The Alembic package brings in vertex cache data from a 3D modeling software, such as facial animation (skinning) and cloth simulation (dynamics). When you play it back inside Unity, it looks exactly the same as it did in the 3D modeling software. 
 
 The Alembic package supports importing and playing back Meshes, Points and Cameras.
@@ -21,6 +23,8 @@ The package is available on 64-bit desktop platforms:
 
 * Material import and export are currently not supported
 * There is no exposed public API in the Alembic package.
+
+> the API thing is inherent to this package but material import/export isn't actually supported by Alembic - maybe consider making it clear that it can't ever be added?
 
 ## Feedback
 
@@ -62,7 +66,7 @@ You can customize import and playback of Alembic data through the properties on 
 If you change the **Time** parameter you can see the Alembic objects moving. To play the animation this parameter can be controlled from the [Timeline](#timeline), [Animation ](#animClip) component or via scripts.
 
 **Vertex Motion Scale** is a magnification factor when calculating velocity. The greater the velocity and motion scale, the more blurring the [MotionBlur post processing effect](#blur) applies.
-
+> Consider making MotionBlur two words
 
 
 ## Exporting Unity GameObjects to Alembic files
@@ -78,7 +82,7 @@ To configure a scene to export an Alembic file, add the [Alembic Exporter compon
 The component can be configured to export the entire scene or individual object hierarchies.
 
 Using the AlembicExporter component automatically disables Draw Call Batching. If the Mesh group is valid after being batched then it will be exported. In some cases the data will be batched multiplied times and the results may change.  If you want to control the Batch settings they can be found in the Rendering section of Player Settings.
-
+> Consider clarifying section; maybe a reminder line about what batching does for people who mark everything as static in their scene for performance and panic when the exporter turns it off and the project starts to slow down
 
 
 <a name="dccs"></a>
@@ -90,10 +94,10 @@ Autodesk® Maya®'s shading group can be imported as a sub-Mesh. Autodesk® Maya
 The Alembic import supports Autodesk® Maya®'s vertex color and multiple UV sets. It is necessary to export from Autodesk® Maya® by setting **Write Color Sets** and **Write UV Sets** options. Please note these are off by default.
 
 To export from Autodesk® Maya® with materials and vertex colors you will need the following highlighted Alembic export settings:
-
+> Isn't this a repeat of the two previous lines?
 ![Autodesk® Maya® Alembic Settings](/Users/amylouise/Documents/github/AlembicForUnity/AlembicImporter/Packages/com.unity.formats.alembic/Documentation~/images/abc_maya_options.png)|
 
-
+> Consider adding a 3DS Max section 
 
 # Using Alembic in Timeline
 
@@ -103,7 +107,7 @@ The Timeline can be used to playback and record Alembic animation including:
 * Create sequences using Alembic clips with the ability to trim times and adjust clip-ins
 * Record Alembic data directly from the Timeline to an Alembic file
 
-
+> Consider making sure that you can actually edit Alembic Shot Clips via code or otherwise add it to known limitations
 
 ## Record and playback the Alembic using an `Infinite Clip`
 
@@ -168,16 +172,21 @@ The Alembic package includes the following Shaders:
 |__Standard__                   |Standard PBR material with motionblur support added |
 |__Standard (Roughness setup)__ |Standard (Roughness setup) PBR with roughness material with motionblur support added |
 |__Standard (Specular setup)__   |Standard (Specular setup) material with motionblur support added |
-
+> Consider making MotionBlur two words
 
 
 <a name="blur"></a>
 
 ## Motion Blur
 
+
+> Unity does generate motion vectors for mesh and skinned renderers already; these shaders add motion vector support to Alembic files only.
+
 The Alembic shaders included add motion vector generation. This is useful for rendering that requires motion vectors, such as the post processing effect MotionBlur. If you want to add the motion vector generation function to your own shader, add the line `UsePass "Hidden / Alembic / MotionVectors / MOTIONVECTORS"` into a SubShader. Please see AlembicMotionVectors.cginc for details. Since the velocity data is passed to the fourth UV, the apex position of the previous frame is calculated based on it. Left is unprocessed, right is output of motion vector and MotionBlur applied by the Post Processing Stack.<br/>![Alembic MotionBlur](images/abc_motionblur.png)|
 
+> Consider adding a linebreak or rewording to make it more obvious the "left is unprocessed" line is about the picture
 
+> Consider making MotionBlur two words
 
 # Reference pages
 
@@ -222,7 +231,7 @@ The Alembic shaders included add motion vector generation. This is useful for re
 | **Generate Motion Vector** |                   |
 | **Point Size**             |                   |
 
-
+> Todo, but I guess that's part of the review process already
 
 
 
@@ -327,7 +336,7 @@ You can customize import and playback through the properties on this component:
 
 - Material import is currently not supported
 
-
+> As with higher in the docs, this is more of a filetype limitation than an issue with our plugin
 
 <a name="exportRef"></a>
 
