@@ -4,6 +4,10 @@ pushd External
 ./build.sh
 popd
 
+if [[ -e build ]]; then
+    rm -rf build
+fi
+
 depsdir=${PWD}/External/install
 installdir=${PWD}/build/install
 mkdir -p build

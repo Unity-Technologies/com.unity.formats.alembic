@@ -6,7 +6,11 @@ cd ..
 
 SET depsdir=%cd%\External\install
 SET installdir=%cd%\build\install
-echo %depsdir%
+
+
+if exist build (
+    rd /s /q build
+)
 md build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release ^

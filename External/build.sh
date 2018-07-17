@@ -13,14 +13,23 @@ export MAKEFLAGS="-j4"
 hdf5_version=1.10.1
 hdf5_arch=$(uname)
 
+if [[ -e ${installdir} ]]; then
+    rm -rf ${installdir}
+fi
 mkdir -p ${installdir}
 
+if [[ -e hdf5-build ]]; then
+    rm -rf hdf5-build
+fi
 mkdir -p hdf5-build
 pushd hdf5-build
 tar xf ${tgzdir}/HDF5-${hdf5_version}-${hdf5_arch}.tar.gz
 cp -R HDF5-${hdf5_version}-${hdf5_arch}/HDF_Group/HDF5/${hdf5_version}/* ${installdir}
 popd
 
+if [[ -e ilmbase-build ]]; then
+    rm -rf ilmbase-build
+fi
 mkdir -p ilmbase-build
 pushd ilmbase-build
 cmake ../OpenExr/IlmBase -DCMAKE_BUILD_TYPE=Release \
@@ -31,6 +40,9 @@ cmake ../OpenExr/IlmBase -DCMAKE_BUILD_TYPE=Release \
 cmake --build . --target install --config Release
 popd
 
+if [[ -e alembic-build ]]; then
+    rm -rf alembic-build
+fi
 mkdir -p alembic-build
 pushd alembic-build
 cmake ../alembic -DCMAKE_BUILD_TYPE=Release \
