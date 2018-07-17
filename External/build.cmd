@@ -1,17 +1,18 @@
 @echo off
 
-set installdir=%cd%\install
-set tgzdir=%cd%
 set PATH=%PATH%;%cd%\7z
 
-set HDF5_VERSION=1.8.20
+set installdir=%cd%\install
+set tgzdir=%cd%
 
 md %installdir%
 
+set hdf5_version=1.10.1
+
 md hdf5-build
 cd hdf5-build
-7za x -aoa %tgzdir%\HDF5-%HDF5_VERSION%-win64.zip
-xcopy /Q /S /Y HDF5-%HDF5_VERSION%-win64\* %installdir%
+7za x -aoa %tgzdir%\HDF5-%hdf5_version%-win64.zip
+xcopy /Q /S /Y HDF5-%hdf5_version%-win64\* %installdir%
 cd ..
 
 md ilmbase-build
