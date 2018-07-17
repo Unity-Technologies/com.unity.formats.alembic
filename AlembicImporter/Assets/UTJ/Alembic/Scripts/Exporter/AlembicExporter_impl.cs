@@ -337,7 +337,6 @@ namespace UTJ.Alembic
         public class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
-            AlembicCameraParams m_params;
             aeCameraData m_data = aeCameraData.defaultValue;
 
             public override void Setup(Component c)
@@ -345,7 +344,6 @@ namespace UTJ.Alembic
                 var target = c as Camera;
                 abcObject = parent.abcObject.NewCamera(target.name, timeSamplingIndex);
                 m_target = target;
-                m_params = target.GetComponent<AlembicCameraParams>();
 
                 var trans = parent as TransformCapturer;
                 if (trans != null)
@@ -372,13 +370,16 @@ namespace UTJ.Alembic
                 dst.nearClippingPlane = src.nearClipPlane;
                 dst.farClippingPlane = src.farClipPlane;
                 dst.fieldOfView = src.fieldOfView;
-                if (m_params != null)
+
+#if UNITY_2018_2_OR_NEWER
+                if (m_target.usePhysicalProperties)
                 {
-                    dst.focalLength = m_params.m_focalLength;
-                    dst.focusDistance = m_params.m_focusDistance;
-                    dst.aperture = m_params.m_aperture;
-                    dst.aspectRatio = m_params.GetAspectRatio();
+                    dst.focalLength = m_target.focalLength;
+                    //dst.focusDistance = m_params.m_focusDistance;
+                    //dst.aperture = m_params.m_aperture;
+                    //dst.aspectRatio = m_params.GetAspectRatio();
                 }
+#endif
             }
         }
 
