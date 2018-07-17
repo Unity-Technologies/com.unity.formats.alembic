@@ -6,3 +6,4 @@
 	url = https://github.com/openexr/openexr.git
 [submodule "External/alembic"]
 	path = External/alembic
+	url = https://github.com/alembic/alembic.git
