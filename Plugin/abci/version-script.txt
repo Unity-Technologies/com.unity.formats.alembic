@@ -1,7 +1,0 @@
-LIBABCI_1.0 {
-  global:
-	ae* ;
-	ai* ;
-  local:
-	*;
-};

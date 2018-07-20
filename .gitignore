@@ -16,6 +16,7 @@
 *.db
 *.opendb
 *.sw[op]
+*.pyc
 
 *.exe
 *.dll
@@ -33,40 +34,24 @@ Plugin/_build_*
 *.dblite
 excons.cache
 
-AlembicImporter/*.csproj
-AlembicImporter/*.sln
-AlembicImporter/Assets/UTJ/NormalPainter*
-AlembicImporter/Assets/UTJ/BlendShapeBuilder*
-AlembicImporter/Assets/UTJ/VertexTweaker*
-AlembicImporter/Assets/PostProcessing*
 .vs/
+.idea
 Library/
 Temp/
 _tmp/
 _out/
-external/
 ipch/
 
-*.abc
-*.abc.meta
-build/
-TestLocal*
 StreamingAssets*
+build/**
+External/*-build/*
+artifacts/**
+install/**
+External/install/**
 
 # Ignore npmrc because it has your own personal key. It needs to be next
 # to package.json though.
 .npmrc
-
-# Unignore specific folders
-!Plugin/external/ThirdParty/Deploy/MacOS/include
-!Plugin/external/ThirdParty/Deploy/MacOS/lib
-
-# Unignore specific .abc files
-!AlembicImporter/Assets/Tests/MVPCloth.abc
-!AlembicImporter/Assets/Tests/MVPCloth.abc.meta
-
-# We keep the plug-in libraries in the repo
-!AlembicImporter/Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll
 
 # Package Validation Suite files are not tracked
 AlembicImporter/ValidationSuiteResults/*
