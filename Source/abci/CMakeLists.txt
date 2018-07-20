@@ -9,10 +9,13 @@ if(ENABLE_ISPC)
     file(GLOB ISPC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Foundation/*.ispc)
     add_ispc_targets(SOURCES ${ISPC_SOURCES} HEADERS ${ISPC_HEADERS} OUTDIR ${ISPC_OUTDIR})
     set(ISPC_OUTPUTS ${_ispc_outputs})
+    set(ISPC_OBJECTS ${_ispc_objects})
 endif()
 
 file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importer/*.cpp Exporter/*.h Exporter/*.cpp)
-list(APPEND sources ${ISPC_OUTPUTS})
+list(APPEND sources ${ISPC_SOURCES})
+list(APPEND sources ${ISPC_OBJECTS})
+
 add_plugin(abci
     SOURCES ${sources}
     PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64
@@ -42,11 +45,6 @@ target_link_libraries(abci
 )
 
 install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
-
-if(ENABLE_ISPC)
-    add_definitions(-DaiEnableISPC)
-    target_include_directories(abci PUBLIC ${ISPC_OUTDIR})
-endif()
 
 ########################################
 # Unit tests

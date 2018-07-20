@@ -67,7 +67,7 @@ function(add_ispc_targets)
         add_custom_command(
             OUTPUT ${outputs}
             COMMAND ${ISPC}
-            ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4,avx --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
+            ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
             DEPENDS ${source} ${arg_HEADERS}
             MAIN_DEPENDENCY ${source}
             COMMENT "Building ISPC header ${header} and objects ${object} from ${source}"
