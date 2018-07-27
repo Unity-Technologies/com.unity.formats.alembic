@@ -58,3 +58,7 @@ AlembicImporter/ValidationSuiteResults/*
 
 # Rulesets in this location should not be tracked
 AlembicImporter/*.ruleset
+
+InitTestScene*.unity
+InitTestScene*.unity.meta
+

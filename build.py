@@ -1,7 +1,6 @@
 #!/usr/bin/python -B
 import os
 import platform
-import logging
 
 def packages_list():
     return [
@@ -10,7 +9,7 @@ def packages_list():
 
 def test_packages_list():
     return [
-        ("com.unity.formats.alembic", os.path.join("build", "install", "com.unity.formats.alembic"))
+        "com.unity.formats.alembic"
     ]
 
 def gitlab_ci_build_stage():
@@ -28,8 +27,7 @@ def gitlab_ci_build_environment_fixup(build_env, logger):
 
     return build_env
 
-# Prepare an empty project for editor tests
-def prepare_editor_test_project(repo_path, project_path, logger):
+def prepare_playmode_test_project(repo_path, project_path, logger):
     import unity_package_build
 
 if __name__ == "__main__":
