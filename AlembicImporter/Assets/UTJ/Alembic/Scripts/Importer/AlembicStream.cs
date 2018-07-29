@@ -130,7 +130,6 @@ namespace UTJ.Alembic
             m_config.scaleFactor = settings.scaleFactor;
             m_config.normalsMode = settings.normals;
             m_config.tangentsMode = settings.tangents;
-            m_config.turnQuadEdges = settings.turnQuadEdges;
             m_config.interpolateSamples = settings.interpolateSamples;
             m_config.importPointPolygon = settings.importPointPolygon;
             m_config.importLinePolygon = settings.importLinePolygon;

@@ -89,7 +89,6 @@ namespace UTJ.Alembic
         public Bool swapHandedness;
         public Bool flipFaces;
         public Bool interpolateSamples;
-        public Bool turnQuadEdges;
         public Bool asyncLoad;
         public Bool importPointPolygon;
         public Bool importLinePolygon;
@@ -110,7 +109,6 @@ namespace UTJ.Alembic
             swapHandedness = true;
             flipFaces = false;
             interpolateSamples = true;
-            turnQuadEdges = false;
             asyncLoad = true;
             importPointPolygon = true;
             importLinePolygon = true;

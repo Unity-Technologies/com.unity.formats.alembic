@@ -106,7 +106,6 @@ struct aiConfig
     bool swap_handedness = true;
     bool swap_face_winding = false;
     bool interpolate_samples = true;
-    bool turn_quad_edges = false;
     bool async_load = false;
 
     bool import_point_polygon = true;

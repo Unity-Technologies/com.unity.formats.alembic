@@ -841,7 +841,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
 
     refiner.refine();
-    refiner.retopology(config.swap_face_winding, config.turn_quad_edges);
+    refiner.retopology(config.swap_face_winding);
 
     // generate submeshes
     if (!topology.m_faceset_sps.empty()) {

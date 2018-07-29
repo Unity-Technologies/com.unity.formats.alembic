@@ -11,7 +11,6 @@ namespace UTJ.Alembic
         [SerializeField] public float scaleFactor = 0.01f;
         [SerializeField] public bool swapHandedness = true;
         [SerializeField] public bool flipFaces = false;
-        [SerializeField] public bool turnQuadEdges = false;
         [SerializeField] public bool interpolateSamples = true;
 
         [SerializeField] public bool importPointPolygon = true;

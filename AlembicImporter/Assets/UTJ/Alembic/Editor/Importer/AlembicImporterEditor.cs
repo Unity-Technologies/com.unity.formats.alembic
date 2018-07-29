@@ -92,7 +92,6 @@ namespace UTJ.Alembic
                 DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(aiNormalsMode)));
                 DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(aiTangentsMode)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "flipFaces"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "turnQuadEdges"));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
