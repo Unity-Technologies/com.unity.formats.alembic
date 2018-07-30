@@ -3,11 +3,11 @@
     * [Creating Alembic files in Autodesk® DCC applications](dccs)
     * [Controlling Alembic playback](playback)
     * [Using Alembic with Timeline](timeline)
-        * [Record and play back the Alembic using an Infinite clip](time_InfiniteClip)
         * [Play back using an Alembic Shot clip](time_AlembicShot)
         * [Recording with the Alembic Recorder clip](time_AlembicRecorder)
+        * [Record and play back the Alembic using an Infinite clip](time_InfiniteClip)
     * [Using Alembic with Unity Animation](animClip)
-    * [Exporting Unity GameObjects to Alembic files](export)
+    * [Exporting Unity GameObjects to Alembic](export)
     * [Working with Particles](particles)
     * [Working with Materials](matshad)
     * [Window reference](reference)
@@ -19,3 +19,4 @@
       * [Alembic Stream Player component](ref_StreamPlayer)
       * [Alembic Import Settings window](ref_Importer)
     * [Tutorial: Import and play back Alembic](tutorial)
+
