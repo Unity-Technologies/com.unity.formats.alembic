@@ -11,9 +11,9 @@ To configure a scene to export an Alembic file, add the [Alembic Exporter compon
 
 You can configure the component to export the entire scene or individual object hierarchies.
 
-> ***Warning:*** Using the AlembicExporter component automatically disables Draw Call Batching. Because of this, you may notice your Scene slowing down, since the elements are no longer static. 
+> ***Warning:*** Using the Alembic Exporter component automatically disables Draw Call Batching. Because of this, you may notice your Scene slowing down, since the elements are no longer static. 
 
 If the Mesh group is valid after being batched then the Alembic package exports it. In some cases the data is batched multiple times and the results may change.  
 
-If you want to control the Batch settings, open the Rendering section of Player settings (from Unity's main menu: **Edit** > **Project Settings** > **Player** > **Other Settings** > **Rendering**).
+If you want to control the Batch settings, open the Rendering section of Player settings (from Unity's main menu: **Edit** > **Project Settings** > **Player** > **Other Settings** > **Rendering**). However, it is not recommended to re-enable Draw Call Batching while using the Alembic Exporter component.
 
