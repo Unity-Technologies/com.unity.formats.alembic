@@ -130,7 +130,7 @@ These options allow you to control starting and stopping the capture.
 
 | ***Property***         | ***Description***                                            |
 | :--------------------- | :----------------------------------------------------------- |
-| __Capture On Start__   | Enable to begin capturing in Start() when a Scene with an [AlembicExporter](ref_Exporter.html) component is loaded. |
+| __Capture On Start__   | Enable to begin capturing in [Start()](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) when a Scene with an [AlembicExporter](ref_Exporter.html) component is loaded. |
 | __Ignore First Frame__ | Enable to skip capturing the first frame. <br/>Only available if **Capture On Start** is enabled. |
 | __Max Capture Frame__  | Set the frame to stop capturing at.                          |
 
