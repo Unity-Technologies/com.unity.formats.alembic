@@ -1,4 +1,4 @@
-# Exporting Unity GameObjects to Alembic files
+# Exporting Unity GameObjects to Alembic
 
 The Alembic exporter supports exporting single frame and multi-frame Alembic files and can export GameObjects with the following components:
 
