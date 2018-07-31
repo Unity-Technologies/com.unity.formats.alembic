@@ -8,7 +8,7 @@ The following topics explain the properties of the Alembic Import Settings windo
 
 - [Scene options](#importRef_A)
 - [Geometry options](#importRef_B)
-- [Camera options](#importRef_C)
+- [Cameras options](#importRef_C)
 - [Time range options](#importRef_D)
 
 When you are finished customizing the import options, click **Apply** to proceed or **Revert** to abandon your changes.
@@ -63,11 +63,11 @@ Use these options to customize how Meshes are imported.
 
 <a name="importRef_C"></a>
 
-## Camera options
+## Cameras options
 
 Use these options to customize which components to import from the Alembic file.
 
-![Import Camera options](images/abc_import_options_C.png)
+![Import Cameras options](images/abc_import_options_C.png)
 
 
 
