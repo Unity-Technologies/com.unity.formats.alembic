@@ -15,5 +15,5 @@ You can configure the component to export the entire scene or individual object 
 
 If the Mesh group is valid after being batched then the Alembic package exports it. In some cases the data is batched multiple times and the results may change.  
 
-If you want to control the Batch settings, open the Rendering section of Player settings (from Unity's main menu: **Edit** > **Project Settings** > **Player** > **Other Settings** > **Rendering**). However, it is not recommended to re-enable Draw Call Batching while using the Alembic Exporter component.
+When you are done using the Exporter component and want to re-enable batching in your project, open the Rendering section of Player settings (from Unity's main menu: **Edit** > **Project Settings** > **Player** > **Other Settings** > **Rendering**). However, it is not recommended to re-enable Draw Call Batching while using the Alembic Exporter component.
 
