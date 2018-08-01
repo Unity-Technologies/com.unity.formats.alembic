@@ -1,4 +1,4 @@
-# About the Alembic package
+# Alembic
 
 Use the Alembic package to import and export [Alembic](http://www.alembic.io/) files into your Unity Scenes where you can playback and record animation directly in Unity. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a tremendous amount of resources, as the modeling and animating does not happen directly inside Unity.
 
@@ -33,7 +33,7 @@ The package is available on these 64-bit desktop platforms:
 
 We welcome hearing about your experience on [the Alembic-For-Unity forum](https://forum.unity.com/threads/alembic-for-unity.521649/).
 
-## Installing the Alembic package
+## Installation
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest).
 
