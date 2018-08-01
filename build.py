@@ -24,6 +24,9 @@ def gitlab_ci_build_environment_fixup(build_env, logger):
     if platform.system() == "Darwin" or platform.system() == "Linux":
         # Assumption we need a mono, and we can grab it from here
         build_env["PATH"] = unity_editor_common.get_mono_path() + ":" + build_env["PATH"]
+    elif platform.system() == "Windows":
+        # Make sure CMake is in the path
+        build_env["PATH"] = build_env["PATH"] + ";" + r'"C:\Program Files\CMake\bin"'
 
     return build_env
 
