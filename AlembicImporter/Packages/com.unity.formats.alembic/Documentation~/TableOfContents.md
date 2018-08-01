@@ -1,4 +1,4 @@
-* [About the Alembic package](index)
+* [Alembic](index)
     * [Importing Alembic files](import)
     * [Creating Alembic files in Autodesk® DCC applications](dccs)
     * [Controlling Alembic playback](playback)
@@ -19,4 +19,3 @@
       * [Alembic Stream Player component](ref_StreamPlayer)
       * [Alembic Import Settings window](ref_Importer)
     * [Tutorial: Import and play back Alembic](tutorial)
-
