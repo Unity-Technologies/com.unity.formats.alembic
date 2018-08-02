@@ -1,10 +1,10 @@
 # Recording with the Alembic Recorder clip
 
 You can record the following types of components to Alembic files using the **Alembic Recorder Clip** component:
-* Static Meshes (**MeshRenderer** component)
-* Skinned Meshes (**SkinnedMeshRenderer** component)
-* Particles (**ParticleSystem** component)
-* Cameras (**Camera** component)
+* Static Meshes ([**MeshRenderer**](https://docs.unity3d.com/Manual/class-MeshRenderer.html) component)
+* Skinned Meshes ([**SkinnedMeshRenderer**](https://docs.unity3d.com/Manual/class-SkinnedMeshRenderer.html) component)
+* Particles ([**ParticleSystem**](https://docs.unity3d.com/Manual/class-ParticleSystem.html) component)
+* Cameras ([**Camera**](https://docs.unity3d.com/Manual/class-Camera.html) component)
 
 
 
@@ -18,9 +18,9 @@ To record Timeline animation to an Alembic file:
 
    ![Alembic Shot Clip](images/abc_recorded_clip.png)
 
-4. You can name the Alembic file and choose where to write it to in the **Output Path** property on the [Alembic Recorder Clip component](ref_Recorder.html).
+4. To name the Alembic file and choose where to write it to, use the [Alembic Recorder Clip component](ref_Recorder.html)'s **Output Path** property.
 
-5. If you want to change the recording scope from the default (**Entire Scene**), choose **Target Branch** in the **Scope** property under the **Capture Settings** grouping and then set a reference to the root object in the **Target** property.
+5. To change the recording scope from the default (**Entire Scene**), navigate to the **Capture Settings** grouping and choose **Target Branch** in the **Scope** property, then set a reference to the root object in the **Target** property.
 
 6. You can customize a number of [Alembic Recorder Clip properties](ref_Recorder.html), including limiting which components to record.
 
