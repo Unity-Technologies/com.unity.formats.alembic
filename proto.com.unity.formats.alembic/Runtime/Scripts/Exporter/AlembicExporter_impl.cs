@@ -30,7 +30,12 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        public aeConfig conf = aeConfig.defaultValue;
+        internal aeConfig conf = aeConfig.defaultValue;
+        public aeConfig Conf
+        {
+            get { return conf; }
+            set { conf = value; }
+        }
 
         [SerializeField]
         private ExportScope scope = ExportScope.EntireScene;
