@@ -1,6 +1,6 @@
 # Alembic Shot Asset component
 
-You can use this component to customize where to stop playback of the Alembic Shot clip:
+The Alembic Shot Asset component allows you to customize where to stop playback of the Alembic Shot clip:
 
 ![The Alembic Shot component](images/abc_shot_options.png)
 
