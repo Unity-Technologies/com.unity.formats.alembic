@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    // bool is marshal as int (4 byte) by default and you need ugly [MarshalAs(UnmanagedType.U1)] to pass to (or receive from) C++ code.
-    // this struct emulates bool and marshal as byte (1 byte). this makes things bit easier in some cases.
+    /// <summary>
+    /// bool is marshal as int (4 byte) by default and you need ugly [MarshalAs(UnmanagedType.U1)] to pass to (or receive from) C++ code.
+    /// this struct emulates bool and marshal as byte (1 byte). this makes things bit easier in some cases.
+    /// </summary>
     [Serializable]
     public struct Bool
     {

@@ -67,9 +67,15 @@ namespace UnityEngine.Formats.Alembic.Sdk
         ArrayTypeEnd = Float4x4Array,
     };
 
+    /// <summary>
+    /// Configuration settings for file export. 
+    /// </summary>
     [Serializable]
     public struct aeConfig
     {
+        /// <summary>
+        /// Export archive type (HDF5 or Ogawa).
+        /// </summary>
         [SerializeField]
         private aeArchiveType archiveType;
         public aeArchiveType ArchiveType
@@ -84,6 +90,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
         }
+
+        /// <summary>
+        /// Frame rate to use for uniform sampling.
+        /// </summary>
         [SerializeField]
         private float frameRate;
         public float FrameRate
@@ -98,6 +108,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return xformType; }
             set { xformType = value; }
         }
+
+        /// <summary>
+        /// If true, exports as right hand coordinate system (Maya)
+        /// instead of left handed coordinate system (Unity)
+        /// </summary>
         [SerializeField]
         private Bool swapHandedness;
         public Bool SwapHandedness
@@ -112,6 +127,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return swapFaces; }
             set { swapFaces = value; }
         }
+
+        /// <summary>
+        /// Factor to convert between different system units.
+        /// </summary>
         [SerializeField]
         private float scaleFactor;
         public float ScaleFactor

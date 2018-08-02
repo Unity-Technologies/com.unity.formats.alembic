@@ -17,10 +17,15 @@ namespace UnityEngine.Formats.Alembic.Util
         TargetBranch,
     }
 
-
+    /// <summary>
+    /// Settings specifying export settings including which properties should be recorded and where to send the output.
+    /// </summary>
     [Serializable]
     public class AlembicRecorderSettings
     {
+        /// <summary>
+        /// Path to Alembic file to export to. Path can be absolute or relative to project folder.
+        /// </summary>
         [SerializeField]
         private string outputPath = "Output/Output.abc";
         public string OutputPath
@@ -29,6 +34,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { outputPath = value; }
         }
 
+        /// <summary>
+        /// Configuration settings for file export. 
+        /// </summary>
         [SerializeField]
         internal aeConfig conf = aeConfig.defaultValue;
         public aeConfig Conf
@@ -61,6 +69,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { fixDeltaTime = value; }
         }
 
+        /// <summary>
+        /// If set to true, static meshes will not be recorded.
+        /// </summary>
         [SerializeField]
         private bool assumeNonSkinnedMeshesAreConstant = true;
         public bool AssumeNonSkinnedMeshesAreConstant
@@ -69,6 +80,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { assumeNonSkinnedMeshesAreConstant = value; }
         }
 
+        /// <summary>
+        /// If set to true, mesh renderer components will be recorded.
+        /// </summary>
         [SerializeField]
         private bool captureMeshRenderer = true;
         public bool CaptureMeshRenderer
@@ -77,6 +91,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { captureMeshRenderer = value; }
         }
 
+        /// <summary>
+        /// If set to true, skinned mesh renderer components will be recorded.
+        /// </summary>
         [SerializeField]
         private bool captureSkinnedMeshRenderer = true;
         internal bool CaptureSkinnedMeshRenderer
@@ -84,7 +101,7 @@ namespace UnityEngine.Formats.Alembic.Util
             get { return captureSkinnedMeshRenderer; }
             set { captureSkinnedMeshRenderer = value; }
         }
-
+        
         [SerializeField]
         private bool captureParticleSystem = true;
         internal bool CaptureParticleSystem
@@ -93,6 +110,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { captureParticleSystem = value; }
         }
 
+        /// <summary>
+        /// If set to true, camera components will be recorded.
+        /// </summary>
         [SerializeField]
         private bool captureCamera = true;
         public bool CaptureCamera
@@ -133,6 +153,9 @@ namespace UnityEngine.Formats.Alembic.Util
             set { meshColors = value; }
         }
 
+        /// <summary>
+        /// If true, submeshes will be exported.
+        /// </summary>
         [SerializeField]
         private bool meshSubmeshes = true;
         public bool MeshSubmeshes
@@ -917,7 +940,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         /// <summary>
-        /// Start recording to Alembic file.
+        /// Start recording to an Alembic file.
         /// </summary>
         /// <returns>true if recording started successfully, false otherwise</returns>
         public bool BeginRecording()
@@ -987,6 +1010,9 @@ namespace UnityEngine.Formats.Alembic.Util
             return true;
         }
 
+        /// <summary>
+        /// Stop recording to the Alembic file.
+        /// </summary>
         public void EndRecording()
         {
             if (!m_recording) { return; }
@@ -1001,6 +1027,9 @@ namespace UnityEngine.Formats.Alembic.Util
             Debug.Log("AlembicRecorder: end: " + m_settings.OutputPath);
         }
 
+        /// <summary>
+        /// Record the current frame of animation.
+        /// </summary>
         public void ProcessRecording()
         {
             if (!m_recording) { return; }
