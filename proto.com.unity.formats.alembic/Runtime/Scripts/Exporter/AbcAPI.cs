@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    internal enum aeArchiveType
+    public enum aeArchiveType
     {
         HDF5,
         Ogawa,
@@ -68,7 +68,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    internal struct aeConfig
+    public struct aeConfig
     {
         [SerializeField]
         private aeArchiveType archiveType;
@@ -79,7 +79,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         [SerializeField]
         private aeTimeSamplingType timeSamplingType;
-        public aeTimeSamplingType TimeSamplingType
+        internal aeTimeSamplingType TimeSamplingType
         {
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
@@ -93,7 +93,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         [SerializeField]
         private aeXformType xformType;
-        public aeXformType XformType
+        internal aeXformType XformType
         {
             get { return xformType; }
             set { xformType = value; }
@@ -107,7 +107,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         [SerializeField]
         private Bool swapFaces;
-        public Bool SwapFaces
+        internal Bool SwapFaces
         {
             get { return swapFaces; }
             set { swapFaces = value; }

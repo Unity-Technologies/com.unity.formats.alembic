@@ -19,7 +19,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    internal class AlembicRecorderSettings
+    public class AlembicRecorderSettings
     {
         [SerializeField]
         private string outputPath = "Output/Output.abc";
@@ -34,7 +34,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private ExportScope scope = ExportScope.EntireScene;
-        public ExportScope Scope
+        internal ExportScope Scope
         {
             get { return scope; }
             set { scope = value; }
@@ -179,7 +179,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    internal sealed class AlembicRecorder : IDisposable
+    public sealed class AlembicRecorder : IDisposable
     {
         #region internal types
         internal class MeshBuffer : IDisposable
@@ -740,15 +740,15 @@ namespace UnityEngine.Formats.Alembic.Util
             get { return m_settings; }
             set { m_settings = value; }
         }
-        public GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
-        public bool recording { get { return m_recording; } }
-        public int frameCount { get { return m_frameCount; } }
+        internal GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
+        internal bool recording { get { return m_recording; } }
+        internal int frameCount { get { return m_frameCount; } }
 #endregion
 
 
 #region impl
 #if UNITY_EDITOR
-        public static void ForceDisableBatching()
+        internal static void ForceDisableBatching()
         {
             var method = typeof(UnityEditor.PlayerSettings).GetMethod("SetBatchingForPlatform", BindingFlags.NonPublic | BindingFlags.Static);
             if (method != null)
