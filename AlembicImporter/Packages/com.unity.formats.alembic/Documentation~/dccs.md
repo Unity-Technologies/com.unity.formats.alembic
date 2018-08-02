@@ -14,7 +14,7 @@ The Alembic package also supports Autodesk® Maya®'s vertex color and multiple 
 
 ## Creating Alembic files in Autodesk® 3ds Max®
 
-The Alembic package also supports Autodesk® 3ds Max®'s vertex colors and multiple UV sets. Before exporting to an Alembic file, enable the **UVs**, **Vertex Colors**, and **Material IDs** options under the **Export Data** section of Autodesk® 3ds Max® Alembic export settings. 
+The Alembic package also supports Autodesk® 3ds Max®'s vertex colors and multiple UV sets. Before exporting to an Alembic file, open the Autodesk® 3ds Max® Alembic export settings, navigate to the **Export Data** section, and enable **UVs**, **Vertex Colors**, and **Material IDs**. 
 
 
 ![Autodesk® 3ds Max® Alembic](images/abc_max_options.png)
