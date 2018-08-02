@@ -1,6 +1,6 @@
 # Alembic
 
-Use the Alembic package to import and export [Alembic](http://www.alembic.io/) files into your Unity Scenes where you can playback and record animation directly in Unity. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a tremendous amount of resources, as the modeling and animating does not happen directly inside Unity.
+Use the Alembic package to import and export [Alembic](http://www.alembic.io/) files into your Unity Scenes, where you can playback and record animation directly in Unity. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a significant amount of resources, because the modeling and animating does not happen directly inside Unity.
 
 The Alembic package brings in vertex cache data from a 3D modeling software, such as facial animation (skinning) and cloth simulation (dynamics). When you play it back inside Unity, it looks exactly the same as it did in the 3D modeling software. 
 
@@ -26,18 +26,18 @@ The package is available on these 64-bit desktop platforms:
 
 ## Known limitations
 
-* Material import and export are not supported, as they are not supported in Alembic.
+* Alembic does not support Material import and export.
 * There is no exposed public API in the Alembic package.
 
 ## Feedback
 
-We welcome hearing about your experience on [the Alembic-For-Unity forum](https://forum.unity.com/threads/alembic-for-unity.521649/).
+Tell Unity about your experience using Alembic for Unity on [the Alembic-For-Unity forum](https://forum.unity.com/threads/alembic-for-unity.521649/).
 
 ## Installation
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest).
 
-Verify that the Alembic package is correctly installed by trying to add an Alembic component to a GameObject or Camera:
+To verify that the Alembic package is correctly installed, try to add an Alembic component to a GameObject or Camera:
 
 1. Select a GameObject or Camera and open the Inspector view.
 
