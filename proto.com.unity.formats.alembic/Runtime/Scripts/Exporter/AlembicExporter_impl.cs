@@ -182,7 +182,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
     }
 
-
+    /// <summary>
+    /// The Alembic Recorder class allows for the recording of animated GameObjects and components (e.g. camera, cloth, particle systems)
+    /// in the scene to Alembic files during runtime.
+    /// </summary>
     [Serializable]
     public sealed class AlembicRecorder : IDisposable
     {
@@ -740,6 +743,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
 #region properties
+        /// <summary>
+        /// Settings specifying export settings including which properties should be recorded and where to send the output.
+        /// </summary>
         public AlembicRecorderSettings settings
         {
             get { return m_settings; }
@@ -902,11 +908,18 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
 #region public methods
+        /// <summary>
+        /// Dispose the current context.
+        /// </summary>
         public void Dispose()
         {
             m_ctx.Destroy();
         }
 
+        /// <summary>
+        /// Start recording to Alembic file.
+        /// </summary>
+        /// <returns>true if recording started successfully, false otherwise</returns>
         public bool BeginRecording()
         {
             if (m_recording)
