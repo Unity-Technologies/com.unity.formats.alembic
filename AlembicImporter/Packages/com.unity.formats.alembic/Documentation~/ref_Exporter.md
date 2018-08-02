@@ -1,6 +1,6 @@
 # Alembic Exporter component
 
-You can use the Alembic Exporter component to customize how the Alembic package exports animation to an Alembic file. 
+The Alembic Exporter component allows you to customize how the Alembic package exports animation to an Alembic file. 
 
 ![The Export Settings window](images/abc_export_options.png)
 
@@ -50,10 +50,10 @@ Use these settings to define the properties of the Alembic output.
 |                     | __Uniform__ | The interval between frames on the Alembic side is always constant (`1 / Frame Rate seconds`). |
 |                     | __Acyclic__ | The delta time in Unity is the interval between the frames on the Alembic side. The interval is not constant, but the impact on the game progress is minimal. It is a mode mainly assuming 3D recording of games. |
 | __Frame Rate__      |             | Set the frame rate to use for uniform sampling. This option is only available when Time Sampling **Type** is set to Uniform. |
-| __Fix Delta Time__  |             | Enable this option to set [Time.maximumDeltaTime](https://docs.unity3d.com/ScriptReference/Time-maximumDeltaTime.html) using the frame rate to ensure fixed delta time. In the case of video production this is the desired behavior.<br/>***Note:*** If you are managing [Time.maximumDeltaTime](https://docs.unity3d.com/ScriptReference/Time-maximumDeltaTime.html) yourself, be aware that this could lead to non-uniform delta time. <br/>This option is only available when Time Sampling **Type** is set to Uniform. |
+| __Fix Delta Time__  |             | Enable this option to set [Time.maximumDeltaTime](https://docs.unity3d.com/ScriptReference/Time-maximumDeltaTime.html) using the frame rate to ensure fixed delta time. In the case of video production, this is the desired behavior.<br/>***Note:*** If you are managing [Time.maximumDeltaTime](https://docs.unity3d.com/ScriptReference/Time-maximumDeltaTime.html) yourself, be aware that this could lead to non-uniform delta time. <br/>This option is only available when Time Sampling **Type** is set to Uniform. |
 | __Swap Handedness__ |             | Enable to change from a left hand coordinate system (Unity) to a right hand coordinate system (Autodesk® Maya®). |
 | __Swap Faces__      |             | Enable to reverse the front and back of all faces.           |
-| __Scale Factor__    |             | Set scale factor to convert between different system units. For example, using 0.1 will convert the Unity units to 1/10 of their value in the resulting Alembic file. This also affects position and speed. |
+| __Scale Factor__    |             | Set scale factor to convert between different system units. For example, using 0.1 converts the Unity units to 1/10 of their value in the resulting Alembic file. This also affects position and speed. |
 
 
 
@@ -63,7 +63,7 @@ Use these settings to define the properties of the Alembic output.
 
 Use these settings to determine the set of target GameObject(s) for the current capture. Once the capture begins, the target set is locked and does not change. Enabling or disabling a GameObject in the target set does not affect the capture. Any GameObjects generated after the start of the capture are not included.
 
-> ***Warning:*** Deleting a target GameObject in the middle of a capture interrupts the capture, and the Alembic file may have a non-uniform number of samples as a result. Some software may not handle this properly.
+> ***Warning:*** Deleting a target GameObject in the middle of a capture interrupts the capture, and the Alembic file might have a non-uniform number of samples as a result. Some software might not handle this properly.
 
 ![Capture Settings section](images/abc_export_options_C.png)
 
@@ -116,7 +116,7 @@ Use these settings to fine-tune the Mesh data you are saving.
 | __Vertex Color__ | Enable to export vertex colors. |
 | __Submeshes__    | Enable to export sub-Meshes.    |
 
-> ***Note:*** Material export is not supported, as it is not supported in Alembic.
+> ***Note:*** Alembic does not support Material export, and therefore neither does Alembic in Unity.
 
 
 
@@ -150,11 +150,11 @@ Enable the __Detailed Log__ option to provide Debug logging for each captured fr
 
 ## Capture Control section
 
-The buttons in this section allow define how much of the animation to capture.
+The buttons in this section allow you to define how much of the animation to capture.
 
 ![Capture Control section](images/abc_export_options_H.png)
 
-In play mode, click __Begin Recording__ to start capturing the entire scene. Use this option if **Capture On Start** is disabled.
+In Play mode, click __Begin Recording__ to start capturing the entire Scene. Use this option if **Capture On Start** is disabled.
 
-You can click __One Shot__ to export only the current frame to the Alembic file.
+To export only the current frame to the Alembic file, click __One Shot__.
 
