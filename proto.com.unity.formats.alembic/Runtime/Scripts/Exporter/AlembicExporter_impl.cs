@@ -42,7 +42,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private GameObject targetBranch;
-        public GameObject TargetBranch
+        internal GameObject TargetBranch
         {
             get { return targetBranch; }
             set { targetBranch = value; }
@@ -50,7 +50,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool fixDeltaTime = true;
-        public bool FixDeltaTime
+        internal bool FixDeltaTime
         {
             get { return fixDeltaTime; }
             set { fixDeltaTime = value; }
@@ -74,7 +74,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool captureSkinnedMeshRenderer = true;
-        public bool CaptureSkinnedMeshRenderer
+        internal bool CaptureSkinnedMeshRenderer
         {
             get { return captureSkinnedMeshRenderer; }
             set { captureSkinnedMeshRenderer = value; }
@@ -82,7 +82,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool captureParticleSystem = true;
-        public bool CaptureParticleSystem
+        internal bool CaptureParticleSystem
         {
             get { return captureParticleSystem; }
             set { captureParticleSystem = value; }
@@ -98,7 +98,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool meshNormals = true;
-        public bool MeshNormals
+        internal bool MeshNormals
         {
             get { return meshNormals; }
             set { meshNormals = value; }
@@ -106,7 +106,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool meshUV0 = true;
-        public bool MeshUV0
+        internal bool MeshUV0
         {
             get { return meshUV0; }
             set { meshUV0 = value; }
@@ -114,7 +114,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool meshUV1 = true;
-        public bool MeshUV1
+        internal bool MeshUV1
         {
             get { return meshUV1; }
             set { meshUV1 = value; }
@@ -122,7 +122,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool meshColors = true;
-        public bool MeshColors
+        internal bool MeshColors
         {
             get { return meshColors; }
             set { meshColors = value; }
@@ -138,7 +138,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool detailedLog = false;
-        public bool DetailedLog
+        internal bool DetailedLog
         {
             get { return detailedLog; }
             set { detailedLog = value; }
@@ -146,7 +146,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         private bool debugLog = false;
-        public bool DebugLog
+        internal bool DebugLog
         {
             get { return debugLog; }
             set { debugLog = value; }

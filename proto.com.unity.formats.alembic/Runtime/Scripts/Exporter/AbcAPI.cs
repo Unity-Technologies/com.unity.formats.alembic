@@ -120,7 +120,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             set { scaleFactor = value; }
         }
 
-        public static aeConfig defaultValue
+        internal static aeConfig defaultValue
         {
             get
             {
