@@ -1,0 +1,10 @@
+{
+    "name": "Unity.Formats.Alembic.Editor",
+  "references": [
+    "Unity.Formats.Alembic.Runtime"
+  ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
