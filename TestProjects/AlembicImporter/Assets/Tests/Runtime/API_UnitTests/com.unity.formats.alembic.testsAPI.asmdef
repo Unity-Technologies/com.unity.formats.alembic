@@ -1,0 +1,12 @@
+{
+    "name": "com.unity.formats.alembic.unittestsAPI",
+    "references": [
+        "Unity.Formats.Alembic.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
