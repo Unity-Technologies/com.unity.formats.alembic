@@ -1,15 +1,10 @@
 ﻿using System.Collections;
 using System.IO;
-using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.Formats.Alembic.Timeline;
-using UnityEngine.Formats.Alembic.Util;
-using UnityEngine.Playables;
 using UnityEngine.TestTools;
-using UnityEngine.Timeline;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
     public class AlembicTestBase {
@@ -386,7 +381,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         [Ignore ("You can't access Alembic Timeline recorder clip settings programatically - so there's functionally no way of customizing the settings via code")]
         [UnityTest]
         public IEnumerator TestCreateAndDelete () {
-            SceneManagement.EditorSceneManager.LoadScene ("TestCreateAndDelete", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            yield return SceneLoader("TestCreateAndDelete");
             yield return new WaitForSeconds (9f);
             // Afaik, there is no programmatical way of manually accessing Alembic recorder clip settings, thus the path has to be set manually
             TestAbcImported ("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
