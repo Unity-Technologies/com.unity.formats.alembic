@@ -109,14 +109,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             if (string.IsNullOrEmpty (_testDirectory)) {
                 return;
             }
-
+#if UNITY_EDITOR
             // Delete the directory on the next editor update.  Otherwise,
             // prefabs don't get deleted and the directory delete fails.
             EditorApplication.update += DeleteOnNextUpdate;
+#else
+            // not in editor so delete immediately
+            try {
+                Directory.Delete (filePath, recursive : true);
+            } catch (IOException) {
+                // ignore -- something else must have deleted this.
+            }
+#endif
         }
 
         // Helper for the tear-down. This is run from the editor's update loop.
         void DeleteOnNextUpdate () {
+#if UNITY_EDITOR
             EditorApplication.update -= DeleteOnNextUpdate;
             try {
                 Directory.Delete (filePath, recursive : true);
@@ -124,6 +133,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             } catch (IOException) {
                 // ignore -- something else must have deleted this.
             }
+#endif
         }
 
     }
@@ -146,23 +156,31 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         /// </summary>
         /// <param name="abcPath"></param>
         private void TestAbcImported (string abcPath) {
+#if UNITY_EDITOR
             AssetDatabase.Refresh ();
+#endif
 
             var absPath = GetAssetsAbsolutePath (abcPath);
 
             Assert.That (string.IsNullOrEmpty (absPath), Is.False);
             Assert.That (File.Exists (absPath));
 
+#if UNITY_EDITOR
             // now try loading the asset to see if it imported properly
             var obj = AssetDatabase.LoadMainAssetAtPath (abcPath);
             Assert.That (obj, Is.Not.Null);
             var go = obj as GameObject;
             Assert.That (go, Is.Not.Null);
+#endif
         }
 
         // Loads a given scene
         IEnumerator SceneLoader (string sceneToLoad) {
+#if UNITY_EDITOR
             SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+#else
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+#endif
             yield return null;
         }
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
