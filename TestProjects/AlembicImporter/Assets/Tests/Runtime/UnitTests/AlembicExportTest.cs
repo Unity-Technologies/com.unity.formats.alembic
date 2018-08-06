@@ -183,6 +183,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
 #endif
             yield return null;
         }
+
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
         string SetupExporter (AlembicExporter exporter = null) {
             if (exporter == null) {
@@ -192,6 +193,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             exporter.recorder.settings.OutputPath = GetAssetsAbsolutePath (exportPath);
             return exportPath;
         }
+
         // Begin recording and yield until the recording is done
         IEnumerator RecordAlembic (AlembicExporter exporter = null) {
             if (exporter == null) {
@@ -208,6 +210,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             }
 
         }
+
         // Loads ands runs generic scenes with vanilla recorder settings
         IEnumerator TestScene (string scene) {
             yield return SceneLoader (scene);
@@ -220,6 +223,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // One shot export
         [UnityTest]
         public IEnumerator TestOneShotExport () {
@@ -232,21 +236,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return null;
             TestAbcImported (exportFile);
         }
+
         // Export Cloth
         [UnityTest]
         public IEnumerator TestClothExport () {
             yield return TestScene ("TestCloth");
         }
+
         //Test Export of multiple, varied assets in a scene
         [UnityTest]
         public IEnumerator TestMultipleExport () {
             yield return TestScene ("TestExport");
         }
+
         //CustomCapturer
         [UnityTest]
         public IEnumerator TestCustomCapturer () {
             yield return TestScene ("TestCustomCapturer");
         }
+
         // GUI  Linear
         [UnityTest]
         public IEnumerator TestGUIUniform () {
@@ -260,6 +268,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // GUI  Acyclic
         [UnityTest]
         public IEnumerator TestAcyclic () {
@@ -273,6 +282,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap xform test
         [UnityTest]
         public IEnumerator TestXform () {
@@ -286,6 +296,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return null;
             TestAbcImported (exportFile);
         }
+
         // Other file format test
         [UnityTest]
         public IEnumerator TestHDF5 () {
@@ -299,6 +310,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap handedness test
         [UnityTest]
         public IEnumerator TestSwapHandedness () {
@@ -312,6 +324,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         //Small Scale Recording
         [UnityTest]
         public IEnumerator TestScaleFactor () {
@@ -325,6 +338,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Low Frame Rate
         [UnityTest]
         public IEnumerator TestLowFrameRate () {
@@ -339,6 +353,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // High Frame Rate
         [UnityTest]
         public IEnumerator TestHighFrameRate () {
@@ -353,6 +368,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap Faces
         [UnityTest]
         public IEnumerator TestSwapFaces () {
