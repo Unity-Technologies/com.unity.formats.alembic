@@ -9,9 +9,9 @@ SET installdir=%cd%\build\install
 
 
 if exist build (
-    rd /s /q build
+    rmdir /s /q build
 )
-md build
+mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release ^
     -DALEMBIC_DIR=%depsdir% ^

@@ -6,25 +6,25 @@ set installdir=%cd%\install
 set tgzdir=%cd%
 
 if exist install (
-    rd /s /q install
+    rmdir /s /q install
 )
-md %installdir%
+mkdir %installdir%
 
 set hdf5_version=1.10.1
 
 if exist hdf5-build (
-    rd /s /q hdf5-build
+    rmdir /s /q hdf5-build
 )
-md hdf5-build
+mkdir hdf5-build
 cd hdf5-build
 7za x -aoa %tgzdir%\HDF5-%hdf5_version%-win64.zip
 xcopy /Q /S /Y HDF5-%hdf5_version%-win64\* %installdir%
 cd ..
 
 if exist ilmbase-build (
-    rd /s /q ilmbase-build
+    rmdir /s /q ilmbase-build
 )
-md ilmbase-build
+mkdir ilmbase-build
 cd ilmbase-build
 cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
@@ -36,9 +36,9 @@ cmake --build . --target install --config Release
 cd ..
 
 if exist alembic-build (
-    rd /s /q alembic-build
+    rmdir /s /q alembic-build
 )
-md alembic-build
+mkdir alembic-build
 cd alembic-build
 cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
