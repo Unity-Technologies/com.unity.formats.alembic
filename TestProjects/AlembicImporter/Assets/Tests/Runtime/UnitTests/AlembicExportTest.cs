@@ -118,9 +118,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
 #endif
         }
 
+#if UNITY_EDITOR
         // Helper for the tear-down. This is run from the editor's update loop.
         void DeleteOnNextUpdate () {
-#if UNITY_EDITOR
             EditorApplication.update -= DeleteOnNextUpdate;
             try {
                 Directory.Delete (filePath, recursive : true);
@@ -128,8 +128,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             } catch (IOException) {
                 // ignore -- something else must have deleted this.
             }
-#endif
         }
+#endif
 
     }
 
@@ -151,6 +151,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         /// </summary>
         /// <param name="abcPath"></param>
         private void TestAbcImported (string abcPath) {
+            // AssetDatabase is only available in Editor,
+            // make sure it doesn't run in standalone test
+            // otherwise test will fail.
 #if UNITY_EDITOR
             AssetDatabase.Refresh ();
 #endif
@@ -160,6 +163,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             Assert.That (string.IsNullOrEmpty (absPath), Is.False);
             Assert.That (File.Exists (absPath));
 
+            // AssetDatabase is only available in Editor,
+            // make sure it doesn't run in standalone test
+            // otherwise test will fail.
 #if UNITY_EDITOR
             // now try loading the asset to see if it imported properly
             var obj = AssetDatabase.LoadMainAssetAtPath (abcPath);
