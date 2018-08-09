@@ -132,6 +132,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return null;
         }
 
+        /// <summary>
+        /// Test that the abc file was reimported and can be loaded into Unity through
+        /// the asset database.
+        /// </summary>
+        /// <param name="abcPath"></param>
         public void TestAbcImported (string abcPath) {
             AssetDatabase.Refresh ();
 
@@ -160,14 +165,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             Assert.That (alembicExporter, Is.Not.Null);
             return alembicExporter;
         }
-
-
-
-        /// <summary>
-        /// Test that the abc file was reimported and can be loaded into Unity through
-        /// the asset database.
-        /// </summary>
-        /// <param name="abcPath"></param>
 
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
         string SetupExporter (AlembicExporter exporter = null) {
