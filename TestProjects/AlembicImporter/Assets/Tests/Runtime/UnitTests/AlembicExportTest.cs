@@ -1,15 +1,10 @@
 ﻿using System.Collections;
 using System.IO;
-using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.Formats.Alembic.Timeline;
-using UnityEngine.Formats.Alembic.Util;
-using UnityEngine.Playables;
 using UnityEngine.TestTools;
-using UnityEngine.Timeline;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
     public class AlembicTestBase {
@@ -109,12 +104,21 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             if (string.IsNullOrEmpty (_testDirectory)) {
                 return;
             }
-
+#if UNITY_EDITOR
             // Delete the directory on the next editor update.  Otherwise,
             // prefabs don't get deleted and the directory delete fails.
             EditorApplication.update += DeleteOnNextUpdate;
+#else
+            // not in editor so delete immediately
+            try {
+                Directory.Delete (filePath, recursive : true);
+            } catch (IOException) {
+                // ignore -- something else must have deleted this.
+            }
+#endif
         }
 
+#if UNITY_EDITOR
         // Helper for the tear-down. This is run from the editor's update loop.
         void DeleteOnNextUpdate () {
             EditorApplication.update -= DeleteOnNextUpdate;
@@ -125,6 +129,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
                 // ignore -- something else must have deleted this.
             }
         }
+#endif
 
     }
 
@@ -146,25 +151,40 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         /// </summary>
         /// <param name="abcPath"></param>
         private void TestAbcImported (string abcPath) {
+            // AssetDatabase is only available in Editor,
+            // make sure it doesn't run in standalone test
+            // otherwise test will fail.
+#if UNITY_EDITOR
             AssetDatabase.Refresh ();
+#endif
 
             var absPath = GetAssetsAbsolutePath (abcPath);
 
             Assert.That (string.IsNullOrEmpty (absPath), Is.False);
             Assert.That (File.Exists (absPath));
 
+            // AssetDatabase is only available in Editor,
+            // make sure it doesn't run in standalone test
+            // otherwise test will fail.
+#if UNITY_EDITOR
             // now try loading the asset to see if it imported properly
             var obj = AssetDatabase.LoadMainAssetAtPath (abcPath);
             Assert.That (obj, Is.Not.Null);
             var go = obj as GameObject;
             Assert.That (go, Is.Not.Null);
+#endif
         }
 
         // Loads a given scene
         IEnumerator SceneLoader (string sceneToLoad) {
+#if UNITY_EDITOR
             SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+#else
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+#endif
             yield return null;
         }
+
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
         string SetupExporter (AlembicExporter exporter = null) {
             if (exporter == null) {
@@ -174,6 +194,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             exporter.recorder.settings.OutputPath = GetAssetsAbsolutePath (exportPath);
             return exportPath;
         }
+
         // Begin recording and yield until the recording is done
         IEnumerator RecordAlembic (AlembicExporter exporter = null) {
             if (exporter == null) {
@@ -190,6 +211,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             }
 
         }
+
         // Loads ands runs generic scenes with vanilla recorder settings
         IEnumerator TestScene (string scene) {
             yield return SceneLoader (scene);
@@ -202,6 +224,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // One shot export
         [UnityTest]
         public IEnumerator TestOneShotExport () {
@@ -214,21 +237,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return null;
             TestAbcImported (exportFile);
         }
+
         // Export Cloth
         [UnityTest]
         public IEnumerator TestClothExport () {
             yield return TestScene ("TestCloth");
         }
+
         //Test Export of multiple, varied assets in a scene
         [UnityTest]
         public IEnumerator TestMultipleExport () {
             yield return TestScene ("TestExport");
         }
+
         //CustomCapturer
         [UnityTest]
         public IEnumerator TestCustomCapturer () {
             yield return TestScene ("TestCustomCapturer");
         }
+
         // GUI  Linear
         [UnityTest]
         public IEnumerator TestGUIUniform () {
@@ -242,6 +269,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // GUI  Acyclic
         [UnityTest]
         public IEnumerator TestAcyclic () {
@@ -255,6 +283,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap xform test
         [UnityTest]
         public IEnumerator TestXform () {
@@ -268,6 +297,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return null;
             TestAbcImported (exportFile);
         }
+
         // Other file format test
         [UnityTest]
         public IEnumerator TestHDF5 () {
@@ -281,6 +311,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap handedness test
         [UnityTest]
         public IEnumerator TestSwapHandedness () {
@@ -294,6 +325,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         //Small Scale Recording
         [UnityTest]
         public IEnumerator TestScaleFactor () {
@@ -307,6 +339,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Low Frame Rate
         [UnityTest]
         public IEnumerator TestLowFrameRate () {
@@ -321,6 +354,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // High Frame Rate
         [UnityTest]
         public IEnumerator TestHighFrameRate () {
@@ -335,6 +369,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // Swap Faces
         [UnityTest]
         public IEnumerator TestSwapFaces () {
@@ -352,7 +387,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         [Ignore ("You can't access Alembic Timeline recorder clip settings programatically - so there's functionally no way of customizing the settings via code")]
         [UnityTest]
         public IEnumerator TestCreateAndDelete () {
-            SceneManagement.EditorSceneManager.LoadScene ("TestCreateAndDelete", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            yield return SceneLoader("TestCreateAndDelete");
             yield return new WaitForSeconds (9f);
             // Afaik, there is no programmatical way of manually accessing Alembic recorder clip settings, thus the path has to be set manually
             TestAbcImported ("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
