@@ -35,6 +35,7 @@ Plugin/_build_*
 excons.cache
 
 .vs/
+.vscode/
 .idea
 Library/
 Temp/
