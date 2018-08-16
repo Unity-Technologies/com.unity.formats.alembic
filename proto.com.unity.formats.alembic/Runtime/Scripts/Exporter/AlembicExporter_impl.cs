@@ -101,7 +101,7 @@ namespace UnityEngine.Formats.Alembic.Util
             get { return captureSkinnedMeshRenderer; }
             set { captureSkinnedMeshRenderer = value; }
         }
-        
+
         [SerializeField]
         private bool captureParticleSystem = true;
         internal bool CaptureParticleSystem
