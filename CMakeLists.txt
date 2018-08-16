@@ -7,5 +7,8 @@ add_subdirectory("Source/")
 
 # create package
 install(DIRECTORY proto.com.unity.formats.alembic/ DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
-
-
+install(FILES
+        ${CMAKE_SOURCE_DIR}/CHANGELOG.md
+        ${CMAKE_SOURCE_DIR}/LICENSE.md
+        "${CMAKE_SOURCE_DIR}/Third Party Notices.md"
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
