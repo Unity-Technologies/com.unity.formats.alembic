@@ -126,10 +126,18 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             }
         }
 
-        // Loads a given scene
-        public IEnumerator SceneLoader (string sceneToLoad) {
-            SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
-            yield return null;
+    }
+
+    public class AlembicExportTest : AlembicTestBase {
+
+        private AlembicExporter GetAlembicExporter () {
+            var alembicExporter = Object.FindObjectOfType<AlembicExporter> ();
+            Assert.That (alembicExporter, Is.Not.Null);
+            return alembicExporter;
+        }
+
+        private string GetAssetsAbsolutePath (string relPath) {
+            return Application.dataPath + relPath.Replace ("Assets", "");
         }
 
         /// <summary>
@@ -137,7 +145,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         /// the asset database.
         /// </summary>
         /// <param name="abcPath"></param>
-        public void TestAbcImported (string abcPath) {
+        private void TestAbcImported (string abcPath) {
             AssetDatabase.Refresh ();
 
             var absPath = GetAssetsAbsolutePath (abcPath);
@@ -152,20 +160,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             Assert.That (go, Is.Not.Null);
         }
 
-        public string GetAssetsAbsolutePath (string relPath) {
-            return Application.dataPath + relPath.Replace ("Assets", "");
+        // Loads a given scene
+        IEnumerator SceneLoader (string sceneToLoad) {
+            SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+            yield return null;
         }
-
-    }
-
-    public class AlembicExportTest : AlembicTestBase {
-
-        private AlembicExporter GetAlembicExporter () {
-            var alembicExporter = Object.FindObjectOfType<AlembicExporter> ();
-            Assert.That (alembicExporter, Is.Not.Null);
-            return alembicExporter;
-        }
-
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
         string SetupExporter (AlembicExporter exporter = null) {
             if (exporter == null) {
