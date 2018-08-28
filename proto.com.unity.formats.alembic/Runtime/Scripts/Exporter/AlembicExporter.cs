@@ -8,7 +8,6 @@ using UnityEngine.Formats.Alembic.Util;
 namespace UnityEngine.Formats.Alembic.Exporter
 {
     [ExecuteInEditMode]
-    [AddComponentMenu("UTJ/Alembic/Exporter")]
     internal class AlembicExporter : MonoBehaviour
     {
         #region fields
