@@ -12,5 +12,4 @@ You can control the playback of Alembic using Unity's Animation System bound to 
 
 Now you have a Unity Animation clip containing the animation from the Alembic file.
 
-If you want to use the clip in the GameObject's animation state machine, add it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other Animation clip.
-
+If you want to use the clip in the GameObject's animation state machine, add it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other Animation clip. On import, [an Animation Clip containing Animation Events for each frame on the Alembic file](time_frameAnimEvent.html) is also automatically generated.
