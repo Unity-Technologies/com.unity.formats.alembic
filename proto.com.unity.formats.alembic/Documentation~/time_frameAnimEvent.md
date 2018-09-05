@@ -1,12 +1,16 @@
 # Using Animation Events with Alembic files
 
-When an Alembic file is imported, an Animation Clip that contains Animation Events for every frame of the clip will be automatically generated.
+The Alembic package allows you set up an animation event callback for Alembic clips. For example, you could create a callback to change the Textures on an Alembic Mesh at runtime or instantiate prefabs at a specific frame during playback. 
+
+When importing an Alembic file, Unity automatically generates an animation clip that contains animation events for every frame of the clip.
 
 ![Animation Event Clip](images/abc_animationevents.png)
 
-The naming convention of the Animation Clip is {modelName}_Frames.
+The naming convention of the animation clip is `<modelName>_Frames`.
 
-To receive callbacks from the Alembic Animation Events clip, you simply need to have a script on your Alembic Game Object with the *AbcOnFrameChange(int)* method. The example method below would, for instance, print  the current frame of the Alembic file in the Unity console.
+## Setting up an Animation event
+
+To use this callback, [add a script component](https://docs.unity3d.com/Manual/CreatingAndUsingScripts.html) to your Alembic GameObject with the **AbcOnFrameChange()** method. For example, this method below prints the current frame of the Alembic file to the Unity console:
 
 ```
 void AbcOnFrameChange (int frame) {
@@ -14,8 +18,6 @@ void AbcOnFrameChange (int frame) {
 }
 ```
 
-It is to be noted that the Animation Event clip does not contain any animation curves, only the per-frame Animation Events. As with any other Unity Animation Clip, they can be blended and layered in any [Animator Controller.](https://docs.unity3d.com/Manual/class-AnimatorController.html)
+> ***Note:*** The animation event clip does not contain any animation curves: only the per-frame animation events. As with any other Unity animation clip, you can blend and layer them in any [Animator Controller](https://docs.unity3d.com/Manual/class-AnimatorController.html).
 
-Use cases would include calling a script to change the textures on an Alembic mesh at runtime or instantiating prefabs at a specific frame during playback. Refer to the Unity [Animation Events Documentation](https://docs.unity3d.com/Manual/animeditor-AnimationEvents.html) for further reference on how to use Animation Events.
-
-
+For general information about using animation, see [Using Animation Events](https://docs.unity3d.com/Manual/animeditor-AnimationEvents.html) in the Unity manual.

@@ -1,23 +1,25 @@
-# Play back using an Alembic Animation clip
+# Playback using an Alembic Animation clip
 
-When the Alembic file is imported, the animation will automatically import as an Animation Clip that can be accessed expanding the imported Alembic asset.
+When Unity imports an Alembic file, it automatically imports the animation as an Animation clip. To access the imported clip, expand the imported Alembic Asset.
 
 ![Expanded Alembic Asset](images/abc_expanded_asset.png)
 
-The naming convention of the Animation Clip is {modelName}_Time.
+The naming convention of the Animation Clip is `<modelName>_Time`.
+
+## Playing the clip in Timeline
 
 To play back the clip on the timeline:
 
-1. Add the Alembic object into the scene
+1. Import the Alembic file into the Scene.
 
-2. Add an Animator component to the root of the Alembic GameObject hierarchy (the same object which has the [Alembic Stream Player](ref_StreamPlayer.html) component)
+2. Add an Animator component to the root of the Alembic GameObject hierarchy (the same object which has the [Alembic Stream Player](ref_StreamPlayer.html) component).
 
-3. Drag the Animation Clip from the Alembic asset in the Project tab onto the Timeline
+3. Drag the Animation clip from the Alembic Asset in the Project view onto the Timeline view.
 
-![Drag Time Clip](images/abc_drag_time_clip.png)
+	![Drag Time Clip](images/abc_drag_time_clip.png)
 
-4. Set the Animator driving the Animation Clip to be the one added in step 2
+4. Set the Animator driving the Animation clip to the newly created Animator component.
 
-5. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline window. 
+4. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline view. 
 
-The clip can also be played back using the Animator, by adding it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other clip.
+You can also use the Animator to play back the clip by adding it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other clip.
