@@ -1,5 +1,10 @@
 # Changes in Alembic for Unity
 
+## [1.0.0] - 2018-09-07
+- Added Documentation for imported animation clips
+- Removed UTJ/Alembic/Exporter component menu
+- Normalized all line endings
+
 ## [1.0.0] - 2018-08-21
 - Updated Documentation
 - Contains all changes up until [release 20180413](https://github.com/unity3d-jp/AlembicForUnity/releases/tag/20180413) on github
