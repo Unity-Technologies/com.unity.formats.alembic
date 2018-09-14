@@ -87,7 +87,12 @@ namespace UTJ.Alembic
                 EditorGUI.indentLevel--;
             }
 
+#if UNITY_2018_3_OR_NEWER
+            var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
+            if (prefabStatus == PrefabInstanceStatus.NotAPrefab || prefabStatus == PrefabInstanceStatus.Disconnected)
+#else
             if (PrefabUtility.GetPrefabType(streamPlayer.gameObject) == PrefabType.DisconnectedModelPrefabInstance)
+#endif
             {
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(16);
