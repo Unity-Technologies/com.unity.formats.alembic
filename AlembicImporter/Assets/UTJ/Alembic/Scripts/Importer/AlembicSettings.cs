@@ -8,7 +8,7 @@ namespace UTJ.Alembic
         [SerializeField] public aiNormalsMode normals = aiNormalsMode.CalculateIfMissing;
         [SerializeField] public aiTangentsMode tangents = aiTangentsMode.Calculate;
         [SerializeField] public aiAspectRatioMode cameraAspectRatio = aiAspectRatioMode.CameraAperture;
-        [SerializeField] public float scaleFactor = 0.01f;
+        [SerializeField] public float scaleFactor = 1.0f;
         [SerializeField] public bool swapHandedness = true;
         [SerializeField] public bool flipFaces = false;
         [SerializeField] public bool interpolateSamples = true;
