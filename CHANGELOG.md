@@ -1,5 +1,8 @@
 # Changes in Alembic for Unity
 
+## [1.0.0] - 2018-09-20
+- Fixed AlembicStreamPlayerEditor warning in Unity 2018.3
+
 ## [1.0.0] - 2018-09-07
 - Added Documentation for imported animation clips
 - Removed UTJ/Alembic/Exporter component menu
