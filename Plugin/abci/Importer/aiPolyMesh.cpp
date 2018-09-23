@@ -331,7 +331,7 @@ void aiPolyMesh::updateSummary()
         if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
             summary.has_normals_prop = true;
             summary.has_normals = true;
-            summary.constant_normals = param.isConstant();
+            summary.constant_normals = param.isConstant() && config.normals_mode != aiNormalsMode::AlwaysCompute;
             if (!summary.constant_normals)
                 m_constant = false;
         }
