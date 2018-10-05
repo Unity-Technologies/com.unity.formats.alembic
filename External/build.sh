@@ -32,7 +32,7 @@ if [[ -e ilmbase-build ]]; then
 fi
 mkdir -p ilmbase-build
 pushd ilmbase-build
-cmake ../OpenExr/IlmBase -DCMAKE_BUILD_TYPE=Release \
+cmake ../openexr/IlmBase -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX="${installdir}" \
     -DCMAKE_PREFIX_PATH="${installdir}" \
     -DNAMESPACE_VERSIONING=OFF \
