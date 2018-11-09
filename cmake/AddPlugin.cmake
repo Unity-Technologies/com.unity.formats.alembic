@@ -75,9 +75,9 @@ function(add_plugin name)
                 INCLUDE_DIRECTORIES $<TARGET_PROPERTY:${name},INCLUDE_DIRECTORIES>
         )
     else()
-        # It's simpler on other platforms: we have a SHARED and that's it.
+        # It's simpler on other platforms: we have a MODULE and that's it.
         # Add the ALIAS so that the tests don't have to think about this mess.
-        add_library(${name} SHARED ${arg_SOURCES})
+        add_library(${name} MODULE ${arg_SOURCES})
         add_library(${name}_test_lib ALIAS ${name})
     endif()
 
