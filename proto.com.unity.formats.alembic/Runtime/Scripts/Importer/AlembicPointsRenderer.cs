@@ -63,7 +63,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField] Material[] m_materials;
         [SerializeField] Material m_motionVectorMaterial;
         [SerializeField] ShadowCastingMode m_castShadows = ShadowCastingMode.On;
-        [SerializeField] bool m_applyTransform = false;
+        [SerializeField] bool m_applyTransform = true;
         [SerializeField] bool m_receiveShadows = true;
         [SerializeField] bool m_generateMotionVector = true;
         [SerializeField] float m_pointSize = 0.2f;
