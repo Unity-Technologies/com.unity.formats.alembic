@@ -1,7 +1,8 @@
 # Changes in Alembic for Unity
 
-## [1.0.0] - 2018-10-06
-- Removed preview tag from version
+## [1.0.0-preview.6] - 2018-11-22
+- Apply transform to points renderer by default
+- Don't import point clouds by default
 
 ## [1.0.0-preview.4] - 2018-10-05
 - Added missing Linux dso
