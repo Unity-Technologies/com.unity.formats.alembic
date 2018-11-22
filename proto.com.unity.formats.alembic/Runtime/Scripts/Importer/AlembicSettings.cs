@@ -127,7 +127,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool importPoints = true;
+        private bool importPoints = false;
         public bool ImportPoints
         {
             get { return importPoints; }
