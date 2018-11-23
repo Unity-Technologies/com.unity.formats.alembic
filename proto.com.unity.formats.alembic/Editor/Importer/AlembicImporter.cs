@@ -146,12 +146,23 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             get { return splittingMeshNames; }
         }
+        [SerializeField] bool firstImport = true;
 
         public static string MakeShortAssetPath(string assetPath)
         {
             return Regex.Replace(assetPath, "^Assets", "");
         }
 
+        void OnValidate()
+        {
+            if (!firstImport)
+            {
+                if (startTime < abcStartTime)
+                    startTime = abcStartTime;
+                if (endTime > abcEndTime)
+                    endTime = abcStartTime;
+            }
+        }
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -183,9 +194,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 abcStream.AbcLoad(true);
 
-                abcStream.GetTimeRange(ref startTime, ref endTime);
-                streamDescriptor.abcStartTime = abcStartTime = StartTime;
-                streamDescriptor.abcEndTime = abcEndTime = EndTime;
+                abcStream.GetTimeRange(ref abcStartTime, ref abcEndTime);
+                if (firstImport)
+                {
+                    startTime = abcStartTime;
+                    endTime = abcEndTime;
+                }
+                streamDescriptor.abcStartTime = abcStartTime;
+                streamDescriptor.abcEndTime = abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.StreamDescriptor = streamDescriptor;
@@ -204,7 +220,9 @@ namespace UnityEditor.Formats.Alembic.Importer
 #else
                 ctx.SetMainAsset(go.name, go);
 #endif
-            }  
+            }
+
+            firstImport = false;
         }
 
         class Subassets

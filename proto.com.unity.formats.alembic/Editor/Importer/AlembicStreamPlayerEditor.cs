@@ -11,7 +11,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         bool m_foldMisc = false;
 
         public override void OnInspectorGUI()
-        {   
+        {
+            EditorGUI.BeginDisabledGroup((target.hideFlags & HideFlags.NotEditable) != HideFlags.None);
+
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
             SerializedProperty startTime = serializedObject.FindProperty("startTime");
             SerializedProperty endTime = serializedObject.FindProperty("endTime");
@@ -103,6 +105,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
                 EditorGUILayout.EndHorizontal();
             }
+
+            EditorGUI.EndDisabledGroup();
 
             this.serializedObject.ApplyModifiedProperties();
         }
