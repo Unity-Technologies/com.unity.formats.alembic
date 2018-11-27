@@ -57,6 +57,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
+        [Tooltip("Assume only GameObjects with a SkinnedMeshRenderer component change over time.")]
         private bool assumeNonSkinnedMeshesAreConstant = true;
         public bool AssumeNonSkinnedMeshesAreConstant
         {
