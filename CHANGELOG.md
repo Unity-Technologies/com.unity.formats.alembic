@@ -1,5 +1,12 @@
 # Changes in Alembic for Unity
 
+## [1.0.0-preview.7] - 2018-11-28
+- Fixed Windows plugin platform settings
+- Apply Transform On Points is now ON by default to be consistent with mesh behaviour
+- Point clouds are no longer imported by default
+- Bug fix: changes to time range were not persisted
+- Updated label of assumeNonSkinnedMeshRendersAreConstant to "Static MeshRenderers" to prevent cropping at default width
+
 ## [1.0.0-preview.6] - 2018-11-22
 - Apply transform to points renderer by default
 - Don't import point clouds by default
