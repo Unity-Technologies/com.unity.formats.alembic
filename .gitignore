@@ -33,6 +33,7 @@ Plugin/external/libs
 Plugin/_build_*
 *.dblite
 excons.cache
+.DS_Store
 
 .vs/
 .idea
