@@ -95,7 +95,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                     dirty = true;
                 EditorGUI.indentLevel--;
             }
-            EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "assumeNonSkinnedMeshesAreConstant"));
+            EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "assumeNonSkinnedMeshesAreConstant"), new GUIContent("Static MeshRenderers"));
             GUILayout.Space(5);
 
             m_foldCaptureComponents = EditorGUILayout.Foldout(m_foldCaptureComponents, "Capture Components");
