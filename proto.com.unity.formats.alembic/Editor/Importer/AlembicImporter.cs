@@ -26,19 +26,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             var streamingAssetPath = AlembicImporter.MakeShortAssetPath(assetPath);
             AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
 
-            try
-            {
-                var fullStreamingAssetPath = Application.streamingAssetsPath + streamingAssetPath;
-                File.SetAttributes(fullStreamingAssetPath, FileAttributes.Normal);
-                File.Delete(fullStreamingAssetPath);
-                File.SetAttributes(fullStreamingAssetPath + ".meta", FileAttributes.Normal);
-                File.Delete(fullStreamingAssetPath + ".meta");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning(e);
-            }
-
             return AssetDeleteResult.DidNotDelete;
         }
 
@@ -55,38 +42,10 @@ namespace UnityEditor.Formats.Alembic.Importer
             var streamSrcPath = AlembicImporter.MakeShortAssetPath(from);
             AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
             AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
-
-            var dstPath = Application.streamingAssetsPath + streamDstPath;
-            var srcPath = Application.streamingAssetsPath + streamSrcPath;
-
-            try
-            {
-                var directoryPath = Path.GetDirectoryName(dstPath);
-                if (File.Exists(dstPath))
-                {
-                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
-                    File.Delete(dstPath);
-                }
-                else if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-                if (File.Exists(dstPath))
-                    File.SetAttributes(dstPath, FileAttributes.Normal);
-                File.Move(srcPath, dstPath);
-                if (File.Exists(dstPath + ".meta"))
-                {
-                    File.SetAttributes(dstPath + ".meta", FileAttributes.Normal);
-                    File.Move(srcPath + ".meta", dstPath + ".meta");
-                }
-
-                AssetDatabase.Refresh(ImportAssetOptions.Default);
-                AlembicStream.ReconnectStreamsWithPath(streamDstPath);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning(e);
-            }
+            
+            AssetDatabase.Refresh(ImportAssetOptions.Default);
+    		AlembicStream.ReconnectStreamsWithPath(streamDstPath);
+ 
             return AssetMoveResult.DidNotMove;
         } 
     }
@@ -173,15 +132,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var shortAssetPath = MakeShortAssetPath(ctx.assetPath);
             AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
-            var sourcePath = Application.dataPath + shortAssetPath;
-            var destPath = Application.streamingAssetsPath + shortAssetPath;
-            var directoryPath = Path.GetDirectoryName(destPath);
-            if (!Directory.Exists(directoryPath))
-                Directory.CreateDirectory(directoryPath);
-            if (File.Exists(destPath))
-                File.SetAttributes(destPath, FileAttributes.Normal);
-            File.Copy(sourcePath, destPath ,true);
 
+            var destPath = AlembicStream.basePath + shortAssetPath;
             var fileName = Path.GetFileNameWithoutExtension(destPath);
             var go = new GameObject(fileName);
             

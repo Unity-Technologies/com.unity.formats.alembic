@@ -11,10 +11,14 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal sealed class AlembicStream : IDisposable
     {
         static List<AlembicStream> s_streams = new List<AlembicStream>();
+        public static string basePath
+        {
+            get { return Application.dataPath; }
+        }
 
         public static void DisconnectStreamsWithPath(string path)
         {
-            var fullPath = Application.streamingAssetsPath + path;
+            var fullPath = basePath + path;
             aiContext.DestroyByPath(fullPath);
             s_streams.ForEach(s => {
                 if (s.m_streamDesc.PathToAbc == path)
@@ -139,7 +143,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
-            m_loaded = m_context.Load(Application.streamingAssetsPath + m_streamDesc.PathToAbc);
+            m_loaded = m_context.Load(basePath + m_streamDesc.PathToAbc);
 
             if (m_loaded)
             {
@@ -148,7 +152,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + Application.streamingAssetsPath + m_streamDesc.PathToAbc);
+                Debug.LogError("failed to load alembic at " + basePath + m_streamDesc.PathToAbc);
             }
         }
 
