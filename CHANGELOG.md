@@ -3,6 +3,8 @@
 ## [1.0.0-preview.8] - 2018-12-19
 ### Changes
 - Alembic files are No longer copied to the StreamingAssets folder
+- renamed Linux dso to abci.so for consistency
+- reordered DllImport path selection so Editor locations are always found first
 
 ### Known Issues
 - If you rename the prefab once instantiated, all scene references are lost (move works)
