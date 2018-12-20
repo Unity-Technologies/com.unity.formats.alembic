@@ -1,5 +1,12 @@
 # Changes in Alembic for Unity
 
+## [1.0.0-preview.8] - 2018-12-19
+### Changes
+- Alembic files are No longer copied to the StreamingAssets folder
+
+### Known Issues
+- If you rename the prefab once instantiated, all scene references are lost (move works)
+
 ## [1.0.0-preview.7] - 2018-11-28
 ### Changes
 - Fixed Windows plugin platform settings
