@@ -79,6 +79,7 @@ function(add_plugin name)
         # Add the ALIAS so that the tests don't have to think about this mess.
         add_library(${name} MODULE ${arg_SOURCES})
         add_library(${name}_test_lib ALIAS ${name})
+        set_target_properties(${name} PROPERTIES PREFIX "")
     endif()
 
     # Hide symbols so they can be stripped.
