@@ -122,7 +122,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
             EndRecording();
         }
 
-        private void OnDestroy()
+        void OnDestroy()
         {
             if(recorder != null) recorder.Dispose();
         }
