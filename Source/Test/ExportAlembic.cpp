@@ -4,6 +4,30 @@
 #include "Test.h"
 
 
+TestCase(ExportAlembic_Empty)
+{
+    aeConfig config;
+    config.frame_rate = 1.0f;
+    config.scale_factor = 100.0f;
+
+    auto ctx = aeCreateContext();
+    aeSetConfig(ctx, &config);
+    aeOpenArchive(ctx, "Empty.abc");
+
+    auto top = aeGetTopObject(ctx);
+    auto xf = aeNewXform(top, "UVAndColorAnimation");
+    {
+        //aeMarkFrameBegin(ctx);
+
+        //aeXformData xfd;
+        //xfd.translation.x = 0.0f;
+        //aeXformWriteSample(xf, &xfd);
+
+        //aeMarkFrameEnd(ctx);
+    }
+    aeDestroyContext(ctx);
+}
+
 TestCase(ExportAlembic_UVAndColorAnimation)
 {
     aeConfig config;

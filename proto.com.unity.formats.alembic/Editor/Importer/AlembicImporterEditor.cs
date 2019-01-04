@@ -24,6 +24,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     new GUIContent("Scale Factor", "How much to scale the models compared to what is in the source file."));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "swapHandedness"),
                     new GUIContent("Swap Handedness", "Swap X coordinate"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "serializeDynamicMeshes"),
+                    new GUIContent("Serialize Dynamic Meshes", "Serialize mesh data in scene file. This makes scene files very large. Usually not needed."));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "interpolateSamples"),
                     new GUIContent("Interpolate Samples", "Interpolate transforms and vertices (if topology is constant)."));
                 EditorGUILayout.Separator();
@@ -91,7 +93,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                 DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(aiNormalsMode)));
                 DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(aiTangentsMode)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "flipFaces"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "turnQuadEdges"));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
