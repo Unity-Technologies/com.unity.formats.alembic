@@ -63,14 +63,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool turnQuadEdges = false;
-        public bool TurnQuadEdges
-        {
-            get { return turnQuadEdges; }
-            set { turnQuadEdges = value; }
-        }
-
-        [SerializeField]
         private bool interpolateSamples = true;
         public bool InterpolateSamples
         {
@@ -132,6 +124,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             get { return importPoints; }
             set { importPoints = value; }
+        }
+
+        [SerializeField]
+        private bool serializeDynamicMeshes = false;
+        public bool SerializeDynamicMeshes
+        {
+            get { return serializeDynamicMeshes; }
+            set { serializeDynamicMeshes = value; }
         }
     }
 }

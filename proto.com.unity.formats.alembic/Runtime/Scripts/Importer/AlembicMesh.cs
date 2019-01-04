@@ -336,7 +336,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!hasMesh)
             {
-                mesh = new Mesh {name = "dyn: " + go.name};
+                mesh = new Mesh { name = "dyn: " + go.name };
 #if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = IndexFormat.UInt32;
 #endif
@@ -360,6 +360,14 @@ namespace UnityEngine.Formats.Alembic.Importer
                 meshFilter.sharedMesh = mesh;
                 mesh.name = "dyn: " + go.name;
             }
+
+            // update serialize flag
+            int hideFlags = (int)mesh.hideFlags;
+            if (abcTreeNode.stream.streamDescriptor.Settings.SerializeDynamicMeshes)
+                hideFlags &= ~(int)HideFlags.DontSave;
+            else
+                hideFlags |= (int)HideFlags.DontSave;
+            mesh.hideFlags = (HideFlags)hideFlags;
 
             return mesh;
         }

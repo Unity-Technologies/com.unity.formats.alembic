@@ -386,8 +386,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern double aiTimeSamplingGetTime(IntPtr self, int index);
         [DllImport(Abci.Lib)] public static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
 
+
+        [DllImport(Abci.Lib)] public static extern aiContext aiObjectGetContext(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern int aiObjectGetNumChildren(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern aiObject aiObjectGetChild(IntPtr obj, int i);
+        [DllImport(Abci.Lib)] public static extern aiObject aiObjectGetParent(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetName(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetFullName(IntPtr obj);

@@ -89,7 +89,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool swapHandedness { get; set; }
         public Bool flipFaces { get; set; }
         public Bool interpolateSamples { get; set; }
-        public Bool turnQuadEdges { get; set; }
         public Bool asyncLoad { get; set; }
         public Bool importPointPolygon { get; set; }
         public Bool importLinePolygon { get; set; }
@@ -110,7 +109,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
             swapHandedness = true;
             flipFaces = false;
             interpolateSamples = true;
-            turnQuadEdges = false;
             asyncLoad = true;
             importPointPolygon = true;
             importLinePolygon = true;
@@ -128,6 +126,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
     internal struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance { get; set; }
+        public Bool hasCounts { get; set; }
+        public Bool hasIndsices { get; set; }
+        public Bool hasPoints { get; set; }
         public Bool hasVelocities { get; set; }
         public Bool hasNormals { get; set; }
         public Bool hasTangents { get; set; }
@@ -351,8 +352,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
         public static bool ToBool(aiObject v) { return v; }
 
+        public aiContext context { get { return NativeMethods.aiObjectGetContext(self); } }
         public string name { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetName(self)); } }
         public string fullname { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetFullName(self)); } }
+        public aiObject parent { get { return NativeMethods.aiObjectGetParent(self); } }
 
         public void SetEnabled(bool value) { NativeMethods.aiObjectSetEnabled(self, value); }
         public int childCount { get { return NativeMethods.aiObjectGetNumChildren(self); } }
