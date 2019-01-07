@@ -377,7 +377,7 @@
 
             //Custom object velocity pass for Alembic
             //--------------------------------
-            #include "AlembicShaderPassVelocity.hlsl"
+            #include "LitAlembicMotionVectors.hlsl"
             //--------------------------------
 
             ENDHLSL
