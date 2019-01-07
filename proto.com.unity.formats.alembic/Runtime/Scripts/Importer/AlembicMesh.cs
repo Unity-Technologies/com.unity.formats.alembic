@@ -360,7 +360,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 mesh.indexFormat = IndexFormat.UInt32;
 #endif
                 mesh.MarkDynamic();
-                mesh.hideFlags |= HideFlags.DontSave;
 
                 if (meshFilter == null)
                     meshFilter = go.AddComponent<MeshFilter>();

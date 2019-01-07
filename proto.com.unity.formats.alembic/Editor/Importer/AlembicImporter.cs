@@ -144,7 +144,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
-                abcStream.AbcLoad(true);
+                abcStream.AbcLoad(true, true);
 
                 abcStream.GetTimeRange(ref abcStartTime, ref abcEndTime);
                 if (firstImport)
