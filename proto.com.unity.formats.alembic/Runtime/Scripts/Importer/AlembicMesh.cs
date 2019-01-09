@@ -46,6 +46,17 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if(uv0 != null) uv0.Dispose();
                 if(uv1 != null) uv1.Dispose();
                 if(colors != null) colors.Dispose();
+                if ((mesh.hideFlags & HideFlags.DontSave) != 0)
+                {
+#if UNITY_EDITOR
+                Object.DestroyImmediate(mesh);
+#else
+                Object.Destroy(mesh);
+#endif
+                mesh = null;
+                    
+                }
+
             }
         }
 
@@ -66,6 +77,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         public aiMeshSummary summary { get { return m_summary; } }
         public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
 
+        protected override void Dispose(bool v)
+        {
+            base.Dispose(v);
+            foreach (var split in m_splits)
+            {
+                split.Dispose();
+            }
+        }
 
         void UpdateSplits(int numSplits)
         {
