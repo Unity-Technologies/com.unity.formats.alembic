@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Timeline;
 using UnityEngine.Formats.Alembic.Util;
@@ -80,9 +81,37 @@ namespace UnityEditor.Formats.Alembic.Timeline
             {
                 EditorGUI.indentLevel++;
                 EditorGUI.BeginChangeCheck();
-                t.targetBranch = EditorGUILayout.ObjectField("Target", t.targetBranch, typeof(GameObject), true) as GameObject;
+                var pathTag = so.FindProperty("m_targetBranchTag");
+                var tags = UnityEditorInternal.InternalEditorUtility.tags;
+                var idx = Array.IndexOf(tags, pathTag.stringValue);
+                idx = EditorGUILayout.Popup("Target Tag",idx, tags);
+
+
                 if (EditorGUI.EndChangeCheck())
+                {
                     dirty = true;
+                    pathTag.stringValue = tags[idx];
+                }
+
+                using (new EditorGUI.DisabledScope(true))
+                {
+                    var gos = string.IsNullOrEmpty(pathTag.stringValue)
+                        ? new GameObject[]{}
+                         : GameObject.FindGameObjectsWithTag(pathTag.stringValue);
+
+                    switch (gos.Length)
+                    {
+                        case 1:
+                            EditorGUILayout.ObjectField("Target", gos[0], typeof(GameObject), true);
+                            break;
+                        case 0:
+                            EditorGUILayout.ObjectField("Target", null, typeof(GameObject), true);
+                            break;
+                        default:
+                            EditorGUILayout.HelpBox("Multiple GameObjects found matching tag. Please use a single GameObject per tag",MessageType.Warning);
+                            break;
+                    }
+                }
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "assumeNonSkinnedMeshesAreConstant"), new GUIContent("Static MeshRenderers"));
