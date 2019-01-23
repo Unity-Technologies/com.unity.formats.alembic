@@ -1,13 +1,17 @@
 {
-    "name": "Unity.Formats.Alembic.Tests",
-  "references": [
-    "Unity.Formats.Alembic.Runtime"
-  ],
+    "name": "Unity.Formats.Alembic.UnitTests",
+    "references": [
+        "Unity.Formats.Alembic.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
     "includePlatforms": [
         "Editor",
         "LinuxStandalone64",
         "macOSStandalone",
         "WindowsStandalone64"
     ],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
 }
