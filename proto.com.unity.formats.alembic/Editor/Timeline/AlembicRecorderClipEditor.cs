@@ -84,7 +84,7 @@ namespace UnityEditor.Formats.Alembic.Timeline
                 var pathTag = so.FindProperty("m_targetBranchTag");
                 var tags = UnityEditorInternal.InternalEditorUtility.tags;
                 var idx = Array.IndexOf(tags, pathTag.stringValue);
-                idx = EditorGUILayout.Popup("Target Tag",idx, tags);
+                idx = EditorGUILayout.Popup("Target Tag", idx, tags);
 
 
                 if (EditorGUI.EndChangeCheck())
@@ -108,7 +108,7 @@ namespace UnityEditor.Formats.Alembic.Timeline
                             EditorGUILayout.ObjectField("Target", null, typeof(GameObject), true);
                             break;
                         default:
-                            EditorGUILayout.HelpBox("Multiple GameObjects found matching tag. Please use a single GameObject per tag",MessageType.Warning);
+                            EditorGUILayout.HelpBox("Multiple GameObjects found matching tag. Please use a single GameObject per tag", MessageType.Warning);
                             break;
                     }
                 }

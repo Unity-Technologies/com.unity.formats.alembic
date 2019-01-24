@@ -53,7 +53,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
             var streamComponent = streamPlayer.Resolve(director);
             if (streamComponent != null)
             {
-                driver.AddFromName<AlembicStreamPlayer>(streamComponent.gameObject,"currentTime");
+                driver.AddFromName<AlembicStreamPlayer>(streamComponent.gameObject, "currentTime");
             }
         }
     }
