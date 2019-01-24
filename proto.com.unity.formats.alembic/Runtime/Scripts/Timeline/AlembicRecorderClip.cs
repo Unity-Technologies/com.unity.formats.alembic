@@ -1,5 +1,3 @@
-using System;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
@@ -11,85 +9,33 @@ namespace UnityEngine.Formats.Alembic.Timeline
     {
         [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
         [SerializeField] bool m_ignoreFirstFrame = true;
-        [SerializeField] string m_targetBranchPath = "";
+        [SerializeField] string m_targetBranchTag = "";
 
-        public AlembicRecorderSettings settings { get { return m_settings; } }
-        public GameObject targetBranch
+        public AlembicRecorderSettings settings
         {
-            get { return FindObjectByPath(m_targetBranchPath); }
-            set { m_targetBranchPath = GetPath(value); }
+            get { return m_settings; }
         }
 
-        public ClipCaps clipCaps { get { return ClipCaps.None; } }
-
-        public static GameObject FindObjectByPath(string path)
+        public ClipCaps clipCaps
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return null;
-            }
-
-            var names = path.Split('/');
-            Transform ret = null;
-            foreach (var name in names)
-            {
-                if (name.Length == 0) { continue; }
-                ret = FindObjectByName(ret, name);
-                if (ret == null) { break; }
-            }
-            return ret != null ? ret.gameObject : null;
+            get { return ClipCaps.None; }
         }
-        public static Transform FindObjectByName(Transform parent, string name)
-        {
-            Transform ret = null;
-            if (parent == null)
-            {
-                var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
-                foreach (var go in roots)
-                {
-                    if (go.name == name)
-                    {
-                        ret = go.GetComponent<Transform>();
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                ret = parent.Find(name);
-            }
-            return ret;
-        }
-
-        public static string GetPath(Transform trans)
-        {
-            if (trans == null)
-                return "";
-            string ret = "/" + trans.name;
-            if (trans.parent != null)
-                ret = GetPath(trans.parent) + ret;
-            return ret;
-        }
-        public static string GetPath(GameObject go)
-        {
-            return go == null ? "" : GetPath(go.transform);
-        }
-
-
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
-            m_settings.TargetBranch = targetBranch;
+            var gos = new GameObject[] { };
+            if (!string.IsNullOrEmpty(m_targetBranchTag))
+            {
+                gos = GameObject.FindGameObjectsWithTag(m_targetBranchTag);
+            }
 
             var ret = ScriptPlayable<AlembicRecorderBehaviour>.Create(graph);
             var behaviour = ret.GetBehaviour();
             behaviour.settings = m_settings;
             behaviour.ignoreFirstFrame = m_ignoreFirstFrame;
-            return ret;
-        }
+            m_settings.TargetBranch = gos.Length == 1 ? gos[0] : null;
 
-        public virtual void OnDestroy()
-        {
+            return ret;
         }
     }
 }
