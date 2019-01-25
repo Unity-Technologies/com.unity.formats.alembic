@@ -1,17 +1,25 @@
 ﻿using System.Collections;
 using System.IO;
-using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.Formats.Alembic.Timeline;
-using UnityEngine.Formats.Alembic.Util;
-using UnityEngine.Playables;
 using UnityEngine.TestTools;
-using UnityEngine.Timeline;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
+    public class BuildSetup : IPrebuildSetup
+    {
+        public void Setup()
+        {
+            var fullPath = Path.GetFullPath("Assets/");
+            var scenes = Directory.GetFiles(fullPath, "*.unity", SearchOption.AllDirectories);
+            EditorBuildSettings.scenes = scenes.Select(x => new EditorBuildSettingsScene(x, true)).ToArray();
+        }
+    }
+
+
     public class AlembicTestBase {
         // --- Helpers for creating temporary paths -----
         private string _testDirectory;
@@ -128,8 +136,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
 
     }
 
-    public class AlembicExportTest : AlembicTestBase {
-
+    [TestFixture]
+    [PrebuildSetup(typeof(BuildSetup))]
+    public class AlembicExportTest : AlembicTestBase{
         private AlembicExporter GetAlembicExporter () {
             var alembicExporter = Object.FindObjectOfType<AlembicExporter> ();
             Assert.That (alembicExporter, Is.Not.Null);
@@ -202,6 +211,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
         }
+
         // One shot export
         [UnityTest]
         public IEnumerator TestOneShotExport () {
