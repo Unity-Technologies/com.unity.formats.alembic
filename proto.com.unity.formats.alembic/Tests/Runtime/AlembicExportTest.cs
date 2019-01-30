@@ -7,19 +7,9 @@ using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.TestTools;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
-    public class BuildSetup : IPrebuildSetup
-    {
-        public void Setup()
-        {
-            var fullPath = Path.GetFullPath("Assets/");
-            var scenes = Directory.GetFiles(fullPath, "*.unity", SearchOption.AllDirectories);
-            EditorBuildSettings.scenes = scenes.Select(x => new EditorBuildSettingsScene(x, true)).ToArray();
-        }
-    }
-
-
     public class AlembicTestBase {
         // --- Helpers for creating temporary paths -----
         private string _testDirectory;
@@ -137,7 +127,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
     }
 
     [TestFixture]
-    [PrebuildSetup(typeof(BuildSetup))]
     public class AlembicExportTest : AlembicTestBase{
         private AlembicExporter GetAlembicExporter () {
             var alembicExporter = Object.FindObjectOfType<AlembicExporter> ();
@@ -170,9 +159,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         }
 
         // Loads a given scene
-        IEnumerator SceneLoader (string sceneToLoad) {
-            SceneManagement.EditorSceneManager.LoadScene (sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
-            yield return null;
+        IEnumerator SceneLoader (string sceneToLoad)
+        {
+            var scene = SceneManagement.EditorSceneManager.LoadSceneInPlayMode(sceneToLoad, new LoadSceneParameters(LoadSceneMode.Single));
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
         }
         // Sets a random, temporary filepath for a given Alembic exporter in the scene.
         string SetupExporter (AlembicExporter exporter = null) {
@@ -216,7 +207,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         [UnityTest]
         public IEnumerator TestOneShotExport () {
 
-            yield return SceneLoader ("TestCloth");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -227,22 +218,22 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Export Cloth
         [UnityTest]
         public IEnumerator TestClothExport () {
-            yield return TestScene ("TestCloth");
+            yield return TestScene ("Assets/Tests/Runtime/TestCloth.unity");
         }
         //Test Export of multiple, varied assets in a scene
         [UnityTest]
         public IEnumerator TestMultipleExport () {
-            yield return TestScene ("TestExport");
+            yield return TestScene ("Assets/Tests/Runtime/TestExport.unity");
         }
         //CustomCapturer
         [UnityTest]
         public IEnumerator TestCustomCapturer () {
-            yield return TestScene ("TestCustomCapturer");
+            yield return TestScene ("Assets/Tests/Runtime/TestCustomCapturer.unity");
         }
         // GUI  Linear
         [UnityTest]
         public IEnumerator TestGUIUniform () {
-            yield return SceneLoader ("TestGUI");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -255,7 +246,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // GUI  Acyclic
         [UnityTest]
         public IEnumerator TestAcyclic () {
-            yield return SceneLoader ("TestGUI");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -268,7 +259,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap xform test
         [UnityTest]
         public IEnumerator TestXform () {
-            yield return SceneLoader ("TestCloth");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -281,7 +272,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Other file format test
         [UnityTest]
         public IEnumerator TestHDF5 () {
-            yield return SceneLoader ("TestCloth");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -294,7 +285,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap handedness test
         [UnityTest]
         public IEnumerator TestSwapHandedness () {
-            yield return SceneLoader ("TestExport");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestExport.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -307,7 +298,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         //Small Scale Recording
         [UnityTest]
         public IEnumerator TestScaleFactor () {
-            yield return SceneLoader ("TestCustomCapturer");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestCustomCapturer.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -320,7 +311,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Low Frame Rate
         [UnityTest]
         public IEnumerator TestLowFrameRate () {
-            yield return SceneLoader ("TestGUI");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -334,7 +325,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // High Frame Rate
         [UnityTest]
         public IEnumerator TestHighFrameRate () {
-            yield return SceneLoader ("TestGUI");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -348,7 +339,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap Faces
         [UnityTest]
         public IEnumerator TestSwapFaces () {
-            yield return SceneLoader ("TestCustomCapturer");
+            yield return SceneLoader ("Assets/Tests/Runtime/TestCustomCapturer.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -357,16 +348,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             exporter.OneShot ();
             yield return null;
             TestAbcImported (exportFile);
-        }
-
-        [Ignore ("You can't access Alembic Timeline recorder clip settings programatically - so there's functionally no way of customizing the settings via code")]
-        [UnityTest]
-        public IEnumerator TestCreateAndDelete () {
-            SceneManagement.EditorSceneManager.LoadScene ("TestCreateAndDelete", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            yield return new WaitForSeconds (9f);
-            // Afaik, there is no programmatical way of manually accessing Alembic recorder clip settings, thus the path has to be set manually
-            TestAbcImported ("Assets/UnitTests/RecorderUnitTests/Recorder.abc");
-            File.Delete (Application.dataPath + "/UnitTests/RecorderUnitTests/Recorder.abc");
         }
     }
 }
