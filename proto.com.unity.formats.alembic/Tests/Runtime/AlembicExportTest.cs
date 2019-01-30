@@ -197,7 +197,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exportFile = SetupExporter (exporter);
 
             // set test specific exporter settings here
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
@@ -238,7 +238,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exportFile = SetupExporter (exporter);
 
             exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
@@ -251,7 +251,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exportFile = SetupExporter (exporter);
 
             exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 2;
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
@@ -276,7 +276,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
             exporter.recorder.settings.conf.ArchiveType = (aeArchiveType) aeArchiveType.HDF5;
 
             yield return RecordAlembic (exporter);
@@ -290,7 +290,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exportFile = SetupExporter (exporter);
 
             exporter.recorder.settings.conf.SwapHandedness = false;
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
@@ -302,7 +302,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
-            exporter.maxCaptureFrame = 100;
+            exporter.maxCaptureFrame = 10;
             exporter.recorder.settings.conf.ScaleFactor = 1;
 
             yield return RecordAlembic (exporter);
@@ -317,7 +317,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
 
             exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
             exporter.recorder.settings.conf.FrameRate = 12;
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
@@ -331,7 +331,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
 
             exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType) 0;
             exporter.recorder.settings.conf.FrameRate = 120;
-            exporter.maxCaptureFrame = 150;
+            exporter.maxCaptureFrame = 15;
 
             yield return RecordAlembic (exporter);
             TestAbcImported (exportFile);
