@@ -2,6 +2,11 @@
 
 ## [1.0.0-preview.10] - 2019-01-15
 ### Changes
+- Removed broken recording of particles
+- Moved testing code into the package
+
+## [1.0.0-preview.10] - 2019-01-15
+### Changes
 - AlembicShotClip registers the time of the AlembicStreamPlayer as driven so timeline changes to the scene are not persistent
 - AlembicRecorderClip uses tags to target GameObject root when recording a subset of
   the scene. If there are multiple GameObjects that match this Tag, a warning appears
