@@ -207,7 +207,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         [UnityTest]
         public IEnumerator TestOneShotExport () {
 
-            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -218,22 +218,22 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Export Cloth
         [UnityTest]
         public IEnumerator TestClothExport () {
-            yield return TestScene ("Assets/Tests/Runtime/TestCloth.unity");
+            yield return TestScene ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCloth.unity");
         }
         //Test Export of multiple, varied assets in a scene
         [UnityTest]
         public IEnumerator TestMultipleExport () {
-            yield return TestScene ("Assets/Tests/Runtime/TestExport.unity");
+            yield return TestScene ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestExport.unity");
         }
         //CustomCapturer
         [UnityTest]
         public IEnumerator TestCustomCapturer () {
-            yield return TestScene ("Assets/Tests/Runtime/TestCustomCapturer.unity");
+            yield return TestScene ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCustomCapturer.unity");
         }
         // GUI  Linear
         [UnityTest]
         public IEnumerator TestGUIUniform () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -246,7 +246,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // GUI  Acyclic
         [UnityTest]
         public IEnumerator TestAcyclic () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -259,7 +259,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap xform test
         [UnityTest]
         public IEnumerator TestXform () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -272,7 +272,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Other file format test
         [UnityTest]
         public IEnumerator TestHDF5 () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestCloth.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCloth.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -285,7 +285,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap handedness test
         [UnityTest]
         public IEnumerator TestSwapHandedness () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestExport.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestExport.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -298,7 +298,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         //Small Scale Recording
         [UnityTest]
         public IEnumerator TestScaleFactor () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestCustomCapturer.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCustomCapturer.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -311,7 +311,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Low Frame Rate
         [UnityTest]
         public IEnumerator TestLowFrameRate () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -325,7 +325,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // High Frame Rate
         [UnityTest]
         public IEnumerator TestHighFrameRate () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestGUI.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestGUI.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
@@ -339,7 +339,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests {
         // Swap Faces
         [UnityTest]
         public IEnumerator TestSwapFaces () {
-            yield return SceneLoader ("Assets/Tests/Runtime/TestCustomCapturer.unity");
+            yield return SceneLoader ("Packages/com.unity.formats.alembic/Tests/Runtime/Data/TestCustomCapturer.unity");
             var exporter = GetAlembicExporter ();
             var exportFile = SetupExporter (exporter);
 
