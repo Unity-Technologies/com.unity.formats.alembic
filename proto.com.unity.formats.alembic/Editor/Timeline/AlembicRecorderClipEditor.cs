@@ -123,7 +123,7 @@ namespace UnityEditor.Formats.Alembic.Timeline
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureMeshRenderer"), new GUIContent("MeshRenderer"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureSkinnedMeshRenderer"), new GUIContent("SkinnedMeshRenderer"));
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureParticleSystem"), new GUIContent("ParticleSystem"));
+                //EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureParticleSystem"), new GUIContent("ParticleSystem"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureCamera"), new GUIContent("Camera"));
                 EditorGUI.indentLevel--;
             }
