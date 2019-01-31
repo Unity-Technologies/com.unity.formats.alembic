@@ -19,6 +19,6 @@
         "revision": "@PACKAGE_REVISION@",
         "url": "ssh://git@github.com/unity3d-jp/AlembicForUnity.git"
     }, 
-    "unity": "2018.1",
+    "unity": "2018.3",
     "version": "@PACKAGE_VERSION@"
 }
