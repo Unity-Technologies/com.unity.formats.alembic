@@ -1,8 +1,9 @@
 # Changes in Alembic for Unity
 
-## [1.0.0-preview.17] - 2019-01-15
+## [1.0.0-preview.19] - 2019-01-15
 ### Changes
-Temporary changelog to fix internal validation. This will become 1.0.0
+- Removed Timeline Alembic recorder
+- General cleanup
 
 ## [1.0.0-preview.13] - 2019-01-15
 ### Changes
