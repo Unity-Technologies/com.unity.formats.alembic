@@ -20,5 +20,6 @@
         "url": "ssh://git@github.com/unity3d-jp/AlembicForUnity.git"
     }, 
     "unity": "2018.3",
+    "unityRelease": "4f1",
     "version": "@PACKAGE_VERSION@"
 }
