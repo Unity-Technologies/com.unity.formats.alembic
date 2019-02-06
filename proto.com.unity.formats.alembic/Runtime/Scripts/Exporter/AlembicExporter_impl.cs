@@ -82,7 +82,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool captureParticleSystem = true;
+        private bool captureParticleSystem = false;
         public bool CaptureParticleSystem
         {
             get { return captureParticleSystem; }

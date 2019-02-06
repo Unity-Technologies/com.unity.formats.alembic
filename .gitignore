@@ -63,3 +63,5 @@ AlembicImporter/*.ruleset
 InitTestScene*.unity
 InitTestScene*.unity.meta
 
+TestProjects/AlembicImporter/Assets/Plugins.meta
+TestProjects/AlembicImporter/Assets/Plugins/Editor/JetBrains.meta

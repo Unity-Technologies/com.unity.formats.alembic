@@ -1,5 +1,15 @@
 # Changes in Alembic for Unity
 
+## [1.0.0-preview.19] - 2019-01-15
+### Changes
+- Removed Timeline Alembic recorder
+- General cleanup
+
+## [1.0.0-preview.13] - 2019-01-15
+### Changes
+- Removed broken recording of particles
+- Moved testing code into the package
+
 ## [1.0.0-preview.10] - 2019-01-15
 ### Changes
 - AlembicShotClip registers the time of the AlembicStreamPlayer as driven so timeline changes to the scene are not persistent
