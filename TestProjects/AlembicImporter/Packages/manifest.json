@@ -1,11 +1,10 @@
 {
   "dependencies": {
-    "com.unity.ads": "2.0.8",
-    "com.unity.analytics": "2.0.16",
-    "com.unity.formats.alembic": "file:../../../build/install/com.unity.formats.alembic",
-    "com.unity.package-manager-ui": "1.9.11",
-    "com.unity.purchasing": "2.0.3",
-    "com.unity.textmeshpro": "1.2.1",
+    "com.unity.formats.alembic": "file:../../../build/install/automation/packages/alembic",
+    "com.unity.formats.alembic.tests": "file:../../../build/install/automation/packages/alembic-tests",
+    "com.unity.package-manager-ui": "2.0.3",
+    "com.unity.package-validation-suite": "0.4.0-preview.12",
+    "com.unity.timeline": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",
@@ -36,5 +35,8 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "testables": [
+    "com.unity.formats.alembic.tests"
+  ]
 }

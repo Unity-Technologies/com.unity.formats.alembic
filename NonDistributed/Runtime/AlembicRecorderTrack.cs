@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.Timeline;
 
 namespace UnityEngine.Formats.Alembic.Timeline
@@ -7,9 +8,9 @@ namespace UnityEngine.Formats.Alembic.Timeline
     /// Timeline integration class for the Alembic Recorder
     /// </summary>
     [System.Serializable]
-    [TrackClipType(typeof(AlembicShotAsset))]
-    [TrackColor(0.53f, 0.0f, 0.08f)]
-    public class AlembicTrack : TrackAsset
+    [TrackClipType(typeof(AlembicRecorderClip))]
+    [TrackColor(0.33f, 0.0f, 0.08f)]
+    public class AlembicRecorderTrack : TrackAsset
     {
     }
 }
