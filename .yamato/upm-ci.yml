@@ -1,0 +1,70 @@
+editors:
+   #  - version: 2019.1
+  - version: 2018.3
+  #- version: trunk
+platforms:
+  - name: win
+    type: Unity::VM
+    image: package-ci/win10:latest
+    flavor: m1.large
+  - name: mac
+    type: Unity::VM::osx
+    image: buildfarm/mac:stable
+    flavor: m1.mac
+---
+{% for editor in editors %}
+{% for platform in platforms %}
+{{ platform.name }}_{{ editor.version }}:
+  name : Build and Test version {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+    {% if platform.name == 'win' %}
+      - build.cmd
+    {% else %}
+      - build.sh
+    {% endif %}
+    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - upm-ci package pack --package-path build/install/com.unity.formats.alembic
+    - upm-ci package test --unity-version {{ editor.version }} --package-path build/install/com.unity.formats.alembic
+   triggers:
+     branches:
+       only:
+         - "/.*/"
+       except:
+         - master
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/test-results/**/*"
+{% endfor %}
+{% endfor %}
+
+run_preview_verified_staging:
+  name: Preview Package to Staging
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:latest
+    flavor: m1.large
+    name: Runner
+  commands:
+    # Install ci tools dependencies
+    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - upm-ci package pack --package-path .
+    - upm-ci package publish --registry staging --package-path .
+  triggers:
+    tags:
+      only:
+        - /^(v|V)[0-9].[0-9].[0-9]/
+  artifacts:
+    artifacts.zip:
+      paths:
+        - "upm-ci~/packages/*.tgz"
+  dependencies:
+  {% for editor in editors %}
+  {% for platform in platforms %}
+    - .yamato/build.yml#{{ platform.name }}_{{ editor.version }}
+  {% endfor %}  
+  {% endfor %}
