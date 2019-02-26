@@ -174,7 +174,7 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 {
     auto& abc = n->getAbcObject();
     size_t num_children = abc.getNumChildren();
-    
+
     for (size_t i = 0; i < num_children; ++i) {
         auto *child = n->newChild(abc.getChild(i));
         gatherNodesRecursive(child);
@@ -219,6 +219,8 @@ bool aiContext::load(const char *in_path)
             m_streams.push_back(
 #ifdef WIN32
                 new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary)
+#elif __linux__
+                new std::ifstream(in_path, std::ios::in | std::ios::binary)
 #else
                 new std::ifstream(path.c_str(), std::ios::in | std::ios::binary)
 #endif
