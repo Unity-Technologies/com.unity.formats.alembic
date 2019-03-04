@@ -380,14 +380,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 mesh.name = "dyn: " + go.name;
             }
 
-            // update serialize flag
-            int hideFlags = (int)mesh.hideFlags;
-            if (abcTreeNode.stream.streamDescriptor.Settings.SerializeDynamicMeshes)
-                hideFlags &= ~(int)HideFlags.DontSave;
-            else
-                hideFlags |= (int)HideFlags.DontSave;
-            mesh.hideFlags = (HideFlags)hideFlags;
-
             return mesh;
         }
     }
