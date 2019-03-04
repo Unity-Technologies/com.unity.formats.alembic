@@ -9,26 +9,26 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    public enum aeArchiveType
+    enum aeArchiveType
     {
         HDF5,
         Ogawa,
     };
 
-    public enum aeTimeSamplingType
+    enum aeTimeSamplingType
     {
         Uniform = 0,
         // Cyclic = 1,
         Acyclic = 2,
     };
 
-    public enum aeXformType
+    enum aeXformType
     {
         Matrix,
         TRS,
     };
 
-    public enum aeTopology
+    enum aeTopology
     {
         Points,
         Lines,
@@ -36,7 +36,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    public enum aePropertyType
+    enum aePropertyType
     {
         Unknown,
 
@@ -68,7 +68,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    public struct aeConfig
+    struct aeConfig
     {
         [SerializeField]
         private aeArchiveType archiveType;
@@ -138,7 +138,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aeXformData
+    struct aeXformData
     {
         public Bool visibility { get; set; }
         public Vector3 translation { get; set; }
@@ -147,7 +147,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool inherits { get; set; }
     }
 
-    public struct aePointsData
+    struct aePointsData
     {
         public Bool visibility { get; set; }
         public IntPtr positions { get; set; } // Vector3*
@@ -160,14 +160,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    public struct aeSubmeshData
+    struct aeSubmeshData
     {
         internal IntPtr indexes { get; set; }
         public int indexCount { get; set; }
         public aeTopology topology { get; set; }
     };
 
-    public struct aePolyMeshData
+    struct aePolyMeshData
     {
         public Bool visibility { get; set; }
 
@@ -208,7 +208,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int      submeshCount;
     }
 
-    public struct aeFaceSetData
+    struct aeFaceSetData
     {
         public IntPtr faces;
         public int faceCount;
@@ -220,7 +220,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aeCameraData
+    struct aeCameraData
     {
         public Bool visibility;
 
@@ -251,7 +251,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    public struct aeContext
+    struct aeContext
     {
         public IntPtr self;
 
@@ -267,7 +267,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void MarkFrameEnd() { NativeMethods.aeMarkFrameEnd(self); }
     }
 
-    public struct aeObject
+    struct aeObject
     {
         public IntPtr self;
 
@@ -294,7 +294,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void MarkForceInvisible() { NativeMethods.aeMarkForceInvisible(self); }
     }
 
-    public struct aeProperty
+    struct aeProperty
     {
         public IntPtr self;
 
@@ -316,7 +316,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
 
 
-    public static partial class AbcAPI
+    static partial class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {

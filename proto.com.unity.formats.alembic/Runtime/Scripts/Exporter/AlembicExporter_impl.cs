@@ -11,7 +11,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Util
 {
-    public enum ExportScope
+    internal enum ExportScope
     {
         EntireScene,
         TargetBranch,
@@ -19,7 +19,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public class AlembicRecorderSettings
+    internal class AlembicRecorderSettings
     {
         [SerializeField]
         private string outputPath = "Output/Output.abc";
@@ -155,14 +155,14 @@ namespace UnityEngine.Formats.Alembic.Util
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class CaptureTarget : Attribute
+    sealed class CaptureTarget : Attribute
     {
         public Type componentType { get; set; }
 
         public CaptureTarget(Type t) { componentType = t; }
     }
 
-    public abstract class ComponentCapturer
+    abstract class ComponentCapturer
     {
         public AlembicRecorder recorder;
         public ComponentCapturer parent;
@@ -180,7 +180,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    public sealed class AlembicRecorder : IDisposable
+    sealed class AlembicRecorder : IDisposable
     {
         #region internal types
         public class MeshBuffer : IDisposable
@@ -387,7 +387,7 @@ namespace UnityEngine.Formats.Alembic.Util
             }
         }
 
-        public class RootCapturer : ComponentCapturer
+        class RootCapturer : ComponentCapturer
         {
             public RootCapturer(AlembicRecorder rec, aeObject abc)
             {
@@ -399,7 +399,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Capture() { }
         }
 
-        public class TransformCapturer : ComponentCapturer
+        class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
             bool m_inherits = false;
@@ -458,7 +458,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(Camera))]
-        public class CameraCapturer : ComponentCapturer
+        class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
 #if ENABLE_ALEMBIC_CAMERA_PARAMS
@@ -513,7 +513,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(MeshRenderer))]
-        public class MeshCapturer : ComponentCapturer, IDisposable
+        class MeshCapturer : ComponentCapturer, IDisposable
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf = new MeshBuffer();
@@ -553,7 +553,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(SkinnedMeshRenderer))]
-        public class SkinnedMeshCapturer : ComponentCapturer, IDisposable
+        class SkinnedMeshCapturer : ComponentCapturer, IDisposable
         {
             SkinnedMeshRenderer m_target;
             Mesh m_meshSrc;
@@ -625,7 +625,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(ParticleSystem))]
-        public class ParticleCapturer : ComponentCapturer, IDisposable
+        class ParticleCapturer : ComponentCapturer, IDisposable
         {
             ParticleSystem m_target;
             ParticleSystem.Particle[] m_bufParticles;
