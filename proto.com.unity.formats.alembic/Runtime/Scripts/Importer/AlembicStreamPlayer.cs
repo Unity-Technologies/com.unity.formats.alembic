@@ -72,7 +72,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (StreamDescriptor == null)
                 return;
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
-            abcStream.AbcLoad(createMissingNodes);
+            abcStream.AbcLoad(createMissingNodes, false);
             forceUpdate = true;
         }
 

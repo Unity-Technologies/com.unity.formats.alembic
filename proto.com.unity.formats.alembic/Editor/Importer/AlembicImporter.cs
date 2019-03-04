@@ -23,8 +23,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
-            var streamingAssetPath = AlembicImporter.MakeShortAssetPath(assetPath);
-            AlembicStream.DisconnectStreamsWithPath(streamingAssetPath);
+
+            AlembicStream.DisconnectStreamsWithPath(Path.GetFullPath(assetPath));
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -38,8 +38,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDstPath = AlembicImporter.MakeShortAssetPath(to);
-            var streamSrcPath = AlembicImporter.MakeShortAssetPath(from);
+            var streamDstPath = Path.GetFullPath(to);
+            var streamSrcPath = Path.GetFullPath(from);
             AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
             AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
             
@@ -50,7 +50,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         } 
     }
 
-    [ScriptedImporter(2, "abc")]
+    [ScriptedImporter(3, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -107,11 +107,6 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
         [SerializeField] bool firstImport = true;
 
-        public static string MakeShortAssetPath(string assetPath)
-        {
-            return Regex.Replace(assetPath, "^Assets", "");
-        }
-
         void OnValidate()
         {
             if (!firstImport)
@@ -129,22 +124,21 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 return;
             }
+            
+            var fullPath = Path.GetFullPath(ctx.assetPath);
+            AlembicStream.DisconnectStreamsWithPath(fullPath);
 
-            var shortAssetPath = MakeShortAssetPath(ctx.assetPath);
-            AlembicStream.DisconnectStreamsWithPath(shortAssetPath);
-
-            var destPath = AlembicStream.basePath + shortAssetPath;
-            var fileName = Path.GetFileNameWithoutExtension(destPath);
+            var fileName = Path.GetFileNameWithoutExtension(fullPath);
             var go = new GameObject(fileName);
             
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.PathToAbc = shortAssetPath;
+            streamDescriptor.PathToAbc = fullPath;
             streamDescriptor.Settings = StreamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
-                abcStream.AbcLoad(true);
+                abcStream.AbcLoad(true, true);
 
                 abcStream.GetTimeRange(ref abcStartTime, ref abcEndTime);
                 if (firstImport)
@@ -164,7 +158,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 subassets.Add(streamDescriptor.name, streamDescriptor);
                 GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
-                AlembicStream.ReconnectStreamsWithPath(shortAssetPath);
+                AlembicStream.ReconnectStreamsWithPath(fullPath);
 
 #if UNITY_2017_3_OR_NEWER
                 ctx.AddObjectToAsset(go.name, go);

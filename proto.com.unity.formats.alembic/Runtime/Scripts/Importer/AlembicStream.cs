@@ -11,15 +11,10 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal sealed class AlembicStream : IDisposable
     {
         static List<AlembicStream> s_streams = new List<AlembicStream>();
-        public static string basePath
-        {
-            get { return Application.dataPath; }
-        }
 
         public static void DisconnectStreamsWithPath(string path)
         {
-            var fullPath = basePath + path;
-            aiContext.DestroyByPath(fullPath);
+            aiContext.DestroyByPath(path);
             s_streams.ForEach(s => {
                 if (s.m_streamDesc.PathToAbc == path)
                 {
@@ -124,7 +119,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public void AbcLoad(bool createMissingNodes)
+        public void AbcLoad(bool createMissingNodes, bool initialImport)
         {
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
@@ -142,16 +137,16 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
-            m_loaded = m_context.Load(basePath + m_streamDesc.PathToAbc);
+            m_loaded = m_context.Load(m_streamDesc.PathToAbc);
 
             if (m_loaded)
             {
-                UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes);
+                UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
                 AlembicStream.s_streams.Add(this);
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + basePath + m_streamDesc.PathToAbc);
+                Debug.LogError("failed to load alembic at " + m_streamDesc.PathToAbc);
             }
         }
 
@@ -178,7 +173,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes)
+        void UpdateAbcTree(aiContext ctx, AlembicTreeNode node, double time, bool createMissingNodes, bool initialImport)
         {
             var top = ctx.topObject;
             if (!top)
@@ -191,6 +186,15 @@ namespace UnityEngine.Formats.Alembic.Importer
                 createMissingNodes = createMissingNodes,
             };
             top.EachChild(ImportCallback);
+            
+            if (!initialImport)
+            {
+                foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
+                {
+                    meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                }
+            }
+
             m_importContext = null;
         }
 

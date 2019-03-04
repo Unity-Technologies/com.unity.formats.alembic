@@ -7,7 +7,7 @@ using UnityEngine.Timeline;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName("Alembic Shot")]
-    internal class AlembicShotAsset : PlayableAsset, ITimelineClipAsset
+    internal class AlembicShotAsset : PlayableAsset, ITimelineClipAsset, IPropertyPreview
     {
         AlembicStreamPlayer m_stream;
 
@@ -48,5 +48,13 @@ namespace UnityEngine.Formats.Alembic.Timeline
             }
         }
 
+        public void GatherProperties(PlayableDirector director, IPropertyCollector driver)
+        {
+            var streamComponent = streamPlayer.Resolve(director);
+            if (streamComponent != null)
+            {
+                driver.AddFromName<AlembicStreamPlayer>(streamComponent.gameObject, "currentTime");
+            }
+        }
     }
 }
