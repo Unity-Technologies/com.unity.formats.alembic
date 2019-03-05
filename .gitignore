@@ -49,6 +49,12 @@ External/*-build/*
 artifacts/**
 install/**
 External/install/**
+com.unity.formats.alembic/.npmignore
+com.unity.formats.alembic/package.json
+com.unity.formats.alembic/Runtime/Plugins
+automation
+
+
 
 # Ignore npmrc because it has your own personal key. It needs to be next
 # to package.json though.

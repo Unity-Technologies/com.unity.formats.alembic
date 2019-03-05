@@ -16,7 +16,7 @@
     "repoPackagePath": "build/install/com.unity.formats.alembic", 
     "repository": {
         "type": "git", 
-        "revision": "deadbeef01",
+        "revision": "@PACKAGE_REVISION@",
         "url": "ssh://git@github.com/unity3d-jp/AlembicForUnity.git"
     }, 
     "unity": "2018.3",

@@ -5,7 +5,7 @@
 # npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
 
 
-pushd build/install/com.unity.formats.alembic/
+pushd com.unity.formats.alembic/
 upm-ci package pack
 mv automation ../
 cd ../automation/packages

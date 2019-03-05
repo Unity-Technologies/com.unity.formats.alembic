@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "com.unity.formats.alembic": "file:../../../build/install/automation/packages/alembic",
-    "com.unity.formats.alembic.tests": "file:../../../build/install/automation/packages/alembic-tests",
+    "com.unity.formats.alembic": "file:../../../automation/packages/alembic",
+    "com.unity.formats.alembic.tests": "file:../../../automation/packages/alembic-tests",
     "com.unity.package-manager-ui": "2.0.3",
     "com.unity.package-validation-suite": "0.4.0-preview.12",
     "com.unity.timeline": "1.0.0",
