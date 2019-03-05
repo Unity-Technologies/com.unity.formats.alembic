@@ -16,12 +16,12 @@ execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
         OUTPUT_VARIABLE PACKAGE_REVISION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-configure_file(${CMAKE_SOURCE_DIR}/proto.com.unity.formats.alembic/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/com.unity.formats.alembic/package.json.in ${CMAKE_BINARY_DIR}/package.json @ONLY)
 
 add_subdirectory("Source/")
 
 # create package
-install(DIRECTORY proto.com.unity.formats.alembic/ DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic PATTERN *.in EXCLUDE)
+install(DIRECTORY com.unity.formats.alembic/ DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic PATTERN *.in EXCLUDE)
 install(FILES ${CMAKE_BINARY_DIR}/package.json DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
 install(FILES
         ${CMAKE_SOURCE_DIR}/CHANGELOG.md
