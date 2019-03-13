@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
-using UnityEditor.SceneManagement;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -31,7 +31,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     Directory.CreateDirectory(dir);
                 }
 
-                File.Copy(files.Key,files.Value);
+                File.Copy(files.Key,files.Value, true);
             }
             
             FilesToCopy.Clear();
@@ -60,20 +60,22 @@ namespace UnityEditor.Formats.Alembic.Importer
             var pathToStreamingAssets = GetStreamingAssetsPath(report.summary);
             foreach (var p in players)
             {
-                ProcessAlembicStreamPlayerAssets(p, pathToStreamingAssets, report.summary.outputPath);
+                ProcessAlembicStreamPlayerAssets(p, pathToStreamingAssets);
             }
             SceneManager.SetActiveScene(activeScene);
         }
 
-        static void ProcessAlembicStreamPlayerAssets(AlembicStreamPlayer streamPlayer, string streamingAssetsPath, string basePath)
+        static void ProcessAlembicStreamPlayerAssets(AlembicStreamPlayer streamPlayer, string streamingAssetsPath)
         {
             streamPlayer.StreamDescriptor = Object.Instantiate(streamPlayer.StreamDescriptor);// make a copy
             var srcPath = streamPlayer.StreamDescriptor.PathToAbc;
-            var fileName = Path.GetFileName(srcPath);
-            var dstPath = Path.Combine(streamingAssetsPath, fileName);
+            
+            // Avoid name collisions by hashing the full path 
+            var hashedFilename = HashSha1(srcPath) + ".abc";
+            var dstPath = Path.Combine(streamingAssetsPath, hashedFilename);
             AlembicBuildPostProcess.FilesToCopy.Add(new KeyValuePair<string, string>(srcPath,dstPath));
 
-            streamPlayer.StreamDescriptor.PathToAbc = GetAbsolutePath(dstPath, basePath);
+            streamPlayer.StreamDescriptor.PathToAbc = hashedFilename;
         }
 
         static string GetStreamingAssetsPath(BuildSummary summary)
@@ -83,19 +85,25 @@ namespace UnityEditor.Formats.Alembic.Importer
                 case BuildTarget.StandaloneOSX:
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAsset");
                 case BuildTarget.StandaloneWindows64:
-                    var name = Path.GetDirectoryName(summary.outputPath);
-                    name = Path.Combine(name, "_Data/StreamingAssets");
-                    return Path.Combine(summary.outputPath, name);
+                    var name = Path.ChangeExtension(summary.outputPath, null);
+                    return name+"_Data/StreamingAssets";
+                   
                 default:
                     throw new NotImplementedException();   
             }
         }
 
-        static string GetAbsolutePath(string fullPath, string basePath)
+        static string HashSha1(string value)
         {
-            var fullPathUri = new Uri(fullPath, UriKind.Absolute);
-            var basePathUri = new Uri(basePath, UriKind.Absolute);
-            return basePathUri.MakeRelativeUri(fullPathUri).ToString();
+            var sha1 = SHA1.Create();
+            var inputBytes = Encoding.ASCII.GetBytes(value);
+            var hash = sha1.ComputeHash(inputBytes);
+            var sb = new StringBuilder();
+            foreach (var t in hash)
+            {
+                sb.Append(t.ToString("X2"));
+            }
+            return sb.ToString();
         }
     }
 }
