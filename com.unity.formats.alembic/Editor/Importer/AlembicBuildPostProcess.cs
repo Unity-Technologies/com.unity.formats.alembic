@@ -83,7 +83,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             switch (summary.platform)
             {
                 case BuildTarget.StandaloneOSX:
-                    return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAsset");
+                    return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
                     return name+"_Data/StreamingAssets";
