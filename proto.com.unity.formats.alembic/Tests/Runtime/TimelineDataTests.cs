@@ -94,7 +94,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
         
         [UnityTest]
-        public IEnumerator TestSwapHandeness([Values(true, false)]bool swap)
+        public IEnumerator TestSwapHandedness([Values(true, false)]bool swap)
         {
             director.Play();
             exporter.recorder.settings.conf.SwapHandedness = swap;
