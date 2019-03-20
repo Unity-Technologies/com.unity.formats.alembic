@@ -11,6 +11,4 @@ mv automation ../
 cd ../automation/packages
 tar -xzvf `find . -iname '*alembic-*.tgz'`
 mv package alembic
-tar -xzvf `find . -iname '*alembic.*.tgz'`
-mv package alembic-tests
 popd
