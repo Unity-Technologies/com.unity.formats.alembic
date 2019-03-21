@@ -1,5 +1,13 @@
 # Changes in Alembic for Unity
 
+## [1.0.2] - 2019-03-21
+### Changes
+- Removed BuildTarget.LinuxStandalone (obsolete) references for 2019.2+
+
+## [1.0.1] - 2019-03-14
+### Changes
+- Removed UnityEngine.UI references
+
 ## [1.0.0] - 2019-01-15
 ### Changes
 - Removed Timeline Alembic recorder
