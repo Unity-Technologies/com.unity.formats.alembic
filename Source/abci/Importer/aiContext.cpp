@@ -3,7 +3,7 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiAsync.h"
-
+#include <istream>
 
 static std::wstring L(const std::string& s)
 {
@@ -39,7 +39,32 @@ static std::string NormalizePath(const char *in_path)
     return S(path);
 }
 
+#ifdef WIN32
 
+class lockFreeIStream : public std::ifstream
+{
+private:
+	FILE *_file = nullptr;
+	FILE *Init(const wchar_t *name)
+	{
+		_file = _wfsopen(name, L"rb", _SH_DENYNO);
+		return _file;
+	}
+public: 
+	lockFreeIStream(const wchar_t  *name) : std::ifstream(Init(name))
+	{
+	}
+	~lockFreeIStream()
+	{
+		if (_file != nullptr)
+		{
+			fclose(_file);
+		}
+	}
+
+
+};
+#endif
 
 aiContextManager aiContextManager::s_instance;
 
@@ -218,7 +243,7 @@ bool aiContext::load(const char *in_path)
             // (VisualC++'s std::ifstream accepts wide string)
             m_streams.push_back(
 #ifdef WIN32
-                new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary)
+                new lockFreeIStream(wpath.c_str())
 #elif __linux__
                 new std::ifstream(in_path, std::ios::in | std::ios::binary)
 #else
