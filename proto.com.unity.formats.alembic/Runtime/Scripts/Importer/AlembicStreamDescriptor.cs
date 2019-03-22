@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {

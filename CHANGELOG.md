@@ -9,7 +9,6 @@
 - Removed UnityEngine.UI references
 
 ## [1.0.0] - 2019-01-15
-## [1.0.0-preview.19] - 2019-01-15
 ### Changes
 - Removed Timeline Alembic recorder
 - General cleanup
