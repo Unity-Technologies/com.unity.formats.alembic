@@ -761,7 +761,10 @@ namespace UnityEngine.Formats.Alembic.Util
 #else
                 method.Invoke(null, new object[] { BuildTarget.StandaloneOSXUniversal, 0, 0 });
 #endif
+// Deprecated in 2019.2
+#if !UNITY_2019_2_OR_NEWER
                 method.Invoke(null, new object[] { BuildTarget.StandaloneLinux, 0, 0 });
+#endif
                 method.Invoke(null, new object[] { BuildTarget.StandaloneLinux64, 0, 0 });
             }
         }
