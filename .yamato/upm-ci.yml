@@ -22,7 +22,7 @@ build_win:
   artifacts:
     build:
       paths:
-        - "build/**/*"
+        - "com.unity.formats.alembic"
 
 build_mac:
   name: Build Mac
@@ -36,7 +36,7 @@ build_mac:
   artifacts:
     build:
       paths:
-        - "build/**/*"
+        - "com.unity.formats.alembic"
 
 pack:
   name: Pack
@@ -54,7 +54,7 @@ pack:
        - "upm-ci~/packages/**/*"
    build:
      paths:
-       - "build/**/*"
+       - "com.unity.formats.alembic"
   dependencies:
     - .yamato/upm-ci.yml#build_win
     - .yamato/upm-ci.yml#build_mac
@@ -70,7 +70,7 @@ test_{{ platform.name }}_{{ editor.version }}:
   commands:
     - git clone --branch fix/disable-batchmode --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
     - npm install upm-ci-utils/ -g
-    - upm-ci package test --unity-version {{ editor.version }} --package-path build/install/com.unity.formats.alembic --disable-batchmode true
+    - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --disable-batchmode true
   artifacts:
     logs.zip:
       paths:
