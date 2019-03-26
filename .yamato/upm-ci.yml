@@ -45,7 +45,7 @@ pack:
     image: package-ci/win10:stable
     flavor: m1.large
   commands:
-    - git clone --branch fix/disable-batchmode --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
+    - git clone --branch dev --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
     - npm install upm-ci-utils/ -g
     - upm-ci package pack --package-path build/install/com.unity.formats.alembic
   artifacts:
@@ -68,9 +68,9 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - git clone --branch fix/disable-batchmode --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
+    - git clone --branch dev --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
     - npm install upm-ci-utils/ -g
-    - upm-ci package test --unity-version {{ editor.version }} --package-path build/install/com.unity.formats.alembic --disable-batchmode true
+    - upm-ci package test --unity-version {{ editor.version }} --package-path build/install/com.unity.formats.alembic
   artifacts:
     logs.zip:
       paths:
