@@ -155,14 +155,14 @@ namespace UnityEngine.Formats.Alembic.Util
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    internal sealed class CaptureTarget : Attribute
+    sealed class CaptureTarget : Attribute
     {
         public Type componentType { get; set; }
 
         public CaptureTarget(Type t) { componentType = t; }
     }
 
-    internal abstract class ComponentCapturer
+    abstract class ComponentCapturer
     {
         public AlembicRecorder recorder;
         public ComponentCapturer parent;
@@ -180,10 +180,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    internal sealed class AlembicRecorder : IDisposable
+    sealed class AlembicRecorder : IDisposable
     {
         #region internal types
-        internal class MeshBuffer : IDisposable
+        public class MeshBuffer : IDisposable
         {
             public bool visibility = true;
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
@@ -207,7 +207,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 submeshIndices.Clear();
             }
 
-            internal void SetupSubmeshes(aeObject abc, Mesh mesh)
+            public void SetupSubmeshes(aeObject abc, Mesh mesh)
             {
                 for (int smi = 0; smi < mesh.subMeshCount; ++smi)
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
@@ -275,7 +275,7 @@ namespace UnityEngine.Formats.Alembic.Util
             }
 
 
-            internal void WriteSample(aeObject abc)
+            public void WriteSample(aeObject abc)
             {
                 var data = default(aePolyMeshData);
                 data.visibility = visibility;
@@ -302,7 +302,7 @@ namespace UnityEngine.Formats.Alembic.Util
             }
         }
 
-        internal class ClothBuffer : IDisposable
+        public class ClothBuffer : IDisposable
         {
             public PinnedList<int> remap = new PinnedList<int>();
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();
@@ -320,7 +320,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 numRemappedVertices = NativeMethods.aeGenerateRemapIndices(remap, mbuf.points, weights4, mbuf.points.Count);
             }
 
-            internal void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicRecorderSettings settings)
+            public void Capture(Mesh mesh, Cloth cloth, MeshBuffer mbuf, AlembicRecorderSettings settings)
             {
                 if (mesh == null || cloth == null)
                 {
@@ -387,7 +387,7 @@ namespace UnityEngine.Formats.Alembic.Util
             }
         }
 
-        internal class RootCapturer : ComponentCapturer
+        class RootCapturer : ComponentCapturer
         {
             public RootCapturer(AlembicRecorder rec, aeObject abc)
             {
@@ -399,7 +399,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Capture() { }
         }
 
-        internal class TransformCapturer : ComponentCapturer
+        class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
             bool m_inherits = false;
@@ -458,7 +458,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(Camera))]
-        internal class CameraCapturer : ComponentCapturer
+        class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
 #if ENABLE_ALEMBIC_CAMERA_PARAMS
@@ -513,7 +513,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(MeshRenderer))]
-        internal class MeshCapturer : ComponentCapturer, IDisposable
+        class MeshCapturer : ComponentCapturer, IDisposable
         {
             MeshRenderer m_target;
             MeshBuffer m_mbuf = new MeshBuffer();
@@ -553,7 +553,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(SkinnedMeshRenderer))]
-        internal class SkinnedMeshCapturer : ComponentCapturer, IDisposable
+        class SkinnedMeshCapturer : ComponentCapturer, IDisposable
         {
             SkinnedMeshRenderer m_target;
             Mesh m_meshSrc;
@@ -625,7 +625,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [CaptureTarget(typeof(ParticleSystem))]
-        internal class ParticleCapturer : ComponentCapturer, IDisposable
+        class ParticleCapturer : ComponentCapturer, IDisposable
         {
             ParticleSystem m_target;
             ParticleSystem.Particle[] m_bufParticles;

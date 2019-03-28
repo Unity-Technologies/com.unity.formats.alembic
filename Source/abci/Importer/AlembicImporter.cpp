@@ -94,6 +94,11 @@ abciAPI void aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double 
 }
 
 
+abciAPI aiContext * aiObjectGetContext(aiObject * obj)
+{
+    return obj ? obj->getContext() : nullptr;
+}
+
 abciAPI const char* aiObjectGetName(aiObject* obj)
 {
     return obj ? obj->getName() : "";
