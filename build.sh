@@ -9,7 +9,7 @@ if [[ -e build ]]; then
 fi
 
 depsdir=${PWD}/External/install
-installdir=${PWD}/build/install
+installdir=${PWD}
 mkdir -p build
 pushd build
 cmake .. -DCMAKE_BUILD_TYPE=Release \

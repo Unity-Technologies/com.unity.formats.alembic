@@ -5,7 +5,7 @@ call build.cmd
 cd ..
 
 SET depsdir=%cd%\External\install
-SET installdir=%cd%\build\install
+SET installdir=%cd%
 
 
 if exist build (
