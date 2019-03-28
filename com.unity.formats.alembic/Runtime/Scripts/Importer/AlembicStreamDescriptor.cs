@@ -12,7 +12,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             get
             {
 #if UNITY_STANDALONE
-                return Path.Combine(Application.streamingAssetsPath, pathToAbc);
+                return System.IO.Path.Combine(Application.streamingAssetsPath, pathToAbc);
 #else
                 return pathToAbc;
 #endif
