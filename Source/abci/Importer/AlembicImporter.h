@@ -106,7 +106,6 @@ struct aiConfig
     bool swap_handedness = true;
     bool swap_face_winding = false;
     bool interpolate_samples = true;
-    bool turn_quad_edges = false;
     bool async_load = false;
 
     bool import_point_polygon = true;
@@ -141,6 +140,9 @@ struct aiCameraData
 struct aiMeshSummary
 {
     aiTopologyVariance topology_variance = aiTopologyVariance::Constant;
+    bool has_counts = false;
+    bool has_indices = false;
+    bool has_points = false;
     bool has_velocities = false;
     bool has_normals = false;
     bool has_tangents = false;
@@ -211,6 +213,7 @@ struct aiSubmeshData
 
 struct aiPointsSummary
 {
+    bool has_points = false;
     bool has_velocities = false;
     bool has_ids = false;
     bool constant_points = false;
@@ -266,6 +269,7 @@ abciAPI int             aiTimeSamplingGetSampleCount(aiTimeSampling *self);
 abciAPI double          aiTimeSamplingGetTime(aiTimeSampling *self, int index);
 abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end);
 
+abciAPI aiContext*      aiObjectGetContext(aiObject* obj);
 abciAPI const char*     aiObjectGetName(aiObject* obj);
 abciAPI const char*     aiObjectGetFullName(aiObject* obj);
 abciAPI int             aiObjectGetNumChildren(aiObject* obj);

@@ -355,7 +355,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!hasMesh)
             {
-                mesh = new Mesh {name = "dyn: " + go.name};
+                mesh = new Mesh { name = "dyn: " + go.name };
 #if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = IndexFormat.UInt32;
 #endif

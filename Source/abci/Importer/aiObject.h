@@ -57,5 +57,7 @@ protected:
     abcObject   m_abc;
     aiObject    *m_parent = nullptr;
     std::vector<ObjectPtr> m_children;
+    std::string m_name;     //
+    std::string m_fullname; // sanitized
     bool m_enabled = true;
 };

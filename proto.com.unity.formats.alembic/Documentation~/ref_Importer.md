@@ -57,7 +57,6 @@ Use these options to customize how Meshes are imported.
 || **None** | Do not calculate or add tangents at all. Choose this option if you don't need to compute the tangents. Computing tangents is resource-intensive, so choosing this option increases the speed of playback. |
 || **Compute** | Calculate tangents on import. This is the default option for this property.<br/>***Note:*** The calculation of tangents requires normals and UV data. If these are missing, the tangent cannot be computed. |
 | __Flip Faces__ || Enable to invert the orientation of the polygons. |
-| __Turn Quad Edges__ || Enable to invert the arrangement of the triangles when the quadrilateral polygon is divided into triangles. |
 
 
 

@@ -29,7 +29,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
             var trans = abcTreeNode.gameObject.GetComponent<Transform>();
-            if (m_abcData.inherits)
+            if (m_abcData.inherits || abcObject.parent == abcObject.context.topObject)
             {
                 trans.localPosition = m_abcData.translation;
                 trans.localRotation = m_abcData.rotation;

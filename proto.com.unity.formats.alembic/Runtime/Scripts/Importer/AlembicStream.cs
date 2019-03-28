@@ -131,7 +131,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_config.scaleFactor = settings.ScaleFactor;
             m_config.normalsMode = settings.Normals;
             m_config.tangentsMode = settings.Tangents;
-            m_config.turnQuadEdges = settings.TurnQuadEdges;
             m_config.interpolateSamples = settings.InterpolateSamples;
             m_config.importPointPolygon = settings.ImportPointPolygon;
             m_config.importLinePolygon = settings.ImportLinePolygon;

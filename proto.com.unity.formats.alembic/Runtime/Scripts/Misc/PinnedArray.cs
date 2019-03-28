@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace UnityEngine.Formats.Alembic.Sdk
 {
 
-    internal class PinnedObject<T> : IDisposable
+    class PinnedObject<T> : IDisposable
     {
         T m_data;
         GCHandle m_gch;
@@ -42,7 +42,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    internal class PinnedArray<T> : IDisposable, IEnumerable<T> where T : struct
+    class PinnedArray<T> : IDisposable, IEnumerable<T> where T : struct
     {
         T[] m_data;
         GCHandle m_gch;
@@ -164,7 +164,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     // Pinned"List" but assume size is fixed (== functionality is same as PinnedArray).
     // this class is intended to pass to Mesh.GetNormals(), Mesh.SetNormals(), and C++ functions.
-    internal class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
+    class PinnedList<T> : IDisposable, IEnumerable<T> where T : struct
     {
         List<T> m_list;
         T[] m_data;

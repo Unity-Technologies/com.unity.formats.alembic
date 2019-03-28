@@ -63,14 +63,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool turnQuadEdges = false;
-        public bool TurnQuadEdges
-        {
-            get { return turnQuadEdges; }
-            set { turnQuadEdges = value; }
-        }
-
-        [SerializeField]
         private bool interpolateSamples = true;
         public bool InterpolateSamples
         {

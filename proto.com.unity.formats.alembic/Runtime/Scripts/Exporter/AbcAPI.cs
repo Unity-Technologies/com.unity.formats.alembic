@@ -9,26 +9,26 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    internal enum aeArchiveType
+    enum aeArchiveType
     {
         HDF5,
         Ogawa,
     };
 
-    internal enum aeTimeSamplingType
+    enum aeTimeSamplingType
     {
         Uniform = 0,
         // Cyclic = 1,
         Acyclic = 2,
     };
 
-    internal enum aeXformType
+    enum aeXformType
     {
         Matrix,
         TRS,
     };
 
-    internal enum aeTopology
+    enum aeTopology
     {
         Points,
         Lines,
@@ -36,7 +36,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    internal enum aePropertyType
+    enum aePropertyType
     {
         Unknown,
 
@@ -68,7 +68,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    internal struct aeConfig
+    struct aeConfig
     {
         [SerializeField]
         private aeArchiveType archiveType;
@@ -138,7 +138,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aeXformData
+    struct aeXformData
     {
         public Bool visibility { get; set; }
         public Vector3 translation { get; set; }
@@ -147,7 +147,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool inherits { get; set; }
     }
 
-    internal struct aePointsData
+    struct aePointsData
     {
         public Bool visibility { get; set; }
         public IntPtr positions { get; set; } // Vector3*
@@ -160,14 +160,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    internal struct aeSubmeshData
+    struct aeSubmeshData
     {
         internal IntPtr indexes { get; set; }
         public int indexCount { get; set; }
         public aeTopology topology { get; set; }
     };
 
-    internal struct aePolyMeshData
+    struct aePolyMeshData
     {
         public Bool visibility { get; set; }
 
@@ -208,7 +208,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int      submeshCount;
     }
 
-    internal struct aeFaceSetData
+    struct aeFaceSetData
     {
         public IntPtr faces;
         public int faceCount;
@@ -220,7 +220,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aeCameraData
+    struct aeCameraData
     {
         public Bool visibility;
 
@@ -251,7 +251,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aeContext
+    struct aeContext
     {
         public IntPtr self;
 
@@ -267,7 +267,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void MarkFrameEnd() { NativeMethods.aeMarkFrameEnd(self); }
     }
 
-    internal struct aeObject
+    struct aeObject
     {
         public IntPtr self;
 
@@ -294,7 +294,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void MarkForceInvisible() { NativeMethods.aeMarkForceInvisible(self); }
     }
 
-    internal struct aeProperty
+    struct aeProperty
     {
         public IntPtr self;
 
@@ -316,7 +316,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
 
 
-    internal static partial class AbcAPI
+    static partial class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {
@@ -386,8 +386,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern double aiTimeSamplingGetTime(IntPtr self, int index);
         [DllImport(Abci.Lib)] public static extern void aiTimeSamplingGetRange(IntPtr self, ref double start, ref double end);
 
+
+        [DllImport(Abci.Lib)] public static extern aiContext aiObjectGetContext(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern int aiObjectGetNumChildren(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern aiObject aiObjectGetChild(IntPtr obj, int i);
+        [DllImport(Abci.Lib)] public static extern aiObject aiObjectGetParent(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetName(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetFullName(IntPtr obj);
