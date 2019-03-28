@@ -1,0 +1,20 @@
+Editor
+-------
+
+Warning	CA1801	Parameter 'rao' of 'AlembicAssetModificationProcessor.OnWillDeleteAsset(string, RemoveAssetOptions)' is never used. Remove the parameter or use it in the method body.	Unity.Alembic.Editor	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Importer	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Importer\AlembicImporter.cs	17	Active
+> Unity function header that can't be changed
+
+
+Warning	CA1812 (x7) ['AlembicExporterEditor', 'AlembicAssetModificationProcessor', 'AlembicImporterEditor', 'AlembicRecorderClipEditor', 'AlembicStreamDescriptorEditor', 'AlembicStreamPlayerEditor', 'BoolDrawer'] is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.	Unity.Alembic.Editor	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Misc	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Assets\com.unity.formats.alembic\Editor\Misc\BoolDrawer.cs	7	Active
+> These classes are instantiated by Unity and requires a default public constructor
+
+Runtime
+-------
+
+Warning	CA1001 (x3)	Implement IDisposable on ['AlembicExporter', 'AlembicPointsCloud', 'AlembicPointsRenderer' because it creates members of the following IDisposable types: 'AlembicRecorder'. If 'AlembicExporter' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.	Unity.Alembic.Runtime	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Packages\com.unity.formats.alembic\Runtime\Scripts\Exporter	D:\Users\Viktoria\Documents\GitHub\AlembicForUnity\AlembicImporter\Packages\com.unity.formats.alembic\Runtime\Scripts\Exporter\AlembicExporter.cs	13	Active
+> calling Dispose in OnDestroy() instead of implementing IDisposable as it is unclear if or when Dispose() gets called on Monobehaviours
+> https://answers.unity.com/questions/649008/will-ondestroy-call-idisposable-no-.html
+
+
+Warning	CA1812	'PinnedList<T>.ListData' is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.	Unity.Formats.Alembic.Runtime	D:\projects\AlembicForUnity\AlembicImporter\Packages\com.unity.formats.alembic\Runtime\Scripts\Misc\PinnedArray.cs	121	Active
+> Used to define the layout of structures we pass to the native library

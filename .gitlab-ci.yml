@@ -1,0 +1,102 @@
+# build needs to be able to find the following libraries:
+# - OpenEXR(libHalf.dylib libHalf.a)
+# - HDF5(hdf5.a) 
+# - Alembic (libAlembic.a)
+
+# sourcedir needs submodule initialization (to compile googletest)
+# - git submodule update --init --recursive
+
+image: node:6.10.0
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    
+stages:
+  - build
+  - test
+  #- push_to_packman_staging
+
+build:mac:
+  stage: build
+  tags:
+    - mac
+  script:
+    - ./build.sh
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    paths:
+    - External/install
+    - build/install
+    expire_in: 1 hour
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
+
+build:win:
+  stage: build
+  tags:
+    - win
+  script:
+    - build.cmd
+  artifacts:
+    name: "%CI_JOB_STAGE%-%CI_COMMIT_REF_NAME%"
+    paths:
+      - External/install
+      - build/install
+    expire_in: 1 hour
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - C:\Users\builduser\post_build_script.bat
+
+build:lin:
+  stage: build
+  tags:
+    - lin
+  script:
+  - ./build.sh
+  artifacts:
+    name: "$CI_JOB_STAGE-$CI_COMMIT_REF_NAME"
+    paths:
+      - External/install
+      - build/install
+    expire_in: 1 hour
+# Important! Do not remove this after_script as the VM will live for 12 hours before being destroyed!
+  after_script:
+    - /opt/post_build_script.sh
+
+test:mac:
+  stage: test
+  tags:
+    - mac
+  script: 
+    - npm test
+  dependencies:
+    - build:mac
+  
+test:win:
+  stage: test
+  tags:
+    - win
+  script: 
+    - npm test
+  dependencies:
+    - build:win
+  
+test:lin:
+  stage: test
+  tags:
+    - lin
+  script:
+    - npm test
+  dependencies:
+    - build:lin
+  
+#push_to_packman_staging:
+#  stage: push_to_packman_staging
+#  only:
+#    - /^v\d*$/
+#  except:
+#    - branches
+#  script:
+#    - curl -u $USER_NAME:$API_KEY https://staging-packages.unity.com/auth > .npmrc
+#    - npm publish

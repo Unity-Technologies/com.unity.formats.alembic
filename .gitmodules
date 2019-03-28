@@ -1,0 +1,9 @@
+[submodule "Source/abci/googletest"]
+	path = Source/abci/googletest
+	url = https://github.com/google/googletest.git
+[submodule "External/openexr"]
+	path = External/openexr
+	url = https://github.com/openexr/openexr.git
+[submodule "External/alembic"]
+	path = External/alembic
+	url = https://github.com/alembic/alembic.git

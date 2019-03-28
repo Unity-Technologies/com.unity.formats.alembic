@@ -1,0 +1,17 @@
+{
+    "name": "Unity.Formats.Alembic.UnitTests",
+    "references": [
+        "Unity.Formats.Alembic.Runtime",
+        "Unity.Timeline"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "macOSStandalone",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

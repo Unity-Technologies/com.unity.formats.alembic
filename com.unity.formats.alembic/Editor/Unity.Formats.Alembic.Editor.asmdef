@@ -1,0 +1,11 @@
+{
+    "name": "Unity.Formats.Alembic.Editor",
+  "references": [
+    "Unity.Formats.Alembic.Runtime",
+    "Unity.Timeline"
+  ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

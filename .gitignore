@@ -15,6 +15,8 @@
 *.tlog
 *.db
 *.opendb
+*.sw[op]
+*.pyc
 
 *.exe
 *.dll
@@ -31,24 +33,41 @@ Plugin/external/libs
 Plugin/_build_*
 *.dblite
 excons.cache
+.DS_Store
 
-AlembicImporter/*.csproj
-AlembicImporter/*.sln
-AlembicImporter/Assets/UTJ/NormalPainter*
-AlembicImporter/Assets/UTJ/BlendShapeBuilder*
-AlembicImporter/Assets/UTJ/VertexTweaker*
-AlembicImporter/Assets/PostProcessing*
 .vs/
+.idea
 Library/
 Temp/
 _tmp/
 _out/
-external/
 ipch/
 
-*.abc
-*.abc.meta
-abci.bundle/
-build/
-TestLocal*
 StreamingAssets*
+build/**
+External/*-build/*
+artifacts/**
+install/**
+External/install/**
+com.unity.formats.alembic/.npmignore
+com.unity.formats.alembic/package.json
+com.unity.formats.alembic/Runtime/Plugins
+automation
+
+
+
+# Ignore npmrc because it has your own personal key. It needs to be next
+# to package.json though.
+.npmrc
+
+# Package Validation Suite files are not tracked
+AlembicImporter/ValidationSuiteResults/*
+
+# Rulesets in this location should not be tracked
+AlembicImporter/*.ruleset
+
+InitTestScene*.unity
+InitTestScene*.unity.meta
+
+TestProjects/AlembicImporter/Assets/Plugins.meta
+TestProjects/AlembicImporter/Assets/Plugins/Editor/JetBrains.meta

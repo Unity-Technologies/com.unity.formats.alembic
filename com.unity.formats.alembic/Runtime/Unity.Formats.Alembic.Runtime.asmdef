@@ -1,0 +1,12 @@
+{
+  "name": "Unity.Formats.Alembic.Runtime",
+  "references": ["Unity.Timeline"],
+  "optionalUnityReferences": [],
+  "includePlatforms": [
+    "Editor",
+    "macOSStandalone",
+    "WindowsStandalone64"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false
+}
