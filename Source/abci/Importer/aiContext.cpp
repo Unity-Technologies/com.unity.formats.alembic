@@ -4,6 +4,11 @@
 #include "aiObject.h"
 #include "aiAsync.h"
 #include <istream>
+#ifdef WIN32
+    #include <windows.h>
+    #include <io.h>
+    #include <fcntl.h>
+#endif
 
 static std::wstring L(const std::string& s)
 {
@@ -40,29 +45,52 @@ static std::string NormalizePath(const char *in_path)
 }
 
 #ifdef WIN32
-
 class lockFreeIStream : public std::ifstream
 {
 private:
-	FILE *_file = nullptr;
-	FILE *Init(const wchar_t *name)
-	{
-		_file = _wfsopen(name, L"rb", _SH_DENYNO);
-		return _file;
-	}
-public: 
-	lockFreeIStream(const wchar_t  *name) : std::ifstream(Init(name))
-	{
-	}
-	~lockFreeIStream()
-	{
-		if (_file != nullptr)
-		{
-			fclose(_file);
-		}
-	}
+    HANDLE _handle;
 
+    FILE *Init(const wchar_t *name)
+    {
+          _handle = CreateFileW(name,
+            GENERIC_READ,
+            FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+        if (_handle == INVALID_HANDLE_VALUE)
+        {
+            return nullptr;
+        }
 
+        int nHandle = _open_osfhandle((long)_handle, _O_RDONLY);
+
+        if (nHandle == -1)
+        {
+           ::CloseHandle(_handle);
+            return nullptr;
+        }
+
+        auto fh = _fdopen(nHandle, "rb");
+        if (!fh)
+        {
+            ::CloseHandle(_handle);
+        }
+
+        return fh;
+    }
+    
+public:
+    lockFreeIStream(const wchar_t  *name) : std::ifstream(Init(name)) // Beware of constructors, initializers: Init changes the state of the class itself
+    {}
+    ~lockFreeIStream()
+    {
+        if (_handle != INVALID_HANDLE_VALUE)
+        {
+            ::CloseHandle(_handle);
+        }
+    }
 };
 #endif
 
