@@ -146,21 +146,23 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             }
 
-
-            // capture control
-            EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-            if (recorder.recording)
+            using (new EditorGUI.DisabledScope(!Application.isPlaying))
             {
-                if (GUILayout.Button("End Recording"))
-                    t.EndRecording();
-            }
-            else
-            {
-                if (GUILayout.Button("Begin Recording"))
-                    t.BeginRecording();
+                // capture control
+                EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
+                if (recorder.recording)
+                {
+                    if (GUILayout.Button("End Recording"))
+                        t.EndRecording();
+                }
+                else
+                {
+                    if (GUILayout.Button("Begin Recording"))
+                        t.BeginRecording();
 
-                if (GUILayout.Button("One Shot"))
-                    t.OneShot();
+                    if (GUILayout.Button("One Shot"))
+                        t.OneShot();
+                }
             }
         }
     }
