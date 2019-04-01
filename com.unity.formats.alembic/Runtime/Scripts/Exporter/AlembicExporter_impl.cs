@@ -417,9 +417,13 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public override void Setup(Component c)
             {
-                var target = c as Transform;
-                abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
-                m_target = target;
+                if (parent != null && c is Transform)
+                {
+                    var target = (Transform) c;
+                    abcObject = parent.abcObject.NewXform(
+                        target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
+                    m_target = target;
+                }
             }
 
             public override void Capture()
