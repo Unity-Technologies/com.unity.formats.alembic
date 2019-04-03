@@ -22,7 +22,7 @@ build_win:
   artifacts:
     build:
       paths:
-        - "com.unity.formats.alembic/*"
+        - "com.unity.formats.alembic/**/*"
 
 build_mac:
   name: Build Mac
@@ -36,7 +36,7 @@ build_mac:
   artifacts:
     build:
       paths:
-        - "com.unity.formats.alembic/*"
+        - "com.unity.formats.alembic/**/*"
 
 pack:
   name: Pack
@@ -54,7 +54,7 @@ pack:
        - "upm-ci~/packages/**/*"
    build:
      paths:
-       - "com.unity.formats.alembic/*"
+       - "com.unity.formats.alembic/**/*"
   dependencies:
     - .yamato/upm-ci.yml#build_win
     - .yamato/upm-ci.yml#build_mac
