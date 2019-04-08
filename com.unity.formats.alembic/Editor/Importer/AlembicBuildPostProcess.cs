@@ -12,13 +12,13 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    public static class AlembicBuildPostProcess
+    static class AlembicBuildPostProcess
     {
         internal static readonly List<KeyValuePair<string,string>> FilesToCopy = new List<KeyValuePair<string,string>>();
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
-            if (target != BuildTarget.StandaloneOSX && target != BuildTarget.StandaloneWindows64)
+            if (!TargetIsSupported(target))
             {
                 return;
             }
@@ -33,8 +33,12 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 File.Copy(files.Key,files.Value, true);
             }
-            
             FilesToCopy.Clear();
+        }
+
+        public static bool TargetIsSupported(BuildTarget target)
+        {
+            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64;
         }
     }
 
@@ -42,18 +46,16 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public int callbackOrder
         {
-            get { return 9999;}  
+            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process. 
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            if (report == null || 
-                (report.summary.platform != BuildTarget.StandaloneOSX &&
-                report.summary.platform != BuildTarget.StandaloneWindows64))
+            if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
                 return;
-                
             }
+            
             var activeScene = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
             var players = Object.FindObjectsOfType<AlembicStreamPlayer>();
@@ -86,8 +88,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
-                    return name+"_Data/StreamingAssets";
-                   
+                    return name + "_Data/StreamingAssets";
                 default:
                     throw new NotImplementedException();   
             }
