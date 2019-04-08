@@ -13,7 +13,7 @@ using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
-    public class TimelineDataTests : BaseFixture
+    class TimelineDataTests : BaseFixture
     {
         PlayableDirector director;
 
