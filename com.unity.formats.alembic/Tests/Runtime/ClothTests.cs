@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
-    public class ClothTests : BaseFixture
+    class ClothTests : BaseFixture
     {
         static IEnumerator TestPlaneContents(GameObject go)
         {
