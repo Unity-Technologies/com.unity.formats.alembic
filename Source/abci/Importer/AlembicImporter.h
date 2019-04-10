@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <../Foundation/AbcNodes/CameraData.h>
+
 class aiContext;
 class aiTimeSampling;
 class aiObject;
@@ -123,14 +125,6 @@ struct aiXformData
     bool inherits = false;
 };
 
-struct aiCameraData
-{
-    bool visibility = true;
-    float focal_length = 0;
-    abcV2 sensor_size = {0,0};
-    abcV2 lens_shift = {0,0};
-    abcV2 near_far = {0,0};
-};
 
 struct aiMeshSummary
 {
@@ -295,7 +289,7 @@ abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, ai
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);
+abciAPI void            aiCameraGetData(aiCameraSample* sample, CameraData *dst);
 
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);

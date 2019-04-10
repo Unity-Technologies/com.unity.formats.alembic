@@ -11,7 +11,7 @@ aiCameraSample::aiCameraSample(aiCamera *schema)
 {
 }
 
-void aiCameraSample::getData(aiCameraData &dst) const
+void aiCameraSample::getData(CameraData &dst) const
 {
     dst = data;
 }
