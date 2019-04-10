@@ -1,5 +1,8 @@
+using System.Runtime.InteropServices;
+
 namespace UnityEngine.Formats.Alembic.Sdk
 {
+    [StructLayout(LayoutKind.Sequential)]
     struct CameraData
     {
         public Bool visibility { get; set; }
