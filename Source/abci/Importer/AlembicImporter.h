@@ -126,15 +126,10 @@ struct aiXformData
 struct aiCameraData
 {
     bool visibility = true;
-
-    float near_clipping_plane = 0.3f;
-    float far_clipping_plane = 1000.0f;
-    float field_of_view = 60.0f;      // in degree. vertical one
-    float aspect_ratio = 16.0f / 9.0f;
-
-    float focus_distance = 5.0f;     // in cm
-    float focal_length = 0.0f;       // in mm
-    float aperture = 2.4f;          // in cm. vertical one
+    float focal_length = 0;
+    abcV2 sensor_size = {0,0};
+    abcV2 lens_shift = {0,0};
+    abcV2 near_far = {0,0};
 };
 
 struct aiMeshSummary

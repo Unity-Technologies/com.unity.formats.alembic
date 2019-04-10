@@ -229,15 +229,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
     internal struct aiCameraData
     {
         public Bool visibility { get; set; }
-
-        public float nearClippingPlane { get; set; }
-        public float farClippingPlane { get; set; }
-        public float fieldOfView { get; set; }   // in degree. vertical one
-        public float aspectRatio { get; set; }
-
-        public float focusDistance { get; set; } // in cm
-        public float focalLength { get; set; }   // in mm
-        public float aperture { get; set; }      // in cm. vertical one
+        public float focalLength { get; set; }
+        public Vector2 sensorSize { get; set; }
+        public Vector2 lensShift { get; set; }
+        public Vector2 nearFar { get; set; }
     }
 
     internal struct aiPointsSummary

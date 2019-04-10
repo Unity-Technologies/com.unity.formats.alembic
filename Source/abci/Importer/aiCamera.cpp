@@ -44,42 +44,28 @@ void aiCamera::cookSampleBody(Sample& sample)
     auto& dst = sample.data;
 
     dst.visibility = sample.visibility;
+    dst.focal_length = (float)sp.getFocalLength();
+    dst.sensor_size[0] = (float)sp.getHorizontalAperture();
+    dst.sensor_size[1] = (float)sp.getVerticalAperture();
+    dst.lens_shift[0] = (float)sp.getHorizontalFilmOffset();
+    dst.lens_shift[1] = (float)sp.getVerticalFilmOffset();
+    dst.near_far[0] = (float)sp.getNearClippingPlane();
+    dst.near_far[1] = (float)sp.getFarClippingPlane();
 
-    // Note: CameraSample::getFieldOfView() returns the horizontal field of view, we need the verical one
-    static float sRad2Deg = 180.0f / float(M_PI);
-    float focal_length = (float)sp.getFocalLength();
-    float vertical_aperture = (float)sp.getVerticalAperture();
-    if (config.aspect_ratio > 0.0f)
-        vertical_aperture = (float)sp.getHorizontalAperture() / config.aspect_ratio;
-
-    dst.near_clipping_plane = (float)sp.getNearClippingPlane();
-    dst.far_clipping_plane = (float)sp.getFarClippingPlane();
-    dst.field_of_view = 2.0f * atanf(vertical_aperture * 10.0f / (2.0f * focal_length)) * sRad2Deg;
-
-    dst.focus_distance = (float)sp.getFocusDistance();
-    dst.focal_length = focal_length;
-    dst.aperture = vertical_aperture;
-    dst.aspect_ratio = float(sp.getHorizontalAperture() / vertical_aperture);
 
     if (config.interpolate_samples && m_current_time_offset != 0) {
         auto& sp2 = sample.cam_sp2;
         float time_offset = (float)m_current_time_offset;
-        float focal_length2 = (float)sp2.getFocalLength();
-        float vertical_aperture2 = (float)sp2.getVerticalAperture();
-        if (config.aspect_ratio > 0.0f)
-            vertical_aperture2 = (float)sp2.getHorizontalAperture() / config.aspect_ratio;
 
-        float fov2 = 2.0f * atanf(vertical_aperture2 * 10.0f / (2.0f * focal_length2)) * sRad2Deg;
-        dst.near_clipping_plane += time_offset * (float)(sp2.getNearClippingPlane() - sp.getNearClippingPlane());
-        dst.far_clipping_plane += time_offset * (float)(sp2.getFarClippingPlane() - sp.getFarClippingPlane());
-        dst.field_of_view += time_offset * (fov2 - dst.field_of_view);
-
-        dst.focus_distance += time_offset * (float)(sp2.getFocusDistance() - sp.getFocusDistance());
-        dst.focal_length += time_offset * (focal_length2 - focal_length);
-        dst.aperture += time_offset * (vertical_aperture2 - vertical_aperture);
-        dst.aspect_ratio += time_offset * (float(sp2.getHorizontalAperture() / vertical_aperture2) - dst.aspect_ratio);
+        dst.focal_length += time_offset * ((float)sp2.getFocalLength() - dst.focal_length);
+        dst.sensor_size[0] += time_offset * (float)(sp2.getHorizontalAperture() - dst.sensor_size[0]);
+        dst.sensor_size[1] += time_offset * (float)(sp2.getVerticalAperture() - dst.sensor_size[1]);
+        dst.lens_shift[0] += time_offset * (float)(sp2.getHorizontalFilmOffset() - dst.lens_shift[0]);
+        dst.lens_shift[1] += time_offset * (float)(sp2.getVerticalFilmOffset() - dst.lens_shift[1]);
+        dst.near_far[0] += time_offset * (float)(sp2.getNearClippingPlane() - dst.near_far[0]);
+        dst.near_far[1] += time_offset * (float)(sp2.getFarClippingPlane() - dst.near_far[1]);
     }
 
-    if (dst.near_clipping_plane == 0.0f)
-        dst.near_clipping_plane = 0.01f;
+    if (dst.near_far[0] == 0.0f)
+        dst.near_far[0] = 0.01f;
 }
