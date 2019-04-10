@@ -157,20 +157,6 @@ struct aePointsData
     int count = 0;
 };
 
-struct aeCameraData
-{
-    bool visibility = true;
-
-    float near_clipping_plane = 0.3f;
-    float far_clipping_plane = 1000.0f;
-    float field_of_view = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
-    float aspect_ratio = 16.0f / 9.0f;
-
-    float focus_distance = 5.0f;    // in cm
-    float focal_length = 0.0f;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
-    float aperture = 2.4f;          // in cm. vertical one
-};
-
 struct aeWeights4
 {
     float weight[4];
@@ -212,7 +198,7 @@ abciAPI void        aeSetFromPrevious(aeSchema *obj);
 abciAPI void        aeMarkForceInvisible(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
-abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
+abciAPI void        aeCameraWriteSample(aeCamera *obj, const CameraData *data);
 abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
 
 abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);

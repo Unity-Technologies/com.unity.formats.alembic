@@ -219,37 +219,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             this.faceCount = faceCount;
         }
     }
-
-    struct aeCameraData
-    {
-        public Bool visibility;
-
-        public float nearClippingPlane;
-        public float farClippingPlane;
-        public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)
-        public float aspectRatio;
-
-        public float focusDistance; // in cm
-        public float focalLength;   // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
-        public float aperture;      // in cm. vertical one
-
-        public static aeCameraData defaultValue
-        {
-            get
-            {
-                return new aeCameraData
-                {
-                    nearClippingPlane = 0.3f,
-                    farClippingPlane = 1000.0f,
-                    fieldOfView = 60.0f,
-                    aspectRatio = 16.0f / 9.0f,
-                    focusDistance = 5.0f,
-                    focalLength = 0.0f,
-                    aperture = 2.4f,
-                };
-            }
-        }
-    }
+    
 
     struct aeContext
     {
@@ -282,7 +252,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aeObject NewPolyMesh(string name, int tsi) { return NativeMethods.aeNewPolyMesh(self, name, tsi); }
 
         public void WriteSample(ref aeXformData data) { NativeMethods.aeXformWriteSample(self, ref data); }
-        public void WriteSample(ref aeCameraData data) { NativeMethods.aeCameraWriteSample(self, ref data); }
+        public void WriteSample(ref CameraData data) { NativeMethods.aeCameraWriteSample(self, ref data); }
 
         public void WriteSample(ref aePolyMeshData data) { NativeMethods.aePolyMeshWriteSample(self, ref data); }
         public void AddFaceSet(string name) { NativeMethods.aePolyMeshAddFaceSet(self, name); }
@@ -346,7 +316,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
         [DllImport(Abci.Lib)] public static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
-        [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
+        [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref CameraData data);
         [DllImport(Abci.Lib)] public static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
         [DllImport(Abci.Lib)] public static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
@@ -416,7 +386,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
 
-        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref aiCameraData dst);
+        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref CameraData dst);
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSampleSummary(IntPtr sample, ref aiMeshSampleSummary dst);
         [DllImport(Abci.Lib)] public static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);

@@ -7,7 +7,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal class AlembicCamera : AlembicElement
     {
         aiCamera m_abcSchema;
-        aiCameraData m_abcData;
+        CameraData m_abcData;
         Camera m_camera;
 
         internal override aiSchema abcSchema { get { return m_abcSchema; } }

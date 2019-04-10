@@ -225,15 +225,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 scale { get; set; }
         public Bool inherits { get; set; }
     }
-
-    internal struct aiCameraData
-    {
-        public Bool visibility { get; set; }
-        public float focalLength { get; set; }
-        public Vector2 sensorSize { get; set; }
-        public Vector2 lensShift { get; set; }
-        public Vector2 nearFar { get; set; }
-    }
+    
 
     internal struct aiPointsSummary
     {
@@ -470,7 +462,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiCameraSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiCameraSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetData(ref aiCameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
+        public void GetData(ref CameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
     }
 
     internal struct aiPolyMeshSample

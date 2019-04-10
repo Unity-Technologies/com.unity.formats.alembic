@@ -31,7 +31,7 @@ void aeCamera::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeCamera::writeSample(const aeCameraData &data)
+void aeCamera::writeSample(const CameraData &data)
 {
     m_data_local = data;
     m_ctx->addAsync([this]() { writeSampleBody(); });
@@ -42,28 +42,14 @@ void aeCamera::writeSampleBody()
     auto& data = m_data_local;
     writeVisibility(data.visibility);
 
-    const float Rad2Deg = 180.0f / float(M_PI);
-    const float Deg2Rad = float(M_PI) / 180;
+   AbcGeom::CameraSample sample;
+   sample.setFocalLength(data.focal_length);
+   sample.setHorizontalAperture(data.sensor_size[0]);
+   sample.setVerticalAperture(data.sensor_size[1]);
+   sample.setHorizontalFilmOffset(data.sensor_size[0]);
+   sample.setVerticalFilmOffset(data.sensor_size[1]);
+   sample.setNearClippingPlane(data.near_far[0]);
+   sample.setFarClippingPlane(data.near_far[1]);
 
-    if (data.focal_length == 0.0f) {
-        // compute focalLength by fieldOfView and aperture
-        // deformation:
-        //  fieldOfView = atan((aperture * 10.0f) / (2.0f * focalLength)) * Rad2Deg * 2.0f;
-        //  fieldOfView * Deg2Rad / 2.0f = atan((aperture * 10.0f) / (2.0f * focalLength));
-        //  tan(fieldOfView * Deg2Rad / 2.0f) = (aperture * 10.0f) / (2.0f * focalLength);
-        //  tan(fieldOfView * Deg2Rad / 2.0f) * (2.0f * focalLength) = (aperture * 10.0f);
-        //  (2.0f * focalLength) = (aperture * 10.0f) / tan(fieldOfView * Deg2Rad / 2.0f);
-        //  focalLength = (aperture * 10.0f) / tan(fieldOfView * Deg2Rad / 2.0f) / 2.0f;
-
-        data.focal_length = (data.aperture * 10.0f) / std::tan(data.field_of_view * Deg2Rad / 2.0f) / 2.0f;
-    }
-
-    AbcGeom::CameraSample sample;
-    sample.setNearClippingPlane(data.near_clipping_plane);
-    sample.setFarClippingPlane(data.far_clipping_plane);
-    sample.setFocalLength(data.focal_length);
-    sample.setFocusDistance(data.focus_distance);
-    sample.setVerticalAperture(data.aperture);
-    sample.setHorizontalAperture(data.aperture * data.aspect_ratio);
     m_schema.set(sample);
 }

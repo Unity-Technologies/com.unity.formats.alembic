@@ -132,7 +132,7 @@ abciAPI void aeXformWriteSample(aeXform *obj, const aeXformData *data)
     if (obj)
         obj->writeSample(*data);
 }
-abciAPI void aeCameraWriteSample(aeCamera *obj, const aeCameraData *data)
+abciAPI void aeCameraWriteSample(aeCamera *obj, const CameraData *data)
 {
     if (obj)
         obj->writeSample(*data);
