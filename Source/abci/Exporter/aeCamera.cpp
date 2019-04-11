@@ -41,15 +41,16 @@ void aeCamera::writeSampleBody()
 {
     auto& data = m_data_local;
     writeVisibility(data.visibility);
+    auto scale = getConfig().scale_factor;
 
    AbcGeom::CameraSample sample;
    sample.setFocalLength(data.focal_length);
-   sample.setHorizontalAperture(data.sensor_size[0]);
-   sample.setVerticalAperture(data.sensor_size[1]);
-   sample.setHorizontalFilmOffset(data.sensor_size[0]);
-   sample.setVerticalFilmOffset(data.sensor_size[1]);
-   sample.setNearClippingPlane(data.near_far[0]);
-   sample.setFarClippingPlane(data.near_far[1]);
+   sample.setHorizontalAperture(data.sensor_size[0] *0.1); // Param is in cm
+   sample.setVerticalAperture(data.sensor_size[1] *0.1); // Param is in cm
+   sample.setHorizontalFilmOffset(data.lens_shift[0]);
+   sample.setVerticalFilmOffset(data.lens_shift[1]);
+   sample.setNearClippingPlane(data.near_far[0] * scale);
+   sample.setFarClippingPlane(data.near_far[1] * scale);
 
     m_schema.set(sample);
 }
