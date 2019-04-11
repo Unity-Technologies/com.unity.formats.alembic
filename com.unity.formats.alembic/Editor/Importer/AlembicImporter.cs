@@ -161,7 +161,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 AlembicStream.ReconnectStreamsWithPath(fullPath);
 
 #if UNITY_2017_3_OR_NEWER
-                ctx.AddObjectToAsset(go.name, go);
+                ctx.AddObjectToAsset("AbcRoot", go);
                 ctx.SetMainObject(go);
 #else
                 ctx.SetMainAsset(go.name, go);
