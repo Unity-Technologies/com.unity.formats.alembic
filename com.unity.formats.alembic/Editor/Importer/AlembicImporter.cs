@@ -189,7 +189,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        m_defaultMaterial = new Material(Shader.Find("Alembic/Standard"));
+                        m_defaultMaterial = GetMaterial("Standard.shader");
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
                         Add("Default Material", m_defaultMaterial);
@@ -204,7 +204,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultPointsMaterial == null)
                     {
-                        m_defaultPointsMaterial = new Material(Shader.Find("Alembic/Points Standard"));
+                        m_defaultPointsMaterial = GetMaterial("StandardInstanced.shader");
                         m_defaultPointsMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultPointsMaterial.name = "Default Points";
                         Add("Default Points", m_defaultPointsMaterial);
@@ -219,7 +219,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultPointsMotionVectorMaterial == null)
                     {
-                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/Points Motion Vectors"));
+                        m_defaultPointsMotionVectorMaterial = GetMaterial("AlembicPointsMotionVectors.shader");
                         m_defaultPointsMotionVectorMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
                         Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
@@ -235,6 +235,14 @@ namespace UnityEditor.Formats.Alembic.Importer
 #else
                 m_ctx.AddSubAsset(identifier, asset);
 #endif
+            }
+
+            Material GetMaterial(string shaderFile)
+            {
+                var path = Path.Combine("Packages/com.unity.formats.alembic/Runtime/Shaders", shaderFile);
+                var shader =
+                    AssetDatabase.LoadAssetAtPath<Shader>(path);
+                return new Material(shader);
             }
         }
 
