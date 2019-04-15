@@ -123,7 +123,7 @@ publish:
     name: Runner
   commands:
     - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
-    - upm-ci package publish
+    - upm-ci package publish --package-path com.unity.formats.alembic
   triggers:
     tags:
       only:
