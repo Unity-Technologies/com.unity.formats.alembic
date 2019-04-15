@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
-    public class BaseFixture
+    class BaseFixture
     {
         internal AlembicExporter exporter;
         protected readonly List<string> deleteFileList = new List<string>();
@@ -77,6 +77,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             {
                 File.Delete(file);
             }
+            
+            deleteFileList.Clear();
         }
     }
 }

@@ -1,5 +1,7 @@
 editors:
-  - version: trunk
+  - version: 2018.3
+  - version: 2019.1
+  - version: 2019.2
 platforms:
   - name: win
     type: Unity::VM
@@ -22,7 +24,7 @@ build_win:
   artifacts:
     build:
       paths:
-        - "com.unity.formats.alembic/*"
+        - "com.unity.formats.alembic/**/*"
 
 build_mac:
   name: Build Mac
@@ -36,7 +38,7 @@ build_mac:
   artifacts:
     build:
       paths:
-        - "com.unity.formats.alembic/*"
+        - "com.unity.formats.alembic/**/*"
 
 pack:
   name: Pack
@@ -45,8 +47,7 @@ pack:
     image: package-ci/win10:stable
     flavor: m1.large
   commands:
-    - git clone --branch dev --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
-    - npm install upm-ci-utils/ -g
+    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
     - upm-ci package pack --package-path com.unity.formats.alembic
   artifacts:
    packages:
@@ -54,7 +55,7 @@ pack:
        - "upm-ci~/packages/**/*"
    build:
      paths:
-       - "com.unity.formats.alembic/*"
+       - "com.unity.formats.alembic/**/*"
   dependencies:
     - .yamato/upm-ci.yml#build_win
     - .yamato/upm-ci.yml#build_mac
@@ -68,8 +69,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - git clone --branch dev --single-branch git@gitlab.cds.internal.unity3d.com:upm-packages/project-templates/upm-template-utils.git upm-ci-utils
-    - npm install upm-ci-utils/ -g
+    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm 
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
   artifacts:
     logs.zip:

@@ -3,7 +3,12 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiAsync.h"
-
+#include <istream>
+#ifdef WIN32
+    #include <windows.h>
+    #include <io.h>
+    #include <fcntl.h>
+#endif
 
 static std::wstring L(const std::string& s)
 {
@@ -39,7 +44,82 @@ static std::string NormalizePath(const char *in_path)
     return S(path);
 }
 
+#ifdef WIN32
+class lockFreeIStream : public std::ifstream
+{
+private:
+    HANDLE _handle;
 
+    FILE *Init(const wchar_t *name)
+    {
+          _handle = CreateFileW(name,
+            GENERIC_READ,
+            FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+        if (_handle == INVALID_HANDLE_VALUE)
+        {
+            auto errorMsg = GetLastErrorAsString();
+            std::cerr << "Alembic cannot open:" << name <<":"<<errorMsg << std::endl;
+            return nullptr;
+        }
+
+        int nHandle = _open_osfhandle((long)_handle, _O_RDONLY);
+
+        if (nHandle == -1)
+        {
+            ::CloseHandle(_handle);
+            return nullptr;
+        }
+
+        auto fh = _fdopen(nHandle, "rb");
+        if (!fh)
+        {
+            ::CloseHandle(_handle);
+        }
+
+        return fh;
+    }
+    
+public:
+    lockFreeIStream(const wchar_t  *name) : std::ifstream(Init(name)) // Beware of constructors, initializers: Init changes the state of the class itself
+    {}
+    ~lockFreeIStream()
+    {
+        if (_handle != INVALID_HANDLE_VALUE)
+        {
+            auto errorMsg = GetLastErrorAsString();
+            std::cerr << "Alembic cannot close HANDLE:" << errorMsg << std::endl;
+            ::CloseHandle(_handle);
+        }
+    }
+
+private:
+    std::string GetLastErrorAsString()
+    {
+        DWORD errorMessageID = ::GetLastError();
+        if (errorMessageID == 0)
+            return std::string();
+
+        LPSTR messageBuffer = nullptr;
+        size_t size = 
+            FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           NULL, 
+                           errorMessageID, 
+                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
+                           (LPSTR)&messageBuffer, 
+                           0, 
+                           NULL);
+
+        std::string message(messageBuffer, size);
+        LocalFree(messageBuffer);
+
+        return message;
+    }
+};
+#endif
 
 aiContextManager aiContextManager::s_instance;
 
@@ -218,7 +298,7 @@ bool aiContext::load(const char *in_path)
             // (VisualC++'s std::ifstream accepts wide string)
             m_streams.push_back(
 #ifdef WIN32
-                new std::ifstream(wpath.c_str(), std::ios::in | std::ios::binary)
+                new lockFreeIStream(wpath.c_str())
 #elif __linux__
                 new std::ifstream(in_path, std::ios::in | std::ios::binary)
 #else

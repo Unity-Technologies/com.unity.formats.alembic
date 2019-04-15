@@ -1,5 +1,15 @@
 # Changes in Alembic for Unity
 
+## [1.0.3] - 2019-04-9
+### Changes
+- Do not lock Alembic files when Windows
+- Fix InheritXform on files from Blender
+- Fix multibyte character names for Alembic nodes
+- Fix crash from cyclic sampling
+- Fix crash with empty samples
+- Fix standalone player builds for Windows and OSX. Alembic files are now copied in
+  the StreamingAssets folder of the built application
+
 ## [1.0.2] - 2019-03-21
 ### Changes
 - Removed BuildTarget.LinuxStandalone (obsolete) references for 2019.2+
