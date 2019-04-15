@@ -50,7 +50,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         } 
     }
 
-    [ScriptedImporter(3, "abc")]
+    [ScriptedImporter(4, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
