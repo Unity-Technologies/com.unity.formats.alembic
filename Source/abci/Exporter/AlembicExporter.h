@@ -108,35 +108,12 @@ struct aePolyMeshData
 {
     bool visibility = true;
 
-    const int   *faces = nullptr;           // can be null. if null, assume all faces are triangles
-    const int   *indices = nullptr;
-    int         face_count = 0;
-    int         index_count = 0;
-
     const abcV3 *points = nullptr;
-    const abcV3 *velocities = nullptr;      // can be null. if not null, must be same size of positions
     int         point_count = 0;
-
     const abcV3 *normals = nullptr;         // can be null
-    const int   *normal_indices = nullptr;  // can be null. if null, normal_count must be same as point_count or index_count
-    int         normal_count = 0;           // if 0, assume same as position_count
-    int         normal_index_count = 0;
-
     const abcV2 *uv0 = nullptr;             // can be null
-    const int   *uv0_indices = nullptr;     // can be null. if null, uv0_count must be same as point_count or index_count
-    int         uv0_count = 0;              // if 0, assume same as position_count
-    int         uv0_index_count = 0;
-
     const abcV2 *uv1 = nullptr;             // can be null
-    const int   *uv1_indices = nullptr;     // can be null. if null, uv1_count must be same as point_count or index_count
-    int         uv1_count = 0;              // if 0, assume same as position_count
-    int         uv1_index_count = 0;
-
     const abcV4 *colors = nullptr;          // can be null
-    const int   *colors_indices = nullptr;  // can be null. if null, colors_count must be same as point_count or index_count
-    int         colors_count = 0;           // if 0, assume same as position_count
-    int         colors_index_count = 0;
-
     const aeSubmeshData *submeshes = nullptr;
     int submesh_count = 0;
 };
