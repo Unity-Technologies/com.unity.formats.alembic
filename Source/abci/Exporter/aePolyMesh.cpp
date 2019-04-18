@@ -154,10 +154,13 @@ void aePolyMesh::writeSampleBody()
     if (conf.swap_faces) {
         RawVector<int> face_indices;
         auto do_swap = [&](RawVector<int>& dst) {
+            if (dst.empty()){
+                return;
+            }
             int i = 0;
             int num_faces = (int)m_buf_faces.size();
             for (int fi = 0; fi < num_faces; ++fi) {
-                int ngon = m_buf_faces[i];
+                int ngon = m_buf_faces[fi];
                 face_indices.assign(&dst[i], &dst[i + ngon]);
                 for (int ni = 0; ni < ngon; ++ni) {
                     int ini = ngon - ni - 1;
