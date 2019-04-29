@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using Unity.Jobs;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,6 +10,17 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     internal sealed class AlembicStream : IDisposable
     {
+        
+        struct UpdateJob : IJob
+        {
+            public aiContext context;
+            public double time;
+            public void Execute()
+            {
+                context.UpdateSamples(time);
+            }
+        }
+
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
         public static void DisconnectStreamsWithPath(string path)
@@ -55,6 +66,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         double m_time;
         bool m_loaded;
         bool m_streamInterupted;
+        JobHandle m_UpdateSamplesHandle;
 
         internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
@@ -108,13 +120,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_time = time;
             m_context.SetConfig(ref m_config);
             AbcBeforeUpdateSamples(m_abcTreeRoot);
-            m_context.UpdateSamples(m_time);
+            m_UpdateSamplesHandle = new UpdateJob {context = m_context, time = m_time}.Schedule();
+            
             return true;
         }
 
         // returns false if the context needs to be recovered.
         public void AbcUpdateEnd()
         {
+            m_UpdateSamplesHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);
         }
