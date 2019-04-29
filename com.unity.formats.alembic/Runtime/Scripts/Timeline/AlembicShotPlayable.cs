@@ -7,10 +7,8 @@ namespace UnityEngine.Formats.Alembic.Timeline
     {
         public AlembicStreamPlayer streamPlayer { get; set; }
 
-        public override void ProcessFrame(Playable playable, FrameData info, object playerData)
+        public override void PrepareFrame(Playable playable, FrameData info)
         {
-            base.ProcessFrame(playable, info, playerData);
-
             if (streamPlayer == null)
                 return;
 
