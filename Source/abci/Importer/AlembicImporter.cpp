@@ -159,7 +159,6 @@ abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 {
     if (schema) {
-        schema->markForceSync();
         schema->markForceUpdate();
         schema->updateSample(*ss);
     }
@@ -195,14 +194,6 @@ abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name
 {
     return schema->getPropertyByName(name);
 }
-
-abciAPI void aiSampleSync(aiSample * sample)
-{
-    if (sample)
-        sample->waitAsync();
-}
-
-
 
 abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
 {

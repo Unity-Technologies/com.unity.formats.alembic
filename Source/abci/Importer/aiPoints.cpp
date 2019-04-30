@@ -37,7 +37,6 @@ aiPointsSample::aiPointsSample(aiPoints *schema)
 
 aiPointsSample::~aiPointsSample()
 {
-    waitAsync();
 }
 
 void aiPointsSample::fillData(aiPointsData &data)
@@ -66,24 +65,13 @@ void aiPointsSample::fillData(aiPointsData &data)
         data.size = m_bb_size;
     };
 
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_copy = std::async(std::launch::async, body);
+    body();
 }
 
 void aiPointsSample::getSummary(aiPointsSampleSummary & dst)
 {
     dst.count = (int)m_points.size();
 }
-
-void aiPointsSample::waitAsync()
-{
-    if (m_async_copy.valid())
-        m_async_copy.wait();
-    m_force_sync = false;
-}
-
 
 aiPoints::aiPoints(aiObject *parent, const abcObject &abc)
     : super(parent, abc)

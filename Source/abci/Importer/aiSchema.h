@@ -11,15 +11,11 @@ public:
     virtual aiSchema* getSchema() const { return m_schema; }
     const aiConfig& getConfig() const;
 
-    virtual void waitAsync() {}
-    void markForceSync();
-
 public:
     bool visibility = true;
 
 protected:
     aiSchema *m_schema = nullptr;
-    bool m_force_sync = false;
 };
 
 
@@ -49,7 +45,6 @@ protected:
     bool m_constant = false;
     bool m_data_updated = false;
     bool m_force_update = false;
-    bool m_force_sync = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
@@ -124,10 +119,7 @@ public:
             readSampleBody(sample, idx);
         };
 
-        if (m_force_sync || !getConfig().async_load)
-            body();
-        else
-            m_async_load.m_read = body;
+        body();
     }
 
     virtual void cookSample(Sample& sample)
@@ -136,16 +128,9 @@ public:
             cookSampleBody(sample);
         };
 
-        if (m_force_sync || !getConfig().async_load)
-            body();
-        else
-            m_async_load.m_cook = body;
+        body();
     }
 
-    void waitAsync() override
-    {
-        m_async_load.wait();
-    }
 
 protected:
     virtual void updateSampleBody(const abcSampleSelector& ss)
@@ -195,8 +180,6 @@ protected:
         }
 
         if (sample) {
-            if (m_force_sync)
-                sample->markForceSync();
 
             cookSample(*sample);
             m_data_updated = true;
@@ -208,7 +191,6 @@ protected:
 
         m_last_sample_index = sample_index;
         m_force_update = false;
-        m_force_sync = false;
     }
 
     virtual void readSampleBody(Sample& sample, uint64_t idx) = 0;

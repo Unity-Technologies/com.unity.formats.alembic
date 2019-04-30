@@ -242,11 +242,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
-
-            // wait async copy complete
-            var sample = m_abcSchema.sample;
-            sample.Sync();
-
+            
             bool topologyChanged = m_sampleSummary.topologyChanged;
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
             {

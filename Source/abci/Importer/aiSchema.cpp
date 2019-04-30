@@ -20,9 +20,6 @@ const aiConfig & aiSample::getConfig() const
     return m_schema->getConfig();
 }
 
-void aiSample::markForceSync() { m_force_sync = true; }
-
-
 aiSchema::aiSchema(aiObject *parent, const abcObject &abc)
     : super(parent->getContext(), parent, abc)
 {
@@ -36,7 +33,6 @@ aiSchema::~aiSchema()
 bool aiSchema::isConstant() const { return m_constant; }
 bool aiSchema::isDataUpdated() const { return m_data_updated; }
 void aiSchema::markForceUpdate() { m_force_update = true; }
-void aiSchema::markForceSync() { m_force_sync = true; }
 
 int aiSchema::getNumProperties() const
 {

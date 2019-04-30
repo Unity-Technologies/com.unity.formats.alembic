@@ -422,7 +422,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSubmeshSummaries(IntPtr sample, IntPtr dst);
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshFillVertexBuffer(IntPtr sample, IntPtr vbs, IntPtr ibs);
-        [DllImport(Abci.Lib)] public static extern void aiSampleSync(IntPtr sample);
 
         [DllImport(Abci.Lib)] public static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiPointsFillData(IntPtr sample, IntPtr dst);

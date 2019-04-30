@@ -106,8 +106,6 @@ struct aiConfig
     bool swap_handedness = true;
     bool swap_face_winding = false;
     bool interpolate_samples = true;
-    bool async_load = false;
-
     bool import_point_polygon = true;
     bool import_line_polygon = true;
     bool import_triangle_polygon = true;
@@ -289,8 +287,6 @@ abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
 abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
-
-abciAPI void            aiSampleSync(aiSample* sample);
 
 abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
 

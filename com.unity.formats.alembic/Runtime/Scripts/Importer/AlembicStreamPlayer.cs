@@ -47,14 +47,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return vertexMotionScale; }
             set { vertexMotionScale = value; }
         }
-
-        [SerializeField]
-        private bool asyncLoad = true;
-        public bool AsyncLoad
-        {
-            get { return asyncLoad; }
-            set { asyncLoad = value; }
-        }
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
@@ -104,7 +96,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (lastUpdateTime != CurrentTime || forceUpdate)
             {
                 abcStream.SetVertexMotionScale(VertexMotionScale);
-                abcStream.SetAsyncLoad(AsyncLoad);
                 if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
                     lastUpdateTime = CurrentTime;
