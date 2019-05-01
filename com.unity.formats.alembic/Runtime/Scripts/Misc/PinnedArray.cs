@@ -5,111 +5,8 @@ using System.Runtime.InteropServices;
 namespace UnityEngine.Formats.Alembic.Sdk
 {
 
-    class PinnedObject<T> : IDisposable
-    {
-        T m_data;
-        GCHandle m_gch;
-
-        public PinnedObject(T data)
-        {
-            m_data = data;
-            m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
-        }
-
-        public T Object { get { return m_data; } }
-        public IntPtr Pointer { get { return m_gch.AddrOfPinnedObject(); } }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (m_gch.IsAllocated)
-                    m_gch.Free();
-            }
-        }
-
-        public static implicit operator IntPtr(PinnedObject<T> v) {
-            return v == null ? IntPtr.Zero : v.Pointer;
-        }
-        internal static IntPtr ToIntPtr(PinnedObject<T> v) { return v; }
-    }
-
-
-    class PinnedArray<T> : IDisposable, IEnumerable<T> where T : struct
-    {
-        T[] m_data;
-        GCHandle m_gch;
-
-        public PinnedArray(int size)
-        {
-            m_data = new T[size];
-            m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
-        }
-        public PinnedArray(T[] data, bool clone = false)
-        {
-            if(data == null) { return; }
-            m_data = clone ? (T[])data.Clone() : data;
-            m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
-        }
-
-        public int Length { get { return m_data.Length; } }
-        public T this[int i]
-        {
-            get { return m_data[i]; }
-            set { m_data[i] = value; }
-        }
-
-        public T[] GetArray() { return m_data; }
-        public IntPtr Pointer { get { return m_data.Length == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
-
-        public PinnedArray<T> Clone() { return new PinnedArray<T>((T[])m_data.Clone()); }
-        public bool Assign(T[] source)
-        {
-            if (source != null && m_data.Length == source.Length)
-            {
-                System.Array.Copy(source, m_data, m_data.Length);
-                return true;
-            }
-            return false;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (m_gch.IsAllocated)
-                    m_gch.Free();
-            }
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return (IEnumerator<T>)m_data.GetEnumerator();
-        }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public static implicit operator IntPtr(PinnedArray<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
-        internal static IntPtr ToIntPtr(PinnedArray<T> v) { return v; }
-    }
-
     #region dirty
-    internal static class PinnedListImpl
+    static class PinnedListImpl
     {
         class ListData
         {
@@ -176,25 +73,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             m_list = PinnedListImpl.CreateIntrusiveList(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
-        public PinnedList(T[] data, bool clone = false)
-        {
-            if(data == null)
-            {
-                return;
-            }
-
-            m_data = clone ? (T[])data.Clone() : data;
-            m_list = PinnedListImpl.CreateIntrusiveList(m_data);
-            m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
-        }
-        public PinnedList(List<T> data, bool clone = false)
-        {
-            m_list = clone ? new List<T>(data) : data;
-            m_data = PinnedListImpl.GetInternalArray(m_list);
-            m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
-        }
-
-
+        
         public int Capacity { get { return m_data.Length; } }
         public int Count { get { return m_list.Count; } }
         public T this[int i]
@@ -205,7 +84,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public T[] GetArray() { return m_data; }
         public List<T> List { get { return m_list; } }
-        public IntPtr Pointer { get { return Count == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
+        IntPtr Pointer { get { return Count == 0 ? IntPtr.Zero : m_gch.AddrOfPinnedObject(); } }
 
         public void LockList(Action<List<T>> body)
         {
@@ -238,25 +117,19 @@ namespace UnityEngine.Formats.Alembic.Sdk
             {
                 if (m_gch.IsAllocated)
                     m_gch.Free();
-                m_data = new T[size];
+                m_data = new T[ResizePolicy(size)];
                 m_list = PinnedListImpl.CreateIntrusiveList(m_data);
                 m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
             }
-            else
-            {
-                PinnedListImpl.SetCount(m_list, size);
-            }
+
+            PinnedListImpl.SetCount(m_list, size);
+            
         }
 
         public void Clear()
         {
             if (m_data.Length > 0)
                 PinnedListImpl.SetCount(m_list, 0);
-        }
-
-        public PinnedList<T> Clone()
-        {
-            return new PinnedList<T>(m_list, true);
         }
 
         public void Assign(T[] source)
@@ -267,17 +140,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
             }
             ResizeDiscard(source.Length);
             System.Array.Copy(source, m_data, source.Length);
-        }
-        public void Assign(List<T> sourceList)
-        {
-            if(sourceList == null)
-            {
-                return;
-            }
-            var sourceData = PinnedListImpl.GetInternalArray(sourceList);
-            var count = sourceList.Count;
-            ResizeDiscard(count);
-            System.Array.Copy(sourceData, m_data, count);
         }
 
         public void Dispose()
@@ -305,7 +167,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
 
         public static implicit operator IntPtr(PinnedList<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
-        internal static IntPtr ToIntPtr(PinnedList<T> v) { return v; }
-    }
 
+        static int ResizePolicy(int x)
+        {
+            return 2 * x; 
+        }
+    }
 }
