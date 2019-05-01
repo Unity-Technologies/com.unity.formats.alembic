@@ -493,15 +493,17 @@ namespace UnityEngine.Formats.Alembic.Util
                 dst.visibility = src.gameObject.activeSelf;
                 
                 dst.nearFar = new Vector2(src.nearClipPlane, src.farClipPlane);
-                dst.lensShift = src.lensShift;
-                dst.sensorSize = src.sensorSize;
                 if (src.usePhysicalProperties)
                 {
                     dst.focalLength = src.focalLength;
+                    dst.lensShift = src.lensShift;
+                    dst.sensorSize = src.sensorSize;
                 }
                 else
                 {
-                    dst.focalLength = (float)(src.sensorSize[0] / 2 / Math.Tan(src.fieldOfView / 2));
+                    const float deg2rad =  Mathf.PI / 180;
+                    dst.focalLength = (float)(Screen.height / 2 / Math.Tan( deg2rad * src.fieldOfView / 2));
+                    dst.sensorSize= new Vector2(Screen.width, Screen.height);
                 }
             }
         }
