@@ -1,4 +1,13 @@
 # Changes in Alembic for Unity
+## [1.0.4] - 2019-05-2
+### Changes
+- Fixed crash in the Exporter when using SwapFaces
+- Fixed Branch recording mode in the Exporter
+- Fixed Scene references being lost, when alembic prefab was being renamed
+- Fixed initial import of Alembic files when both the alembic Package and assets are
+  imported at the same time
+- Fixed regression, where absolute paths to alembic assets were stored
+- Alembic importer and Exporter correctly deals with physical Camera parameters
 
 ## [1.0.3] - 2019-04-9
 ### Changes
