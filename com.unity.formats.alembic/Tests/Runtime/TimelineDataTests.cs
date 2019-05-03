@@ -115,9 +115,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
         
         
-        // Crash when doing swapFaces ( FTV-124 )
         [UnityTest]
-        public IEnumerator TestSwapFaces([Values(/*true,*/ false)]bool swap)
+        public IEnumerator TestSwapFaces([Values(true, false)]bool swap)
         {
             director.Play();
             exporter.recorder.settings.conf.SwapFaces = swap;

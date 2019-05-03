@@ -3,7 +3,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]  
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")] 
 
@@ -170,54 +171,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
     struct aePolyMeshData
     {
         public Bool visibility { get; set; }
-
-        public IntPtr faces { get; set; } // int*. if null, assume all faces are triangles
-
-        public IntPtr indexes { get; set; } // int*.
-
-        public int faceCount { get; set; }
-
-        public int indexCount { get; set; }
         public IntPtr points { get; set; }  // Vector3*
-
-        public IntPtr velocities { get; set; } // Vector3*. can be null
-
         public int pointCount { get; set; }
-
         public IntPtr   normals;          // Vector3*. can be null
-        public IntPtr   normalIndices;    // int*. if null, assume same as indices
-        public int      normalCount;      // if 0, assume same as pointCount
-        public int      normalIndexCount; // if 0, assume same as indexCount
-
-        public IntPtr   uv0;              // Vector2*. can be null
-        public IntPtr   uv0Indices;       // int*. if null, assume same as indices
-        public int      uv0Count;         // if 0, assume same as pointCount
-        public int      uv0IndexCount;    // if 0, assume same as indexCount
-        
+        public IntPtr   uv0;              // Vector2*. can be null        
         public IntPtr   uv1;              // Vector2*. can be null
-        public IntPtr   uv1Indices;       // int*. if null, assume same as indices
-        public int      uv1Count;         // if 0, assume same as pointCount
-        public int      uv1IndexCount;    // if 0, assume same as indexCount
-        
         public IntPtr   colors;           // Vector2*. can be null
-        public IntPtr   colorIndices;     // int*. if null, assume same as indices
-        public int      colorCount;       // if 0, assume same as pointCount
-        public int      colorIndexCount;  // if 0, assume same as indexCount
-
         public IntPtr   submeshes;        // aeSubmeshData*. can be null
         public int      submeshCount;
-    }
-
-    struct aeFaceSetData
-    {
-        public IntPtr faces;
-        public int faceCount;
-
-        public aeFaceSetData(IntPtr faces, int faceCount)
-        {
-            this.faces = faces;
-            this.faceCount = faceCount;
-        }
     }
 
     struct aeCameraData

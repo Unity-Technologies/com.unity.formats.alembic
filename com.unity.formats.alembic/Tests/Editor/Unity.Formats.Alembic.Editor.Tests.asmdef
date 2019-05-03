@@ -1,0 +1,14 @@
+{
+    "name": "Unity.Formats.Alembic.UnitTests.Editor",
+    "references": [
+        "Unity.Formats.Alembic.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

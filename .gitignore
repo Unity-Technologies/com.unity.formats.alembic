@@ -53,7 +53,9 @@ com.unity.formats.alembic/.npmignore
 com.unity.formats.alembic/package.json
 com.unity.formats.alembic/Runtime/Plugins
 automation
-
+cmake-build-debug
+*.csproj
+*.sln
 
 
 # Ignore npmrc because it has your own personal key. It needs to be next
