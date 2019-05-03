@@ -50,7 +50,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         } 
     }
 
-    [ScriptedImporter(3, "abc")]
+    [ScriptedImporter(4, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -161,7 +161,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 AlembicStream.ReconnectStreamsWithPath(fullPath);
 
 #if UNITY_2017_3_OR_NEWER
-                ctx.AddObjectToAsset(go.name, go);
+                ctx.AddObjectToAsset("AbcRoot", go);
                 ctx.SetMainObject(go);
 #else
                 ctx.SetMainAsset(go.name, go);
