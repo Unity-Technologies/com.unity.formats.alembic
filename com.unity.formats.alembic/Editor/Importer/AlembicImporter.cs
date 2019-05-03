@@ -240,6 +240,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             Material GetMaterial(string shaderFile)
             {
                 var path = Path.Combine("Packages/com.unity.formats.alembic/Runtime/Shaders", shaderFile);
+                m_ctx.DependsOnSourceAsset(path);
                 var shader =
                     AssetDatabase.LoadAssetAtPath<Shader>(path);
                 return new Material(shader);
