@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -313,10 +314,20 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static bool ToBool(aiContext v) { return v; }
 
         public static aiContext Create(int uid) { return NativeMethods.aiContextCreate(uid); }
-        public static void DestroyByPath(string path) { NativeMethods.aiClearContextsWithPath(path); }
+
+        public static void DestroyByPath(string path)
+        {
+            var fullPath = Path.GetFullPath(path);
+            NativeMethods.aiClearContextsWithPath(fullPath);
+        }
 
         public void Destroy() { NativeMethods.aiContextDestroy(self); self = IntPtr.Zero; }
-        public bool Load(string path) { return NativeMethods.aiContextLoad(self, path); }
+
+        public bool Load(string path)
+        {
+            var fullPath = Path.GetFullPath(path);
+            return NativeMethods.aiContextLoad(self, fullPath);
+        }
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 

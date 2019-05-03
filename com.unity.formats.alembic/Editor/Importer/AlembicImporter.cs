@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
 
-            AlembicStream.DisconnectStreamsWithPath(Path.GetFullPath(assetPath));
+            AlembicStream.DisconnectStreamsWithPath(assetPath);
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -38,13 +38,12 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDstPath = Path.GetFullPath(to);
-            var streamSrcPath = Path.GetFullPath(from);
-            AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
-            AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
+
+            AlembicStream.DisconnectStreamsWithPath(from);
+            AlembicStream.RemapStreamsWithPath(from,to);
             
             AssetDatabase.Refresh(ImportAssetOptions.Default);
-    		AlembicStream.ReconnectStreamsWithPath(streamDstPath);
+    		AlembicStream.ReconnectStreamsWithPath(to);
  
             return AssetMoveResult.DidNotMove;
         } 
@@ -125,15 +124,15 @@ namespace UnityEditor.Formats.Alembic.Importer
                 return;
             }
             
-            var fullPath = Path.GetFullPath(ctx.assetPath);
-            AlembicStream.DisconnectStreamsWithPath(fullPath);
+            var path = ctx.assetPath;
+            AlembicStream.DisconnectStreamsWithPath(path);
 
-            var fileName = Path.GetFileNameWithoutExtension(fullPath);
+            var fileName = Path.GetFileNameWithoutExtension(path);
             var go = new GameObject(fileName);
             
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.PathToAbc = fullPath;
+            streamDescriptor.PathToAbc = path;
             streamDescriptor.Settings = StreamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
@@ -158,7 +157,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 subassets.Add(streamDescriptor.name, streamDescriptor);
                 GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
-                AlembicStream.ReconnectStreamsWithPath(fullPath);
+                AlembicStream.ReconnectStreamsWithPath(path);
 
 #if UNITY_2017_3_OR_NEWER
                 ctx.AddObjectToAsset("AbcRoot", go);
