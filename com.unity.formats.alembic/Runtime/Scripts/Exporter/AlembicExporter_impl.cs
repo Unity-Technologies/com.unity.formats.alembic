@@ -461,20 +461,14 @@ namespace UnityEngine.Formats.Alembic.Util
         class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-            AlembicCameraParams m_params;
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
-            aeCameraData m_data = aeCameraData.defaultValue;
+            CameraData m_data;
 
             public override void Setup(Component c)
             {
                 var target = c as Camera;
                 abcObject = parent.abcObject.NewCamera(target.name, timeSamplingIndex);
                 m_target = target;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-                m_params = target.GetComponent<AlembicCameraParams>();
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
-
+                
                 var trans = parent as TransformCapturer;
                 if (trans != null)
                     trans.invertForward = true;
@@ -493,22 +487,25 @@ namespace UnityEngine.Formats.Alembic.Util
                 abcObject.WriteSample(ref m_data);
             }
 
-            void Capture(ref aeCameraData dst)
+            void Capture(ref CameraData dst)
             {
                 var src = m_target;
                 dst.visibility = src.gameObject.activeSelf;
-                dst.nearClippingPlane = src.nearClipPlane;
-                dst.farClippingPlane = src.farClipPlane;
-                dst.fieldOfView = src.fieldOfView;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-                if (m_params != null)
+                dst.nearClipPlane = src.nearClipPlane;
+                dst.farClipPlane = src.farClipPlane;
+                
+                if (src.usePhysicalProperties)
                 {
-                    dst.focalLength = m_params.m_focalLength;
-                    dst.focusDistance = m_params.m_focusDistance;
-                    dst.aperture = m_params.m_aperture;
-                    dst.aspectRatio = m_params.AspectRatio;
+                    dst.focalLength = src.focalLength;
+                    dst.lensShift = src.lensShift;
+                    dst.sensorSize = src.sensorSize;
                 }
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
+                else
+                {
+                    const float deg2rad =  Mathf.PI / 180;
+                    dst.focalLength = (float)(Screen.height / 2 / Math.Tan( deg2rad * src.fieldOfView / 2));
+                    dst.sensorSize= new Vector2(Screen.width, Screen.height);
+                }
             }
         }
 

@@ -15,11 +15,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal abstract aiSchema abcSchema { get; }
         public abstract bool visibility { get; }
 
-        public T GetOrAddComponent<T>() where T : Component
+        public Camera GetOrAddCamera()
         {
-            var c = abcTreeNode.gameObject.GetComponent<T>();
+            var c = abcTreeNode.gameObject.GetComponent<Camera>();
             if (c == null)
-                c = abcTreeNode.gameObject.AddComponent<T>();
+            {
+                c = abcTreeNode.gameObject.AddComponent<Camera>();
+                c.usePhysicalProperties = true;
+            }
+
             return c;
         }
 

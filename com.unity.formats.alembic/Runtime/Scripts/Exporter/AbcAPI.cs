@@ -243,7 +243,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aeObject NewPolyMesh(string name, int tsi) { return NativeMethods.aeNewPolyMesh(self, name, tsi); }
 
         public void WriteSample(ref aeXformData data) { NativeMethods.aeXformWriteSample(self, ref data); }
-        public void WriteSample(ref aeCameraData data) { NativeMethods.aeCameraWriteSample(self, ref data); }
+        public void WriteSample(ref CameraData data) { NativeMethods.aeCameraWriteSample(self, ref data); }
 
         public void WriteSample(ref aePolyMeshData data) { NativeMethods.aePolyMeshWriteSample(self, ref data); }
         public void AddFaceSet(string name) { NativeMethods.aePolyMeshAddFaceSet(self, name); }
@@ -307,7 +307,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
         [DllImport(Abci.Lib)] public static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
-        [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref aeCameraData data);
+        [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref CameraData data);
         [DllImport(Abci.Lib)] public static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
         [DllImport(Abci.Lib)] public static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
@@ -377,7 +377,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
 
-        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref aiCameraData dst);
+        [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref CameraData dst);
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSampleSummary(IntPtr sample, ref aiMeshSampleSummary dst);
         [DllImport(Abci.Lib)] public static extern int aiPolyMeshGetSplitSummaries(IntPtr sample, IntPtr dst);

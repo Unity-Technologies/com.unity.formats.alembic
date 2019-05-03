@@ -242,7 +242,7 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
         sample->fillVertexBuffer(vbs, ibs);
 }
 
-abciAPI void aiCameraGetData(aiCameraSample* sample, aiCameraData *dst)
+abciAPI void aiCameraGetData(aiCameraSample* sample, CameraData *dst)
 {
     if (sample)
     {

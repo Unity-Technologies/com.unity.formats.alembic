@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <../Foundation/AbcNodes/CameraData.h>
+
 class aiContext;
 class aiTimeSampling;
 class aiObject;
@@ -123,19 +125,6 @@ struct aiXformData
     bool inherits = false;
 };
 
-struct aiCameraData
-{
-    bool visibility = true;
-
-    float near_clipping_plane = 0.3f;
-    float far_clipping_plane = 1000.0f;
-    float field_of_view = 60.0f;      // in degree. vertical one
-    float aspect_ratio = 16.0f / 9.0f;
-
-    float focus_distance = 5.0f;     // in cm
-    float focal_length = 0.0f;       // in mm
-    float aperture = 2.4f;          // in cm. vertical one
-};
 
 struct aiMeshSummary
 {
@@ -300,7 +289,7 @@ abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, ai
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-abciAPI void            aiCameraGetData(aiCameraSample* sample, aiCameraData *dst);
+abciAPI void            aiCameraGetData(aiCameraSample* sample, CameraData *dst);
 
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
