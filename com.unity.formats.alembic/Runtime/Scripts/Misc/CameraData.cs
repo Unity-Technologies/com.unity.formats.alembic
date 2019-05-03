@@ -9,6 +9,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public float focalLength { get; set; }
         public Vector2 sensorSize { get; set; }
         public Vector2 lensShift { get; set; }
-        public Vector2 nearFar { get; set; }
+        public float nearClipPlane { get; set; }
+        public float farClipPlane { get; set; }
     }
 }

@@ -38,8 +38,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_camera.sensorSize = m_abcData.sensorSize;
             m_camera.lensShift = m_abcData.lensShift;
 
-            m_camera.nearClipPlane = m_abcData.nearFar.x;
-            m_camera.farClipPlane = m_abcData.nearFar.y;
+            m_camera.nearClipPlane = m_abcData.nearClipPlane;
+            m_camera.farClipPlane = m_abcData.farClipPlane;
         }
     }
 }

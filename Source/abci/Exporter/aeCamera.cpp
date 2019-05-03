@@ -49,8 +49,8 @@ void aeCamera::writeSampleBody()
    sample.setVerticalAperture(data.sensor_size[1] *0.1); // Param is in cm
    sample.setHorizontalFilmOffset(data.lens_shift[0]);
    sample.setVerticalFilmOffset(data.lens_shift[1]);
-   sample.setNearClippingPlane(data.near_far[0] * scale);
-   sample.setFarClippingPlane(data.near_far[1] * scale);
+   sample.setNearClippingPlane(data.near_clip_plane * scale);
+   sample.setFarClippingPlane(data.far_clip_plane * scale);
 
     m_schema.set(sample);
 }

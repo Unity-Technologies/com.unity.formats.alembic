@@ -51,8 +51,8 @@ void aiCamera::cookSampleBody(Sample& sample)
     dst.sensor_size[1] = (float)sp.getVerticalAperture() * lensSizeFactor ;
     dst.lens_shift[0] = (float)sp.getHorizontalFilmOffset();
     dst.lens_shift[1] = (float)sp.getVerticalFilmOffset();
-    dst.near_far[0] = (float)sp.getNearClippingPlane() * config.scale_factor;
-    dst.near_far[1] = (float)sp.getFarClippingPlane() * config.scale_factor;
+    dst.near_clip_plane = (float)sp.getNearClippingPlane() * config.scale_factor;
+    dst.far_clip_plane = (float)sp.getFarClippingPlane() * config.scale_factor;
 
 
     if (config.interpolate_samples && m_current_time_offset != 0) {
@@ -64,10 +64,10 @@ void aiCamera::cookSampleBody(Sample& sample)
         dst.sensor_size[1] += time_offset * (float)(sp2.getVerticalAperture() * lensSizeFactor - dst.sensor_size[1]);
         dst.lens_shift[0] += time_offset * (float)(sp2.getHorizontalFilmOffset() - dst.lens_shift[0]);
         dst.lens_shift[1] += time_offset * (float)(sp2.getVerticalFilmOffset() - dst.lens_shift[1]);
-        dst.near_far[0] += time_offset * (float)(sp2.getNearClippingPlane() * config.scale_factor - dst.near_far[0]);
-        dst.near_far[1] += time_offset * (float)(sp2.getFarClippingPlane() * config.scale_factor - dst.near_far[1]);
+        dst.near_clip_plane += time_offset * (float)(sp2.getNearClippingPlane() * config.scale_factor - dst.near_clip_plane);
+        dst.far_clip_plane += time_offset * (float)(sp2.getFarClippingPlane() * config.scale_factor - dst.far_clip_plane);
     }
 
-    if (dst.near_far[0] == 0.0f)
-        dst.near_far[0] = 0.01f;
+    if (dst.near_clip_plane == 0.0f)
+        dst.near_clip_plane = 0.01f;
 }

@@ -491,8 +491,9 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 var src = m_target;
                 dst.visibility = src.gameObject.activeSelf;
+                dst.nearClipPlane = src.nearClipPlane;
+                dst.farClipPlane = src.farClipPlane;
                 
-                dst.nearFar = new Vector2(src.nearClipPlane, src.farClipPlane);
                 if (src.usePhysicalProperties)
                 {
                     dst.focalLength = src.focalLength;
