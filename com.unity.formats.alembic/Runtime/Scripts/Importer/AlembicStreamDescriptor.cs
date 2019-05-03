@@ -11,10 +11,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             // For standalone builds, the path should be relative to the StreamingAssets
             get
             {
-#if UNITY_STANDALONE
-                return System.IO.Path.Combine(Application.streamingAssetsPath, pathToAbc);
-#else
+#if UNITY_EDITOR
                 return pathToAbc;
+#else
+                return System.IO.Path.Combine(Application.streamingAssetsPath, pathToAbc);
 #endif
             }
             set { pathToAbc = value; }

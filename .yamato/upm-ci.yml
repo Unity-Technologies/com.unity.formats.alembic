@@ -137,6 +137,7 @@ publish:
       paths:
         - "upm-ci~/package/*.tgz"
   dependencies:
+    - .yamato/upm-ci.yml#pack
   {% for editor in editors %}
   {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}

@@ -3,7 +3,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]  
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")] 
 
@@ -170,56 +171,46 @@ namespace UnityEngine.Formats.Alembic.Sdk
     struct aePolyMeshData
     {
         public Bool visibility { get; set; }
-
-        public IntPtr faces { get; set; } // int*. if null, assume all faces are triangles
-
-        public IntPtr indexes { get; set; } // int*.
-
-        public int faceCount { get; set; }
-
-        public int indexCount { get; set; }
         public IntPtr points { get; set; }  // Vector3*
-
-        public IntPtr velocities { get; set; } // Vector3*. can be null
-
         public int pointCount { get; set; }
-
         public IntPtr   normals;          // Vector3*. can be null
-        public IntPtr   normalIndices;    // int*. if null, assume same as indices
-        public int      normalCount;      // if 0, assume same as pointCount
-        public int      normalIndexCount; // if 0, assume same as indexCount
-
-        public IntPtr   uv0;              // Vector2*. can be null
-        public IntPtr   uv0Indices;       // int*. if null, assume same as indices
-        public int      uv0Count;         // if 0, assume same as pointCount
-        public int      uv0IndexCount;    // if 0, assume same as indexCount
-        
+        public IntPtr   uv0;              // Vector2*. can be null        
         public IntPtr   uv1;              // Vector2*. can be null
-        public IntPtr   uv1Indices;       // int*. if null, assume same as indices
-        public int      uv1Count;         // if 0, assume same as pointCount
-        public int      uv1IndexCount;    // if 0, assume same as indexCount
-        
         public IntPtr   colors;           // Vector2*. can be null
-        public IntPtr   colorIndices;     // int*. if null, assume same as indices
-        public int      colorCount;       // if 0, assume same as pointCount
-        public int      colorIndexCount;  // if 0, assume same as indexCount
-
         public IntPtr   submeshes;        // aeSubmeshData*. can be null
         public int      submeshCount;
     }
 
-    struct aeFaceSetData
+    struct aeCameraData
     {
-        public IntPtr faces;
-        public int faceCount;
+        public Bool visibility;
 
-        public aeFaceSetData(IntPtr faces, int faceCount)
+        public float nearClippingPlane;
+        public float farClippingPlane;
+        public float fieldOfView;   // in degree. relevant only if focalLength==0.0 (default)
+        public float aspectRatio;
+
+        public float focusDistance; // in cm
+        public float focalLength;   // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 0.035f.
+        public float aperture;      // in cm. vertical one
+
+        public static aeCameraData defaultValue
         {
-            this.faces = faces;
-            this.faceCount = faceCount;
+            get
+            {
+                return new aeCameraData
+                {
+                    nearClippingPlane = 0.3f,
+                    farClippingPlane = 1000.0f,
+                    fieldOfView = 60.0f,
+                    aspectRatio = 16.0f / 9.0f,
+                    focusDistance = 5.0f,
+                    focalLength = 0.0f,
+                    aperture = 2.4f,
+                };
+            }
         }
     }
-    
 
     struct aeContext
     {
