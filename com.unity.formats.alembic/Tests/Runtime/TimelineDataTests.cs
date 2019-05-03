@@ -1,14 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
-using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.SceneManagement;
+using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
@@ -16,19 +13,20 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     class TimelineDataTests : BaseFixture
     {
         PlayableDirector director;
+        GameObject cube;
 
         static IEnumerator TestCubeContents(GameObject go)
         {
             var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
             var player = root.GetComponent<AlembicStreamPlayer>();
 
-            var cube = root.transform.GetChild(1).gameObject; // First is Camera, Second is Cube
+            var cubeGO = root.GetComponentInChildren<MeshRenderer>().gameObject;
             player.CurrentTime = 0;
             yield return new WaitForEndOfFrame();
-            var t0 = cube.transform.localPosition;
+            var t0 = cubeGO.transform.position;
             player.CurrentTime = (float)player.duration;
             yield return new WaitForEndOfFrame();
-            var t1  = cube.transform.localPosition;
+            var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0,t1);
         }
         
@@ -43,11 +41,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var aTrack = timeline.CreateTrack<AnimationTrack>(null, "CubeAnimation");
             aTrack.CreateClip(clip).displayName = "CubeClip";
             
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.AddComponent<Animator>();
             director = cube.AddComponent<PlayableDirector>();
             director.playableAsset = timeline;
             director.SetGenericBinding(aTrack,cube);
+        }
+        
+        [UnityTest]
+        public IEnumerator  TestTargetBranchExport()
+        {
+            director.Play();
+            exporter.recorder.settings.Scope = ExportScope.TargetBranch;
+            exporter.recorder.settings.TargetBranch = cube;
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            yield return TestCubeContents(go);
         }
 
         [UnityTest]
