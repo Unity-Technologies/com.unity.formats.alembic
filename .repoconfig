@@ -1,0 +1,23 @@
+# ** Note that all patterns below are case-insensitive
+
+[version]
+repoconfig=5
+minimum-unity-meta=33
+
+[processors]
+# best guess at c++/cli from path
+uncrustify.cppcli= (\bwinrt|\/metroplayer\/).*\.(cpp|h)$
+
+[format]
+path-ignore=<<EOT
+# specially named folders that will be matched anywhere in a path (e.g. all files under any 'External' will be ignored)
+(^|/)(
+     External
+)(/|$)
+|
+(^|/)(
+     Source/abci/googletest
+)(/|$)
+|
+.*\.meta
+EOT
