@@ -16,7 +16,6 @@ void aiXformSample::getData(aiXformData &dst) const
     dst = data;
 }
 
-
 aiXform::aiXform(aiObject *parent, const abcObject &abc)
     : super(parent, abc)
 {
@@ -53,8 +52,8 @@ void aiXform::cookSampleBody(Sample& sample)
         Imath::Quatd rot2;
         Imath::V3d trans2;
         decompose(sample.xf_sp2.getMatrix(), scale2, shear, rot2, trans2);
-        scale += (scale2 - scale)* m_current_time_offset;
-        trans += (trans2 - trans)* m_current_time_offset;
+        scale += (scale2 - scale) * m_current_time_offset;
+        trans += (trans2 - trans) * m_current_time_offset;
         rot = Imath::slerpShortestArc(rot, rot2, (double)m_current_time_offset);
     }
 

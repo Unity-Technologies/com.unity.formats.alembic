@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Timeline;
 
 namespace UnityEngine.Formats.Alembic.Timeline

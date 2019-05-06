@@ -26,8 +26,8 @@
 #define abciImpl
 
 #if defined(aiDebug)
-    void aiLogPrint(const char* fmt, ...);
-    void aiLogPrint(const wchar_t* fmt, ...);
+void aiLogPrint(const char* fmt, ...);
+void aiLogPrint(const wchar_t* fmt, ...);
     #define DebugLog(...)       aiLogPrint("abci Log: " __VA_ARGS__)
     #define DebugWarning(...)   aiLogPrint("abci Warning: " __VA_ARGS__)
     #define DebugError(...)     aiLogPrint("abci Error: "  __VA_ARGS__)

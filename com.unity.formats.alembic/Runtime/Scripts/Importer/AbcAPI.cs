@@ -199,7 +199,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiPolyMeshData(
             IntPtr positions, IntPtr velocities, IntPtr normals,
             IntPtr tangents, IntPtr uv0, IntPtr uv1, IntPtr colors,
-            IntPtr indices, int vertexCount, int indexCount, 
+            IntPtr indices, int vertexCount, int indexCount,
             Vector3 center, Vector3 extents)
         {
             this.positions = positions;
@@ -216,7 +216,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             this.extents = extents;
         }
     }
-    
+
     internal struct aiSubmeshData
     {
         public IntPtr indexes;
@@ -232,7 +232,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 scale { get; set; }
         public Bool inherits { get; set; }
     }
-    
+
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct aiPointsSummary
@@ -243,7 +243,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantVelocities { get; set; }
         public Bool constantIDs { get; set; }
     };
-    
+
     internal struct aiPointsSampleSummary
     {
         public int count { get; set; }
@@ -263,7 +263,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 boundsExtents;
 
         public aiPointsData(
-            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids, 
+            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids,
             int count, Vector3 boundsCenter, Vector3 boundsExtents)
         {
             this.visibility = visibility;
@@ -275,7 +275,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             this.boundsExtents = boundsExtents;
         }
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct aiPropertyData
     {
@@ -291,7 +291,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal static class Abci {
+    internal static class Abci
+    {
 #if UNITY_EDITOR_OSX
         internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
 #elif UNITY_EDITOR_LINUX
@@ -302,7 +303,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal const string Lib = "abci";
 #endif
     }
-    
+
     internal struct aiContext
     {
         internal IntPtr self;
@@ -324,6 +325,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             var fullPath = Path.GetFullPath(path);
             return NativeMethods.aiContextLoad(self, fullPath);
         }
+
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 
@@ -375,7 +377,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void EachChild(Action<aiObject> act)
         {
-            if(act == null)
+            if (act == null)
             {
                 return;
             }

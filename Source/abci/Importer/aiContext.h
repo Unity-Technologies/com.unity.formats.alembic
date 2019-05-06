@@ -49,7 +49,7 @@ private:
 class aiContext
 {
 public:
-    explicit aiContext(int uid=-1);
+    explicit aiContext(int uid = -1);
     ~aiContext();
 
     bool load(const char *path);

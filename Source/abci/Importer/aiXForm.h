@@ -2,7 +2,7 @@
 
 class aiXformSample : public aiSample
 {
-using super = aiSample;
+    using super = aiSample;
 public:
     aiXformSample(aiXform *schema);
 
@@ -22,7 +22,7 @@ struct aiXformTraits
 
 class aiXform : public aiTSchema<aiXformTraits>
 {
-using super = aiTSchema<aiXformTraits>;
+    using super = aiTSchema<aiXformTraits>;
 public:
     aiXform(aiObject *parent, const abcObject &abc);
 

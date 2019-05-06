@@ -27,27 +27,27 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.CurrentTime = (float)player.duration;
             yield return new WaitForEndOfFrame();
             var t1  = cubeGO.transform.position;
-            Assert.AreNotEqual(t0,t1);
+            Assert.AreNotEqual(t0, t1);
         }
-        
+
         [SetUp]
         public new void SetUp()
         {
             var curve = AnimationCurve.Linear(0, 0, 10, 10);
             var clip = new AnimationClip {hideFlags = HideFlags.DontSave};
-            clip.SetCurve("",typeof(Transform),"localPosition.x",curve);
+            clip.SetCurve("", typeof(Transform), "localPosition.x", curve);
             var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
             timeline.hideFlags = HideFlags.DontSave;
             var aTrack = timeline.CreateTrack<AnimationTrack>(null, "CubeAnimation");
             aTrack.CreateClip(clip).displayName = "CubeClip";
-            
+
             cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.AddComponent<Animator>();
             director = cube.AddComponent<PlayableDirector>();
             director.playableAsset = timeline;
-            director.SetGenericBinding(aTrack,cube);
+            director.SetGenericBinding(aTrack, cube);
         }
-        
+
         [UnityTest]
         public IEnumerator  TestTargetBranchExport()
         {
@@ -56,7 +56,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             exporter.recorder.settings.TargetBranch = cube;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
 
@@ -65,67 +65,66 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             director.Play();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            exporter.OneShot ();
+            exporter.OneShot();
             yield return null;
-            TestAbcImported (exporter.recorder.settings.OutputPath, 0);
+            TestAbcImported(exporter.recorder.settings.OutputPath, 0);
         }
 
         [UnityTest]
-        public IEnumerator TestTimeSampling([Values(aeTimeSamplingType.Acyclic, aeTimeSamplingType.Uniform)]int sampleType)
+        public IEnumerator TestTimeSampling([Values(aeTimeSamplingType.Acyclic, aeTimeSamplingType.Uniform)] int sampleType)
         {
             director.Play();
             exporter.recorder.settings.conf.TimeSamplingType = (aeTimeSamplingType)sampleType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
         [UnityTest]
-        public IEnumerator TestXForm([Values(aeXformType.Matrix,aeXformType.TRS)]int xFormType)
+        public IEnumerator TestXForm([Values(aeXformType.Matrix, aeXformType.TRS)] int xFormType)
         {
             director.Play();
-            exporter.recorder.settings.conf.XformType = (aeXformType) xFormType;
+            exporter.recorder.settings.conf.XformType = (aeXformType)xFormType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
         [UnityTest]
-        public IEnumerator TestArchiveType([Values(aeArchiveType.Ogawa, aeArchiveType.HDF5)]int archiveType)
+        public IEnumerator TestArchiveType([Values(aeArchiveType.Ogawa, aeArchiveType.HDF5)] int archiveType)
         {
             director.Play();
-            exporter.recorder.settings.conf.ArchiveType = (aeArchiveType) archiveType;
+            exporter.recorder.settings.conf.ArchiveType = (aeArchiveType)archiveType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
         [UnityTest]
-        public IEnumerator TestSwapHandedness([Values(true, false)]bool swap)
+        public IEnumerator TestSwapHandedness([Values(true, false)] bool swap)
         {
             director.Play();
             exporter.recorder.settings.conf.SwapHandedness = swap;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
-        
+
         [UnityTest]
-        public IEnumerator TestSwapFaces([Values(true, false)]bool swap)
+        public IEnumerator TestSwapFaces([Values(true, false)] bool swap)
         {
             director.Play();
             exporter.recorder.settings.conf.SwapFaces = swap;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
         [UnityTest]
         public IEnumerator TestScaleFactor()
         {
@@ -133,19 +132,19 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             exporter.recorder.settings.conf.ScaleFactor = 1;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
         [UnityTest]
-        public IEnumerator TestFrameRate([Values(12, 120)]float frameRate)
+        public IEnumerator TestFrameRate([Values(12, 120)] float frameRate)
         {
             director.Play();
             exporter.recorder.settings.conf.FrameRate = frameRate;
             exporter.maxCaptureFrame = 30;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported (exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
     }

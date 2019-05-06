@@ -2,7 +2,7 @@
 #include <../Foundation/AbcNodes/CameraData.h>
 class aiCameraSample : public aiSample
 {
-using super = aiSample;
+    using super = aiSample;
 public:
     aiCameraSample(aiCamera *schema);
 
@@ -23,7 +23,7 @@ struct aiCameraTraits
 
 class aiCamera : public aiTSchema<aiCameraTraits>
 {
-using super = aiTSchema<aiCameraTraits>;
+    using super = aiTSchema<aiCameraTraits>;
 public:
     aiCamera(aiObject *parent, const abcObject &abc);
 

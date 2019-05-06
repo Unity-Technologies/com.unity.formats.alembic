@@ -69,6 +69,6 @@ private:
     std::unique_ptr<aeObject> m_node_top;
     std::vector<aeTimeSamplingPtr> m_timesamplings;
 
-    std::vector<std::function<void()>> m_async_tasks;
+    std::vector<std::function<void()> > m_async_tasks;
     std::future<void> m_async_task_future;
 };

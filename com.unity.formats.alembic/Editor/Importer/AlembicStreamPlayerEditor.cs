@@ -5,7 +5,7 @@ using UnityEngine.Formats.Alembic.Importer;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    [CustomEditor(typeof(AlembicStreamPlayer)),CanEditMultipleObjects]
+    [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
     internal class AlembicStreamPlayerEditor : Editor
     {
         bool m_foldMisc = false;
@@ -31,7 +31,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUI.EndDisabledGroup();
             if (streamDescriptorObj.objectReferenceValue == null)
             {
-                EditorGUILayout.HelpBox("The stream descriptor could not be found.",MessageType.Error);
+                EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
                 return;
             }
 
@@ -83,7 +83,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.Space();
 
             m_foldMisc = EditorGUILayout.Foldout(m_foldMisc, "Misc");
-            if(m_foldMisc)
+            if (m_foldMisc)
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("asyncLoad"));

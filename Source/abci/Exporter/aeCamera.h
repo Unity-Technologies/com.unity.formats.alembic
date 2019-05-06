@@ -2,7 +2,7 @@
 
 class aeCamera : public aeSchema
 {
-using super = aeSchema;
+    using super = aeSchema;
 public:
     aeCamera(aeObject *parent, const char *name, uint32_t tsi);
     abcCamera& getAbcObject() override;

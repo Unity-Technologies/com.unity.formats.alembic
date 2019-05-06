@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
@@ -39,7 +39,6 @@ abciAPI void aiContextDestroy(aiContext* ctx)
         aiContextManager::destroyContext(ctx->getUid());
 }
 
-
 abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
 {
     return ctx ? ctx->load(path) : false;
@@ -63,7 +62,7 @@ abciAPI aiTimeSampling * aiContextGetTimeSampling(aiContext * ctx, int i)
 
 abciAPI void aiContextGetTimeRange(aiContext* ctx, double *begin, double *end)
 {
-    if(ctx && begin && end)
+    if (ctx && begin && end)
         ctx->getTimeRange(*begin, *end);
 }
 
@@ -78,21 +77,21 @@ abciAPI void aiContextUpdateSamples(aiContext* ctx, double time)
         ctx->updateSamples(time);
 }
 
-
 abciAPI int aiTimeSamplingGetSampleCount(aiTimeSampling *self)
 {
     return self ? (int)self->getSampleCount() : 0;
 }
+
 abciAPI double aiTimeSamplingGetTime(aiTimeSampling *self, int index)
 {
     return self ? self->getTime(index) : 0.0;
 }
+
 abciAPI void aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end)
 {
     if (self)
         self->getTimeRange(*start, *end);
 }
-
 
 abciAPI aiContext * aiObjectGetContext(aiObject * obj)
 {
@@ -150,7 +149,6 @@ abciAPI aiPoints* aiObjectAsPoints(aiObject* obj)
     return obj ? dynamic_cast<aiPoints*>(obj) : nullptr;
 }
 
-
 abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 {
     return schema ? schema->getSample() : nullptr;
@@ -158,7 +156,8 @@ abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 
 abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 {
-    if (schema) {
+    if (schema)
+    {
         schema->markForceSync();
         schema->markForceUpdate();
         schema->updateSample(*ss);
@@ -201,8 +200,6 @@ abciAPI void aiSampleSync(aiSample * sample)
     if (sample)
         sample->waitAsync();
 }
-
-
 
 abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
 {
@@ -255,11 +252,13 @@ abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
     if (schema)
         *dst = schema->getSummary();
 }
+
 abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
     if (schema)
         schema->setSort(v);
 }
+
 abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
 {
     if (schema)
@@ -277,7 +276,6 @@ abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData *dst)
     if (sample)
         sample->fillData(*dst);
 }
-
 
 abciAPI aiPropertyType aiPropertyGetType(aiProperty* prop)
 {
@@ -298,6 +296,7 @@ abciAPI void aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector 
 {
     prop->getDataPointer(*ss, *data);
 }
+
 abciAPI void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst)
 {
     prop->copyData(*ss, *dst);

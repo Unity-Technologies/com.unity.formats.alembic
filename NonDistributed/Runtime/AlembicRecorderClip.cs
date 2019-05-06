@@ -23,7 +23,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
-            var gos = new GameObject[] { };
+            var gos = new GameObject[] {};
             if (!string.IsNullOrEmpty(m_targetBranchTag))
             {
                 gos = GameObject.FindGameObjectsWithTag(m_targetBranchTag);

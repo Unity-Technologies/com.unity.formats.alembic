@@ -36,19 +36,16 @@ The Alembic package includes the following Shaders:
 
 ## Motion Blur
 
-Although Unity generates motion vectors for Mesh Renderers and Skinned Mesh Renderers, the Alembic Shaders add motion vector support to Alembic files only. This is useful for rendering that requires motion vectors, such as the Motion Blur post processing effect. 
+Although Unity generates motion vectors for Mesh Renderers and Skinned Mesh Renderers, the Alembic Shaders add motion vector support to Alembic files only. This is useful for rendering that requires motion vectors, such as the Motion Blur post processing effect.
 
 ![Alembic Motion Blur](images/abc_motionblur.png)|
 
 In the above image, on the left the character is unprocessed. On the right you can see the output of motion vector and Motion Blur applied by the post processing stack.
 
-If you want to add the motion vector generation function to your own Shader, add this line inside a SubShader: 
+If you want to add the motion vector generation function to your own Shader, add this line inside a SubShader:
 
 ```c++
-UsePass "Hidden / Alembic / MotionVectors / MOTIONVECTORS" 
+UsePass "Hidden / Alembic / MotionVectors / MOTIONVECTORS"
 ```
 
-Because the velocity data is passed to the fourth UV, Unity uses this data to calculate the apex position of the previous frame. See *AlembicMotionVectors.cginc* for the **MotionVectorData** struct. 
-
-
-
+Because the velocity data is passed to the fourth UV, Unity uses this data to calculate the apex position of the previous frame. See *AlembicMotionVectors.cginc* for the **MotionVectorData** struct.

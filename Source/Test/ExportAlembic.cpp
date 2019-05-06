@@ -89,7 +89,8 @@ TestCase(ExportAlembic_UVAndColorAnimation)
         aePolyMeshWriteSample(mesh, &data);
         aeMarkFrameEnd(ctx);
 
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i)
+        {
             uv0[i].x += 1.0f;
             uv1[i].y -= 1.0f;
             colors[i].x += 1.0f;
@@ -133,7 +134,8 @@ TestCase(ExportAlembic_VisibilityAnimation)
     auto xf = aeNewXform(top, "VisibilityAnimation");
     auto mesh = aeNewPolyMesh(xf, "VisibilityAnimation_Mesh");
     {
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 10; ++i)
+        {
             mesh_data.visibility = i % 2 == 0;
 
             aeMarkFrameBegin(ctx);
@@ -191,13 +193,15 @@ TestCase(ExportAlembic_MultipleTimeSampling)
         aeNewPolyMesh(xform[2], "Mesh", tsi[2]),
     };
 
-    for (int fi = 0; fi < 10; ++fi) {
+    for (int fi = 0; fi < 10; ++fi)
+    {
         xf_data[0].translation.x = 0.1f * fi - 1.0f;
         xf_data[1].translation.y = 0.1f * fi - 1.0f;
         xf_data[2].translation.z = 0.1f * fi - 1.0f;
 
         aeMarkFrameBegin(ctx);
-        for (int oi = 0; oi < 3; ++oi) {
+        for (int oi = 0; oi < 3; ++oi)
+        {
             aeXformWriteSample(xform[oi], &xf_data[oi]);
             aePolyMeshWriteSample(mesh[oi], &mesh_data);
         }
@@ -226,8 +230,10 @@ TestCase(ExportAlembic_LinesAndPoints)
 
     {
         int n = 0;
-        for (int c : counts_poly) {
-            for (int i = 0; i < c; ++i) {
+        for (int c : counts_poly)
+        {
+            for (int i = 0; i < c; ++i)
+            {
                 indices_lines.push_back(indices_poly[n + i]);
                 indices_lines.push_back(indices_poly[n + (i + 1) % c]);
                 counts_lines.push_back(2);

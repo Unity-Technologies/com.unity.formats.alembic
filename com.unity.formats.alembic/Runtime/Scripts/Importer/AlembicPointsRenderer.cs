@@ -199,7 +199,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
 
             // update materials
-            if(m_mpb==null)
+            if (m_mpb == null)
                 m_mpb = new MaterialPropertyBlock();
             if (m_applyTransform)
             {
@@ -298,8 +298,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public void Release()
         {
-            if (m_cbArgs != null) {
-                foreach(var cb in m_cbArgs) { cb.Release(); }
+            if (m_cbArgs != null)
+            {
+                foreach (var cb in m_cbArgs) { cb.Release(); }
                 m_cbArgs = null;
             }
             if (m_cbPoints != null) { m_cbPoints.Release(); m_cbPoints = null; }
@@ -307,7 +308,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (m_cbIDs != null) { m_cbIDs.Release(); m_cbIDs = null; }
             if (m_cmdMotionVector != null) { m_cmdMotionVector.Release(); m_cmdMotionVector = null; }
         }
-
 
         void OnDisable()
         {

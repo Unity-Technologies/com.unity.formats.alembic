@@ -2,7 +2,7 @@
 
 class aeXform : public aeSchema
 {
-using super = aeSchema;
+    using super = aeSchema;
 public:
     aeXform(aeObject *parent, const char *name, uint32_t tsi);
     abcXform& getAbcObject() override;

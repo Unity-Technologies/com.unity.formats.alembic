@@ -1,4 +1,4 @@
-﻿Shader "Alembic/Points Transparent" {
+Shader "Alembic/Points Transparent" {
     Properties {
         //_AlembicID("AlembicID", Float) = 0.0
 
@@ -55,7 +55,7 @@
                 o.texcoord = v.texcoord;
                 return o;
             }
-           
+
             fixed4 frag (v2f IN) : SV_Target
             {
                 fixed4 c = tex2D(_MainTex, IN.texcoord.xy) * _Color;

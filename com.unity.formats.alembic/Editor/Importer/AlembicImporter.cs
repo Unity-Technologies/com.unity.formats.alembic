@@ -40,13 +40,13 @@ namespace UnityEditor.Formats.Alembic.Importer
                 return AssetMoveResult.DidNotMove;
 
             AlembicStream.DisconnectStreamsWithPath(from);
-            AlembicStream.RemapStreamsWithPath(from,to);
-            
+            AlembicStream.RemapStreamsWithPath(from, to);
+
             AssetDatabase.Refresh(ImportAssetOptions.Default);
-    		AlembicStream.ReconnectStreamsWithPath(to);
- 
+            AlembicStream.ReconnectStreamsWithPath(to);
+
             return AssetMoveResult.DidNotMove;
-        } 
+        }
     }
 
     [ScriptedImporter(4, "abc")]
@@ -119,17 +119,17 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            if(ctx == null)
+            if (ctx == null)
             {
                 return;
             }
-            
+
             var path = ctx.assetPath;
             AlembicStream.DisconnectStreamsWithPath(path);
 
             var fileName = Path.GetFileNameWithoutExtension(path);
             var go = new GameObject(fileName);
-            
+
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
             streamDescriptor.PathToAbc = path;
@@ -340,7 +340,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
-            foreach ( var child in node.Children)
+            foreach (var child in node.Children)
                 CollectSubAssets(subassets, child);
         }
 
@@ -366,4 +366,3 @@ namespace UnityEditor.Formats.Alembic.Importer
 }
 
 #endif
-

@@ -9,7 +9,7 @@ struct aiPointsSummaryInternal : public aiPointsSummary
 
 class aiPointsSample : public aiSample
 {
-using super = aiSample;
+    using super = aiSample;
 public:
     aiPointsSample(aiPoints *schema);
     ~aiPointsSample();
@@ -25,7 +25,7 @@ public:
 
     IArray<abcV3> m_points_ref;
 
-    RawVector<std::pair<float, int>> m_sort_data;
+    RawVector<std::pair<float, int> > m_sort_data;
     RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
     RawVector<uint32_t> m_ids;
@@ -42,7 +42,7 @@ struct aiPointsTraits
 
 class aiPoints : public aiTSchema<aiPointsTraits>
 {
-using super = aiTSchema<aiPointsTraits>;
+    using super = aiTSchema<aiPointsTraits>;
 public:
     aiPoints(aiObject *parent, const abcObject &abc);
     ~aiPoints();

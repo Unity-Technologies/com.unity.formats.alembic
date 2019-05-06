@@ -1,4 +1,4 @@
-﻿using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Playables;
 
 namespace UnityEngine.Formats.Alembic.Timeline

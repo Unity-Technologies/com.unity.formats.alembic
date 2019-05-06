@@ -76,7 +76,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             forceUpdate = true;
         }
 
-
         #region messages
         void Start()
         {
@@ -148,6 +147,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             NativeMethods.aiCleanup();
         }
+
         #endregion
     }
 }

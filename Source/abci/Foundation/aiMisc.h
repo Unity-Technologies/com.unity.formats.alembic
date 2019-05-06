@@ -1,8 +1,7 @@
 #pragma once
 
-template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a%b == 0 ? 0 : 1); }
+template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a % b == 0 ? 0 : 1); }
 template<class IntType> inline IntType ceilup(IntType a, IntType b) { return ceildiv(a, b) * b; }
-
 
 
 template<class T> inline T abcMin(const T& a, const T& b) { return std::min(a, b); }
@@ -18,8 +17,6 @@ template<> inline abcV3 abcMax<abcV3>(const abcV3& a, const abcV3& b)
     return abcV3(std::max<float>(a.x, b.x), std::max<float>(a.y, b.y), std::max<float>(a.z, b.z));
 }
 
-
-
 template<class AbcPropertyType, class Body>
 inline void abcEachSamples(AbcPropertyType& prop, const Body &body);
 
@@ -34,12 +31,12 @@ inline std::pair<
 inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop);
 
 
-
 template<class AbcPropertyType, class Body>
 inline void abcEachSamples(AbcPropertyType& prop, const Body &body)
 {
     size_t num_samples = prop.getNumSamples();
-    for (size_t i = 0; i < num_samples; ++i) {
+    for (size_t i = 0; i < num_samples; ++i)
+    {
         body(prop.getValue(aiIndexToSampleSelector((int)i)));
     }
 }
@@ -88,25 +85,30 @@ inline std::pair<
 
 
     auto scan_minmax = [&](const value_type *value, size_t size) {
-        for (size_t i = 0; i < size; ++i) {
-            ret.first = abcMin<value_type>(ret.first, value[i]);
-            ret.second = abcMax<value_type>(ret.second, value[i]);
-        }
-    };
+            for (size_t i = 0; i < size; ++i)
+            {
+                ret.first = abcMin<value_type>(ret.first, value[i]);
+                ret.second = abcMax<value_type>(ret.second, value[i]);
+            }
+        };
 
     sample_ptr_type sample = prop.getValue(aiIndexToSampleSelector(0));
 
     bool first = true;
-    if (sample->size()) {
+    if (sample->size())
+    {
         ret.first = ret.second = sample->get()[0];
         first = false;
     }
     scan_minmax(sample->get(), sample->size());
 
-    if (!prop.isConstant()) {
-        for (size_t i = 1; i < num_samples; ++i) {
+    if (!prop.isConstant())
+    {
+        for (size_t i = 1; i < num_samples; ++i)
+        {
             sample = prop.getValue(aiIndexToSampleSelector((int)i));
-            if (first && sample->size()) {
+            if (first && sample->size())
+            {
                 ret.first = ret.second = sample->get()[0];
                 first = false;
             }
@@ -129,7 +131,8 @@ inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop)
     bmin = (abcV3)bounds.min;
     bmax = (abcV3)bounds.max;
 
-    for (size_t i = 1; i < n; ++i) {
+    for (size_t i = 1; i < n; ++i)
+    {
         prop.get(bounds, aiIndexToSampleSelector((int)i));
         bmin = abcMin<abcV3>(bmin, (abcV3)bounds.min);
         bmax = abcMax<abcV3>(bmax, (abcV3)bounds.max);

@@ -10,7 +10,6 @@ using UnityEngine.Formats.Alembic.Util;
 
 namespace UnityEditor.Formats.Alembic.Exporter
 {
-
     [CustomEditor(typeof(AlembicExporter))]
     internal class AlembicExporterEditor : Editor
     {
@@ -47,7 +46,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                         dir = Path.GetDirectoryName(settings.OutputPath);
                         filename = Path.GetFileName(settings.OutputPath);
                     }
-                    catch (Exception) { }
+                    catch (Exception) {}
 
                     var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
                     if (path.Length > 0)

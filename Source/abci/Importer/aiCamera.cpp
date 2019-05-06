@@ -16,7 +16,6 @@ void aiCameraSample::getData(CameraData &dst) const
     dst = data;
 }
 
-
 aiCamera::aiCamera(aiObject *parent, const abcObject &abc)
     : super(parent, abc)
 {
@@ -46,16 +45,17 @@ void aiCamera::cookSampleBody(Sample& sample)
     const double lensSizeFactor =  10; // Lens size is in cm
 
     dst.visibility = sample.visibility;
-    dst.focal_length = (float)sp.getFocalLength() ;
+    dst.focal_length = (float)sp.getFocalLength();
     dst.sensor_size[0] = (float)sp.getHorizontalAperture() * lensSizeFactor;
-    dst.sensor_size[1] = (float)sp.getVerticalAperture() * lensSizeFactor ;
+    dst.sensor_size[1] = (float)sp.getVerticalAperture() * lensSizeFactor;
     dst.lens_shift[0] = (float)sp.getHorizontalFilmOffset();
     dst.lens_shift[1] = (float)sp.getVerticalFilmOffset();
     dst.near_clip_plane = (float)sp.getNearClippingPlane() * config.scale_factor;
     dst.far_clip_plane = (float)sp.getFarClippingPlane() * config.scale_factor;
 
 
-    if (config.interpolate_samples && m_current_time_offset != 0) {
+    if (config.interpolate_samples && m_current_time_offset != 0)
+    {
         auto& sp2 = sample.cam_sp2;
         float time_offset = (float)m_current_time_offset;
 

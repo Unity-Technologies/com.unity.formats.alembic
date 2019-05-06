@@ -2,7 +2,7 @@
 
 Use the Alembic package to import and export [Alembic](http://www.alembic.io/) files into your Unity Scenes, where you can playback and record animation directly in Unity. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a significant amount of resources, because the modeling and animating does not happen directly inside Unity.
 
-The Alembic package brings in vertex cache data from a 3D modeling software, such as facial animation (skinning) and cloth simulation (dynamics). When you play it back inside Unity, it looks exactly the same as it did in the 3D modeling software. 
+The Alembic package brings in vertex cache data from a 3D modeling software, such as facial animation (skinning) and cloth simulation (dynamics). When you play it back inside Unity, it looks exactly the same as it did in the 3D modeling software.
 
 ## Overview
 
@@ -46,6 +46,3 @@ To verify that the Alembic package is correctly installed, try to add an Alembic
    If it installed properly, you can see some Alembic components in the list:
 
    ![Add Component drop-down menu shows Alembic component options](images/abc_verify.png)
-
-
-

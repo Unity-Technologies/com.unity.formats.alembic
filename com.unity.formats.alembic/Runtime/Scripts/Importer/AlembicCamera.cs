@@ -15,7 +15,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
-            base.AbcSetup( abcObj, abcSchema);
+            base.AbcSetup(abcObj, abcSchema);
             m_abcSchema = (aiCamera)abcSchema;
 
             m_camera = GetOrAddCamera();
