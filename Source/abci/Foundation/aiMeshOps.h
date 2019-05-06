@@ -26,7 +26,8 @@ struct MeshConnectionInfo
     {
         int count = v2f_counts[vi];
         int offset = v2f_offsets[vi];
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < count; ++i)
+        {
             body(v2f_faces[offset + i], v2f_indices[offset + i]);
         }
     }
@@ -37,7 +38,8 @@ struct MeshConnectionInfo
     {
         int count = weld_counts[vi];
         int offset = weld_offsets[vi];
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < count; ++i)
+        {
             body(weld_indices[offset + i]);
         }
     }
@@ -132,7 +134,7 @@ struct MeshRefiner
     template<class T>
     void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, RawVector<T>& new_values, RawVector<int>& new2old)
     {
-        auto attr = newAttribute<IndexedAttribute<T>>();
+        auto attr = newAttribute<IndexedAttribute<T> >();
         attr->values = values;
         attr->indices = indices;
         attr->new_values = &new_values;
@@ -142,7 +144,7 @@ struct MeshRefiner
     template<class T>
     void addExpandedAttribute(const IArray<T>& values, RawVector<T>& new_values, RawVector<int>& new2old)
     {
-        auto attr = newAttribute<ExpandedAttribute<T>>();
+        auto attr = newAttribute<ExpandedAttribute<T> >();
         attr->values = values;
         attr->new_values = &new_values;
         attr->new2old = &new2old;
@@ -244,7 +246,7 @@ private:
         size_t i = attributes.size();
         if (i >= max_attributes)
             return nullptr;
-        auto *ret = new (&buf_attributes[size_attr * i]) AttrType();
+        auto *ret = new(&buf_attributes[size_attr * i]) AttrType();
         attributes.push_back(ret);
         return ret;
     }
@@ -253,9 +255,6 @@ private:
     RawVector<char> buf_attributes;
     static const int max_attributes = 8; // you can increase this if needed
 };
-
-
-
 
 
 inline uint32_t MeshWelder::hash(const abcV3& value)
@@ -272,30 +271,33 @@ inline int MeshWelder::weld(abcV3 *points, int count, const Compare & compare_op
 
     int new_index = 0;
     int *next = &m_hash_table[m_hash_size];
-    for (int vi = 0; vi < m_count; vi++) {
+    for (int vi = 0; vi < m_count; vi++)
+    {
         auto& v = m_points[vi];
         uint32_t hash_value = hash(v) & (m_hash_size - 1);
         int offset = m_hash_table[hash_value];
-        while (offset != NIL) {
-            if (m_points[offset] == v) {
+        while (offset != NIL)
+        {
+            if (m_points[offset] == v)
+            {
                 if (compare_op(vi, offset))
                     break;
             }
             offset = next[offset];
         }
 
-        if (offset == NIL) {
+        if (offset == NIL)
+        {
             m_remap[vi] = new_index;
             m_points[new_index] = v;
             weld_op(vi, new_index);
             next[new_index] = m_hash_table[hash_value];
             m_hash_table[hash_value] = new_index++;
         }
-        else {
+        else
+        {
             m_remap[vi] = offset;
         }
     }
     return new_index;
 }
-
-

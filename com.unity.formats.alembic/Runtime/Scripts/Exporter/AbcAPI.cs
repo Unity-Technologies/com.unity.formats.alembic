@@ -1,12 +1,12 @@
 using System;
-using System.Runtime.CompilerServices;  
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]  
-[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")] 
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")]
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
@@ -174,7 +174,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr points { get; set; }  // Vector3*
         public int pointCount { get; set; }
         public IntPtr   normals;          // Vector3*. can be null
-        public IntPtr   uv0;              // Vector2*. can be null        
+        public IntPtr   uv0;              // Vector2*. can be null
         public IntPtr   uv1;              // Vector2*. can be null
         public IntPtr   colors;           // Vector2*. can be null
         public IntPtr   submeshes;        // aeSubmeshData*. can be null
@@ -274,7 +274,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void WriteScalarSample(ref Vector4 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
         public void WriteScalarSample(ref Matrix4x4 data) { NativeMethods.aePropertyWriteScalarSample(self, ref data); }
     }
-
 
 
     static partial class AbcAPI

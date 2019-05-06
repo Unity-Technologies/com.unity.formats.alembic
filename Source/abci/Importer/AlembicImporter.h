@@ -8,20 +8,20 @@ class aiContext;
 class aiTimeSampling;
 class aiObject;
 #ifdef abciImpl
-    class aiSchema;         // : aiObject
-    class aiSample;
-    class aiXformSample;    // : aiSample
-    class aiCameraSample;   // : aiSample
-    class aiPolyMeshSample; // : aiSample
-    class aiPointsSample;   // : aiSample
+class aiSchema;             // : aiObject
+class aiSample;
+class aiXformSample;        // : aiSample
+class aiCameraSample;       // : aiSample
+class aiPolyMeshSample;     // : aiSample
+class aiPointsSample;       // : aiSample
 #else
-    // force make castable
-    using aiSchema         = void;
-    using aiSample         = void;
-    using aiXformSample    = void;
-    using aiCameraSample   = void;
-    using aiPolyMeshSample = void;
-    using aiPointsSample   = void;
+// force make castable
+using aiSchema         = void;
+using aiSample         = void;
+using aiXformSample    = void;
+using aiCameraSample   = void;
+using aiPolyMeshSample = void;
+using aiPointsSample   = void;
 #endif
 
 class aiXform;    // : aiSchema
@@ -197,7 +197,6 @@ struct aiPolyMeshData
 struct aiSubmeshData
 {
     int *indices = nullptr;
-
 };
 
 struct aiPointsSummary

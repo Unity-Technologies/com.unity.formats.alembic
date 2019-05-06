@@ -2,7 +2,7 @@ Shader "Hidden/Alembic/MotionVectors"
 {
     SubShader
     {
-        Pass 
+        Pass
         {
             Name "MOTIONVECTORS"
             Tags{ "LightMode" = "MotionVectors" }

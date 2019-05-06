@@ -14,9 +14,11 @@ void GenerateCylinderMesh(
     // vertices
     points.resize(num_vertices);
     uv.resize(points.size());
-    for (int ih = 0; ih < hseg; ++ih) {
+    for (int ih = 0; ih < hseg; ++ih)
+    {
         float y = (float(ih) / float(hseg - 1)) * height;
-        for (int ic = 0; ic < cseg; ++ic) {
+        for (int ic = 0; ic < cseg; ++ic)
+        {
             int i = cseg * ih + ic;
             float ang = ((360.0f / cseg) * ic) * Deg2Rad;
             float r = radius;
@@ -35,8 +37,10 @@ void GenerateCylinderMesh(
 
     counts.resize(num_faces, 4);
     indices.resize(num_indices);
-    for (int ih = 0; ih < hseg - 1; ++ih) {
-        for (int ic = 0; ic < cseg; ++ic) {
+    for (int ih = 0; ih < hseg - 1; ++ih)
+    {
+        for (int ic = 0; ic < cseg; ++ic)
+        {
             auto *dst = &indices[(ih * cseg + ic) * 4];
             dst[0] = cseg * ih + ic;
             dst[1] = cseg * (ih + 1) + ic;
@@ -45,7 +49,6 @@ void GenerateCylinderMesh(
         }
     }
 }
-
 
 static inline int GetMiddlePoint(int p1, int p2, std::vector<float3>& vertices, std::map<int64_t, int>& cache, float radius)
 {
@@ -57,7 +60,8 @@ static inline int GetMiddlePoint(int p1, int p2, std::vector<float3>& vertices, 
 
     {
         auto it = cache.find(key);
-        if (it != cache.end()) {
+        if (it != cache.end())
+        {
             return it->second;
         }
     }
@@ -80,7 +84,6 @@ static inline int GetMiddlePoint(int p1, int p2, std::vector<float3>& vertices, 
     return i;
 }
 
-
 void GenerateIcoSphereMesh(
     std::vector<int>& counts,
     std::vector<int>& indices,
@@ -96,13 +99,13 @@ void GenerateIcoSphereMesh(
         normalize(float3{ 1.0f,    t, 0.0f }) * radius,
         normalize(float3{-1.0f,   -t, 0.0f }) * radius,
         normalize(float3{ 1.0f,   -t, 0.0f }) * radius,
-        normalize(float3{ 0.0f,-1.0f,    t }) * radius,
+        normalize(float3{ 0.0f, -1.0f,    t }) * radius,
         normalize(float3{ 0.0f, 1.0f,    t }) * radius,
-        normalize(float3{ 0.0f,-1.0f,   -t }) * radius,
+        normalize(float3{ 0.0f, -1.0f,   -t }) * radius,
         normalize(float3{ 0.0f, 1.0f,   -t }) * radius,
-        normalize(float3{    t, 0.0f,-1.0f }) * radius,
+        normalize(float3{    t, 0.0f, -1.0f }) * radius,
         normalize(float3{    t, 0.0f, 1.0f }) * radius,
-        normalize(float3{   -t, 0.0f,-1.0f }) * radius,
+        normalize(float3{   -t, 0.0f, -1.0f }) * radius,
         normalize(float3{   -t, 0.0f, 1.0f }) * radius,
     };
 
@@ -158,5 +161,8 @@ void GenerateIcoSphereMesh(
     }
 
     counts.resize(indices.size() / 3);
-    for (int& c : counts) { c = 3; }
+    for (int& c : counts)
+    {
+        c = 3;
+    }
 }

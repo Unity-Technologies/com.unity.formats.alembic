@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Playables;
@@ -43,7 +43,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
         public override double duration
         {
             get
-            {   
+            {
                 return m_stream == null ? 0 : m_stream.duration;
             }
         }

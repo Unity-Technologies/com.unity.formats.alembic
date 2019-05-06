@@ -56,6 +56,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
             if (m_maxCaptureFrame > 0 && m_recorder.frameCount >= m_maxCaptureFrame)
                 EndRecording();
         }
+
         #endregion
 
 
@@ -78,6 +79,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
             m_recorder.ProcessRecording();
             EndRecording();
         }
+
         #endregion
 
 
@@ -88,6 +90,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
             AlembicRecorder.ForceDisableBatching();
             InitializeOutputPath();
         }
+
 #endif
 
         void OnEnable()
@@ -101,7 +104,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 #if UNITY_EDITOR
                 && EditorApplication.isPlaying
 #endif
-                )
+            )
             {
                 BeginRecording();
             }
@@ -109,7 +112,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         void Update()
         {
-            if(m_recorder.recording)
+            if (m_recorder.recording)
             {
                 StartCoroutine(ProcessRecording());
             }
@@ -122,8 +125,9 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         void OnDestroy()
         {
-            if(recorder != null) recorder.Dispose();
+            if (recorder != null) recorder.Dispose();
         }
+
         #endregion
     }
 }

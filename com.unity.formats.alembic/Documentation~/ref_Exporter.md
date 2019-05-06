@@ -1,6 +1,6 @@
 # Alembic Exporter component
 
-The Alembic Exporter component allows you to customize how the Alembic package exports animation to an Alembic file. 
+The Alembic Exporter component allows you to customize how the Alembic package exports animation to an Alembic file.
 
 ![The Export Settings window](images/abc_export_options.png)
 
@@ -15,7 +15,7 @@ The following topics describe the properties of the Alembic Exporter component i
 - [**Misc** section](#exportRef_G)
 - [**Capture Control** section](#exportRef_H)
 
-> ***Note:*** The Alembic package appends an ID (for example, `(0000283C)`) to the name of the Alembic node on export. This is to avoid naming conflicts, because Alembic forces each node in a hierarchy to have a unique name. 
+> ***Note:*** The Alembic package appends an ID (for example, `(0000283C)`) to the name of the Alembic node on export. This is to avoid naming conflicts, because Alembic forces each node in a hierarchy to have a unique name.
 
 
 
@@ -140,7 +140,7 @@ These options allow you to control starting and stopping the capture.
 
 ## Misc section
 
-Enable the __Detailed Log__ option to provide Debug logging for each captured frame. 
+Enable the __Detailed Log__ option to provide Debug logging for each captured frame.
 
 ![Misc section](images/abc_export_options_G.png)
 
@@ -157,4 +157,3 @@ The buttons in this section allow you to define how much of the animation to cap
 In Play mode, click __Begin Recording__ to start capturing the entire Scene. Use this option if **Capture On Start** is disabled.
 
 To export only the current frame to the Alembic file, click __One Shot__.
-

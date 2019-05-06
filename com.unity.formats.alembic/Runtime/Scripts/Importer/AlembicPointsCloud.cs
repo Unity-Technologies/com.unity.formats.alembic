@@ -31,7 +31,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         void Reset()
         {
             var cam = Camera.main;
-            if(cam != null)
+            if (cam != null)
             {
                 m_sortFrom = cam.GetComponent<Transform>();
             }
@@ -39,9 +39,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         private void OnDestroy()
         {
-            if(m_points != null) m_points.Dispose();
-            if(m_velocities != null) m_velocities.Dispose();
-            if(m_ids != null) m_ids.Dispose();
+            if (m_points != null) m_points.Dispose();
+            if (m_velocities != null) m_velocities.Dispose();
+            if (m_ids != null) m_ids.Dispose();
         }
     }
 }

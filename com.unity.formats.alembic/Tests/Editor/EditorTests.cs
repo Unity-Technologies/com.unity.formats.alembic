@@ -8,7 +8,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void MarshalTests()
         {
-            Assert.AreEqual(72,System.Runtime.InteropServices.Marshal.SizeOf(typeof(aePolyMeshData)));
+            Assert.AreEqual(72, System.Runtime.InteropServices.Marshal.SizeOf(typeof(aePolyMeshData)));
         }
     }
 }

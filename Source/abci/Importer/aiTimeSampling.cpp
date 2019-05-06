@@ -50,7 +50,8 @@ aiTimeSampling* aiCreateTimeSampling(Abc::IArchive& archive, int index)
 {
     auto ts = archive.getTimeSampling(index);
     auto tst = ts->getTimeSamplingType();
-    if (tst.isUniform() || tst.isCyclic()) {
+    if (tst.isUniform() || tst.isCyclic())
+    {
         auto start = ts->getStoredTimes()[0];
         auto max_num_samples = archive.getMaxNumSamplesForTimeSamplingIndex(index);
         auto samples_per_cycle = tst.getNumSamplesPerCycle();
@@ -62,17 +63,16 @@ aiTimeSampling* aiCreateTimeSampling(Abc::IArchive& archive, int index)
         else if (tst.isCyclic())
             return new aiTimeSamplingCyclic(start, time_per_cycle, num_cycles, ts);
     }
-    else if (tst.isAcyclic()) {
+    else if (tst.isAcyclic())
+    {
         return new aiTimeSamplingAcyclic(ts);
     }
     return nullptr;
 }
 
-
 aiTimeSampling::~aiTimeSampling()
 {
 }
-
 
 aiTimeSamplingUniform::aiTimeSamplingUniform(double start, double interval, size_t sample_count)
 {
@@ -97,7 +97,6 @@ double aiTimeSamplingUniform::getTime(uint64_t sample_index) const
     return m_start + m_interval * std::min<uint64_t>(sample_index, m_sample_count);
 }
 
-
 aiTimeSamplingAcyclic::aiTimeSamplingAcyclic(Abc::TimeSamplingPtr tsp)
 {
     m_tsp = tsp;
@@ -121,7 +120,6 @@ double aiTimeSamplingAcyclic::getTime(uint64_t sample_index) const
     sample_index = std::min<uint64_t>(sample_index, st.size() - 1);
     return st[(size_t)sample_index];
 }
-
 
 aiTimeSamplingCyclic::aiTimeSamplingCyclic(double start, double interval, size_t cycle_count, Abc::TimeSamplingPtr tsp)
 {

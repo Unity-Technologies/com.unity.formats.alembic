@@ -9,10 +9,10 @@ class RawVector
 {
 public:
     using value_type = T;
-    using reference = T & ;
+    using reference = T &;
     using const_reference = const T&;
-    using pointer = T * ;
-    using const_pointer = const T*;
+    using pointer = T *;
+    using const_pointer = const T *;
     using iterator = pointer;
     using const_iterator = const_pointer;
     static const int alignment = Align;
@@ -22,25 +22,30 @@ public:
     {
         operator=(v);
     }
+
     RawVector(RawVector&& v)
     {
         v.swap(*this);
     }
+
     RawVector(std::initializer_list<T> v)
     {
         operator=(v);
     }
+
     explicit RawVector(size_t initial_size) { resize(initial_size); }
     RawVector& operator=(const RawVector& v)
     {
         assign(v.begin(), v.end());
         return *this;
     }
+
     RawVector& operator=(RawVector&& v)
     {
         v.swap(*this);
         return *this;
     }
+
     RawVector& operator=(std::initializer_list<T> v)
     {
         assign(v.begin(), v.end());
@@ -81,7 +86,8 @@ public:
 
     void reserve(size_t s)
     {
-        if (s > m_capacity) {
+        if (s > m_capacity)
+        {
             s = std::max<size_t>(s, m_size * 2);
             size_t newsize = sizeof(T) * s;
             size_t oldsize = sizeof(T) * m_size;
@@ -96,7 +102,8 @@ public:
 
     void reserve_discard(size_t s)
     {
-        if (s > m_capacity) {
+        if (s > m_capacity)
+        {
             s = std::max<size_t>(s, m_size * 2);
             size_t newsize = sizeof(T) * s;
             size_t oldsize = sizeof(T) * m_size;
@@ -109,15 +116,18 @@ public:
 
     void shrink_to_fit()
     {
-        if (m_size == 0) {
+        if (m_size == 0)
+        {
             deallocate(m_data, m_size);
             m_size = m_capacity = 0;
         }
-        else if (m_size == m_capacity) {
+        else if (m_size == m_capacity)
+        {
             // nothing to do
             return;
         }
-        else {
+        else
+        {
             size_t newsize = sizeof(T) * m_size;
             size_t oldsize = sizeof(T) * m_capacity;
             T *newdata = (T*)allocate(newsize);
@@ -151,7 +161,8 @@ public:
         size_t pos = size();
         resize(s);
         // std::fill() can be significantly slower than plain copy
-        for (size_t i = pos; i < s; ++i) {
+        for (size_t i = pos; i < s; ++i)
+        {
             m_data[i] = v;
         }
     }
@@ -174,13 +185,16 @@ public:
         resize_discard(std::distance(first, last));
         std::copy(first, last, begin());
     }
+
     void assign(const_pointer first, const_pointer last)
     {
-        if (!first) {
+        if (!first)
+        {
             clear();
             return;
         }
-        else {
+        else
+        {
             resize_discard(std::distance(first, last));
             // sadly, memcpy() can way faster than std::copy()
             memcpy(m_data, first, sizeof(value_type) * m_size);
@@ -195,6 +209,7 @@ public:
         resize(d + s);
         std::copy(first, last, begin() + d);
     }
+
     void insert(iterator pos, const_pointer first, const_pointer last)
     {
         size_t d = std::distance(begin(), pos);
@@ -225,37 +240,38 @@ public:
         resize(m_size + 1);
         back() = v;
     }
+
     void push_back(T&& v)
     {
         resize(m_size + 1);
         back() = v;
     }
 
-
     void pop_back()
     {
         --m_size;
     }
 
-    bool operator == (const RawVector& other) const
+    bool operator==(const RawVector& other) const
     {
-        return m_size == other.m_size && memcmp(m_data, other.m_data, sizeof(T)*m_size) == 0;
+        return m_size == other.m_size && memcmp(m_data, other.m_data, sizeof(T) * m_size) == 0;
     }
 
-    bool operator != (const RawVector& other) const
+    bool operator!=(const RawVector& other) const
     {
         return !(*this == other);
     }
 
     void zeroclear()
     {
-        memset(m_data, 0, sizeof(T)*m_size);
+        memset(m_data, 0, sizeof(T) * m_size);
     }
 
     void copy_to(pointer dst) const
     {
         memcpy(dst, m_data, sizeof(value_type) * m_size);
     }
+
     void copy_to(pointer dst, size_t length, size_t offset = 0) const
     {
         memcpy(dst, m_data + offset, sizeof(value_type) * length);

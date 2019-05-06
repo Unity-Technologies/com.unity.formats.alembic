@@ -25,7 +25,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                 cam.nearClipPlane = nearFar[0];
                 cam.farClipPlane = nearFar[1];
             }
-            
+
             public void FromCamera(Camera cam)
             {
                 focalLength = cam.focalLength;
@@ -36,10 +36,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             public bool Equals(CamParams other)
             {
                 return NearlyEqual(focalLength, other.focalLength) &&
-                       NearlyEqual(filmBack.x, other.filmBack.x) &&
-                       NearlyEqual(filmBack.y, other.filmBack.y) &&
-                       NearlyEqual(nearFar.x, other.nearFar.x) &&
-                       NearlyEqual(nearFar.y, other.nearFar.y);
+                    NearlyEqual(filmBack.x, other.filmBack.x) &&
+                    NearlyEqual(filmBack.y, other.filmBack.y) &&
+                    NearlyEqual(nearFar.x, other.nearFar.x) &&
+                    NearlyEqual(nearFar.y, other.nearFar.y);
             }
 
             public override bool Equals(object obj)
@@ -60,30 +60,27 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             static bool NearlyEqual(float f1, float f2, float eps = 1e-5f)
             {
-                return Mathf.Abs(f1 -f2) < eps;
+                return Mathf.Abs(f1 - f2) < eps;
             }
-            
         }
 
-        CamParams camParams = new CamParams {focalLength = 300, filmBack = new Vector2(200,300), nearFar = new Vector2(0.1f,500)};
-        
+        CamParams camParams = new CamParams {focalLength = 300, filmBack = new Vector2(200, 300), nearFar = new Vector2(0.1f, 500)};
+
 
         [SetUp]
         public new void SetUp()
         {
-
             var cam = Object.FindObjectOfType<Camera>();
-           camParams.ToCamera(cam);
+            camParams.ToCamera(cam);
         }
-
 
         [UnityTest]
         public IEnumerator TestPhysicalCamParams()
         {
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            exporter.OneShot ();
+            exporter.OneShot();
             yield return null;
-            
+
             AssetDatabase.Refresh();
             Assert.That(File.Exists(exporter.recorder.settings.OutputPath));
             var abc = AssetDatabase.LoadMainAssetAtPath(exporter.recorder.settings.OutputPath) as GameObject;

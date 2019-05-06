@@ -48,7 +48,8 @@ void aeXform::writeSampleBody()
 
     float angle = 0.0f;
     abcV3 axis = abcV3(0.0f, 1.0f, 0.0f);
-    if (abs(quat.w) != 1.0f) {
+    if (abs(quat.w) != 1.0f)
+    {
         float qw2 = quat.w * quat.w;
         angle = std::acos(quat.w) * 2.0f;
         axis = abcV3(

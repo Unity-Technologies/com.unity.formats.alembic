@@ -16,13 +16,12 @@ aeProperty::~aeProperty()
 {
 }
 
-
 // array property
 
 template<class T>
 class aeTArrayProprty : public aeProperty
 {
-using super = aeProperty;
+    using super = aeProperty;
 public:
     using property_type = T;
     using value_type = typename T::value_type;
@@ -33,6 +32,7 @@ public:
     {
         DebugLog("aeTArrayProprty::aeTArrayProprty() %s", m_abcprop->getName().c_str());
     }
+
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return true; }
 
@@ -59,7 +59,7 @@ template class aeTArrayProprty<abcFloat4x4ArrayProperty>;
 template<class T>
 class aeTScalarProprty : public aeProperty
 {
-using super = aeProperty;
+    using super = aeProperty;
 public:
     using property_type = T;
     using value_type = typename T::value_type;
@@ -69,6 +69,7 @@ public:
     {
         DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
+
     const char* getName() const override { return m_abcprop->getName().c_str(); }
     bool isArray() const override { return false; }
 
@@ -80,13 +81,13 @@ public:
 private:
     std::unique_ptr<property_type> m_abcprop;
 };
-template class aeTScalarProprty<abcBoolProperty >;
+template class aeTScalarProprty<abcBoolProperty>;
 template class aeTScalarProprty<abcIntProperty>;
 template class aeTScalarProprty<abcUIntProperty>;
 template class aeTScalarProprty<abcFloatProperty>;
-template class aeTScalarProprty<abcFloat2Property >;
-template class aeTScalarProprty<abcFloat3Property >;
-template class aeTScalarProprty<abcFloat4Property >;
+template class aeTScalarProprty<abcFloat2Property>;
+template class aeTScalarProprty<abcFloat3Property>;
+template class aeTScalarProprty<abcFloat4Property>;
 template class aeTScalarProprty<abcFloat4x4Property>;
 
 template<class T, bool is_array = std::is_base_of<Abc::OArrayProperty, T>::value>
@@ -105,7 +106,6 @@ struct aeMakeProperty<T, true>
 };
 
 
-
 aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t tsi)
     : m_ctx(ctx)
     , m_parent(parent)
@@ -116,9 +116,10 @@ aeObject::aeObject(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t ts
 
 aeObject::~aeObject()
 {
-    if(!m_children.empty()) {
+    if (!m_children.empty())
+    {
         // make m_children empty before deleting children because children try to remove element of it in their destructor
-        decltype(m_children) tmp;
+        decltype(m_children)tmp;
         tmp.swap(m_children);
     }
     if (m_parent)
@@ -143,6 +144,7 @@ T* aeObject::newChild(const char *name, uint32_t tsi)
     m_children.emplace_back(child);
     return child;
 }
+
 template aeXform*       aeObject::newChild<aeXform>(const char *name, uint32_t tsi);
 template aeCamera*      aeObject::newChild<aeCamera>(const char *name, uint32_t tsi);
 template aePolyMesh*    aeObject::newChild<aePolyMesh>(const char *name, uint32_t tsi);
@@ -153,12 +155,12 @@ void aeObject::removeChild(aeObject *c)
     if (c == nullptr) { return; }
 
     auto it = std::find_if(m_children.begin(), m_children.end(), [c](const ObjectPtr& o) { return o.get() == c; });
-    if (it != m_children.end()) {
+    if (it != m_children.end())
+    {
         c->m_parent = nullptr;
         m_children.erase(it);
     }
 }
-
 
 aeSchema::aeSchema(aeContext * ctx, aeObject * parent, abcObject * abc, uint32_t tsi)
     : super(ctx, parent, abc, tsi)
@@ -178,7 +180,8 @@ void aeSchema::markForceInvisible()
 
 void aeSchema::writeVisibility(bool v)
 {
-    if (m_force_invisible) {
+    if (m_force_invisible)
+    {
         m_force_invisible = false;
         v = false;
     }
@@ -189,7 +192,8 @@ template<class T>
 aeProperty* aeSchema::newProperty(const char *name, uint32_t tsi)
 {
     auto cprop = getAbcProperties();
-    if (!cprop.valid()) {
+    if (!cprop.valid())
+    {
         DebugLog("aeObject::newProperty() %s failed!", name);
         return nullptr;
     }

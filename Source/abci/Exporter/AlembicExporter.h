@@ -4,11 +4,11 @@
 
 class aeContext;
 #ifdef abciImpl
-    class aeObject;
-    class aeSchema;
+class aeObject;
+class aeSchema;
 #else
-    using aeObject = void; // force make upper-castable
-    using aeSchema = void; // 
+using aeObject = void;     // force make upper-castable
+using aeSchema = void;     //
 #endif
 class aeXform;    // : aeSchema
 class aePoints;   // : aeSchema
@@ -141,7 +141,6 @@ struct aeWeights4
 
     bool operator==(const aeWeights4& v) { return memcmp(this, &v, sizeof(*this)) == 0; }
 };
-
 
 
 abciAPI aeContext*  aeCreateContext();

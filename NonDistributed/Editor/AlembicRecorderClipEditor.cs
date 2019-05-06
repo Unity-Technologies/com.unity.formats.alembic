@@ -47,7 +47,7 @@ namespace UnityEditor.Formats.Alembic.Timeline
                         dir = Path.GetDirectoryName(settings.OutputPath);
                         filename = Path.GetFileName(settings.OutputPath);
                     }
-                    catch (Exception) { }
+                    catch (Exception) {}
 
                     var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
                     if (path.Length > 0)
@@ -70,7 +70,6 @@ namespace UnityEditor.Formats.Alembic.Timeline
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.scaleFactor"));
             }
             GUILayout.Space(5);
-
 
 
             // capture settings
@@ -96,8 +95,8 @@ namespace UnityEditor.Formats.Alembic.Timeline
                 using (new EditorGUI.DisabledScope(true))
                 {
                     var gos = string.IsNullOrEmpty(pathTag.stringValue)
-                        ? new GameObject[]{}
-                         : GameObject.FindGameObjectsWithTag(pathTag.stringValue);
+                        ? new GameObject[] {}
+                    : GameObject.FindGameObjectsWithTag(pathTag.stringValue);
 
                     switch (gos.Length)
                     {

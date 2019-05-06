@@ -25,7 +25,7 @@ protected:
 
 class aiSchema : public aiObject
 {
-using super = aiObject;
+    using super = aiObject;
 public:
     using aiPropertyPtr = std::unique_ptr<aiProperty>;
 
@@ -54,10 +54,10 @@ protected:
 };
 
 
-template <class Traits>
+template<class Traits>
 class aiTSchema : public aiSchema
 {
-using super = aiSchema;
+    using super = aiSchema;
 public:
     using Sample = typename Traits::SampleT;
     using SamplePtr = std::shared_ptr<Sample>;
@@ -100,7 +100,6 @@ public:
         return static_cast<int>(m_num_samples);
     }
 
-
     Sample* getSample() override
     {
         return m_sample.get();
@@ -121,8 +120,8 @@ public:
         m_force_update_local = m_force_update;
 
         auto body = [this, &sample, idx]() {
-            readSampleBody(sample, idx);
-        };
+                readSampleBody(sample, idx);
+            };
 
         if (m_force_sync || !getConfig().async_load)
             body();
@@ -133,8 +132,8 @@ public:
     virtual void cookSample(Sample& sample)
     {
         auto body = [this, &sample]() {
-            cookSampleBody(sample);
-        };
+                cookSampleBody(sample);
+            };
 
         if (m_force_sync || !getConfig().async_load)
             body();
@@ -157,30 +156,35 @@ protected:
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();
 
-        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update) {
+        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update)
+        {
             m_sample_index_changed = true;
             if (!m_sample)
                 m_sample.reset(newSample());
             sample = m_sample.get();
             readSample(*sample, sample_index);
         }
-        else {
+        else
+        {
             m_sample_index_changed = false;
             sample = m_sample.get();
             if (m_constant || !config.interpolate_samples)
                 sample = nullptr;
         }
 
-        if (sample && config.interpolate_samples) {
+        if (sample && config.interpolate_samples)
+        {
             auto& ts = *m_time_sampling;
             double requested_time = ss.getRequestedTime();
             double index_time = ts.getSampleTime(sample_index);
             double interval = 0;
-            if (ts.getTimeSamplingType().isAcyclic()) {
+            if (ts.getTimeSamplingType().isAcyclic())
+            {
                 auto tsi = std::min((size_t)sample_index + 1, ts.getNumStoredTimes() - 1);
                 interval = ts.getSampleTime(tsi) - index_time;
             }
-            else {
+            else
+            {
                 interval = ts.getTimeSamplingType().getTimePerCycle();
             }
 
@@ -194,14 +198,16 @@ protected:
                 sample = nullptr;
         }
 
-        if (sample) {
+        if (sample)
+        {
             if (m_force_sync)
                 sample->markForceSync();
 
             cookSample(*sample);
             m_data_updated = true;
         }
-        else {
+        else
+        {
             m_data_updated = false;
         }
         updateProperties(ss);
@@ -222,7 +228,8 @@ protected:
 
     void readVisibility(Sample& sample, const abcSampleSelector& ss)
     {
-        if (m_visibility_prop.valid() && m_visibility_prop.getNumSamples() > 0) {
+        if (m_visibility_prop.valid() && m_visibility_prop.getNumSamples() > 0)
+        {
             int8_t v;
             m_visibility_prop.get(v, ss);
             sample.visibility = v != 0;

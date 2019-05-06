@@ -11,16 +11,16 @@ namespace UnityEngine.Formats.Alembic.Timeline
 {
     internal class AlembicRecorderBehaviour : PlayableBehaviour, IDisposable
     {
-#region fields
+        #region fields
         AlembicRecorder m_recorder = new AlembicRecorder();
         bool m_ignoreFirstFrame = true;
         int m_prevFrame = 0;
         bool m_firstFrame;
         PlayState m_playState = PlayState.Paused;
-#endregion
+        #endregion
 
 
-#region properties
+        #region properties
         internal AlembicRecorderSettings settings
         {
             get { return m_recorder.settings; }
@@ -32,15 +32,15 @@ namespace UnityEngine.Formats.Alembic.Timeline
             set { m_ignoreFirstFrame = value; }
         }
 
-#endregion
+        #endregion
 
 
-#region impl
+        #region impl
         void BeginRecording()
         {
             m_firstFrame = true;
             m_prevFrame = -1;
-            
+
             if (m_recorder.BeginRecording())
             {
                 var settings = m_recorder.settings;
@@ -70,15 +70,15 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
             m_recorder.ProcessRecording();
         }
-#endregion
+
+        #endregion
 
 
-#region messsages
+        #region messsages
 
         public override void OnPlayableCreate(Playable playable)
         {
         }
-
 
         public override void OnPlayableDestroy(Playable playable)
         {
@@ -93,7 +93,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
         public override void OnGraphStart(Playable playable)
         {
 #if UNITY_EDITOR
-            if(EditorApplication.isPlaying)
+            if (EditorApplication.isPlaying)
 #endif
             {
                 BeginRecording();
@@ -137,7 +137,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
 
         protected virtual void Dispose(bool v)
         {
-            if(m_recorder != null) m_recorder.Dispose();
+            if (m_recorder != null) m_recorder.Dispose();
         }
 
         public void Dispose()
@@ -145,6 +145,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-#endregion
+
+        #endregion
     }
 }

@@ -9,7 +9,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if(property == null)
+            if (property == null)
             {
                 return;
             }

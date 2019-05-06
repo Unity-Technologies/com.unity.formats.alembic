@@ -1,5 +1,6 @@
 #pragma once
-struct CameraData {
+struct CameraData
+{
     bool visibility = true;
     float focal_length = 0;
     abcV2 sensor_size = {0, 0};

@@ -6,7 +6,7 @@ This quick tutorial covers adding Alembic assets to your Project and using them 
 
    ![Drag the file](images/drag-to-project.png)
 
-2. Drag the Alembic Asset into the Scene. 
+2. Drag the Alembic Asset into the Scene.
 
 3. Open the **Alembic Stream Player** component in the Inspector and scrub the **Time** property.
 
@@ -16,7 +16,7 @@ This quick tutorial covers adding Alembic assets to your Project and using them 
 
    Next, you can learn how to play back the Alembic animation using the [Timeline Editor](https://docs.unity3d.com/Manual/TimelineEditorWindow.html).
 
-4. Select your Alembic object in the Scene view and open the Timeline Editor (top menu: **Window** > **Sequencing** > **Timeline**). 
+4. Select your Alembic object in the Scene view and open the Timeline Editor (top menu: **Window** > **Sequencing** > **Timeline**).
 
 5. Click the **Create** button to [create a Director component and a Timeline Asset](https://docs.unity3d.com/Manual/TimelineWorkflowCreatingAssetInstance.html) and save it to file.
 
@@ -28,9 +28,6 @@ This quick tutorial covers adding Alembic assets to your Project and using them 
 
 7. Drag the Alembic object from the Scene onto the Timeline Editor and select **Add Clip With Alembic Track** from the pop-up menu.![Timeline](images/timeline2.png)
 
-   This creates an Alembic Track with an Alembic clip. 
+   This creates an Alembic Track with an Alembic clip.
 
 8. Now you can [scrub the Timeline Playhead or use the Timeline Playback Controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) to see the animation playing in Unity.
-
-
-

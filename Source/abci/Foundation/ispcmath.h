@@ -16,12 +16,12 @@ struct float4 { float x, y, z, w; };
 struct quatf  { float x, y, z, w; };
 struct float4x4 { float4 m[4]; };
 
-static inline float2 float2_(float x, float y) { float2 r = { x,y }; return r; }
-static inline float3 float3_(float x, float y, float z) { float3 r = { x,y,z }; return r; }
-static inline float4 float4_(float x, float y, float z, float w) { float4 r = { x,y,z,w }; return r; }
-static inline uniform float2 float2_(uniform float x, uniform float y) { uniform float2 r = { x,y }; return r; }
-static inline uniform float3 float3_(uniform float x, uniform float y, uniform float z) { uniform float3 r = { x,y,z }; return r; }
-static inline uniform float4 float4_(uniform float x, uniform float y, uniform float z, uniform float w) { uniform float4 r = { x,y,z,w }; return r; }
+static inline float2 float2_(float x, float y) { float2 r = { x, y }; return r; }
+static inline float3 float3_(float x, float y, float z) { float3 r = { x, y, z }; return r; }
+static inline float4 float4_(float x, float y, float z, float w) { float4 r = { x, y, z, w }; return r; }
+static inline uniform float2 float2_(uniform float x, uniform float y) { uniform float2 r = { x, y }; return r; }
+static inline uniform float3 float3_(uniform float x, uniform float y, uniform float z) { uniform float3 r = { x, y, z }; return r; }
+static inline uniform float4 float4_(uniform float x, uniform float y, uniform float z, uniform float w) { uniform float4 r = { x, y, z, w }; return r; }
 
 
 static inline float2 half_to_float(half2 h)
@@ -29,17 +29,18 @@ static inline float2 half_to_float(half2 h)
     float2 ret = {half_to_float(h.x), half_to_float(h.y)};
     return ret;
 }
+
 static inline float3 half_to_float(half3 h)
 {
     float3 ret = {half_to_float(h.x), half_to_float(h.y), half_to_float(h.z)};
     return ret;
 }
+
 static inline float4 half_to_float(half4 h)
 {
     float4 ret = {half_to_float(h.x), half_to_float(h.y), half_to_float(h.z), half_to_float(h.w)};
     return ret;
 }
-
 
 static inline float2 operator+(float2 a, float2 b) { float2 r = { a.x + b.x, a.y + b.y }; return r; }
 static inline float2 operator-(float2 a, float2 b) { float2 r = { a.x - b.x, a.y - b.y }; return r; }
@@ -98,6 +99,7 @@ static inline uniform float2 reduce_add(float2 v)
     uniform float2 r = { reduce_add(v.x), reduce_add(v.y) };
     return r;
 }
+
 static inline uniform float3 reduce_add(float3 v)
 {
     uniform float3 r = {reduce_add(v.x), reduce_add(v.y), reduce_add(v.z)};
@@ -108,6 +110,7 @@ static inline float mod(float a, float b)
 {
     return a - b * floor(a / b);
 }
+
 static inline uniform float mod(uniform float a, uniform float b)
 {
     return a - b * floor(a / b);
@@ -117,13 +120,13 @@ static inline float frac(float a)
 {
     return mod(a, 1.0);
 }
+
 static inline uniform float frac(uniform float a)
 {
     return mod(a, 1.0);
 }
 
-
-#define VF1(f)\
+#define VF1(f) \
     static inline float2 f(float2 a) { return float2_(f(a.x), f(a.y)); }\
     static inline float3 f(float3 a) { return float3_(f(a.x), f(a.y), f(a.z)); }\
     static inline float4 f(float4 a) { return float4_(f(a.x), f(a.y), f(a.z), f(a.w)); }\
@@ -131,7 +134,7 @@ static inline uniform float frac(uniform float a)
     static inline uniform float3 f(uniform float3 a) { return float3_(f(a.x), f(a.y), f(a.z)); }\
     static inline uniform float4 f(uniform float4 a) { return float4_(f(a.x), f(a.y), f(a.z), f(a.w)); }\
 
-#define VF2(f)\
+#define VF2(f) \
     static inline float2 f(float2 a, float2 b) { return float2_(f(a.x, b.x), f(a.y, b.y)); }\
     static inline float3 f(float3 a, float3 b) { return float3_(f(a.x, b.x), f(a.y, b.y), f(a.z, b.z)); }\
     static inline float4 f(float4 a, float4 b) { return float4_(f(a.x, b.x), f(a.y, b.y), f(a.z, b.z), f(a.w, b.w)); }\
@@ -167,39 +170,41 @@ VF1(frac)
 
 static inline float dot(float2 a, float2 b)
 {
-    return a.x*b.x + a.y*b.y;
-}
-static inline uniform float dot(uniform float2 a, uniform float2 b)
-{
-    return a.x*b.x + a.y*b.y;
-}
-static inline float dot(float3 a, float3 b)
-{
-    return a.x*b.x + a.y*b.y + a.z*b.z;
-}
-static inline uniform float dot(uniform float3 a, uniform float3 b)
-{
-    return a.x*b.x + a.y*b.y + a.z*b.z;
+    return a.x * b.x + a.y * b.y;
 }
 
+static inline uniform float dot(uniform float2 a, uniform float2 b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
+static inline float dot(float3 a, float3 b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+static inline uniform float dot(uniform float3 a, uniform float3 b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
 static inline float3 cross(float3 v0, float3 v1)
 {
     float3 ret;
-    ret.x = v0.y*v1.z - v0.z*v1.y;
-    ret.y = v0.z*v1.x - v0.x*v1.z;
-    ret.z = v0.x*v1.y - v0.y*v1.x;
-    return ret;
-}
-static inline uniform float3 cross(uniform float3 v0, uniform float3 v1)
-{
-    uniform float3 ret;
-    ret.x = v0.y*v1.z - v0.z*v1.y;
-    ret.y = v0.z*v1.x - v0.x*v1.z;
-    ret.z = v0.x*v1.y - v0.y*v1.x;
+    ret.x = v0.y * v1.z - v0.z * v1.y;
+    ret.y = v0.z * v1.x - v0.x * v1.z;
+    ret.z = v0.x * v1.y - v0.y * v1.x;
     return ret;
 }
 
+static inline uniform float3 cross(uniform float3 v0, uniform float3 v1)
+{
+    uniform float3 ret;
+    ret.x = v0.y * v1.z - v0.z * v1.y;
+    ret.y = v0.z * v1.x - v0.x * v1.z;
+    ret.z = v0.x * v1.y - v0.y * v1.x;
+    return ret;
+}
 
 static inline float  rcp_precise(float  v) { return 1.0f / v; }
 static inline float2 rcp_precise(float2 v) { return 1.0f / v; }
@@ -251,18 +256,21 @@ static inline float angle_between2_precise(float3 pos1, float3 pos2, float3 cent
         normalize_precise(pos1 - center),
         normalize_precise(pos2 - center));
 }
+
 static inline uniform float angle_between2_precise(uniform float3 pos1, uniform float3 pos2, uniform float3 center)
 {
     return angle_between(
         normalize_precise(pos1 - center),
         normalize_precise(pos2 - center));
 }
+
 static inline float angle_between2_estimate(float3 pos1, float3 pos2, float3 center)
 {
     return angle_between(
         normalize_estimate(pos1 - center),
         normalize_estimate(pos2 - center));
 }
+
 static inline uniform float angle_between2_estimate(uniform float3 pos1, uniform float3 pos2, uniform float3 center)
 {
     return angle_between(
@@ -270,18 +278,24 @@ static inline uniform float angle_between2_estimate(uniform float3 pos1, uniform
         normalize_estimate(pos2 - center));
 }
 
-static inline float lerp(float a, float b, float t) {
-    return (1.0f-t)*a + t*b;
-}
-static inline uniform float lerp(uniform float a, uniform float b, uniform float t) {
-    return (1.0f-t)*a + t*b;
+static inline float lerp(float a, float b, float t)
+{
+    return (1.0f - t) * a + t * b;
 }
 
-static inline float3 lerp(float3 a, float3 b, float t) {
-    return (1.0f-t)*a + t*b;
+static inline uniform float lerp(uniform float a, uniform float b, uniform float t)
+{
+    return (1.0f - t) * a + t * b;
 }
-static inline uniform float3 lerp(uniform float3 a, uniform float3 b, uniform float t) {
-    return (1.0f-t)*a + t*b;
+
+static inline float3 lerp(float3 a, float3 b, float t)
+{
+    return (1.0f - t) * a + t * b;
+}
+
+static inline uniform float3 lerp(uniform float3 a, uniform float3 b, uniform float t)
+{
+    return (1.0f - t) * a + t * b;
 }
 
 #ifdef ispcmathEstimate
@@ -295,7 +309,6 @@ static inline uniform float3 lerp(uniform float3 a, uniform float3 b, uniform fl
     #define normalize normalize_precise
     #define angle_between2 angle_between2_precise
 #endif
-
 
 
 static inline bool ray_triangle_intersection(uniform float3 pos, uniform float3 dir, float3 p1, float3 p2, float3 p3, float& distance)
@@ -345,7 +358,6 @@ static inline uniform bool ray_triangle_intersection(uniform float3 pos, uniform
         distance >= 0.0f;
 }
 
-
 static inline float ray_point_distance(float3 pos, float3 dir, float3 p)
 {
     return length(cross(dir, p - pos));
@@ -356,10 +368,9 @@ static inline uniform float ray_point_distance(uniform float3 pos, uniform float
     return length(cross(dir, p - pos));
 }
 
-
 static inline void compute_triangle_tangents(
-    const float3 (&vertices)[3], const float2 (&uv)[3],
-    float3 (&dst_tangent)[3], float3 (&dst_binormal)[3])
+    const float3(&vertices)[3], const float2(&uv)[3],
+    float3(&dst_tangent)[3], float3(&dst_binormal)[3])
 {
     float3 p = vertices[1] - vertices[0];
     float3 q = vertices[2] - vertices[0];
@@ -370,7 +381,8 @@ static inline void compute_triangle_tangents(
     float d = s.x * t.y - s.y * t.x;
     float area = abs(d);
 
-    if (area > 1e-8f) {
+    if (area > 1e-8f)
+    {
         float rd = rcp(d);
         s = s * rd;
         t = t * rd;
@@ -378,15 +390,16 @@ static inline void compute_triangle_tangents(
             t.y * p.x - t.x * q.x,
             t.y * p.y - t.x * q.y,
             t.y * p.z - t.x * q.z
-        )) * area;
+            )) * area;
         binormal = normalize_estimate(float3_(
             s.x * q.x - s.y * p.x,
             s.x * q.y - s.y * p.y,
             s.x * q.z - s.y * p.z
-        )) * area;
+            )) * area;
     }
-    else {
-        tangent = binormal = float3_(0,0,0);
+    else
+    {
+        tangent = binormal = float3_(0, 0, 0);
     }
 
 
@@ -395,11 +408,13 @@ static inline void compute_triangle_tangents(
         angle_between2_estimate(vertices[0], vertices[2], vertices[1]),
         angle_between2_estimate(vertices[1], vertices[0], vertices[2]),
     };
-    for (int v = 0; v < 3; ++v) {
+    for (int v = 0; v < 3; ++v)
+    {
         dst_tangent[v] = tangent * angles[v];
         dst_binormal[v] = binormal * angles[v];
     }
 }
+
 static inline void compute_triangle_tangents(
     uniform const float3(&vertices)[3], uniform const float2(&uv)[3],
     uniform float3(&dst_tangent)[3], uniform float3(&dst_binormal)[3])
@@ -413,7 +428,8 @@ static inline void compute_triangle_tangents(
     uniform float d = s.x * t.y - s.y * t.x;
     uniform float area = abs(d);
 
-    if (area > 1e-8f) {
+    if (area > 1e-8f)
+    {
         uniform float rd = rcp(d);
         s = s * rd;
         t = t * rd;
@@ -421,14 +437,15 @@ static inline void compute_triangle_tangents(
             t.y * p.x - t.x * q.x,
             t.y * p.y - t.x * q.y,
             t.y * p.z - t.x * q.z
-        )) * area;
+            )) * area;
         binormal = normalize_estimate(float3_(
             s.x * q.x - s.y * p.x,
             s.x * q.y - s.y * p.y,
             s.x * q.z - s.y * p.z
-        )) * area;
+            )) * area;
     }
-    else {
+    else
+    {
         tangent = binormal = float3_(0, 0, 0);
     }
 
@@ -437,7 +454,8 @@ static inline void compute_triangle_tangents(
         angle_between2_estimate(vertices[0], vertices[2], vertices[1]),
         angle_between2_estimate(vertices[1], vertices[0], vertices[2]),
     };
-    for (uniform int v = 0; v < 3; ++v) {
+    for (uniform int v = 0; v < 3; ++v)
+    {
         dst_tangent[v] = tangent * angles[v];
         dst_binormal[v] = binormal * angles[v];
     }
@@ -484,7 +502,7 @@ static inline float4 orthogonalize_tangent(float3 tangent, float3 binormal, floa
         binormal = normalize_estimate(axis2 - normal * dot(normal, axis2) - normalize_estimate(tangent) * dot(tangent, axis2));
     }
     return float4_(tangent.x, tangent.y, tangent.z,
-        select(dot(cross(normal, tangent), binormal) > 0.0f, 1.0f, -1.0f) );
+        select(dot(cross(normal, tangent), binormal) > 0.0f, 1.0f, -1.0f));
 }
 
 static inline uniform float4 orthogonalize_tangent(
@@ -532,25 +550,27 @@ static inline uniform float4 orthogonalize_tangent(
         select(dot(cross(normal, tangent), binormal) > 0.0f, 1.0f, -1.0f));
 }
 
-
 static inline void NormalizeImpl(uniform float3 dst[], uniform const int num)
 {
     uniform int num_simd = num & ~(C - 1);
 
-    for (uniform int bi = 0; bi < num_simd; bi += C) {
+    for (uniform int bi = 0; bi < num_simd; bi += C)
+    {
         float3 n;
         aos_to_soa3((uniform float*)(&dst[bi]), &n.x, &n.y, &n.z);
         n = normalize(n);
         soa_to_aos3(n.x, n.y, n.z, (uniform float*)(&dst[bi]));
     }
 
-    for (uniform int i = num_simd; i < num; ++i) {
+    for (uniform int i = num_simd; i < num; ++i)
+    {
         dst[i] = normalize(dst[i]);
     }
 }
+
 static inline void NormalizeSoAImpl(uniform float dstx[], uniform float dsty[], uniform float dstz[], uniform const int num)
 {
-    foreach(i=0 ... num) {
+    foreach(i = 0 ... num) {
         float3 n = {dstx[i], dsty[i], dstz[i]};
         n = normalize(n);
         dstx[i] = n.x;
@@ -561,25 +581,28 @@ static inline void NormalizeSoAImpl(uniform float dstx[], uniform float dsty[], 
 
 static inline void SoAToAoS(uniform float3 dst[], uniform float sx[], uniform float sy[], uniform float sz[], uniform const int num)
 {
-    uniform int num_simd = num & ~(C-1);
-    for (uniform int bi = 0; bi < num_simd; bi += C) {
+    uniform int num_simd = num & ~(C - 1);
+    for (uniform int bi = 0; bi < num_simd; bi += C)
+    {
         int i = bi + I;
         uniform float3 aos[C];
         soa_to_aos3(sx[i], sy[i], sz[i], (uniform float*)&aos[0]);
 
-        for (uniform int ci = 0; ci < C; ++ci) {
-            dst[bi+ci] = aos[ci];
+        for (uniform int ci = 0; ci < C; ++ci)
+        {
+            dst[bi + ci] = aos[ci];
         }
     }
 
-    for (uniform int i = num_simd; i < num; ++i) {
+    for (uniform int i = num_simd; i < num; ++i)
+    {
         dst[i] = float3_(sx[i], sy[i], sz[i]);
     }
 }
 
 static inline void zeroclear(uniform float dst[], uniform int size)
 {
-    memset(dst, 0, size*4);
+    memset(dst, 0, size * 4);
     //foreach(i = 0 ... size) { dst[i] = 0.0f; }
     //int size = size + (C -1) & ~(C - 1);
     //for (uniform int bi = 0; bi < size; bi += C) { dst[bi+I] = 0.0f; }

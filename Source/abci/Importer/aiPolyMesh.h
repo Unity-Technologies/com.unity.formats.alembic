@@ -57,8 +57,8 @@ using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
 class aiPolyMeshSample : public aiSample
 {
-using super = aiSample;
-using schema_t = aiPolyMesh;
+    using super = aiSample;
+    using schema_t = aiPolyMesh;
 public:
     aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
     ~aiPolyMeshSample();
@@ -113,7 +113,7 @@ struct aiPolyMeshTraits
 
 class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 {
-using super = aiTSchema<aiPolyMeshTraits>;
+    using super = aiTSchema<aiPolyMeshTraits>;
 public:
     aiPolyMesh(aiObject *parent, const abcObject &abc);
     ~aiPolyMesh() override;

@@ -16,7 +16,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Dispose()
             {
-               if(indexes != null) indexes.Dispose();
+                if (indexes != null) indexes.Dispose();
             }
         }
 
@@ -39,24 +39,22 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Dispose()
             {
-                if(points != null) points.Dispose();
-                if(velocities != null) velocities.Dispose();
-                if(normals != null) normals.Dispose();
-                if(tangents != null) tangents.Dispose();
-                if(uv0 != null) uv0.Dispose();
-                if(uv1 != null) uv1.Dispose();
-                if(colors != null) colors.Dispose();
+                if (points != null) points.Dispose();
+                if (velocities != null) velocities.Dispose();
+                if (normals != null) normals.Dispose();
+                if (tangents != null) tangents.Dispose();
+                if (uv0 != null) uv0.Dispose();
+                if (uv1 != null) uv1.Dispose();
+                if (colors != null) colors.Dispose();
                 if ((mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
 #if UNITY_EDITOR
-                Object.DestroyImmediate(mesh);
+                    Object.DestroyImmediate(mesh);
 #else
-                Object.Destroy(mesh);
+                    Object.Destroy(mesh);
 #endif
-                mesh = null;
-                    
+                    mesh = null;
                 }
-
             }
         }
 
@@ -104,7 +102,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 if (m_splits.Count == 0)
                 {
-                    split = new Split {
+                    split = new Split
+                    {
                         host = abcTreeNode.gameObject,
                     };
                     m_splits.Add(split);

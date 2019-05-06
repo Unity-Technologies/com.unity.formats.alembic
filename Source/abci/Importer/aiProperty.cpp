@@ -46,7 +46,7 @@ template<> struct aiGetPropertyTypeID<abcFloat4x4ArrayProperty> { static const a
 template<class T>
 class aiTScalarProprty : public aiProperty
 {
-using super = aiProperty;
+    using super = aiProperty;
 public:
     using property_type = T;
     using value_type = typename T::value_type;
@@ -56,6 +56,7 @@ public:
     {
         DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
+
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
@@ -67,7 +68,8 @@ public:
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
-        if (m_active) {
+        if (m_active)
+        {
             m_value = m_abcprop->getValue(ss);
             m_data = { &m_value, 1, getPropertyType() };
         }
@@ -82,8 +84,9 @@ public:
     void copyData(const abcSampleSelector& ss, aiPropertyData& dst) override
     {
         auto src = updateSample(ss);
-        if (dst.data) {
-            memcpy(dst.data, src->data, sizeof(T)*src->size);
+        if (dst.data)
+        {
+            memcpy(dst.data, src->data, sizeof(T) * src->size);
         }
         dst.size = src->size;
         dst.type = src->type;
@@ -110,7 +113,7 @@ template class aiTScalarProprty<abcFloat4x4Property>;
 template<class T>
 class aiTArrayProprty : public aiProperty
 {
-using super = aiProperty;
+    using super = aiProperty;
 public:
     using property_type = T;
     using value_type = typename T::value_type;
@@ -121,6 +124,7 @@ public:
     {
         DebugLog("aeTScalarProprty::aeTScalarProprty() %s", m_abcprop->getName().c_str());
     }
+
     const std::string& getName() const override { return m_abcprop->getName(); }
     aiPropertyType getPropertyType() const override { return aiGetPropertyTypeID<T>::value; }
     int getNumSamples() const override { return (int)m_abcprop->getNumSamples(); }
@@ -132,7 +136,8 @@ public:
 
     aiPropertyData* updateSample(const abcSampleSelector& ss) override
     {
-        if (m_active) {
+        if (m_active)
+        {
             m_value = m_abcprop->getValue(ss);
             m_data = { const_cast<void*>(m_value->getData()), (int)m_value->size(), getPropertyType() };
         }
@@ -147,8 +152,9 @@ public:
     void copyData(const abcSampleSelector& ss, aiPropertyData& dst) override
     {
         auto src = updateSample(ss);
-        if (dst.data && src->size <= dst.size) {
-            memcpy(dst.data, src->data, sizeof(T)*src->size);
+        if (dst.data && src->size <= dst.size)
+        {
+            memcpy(dst.data, src->data, sizeof(T) * src->size);
         }
         dst.size = src->size;
         dst.type = src->type;
@@ -195,55 +201,73 @@ struct aiMakePropertyImpl<T, true>
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
 {
     const auto &dt = header.getDataType();
-    if (header.getPropertyType() == Abc::kScalarProperty) {
-        if (dt.getPod() == Abc::kBooleanPOD) {
-            switch (dt.getNumBytes()) {
-            case 1: return aiPropertyType::Bool;
+    if (header.getPropertyType() == Abc::kScalarProperty)
+    {
+        if (dt.getPod() == Abc::kBooleanPOD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 1: return aiPropertyType::Bool;
             }
         }
-        else if (dt.getPod() == Abc::kInt32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::Int;
+        else if (dt.getPod() == Abc::kInt32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::Int;
             }
         }
-        else if (dt.getPod() == Abc::kUint32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::UInt;
+        else if (dt.getPod() == Abc::kUint32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::UInt;
             }
         }
-        else if (dt.getPod() == Abc::kFloat32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::Float;
-            case 8: return aiPropertyType::Float2;
-            case 12: return aiPropertyType::Float3;
-            case 16: return aiPropertyType::Float4;
-            case 64: return aiPropertyType::Float4x4;
+        else if (dt.getPod() == Abc::kFloat32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::Float;
+                case 8: return aiPropertyType::Float2;
+                case 12: return aiPropertyType::Float3;
+                case 16: return aiPropertyType::Float4;
+                case 64: return aiPropertyType::Float4x4;
             }
         }
     }
-    else if (header.getPropertyType() == Abc::kArrayProperty) {
-        if (dt.getPod() == Abc::kBooleanPOD) {
-            switch (dt.getNumBytes()) {
-            case 1: return aiPropertyType::BoolArray;
+    else if (header.getPropertyType() == Abc::kArrayProperty)
+    {
+        if (dt.getPod() == Abc::kBooleanPOD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 1: return aiPropertyType::BoolArray;
             }
         }
-        else if (dt.getPod() == Abc::kInt32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::IntArray;
+        else if (dt.getPod() == Abc::kInt32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::IntArray;
             }
         }
-        else if (dt.getPod() == Abc::kUint32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::UIntArray;
+        else if (dt.getPod() == Abc::kUint32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::UIntArray;
             }
         }
-        else if (dt.getPod() == Abc::kFloat32POD) {
-            switch (dt.getNumBytes()) {
-            case 4: return aiPropertyType::FloatArray;
-            case 8: return aiPropertyType::Float2Array;
-            case 12: return aiPropertyType::Float3Array;
-            case 16: return aiPropertyType::Float4Array;
-            case 64: return aiPropertyType::Float4x4Array;
+        else if (dt.getPod() == Abc::kFloat32POD)
+        {
+            switch (dt.getNumBytes())
+            {
+                case 4: return aiPropertyType::FloatArray;
+                case 8: return aiPropertyType::Float2Array;
+                case 12: return aiPropertyType::Float3Array;
+                case 16: return aiPropertyType::Float4Array;
+                case 64: return aiPropertyType::Float4x4Array;
             }
         }
     }
@@ -257,24 +281,24 @@ aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyH
 
     switch (ptype)
     {
-    case aiPropertyType::Bool: return aiMakePropertyImpl<abcBoolProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Int: return aiMakePropertyImpl<abcIntProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::UInt: return aiMakePropertyImpl<abcUIntProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float: return aiMakePropertyImpl<abcFloatProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float2: return aiMakePropertyImpl<abcFloat2Property>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float3: return aiMakePropertyImpl<abcFloat3Property>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float4: return aiMakePropertyImpl<abcFloat4Property>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float4x4: return aiMakePropertyImpl<abcFloat4x4Property>::make(schema, cprop, header.getName());
+        case aiPropertyType::Bool: return aiMakePropertyImpl<abcBoolProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Int: return aiMakePropertyImpl<abcIntProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::UInt: return aiMakePropertyImpl<abcUIntProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float: return aiMakePropertyImpl<abcFloatProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float2: return aiMakePropertyImpl<abcFloat2Property>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float3: return aiMakePropertyImpl<abcFloat3Property>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float4: return aiMakePropertyImpl<abcFloat4Property>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float4x4: return aiMakePropertyImpl<abcFloat4x4Property>::make(schema, cprop, header.getName());
 
-    case aiPropertyType::BoolArray: return aiMakePropertyImpl<abcBoolArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::IntArray: return aiMakePropertyImpl<abcIntArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::UIntArray: return aiMakePropertyImpl<abcUIntArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::FloatArray: return aiMakePropertyImpl<abcFloatArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float2Array: return aiMakePropertyImpl<abcFloat2ArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float3Array: return aiMakePropertyImpl<abcFloat3ArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float4Array: return aiMakePropertyImpl<abcFloat4ArrayProperty>::make(schema, cprop, header.getName());
-    case aiPropertyType::Float4x4Array: return aiMakePropertyImpl<abcFloat4x4ArrayProperty>::make(schema, cprop, header.getName());
-    default: break;
+        case aiPropertyType::BoolArray: return aiMakePropertyImpl<abcBoolArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::IntArray: return aiMakePropertyImpl<abcIntArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::UIntArray: return aiMakePropertyImpl<abcUIntArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::FloatArray: return aiMakePropertyImpl<abcFloatArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float2Array: return aiMakePropertyImpl<abcFloat2ArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float3Array: return aiMakePropertyImpl<abcFloat3ArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float4Array: return aiMakePropertyImpl<abcFloat4ArrayProperty>::make(schema, cprop, header.getName());
+        case aiPropertyType::Float4x4Array: return aiMakePropertyImpl<abcFloat4x4ArrayProperty>::make(schema, cprop, header.getName());
+        default: break;
     }
     return nullptr;
 }

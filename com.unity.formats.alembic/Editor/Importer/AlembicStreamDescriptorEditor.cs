@@ -7,7 +7,6 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicStreamDescriptor))]
     internal class AlembicStreamDescriptorEditor : Editor
     {
-
         public override void OnInspectorGUI()
         {
 #if UNITY_2017_1_OR_NEWER || ENABLE_SCRIPTED_IMPORTERS
@@ -21,7 +20,5 @@ namespace UnityEditor.Formats.Alembic.Importer
             base.OnInspectorGUI();
 #endif
         }
-
     }
-
 }
