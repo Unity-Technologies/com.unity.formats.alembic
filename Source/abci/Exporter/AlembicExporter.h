@@ -4,11 +4,11 @@
 
 class aeContext;
 #ifdef abciImpl
-    class aeObject;
-    class aeSchema;
+class aeObject;
+class aeSchema;
 #else
-    using aeObject = void; // force make upper-castable
-    using aeSchema = void; // 
+using aeObject = void;     // force make upper-castable
+using aeSchema = void;     //
 #endif
 class aeXform;    // : aeSchema
 class aePoints;   // : aeSchema
@@ -108,35 +108,12 @@ struct aePolyMeshData
 {
     bool visibility = true;
 
-    const int   *faces = nullptr;           // can be null. if null, assume all faces are triangles
-    const int   *indices = nullptr;
-    int         face_count = 0;
-    int         index_count = 0;
-
     const abcV3 *points = nullptr;
-    const abcV3 *velocities = nullptr;      // can be null. if not null, must be same size of positions
     int         point_count = 0;
-
     const abcV3 *normals = nullptr;         // can be null
-    const int   *normal_indices = nullptr;  // can be null. if null, normal_count must be same as point_count or index_count
-    int         normal_count = 0;           // if 0, assume same as position_count
-    int         normal_index_count = 0;
-
     const abcV2 *uv0 = nullptr;             // can be null
-    const int   *uv0_indices = nullptr;     // can be null. if null, uv0_count must be same as point_count or index_count
-    int         uv0_count = 0;              // if 0, assume same as position_count
-    int         uv0_index_count = 0;
-
     const abcV2 *uv1 = nullptr;             // can be null
-    const int   *uv1_indices = nullptr;     // can be null. if null, uv1_count must be same as point_count or index_count
-    int         uv1_count = 0;              // if 0, assume same as position_count
-    int         uv1_index_count = 0;
-
     const abcV4 *colors = nullptr;          // can be null
-    const int   *colors_indices = nullptr;  // can be null. if null, colors_count must be same as point_count or index_count
-    int         colors_count = 0;           // if 0, assume same as position_count
-    int         colors_index_count = 0;
-
     const aeSubmeshData *submeshes = nullptr;
     int submesh_count = 0;
 };
@@ -157,20 +134,6 @@ struct aePointsData
     int count = 0;
 };
 
-struct aeCameraData
-{
-    bool visibility = true;
-
-    float near_clipping_plane = 0.3f;
-    float far_clipping_plane = 1000.0f;
-    float field_of_view = 60.0f;      // in degree. vertical one. relevant only if focalLength==0.0
-    float aspect_ratio = 16.0f / 9.0f;
-
-    float focus_distance = 5.0f;    // in cm
-    float focal_length = 0.0f;      // in mm. if 0.0f, automatically computed by aperture and fieldOfView. alembic's default value is 35.0
-    float aperture = 2.4f;          // in cm. vertical one
-};
-
 struct aeWeights4
 {
     float weight[4];
@@ -178,7 +141,6 @@ struct aeWeights4
 
     bool operator==(const aeWeights4& v) { return memcmp(this, &v, sizeof(*this)) == 0; }
 };
-
 
 
 abciAPI aeContext*  aeCreateContext();
@@ -212,7 +174,7 @@ abciAPI void        aeSetFromPrevious(aeSchema *obj);
 abciAPI void        aeMarkForceInvisible(aeSchema *obj);
 
 abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
-abciAPI void        aeCameraWriteSample(aeCamera *obj, const aeCameraData *data);
+abciAPI void        aeCameraWriteSample(aeCamera *obj, const CameraData *data);
 abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
 
 abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);

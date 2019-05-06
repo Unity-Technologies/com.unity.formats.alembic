@@ -29,7 +29,8 @@ void aiAsyncManager::queue(aiAsync **tasks, size_t num)
         m_tasks.insert(m_tasks.end(), tasks, tasks + num);
 
         // launch worker thread (task) if needed
-        if (!m_processing) {
+        if (!m_processing)
+        {
             m_processing = true;
             m_future = std::async(std::launch::async, [this]() { process(); });
         }
@@ -38,15 +39,18 @@ void aiAsyncManager::queue(aiAsync **tasks, size_t num)
 
 void aiAsyncManager::process()
 {
-    while (true) {
+    while (true)
+    {
         aiAsync *task = nullptr;
         {
             std::lock_guard<std::mutex> lock(m_mutex);
-            if (!m_tasks.empty()) {
+            if (!m_tasks.empty())
+            {
                 task = m_tasks.front();
                 m_tasks.pop_front();
             }
-            else {
+            else
+            {
                 m_processing = false;
             }
         }
@@ -57,7 +61,6 @@ void aiAsyncManager::process()
             break;
     }
 }
-
 
 aiAsyncLoad::~aiAsyncLoad()
 {
@@ -86,13 +89,15 @@ void aiAsyncLoad::run()
     if (m_read)
         m_read();
 
-    if (m_cook) {
+    if (m_cook)
+    {
         m_async_cook = std::async(std::launch::async, [this]() {
             m_cook();
             release();
         });
     }
-    else {
+    else
+    {
         release();
     }
 }
@@ -108,9 +113,9 @@ void aiAsyncLoad::release()
 
 void aiAsyncLoad::wait()
 {
-    if (!m_completed) {
+    if (!m_completed)
+    {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_notify_completed.wait(lock, [this] { return m_completed; });
     }
 }
-

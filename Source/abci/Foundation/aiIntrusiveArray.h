@@ -9,8 +9,8 @@ public:
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
-    using pointer = T*;
-    using const_pointer = const T*;
+    using pointer = T *;
+    using const_pointer = const T *;
     using iterator = pointer;
     using const_iterator = const_pointer;
 
@@ -51,12 +51,14 @@ public:
 
     void zeroclear()
     {
-        memset(m_data, 0, sizeof(T)*m_size);
+        memset(m_data, 0, sizeof(T) * m_size);
     }
+
     void copy_to(pointer dst) const
     {
         memcpy(dst, m_data, sizeof(value_type) * m_size);
     }
+
     void copy_to(pointer dst, size_t num_elements, size_t offset = 0) const
     {
         memcpy(dst, m_data + offset, sizeof(value_type) * num_elements);
@@ -75,8 +77,8 @@ public:
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
-    using pointer = T*;
-    using const_pointer = const T*;
+    using pointer = T *;
+    using const_pointer = const T *;
     using iterator = indexed_iterator<T*, const I*>;
     using const_iterator = indexed_iterator<const T*, const I*>;
 

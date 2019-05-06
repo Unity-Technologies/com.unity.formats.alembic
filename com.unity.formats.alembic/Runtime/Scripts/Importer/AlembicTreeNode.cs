@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-
     internal sealed class AlembicTreeNode : IDisposable
     {
         public AlembicStream stream { get; set; }
@@ -75,5 +74,4 @@ namespace UnityEngine.Formats.Alembic.Importer
             return null;
         }
     }
-
 }

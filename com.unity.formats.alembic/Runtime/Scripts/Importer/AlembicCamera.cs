@@ -7,19 +7,18 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal class AlembicCamera : AlembicElement
     {
         aiCamera m_abcSchema;
-        aiCameraData m_abcData;
+        CameraData m_abcData;
         Camera m_camera;
-        bool m_ignoreClippingPlanes = false;
 
         internal override aiSchema abcSchema { get { return m_abcSchema; } }
         public override bool visibility { get { return m_abcData.visibility; } }
 
         internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
-            base.AbcSetup( abcObj, abcSchema);
+            base.AbcSetup(abcObj, abcSchema);
             m_abcSchema = (aiCamera)abcSchema;
 
-            m_camera = GetOrAddComponent<Camera>();
+            m_camera = GetOrAddCamera();
 
             // flip forward direction (camera in Alembic has inverted forward direction)
             abcTreeNode.gameObject.transform.localEulerAngles = new Vector3(0, 180, 0);
@@ -35,15 +34,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
                 abcTreeNode.gameObject.SetActive(m_abcData.visibility);
 
-            m_camera.fieldOfView = m_abcData.fieldOfView;
+            m_camera.focalLength = m_abcData.focalLength;
+            m_camera.sensorSize = m_abcData.sensorSize;
+            m_camera.lensShift = m_abcData.lensShift;
 
-            if (!m_ignoreClippingPlanes)
-            {
-                m_camera.nearClipPlane = m_abcData.nearClippingPlane;
-                m_camera.farClipPlane = m_abcData.farClippingPlane;
-            }
-
-            // no use for focusDistance and focalLength yet (could be usefull for DoF component)
+            m_camera.nearClipPlane = m_abcData.nearClipPlane;
+            m_camera.farClipPlane = m_abcData.farClipPlane;
         }
     }
 }

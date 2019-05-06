@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-
     class PinnedObject<T> : IDisposable
     {
         T m_data;
@@ -35,9 +34,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
             }
         }
 
-        public static implicit operator IntPtr(PinnedObject<T> v) {
+        public static implicit operator IntPtr(PinnedObject<T> v)
+        {
             return v == null ? IntPtr.Zero : v.Pointer;
         }
+
         internal static IntPtr ToIntPtr(PinnedObject<T> v) { return v; }
     }
 
@@ -52,9 +53,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             m_data = new T[size];
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
+
         public PinnedArray(T[] data, bool clone = false)
         {
-            if(data == null) { return; }
+            if (data == null) { return; }
             m_data = clone ? (T[])data.Clone() : data;
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
@@ -99,6 +101,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         {
             return (IEnumerator<T>)m_data.GetEnumerator();
         }
+
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -125,7 +128,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         internal static T[] GetInternalArray<T>(List<T> list) where T : struct
         {
-            if(list == null)
+            if (list == null)
             {
                 return null;
             }
@@ -133,9 +136,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             caster.list = list;
             return (T[])caster.data.items;
         }
+
         internal static List<T> CreateIntrusiveList<T>(T[] data) where T : struct
         {
-            if(data == null)
+            if (data == null)
             {
                 return null;
             }
@@ -147,9 +151,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             caster.data.size = data.Length;
             return ret;
         }
+
         internal static void SetCount<T>(List<T> list, int count) where T : struct
         {
-            if(list == null)
+            if (list == null)
             {
                 return;
             }
@@ -176,9 +181,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
             m_list = PinnedListImpl.CreateIntrusiveList(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
+
         public PinnedList(T[] data, bool clone = false)
         {
-            if(data == null)
+            if (data == null)
             {
                 return;
             }
@@ -187,13 +193,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
             m_list = PinnedListImpl.CreateIntrusiveList(m_data);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
+
         public PinnedList(List<T> data, bool clone = false)
         {
             m_list = clone ? new List<T>(data) : data;
             m_data = PinnedListImpl.GetInternalArray(m_list);
             m_gch = GCHandle.Alloc(m_data, GCHandleType.Pinned);
         }
-
 
         public int Capacity { get { return m_data.Length; } }
         public int Count { get { return m_list.Count; } }
@@ -209,7 +215,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void LockList(Action<List<T>> body)
         {
-            if(body == null)
+            if (body == null)
             {
                 return;
             }
@@ -223,7 +229,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void Resize(int size)
         {
-            if(size > m_data.Length)
+            if (size > m_data.Length)
             {
                 LockList(l => {
                     l.Capacity = size;
@@ -261,16 +267,17 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void Assign(T[] source)
         {
-            if(source == null)
+            if (source == null)
             {
                 return;
             }
             ResizeDiscard(source.Length);
             System.Array.Copy(source, m_data, source.Length);
         }
+
         public void Assign(List<T> sourceList)
         {
-            if(sourceList == null)
+            if (sourceList == null)
             {
                 return;
             }
@@ -299,6 +306,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         {
             return (IEnumerator<T>)m_data.GetEnumerator();
         }
+
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -307,5 +315,4 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator IntPtr(PinnedList<T> v) { return v == null ? IntPtr.Zero : v.Pointer; }
         internal static IntPtr ToIntPtr(PinnedList<T> v) { return v; }
     }
-
 }

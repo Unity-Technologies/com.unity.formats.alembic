@@ -77,7 +77,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             {
                 File.Delete(file);
             }
-            
+
             deleteFileList.Clear();
         }
     }

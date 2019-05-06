@@ -47,7 +47,7 @@ protected:
 
 class aeSchema : public aeObject
 {
-using super = aeObject;
+    using super = aeObject;
 public:
     aeSchema(aeContext *ctx, aeObject *parent, abcObject *abc, uint32_t tsi);
     ~aeSchema();

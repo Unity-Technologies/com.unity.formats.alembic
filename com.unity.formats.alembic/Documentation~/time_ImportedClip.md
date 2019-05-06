@@ -16,10 +16,10 @@ To play back the clip on the timeline:
 
 3. Drag the Animation clip from the Alembic Asset in the Project view onto the Timeline view.
 
-	![Drag Time Clip](images/abc_drag_time_clip.png)
+    ![Drag Time Clip](images/abc_drag_time_clip.png)
 
 4. Set the Animator driving the Animation clip to the newly created Animator component.
 
-4. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline view. 
+4. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline view.
 
 You can also use the Animator to play back the clip by adding it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other clip.

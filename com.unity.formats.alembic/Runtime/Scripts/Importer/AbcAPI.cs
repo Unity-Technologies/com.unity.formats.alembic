@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -78,6 +79,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         ArrayTypeEnd = Float4x4Array,
     };
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiConfig
     {
         public aiNormalsMode normalsMode { get; set; }
@@ -123,6 +125,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int requestedTimeIndexType { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance { get; set; }
@@ -144,6 +147,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantColors { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiMeshSampleSummary
     {
         public Bool visibility { get; set; }
@@ -165,6 +169,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int indexOffset { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiSubmeshSummary
     {
         public int splitIndex { get; set; }
@@ -173,6 +178,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiTopology topology { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiPolyMeshData
     {
         public IntPtr positions;
@@ -193,7 +199,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiPolyMeshData(
             IntPtr positions, IntPtr velocities, IntPtr normals,
             IntPtr tangents, IntPtr uv0, IntPtr uv1, IntPtr colors,
-            IntPtr indices, int vertexCount, int indexCount, 
+            IntPtr indices, int vertexCount, int indexCount,
             Vector3 center, Vector3 extents)
         {
             this.positions = positions;
@@ -216,6 +222,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr indexes;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiXformData
     {
         public Bool visibility { get; set; }
@@ -226,20 +233,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool inherits { get; set; }
     }
 
-    internal struct aiCameraData
-    {
-        public Bool visibility { get; set; }
 
-        public float nearClippingPlane { get; set; }
-        public float farClippingPlane { get; set; }
-        public float fieldOfView { get; set; }   // in degree. vertical one
-        public float aspectRatio { get; set; }
-
-        public float focusDistance { get; set; } // in cm
-        public float focalLength { get; set; }   // in mm
-        public float aperture { get; set; }      // in cm. vertical one
-    }
-
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiPointsSummary
     {
         public Bool hasVelocities { get; set; }
@@ -254,6 +249,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public int count { get; set; }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiPointsData
     {
         public Bool visibility;
@@ -267,7 +263,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 boundsExtents;
 
         public aiPointsData(
-            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids, 
+            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids,
             int count, Vector3 boundsCenter, Vector3 boundsExtents)
         {
             this.visibility = visibility;
@@ -280,6 +276,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiPropertyData
     {
         public IntPtr data;
@@ -294,7 +291,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal static class Abci {
+    internal static class Abci
+    {
 #if UNITY_EDITOR_OSX
         internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
 #elif UNITY_EDITOR_LINUX
@@ -313,10 +311,21 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static bool ToBool(aiContext v) { return v; }
 
         public static aiContext Create(int uid) { return NativeMethods.aiContextCreate(uid); }
-        public static void DestroyByPath(string path) { NativeMethods.aiClearContextsWithPath(path); }
+
+        public static void DestroyByPath(string path)
+        {
+            var fullPath = Path.GetFullPath(path);
+            NativeMethods.aiClearContextsWithPath(fullPath);
+        }
 
         public void Destroy() { NativeMethods.aiContextDestroy(self); self = IntPtr.Zero; }
-        public bool Load(string path) { return NativeMethods.aiContextLoad(self, path); }
+
+        public bool Load(string path)
+        {
+            var fullPath = Path.GetFullPath(path);
+            return NativeMethods.aiContextLoad(self, fullPath);
+        }
+
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 
@@ -368,7 +377,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void EachChild(Action<aiObject> act)
         {
-            if(act == null)
+            if (act == null)
             {
                 return;
             }
@@ -475,7 +484,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiCameraSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiCameraSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
-        public void GetData(ref aiCameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
+        public void GetData(ref CameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
     }
 
     internal struct aiPolyMeshSample

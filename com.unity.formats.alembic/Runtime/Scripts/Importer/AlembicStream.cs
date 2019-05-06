@@ -186,7 +186,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 createMissingNodes = createMissingNodes,
             };
             top.EachChild(ImportCallback);
-            
+
             if (!initialImport)
             {
                 foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
@@ -286,7 +286,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return (float)PlayerSettings.defaultScreenWidth / (float)PlayerSettings.defaultScreenHeight;
 #else
                 // fallback on current resoltution
-                return (float) Screen.width / (float) Screen.height;
+                return (float)Screen.width / (float)Screen.height;
 #endif
             }
         }

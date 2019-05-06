@@ -257,7 +257,8 @@ namespace UnityEngine.Formats.Alembic.Util
                     indices.LockList(l => { mesh.GetIndices(l, smi); });
 
                     aeSubmeshData smd = new aeSubmeshData();
-                    switch (mesh.GetTopology(smi)) {
+                    switch (mesh.GetTopology(smi))
+                    {
                         case MeshTopology.Triangles: smd.topology = aeTopology.Triangles; break;
                         case MeshTopology.Lines: smd.topology = aeTopology.Lines; break;
                         case MeshTopology.Quads: smd.topology = aeTopology.Quads; break;
@@ -273,7 +274,6 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 Capture(mesh, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
-
 
             public void WriteSample(aeObject abc)
             {
@@ -292,13 +292,13 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                if(points != null) points.Dispose();
-                if(normals != null) normals.Dispose();
-                if(uv0 != null) uv0.Dispose();
-                if(uv1 != null) uv1.Dispose();
-                if(colors != null) colors.Dispose();
-                if(submeshData != null) submeshData.Dispose();
-                if(submeshIndices != null) submeshIndices.ForEach(i => { if (i != null) i.Dispose(); });
+                if (points != null) points.Dispose();
+                if (normals != null) normals.Dispose();
+                if (uv0 != null) uv0.Dispose();
+                if (uv1 != null) uv1.Dispose();
+                if (colors != null) colors.Dispose();
+                if (submeshData != null) submeshData.Dispose();
+                if (submeshIndices != null) submeshIndices.ForEach(i => { if (i != null) i.Dispose(); });
             }
         }
 
@@ -381,9 +381,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                if(remap != null) remap.Dispose();
-                if(vertices != null) vertices.Dispose();
-                if(normals != null) normals.Dispose();
+                if (remap != null) remap.Dispose();
+                if (vertices != null) vertices.Dispose();
+                if (normals != null) normals.Dispose();
             }
         }
 
@@ -395,8 +395,8 @@ namespace UnityEngine.Formats.Alembic.Util
                 abcObject = abc;
             }
 
-            public override void Setup(Component c) { }
-            public override void Capture() { }
+            public override void Setup(Component c) {}
+            public override void Capture() {}
         }
 
         class TransformCapturer : ComponentCapturer
@@ -424,7 +424,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public override void Capture()
             {
-                if (m_target == null) {
+                if (m_target == null)
+                {
                     m_data.visibility = false;
                 }
                 else
@@ -461,19 +462,13 @@ namespace UnityEngine.Formats.Alembic.Util
         class CameraCapturer : ComponentCapturer
         {
             Camera m_target;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-            AlembicCameraParams m_params;
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
-            aeCameraData m_data = aeCameraData.defaultValue;
+            CameraData m_data;
 
             public override void Setup(Component c)
             {
                 var target = c as Camera;
                 abcObject = parent.abcObject.NewCamera(target.name, timeSamplingIndex);
                 m_target = target;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-                m_params = target.GetComponent<AlembicCameraParams>();
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
 
                 var trans = parent as TransformCapturer;
                 if (trans != null)
@@ -493,22 +488,25 @@ namespace UnityEngine.Formats.Alembic.Util
                 abcObject.WriteSample(ref m_data);
             }
 
-            void Capture(ref aeCameraData dst)
+            void Capture(ref CameraData dst)
             {
                 var src = m_target;
                 dst.visibility = src.gameObject.activeSelf;
-                dst.nearClippingPlane = src.nearClipPlane;
-                dst.farClippingPlane = src.farClipPlane;
-                dst.fieldOfView = src.fieldOfView;
-#if ENABLE_ALEMBIC_CAMERA_PARAMS
-                if (m_params != null)
+                dst.nearClipPlane = src.nearClipPlane;
+                dst.farClipPlane = src.farClipPlane;
+
+                if (src.usePhysicalProperties)
                 {
-                    dst.focalLength = m_params.m_focalLength;
-                    dst.focusDistance = m_params.m_focusDistance;
-                    dst.aperture = m_params.m_aperture;
-                    dst.aspectRatio = m_params.AspectRatio;
+                    dst.focalLength = src.focalLength;
+                    dst.lensShift = src.lensShift;
+                    dst.sensorSize = src.sensorSize;
                 }
-#endif // ENABLE_ALEMBIC_CAMERA_PARAMS
+                else
+                {
+                    const float deg2rad =  Mathf.PI / 180;
+                    dst.focalLength = (float)(Screen.height / 2 / Math.Tan(deg2rad * src.fieldOfView / 2));
+                    dst.sensorSize = new Vector2(Screen.width, Screen.height);
+                }
             }
         }
 
@@ -548,7 +546,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                if(m_mbuf != null) m_mbuf.Dispose();
+                if (m_mbuf != null) m_mbuf.Dispose();
             }
         }
 
@@ -619,8 +617,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                if(m_mbuf != null) m_mbuf.Dispose();
-                if(m_cbuf != null) m_cbuf.Dispose();
+                if (m_mbuf != null) m_mbuf.Dispose();
+                if (m_cbuf != null) m_cbuf.Dispose();
             }
         }
 
@@ -674,8 +672,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Dispose()
             {
-                if(m_bufPoints != null) m_bufPoints.Dispose();
-                if(m_bufRotations != null) m_bufRotations.Dispose();
+                if (m_bufPoints != null) m_bufPoints.Dispose();
+                if (m_bufRotations != null) m_bufRotations.Dispose();
             }
         }
 
@@ -712,10 +710,10 @@ namespace UnityEngine.Formats.Alembic.Util
             public bool enabled = true;
             public Type type;
         }
-#endregion
+        #endregion
 
 
-#region fields
+        #region fields
         [SerializeField] AlembicRecorderSettings m_settings = new AlembicRecorderSettings();
 
         aeContext m_ctx;
@@ -732,10 +730,10 @@ namespace UnityEngine.Formats.Alembic.Util
         int m_frameCount;
 
         Dictionary<Type, CapturerRecord> m_capturerTable = new Dictionary<Type, CapturerRecord>();
-#endregion
+        #endregion
 
 
-#region properties
+        #region properties
         public AlembicRecorderSettings settings
         {
             get { return m_settings; }
@@ -744,10 +742,10 @@ namespace UnityEngine.Formats.Alembic.Util
         public GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
         public bool recording { get { return m_recording; } }
         public int frameCount { get { return m_frameCount; } }
-#endregion
+        #endregion
 
 
-#region impl
+        #region impl
 #if UNITY_EDITOR
         public static void ForceDisableBatching()
         {
@@ -768,9 +766,10 @@ namespace UnityEngine.Formats.Alembic.Util
                 method.Invoke(null, new object[] { BuildTarget.StandaloneLinux64, 0, 0 });
             }
         }
+
 #endif
 
-                T[] GetTargets<T>() where T : Component
+        T[] GetTargets<T>() where T : Component
         {
             if (m_settings.Scope == ExportScope.TargetBranch && targetBranch != null)
             {
@@ -817,7 +816,6 @@ namespace UnityEngine.Formats.Alembic.Util
             return cn;
         }
 
-
         void SetupCapturerTable()
         {
             if (m_capturerTable.Count != 0)
@@ -845,7 +843,6 @@ namespace UnityEngine.Formats.Alembic.Util
                 m_capturerTable[typeof(ParticleSystem)].enabled = false;
         }
 
-
         void SetupComponentCapturer(CaptureNode node)
         {
             if (node.setup)
@@ -868,7 +865,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     var cr = m_capturerTable[node.componentType];
                     node.componentCapturer = Activator.CreateInstance(cr.type) as ComponentCapturer;
                     node.componentCapturer.recorder = this;
-                    node.componentCapturer.parent = node.transformCapturer; ;
+                    node.componentCapturer.parent = node.transformCapturer;;
                     node.componentCapturer.timeSamplingIndex = timeSamplingIndex;
                     node.componentCapturer.Setup(component);
                 }
@@ -897,10 +894,11 @@ namespace UnityEngine.Formats.Alembic.Util
             foreach (var c in m_nodes)
                 SetupComponentCapturer(c.Value);
         }
-#endregion
+
+        #endregion
 
 
-#region public methods
+        #region public methods
         public void Dispose()
         {
             m_ctx.Destroy();
@@ -1028,7 +1026,7 @@ namespace UnityEngine.Formats.Alembic.Util
             // advance time
             ++m_frameCount;
             m_timePrev = m_time;
-            switch(m_settings.conf.TimeSamplingType)
+            switch (m_settings.conf.TimeSamplingType)
             {
                 case aeTimeSamplingType.Uniform:
                     m_time = (1.0f / m_settings.conf.FrameRate) * m_frameCount;
@@ -1048,6 +1046,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 Debug.Log("AlembicRecorder: frame " + m_frameCount + " (" + (m_elapsed * 1000.0f) + " ms)");
             }
         }
-#endregion
+
+        #endregion
     }
 }

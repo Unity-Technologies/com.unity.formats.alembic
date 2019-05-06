@@ -7,4 +7,3 @@ This section provides details on the properties for the following windows or com
 - [Alembic Point Renderer component](ref_PointRenderer.html), which allows you to customize the appearance of the particles in the point cloud.
 - [Alembic Stream Player component](ref_StreamPlayer.html), which allows you to play back animation from the Alembic file in either Timeline or Unity Animation.
 - [Import Settings for Alembic](ref_Importer.html), which allows you to customize importing the data from the Alembic file.
-

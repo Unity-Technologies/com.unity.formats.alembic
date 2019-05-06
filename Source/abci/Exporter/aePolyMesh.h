@@ -16,7 +16,7 @@ using aeFaceSetPtr = std::shared_ptr<aeFaceSet>;
 
 class aePolyMesh : public aeSchema
 {
-using super = aeSchema;
+    using super = aeSchema;
 public:
     aePolyMesh(aeObject *parent, const char *name, uint32_t tsi);
     abcPolyMesh& getAbcObject() override;

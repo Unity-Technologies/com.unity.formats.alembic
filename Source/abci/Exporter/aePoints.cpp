@@ -46,22 +46,37 @@ void aePoints::doWriteSample()
     const auto &conf = getConfig();
 
     // generate ids if needed
-    if (m_buf_ids.size() != m_buf_positions.size()) {
+    if (m_buf_ids.size() != m_buf_positions.size())
+    {
         m_buf_ids.resize_discard(m_buf_positions.size());
         std::iota(m_buf_ids.begin(), m_buf_ids.end(), 0);
     }
 
     // handle swap handedness
-    if (conf.swap_handedness) {
-        for (auto &v : m_buf_positions) { v.x *= -1.0f; }
-        for (auto &v : m_buf_velocities) { v.x *= -1.0f; }
+    if (conf.swap_handedness)
+    {
+        for (auto &v : m_buf_positions)
+        {
+            v.x *= -1.0f;
+        }
+        for (auto &v : m_buf_velocities)
+        {
+            v.x *= -1.0f;
+        }
     }
 
     // handle scale factor
     float scale = conf.scale_factor;
-    if (scale != 1.0f) {
-        for (auto &v : m_buf_positions) { v *= scale; }
-        for (auto &v : m_buf_velocities) { v *= scale; }
+    if (scale != 1.0f)
+    {
+        for (auto &v : m_buf_positions)
+        {
+            v *= scale;
+        }
+        for (auto &v : m_buf_velocities)
+        {
+            v *= scale;
+        }
     }
 
     // write!
@@ -70,7 +85,8 @@ void aePoints::doWriteSample()
     AbcGeom::OPointsSchema::Sample sample;
     sample.setPositions(Abc::P3fArraySample(m_buf_positions.data(), m_buf_positions.size()));
     sample.setIds(Abc::UInt64ArraySample(m_buf_ids.data(), m_buf_ids.size()));
-    if (!m_buf_velocities.empty()) {
+    if (!m_buf_velocities.empty())
+    {
         sample.setVelocities(Abc::V3fArraySample(m_buf_velocities.data(), m_buf_velocities.size()));
     }
 

@@ -49,5 +49,3 @@ private:
     std::condition_variable m_notify_completed;
     bool m_completed = true;
 };
-
-

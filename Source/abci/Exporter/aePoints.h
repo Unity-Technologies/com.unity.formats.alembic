@@ -2,7 +2,7 @@
 
 class aePoints : public aeSchema
 {
-using super = aeSchema;
+    using super = aeSchema;
 public:
     aePoints(aeObject *parent, const char *name, uint32_t tsi);
     abcPoints& getAbcObject() override;

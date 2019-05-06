@@ -322,20 +322,20 @@
     {
         Tags{ "RenderPipeline"="HDRenderPipeline" "RenderType" = "HDLitShader" }
 
-		// Default to normal HD Render Pipeline Lit Passes.
+        // Default to normal HD Render Pipeline Lit Passes.
         UsePass "HDRenderPipeline/Lit/SCENESELECTIONPASS"
         UsePass "HDRenderPipeline/Lit/GBUFFER"
         UsePass "HDRenderPipeline/Lit/META"
         UsePass "HDRenderPipeline/Lit/SHADOWCASTER"
         UsePass "HDRenderPipeline/Lit/DEPTHONLY"
-		UsePass "HDRenderPipeline/Lit/DISTORTION"
-		UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPREPASS"
-		UsePass "HDRenderPipeline/Lit/TRANSPARENTBACKFACE"
-		UsePass "HDRenderPipeline/Lit/FORWARD"
-		UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPOSTPASS"
+        UsePass "HDRenderPipeline/Lit/DISTORTION"
+        UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPREPASS"
+        UsePass "HDRenderPipeline/Lit/TRANSPARENTBACKFACE"
+        UsePass "HDRenderPipeline/Lit/FORWARD"
+        UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPOSTPASS"
 
-		// Alembic: Override the MotionVectors pass to integrate runtime velocities.
-		/////////////////////////////////////////////////////////////////////////////
+        // Alembic: Override the MotionVectors pass to integrate runtime velocities.
+        /////////////////////////////////////////////////////////////////////////////
         Pass
         {
             Name "Motion Vectors"
@@ -357,13 +357,13 @@
             HLSLPROGRAM
             #pragma multi_compile _ WRITE_NORMAL_BUFFER
             #pragma multi_compile _ WRITE_MSAA_DEPTH
-            
-            // Alembic velocities are computed 
+
+            // Alembic velocities are computed
             // on runtime side and submitted via texcoord 3.
             //-------------------------------
             //#define _REQUIRE_UV3
             //-------------------------------
-            
+
             #define SHADERPASS SHADERPASS_VELOCITY
             #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
             #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Material.hlsl"

@@ -1,5 +1,5 @@
 {
-    "name": "Unity.Formats.Alembic.UnitTests",
+    "name": "Unity.Formats.Alembic.UnitTests.Runtime",
     "references": [
         "Unity.Formats.Alembic.Runtime",
         "Unity.Timeline"

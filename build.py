@@ -36,10 +36,9 @@ def prepare_playmode_test_project(repo_path, project_path, logger):
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, os.path.abspath(os.path.join("..", "automation-tools")))
-    
+
     try:
         import unity_package_build
         build_log = unity_package_build.setup()
     except ImportError:
         print "No Automation Tools found."
-

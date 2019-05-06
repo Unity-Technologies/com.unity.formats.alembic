@@ -6,7 +6,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    internal abstract class AlembicElement : IDisposable 
+    internal abstract class AlembicElement : IDisposable
     {
         private aiObject m_abcObj;
 
@@ -15,11 +15,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal abstract aiSchema abcSchema { get; }
         public abstract bool visibility { get; }
 
-        public T GetOrAddComponent<T>() where T : Component
+        public Camera GetOrAddCamera()
         {
-            var c = abcTreeNode.gameObject.GetComponent<T>();
+            var c = abcTreeNode.gameObject.GetComponent<Camera>();
             if (c == null)
-                c = abcTreeNode.gameObject.AddComponent<T>();
+            {
+                c = abcTreeNode.gameObject.AddComponent<Camera>();
+                c.usePhysicalProperties = true;
+            }
+
             return c;
         }
 
@@ -41,15 +45,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         // called before update samples
-        public virtual void AbcPrepareSample() { }
+        public virtual void AbcPrepareSample() {}
 
         // called after update samples kicked
         // (possibly not finished yet. call aiPolyMesh.Sync() etc. to sync)
-        public virtual void AbcSyncDataBegin() { }
+        public virtual void AbcSyncDataBegin() {}
 
         // called after AbcSyncDataBegin()
         // intended to wait vertex buffer copy task (kicked in AbcSyncDataBegin()) and update meshes in this
-        public virtual void AbcSyncDataEnd() { }
-
+        public virtual void AbcSyncDataEnd() {}
     }
 }

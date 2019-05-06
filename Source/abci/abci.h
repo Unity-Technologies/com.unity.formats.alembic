@@ -8,7 +8,7 @@
             #define abciAPI extern "C"
         #endif
     #else
-        #define abciAPI 
+        #define abciAPI
     #endif
 #else
     #ifdef _MSC_VER
@@ -23,17 +23,17 @@
         #define abciAPI extern "C"
     #endif
 
-    struct abcV2 { float x, y; };
-    struct abcV3 { float x, y, z; };
-    struct abcV4 { float x, y, z, w; };
-    using abcC4 = abcV4;
+struct abcV2 { float x, y; };
+struct abcV3 { float x, y, z; };
+struct abcV4 { float x, y, z, w; };
+using abcC4 = abcV4;
 
-    struct abcSampleSelector
-    {
-        uint64_t m_requestedIndex;
-        double m_requestedTime;
-        int m_requestedTimeIndexType;
-    };
+struct abcSampleSelector
+{
+    uint64_t m_requestedIndex;
+    double m_requestedTime;
+    int m_requestedTimeIndexType;
+};
 #endif // abciImpl
 
 #include "Importer/AlembicImporter.h"

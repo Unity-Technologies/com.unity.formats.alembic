@@ -33,7 +33,8 @@ public:
     template<class F>
     void eachChildRecursive(const F &f)
     {
-        for (auto& c : m_children) {
+        for (auto& c : m_children)
+        {
             f(*c);
             c->eachChildRecursive(f);
         }

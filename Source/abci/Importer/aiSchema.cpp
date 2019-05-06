@@ -54,7 +54,8 @@ aiProperty* aiSchema::getPropertyByName(const std::string& name)
 {
     auto i = std::lower_bound(m_properties.begin(), m_properties.end(), name,
         [](const aiPropertyPtr& a, const std::string& name) { return a->getName() < name; });
-    if (i != m_properties.end()) {
+    if (i != m_properties.end())
+    {
         (*i)->setActive(true);
         return i->get();
     }
@@ -67,10 +68,12 @@ void aiSchema::setupProperties()
     if (!cpro.valid()) { return; }
 
     size_t n = cpro.getNumProperties();
-    for (size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i)
+    {
         auto header = cpro.getPropertyHeader(i);
         auto *prop = aiMakeProperty(this, cpro, header);
-        if (prop != nullptr) {
+        if (prop != nullptr)
+        {
             m_properties.emplace_back(prop);
         }
     }
@@ -80,7 +83,8 @@ void aiSchema::setupProperties()
 
 void aiSchema::updateProperties(const abcSampleSelector& ss)
 {
-    for (auto &prop : m_properties) {
+    for (auto &prop : m_properties)
+    {
         prop->updateSample(ss);
     }
 }

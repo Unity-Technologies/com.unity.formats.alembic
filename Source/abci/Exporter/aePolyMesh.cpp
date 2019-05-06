@@ -20,7 +20,6 @@ void aeFaceSet::writeSample(const aeFaceSetData & data)
     m_schema.set(sample);
 }
 
-
 aePolyMesh::aePolyMesh(aeObject *parent, const char *name, uint32_t tsi)
     : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi)
     , m_schema(getAbcObject().getSchema())
@@ -50,27 +49,15 @@ void aePolyMesh::setFromPrevious()
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
     m_buf_visibility = data.visibility;
-
-    m_buf_faces.assign(data.faces, data.faces + data.face_count);
-    m_buf_indices.assign(data.indices, data.indices + data.index_count);
-
     m_buf_points.assign(data.points, data.points + data.point_count);
-    m_buf_velocities.assign(data.velocities, data.velocities + data.point_count);
-
-    m_buf_normals.assign(data.normals, data.normals + (data.normal_count ? data.normal_count : data.point_count));
-    m_buf_normal_indices.assign(data.normal_indices, data.normal_indices + data.normal_index_count);
-
-    m_buf_uv0.assign(data.uv0, data.uv0 + (data.uv0_count ? data.uv0_count : data.point_count));
-    m_buf_uv0_indices.assign(data.uv0_indices, data.uv0_indices + data.uv0_index_count);
-
-    m_buf_uv1.assign(data.uv1, data.uv1 + (data.uv1_count ? data.uv1_count : data.point_count));
-    m_buf_uv1_indices.assign(data.uv1_indices, data.uv1_indices + data.uv1_index_count);
-
-    m_buf_colors.assign(data.colors, data.colors + (data.colors_count ? data.colors_count : data.point_count));
-    m_buf_colors_indices.assign(data.colors_indices, data.colors_indices + data.colors_index_count);
+    m_buf_normals.assign(data.normals, data.normals +  data.point_count);
+    m_buf_uv0.assign(data.uv0, data.uv0 + data.point_count);
+    m_buf_uv1.assign(data.uv1, data.uv1 +  data.point_count);
+    m_buf_colors.assign(data.colors, data.colors +  data.point_count);
 
     m_buf_submeshes.resize(data.submesh_count);
-    for (int smi = 0; smi < data.submesh_count; ++smi) {
+    for (int smi = 0; smi < data.submesh_count; ++smi)
+    {
         auto& src = data.submeshes[smi];
         auto& dst = m_buf_submeshes[smi];
         dst.indices.assign(src.indices, src.indices + src.index_count);
@@ -90,7 +77,8 @@ int aePolyMesh::addFaceSet(const char *name)
 
 void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data)
 {
-    if (faceset_index >= (int)m_facesets.size()) {
+    if (faceset_index >= (int)m_facesets.size())
+    {
         DebugLog("aePolyMesh::writeFaceSetSample(): invalid index");
         return;
     }
@@ -102,7 +90,8 @@ void aePolyMesh::writeSampleBody()
     const auto &conf = getConfig();
 
     // handle swap handedness
-    if (conf.swap_handedness) {
+    if (conf.swap_handedness)
+    {
         SwapHandedness(m_buf_points.data(), (int)m_buf_points.size());
         SwapHandedness(m_buf_velocities.data(), (int)m_buf_velocities.size());
         SwapHandedness(m_buf_normals.data(), (int)m_buf_normals.size());
@@ -110,46 +99,51 @@ void aePolyMesh::writeSampleBody()
 
     // handle scale factor
     float scale = conf.scale_factor;
-    if (scale != 1.0f) {
+    if (scale != 1.0f)
+    {
         ApplyScale(m_buf_points.data(), (int)m_buf_points.size(), scale);
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
     // if face counts are empty, assume all faces are triangles
-    if (m_buf_faces.empty()) {
+    if (m_buf_faces.empty())
+    {
         m_buf_faces.resize((int)(m_buf_indices.size() / 3), 3);
     }
 
     // process submesh data if present
     {
         int offset_faces = 0;
-        for (size_t smi = 0; smi < m_buf_submeshes.size(); ++smi) {
+        for (size_t smi = 0; smi < m_buf_submeshes.size(); ++smi)
+        {
             auto& sm = m_buf_submeshes[smi];
             m_buf_indices.insert(m_buf_indices.end(), sm.indices.begin(), sm.indices.end());
 
             int ngon = 0;
             int face_count = 0;
-            switch (sm.topology) {
-            case aeTopology::Lines:
-                ngon = 2;
-                face_count = (int)sm.indices.size() / 2;
-                break;
-            case aeTopology::Triangles:
-                ngon = 3;
-                face_count = (int)sm.indices.size() / 3;
-                break;
-            case aeTopology::Quads:
-                ngon = 4;
-                face_count = (int)sm.indices.size() / 4;
-                break;
-            default: // points
-                ngon = 1;
-                face_count = (int)sm.indices.size();
-                break;
+            switch (sm.topology)
+            {
+                case aeTopology::Lines:
+                    ngon = 2;
+                    face_count = (int)sm.indices.size() / 2;
+                    break;
+                case aeTopology::Triangles:
+                    ngon = 3;
+                    face_count = (int)sm.indices.size() / 3;
+                    break;
+                case aeTopology::Quads:
+                    ngon = 4;
+                    face_count = (int)sm.indices.size() / 4;
+                    break;
+                default: // points
+                    ngon = 1;
+                    face_count = (int)sm.indices.size();
+                    break;
             }
             m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
 
-            if (smi < m_facesets.size()) {
+            if (smi < m_facesets.size())
+            {
                 m_tmp_facecet.resize_discard(face_count);
                 std::iota(m_tmp_facecet.begin(), m_tmp_facecet.end(), offset_faces);
 
@@ -164,21 +158,28 @@ void aePolyMesh::writeSampleBody()
     }
 
     // handle swap face option
-    if (conf.swap_faces) {
+    if (conf.swap_faces)
+    {
         RawVector<int> face_indices;
         auto do_swap = [&](RawVector<int>& dst) {
-            int i = 0;
-            int num_faces = (int)m_buf_faces.size();
-            for (int fi = 0; fi < num_faces; ++fi) {
-                int ngon = m_buf_faces[i];
-                face_indices.assign(&dst[i], &dst[i + ngon]);
-                for (int ni = 0; ni < ngon; ++ni) {
-                    int ini = ngon - ni - 1;
-                    dst[i + ni] = face_indices[ini];
+                if (dst.empty())
+                {
+                    return;
                 }
-                i += ngon;
-            }
-        };
+                int i = 0;
+                int num_faces = (int)m_buf_faces.size();
+                for (int fi = 0; fi < num_faces; ++fi)
+                {
+                    int ngon = m_buf_faces[fi];
+                    face_indices.assign(&dst[i], &dst[i + ngon]);
+                    for (int ni = 0; ni < ngon; ++ni)
+                    {
+                        int ini = ngon - ni - 1;
+                        dst[i + ni] = face_indices[ini];
+                    }
+                    i += ngon;
+                }
+            };
         do_swap(m_buf_indices);
         do_swap(m_buf_normal_indices);
         do_swap(m_buf_uv0_indices);
@@ -192,19 +193,22 @@ void aePolyMesh::writeSampleBody()
     sample.setFaceIndices(Abc::Int32ArraySample(m_buf_indices.data(), m_buf_indices.size()));
     sample.setFaceCounts(Abc::Int32ArraySample(m_buf_faces.data(), m_buf_faces.size()));
     sample.setPositions(Abc::P3fArraySample(m_buf_points.data(), m_buf_points.size()));
-    if (!m_buf_velocities.empty()) {
+    if (!m_buf_velocities.empty())
+    {
         sample.setVelocities(Abc::V3fArraySample(m_buf_velocities.data(), m_buf_velocities.size()));
     }
-    if (!m_buf_normals.empty()) {
+    if (!m_buf_normals.empty())
+    {
         AbcGeom::ON3fGeomParam::Sample sp;
         sp.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
         if (!m_buf_normal_indices.empty())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
-        else if(m_buf_normals.size() == m_buf_points.size())
+        else if (m_buf_normals.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         sample.setNormals(sp);
     }
-    if (!m_buf_uv0.empty()) {
+    if (!m_buf_uv0.empty())
+    {
         AbcGeom::OV2fGeomParam::Sample sp;
         sp.setVals(Abc::V2fArraySample(m_buf_uv0.data(), m_buf_uv0.size()));
         if (!m_buf_uv0_indices.empty())
@@ -215,8 +219,10 @@ void aePolyMesh::writeSampleBody()
     }
     m_schema.set(sample);
 
-    if (!m_buf_uv1.empty()) {
-        if (!m_uv1_param.valid()) {
+    if (!m_buf_uv1.empty())
+    {
+        if (!m_uv1_param.valid())
+        {
             bool indexed = !m_buf_uv1_indices.empty() || m_buf_uv1.size() == m_buf_points.size();
             m_uv1_param = AbcGeom::OV2fGeomParam(
                 m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
@@ -231,8 +237,10 @@ void aePolyMesh::writeSampleBody()
         m_uv1_param.set(sp);
     }
 
-    if (!m_buf_colors.empty()) {
-        if (!m_colors_param.valid()) {
+    if (!m_buf_colors.empty())
+    {
+        if (!m_colors_param.valid())
+        {
             bool indexed = !m_buf_colors_indices.empty() || m_buf_colors.size() == m_buf_points.size();
             m_colors_param = AbcGeom::OC4fGeomParam(
                 m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());

@@ -22,4 +22,3 @@ The **Alembic Point Renderer** component allows you to customize the appearance 
 | **Receive Shadows** || Enable to have points receive shadows. |
 | **Generate Motion Vector** || Enable to generate motion vectors for points. |
 | **Point Size** || Set the size of points in meters. |
-

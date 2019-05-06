@@ -14,7 +14,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 {
     static class AlembicBuildPostProcess
     {
-        internal static readonly List<KeyValuePair<string,string>> FilesToCopy = new List<KeyValuePair<string,string>>();
+        internal static readonly List<KeyValuePair<string, string>> FilesToCopy = new List<KeyValuePair<string, string>>();
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
@@ -31,7 +31,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     Directory.CreateDirectory(dir);
                 }
 
-                File.Copy(files.Key,files.Value, true);
+                File.Copy(files.Key, files.Value, true);
             }
             FilesToCopy.Clear();
         }
@@ -46,7 +46,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public int callbackOrder
         {
-            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process. 
+            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
@@ -55,7 +55,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 return;
             }
-            
+
             var activeScene = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
             var players = Object.FindObjectsOfType<AlembicStreamPlayer>();
@@ -71,11 +71,11 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             streamPlayer.StreamDescriptor = Object.Instantiate(streamPlayer.StreamDescriptor);// make a copy
             var srcPath = streamPlayer.StreamDescriptor.PathToAbc;
-            
-            // Avoid name collisions by hashing the full path 
+
+            // Avoid name collisions by hashing the full path
             var hashedFilename = HashSha1(srcPath) + ".abc";
             var dstPath = Path.Combine(streamingAssetsPath, hashedFilename);
-            AlembicBuildPostProcess.FilesToCopy.Add(new KeyValuePair<string, string>(srcPath,dstPath));
+            AlembicBuildPostProcess.FilesToCopy.Add(new KeyValuePair<string, string>(srcPath, dstPath));
 
             streamPlayer.StreamDescriptor.PathToAbc = hashedFilename;
         }
@@ -90,7 +90,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     var name = Path.ChangeExtension(summary.outputPath, null);
                     return name + "_Data/StreamingAssets";
                 default:
-                    throw new NotImplementedException();   
+                    throw new NotImplementedException();
             }
         }
 

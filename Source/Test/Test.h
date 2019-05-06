@@ -12,7 +12,7 @@ void PrintImpl(const char *format, ...);
 
 #define Print(...) PrintImpl(__VA_ARGS__)
 
-#define RegisterTestEntry(Name)\
+#define RegisterTestEntry(Name) \
     struct Register##Name {\
         Register##Name() { RegisterTestEntryImpl(#Name, Name); }\
     } g_Register##Name;
@@ -37,7 +37,8 @@ inline void TestScope(const char *name, const Body& body, int num_try = 1)
 
     float elapsed = end - begin;
     Print("    %s: %.2fms", name, elapsed / num_try);
-    if (num_try > 1) {
+    if (num_try > 1)
+    {
         Print(" (%.2fms in total)", elapsed);
     }
     Print("\n");

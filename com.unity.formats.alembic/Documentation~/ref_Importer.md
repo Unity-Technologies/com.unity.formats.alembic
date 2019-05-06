@@ -19,7 +19,7 @@ When you are finished customizing the import options, click **Apply** to proceed
 
 ## Scene options
 
-Use these options to customize the scale factor, handedness, interpolation, and which components to import from the Alembic file. 
+Use these options to customize the scale factor, handedness, interpolation, and which components to import from the Alembic file.
 
 ![Import Scene options](images/abc_import_options_A.png)
 
@@ -30,7 +30,7 @@ Use these options to customize the scale factor, handedness, interpolation, and 
 | __Scale Factor__ | Set the scale factor to convert between different system units. For example, using 0.1 converts the Alembic units to 1/10 of their value in the resulting Unity GameObject. This also affects position and speed. |
 | __Swap Handedness__ | Enable to invert the X axis' direction. |
 | __Interpolate Samples__ | Enable to interpolate animation for Transform, Camera, and Mesh components for which the topology does not change (that is, for which the number of vertices and indices are immutable).<br/>If **Interpolate Samples** is enabled, or velocity data is included in the .abc file, you can pass velocity data to an Alembic shader. |
-| __Import Visibility__ | Enable to import Visibility. | 
+| __Import Visibility__ | Enable to import Visibility. |
 | __Import Camera__ | Enable to import Camera data. |
 | __Import Meshes__ | Enable to import Mesh data. |
 | __Import Points__ | Enable to import Point (particle cloud) data. |
@@ -88,5 +88,4 @@ Use these options to customize which components to import from the Alembic file.
 
 ![Import Time range options](images/abc_import_options_D.png)
 
-Enter the start and end frames to define the range of the Alembic animation. 
-
+Enter the start and end frames to define the range of the Alembic animation.

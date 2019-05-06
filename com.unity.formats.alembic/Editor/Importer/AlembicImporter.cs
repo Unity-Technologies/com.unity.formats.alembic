@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (Path.GetExtension(assetPath.ToLower()) != ".abc")
                 return AssetDeleteResult.DidNotDelete;
 
-            AlembicStream.DisconnectStreamsWithPath(Path.GetFullPath(assetPath));
+            AlembicStream.DisconnectStreamsWithPath(assetPath);
 
             return AssetDeleteResult.DidNotDelete;
         }
@@ -38,19 +38,18 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
-            var streamDstPath = Path.GetFullPath(to);
-            var streamSrcPath = Path.GetFullPath(from);
-            AlembicStream.DisconnectStreamsWithPath(streamSrcPath);
-            AlembicStream.RemapStreamsWithPath(streamSrcPath,streamDstPath);
-            
+
+            AlembicStream.DisconnectStreamsWithPath(from);
+            AlembicStream.RemapStreamsWithPath(from, to);
+
             AssetDatabase.Refresh(ImportAssetOptions.Default);
-    		AlembicStream.ReconnectStreamsWithPath(streamDstPath);
- 
+            AlembicStream.ReconnectStreamsWithPath(to);
+
             return AssetMoveResult.DidNotMove;
-        } 
+        }
     }
 
-    [ScriptedImporter(3, "abc")]
+    [ScriptedImporter(4, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -120,20 +119,20 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            if(ctx == null)
+            if (ctx == null)
             {
                 return;
             }
-            
-            var fullPath = Path.GetFullPath(ctx.assetPath);
-            AlembicStream.DisconnectStreamsWithPath(fullPath);
 
-            var fileName = Path.GetFileNameWithoutExtension(fullPath);
+            var path = ctx.assetPath;
+            AlembicStream.DisconnectStreamsWithPath(path);
+
+            var fileName = Path.GetFileNameWithoutExtension(path);
             var go = new GameObject(fileName);
-            
+
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
-            streamDescriptor.PathToAbc = fullPath;
+            streamDescriptor.PathToAbc = path;
             streamDescriptor.Settings = StreamSettings;
 
             using (var abcStream = new AlembicStream(go, streamDescriptor))
@@ -158,10 +157,10 @@ namespace UnityEditor.Formats.Alembic.Importer
                 subassets.Add(streamDescriptor.name, streamDescriptor);
                 GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
-                AlembicStream.ReconnectStreamsWithPath(fullPath);
+                AlembicStream.ReconnectStreamsWithPath(path);
 
 #if UNITY_2017_3_OR_NEWER
-                ctx.AddObjectToAsset(go.name, go);
+                ctx.AddObjectToAsset("AbcRoot", go);
                 ctx.SetMainObject(go);
 #else
                 ctx.SetMainAsset(go.name, go);
@@ -189,7 +188,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        m_defaultMaterial = new Material(Shader.Find("Alembic/Standard"));
+                        m_defaultMaterial = GetMaterial("Standard.shader");
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
                         Add("Default Material", m_defaultMaterial);
@@ -204,7 +203,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultPointsMaterial == null)
                     {
-                        m_defaultPointsMaterial = new Material(Shader.Find("Alembic/Points Standard"));
+                        m_defaultPointsMaterial = GetMaterial("StandardInstanced.shader");
                         m_defaultPointsMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultPointsMaterial.name = "Default Points";
                         Add("Default Points", m_defaultPointsMaterial);
@@ -219,7 +218,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultPointsMotionVectorMaterial == null)
                     {
-                        m_defaultPointsMotionVectorMaterial = new Material(Shader.Find("Alembic/Points Motion Vectors"));
+                        m_defaultPointsMotionVectorMaterial = GetMaterial("AlembicPointsMotionVectors.shader");
                         m_defaultPointsMotionVectorMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
                         Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
@@ -235,6 +234,15 @@ namespace UnityEditor.Formats.Alembic.Importer
 #else
                 m_ctx.AddSubAsset(identifier, asset);
 #endif
+            }
+
+            Material GetMaterial(string shaderFile)
+            {
+                var path = Path.Combine("Packages/com.unity.formats.alembic/Runtime/Shaders", shaderFile);
+                m_ctx.DependsOnSourceAsset(path);
+                var shader =
+                    AssetDatabase.LoadAssetAtPath<Shader>(path);
+                return new Material(shader);
             }
         }
 
@@ -332,7 +340,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
-            foreach ( var child in node.Children)
+            foreach (var child in node.Children)
                 CollectSubAssets(subassets, child);
         }
 
@@ -358,4 +366,3 @@ namespace UnityEditor.Formats.Alembic.Importer
 }
 
 #endif
-

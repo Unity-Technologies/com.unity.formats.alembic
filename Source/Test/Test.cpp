@@ -20,8 +20,6 @@ void PrintImpl(const char *format, ...)
     fflush(stdout);
 }
 
-
-
 struct TestEntry
 {
     std::string name;
@@ -45,7 +43,7 @@ static void RunTestImpl(const TestEntry& v)
     auto begin = Now();
     v.body();
     auto end = Now();
-    Print("%s end (%.2fms)\n\n", v.name.c_str(), end-begin);
+    Print("%s end (%.2fms)\n\n", v.name.c_str(), end - begin);
 }
 
 testExport const char* GetLogMessage()
@@ -56,8 +54,10 @@ testExport const char* GetLogMessage()
 testExport void RunTest(char *name)
 {
     g_log.clear();
-    for (auto& entry : GetTests()) {
-        if (entry.name == name) {
+    for (auto& entry : GetTests())
+    {
+        if (entry.name == name)
+        {
             RunTestImpl(entry);
         }
     }
@@ -66,18 +66,22 @@ testExport void RunTest(char *name)
 testExport void RunAllTests()
 {
     g_log.clear();
-    for (auto& entry : GetTests()) {
+    for (auto& entry : GetTests())
+    {
         RunTestImpl(entry);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    if (argc == 1) {
+    if (argc == 1)
+    {
         RunAllTests();
     }
-    else {
-        for (int i = 1; i < argc; ++i) {
+    else
+    {
+        for (int i = 1; i < argc; ++i)
+        {
             RunTest(argv[i]);
         }
     }

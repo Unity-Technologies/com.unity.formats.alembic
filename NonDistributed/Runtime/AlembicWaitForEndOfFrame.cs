@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     [ExecuteInEditMode]
-    class AlembicWaitForEndOfFrame: MonoBehaviour
+    class AlembicWaitForEndOfFrame : MonoBehaviour
     {
         List<AlembicRecorderBehaviour> m_playables = new List<AlembicRecorderBehaviour>();
 
@@ -30,7 +30,6 @@ namespace UnityEngine.Formats.Alembic.Timeline
         {
             GetInstance().m_playables.Add(v);
         }
-
 
         IEnumerator WaitForEndOfFrame()
         {

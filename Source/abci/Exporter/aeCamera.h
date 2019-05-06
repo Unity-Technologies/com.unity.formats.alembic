@@ -2,7 +2,7 @@
 
 class aeCamera : public aeSchema
 {
-using super = aeSchema;
+    using super = aeSchema;
 public:
     aeCamera(aeObject *parent, const char *name, uint32_t tsi);
     abcCamera& getAbcObject() override;
@@ -10,11 +10,11 @@ public:
 
     size_t  getNumSamples() override;
     void    setFromPrevious() override;
-    void    writeSample(const aeCameraData &data);
+    void    writeSample(const CameraData &data);
 
     void    writeSampleBody();
 
 private:
     AbcGeom::OCameraSchema m_schema;
-    aeCameraData m_data_local;
+    CameraData m_data_local;
 };

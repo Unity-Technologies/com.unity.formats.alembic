@@ -25,10 +25,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         public override void AbcPrepareSample()
         {
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
-            if(cloud != null)
+            if (cloud != null)
             {
                 m_abcSchema.sort = cloud.m_sort;
-                if(cloud.m_sort && cloud.m_sortFrom != null)
+                if (cloud.m_sort && cloud.m_sortFrom != null)
                 {
                     m_abcSchema.sortBasePosition = cloud.m_sortFrom.position;
                 }
