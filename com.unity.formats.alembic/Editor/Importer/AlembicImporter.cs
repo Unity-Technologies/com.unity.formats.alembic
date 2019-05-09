@@ -49,10 +49,14 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(4, "abc")]
+    [ScriptedImporter(5, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
-        [SerializeField]
+
+		[SerializeField]
+		private string rootGameObjectId;
+        
+		[SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         public AlembicStreamSettings StreamSettings
         {
@@ -159,11 +163,17 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 AlembicStream.ReconnectStreamsWithPath(path);
 
+                if (string.IsNullOrEmpty(rootGameObjectId))
+                {
+                    rootGameObjectId = fileName;
+                    EditorUtility.SetDirty(this);
+                }
+                
 #if UNITY_2017_3_OR_NEWER
-                ctx.AddObjectToAsset("AbcRoot", go);
+                ctx.AddObjectToAsset(rootGameObjectId, go);
                 ctx.SetMainObject(go);
 #else
-                ctx.SetMainAsset(go.name, go);
+                ctx.SetMainAsset(rootGameObjectId, go);
 #endif
             }
 
