@@ -52,11 +52,10 @@ namespace UnityEditor.Formats.Alembic.Importer
     [ScriptedImporter(5, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
+        [SerializeField]
+        private string rootGameObjectId;
 
-		[SerializeField]
-		private string rootGameObjectId;
-        
-		[SerializeField]
+        [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         public AlembicStreamSettings StreamSettings
         {
@@ -168,7 +167,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     rootGameObjectId = fileName;
                     EditorUtility.SetDirty(this);
                 }
-                
+
 #if UNITY_2017_3_OR_NEWER
                 ctx.AddObjectToAsset(rootGameObjectId, go);
                 ctx.SetMainObject(go);
