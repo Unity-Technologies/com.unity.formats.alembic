@@ -766,8 +766,11 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         {
             const auto &indices = topology.m_refiner.new_indices_tri;
             sample.m_normals.resize_discard(sample.m_points_ref.size());
-            GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
-                (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
+                    sample.m_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
+                    topology.m_remap_points.size(), sample.m_points_sp->size());
+            //GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
+                //(int)sample.m_points_ref.size(), (int)indices.size() / 3);
             sample.m_normals_ref = sample.m_normals;
         }
     }
@@ -979,7 +982,6 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     topology.m_vertex_count = (int)refiner.new_points.size();
     onTopologyDetermined();
 
-
     topology.m_remap_points.swap(refiner.new2old_points);
     {
         auto& points = summary.constant_points ? m_constant_points : sample.m_points;
@@ -1021,7 +1023,9 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     {
         const auto &indices = topology.m_refiner.new_indices_tri;
         m_constant_normals.resize_discard(m_constant_points.size());
-        GenerateNormals(m_constant_normals.data(), m_constant_points.data(), indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
+        GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
+                m_constant_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
+                topology.m_remap_points.size(), sample.m_points_sp->size());
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents)

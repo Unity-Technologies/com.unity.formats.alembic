@@ -1458,3 +1458,16 @@ void GenerateTangentsGeneric(abcV4 *dst,
 void GenerateTangentsISPC(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
     int num_points, int num_triangles);
+
+//void GeneratePointNormals(const std::vector<int> &face_vertex_counts, const std::vector<int> &face_indices,
+        //const std::vector<Imath::V3f> &in_positions, std::vector<Imath::V3f> &out_normals,
+        //const std::vector<int> &remapped_points);
+void GeneratePointNormals(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
+        const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count);
+//void GeneratePointNormalsISPC(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
+        //const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count);
+//void GeneratePointNormalsGeneric(const std::vector<int> &face_start_offsets, const std::vector<int> &face_vertex_counts,
+    //const std::vector<int> &face_indices, const std::vector<Imath::V3f> &in_positions,
+    //std::vector<Imath::V3f> &out_normals, const int face_count);
+void GeneratePointNormalsISPC(const int *face_start_offsets, const int *face_vertex_counts, const int *face_indices,
+    const float *positions, float *normals, const int *remapped_points, const int face_count, const int remapped_count, const int orig_point_count);

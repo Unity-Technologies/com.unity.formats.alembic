@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "aiMath.h"
 #include "RawVector.h"
-
+#include <numeric>
 
 // ispc implementation
 #ifdef aiEnableISPC
@@ -54,6 +54,16 @@ void GenerateTangentsISPC(abcV4 *dst,
 {
     ispc::GenerateTangentsTriangleIndexed(
         (ispc::float4*)dst, (const ispc::float3*)points, (const ispc::float2*)uv, (const ispc::float3*)normals, indices, num_points, num_triangles);
+}
+
+void GeneratePointNormalsISPC(const int *face_start_offsets, const int *face_vertex_counts, const int *face_indices,
+    const float *positions, float *normals, const int *remapped_indices, const int face_count, const int remapped_count, const int orig_point_count)
+{
+    std::vector<float> temp_normals(orig_point_count * 3, 0);
+    memset(normals, 0, remapped_count * 3 * sizeof(float));
+    ispc::GeneratePointNormals(face_start_offsets, face_vertex_counts, face_indices, positions, temp_normals.data(), remapped_indices, face_count, remapped_count, orig_point_count);
+
+    ispc::RemapNormalize(temp_normals.data(), normals, remapped_indices, orig_point_count, remapped_count);
 }
 
 #endif // aiEnableISPC
@@ -188,6 +198,13 @@ void GenerateTangentsGeneric(abcV4 *dst_,
     }
 }
 
+
+void GeneratePointNormalsGeneric(const std::vector<int> &face_start_offsets, const std::vector<int> &face_vertex_counts,
+    const std::vector<int> &face_indices, const std::vector<Imath::V3f> &in_positions,
+    std::vector<Imath::V3f> &out_normals)
+{
+
+}
 // > generic implementation
 
 
@@ -259,6 +276,23 @@ void GenerateTangents(abcV4 *dst,
     int num_points, int num_triangles)
 {
     Impl(GenerateTangents, dst, points, uv, normals, indices, num_points, num_triangles);
+}
+
+//void GeneratePointNormals(const std::vector<int> &face_vertex_counts, const std::vector<int> &face_indices,
+        //const std::vector<Imath::V3f> &in_positions, std::vector<Imath::V3f> &out_normals,
+        //const std::vector<int> &remapped_indices)
+void GeneratePointNormals(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
+        const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count)
+{
+    std::vector<int> face_start_indices(face_count);
+    std::partial_sum(face_vertex_counts, face_vertex_counts + face_count - 1, face_start_indices.begin() + 1);
+    memset(normals, 0, remapped_count * 3 * sizeof(float));
+#ifdef aiEnableISPC
+    GeneratePointNormalsISPC(face_start_indices.data(), face_vertex_counts, face_indices,
+            reinterpret_cast<const float*>(points), reinterpret_cast<float*>(normals),
+            remapped_point_indices, face_count, remapped_count, orig_point_count);
+#else
+#endif
 }
 
 #undef Impl
