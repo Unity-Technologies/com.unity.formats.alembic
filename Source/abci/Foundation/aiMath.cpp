@@ -61,9 +61,7 @@ void GeneratePointNormalsISPC(const int *face_start_offsets, const int *face_ver
 {
     std::vector<float> temp_normals(orig_point_count * 3, 0);
     memset(normals, 0, remapped_count * 3 * sizeof(float));
-    //ispc::GeneratePointNormals(face_start_offsets, face_vertex_counts, face_indices, positions, temp_normals.data(), face_count);
     ispc::GeneratePointNormals(face_start_offsets, face_vertex_counts, face_indices, positions, normals, remapped_indices, face_count, remapped_count, orig_point_count);
-    //ispc::RemapNormalize(temp_normals.data(), normals, remapped_indices, orig_point_count, remapped_count);
 }
 
 #endif // aiEnableISPC
@@ -230,6 +228,7 @@ void GeneratePointNormalsGeneric(const int *face_start_offsets, const int *face_
         reinterpret_cast<abcV3*>(normals)[i] = abcV3{ -n.x, n.y, n.z};
     }
 }
+
 // > generic implementation
 
 
