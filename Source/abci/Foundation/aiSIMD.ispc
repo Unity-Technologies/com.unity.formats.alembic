@@ -196,6 +196,9 @@ export void GeneratePointNormals(uniform const int face_start_offsets[], uniform
     uniform const float positions[], uniform float normals[], uniform const int remapped_indices[], uniform const int face_count,
     uniform const int remapped_count, uniform const int orig_point_count)
 {
+
+    float * uniform tmp_normals = uniform new float[remapped_count * 3];
+    zeroclear(tmp_normals, remapped_count * 3);
     foreach (face_index = 0 ... face_count) {
         int face_vert_count = face_vertex_counts[face_index];
         int face_start_index = face_start_offsets[face_index];
@@ -223,37 +226,32 @@ export void GeneratePointNormals(uniform const int face_start_offsets[], uniform
                 positions[i3 * 3 + 2]
             };
             float3 tri_normal = cross(p3 - p1, p2 - p1);
-            tri_normal = (tri_normal * 0.5);
-            normals[i1 * 3] += tri_normal.x;
-            normals[i1 * 3 + 1] += tri_normal.y;
-            normals[i1 * 3 + 2] += tri_normal.z;
+            tmp_normals[i1 * 3] += tri_normal.x;
+            tmp_normals[i1 * 3 + 1] += tri_normal.y;
+            tmp_normals[i1 * 3 + 2] += tri_normal.z;
 
-            normals[i2 * 3] += tri_normal.x;
-            normals[i2 * 3 + 1] += tri_normal.y;
-            normals[i2 * 3 + 2] += tri_normal.z;
+            tmp_normals[i2 * 3] += tri_normal.x;
+            tmp_normals[i2 * 3 + 1] += tri_normal.y;
+            tmp_normals[i2 * 3 + 2] += tri_normal.z;
 
-            normals[i3 * 3] += tri_normal.x;
-            normals[i3 * 3 + 1] += tri_normal.y;
-            normals[i3 * 3 + 2] += tri_normal.z;
+            tmp_normals[i3 * 3] += tri_normal.x;
+            tmp_normals[i3 * 3 + 1] += tri_normal.y;
+            tmp_normals[i3 * 3 + 2] += tri_normal.z;
         }
     }
-}
-
-export void RemapNormalize(uniform float normals[], uniform float remapped_normals[], uniform const int remapped_indices[],
-    uniform const int normal_count, uniform const int remap_count)
-{
-    foreach (index = 0 ... remap_count) {
+    foreach (index = 0 ... remapped_count) {
         int remap = remapped_indices[index];
         float3 n = {
-            normals[remap * 3],
-            normals[remap * 3 + 1],
-            normals[remap * 3 + 2]
+            tmp_normals[remap * 3],
+            tmp_normals[remap * 3 + 1],
+            tmp_normals[remap * 3 + 2]
         };
         n = normalize(n);
-        remapped_normals[index * 3] = -n.x;
-        remapped_normals[index * 3 + 1] = n.y;
-        remapped_normals[index * 3 + 2] = n.z;
+        normals[index * 3] = -n.x;
+        normals[index * 3 + 1] = n.y;
+        normals[index * 3 + 2] = n.z;
     }
+    delete[] tmp_normals;
 }
 
 #if 0
