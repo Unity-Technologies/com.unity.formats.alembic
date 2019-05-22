@@ -202,12 +202,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.colors.ResizeDiscard(0);
                 vertexData.colors = split.colors;
 
-                if (m_summary.hasRgb) {
-                    Debug.Log("############################# We HAVE RGB");
-                } else {
-                    Debug.Log("############################# We HAVE NO RGB");
-                }
-
                 if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged)) {
                     split.rgb.ResizeDiscard(vertexCount);
                 } else {
