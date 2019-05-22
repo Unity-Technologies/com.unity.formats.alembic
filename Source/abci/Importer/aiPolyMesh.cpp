@@ -769,8 +769,6 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
                     sample.m_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
                     topology.m_remap_points.size(), sample.m_points_sp->size());
-            //GenerateNormals(sample.m_normals.data(), sample.m_points_ref.data(), indices.data(),
-                //(int)sample.m_points_ref.size(), (int)indices.size() / 3);
             sample.m_normals_ref = sample.m_normals;
         }
     }
