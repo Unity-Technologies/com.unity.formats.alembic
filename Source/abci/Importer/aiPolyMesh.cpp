@@ -122,6 +122,7 @@ void aiPolyMeshSample::reset()
     m_normals_sp.reset(); m_normals_sp2.reset();
     m_uv0_sp.reset(); m_uv1_sp.reset();
     m_colors_sp.reset();
+    m_rgb_sp.reset();
 
     m_points_ref.reset();
     m_velocities_ref.reset();
@@ -130,6 +131,7 @@ void aiPolyMeshSample::reset()
     m_normals_ref.reset();
     m_tangents_ref.reset();
     m_colors_ref.reset();
+    m_rgb_ref.reset();
 }
 
 void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
@@ -182,6 +184,20 @@ static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner
     }
 }
 
+static inline void copy_or_clear_rgb(abcC4* dst, const IArray<abcC3>& src, const MeshRefiner::Split& split)
+{
+    if (dst)
+    {
+        if (!src.empty()) {
+            std::vector<abcC4> rgba(split.vertex_count);
+            std::transform(src.begin(), src.end(), rgba.begin(), [](const abcC3 &c){ return abcC4{c.x, c.y, c.z, 1.f}; });
+            memcpy(dst, rgba.data() + split.vertex_offset, sizeof(abcC4) * split.vertex_count);
+        } else {
+            memset(dst, 0, split.vertex_count * sizeof(abcC4));
+        }
+    }
+}
+
 void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
 {
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
@@ -211,6 +227,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.colors, m_colors_ref, split);
+    copy_or_clear_rgb((abcC4*)data.rgb, m_rgb_ref, split);
 }
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
@@ -262,6 +279,8 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
             if (AbcGeom::IC4fGeomParam::matches(header))
             {
                 m_colors_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
+            } else if (AbcGeom::IC3fGeomParam::matches(header)) {
+                m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
             }
 
             // uv
@@ -393,6 +412,18 @@ void aiPolyMesh::updateSummary()
         }
     }
 
+    // rgb colors
+    {
+        auto& param = m_rgb_param;
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
+        {
+            summary.has_rgb_prop = true;
+            summary.has_rgb = true;
+            summary.constant_rgb = param.isConstant();
+            if (!summary.constant_rgb)
+                m_constant = false;
+        }
+    }
 
     bool interpolate = config.interpolate_samples && !m_constant && !m_varying_topology;
     summary.interpolate_points = interpolate && !summary.constant_points;
@@ -453,6 +484,8 @@ void aiPolyMesh::updateSummary()
             summary.interpolate_uv1 = true;
         if (summary.has_colors_prop && !summary.constant_colors)
             summary.interpolate_colors = true;
+        if (summary.has_rgb_prop && !summary.constant_rgb)
+            summary.interpolate_rgb = true;
     }
 }
 
@@ -573,6 +606,16 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
         }
     }
 
+    // rgb
+    if (m_constant_rgb.empty() && summary.has_rgb_prop)
+    {
+        m_rgb_param.getIndexed(sample.m_rgb_sp, ss);
+        if (summary.interpolate_rgb)
+        {
+            m_rgb_param.getIndexed(sample.m_rgb_sp2, ss2);
+        }
+    }
+
     auto bounds_param = m_schema.getSelfBoundsProperty();
     if (bounds_param && bounds_param.getNumSamples() > 0)
         bounds_param.get(sample.m_bounds, ss);
@@ -660,6 +703,16 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
             Remap(sample.m_colors, *sample.m_colors_sp.getVals(), topology.m_remap_colors);
             sample.m_colors_ref = sample.m_colors;
         }
+
+        if (!m_constant_rgb.empty())
+        {
+            sample.m_rgb_ref = m_constant_rgb;
+        }
+        else if (summary.has_rgb_prop)
+        {
+            Remap(sample.m_rgb, *sample.m_rgb_sp.getVals(), topology.m_remap_rgb);
+            sample.m_rgb_ref = sample.m_rgb;
+        }
     }
     else
     {
@@ -699,6 +752,11 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         if (summary.interpolate_colors)
         {
             Remap(sample.m_colors2, *sample.m_colors_sp2.getVals(), topology.m_remap_colors);
+        }
+
+        if (summary.interpolate_rgb)
+        {
+            Remap(sample.m_rgb2, *sample.m_rgb_sp2.getVals(), topology.m_remap_rgb);
         }
 
         if (!m_constant_velocities.empty())
@@ -814,6 +872,13 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         Lerp(sample.m_colors_int, sample.m_colors, sample.m_colors2, m_current_time_offset);
         sample.m_colors_ref = sample.m_colors_int;
     }
+
+    // rgb
+    if (summary.interpolate_rgb)
+    {
+        Lerp(sample.m_rgb_int, sample.m_rgb, sample.m_rgb2, m_current_time_offset);
+        sample.m_rgb_ref = sample.m_rgb_int;
+    }
 }
 
 void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
@@ -840,6 +905,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     bool has_valid_uv0 = false;
     bool has_valid_uv1 = false;
     bool has_valid_colors = false;
+    bool has_valid_rgb = false;
 
     if (sample.m_normals_sp.valid() && !summary.compute_normals)
     {
@@ -945,6 +1011,32 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         }
     }
 
+    if (sample.m_rgb_sp.valid())
+    {
+        IArray<abcC3> src{ sample.m_rgb_sp.getVals()->get(), sample.m_rgb_sp.getVals()->size() };
+        auto& dst = summary.constant_colors ? m_constant_rgb : sample.m_rgb;
+
+        has_valid_rgb = true;
+        if (sample.m_rgb_sp.isIndexed() && sample.m_rgb_sp.getIndices()->size() == refiner.indices.size())
+        {
+            IArray<int> rgb_indices{ (int*)sample.m_rgb_sp.getIndices()->get(), sample.m_rgb_sp.getIndices()->size() };
+            refiner.addIndexedAttribute<abcC3>(src, rgb_indices, dst, topology.m_remap_rgb);
+        }
+        else if (src.size() == refiner.indices.size())
+        {
+            refiner.addExpandedAttribute<abcC3>(src, dst, topology.m_remap_rgb);
+        }
+        else if (src.size() == refiner.points.size())
+        {
+            refiner.addIndexedAttribute<abcC3>(src, refiner.indices, dst, topology.m_remap_rgb);
+        }
+        else
+        {
+            DebugLog("Invalid rgb attribute");
+            has_valid_rgb = false;
+        }
+    }
+
 
     refiner.refine();
     refiner.retopology(config.swap_face_winding);
@@ -1016,6 +1108,11 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         sample.m_colors_ref = !m_constant_colors.empty() ? m_constant_colors : sample.m_colors;
     else
         sample.m_colors_ref.reset();
+
+    if (has_valid_rgb)
+        sample.m_rgb_ref = !m_constant_rgb.empty() ? m_constant_rgb : sample.m_rgb;
+    else
+        sample.m_rgb_ref.reset();
 
     if (summary.constant_normals && summary.compute_normals)
     {

@@ -29,6 +29,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
             public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
             public PinnedList<Color> colors = new PinnedList<Color>();
+            public PinnedList<Color> rgb = new PinnedList<Color>();
 
             public Mesh mesh;
             public GameObject host;
@@ -46,6 +47,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (uv0 != null) uv0.Dispose();
                 if (uv1 != null) uv1.Dispose();
                 if (colors != null) colors.Dispose();
+                if (rgb != null) rgb.Dispose();
                 if ((mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
 #if UNITY_EDITOR
@@ -200,6 +202,19 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.colors.ResizeDiscard(0);
                 vertexData.colors = split.colors;
 
+                if (m_summary.hasRgb) {
+                    Debug.Log("############################# We HAVE RGB");
+                } else {
+                    Debug.Log("############################# We HAVE NO RGB");
+                }
+
+                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged)) {
+                    split.rgb.ResizeDiscard(vertexCount);
+                } else {
+                    split.rgb.ResizeDiscard(0);
+                }
+                vertexData.rgb = split.rgb;
+
                 m_splitData[spi] = vertexData;
             }
 
@@ -314,6 +329,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetUVs(3, split.velocities.List);
                     if (split.colors.Count > 0)
                         split.mesh.SetColors(split.colors.List);
+                    else if (split.rgb.Count > 0)
+                        split.mesh.SetColors(split.rgb.List);
 
                     // update the bounds
                     var data = m_splitData[s];
@@ -343,7 +360,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     else if (sum.topology == aiTopology.Quads)
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
-            }
+           }
         }
 
         Mesh AddMeshComponents(GameObject go)

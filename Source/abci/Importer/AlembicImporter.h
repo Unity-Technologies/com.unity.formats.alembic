@@ -138,6 +138,7 @@ struct aiMeshSummary
     bool has_uv0 = false;
     bool has_uv1 = false;
     bool has_colors = false;
+    bool has_rgb = false;
     bool constant_points = false;
     bool constant_velocities = false;
     bool constant_normals = false;
@@ -145,6 +146,7 @@ struct aiMeshSummary
     bool constant_uv0 = false;
     bool constant_uv1 = false;
     bool constant_colors = false;
+    bool constant_rgb = false;
 };
 
 struct aiMeshSampleSummary
@@ -185,6 +187,7 @@ struct aiPolyMeshData
     abcV2 *uv0 = nullptr;
     abcV2 *uv1 = nullptr;
     abcV4 *colors = nullptr;
+    abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
     int vertex_count = 0;
