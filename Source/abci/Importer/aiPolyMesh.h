@@ -12,12 +12,14 @@ struct aiMeshSummaryInternal : public aiMeshSummary
     bool has_uv0_prop = false;
     bool has_uv1_prop = false;
     bool has_colors_prop = false;
+    bool has_rgb_prop = false;
 
     bool interpolate_points = false;
     bool interpolate_normals = false;
     bool interpolate_uv0 = false;
     bool interpolate_uv1 = false;
     bool interpolate_colors = false;
+    bool interpolate_rgb = false;
     bool compute_normals = false;
     bool compute_tangents = false;
     bool compute_velocities = false;
@@ -48,6 +50,7 @@ public:
     RawVector<int> m_remap_normals;
     RawVector<int> m_remap_uv0, m_remap_uv1;
     RawVector<int> m_remap_colors;
+    RawVector<int> m_remap_rgb;
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -81,6 +84,7 @@ public:
     AbcGeom::IV2fGeomParam::Sample m_uv0_sp, m_uv0_sp2;
     AbcGeom::IV2fGeomParam::Sample m_uv1_sp, m_uv1_sp2;
     AbcGeom::IC4fGeomParam::Sample m_colors_sp, m_colors_sp2;
+    AbcGeom::IC3fGeomParam::Sample m_rgb_sp, m_rgb_sp2;
     Abc::Box3d m_bounds;
 
     IArray<abcV3> m_points_ref;
@@ -89,6 +93,7 @@ public:
     IArray<abcV3> m_normals_ref;
     IArray<abcV4> m_tangents_ref;
     IArray<abcC4> m_colors_ref;
+    IArray<abcC3> m_rgb_ref;
 
     RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
@@ -97,6 +102,7 @@ public:
     RawVector<abcV3> m_normals, m_normals2, m_normals_int;
     RawVector<abcV4> m_tangents;
     RawVector<abcC4> m_colors, m_colors2, m_colors_int;
+    RawVector<abcC3> m_rgb, m_rgb2, m_rgb_int;
 
     TopologyPtr m_topology;
     bool m_topology_changed = false;
@@ -135,11 +141,13 @@ public:
     RawVector<abcV2> m_constant_uv0;
     RawVector<abcV2> m_constant_uv1;
     RawVector<abcC4> m_constant_colors;
+    RawVector<abcC3> m_constant_rgb;
 
 private:
     aiMeshSummaryInternal m_summary;
     AbcGeom::IV2fGeomParam m_uv1_param;
     AbcGeom::IC4fGeomParam m_colors_param;
+    AbcGeom::IC3fGeomParam m_rgb_param;
 
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
