@@ -184,16 +184,17 @@ static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner
     }
 }
 
-static inline void copy_or_clear_rgb(abcC4* dst, const IArray<abcC3>& src, const MeshRefiner::Split& split)
+template<class T1, class T2>
+static inline void copy_or_clear_3_to_4(T1* dst, const IArray<T2>& src, const MeshRefiner::Split& split)
 {
     if (dst)
     {
         if (!src.empty()) {
-            std::vector<abcC4> rgba(split.vertex_count);
-            std::transform(src.begin(), src.end(), rgba.begin(), [](const abcC3 &c){ return abcC4{c.x, c.y, c.z, 1.f}; });
-            memcpy(dst, rgba.data() + split.vertex_offset, sizeof(abcC4) * split.vertex_count);
+            std::vector<T1> abc4(split.vertex_count);
+            std::transform(src.begin(), src.end(), abc4.begin(), [](const T2& c){ return T1{c.x, c.y, c.z, 1.f}; });
+            memcpy(dst, abc4.data() + split.vertex_offset, sizeof(T1) * split.vertex_count);
         } else {
-            memset(dst, 0, split.vertex_count * sizeof(abcC4));
+            memset(dst, 0, split.vertex_count * sizeof(T1));
         }
     }
 }
@@ -227,7 +228,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-    copy_or_clear_rgb((abcC4*)data.rgb, m_rgb_ref, split);
+    copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
 }
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
