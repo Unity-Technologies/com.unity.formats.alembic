@@ -7,7 +7,7 @@ The Alembic exporter supports exporting single frame and multi-frame Alembic fil
 - Particles ([**ParticleSystem**](https://docs.unity3d.com/Manual/class-ParticleSystem.html) component)
 - Cameras ([**Camera**](https://docs.unity3d.com/Manual/class-Camera.html) component)
 
-To configure a Scene to export an Alembic file, add the [Alembic Exporter component](ref_Exporter.html) to a GameObject in the Scene. You can add it to an empty GameObject in the Scene; it is not necessary to add it to the GameObjects being exported.
+To configure a Scene to export an Alembic file, add the [Alembic Exporter component](ref_Exporter.md) to a GameObject in the Scene. You can add it to an empty GameObject in the Scene; it is not necessary to add it to the GameObjects being exported.
 
 You can configure the component to export the entire Scene, or individual GameObject hierarchies.
 
