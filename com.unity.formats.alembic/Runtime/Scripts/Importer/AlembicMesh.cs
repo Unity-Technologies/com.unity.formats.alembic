@@ -311,7 +311,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     if (split.uv1.Count > 0)
                         split.mesh.SetUVs(1, split.uv1.List);
                     if (split.velocities.Count > 0)
-                        split.mesh.SetUVs(3, split.velocities.List);
+                        split.mesh.SetUVs(5, split.velocities.List);
                     if (split.colors.Count > 0)
                         split.mesh.SetColors(split.colors.List);
 
