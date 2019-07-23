@@ -1,4 +1,8 @@
 # Changes in Alembic for Unity
+## [1.0.6] - 2019-07-23
+### Changes
+- Fix for HDRP 7 shipped materials
+
 ## [1.0.5] - 2019-05-10
 ### Changes
 - Fixed regression introduced in 1.0.4 where old Alembic scene instances would lose prefab connection. New scene instances made with 1.0.4 are unfortunately unrecoverable
