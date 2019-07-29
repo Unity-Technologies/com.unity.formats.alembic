@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.CurrentTime = 0;
             yield return new WaitForEndOfFrame();
             var t0 = cubeGO.transform.position;
-            player.CurrentTime = (float)player.duration;
+            player.CurrentTime = (float)player.Duration;
             yield return new WaitForEndOfFrame();
             var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);

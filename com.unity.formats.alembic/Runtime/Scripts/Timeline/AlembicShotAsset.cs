@@ -44,7 +44,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
         {
             get
             {
-                return m_stream == null ? 0 : m_stream.duration;
+                return m_stream == null ? 0 : m_stream.Duration;
             }
         }
 
