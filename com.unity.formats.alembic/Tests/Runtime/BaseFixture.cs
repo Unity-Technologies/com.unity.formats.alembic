@@ -28,7 +28,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.That(go, Is.Not.Null);
 
             var player = go.GetComponent<AlembicStreamPlayer>();
-            Assert.GreaterOrEqual(player.duration, minDuration); // More than empty
+            Assert.GreaterOrEqual(player.Duration, minDuration); // More than empty
 
             return go;
         }

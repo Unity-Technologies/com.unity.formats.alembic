@@ -153,8 +153,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.StreamDescriptor = streamDescriptor;
-                streamPlayer.StartTime = StartTime;
-                streamPlayer.EndTime = EndTime;
+                streamPlayer.StartTime = (float)StartTime;
+                streamPlayer.EndTime = (float)EndTime;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);

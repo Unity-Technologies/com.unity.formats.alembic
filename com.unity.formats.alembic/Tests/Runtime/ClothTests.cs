@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.CurrentTime = 0;
             yield return new WaitForEndOfFrame();
             var t0 = meshFiler.sharedMesh.vertices[0];
-            player.CurrentTime = (float)player.duration;
+            player.CurrentTime = (float)player.Duration;
             yield return new WaitForEndOfFrame();
             var t1 = meshFiler.sharedMesh.vertices[0];
             Assert.AreNotEqual(t0, t1);

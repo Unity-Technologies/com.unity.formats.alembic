@@ -4,40 +4,52 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [ExecuteInEditMode]
-    internal class AlembicStreamPlayer : MonoBehaviour
+    public class AlembicStreamPlayer : MonoBehaviour
     {
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
-        public AlembicStream abcStream { get; set; }
+        AlembicStream abcStream { get; set; }
         [SerializeField]
-        private AlembicStreamDescriptor streamDescriptor;
-        public AlembicStreamDescriptor StreamDescriptor
+        AlembicStreamDescriptor streamDescriptor;
+        internal AlembicStreamDescriptor StreamDescriptor
         {
             get { return streamDescriptor; }
             set { streamDescriptor = value; }
         }
 
         [SerializeField]
-        private double startTime = double.MinValue;
-        public double StartTime
+        float startTime = float.MinValue;
+        public float StartTime
         {
             get { return startTime; }
-            set { startTime = value; }
+            set
+            {
+                startTime = value;
+                if (StreamDescriptor == null)
+                    return;
+                startTime = Mathf.Clamp(startTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
+            }
         }
 
         [SerializeField]
-        private double endTime = double.MaxValue;
-        public double EndTime
+        float endTime = float.MaxValue;
+        public float EndTime
         {
             get { return endTime; }
-            set { endTime = value; }
+            set
+            {
+                endTime = value;
+                if (StreamDescriptor == null)
+                    return;
+                endTime = Mathf.Clamp(endTime, StartTime, (float)StreamDescriptor.abcEndTime);
+            }
         }
 
         [SerializeField]
-        private float currentTime;
+        float currentTime;
         public float CurrentTime
         {
             get { return currentTime; }
-            set { currentTime = value; }
+            set { currentTime = Mathf.Clamp(value, 0.0f, Duration); }
         }
 
         [SerializeField]
@@ -50,7 +62,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         private bool asyncLoad = true;
-        public bool AsyncLoad
+        bool AsyncLoad
         {
             get { return asyncLoad; }
             set { asyncLoad = value; }
@@ -59,15 +71,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         bool forceUpdate = false;
         bool updateStarted = false;
 
-        public double duration { get { return EndTime - StartTime; } }
+        public float Duration { get { return EndTime - StartTime; } }
 
 
         void ClampTime()
         {
-            CurrentTime = Mathf.Clamp((float)CurrentTime, 0.0f, (float)duration);
+            CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
         }
 
-        public void LoadStream(bool createMissingNodes)
+        internal void LoadStream(bool createMissingNodes)
         {
             if (StreamDescriptor == null)
                 return;
@@ -75,8 +87,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             abcStream.AbcLoad(createMissingNodes, false);
             forceUpdate = true;
         }
-
-        #region messages
+        
         void Start()
         {
             OnValidate();
@@ -88,8 +99,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return;
             if (StreamDescriptor.abcStartTime == double.MinValue || StreamDescriptor.abcEndTime == double.MaxValue)
                 abcStream.GetTimeRange(ref StreamDescriptor.abcStartTime, ref StreamDescriptor.abcEndTime);
-            StartTime = Mathf.Clamp((float)StartTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
-            EndTime = Mathf.Clamp((float)EndTime, (float)StartTime, (float)StreamDescriptor.abcEndTime);
+            StartTime = Mathf.Clamp(StartTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
+            EndTime = Mathf.Clamp(EndTime, StartTime, (float)StreamDescriptor.abcEndTime);
             ClampTime();
             forceUpdate = true;
         }
@@ -103,7 +114,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (lastUpdateTime != CurrentTime || forceUpdate)
             {
                 abcStream.SetVertexMotionScale(VertexMotionScale);
-                abcStream.SetAsyncLoad(AsyncLoad);
+                abcStream.SetAsyncLoad(AsyncLoad );
                 if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
                     lastUpdateTime = CurrentTime;
@@ -147,7 +158,5 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             NativeMethods.aiCleanup();
         }
-
-        #endregion
     }
 }
