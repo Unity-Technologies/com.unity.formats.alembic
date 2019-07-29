@@ -59,6 +59,4 @@ Shader "Alembic/Standard (Roughness setup)"
         UsePass "Autodesk Interactive/DEFERRED"
         UsePass "Autodesk Interactive/META"
     }
-
-    CustomEditor "StandardRoughnessShaderGUI"
 }
