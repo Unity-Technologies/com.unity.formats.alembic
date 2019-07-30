@@ -8,11 +8,11 @@ The naming convention of the Animation Clip is `<modelName>_Time`.
 
 ## Playing the clip in Timeline
 
-To play back the clip on the timeline:
+To play back the clip in [Timeline](https://docs.unity3d.com/Manual/TimelineSection.html):
 
 1. Import the Alembic file into the Scene.
 
-2. Add an Animator component to the root of the Alembic GameObject hierarchy (the same object which has the [Alembic Stream Player](ref_StreamPlayer.html) component).
+2. Add an Animator component to the root of the Alembic GameObject hierarchy (the same object which has the [Alembic Stream Player](ref_StreamPlayer.md) component).
 
 3. Drag the Animation clip from the Alembic Asset in the Project view onto the Timeline view.
 

@@ -1,4 +1,4 @@
-# Alembic
+# Alembic for Unity
 
 Use the Alembic package to import and export [Alembic](http://www.alembic.io/) files into your Unity Scenes, where you can playback and record animation directly in Unity. The Alembic format bakes animation data into a file so that you can stream the animation in Unity directly from the file. This saves a significant amount of resources, because the modeling and animating does not happen directly inside Unity.
 
@@ -8,12 +8,12 @@ The Alembic package brings in vertex cache data from a 3D modeling software, suc
 
 The Alembic package supports these features:
 
-- [Importing](import.html) data from Meshes, Particle Cloud Points, and Cameras.
-- Applying [Alembic Shaders](matshad.html#shaders) and [Motion Blur](matshad.html#blur) effects.
-- Customizing [particle and point cloud effects](particles.html).
-- Playing animation by streaming data through [Timeline](timeline.html) or [Unity Animation](animClip.html).
-- [Recording animation](time_AlembicRecorder.html) in Timeline.
-- [Exporting](export.html) Unity GameObjects to an Alembic file.
+- [Importing](import.md) data from Meshes, Particle Cloud Points, and Cameras.
+- Applying [Alembic Shaders](matshad.md#shaders) and [Motion Blur](matshad.md#blur) effects.
+- Customizing [particle and point cloud effects](particles.md).
+- Playing animation by streaming data through [Timeline](timeline.md) or [Unity Animation](animClip.md).
+- Playing Alembic animation [using imported animation clips](time_ImportedClip.md).
+- [Exporting](export.md) Unity GameObjects to an Alembic file.
 
 ## Requirements
 

@@ -69,13 +69,13 @@ Use these settings to determine the set of target GameObject(s) for the current 
 
 
 
-| ***Property***                             |                   | ***Description***                                            |
-| :----------------------------------------- | :---------------- | :----------------------------------------------------------- |
-| __Scope__                |                   | Choose the scope of the export. By default, this is set to the **Entire Scene**. |
-|                          | __Entire Scene__  | Export the entire Scene. This is the default.                |
-|                          | __Target Branch__ | Export only a branch (or hierarchy) of the Scene. When you choose this option, the **Target** property appears, which allows you to select a GameObject. |
-| __Target__               |                   | Set a reference to the GameObject that is the root of the hierarchy you want to export.<br/>This property is only available if the **Scope** property is set to __Target Branch__. |
-| __Static MeshRenderers__ | Enable this option to skip capturing animation on static Meshes. |
+| ***Property*** || ***Description*** |
+| :--- | :--- | :--- |
+| __Scope__ || Choose the scope of the export. By default, this is set to the **Entire Scene**. |
+|| __Entire Scene__  | Export the entire Scene. This is the default. |
+|| __Target Branch__ | Export only a branch (or hierarchy) of the Scene. When you choose this option, the **Target** property appears, which allows you to select a GameObject. |
+| __Target__ || Set a reference to the GameObject that is the root of the hierarchy you want to export.<br/>This property is only available if the **Scope** property is set to __Target Branch__. |
+| __Static MeshRenderers__ || Enable this option to skip capturing animation on static Meshes. |
 
 
 
@@ -130,7 +130,7 @@ These options allow you to control starting and stopping the capture.
 
 | ***Property***         | ***Description***                                            |
 | :--------------------- | :----------------------------------------------------------- |
-| __Capture On Start__   | Enable to begin capturing in [Start()](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) when a Scene with an [AlembicExporter](ref_Exporter.html) component is loaded. |
+| __Capture On Start__   | Enable to begin capturing in [Start()](https://docs.unity3d.com/ScriptReference/MonoBehaviour.Start.html) when a Scene with an [AlembicExporter](ref_Exporter.md) component is loaded. |
 | __Ignore First Frame__ | Enable to skip capturing the first frame. <br/>Only available if **Capture On Start** is enabled. |
 | __Max Capture Frame__  | Set the frame to stop capturing at.                          |
 
