@@ -11,4 +11,3 @@ The Alembic Stream Player component allows you to customize import and playback.
 | __Vertex Motion Scale__    | Set the magnification factor when calculating velocity. Greater velocity means more blurring when used with Motion Blur. By default, the value is set to 1 (the velocity is not scaled). |
 | __Async Load__             | Enable this option to load the file asynchronously during playback. |
 
-> ***Note:*** Unity creates copies of .abc files under `Assets / StreamingAssets`. This is necessary for streaming data, which requires that the .abc files remain after building the project.

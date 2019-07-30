@@ -3,6 +3,9 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    /// <summary>
+    /// This component allows data streaming from alembic files. It updates children nodes (meshes, transforms, cameras, etc) to reflect the alembic data at the given time.
+    /// </summary>
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
@@ -18,6 +21,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         float startTime = float.MinValue;
+        /// <summary>
+        /// The beginning of the streaming time window. This is clamped to the time range of the alembic source file.
+        /// </summary>
         public float StartTime
         {
             get { return startTime; }
@@ -32,6 +38,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         float endTime = float.MaxValue;
+        /// <summary>
+        /// The end of the streaming time window. This is clamped to the time range of the alembic source file.
+        /// </summary>
         public float EndTime
         {
             get { return endTime; }
@@ -46,14 +55,25 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         float currentTime;
+        /// <summary>
+        /// The time relative to the alembic time range. This is clamped between 0 and the alembic time duration.
+        /// </summary>
         public float CurrentTime
         {
             get { return currentTime; }
             set { currentTime = Mathf.Clamp(value, 0.0f, Duration); }
         }
 
+        /// <summary>
+        /// The duration of the Alembic file.
+        /// </summary>
+        public float Duration { get { return EndTime - StartTime; } }
+
         [SerializeField]
-        private float vertexMotionScale = 1.0f;
+        float vertexMotionScale = 1.0f;
+        /// <summary>
+        /// Scalar multiplier to the Alembic vertex speed. Default value is 1.
+        /// </summary>
         public float VertexMotionScale
         {
             get { return vertexMotionScale; }
@@ -61,18 +81,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool asyncLoad = true;
-        bool AsyncLoad
-        {
-            get { return asyncLoad; }
-            set { asyncLoad = value; }
-        }
+        bool asyncLoad = true;
+        
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
-
-        public float Duration { get { return EndTime - StartTime; } }
-
+        
 
         void ClampTime()
         {
@@ -105,6 +119,9 @@ namespace UnityEngine.Formats.Alembic.Importer
             forceUpdate = true;
         }
 
+        /// <summary>
+        /// Update the child game object's data to the CurrentTime.
+        /// </summary>
         public void Update()
         {
             if (abcStream == null || StreamDescriptor == null)
@@ -114,7 +131,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (lastUpdateTime != CurrentTime || forceUpdate)
             {
                 abcStream.SetVertexMotionScale(VertexMotionScale);
-                abcStream.SetAsyncLoad(AsyncLoad );
+                abcStream.SetAsyncLoad(asyncLoad);
                 if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
                     lastUpdateTime = CurrentTime;
