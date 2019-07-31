@@ -1,6 +1,6 @@
 # Record and play back the Alembic using an Infinite clip
 
-To control the playback of Alembic, use an **Infinite clip** on a Timeline **Animation Track** bound to the GameObject that contains the [Alembic Stream Player](ref_StreamPlayer.html) component.
+To control the playback of Alembic, use an **Infinite clip** on a Timeline **Animation Track** bound to the GameObject that contains the [Alembic Stream Player](ref_StreamPlayer.md) component.
 
 1. Select the GameObject with the Alembic Stream Player component and [open the Timeline window](https://docs.unity3d.com/Manual/TimelineEditorWindow.html).
 2. [Create a Director component and a Timeline Asset](https://docs.unity3d.com/Manual/TimelineWorkflowCreatingAssetInstance.html) if you don't already have them.

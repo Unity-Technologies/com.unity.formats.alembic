@@ -1,6 +1,6 @@
 # Using Animation Events with Alembic files
 
-The Alembic package allows you set up an animation event callback for Alembic clips. For example, you could create a callback to change the Textures on an Alembic Mesh at runtime or instantiate prefabs at a specific frame during playback.
+The Alembic package allows you set up an animation event callback for Alembic clips. For example, you could create a callback to change the Textures on an Alembic Mesh at runtime or instantiate Prefabs at a specific frame during playback.
 
 When importing an Alembic file, Unity automatically generates an animation clip that contains animation events for every frame of the clip.
 
