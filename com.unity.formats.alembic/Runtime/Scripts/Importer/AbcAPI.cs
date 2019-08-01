@@ -41,13 +41,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    internal enum aiTimeSamplingType
-    {
-        Uniform,
-        Cyclic,
-        Acyclic,
-    };
-
     internal enum aiPropertyType
     {
         Unknown,
