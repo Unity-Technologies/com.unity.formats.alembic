@@ -90,7 +90,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public float FrameRate
         {
             get { return frameRate; }
-            set { frameRate = value; }
+            set { frameRate = Mathf.Max(value, Mathf.Epsilon); }
         }
         [SerializeField]
         private aeXformType xformType;

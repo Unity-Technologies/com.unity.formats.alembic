@@ -82,11 +82,22 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         bool asyncLoad = true;
-        
+
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
-        
+
+
+        /// <summary>
+        /// Update the child game object's data to the CurrentTime (The regular update happens during the LateUpdate phase).
+        /// </summary>
+        /// <param name="time">The time stamp to stream from the asset file</param>
+        public void UpdateImmediately(float time)
+        {
+            CurrentTime = time;
+            Update();
+            LateUpdate();
+        }
 
         void ClampTime()
         {
@@ -101,7 +112,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             abcStream.AbcLoad(createMissingNodes, false);
             forceUpdate = true;
         }
-        
+
         void Start()
         {
             OnValidate();
@@ -119,10 +130,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             forceUpdate = true;
         }
 
-        /// <summary>
-        /// Update the child game object's data to the CurrentTime.
-        /// </summary>
-        public void Update()
+        internal void Update()
         {
             if (abcStream == null || StreamDescriptor == null)
                 return;
