@@ -147,7 +147,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             yield return TestCubeContents(go);
         }
-        
+
+        // PublicAPI tests
         [UnityTest]
         public IEnumerator  TestAlembicStreamPlayerTimeFieldsClampToValidRange()
         {
@@ -167,6 +168,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(player.CurrentTime, (player.StartTime + player.EndTime) / 2);
             player.CurrentTime = player.EndTime + 1;
             Assert.AreEqual(player.CurrentTime, player.EndTime);
+        }
+
+        [UnityTest]
+        public IEnumerator TestMultipleUpdatesPerFrame()
+        {
+            director.Play();
+            exporter.maxCaptureFrame = 30;
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.recorder.settings.OutputPath);
+            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
+            var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
+            var player = root.GetComponent<AlembicStreamPlayer>();
+
+            var cubeGO = root.GetComponentInChildren<MeshRenderer>().gameObject;
+            player.UpdateImmediately(0);
+            var t0 = cubeGO.transform.position;
+            player.UpdateImmediately(player.Duration);
+            var t1  = cubeGO.transform.position;
+            Assert.AreNotEqual(t0, t1);
         }
     }
 }
