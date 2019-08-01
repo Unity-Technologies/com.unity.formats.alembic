@@ -95,12 +95,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             get { return importWarning; }
             set { importWarning = value; }
         }
-        [SerializeField]
-        private List<string> varyingTopologyMeshNames = new List<string>();
-        public List<string> VaryingTopologyMeshNames
-        {
-            get { return varyingTopologyMeshNames; }
-        }
+
         [SerializeField]
         private List<string> splittingMeshNames = new List<string>();
         public List<string> SplittingMeshNames
@@ -285,7 +280,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     var abc = root.stream.abcContext;
                     var n = abc.timeSamplingCount;
-                    for (int i = 1; i < n; ++i)
+                    for (var i = 1; i < n; ++i)
                     {
                         var clip = new AnimationClip();
                         if (AddFrameEvents(clip, abc.GetTimeSampling(i)))
@@ -299,12 +294,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
-            varyingTopologyMeshNames = new List<string>();
             splittingMeshNames = new List<string>();
 
             CollectSubAssets(subassets, root);
-
-            streamDescr.HasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
         }
 
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
@@ -312,14 +304,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             var mesh = node.GetAlembicObj<AlembicMesh>();
             if (mesh != null)
             {
-                var sum = mesh.summary;
-                if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
-                    VaryingTopologyMeshNames.Add(node.gameObject.name);
-                else if (mesh.sampleSummary.splitCount > 1)
+                if (mesh.summary.topologyVariance != aiTopologyVariance.Heterogeneous &&
+                    mesh.sampleSummary.splitCount > 1)
+                {
                     SplittingMeshNames.Add(node.gameObject.name);
+                }
             }
 
-            int submeshCount = 0;
+            var submeshCount = 0;
             var meshFilter = node.gameObject.GetComponent<MeshFilter>();
             if (meshFilter != null)
             {
@@ -333,7 +325,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (renderer != null)
             {
                 var mats = new Material[submeshCount];
-                for (int i = 0; i < submeshCount; ++i)
+                for (var i = 0; i < submeshCount; ++i)
                     mats[i] = subassets.defaultMaterial;
                 renderer.sharedMaterials = mats;
             }
@@ -353,19 +345,19 @@ namespace UnityEditor.Formats.Alembic.Importer
                 CollectSubAssets(subassets, child);
         }
 
-        bool AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
+        static bool AddFrameEvents(AnimationClip clip, aiTimeSampling ts)
         {
-            int n = ts.sampleCount;
+            var n = ts.sampleCount;
             if (n <= 0)
                 return false;
 
             var events = new AnimationEvent[n];
-            for (int i = 0; i < n; ++i)
+            for (var i = 0; i < n; ++i)
             {
-                var ev = new AnimationEvent();
-                ev.time = (float)ts.GetTime(i);
-                ev.intParameter = i;
-                ev.functionName = "AbcOnFrameChange";
+                var ev = new AnimationEvent
+                {
+                    time = (float) ts.GetTime(i), intParameter = i, functionName = "AbcOnFrameChange"
+                };
                 events[i] = ev;
             }
             AnimationUtility.SetAnimationEvents(clip, events);

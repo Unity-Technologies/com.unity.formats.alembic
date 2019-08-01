@@ -29,22 +29,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool hasVaryingTopology = false;
-        public bool HasVaryingTopology
-        {
-            get { return hasVaryingTopology; }
-            set { hasVaryingTopology = value; }
-        }
-
-        [SerializeField]
-        private bool hasAcyclicFramerate = false;
-        public bool HasAcyclicFramerate
-        {
-            get { return hasAcyclicFramerate; }
-            set { hasAcyclicFramerate = value; }
-        }
-
-        [SerializeField]
         public double abcStartTime = double.MinValue;
 
         [SerializeField]
