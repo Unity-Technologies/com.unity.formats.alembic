@@ -118,18 +118,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             get { return importWarning; }
             set { importWarning = value; }
         }
-        [SerializeField]
-        private List<string> varyingTopologyMeshNames = new List<string>();
-        public List<string> VaryingTopologyMeshNames
-        {
-            get { return varyingTopologyMeshNames; }
-        }
-        [SerializeField]
-        private List<string> splittingMeshNames = new List<string>();
-        public List<string> SplittingMeshNames
-        {
-            get { return splittingMeshNames; }
-        }
+
         [SerializeField] bool firstImport = true;
 
         void OnValidate()
@@ -324,26 +313,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
-            varyingTopologyMeshNames = new List<string>();
-            splittingMeshNames = new List<string>();
 
             CollectSubAssets(subassets, root);
-
-            streamDescr.HasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
         }
 
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
-            var mesh = node.GetAlembicObj<AlembicMesh>();
-            if (mesh != null)
-            {
-                var sum = mesh.summary;
-                if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
-                    VaryingTopologyMeshNames.Add(node.gameObject.name);
-                else if (mesh.sampleSummary.splitCount > 1)
-                    SplittingMeshNames.Add(node.gameObject.name);
-            }
-
             int submeshCount = 0;
             var meshFilter = node.gameObject.GetComponent<MeshFilter>();
             if (meshFilter != null)
