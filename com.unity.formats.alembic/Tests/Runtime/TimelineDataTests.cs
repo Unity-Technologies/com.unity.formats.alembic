@@ -160,10 +160,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var go = TestAbcImported(exporter.recorder.settings.OutputPath);
             //yield return TestCubeContents(go);
             var player = go.GetComponentInChildren<AlembicStreamPlayer>();
-            player.StartTime = (float)player.StreamDescriptor.abcStartTime-1;
-            Assert.AreEqual(player.StartTime,(float)player.StreamDescriptor.abcStartTime);
-            player.EndTime = (float)player.StreamDescriptor.abcEndTime + 1;
-            Assert.AreEqual(player.EndTime,(float)player.StreamDescriptor.abcEndTime);
+            player.StartTime = player.StreamDescriptor.mediaStartTime-1;
+            Assert.AreEqual(player.StartTime,player.StreamDescriptor.mediaStartTime);
+            player.EndTime = (float)player.StreamDescriptor.mediaEndTime + 1;
+            Assert.AreEqual(player.EndTime,(float)player.StreamDescriptor.mediaEndTime);
             player.CurrentTime = (player.StartTime + player.EndTime) / 2;
             Assert.AreEqual(player.CurrentTime, (player.StartTime + player.EndTime) / 2);
             player.CurrentTime = player.EndTime + 1;

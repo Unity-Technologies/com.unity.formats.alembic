@@ -38,10 +38,10 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField(new GUIContent("Time Range"));
             EditorGUI.BeginDisabledGroup(multipleTimeRanges);
 
-            var abcStart = (float)targetStreamDesc.abcStartTime;
-            var abcEnd = (float)targetStreamDesc.abcEndTime;
-            var start = (float)streamPlayer.StartTime;
-            var end = (float)streamPlayer.EndTime;
+            var abcStart = targetStreamDesc.mediaStartTime;
+            var abcEnd = targetStreamDesc.mediaEndTime;
+            var start = streamPlayer.StartTime;
+            var end = streamPlayer.EndTime;
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
             if (EditorGUI.EndChangeCheck())

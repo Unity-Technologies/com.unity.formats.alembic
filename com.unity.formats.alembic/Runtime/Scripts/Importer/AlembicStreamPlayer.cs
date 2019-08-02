@@ -13,6 +13,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         AlembicStream abcStream { get; set; }
         [SerializeField]
         AlembicStreamDescriptor streamDescriptor;
+        /// <summary>
+        /// Gives access to the stream description.
+        /// </summary>
         public AlembicStreamDescriptor StreamDescriptor
         {
             get { return streamDescriptor; }
@@ -32,7 +35,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 startTime = value;
                 if (StreamDescriptor == null)
                     return;
-                startTime = Mathf.Clamp(startTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
+                startTime = Mathf.Clamp(startTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
             }
         }
 
@@ -49,7 +52,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 endTime = value;
                 if (StreamDescriptor == null)
                     return;
-                endTime = Mathf.Clamp(endTime, StartTime, (float)StreamDescriptor.abcEndTime);
+                endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.mediaEndTime);
             }
         }
 
@@ -122,10 +125,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (StreamDescriptor == null || abcStream == null)
                 return;
-            if (StreamDescriptor.abcStartTime == double.MinValue || StreamDescriptor.abcEndTime == double.MaxValue)
-                abcStream.GetTimeRange(ref StreamDescriptor.abcStartTime, ref StreamDescriptor.abcEndTime);
-            StartTime = Mathf.Clamp(StartTime, (float)StreamDescriptor.abcStartTime, (float)StreamDescriptor.abcEndTime);
-            EndTime = Mathf.Clamp(EndTime, StartTime, (float)StreamDescriptor.abcEndTime);
+            if (StreamDescriptor.mediaStartTime == double.MinValue || StreamDescriptor.mediaEndTime == double.MaxValue)
+            {
+                double start, end;
+                abcStream.GetTimeRange(out start, out end);
+                StreamDescriptor.mediaStartTime = (float)start;
+                StreamDescriptor.mediaEndTime = (float)end;
+            }
+
+            StartTime = Mathf.Clamp(StartTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
+            EndTime = Mathf.Clamp(EndTime, StartTime, StreamDescriptor.mediaEndTime);
             ClampTime();
             forceUpdate = true;
         }

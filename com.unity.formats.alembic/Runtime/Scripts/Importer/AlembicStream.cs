@@ -65,7 +65,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
         public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
 
-        public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
+        public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
 
         internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
@@ -142,7 +142,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (m_loaded)
             {
                 UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
-                AlembicStream.s_streams.Add(this);
+                s_streams.Add(this);
             }
             else
             {
