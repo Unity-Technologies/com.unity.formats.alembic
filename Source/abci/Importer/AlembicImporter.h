@@ -30,7 +30,7 @@ class aiPolyMesh; // : aiSchema
 class aiPoints;   // : aiSchema
 class aiProperty;
 
-enum class aiNormalsMode
+enum class NormalsMode
 {
     //ReadFromFile,
     ComputeIfMissing = 1,
@@ -38,7 +38,7 @@ enum class aiNormalsMode
     //Ignore
 };
 
-enum class aiTangentsMode
+enum class TangentsMode
 {
     None,
     Compute,
@@ -99,8 +99,8 @@ enum class aiPropertyType
 
 struct aiConfig
 {
-    aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
-    aiTangentsMode tangents_mode = aiTangentsMode::None;
+    NormalsMode normals_mode = NormalsMode::ComputeIfMissing;
+    TangentsMode tangents_mode = TangentsMode::None;
     float scale_factor = 1.0f;
     float aspect_ratio = -1.0f;
     float vertex_motion_scale = 1.0f;

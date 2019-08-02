@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    public enum AspectRatioMode
+    enum AspectRatioMode
     {
         CurrentResolution,
         DefaultResolution,
@@ -15,14 +15,26 @@ namespace UnityEngine.Formats.Alembic.Sdk
     public enum NormalsMode
     {
         //Import,
+        /// <summary>
+        /// If Alembic file has no normals, compute them
+        /// </summary>
         CalculateIfMissing = 1,
+        /// <summary>
+        /// Ignore normals from the Alembic file and always recompute.
+        /// </summary>
         AlwaysCalculate = 2,
         //None
     }
 
     public enum TangentsMode
     {
+        /// <summary>
+        /// Do not compute tangents.
+        /// </summary>
         None,
+        /// <summary>
+        /// Compute and set mesh tangents. Needs normals and UVs.
+        /// </summary>
         Calculate,
     }
 
@@ -78,7 +90,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public NormalsMode normalsMode { get; set; }
         public TangentsMode tangentsMode { get; set; }
         public float scaleFactor { get; set; }
-        public float aspectRatio { get; set; }
+        public float aspectRatio { get; set; } // Broken
         public float vertexMotionScale { get; set; }
         public int splitUnit { get; set; }
         public Bool swapHandedness { get; set; }
@@ -309,7 +321,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiObject topObject { get { return NativeMethods.aiContextGetTopObject(self); } }
         public int timeSamplingCount { get { return NativeMethods.aiContextGetTimeSamplingCount(self); } }
         public aiTimeSampling GetTimeSampling(int i) { return NativeMethods.aiContextGetTimeSampling(self, i); }
-        internal void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
+        internal void GetTimeRange(out double begin, out double end) { NativeMethods.aiContextGetTimeRange(self, out begin, out end); }
     }
 
     struct aiTimeSampling

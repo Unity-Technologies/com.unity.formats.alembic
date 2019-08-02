@@ -370,7 +370,7 @@ void aiPolyMesh::updateSummary()
         {
             summary.has_normals_prop = true;
             summary.has_normals = true;
-            summary.constant_normals = param.isConstant() && config.normals_mode != aiNormalsMode::AlwaysCompute;
+            summary.constant_normals = param.isConstant() && config.normals_mode != NormalsMode::AlwaysCompute;
             if (!summary.constant_normals)
                 m_constant = false;
         }
@@ -451,15 +451,15 @@ void aiPolyMesh::updateSummary()
     // normals - interpolate or compute?
     if (!summary.constant_normals)
     {
-        if (summary.has_normals && config.normals_mode != aiNormalsMode::AlwaysCompute)
+        if (summary.has_normals && config.normals_mode != NormalsMode::AlwaysCompute)
         {
             summary.interpolate_normals = interpolate;
         }
         else
         {
             summary.compute_normals =
-                config.normals_mode == aiNormalsMode::AlwaysCompute ||
-                (!summary.has_normals && config.normals_mode == aiNormalsMode::ComputeIfMissing);
+                    config.normals_mode == NormalsMode::AlwaysCompute ||
+                    (!summary.has_normals && config.normals_mode == NormalsMode::ComputeIfMissing);
             if (summary.compute_normals)
             {
                 summary.has_normals = true;
@@ -469,7 +469,7 @@ void aiPolyMesh::updateSummary()
     }
 
     // tangents
-    if (config.tangents_mode == aiTangentsMode::Compute && summary.has_normals && summary.has_uv0)
+    if (config.tangents_mode == TangentsMode::Compute && summary.has_normals && summary.has_uv0)
     {
         summary.has_tangents = true;
         summary.compute_tangents = true;

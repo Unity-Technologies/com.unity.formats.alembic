@@ -338,7 +338,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
-        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
+        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, out double begin, out double end);
         [DllImport(Abci.Lib)] public static extern aiObject aiContextGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aiContextUpdateSamples(IntPtr ctx, double time);
 
