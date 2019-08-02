@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         AlembicStream abcStream { get; set; }
         [SerializeField]
         AlembicStreamDescriptor streamDescriptor;
-        internal AlembicStreamDescriptor StreamDescriptor
+        public AlembicStreamDescriptor StreamDescriptor
         {
             get { return streamDescriptor; }
             set { streamDescriptor = value; }

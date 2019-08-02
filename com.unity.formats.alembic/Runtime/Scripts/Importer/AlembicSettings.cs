@@ -4,27 +4,27 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [System.Serializable]
-    internal class AlembicStreamSettings
+    public class AlembicStreamSettings
     {
         [SerializeField]
-        private aiNormalsMode normals = aiNormalsMode.CalculateIfMissing;
-        public aiNormalsMode Normals
+        private NormalsMode normals = NormalsMode.CalculateIfMissing;
+        public NormalsMode Normals
         {
             get { return normals; }
             set { normals = value; }
         }
 
         [SerializeField]
-        private aiTangentsMode tangents = aiTangentsMode.Calculate;
-        public aiTangentsMode Tangents
+        private TangentsMode tangents = TangentsMode.Calculate;
+        public TangentsMode Tangents
         {
             get { return tangents; }
             set { tangents = value; }
         }
 
         [SerializeField]
-        private aiAspectRatioMode cameraAspectRatio = aiAspectRatioMode.CameraAperture;
-        public aiAspectRatioMode CameraAspectRatio
+        private AspectRatioMode cameraAspectRatio = AspectRatioMode.CameraAperture;
+        public AspectRatioMode CameraAspectRatio
         {
             get { return cameraAspectRatio; }
             set { cameraAspectRatio = value; }
@@ -72,7 +72,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         private bool importPointPolygon = true;
-        public bool ImportPointPolygon
+        internal bool ImportPointPolygon // Broken
         {
             get { return importPointPolygon; }
             set { importPointPolygon = value; }
@@ -80,7 +80,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         private bool importLinePolygon = true;
-        public bool ImportLinePolygon
+        internal bool ImportLinePolygon // Broken
         {
             get { return importLinePolygon; }
             set { importLinePolygon = value; }
@@ -88,7 +88,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         private bool importTrianglePolygon = true;
-        public bool ImportTrianglePolygon
+        internal bool ImportTrianglePolygon // Broken
         {
             get { return importTrianglePolygon; }
             set { importTrianglePolygon = value; }

@@ -5,35 +5,35 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    internal enum aiAspectRatioMode
+    public enum AspectRatioMode
     {
         CurrentResolution,
         DefaultResolution,
         CameraAperture
     };
 
-    internal enum aiNormalsMode
+    public enum NormalsMode
     {
-        Import,
-        CalculateIfMissing,
-        AlwaysCalculate,
-        None
+        //Import,
+        CalculateIfMissing = 1,
+        AlwaysCalculate = 2,
+        //None
     }
 
-    internal enum aiTangentsMode
+    public enum TangentsMode
     {
         None,
         Calculate,
     }
 
-    internal enum aiTopologyVariance
+    enum aiTopologyVariance
     {
         Constant,
         Homogeneous, // vertices are variant, topology is constant
         Heterogeneous, // both vertices and topology are variant
     }
 
-    internal enum aiTopology
+    enum aiTopology
     {
         Points,
         Lines,
@@ -41,7 +41,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    internal enum aiPropertyType
+    enum aiPropertyType
     {
         Unknown,
 
@@ -73,10 +73,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiConfig
+    struct aiConfig
     {
-        public aiNormalsMode normalsMode { get; set; }
-        public aiTangentsMode tangentsMode { get; set; }
+        public NormalsMode normalsMode { get; set; }
+        public TangentsMode tangentsMode { get; set; }
         public float scaleFactor { get; set; }
         public float aspectRatio { get; set; }
         public float vertexMotionScale { get; set; }
@@ -91,8 +91,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void SetDefaults()
         {
-            normalsMode = aiNormalsMode.CalculateIfMissing;
-            tangentsMode = aiTangentsMode.None;
+            normalsMode = NormalsMode.CalculateIfMissing;
+            tangentsMode = TangentsMode.None;
             scaleFactor = 0.01f;
             aspectRatio = -1.0f;
             vertexMotionScale = 1.0f;
@@ -111,7 +111,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aiSampleSelector
+    struct aiSampleSelector
     {
         public ulong requestedIndex { get; set; }
         public double requestedTime { get; set; }
@@ -119,7 +119,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiMeshSummary
+    struct aiMeshSummary
     {
         public aiTopologyVariance topologyVariance { get; set; }
         public Bool hasCounts { get; set; }
@@ -214,13 +214,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aiSubmeshData
+    struct aiSubmeshData
     {
         public IntPtr indexes;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiXformData
+    struct aiXformData
     {
         public Bool visibility { get; set; }
 
@@ -232,7 +232,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiPointsSummary
+    struct aiPointsSummary
     {
         public Bool hasVelocities { get; set; }
         public Bool hasIDs { get; set; }
@@ -241,13 +241,13 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantIDs { get; set; }
     };
 
-    internal struct aiPointsSampleSummary
+    struct aiPointsSampleSummary
     {
         public int count { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiPointsData
+    struct aiPointsData
     {
         public Bool visibility;
 
@@ -258,34 +258,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public Vector3 boundsCenter;
         public Vector3 boundsExtents;
-
-        public aiPointsData(
-            Bool visibility, IntPtr points, IntPtr velocities, IntPtr ids,
-            int count, Vector3 boundsCenter, Vector3 boundsExtents)
-        {
-            this.visibility = visibility;
-            this.points = points;
-            this.velocities = velocities;
-            this.ids = ids;
-            this.count = count;
-            this.boundsCenter = boundsCenter;
-            this.boundsExtents = boundsExtents;
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct aiPropertyData
+    struct aiPropertyData
     {
         public IntPtr data;
         public int size;
         public aiPropertyType type;
-
-        public aiPropertyData(IntPtr data, int size, aiPropertyType type)
-        {
-            this.data = data;
-            this.size = size;
-            this.type = type;
-        }
     }
 
     internal static class Abci
@@ -301,7 +281,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 #endif
     }
 
-    internal struct aiContext
+    struct aiContext
     {
         internal IntPtr self;
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
@@ -332,32 +312,18 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal void GetTimeRange(ref double begin, ref double end) { NativeMethods.aiContextGetTimeRange(self, ref begin, ref end); }
     }
 
-    internal struct aiTimeSampling
+    struct aiTimeSampling
     {
         internal IntPtr self;
-
-        internal aiTimeSampling(IntPtr self)
-        {
-            this.self = self;
-        }
 
         public int sampleCount { get { return NativeMethods.aiTimeSamplingGetSampleCount(self); } }
         public double GetTime(int index) { return NativeMethods.aiTimeSamplingGetTime(self, index); }
-        internal void GetRange(ref double start, ref double end) { NativeMethods.aiTimeSamplingGetRange(self, ref start, ref end); }
     }
 
-    internal struct aiObject
+    struct aiObject
     {
         internal IntPtr self;
-
-        internal aiObject(IntPtr self)
-        {
-            this.self = self;
-        }
-
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
-        public static bool ToBool(aiObject v) { return v; }
-
         public aiContext context { get { return NativeMethods.aiObjectGetContext(self); } }
         public string name { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetName(self)); } }
         public string fullname { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetFullName(self)); } }
@@ -384,30 +350,21 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal struct aiSchema
+    struct aiSchema
     {
         public IntPtr self;
-
-        public aiSchema(IntPtr self)
-        {
-            this.self = self;
-        }
 
         public static implicit operator bool(aiSchema v) { return v.self != IntPtr.Zero; }
         public static explicit operator aiXform(aiSchema v) { var tmp = default(aiXform); tmp.self = v.self; return tmp; }
         public static explicit operator aiCamera(aiSchema v) { var tmp = default(aiCamera); tmp.self = v.self; return tmp; }
         public static explicit operator aiPolyMesh(aiSchema v) { var tmp = default(aiPolyMesh); tmp.self = v.self; return tmp; }
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
-
-        public bool isConstant { get { return NativeMethods.aiSchemaIsConstant(self); } }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
-        internal aiSample sample { get { return NativeMethods.aiSchemaGetSample(self); } }
-
         public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct aiXform
+    struct aiXform
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -418,7 +375,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct aiCamera
+    struct aiCamera
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -429,7 +386,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct aiPolyMesh
+    struct aiPolyMesh
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -441,7 +398,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal struct aiPoints
+    struct aiPoints
     {
         [FieldOffset(0)] public IntPtr self;
         [FieldOffset(0)] public aiSchema schema;
@@ -455,8 +412,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetSummary(ref aiPointsSummary dst) { NativeMethods.aiPointsGetSummary(self, ref dst); }
     }
 
-
-    internal struct aiSample
+    struct aiSample
     {
         public IntPtr self;
         public static implicit operator bool(aiSample v) { return v.self != IntPtr.Zero; }
@@ -466,7 +422,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiPointsSample(aiSample v) { aiPointsSample tmp; tmp.self = v.self; return tmp; }
     }
 
-    internal struct aiXformSample
+    struct aiXformSample
     {
         public IntPtr self;
         public static implicit operator bool(aiXformSample v) { return v.self != IntPtr.Zero; }
@@ -475,7 +431,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetData(ref aiXformData dst) { NativeMethods.aiXformGetData(self, ref dst); }
     }
 
-    internal struct aiCameraSample
+    struct aiCameraSample
     {
         public IntPtr self;
         public static implicit operator bool(aiCameraSample v) { return v.self != IntPtr.Zero; }
@@ -484,7 +440,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetData(ref CameraData dst) { NativeMethods.aiCameraGetData(self, ref dst); }
     }
 
-    internal struct aiPolyMeshSample
+    struct aiPolyMeshSample
     {
         public IntPtr self;
         public static implicit operator bool(aiPolyMeshSample v) { return v.self != IntPtr.Zero; }
@@ -497,7 +453,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void Sync() { NativeMethods.aiSampleSync(self); }
     }
 
-    internal struct aiPointsSample
+    struct aiPointsSample
     {
         public IntPtr self;
         public static implicit operator bool(aiPointsSample v) { return v.self != IntPtr.Zero; }
@@ -509,16 +465,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    internal struct aiProperty
+    struct aiProperty
     {
         public IntPtr self;
-
-        public aiProperty(IntPtr self)
-        {
-            this.self = self;
-        }
-
         public static implicit operator bool(aiProperty v) { return v.self != IntPtr.Zero; }
-        public static bool ToBool(aiProperty v) { return v; }
     }
 }
