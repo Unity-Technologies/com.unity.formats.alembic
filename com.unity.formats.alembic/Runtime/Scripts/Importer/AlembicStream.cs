@@ -270,13 +270,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             ic.alembicTreeNode = treeNode;
         }
 
-        internal static float GetAspectRatio(aiAspectRatioMode mode)
+        internal static float GetAspectRatio(AspectRatioMode mode)
         {
-            if (mode == aiAspectRatioMode.CameraAperture)
+            if (mode == AspectRatioMode.CameraAperture)
             {
                 return 0.0f;
             }
-            else if (mode == aiAspectRatioMode.CurrentResolution)
+            else if (mode == AspectRatioMode.CurrentResolution)
             {
                 return (float)Screen.width / (float)Screen.height;
             }

@@ -1,11 +1,9 @@
-using UnityEngine;
-
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    internal class AlembicStreamDescriptor : ScriptableObject
+    public class AlembicStreamDescriptor : ScriptableObject
     {
         [SerializeField]
-        private string pathToAbc;
+        string pathToAbc;
         public string PathToAbc
         {
             // For standalone builds, the path should be relative to the StreamingAssets
@@ -21,7 +19,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private AlembicStreamSettings settings = new AlembicStreamSettings();
+        AlembicStreamSettings settings = new AlembicStreamSettings();
         public AlembicStreamSettings Settings
         {
             get { return settings; }
@@ -29,19 +27,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool hasAcyclicFramerate = false;
-        public bool HasAcyclicFramerate
-        {
-            get { return hasAcyclicFramerate; }
-            set { hasAcyclicFramerate = value; }
-        }
+        internal double abcStartTime = double.MinValue;
 
         [SerializeField]
-        public double abcStartTime = double.MinValue;
+        internal double abcEndTime = double.MaxValue;
 
-        [SerializeField]
-        public double abcEndTime = double.MaxValue;
-
-        public double duration { get { return abcEndTime - abcStartTime; } }
+        public double mediaDuration { get { return abcEndTime - abcStartTime; } }
     }
 }

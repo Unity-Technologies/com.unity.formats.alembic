@@ -32,10 +32,10 @@ class aiProperty;
 
 enum class aiNormalsMode
 {
-    ReadFromFile,
-    ComputeIfMissing,
-    AlwaysCompute,
-    Ignore
+    //ReadFromFile,
+    ComputeIfMissing = 1,
+    AlwaysCompute = 2,
+    //Ignore
 };
 
 enum class aiTangentsMode

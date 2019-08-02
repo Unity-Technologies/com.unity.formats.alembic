@@ -246,7 +246,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
-            if (streamDescr.duration > 0)
+            if (streamDescr.mediaDuration > 0)
             {
                 // AnimationClip for time
                 {
@@ -254,8 +254,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     frames[0].value = 0.0f;
                     frames[0].time = 0.0f;
                     frames[0].outTangent = 1.0f;
-                    frames[1].value = (float)streamDescr.duration;
-                    frames[1].time = (float)streamDescr.duration;
+                    frames[1].value = (float)streamDescr.mediaDuration;
+                    frames[1].time = (float)streamDescr.mediaDuration;
                     frames[1].inTangent = 1.0f;
 
                     var curve = new AnimationCurve(frames);
