@@ -1,5 +1,6 @@
-using UnityEngine;
+using System;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -16,7 +17,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// Gives access to the stream description.
         /// </summary>
-        public AlembicStreamDescriptor StreamDescriptor
+        internal AlembicStreamDescriptor StreamDescriptor
         {
             get { return streamDescriptor; }
             set { streamDescriptor = value; }
@@ -82,6 +83,30 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return vertexMotionScale; }
             set { vertexMotionScale = value; }
         }
+        
+        /// <summary>
+        /// The start timestamp of the Alembic file.
+        /// </summary>
+        public float mediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
+        /// <summary>
+        /// The end timestamp of the Alembic file.
+        /// </summary>
+        public float mediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
+
+        /// <summary>
+        /// The duration of the Alembic file.
+        /// </summary>
+        public float mediaDuration => mediaEndTime - mediaStartTime;
+
+        /// <summary>
+        /// The path to the Alembic asset. When in a standalone build, the returned path is prepended by the streamingAssets path.
+        /// </summary>
+        public string pathToAbc => StreamDescriptor != null ? StreamDescriptor.PathToAbc : "";
+        
+        /// <summary>
+        /// The stream import options.
+        /// </summary>
+        public AlembicStreamSettings Settings => StreamDescriptor !=null ? StreamDescriptor.Settings : null;
 
         [SerializeField]
         bool asyncLoad = true;
@@ -100,6 +125,51 @@ namespace UnityEngine.Formats.Alembic.Importer
             CurrentTime = time;
             Update();
             LateUpdate();
+        }
+        
+        /// <summary>
+        /// Loads a different alembic file.
+        /// </summary>
+        /// <param name="newPath">Path to the new file.</param>
+        public void LoadFromFile(string newPath)
+        {
+            if (StreamDescriptor == null)
+            {
+                StreamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+            }
+
+            StreamDescriptor.PathToAbc = newPath;
+            InitializeAfterLoad();
+
+        }
+
+        void InitializeAfterLoad()
+        {
+            LoadStream(true);
+            abcStream.AbcLoad(true, true);
+            double start, end;
+            abcStream.GetTimeRange(out start, out end);
+            startTime = (float) start;
+            endTime = (float) end;
+
+            streamDescriptor.mediaStartTime = (float) start;
+            streamDescriptor.mediaEndTime = (float) end;
+            
+            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+            var defaultMat = pipelineAsset != null
+                ? pipelineAsset.defaultMaterial
+                : new Material(Shader.Find("Standard"));
+
+            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var mats = new Material[meshRenderer.sharedMaterials.Length];
+                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+            }
+
+            foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())
+            {
+                meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+            }
         }
 
         void ClampTime()
