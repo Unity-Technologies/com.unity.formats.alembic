@@ -119,7 +119,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public void AbcLoad(bool createMissingNodes, bool initialImport)
+        public bool AbcLoad(bool createMissingNodes, bool initialImport)
         {
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
@@ -148,6 +148,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 Debug.LogError("failed to load alembic at " + m_streamDesc.PathToAbc);
             }
+
+            return m_loaded;
         }
 
         public void Dispose()

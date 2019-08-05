@@ -131,7 +131,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// Loads a different alembic file.
         /// </summary>
         /// <param name="newPath">Path to the new file.</param>
-        public void LoadFromFile(string newPath)
+        /// <returns>True if the load succeeded, false otherwise.</returns>
+        public bool LoadFromFile(string newPath)
         {
             if (StreamDescriptor == null)
             {
@@ -139,14 +140,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             StreamDescriptor.PathToAbc = newPath;
-            InitializeAfterLoad();
-
+            return InitializeAfterLoad();
         }
 
-        void InitializeAfterLoad()
+        bool InitializeAfterLoad()
         {
-            LoadStream(true);
-            abcStream.AbcLoad(true, true);
+            var ret = LoadStream(true);
+            if (!ret)
+                return false;
+            //abcStream.AbcLoad(true, true);
             double start, end;
             abcStream.GetTimeRange(out start, out end);
             startTime = (float) start;
@@ -170,6 +172,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
             }
+
+            return true;
         }
 
         void ClampTime()
@@ -177,13 +181,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
         }
 
-        internal void LoadStream(bool createMissingNodes)
+        internal bool  LoadStream(bool createMissingNodes)
         {
             if (StreamDescriptor == null)
-                return;
+                return false;
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
-            abcStream.AbcLoad(createMissingNodes, false);
+            var ret = abcStream.AbcLoad(createMissingNodes, false);
             forceUpdate = true;
+            return ret;
         }
 
         void Start()
