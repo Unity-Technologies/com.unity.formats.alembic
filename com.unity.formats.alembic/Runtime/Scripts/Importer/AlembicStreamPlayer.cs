@@ -87,21 +87,21 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// The start timestamp of the Alembic file.
         /// </summary>
-        public float mediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
+        public float MediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
         /// <summary>
         /// The end timestamp of the Alembic file.
         /// </summary>
-        public float mediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
+        public float MediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
 
         /// <summary>
         /// The duration of the Alembic file.
         /// </summary>
-        public float mediaDuration => mediaEndTime - mediaStartTime;
+        public float MediaDuration => MediaEndTime - MediaStartTime;
 
         /// <summary>
         /// The path to the Alembic asset. When in a standalone build, the returned path is prepended by the streamingAssets path.
         /// </summary>
-        public string pathToAbc => StreamDescriptor != null ? StreamDescriptor.PathToAbc : "";
+        public string PathToAbc => StreamDescriptor != null ? StreamDescriptor.PathToAbc : "";
         
         /// <summary>
         /// The stream import options.
