@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -6,6 +7,7 @@ using UnityEngine.Timeline;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Util;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
@@ -187,6 +189,39 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.UpdateImmediately(player.Duration);
             var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
+        }
+
+        [Test]
+        public void TestImportlessAlembicInvalidFile()
+        {
+            var go = new GameObject("abc");
+            var player = go.AddComponent<AlembicStreamPlayer>();
+            LogAssert.Expect(LogType.Error,new Regex("failed to load alembic at"));
+            var ret = player.LoadFromFile("DoesNotExist");
+
+            Assert.IsFalse(ret);
+        }
+
+        [UnityTest]
+        public IEnumerator TestImportlessAlembic()
+        {
+            director.Play();
+            exporter.maxCaptureFrame = 30;
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.recorder.settings.OutputPath);
+            var scene = SceneManager.CreateScene(GUID.Generate().ToString());
+           SceneManager.SetActiveScene(scene);
+           var go = new GameObject("abc");
+           var player = go.AddComponent<AlembicStreamPlayer>();
+           var ret = player.LoadFromFile(exporter.recorder.settings.OutputPath);
+           Assert.IsTrue(ret);
+           
+           var cubeGO = go.GetComponentInChildren<MeshRenderer>().gameObject;
+           player.UpdateImmediately(0);
+           var t0 = cubeGO.transform.position;
+           player.UpdateImmediately(player.Duration);
+           var t1  = cubeGO.transform.position;
+           Assert.AreNotEqual(t0, t1);
         }
     }
 }
