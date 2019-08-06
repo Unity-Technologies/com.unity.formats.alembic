@@ -11,18 +11,32 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Util
 {
+    /// <summary>
+    /// Controls the scope of Alembic export.
+    /// </summary>
     public enum ExportScope
     {
+        /// <summary>
+        /// Export the entire Scene.
+        /// </summary>
         EntireScene,
+        /// <summary>
+        /// Export only a branch (or hierarchy) of the Scene.
+        /// </summary>
         TargetBranch,
     }
-
-
+    
+    /// <summary>
+    /// Settings controlling different aspects of recording.
+    /// </summary>
     [Serializable]
     public class AlembicRecorderSettings
     {
         [SerializeField]
-        private string outputPath = "Output/Output.abc";
+        string outputPath = "Output/Output.abc";
+        /// <summary>
+        /// Specify the location to save the Alembic file to.
+        /// </summary>
         public string OutputPath
         {
             get { return outputPath; }
@@ -30,10 +44,18 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        public aeConfig conf = new aeConfig();
+        AlembicExportOptions conf = new AlembicExportOptions();
+
+        /// <summary>
+        /// Alembic file options (archive type, transform format, etc)
+        /// </summary>
+        public AlembicExportOptions exportOptions => conf;
 
         [SerializeField]
-        private ExportScope scope = ExportScope.EntireScene;
+        ExportScope scope = ExportScope.EntireScene;
+        /// <summary>
+        /// Choose the scope of the export.
+        /// </summary>
         public ExportScope Scope
         {
             get { return scope; }
@@ -41,7 +63,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private GameObject targetBranch;
+        GameObject targetBranch;
+        /// <summary>
+        /// Export only a branch (or hierarchy) of the Scene. This options is used only if Export Scope is set to Branch.
+        /// </summary>
         public GameObject TargetBranch
         {
             get { return targetBranch; }
@@ -49,7 +74,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool fixDeltaTime = true;
+        bool fixDeltaTime = true;
+        /// <summary>
+        /// Enable this option to set Time.maximumDeltaTime using the frame rate to ensure fixed delta time.
+        /// </summary>
         public bool FixDeltaTime
         {
             get { return fixDeltaTime; }
@@ -58,7 +86,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
         [SerializeField]
         [Tooltip("Assume only GameObjects with a SkinnedMeshRenderer component change over time.")]
-        private bool assumeNonSkinnedMeshesAreConstant = true;
+        bool assumeNonSkinnedMeshesAreConstant = true;
+        /// <summary>
+        /// Enable this option to skip capturing animation on static Meshes.
+        /// </summary>
         public bool AssumeNonSkinnedMeshesAreConstant
         {
             get { return assumeNonSkinnedMeshesAreConstant; }
@@ -66,7 +97,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool captureMeshRenderer = true;
+        bool captureMeshRenderer = true;
+        /// <summary>
+        /// Enable to capture Meshes.
+        /// </summary>
         public bool CaptureMeshRenderer
         {
             get { return captureMeshRenderer; }
@@ -74,7 +108,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool captureSkinnedMeshRenderer = true;
+        bool captureSkinnedMeshRenderer = true;
+        /// <summary>
+        /// Enable to capture Skinned Meshes.
+        /// </summary>
         public bool CaptureSkinnedMeshRenderer
         {
             get { return captureSkinnedMeshRenderer; }
@@ -82,15 +119,18 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool captureParticleSystem = false;
-        public bool CaptureParticleSystem
+        bool captureParticleSystem = false;
+        internal bool CaptureParticleSystem // Need to confirm is working.
         {
             get { return captureParticleSystem; }
             set { captureParticleSystem = value; }
         }
 
         [SerializeField]
-        private bool captureCamera = true;
+        bool captureCamera = true;
+        /// <summary>
+        /// Enable to capture Cameras.
+        /// </summary>
         public bool CaptureCamera
         {
             get { return captureCamera; }
@@ -98,7 +138,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool meshNormals = true;
+        bool meshNormals = true;
+        /// <summary>
+        /// Enable to export Mesh normals.
+        /// </summary>
         public bool MeshNormals
         {
             get { return meshNormals; }
@@ -106,7 +149,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool meshUV0 = true;
+        bool meshUV0 = true;
+        /// <summary>
+        /// Enable to export Mesh UV0.
+        /// </summary>
         public bool MeshUV0
         {
             get { return meshUV0; }
@@ -114,7 +160,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool meshUV1 = true;
+        bool meshUV1 = true;
+        /// <summary>
+        /// Enable to export Mesh UV1.
+        /// </summary>
         public bool MeshUV1
         {
             get { return meshUV1; }
@@ -122,7 +171,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool meshColors = true;
+        bool meshColors = true;
+        /// <summary>
+        /// Enable to export Mesh Vertex Colour.
+        /// </summary>
         public bool MeshColors
         {
             get { return meshColors; }
@@ -130,7 +182,10 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool meshSubmeshes = true;
+        bool meshSubmeshes = true;
+        /// <summary>
+        /// Enable to export sub-Meshes.
+        /// </summary>
         public bool MeshSubmeshes
         {
             get { return meshSubmeshes; }
@@ -138,19 +193,14 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        private bool detailedLog = false;
+        bool detailedLog = false;
+        /// <summary>
+        /// Enable the Detailed Log option to provide Debug logging for each captured frame.
+        /// </summary>
         public bool DetailedLog
         {
             get { return detailedLog; }
             set { detailedLog = value; }
-        }
-
-        [SerializeField]
-        private bool debugLog = false;
-        public bool DebugLog
-        {
-            get { return debugLog; }
-            set { debugLog = value; }
         }
     }
 
@@ -179,6 +229,9 @@ namespace UnityEngine.Formats.Alembic.Util
     }
 
 
+    /// <summary>
+    /// Class that implements recording of Unity scene elements in the Alembic format.
+    /// </summary>
     [Serializable]
     public sealed class AlembicRecorder : IDisposable
     {
@@ -524,7 +577,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
 
                 abcObject = parent.abcObject.NewPolyMesh(m_target.name, timeSamplingIndex);
-                if (recorder.settings.MeshSubmeshes)
+                if (recorder.Settings.MeshSubmeshes)
                     m_mbuf.SetupSubmeshes(abcObject, mesh);
             }
 
@@ -569,7 +622,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
 
                 abcObject = parent.abcObject.NewPolyMesh(target.name, timeSamplingIndex);
-                if (recorder.settings.MeshSubmeshes)
+                if (recorder.Settings.MeshSubmeshes)
                     m_mbuf.SetupSubmeshes(abcObject, mesh);
 
                 m_meshSrc = target.sharedMesh;
@@ -734,14 +787,33 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
         #region properties
-        public AlembicRecorderSettings settings
+        /// <summary>
+        /// The Recorder settings.
+        /// </summary>
+        public AlembicRecorderSettings Settings
         {
             get { return m_settings; }
             set { m_settings = value; }
         }
-        public GameObject targetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
-        public bool recording { get { return m_recording; } }
-        public int frameCount { get { return m_frameCount; } }
+        
+        /// <summary>
+        /// The recording target branch. Ignored if scope is set to whole scene.
+        /// </summary>
+        public GameObject TargetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
+        
+        /// <summary>
+        /// Returns true if a recording session is active.
+        /// </summary>
+        public bool Recording { get { return m_recording; } }
+        
+        /// <summary>
+        /// Set the frame to stop capturing at. 
+        /// </summary>
+        public int FrameCount
+        {
+            get { return m_frameCount; }
+            set { m_frameCount = value; }
+        }
         #endregion
 
 
@@ -771,9 +843,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
         T[] GetTargets<T>() where T : Component
         {
-            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch != null)
+            if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
             {
-                return targetBranch.GetComponentsInChildren<T>();
+                return TargetBranch.GetComponentsInChildren<T>();
             }
             else
             {
@@ -783,8 +855,8 @@ namespace UnityEngine.Formats.Alembic.Util
 
         Component[] GetTargets(Type type)
         {
-            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch != null)
-                return targetBranch.GetComponentsInChildren(type);
+            if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
+                return TargetBranch.GetComponentsInChildren(type);
             else
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
         }
@@ -899,11 +971,18 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
         #region public methods
+        /// <summary>
+        /// Deallocate the native resources.
+        /// </summary>
         public void Dispose()
         {
             m_ctx.Destroy();
         }
 
+        /// <summary>
+        /// Starts a recording session.
+        /// </summary>
+        /// <returns>True if succeeded, false otherwise. </returns>
         public bool BeginRecording()
         {
             if (m_recording)
@@ -911,7 +990,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 Debug.LogWarning("AlembicRecorder: already recording");
                 return false;
             }
-            if (m_settings.Scope == ExportScope.TargetBranch && targetBranch == null)
+            if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch == null)
             {
                 Debug.LogWarning("AlembicRecorder: target object is not set");
                 return false;
@@ -942,7 +1021,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 return false;
             }
 
-            m_ctx.SetConfig(m_settings.conf);
+            m_ctx.SetConfig(m_settings.exportOptions);
             if (!m_ctx.OpenArchive(m_settings.OutputPath))
             {
                 Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.OutputPath);
@@ -964,13 +1043,16 @@ namespace UnityEngine.Formats.Alembic.Util
             m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
-            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.FixDeltaTime)
-                Time.maximumDeltaTime = (1.0f / m_settings.conf.FrameRate);
+            if (m_settings.exportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
+                Time.maximumDeltaTime = (1.0f / m_settings.exportOptions.FrameRate);
 
             Debug.Log("AlembicRecorder: start " + m_settings.OutputPath);
             return true;
         }
 
+        /// <summary>
+        /// Ends the recording session.
+        /// </summary>
         public void EndRecording()
         {
             if (!m_recording) { return; }
@@ -985,7 +1067,7 @@ namespace UnityEngine.Formats.Alembic.Util
             Debug.Log("AlembicRecorder: end: " + m_settings.OutputPath);
         }
 
-        public void ProcessRecording()
+        internal void ProcessRecording()
         {
             if (!m_recording) { return; }
 
@@ -1026,19 +1108,19 @@ namespace UnityEngine.Formats.Alembic.Util
             // advance time
             ++m_frameCount;
             m_timePrev = m_time;
-            switch (m_settings.conf.TimeSamplingType)
+            switch (m_settings.exportOptions.TimeSamplingType)
             {
-                case aeTimeSamplingType.Uniform:
-                    m_time = (1.0f / m_settings.conf.FrameRate) * m_frameCount;
+                case TimeSamplingType.Uniform:
+                    m_time = (1.0f / m_settings.exportOptions.FrameRate) * m_frameCount;
                     break;
-                case aeTimeSamplingType.Acyclic:
+                case TimeSamplingType.Acyclic:
                     m_time += Time.deltaTime;
                     break;
             }
             m_elapsed = Time.realtimeSinceStartup - begin_time;
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_settings.conf.TimeSamplingType == aeTimeSamplingType.Uniform && m_settings.FixDeltaTime)
+            if (m_settings.exportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
                 AbcAPI.aeWaitMaxDeltaTime();
 
             if (m_settings.DetailedLog)

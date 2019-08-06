@@ -77,13 +77,13 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [UnityTest]
         public IEnumerator TestPhysicalCamParams()
         {
-            deleteFileList.Add(exporter.recorder.settings.OutputPath);
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             exporter.OneShot();
             yield return null;
 
             AssetDatabase.Refresh();
-            Assert.That(File.Exists(exporter.recorder.settings.OutputPath));
-            var abc = AssetDatabase.LoadMainAssetAtPath(exporter.recorder.settings.OutputPath) as GameObject;
+            Assert.That(File.Exists(exporter.Recorder.Settings.OutputPath));
+            var abc = AssetDatabase.LoadMainAssetAtPath(exporter.Recorder.Settings.OutputPath) as GameObject;
             var importedParams = new CamParams();
             importedParams.FromCamera(abc.GetComponentInChildren<Camera>());
             Assert.IsTrue(camParams.Equals(importedParams));

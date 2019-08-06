@@ -38,8 +38,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestDefaultExportParams()
         {
             yield return RecordAlembic();
-            deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
             yield return TestPlaneContents(go);
         }
     }
