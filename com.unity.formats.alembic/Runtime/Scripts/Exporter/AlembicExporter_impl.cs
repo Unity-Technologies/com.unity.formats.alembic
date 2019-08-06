@@ -30,7 +30,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         [SerializeField]
-        public aeConfig conf = aeConfig.defaultValue;
+        public aeConfig conf = new aeConfig();
 
         [SerializeField]
         private ExportScope scope = ExportScope.EntireScene;
@@ -942,7 +942,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 return false;
             }
 
-            m_ctx.SetConfig(ref m_settings.conf);
+            m_ctx.SetConfig(m_settings.conf);
             if (!m_ctx.OpenArchive(m_settings.OutputPath))
             {
                 Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.OutputPath);
