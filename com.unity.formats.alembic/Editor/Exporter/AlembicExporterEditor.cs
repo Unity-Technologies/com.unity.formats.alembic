@@ -19,8 +19,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
         public override void OnInspectorGUI()
         {
             var t = target as AlembicExporter;
-            var recorder = t.recorder;
-            var settings = recorder.settings;
+            var recorder = t.Recorder;
+            var settings = recorder.Settings;
             var so = serializedObject;
 
             bool dirty = false;
@@ -67,7 +67,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.xformType"));
                 var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
                 EditorGUILayout.PropertyField(timeSamplingType);
-                if (timeSamplingType.intValue == (int)aeTimeSamplingType.Uniform)
+                if (timeSamplingType.intValue == (int)TimeSamplingType.Uniform)
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.frameRate"));
@@ -149,7 +149,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
             {
                 // capture control
                 EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-                if (recorder.recording)
+                if (recorder.Recording)
                 {
                     if (GUILayout.Button("End Recording"))
                         t.EndRecording();
