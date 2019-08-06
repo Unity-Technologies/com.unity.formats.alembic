@@ -11,7 +11,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Util
 {
-    internal enum ExportScope
+    public enum ExportScope
     {
         EntireScene,
         TargetBranch,
@@ -19,7 +19,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    internal class AlembicRecorderSettings
+    public class AlembicRecorderSettings
     {
         [SerializeField]
         private string outputPath = "Output/Output.abc";
@@ -180,10 +180,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     [Serializable]
-    sealed class AlembicRecorder : IDisposable
+    public sealed class AlembicRecorder : IDisposable
     {
         #region internal types
-        public class MeshBuffer : IDisposable
+        class MeshBuffer : IDisposable
         {
             public bool visibility = true;
             public PinnedList<Vector3> points = new PinnedList<Vector3>();
@@ -302,7 +302,7 @@ namespace UnityEngine.Formats.Alembic.Util
             }
         }
 
-        public class ClothBuffer : IDisposable
+        class ClothBuffer : IDisposable
         {
             public PinnedList<int> remap = new PinnedList<int>();
             public PinnedList<Vector3> vertices = new PinnedList<Vector3>();

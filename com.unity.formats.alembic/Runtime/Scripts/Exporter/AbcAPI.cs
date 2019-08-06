@@ -10,26 +10,26 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    enum aeArchiveType
+    public enum aeArchiveType
     {
         HDF5,
         Ogawa,
     };
 
-    enum aeTimeSamplingType
+    public enum aeTimeSamplingType
     {
         Uniform = 0,
         // Cyclic = 1,
         Acyclic = 2,
     };
 
-    enum aeXformType
+    public enum aeXformType
     {
         Matrix,
         TRS,
     };
 
-    enum aeTopology
+    public enum aeTopology
     {
         Points,
         Lines,
@@ -69,7 +69,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    struct aeConfig
+    public struct aeConfig
     {
         [SerializeField]
         private aeArchiveType archiveType;
@@ -101,14 +101,14 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
         [SerializeField]
         private Bool swapHandedness;
-        public Bool SwapHandedness
+        public bool SwapHandedness
         {
             get { return swapHandedness; }
             set { swapHandedness = value; }
         }
         [SerializeField]
         private Bool swapFaces;
-        public Bool SwapFaces
+        public bool SwapFaces
         {
             get { return swapFaces; }
             set { swapFaces = value; }
@@ -276,7 +276,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    static partial class AbcAPI
+    static class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {
@@ -286,7 +286,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal static class NativeMethods
+    static class NativeMethods
     {
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
