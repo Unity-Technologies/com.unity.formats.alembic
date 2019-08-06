@@ -209,7 +209,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             exporter.maxCaptureFrame = 30;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var scene = SceneManager.CreateScene(GUID.Generate().ToString());
+            
+            var sceneName = GUID.Generate().ToString();
+            var scene = SceneManager.CreateScene(sceneName);
            SceneManager.SetActiveScene(scene);
            var go = new GameObject("abc");
            var player = go.AddComponent<AlembicStreamPlayer>();
@@ -222,6 +224,12 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
            player.UpdateImmediately(player.Duration);
            var t1  = cubeGO.transform.position;
            Assert.AreNotEqual(t0, t1);
+           
+           var asyncOperation = SceneManager.UnloadSceneAsync(sceneName);
+           while (!asyncOperation.isDone)
+           {
+               yield return null;
+           }
         }
     }
 }
