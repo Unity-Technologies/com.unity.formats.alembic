@@ -159,15 +159,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
                 abcStream.AbcLoad(true, true);
-                double start, end;
-                abcStream.GetTimeRange(out start, out end);
+                abcStream.GetTimeRange(out abcStartTime, out abcEndTime);
                 if (firstImport)
                 {
-                    startTime = start;
-                    endTime = end;
+                    startTime = abcStartTime;
+                    endTime = abcEndTime;
                 }
-                streamDescriptor.mediaStartTime = (float)start;
-                streamDescriptor.mediaEndTime = (float)end;
+                streamDescriptor.mediaStartTime = (float)abcStartTime;
+                streamDescriptor.mediaEndTime = (float)abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.StreamDescriptor = streamDescriptor;
