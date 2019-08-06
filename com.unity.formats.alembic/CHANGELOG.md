@@ -1,4 +1,8 @@
 # Changes in Alembic for Unity
+## [2.0.0-preview.1] - 2019-08-07
+### Changes
+- Introduced public API for Alembic playback and recording
+
 ## [1.0.6] - 2019-08-26
 ### Changes
 - Added support for Linux

@@ -1,12 +1,11 @@
 editors:
-  - version: 2018.4
   - version: 2019.2
-  - version: 2019.3  
+  - version: trunk
 platforms:
   - name: win
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.large
+    flavor: m1.large
   - name: mac
     type: Unity::VM::osx
     image: buildfarm/mac:stable
@@ -17,7 +16,7 @@ build_win:
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.large
+    flavor: m1.large
   commands:
     - git submodule update --init --recursive
     - build.cmd
@@ -45,7 +44,7 @@ pack:
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.large
+    flavor: m1.large
   commands:
     - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
     - upm-ci package pack --package-path com.unity.formats.alembic
@@ -90,7 +89,7 @@ test_trigger:
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: b1.large
+    flavor: m1.large
   commands:
     - dir
   triggers:
@@ -119,7 +118,7 @@ publish:
   agent:
     type: Unity::VM
     image: package-ci/win10:latest
-    flavor: b1.large
+    flavor: m1.large
     name: Runner
   commands:
     - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
