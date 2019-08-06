@@ -69,73 +69,57 @@ namespace UnityEngine.Formats.Alembic.Sdk
     };
 
     [Serializable]
-    public struct aeConfig
+    [StructLayout(LayoutKind.Sequential)]
+    public class aeConfig
     {
         [SerializeField]
-        private aeArchiveType archiveType;
+        private aeArchiveType archiveType = aeArchiveType.Ogawa;
         public aeArchiveType ArchiveType
         {
             get { return archiveType; }
             set { archiveType = value; }
         }
         [SerializeField]
-        private aeTimeSamplingType timeSamplingType;
+        private aeTimeSamplingType timeSamplingType = aeTimeSamplingType.Uniform;
         public aeTimeSamplingType TimeSamplingType
         {
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
         }
         [SerializeField]
-        private float frameRate;
+        private float frameRate = 30;
         public float FrameRate
         {
             get { return frameRate; }
             set { frameRate = Mathf.Max(value, Mathf.Epsilon); }
         }
         [SerializeField]
-        private aeXformType xformType;
+        private aeXformType xformType = aeXformType.TRS;
         public aeXformType XformType
         {
             get { return xformType; }
             set { xformType = value; }
         }
         [SerializeField]
-        private Bool swapHandedness;
+        private Bool swapHandedness = true;
         public bool SwapHandedness
         {
             get { return swapHandedness; }
             set { swapHandedness = value; }
         }
         [SerializeField]
-        private Bool swapFaces;
+        private Bool swapFaces = false;
         public bool SwapFaces
         {
             get { return swapFaces; }
             set { swapFaces = value; }
         }
         [SerializeField]
-        private float scaleFactor;
+        private float scaleFactor = 100;
         public float ScaleFactor
         {
             get { return scaleFactor; }
             set { scaleFactor = value; }
-        }
-
-        public static aeConfig defaultValue
-        {
-            get
-            {
-                return new aeConfig
-                {
-                    ArchiveType = aeArchiveType.Ogawa,
-                    TimeSamplingType = aeTimeSamplingType.Uniform,
-                    FrameRate = 30.0f,
-                    XformType = aeXformType.TRS,
-                    SwapHandedness = true,
-                    SwapFaces = false,
-                    ScaleFactor = 100.0f,
-                };
-            }
         }
     }
 
@@ -220,7 +204,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public static aeContext Create() { return NativeMethods.aeCreateContext(); }
         public void Destroy() { NativeMethods.aeDestroyContext(self); self = IntPtr.Zero; }
-        public void SetConfig(ref aeConfig conf) { NativeMethods.aeSetConfig(self, ref conf); }
+        public void SetConfig(aeConfig conf) { NativeMethods.aeSetConfig(self, conf); }
         public bool OpenArchive(string path) { return NativeMethods.aeOpenArchive(self, path); }
         public int AddTimeSampling(float start_time) { return NativeMethods.aeAddTimeSampling(self, start_time); }
         public void AddTime(float start_time) { NativeMethods.aeAddTime(self, start_time); }
@@ -291,7 +275,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
 
-        [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
+        [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, aeConfig conf);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
