@@ -54,6 +54,8 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         [SerializeField]
         private string rootGameObjectId;
+        [SerializeField]
+        private string rootGameObjectName;
 
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
@@ -131,7 +133,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             AlembicStream.DisconnectStreamsWithPath(path);
 
             var fileName = Path.GetFileNameWithoutExtension(path);
-            var go = new GameObject(fileName);
+            
+            if (string.IsNullOrEmpty(rootGameObjectName))
+            {
+                rootGameObjectName = fileName;
+                EditorUtility.SetDirty(this);
+            }
+            var go = new GameObject(rootGameObjectName);
 
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
