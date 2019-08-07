@@ -323,22 +323,23 @@
         Tags{ "RenderPipeline"="HDRenderPipeline" "RenderType" = "HDLitShader" }
 
         // Default to normal HD Render Pipeline Lit Passes.
-        UsePass "HDRenderPipeline/Lit/SCENESELECTIONPASS"
-        UsePass "HDRenderPipeline/Lit/GBUFFER"
-        UsePass "HDRenderPipeline/Lit/META"
-        UsePass "HDRenderPipeline/Lit/SHADOWCASTER"
-        UsePass "HDRenderPipeline/Lit/DEPTHONLY"
-        UsePass "HDRenderPipeline/Lit/DISTORTION"
-        UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPREPASS"
-        UsePass "HDRenderPipeline/Lit/TRANSPARENTBACKFACE"
-        UsePass "HDRenderPipeline/Lit/FORWARD"
-        UsePass "HDRenderPipeline/Lit/TRANSPARENTDEPTHPOSTPASS"
+        UsePass "HDRP/Lit/SCENESELECTIONPASS"
+        UsePass "HDRP/Lit/GBUFFER"
+        UsePass "HDRP/Lit/META"
+        UsePass "HDRP/Lit/SHADOWCASTER"
+        UsePass "HDRP/Lit/DEPTHONLY"
+        UsePass "HDRP/Lit/DISTORTIONVECTORS"
+        UsePass "HDRP/Lit/TRANSPARENTDEPTHPREPASS"
+        UsePass "HDRP/Lit/TRANSPARENTBACKFACE"
+        UsePass "HDRP/Lit/FORWARD"
+        UsePass "HDRP/Lit/TRANSPARENTDEPTHPOSTPASS"
+
 
         // Alembic: Override the MotionVectors pass to integrate runtime velocities.
         /////////////////////////////////////////////////////////////////////////////
         Pass
         {
-            Name "Motion Vectors"
+            Name "MotionVectors"
             Tags{ "LightMode" = "MotionVectors" } // Caution, this need to be call like this to setup the correct parameters by C++ (legacy Unity)
 
             // If velocity pass (motion vectors) is enabled we tag the stencil so it don't perform CameraMotionVelocity
