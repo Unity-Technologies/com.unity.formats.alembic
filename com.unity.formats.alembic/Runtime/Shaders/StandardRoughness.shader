@@ -53,11 +53,11 @@ Shader "Alembic/Standard (Roughness setup)"
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
 
         UsePass "Hidden/Alembic/MotionVectors/MOTIONVECTORS"
-        UsePass "Standard (Roughness setup)/FORWARD"
-        UsePass "Standard (Roughness setup)/FORWARD_DELTA"
-        UsePass "Standard (Roughness setup)/SHADOWCASTER"
-        UsePass "Standard (Roughness setup)/DEFERRED"
-        UsePass "Standard (Roughness setup)/META"
+        UsePass "Autodesk Interactive/FORWARD"
+        UsePass "Autodesk Interactive/FORWARD_DELTA"
+        UsePass "Autodesk Interactive/SHADOWCASTER"
+        UsePass "Autodesk Interactive/DEFERRED"
+        UsePass "Autodesk Interactive/META"
     }
 
     CustomEditor "StandardRoughnessShaderGUI"
