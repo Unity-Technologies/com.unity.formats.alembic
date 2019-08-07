@@ -320,7 +320,14 @@ namespace UnityEngine.Formats.Alembic.Importer
                     if (split.uv1.Count > 0)
                         split.mesh.SetUVs(1, split.uv1.List);
                     if (split.velocities.Count > 0)
+                    {
+#if UNITY_2019_2_OR_NEWER
+                        split.mesh.SetUVs(5, split.velocities.List);
+#else
                         split.mesh.SetUVs(3, split.velocities.List);
+#endif
+                    }
+
                     if (split.rgba.Count > 0)
                         split.mesh.SetColors(split.rgba.List);
                     else if (split.rgb.Count > 0)
