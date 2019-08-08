@@ -25,3 +25,4 @@ install(DIRECTORY com.unity.formats.alembic/ DESTINATION ${CMAKE_INSTALL_PREFIX}
 install(FILES ${CMAKE_BINARY_DIR}/package.json DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
 install(FILES
         DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.md  DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
