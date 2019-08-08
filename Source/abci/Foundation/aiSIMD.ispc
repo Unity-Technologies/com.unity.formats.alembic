@@ -192,6 +192,67 @@ export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
     delete[] mem_tmp;
 }
 
+export void GeneratePointNormals(uniform const int face_start_offsets[], uniform const int face_vertex_counts[], uniform const int face_indices[],
+    uniform const float positions[], uniform float normals[], uniform const int remapped_indices[], uniform const int face_count,
+    uniform const int remap_count, uniform const int orig_point_count)
+{
+    float* uniform tmp_normals = uniform new float[orig_point_count * 3];
+    zeroclear(tmp_normals, orig_point_count * 3);
+    foreach (face_index = 0 ... face_count) {
+        int face_vert_count = face_vertex_counts[face_index];
+        int face_start_index = face_start_offsets[face_index];
+        if (face_vert_count < 3) {
+            continue;
+        }
+        for (int tri = 0; tri < face_vert_count - 2; ++tri) {
+            int i1 = face_indices[face_start_index + tri];
+            int i2 = face_indices[face_start_index + tri + 1];
+            int i3 = face_indices[face_start_index + tri + 2];
+
+            float3 p1 = {
+                positions[i1 * 3],
+                positions[i1 * 3 + 1],
+                positions[i1 * 3 + 2]
+            };
+            float3 p2 = {
+                positions[i2 * 3],
+                positions[i2 * 3 + 1],
+                positions[i2 * 3 + 2]
+            };
+            float3 p3 = {
+                positions[i3 * 3],
+                positions[i3 * 3 + 1],
+                positions[i3 * 3 + 2]
+            };
+            float3 tri_normal = cross(p3 - p1, p2 - p1);
+            tmp_normals[i1 * 3] += tri_normal.x;
+            tmp_normals[i1 * 3 + 1] += tri_normal.y;
+            tmp_normals[i1 * 3 + 2] += tri_normal.z;
+
+            tmp_normals[i2 * 3] += tri_normal.x;
+            tmp_normals[i2 * 3 + 1] += tri_normal.y;
+            tmp_normals[i2 * 3 + 2] += tri_normal.z;
+
+            tmp_normals[i3 * 3] += tri_normal.x;
+            tmp_normals[i3 * 3 + 1] += tri_normal.y;
+            tmp_normals[i3 * 3 + 2] += tri_normal.z;
+        }
+    }
+    foreach (index = 0 ... remap_count) {
+        int remap = remapped_indices[index];
+        float3 n = {
+            tmp_normals[remap * 3],
+            tmp_normals[remap * 3 + 1],
+            tmp_normals[remap * 3 + 2]
+        };
+        n = normalize(n);
+        normals[index * 3] = -n.x;
+        normals[index * 3 + 1] = n.y;
+        normals[index * 3 + 2] = n.z;
+    }
+    delete[] tmp_normals;
+}
+
 #if 0
 export void GenerateNormalsPolygonIndexed(uniform float3 dst[],
     uniform const float3 points[], uniform const int indices[], uniform const int counts[], uniform const int offsets[],

@@ -57,6 +57,7 @@ using namespace Alembic;
 
 using abcV2 = Imath::V2f;
 using abcV3 = Imath::V3f;
+using abcV3i = Imath::V3i;
 using abcV3d = Imath::V3d;
 using abcV4 = Imath::V4f;
 using abcC4 = Imath::C4f;
