@@ -1430,7 +1430,6 @@ void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
 void Lerp(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w);
 void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float motion_scale);
 void MinMax(abcV3& min, abcV3& max, const abcV3 *points, int num);
-void GenerateNormals(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles);
 void GenerateTangents(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
     int num_points, int num_triangles);
@@ -1450,8 +1449,6 @@ void GenerateVelocitiesGeneric(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int
 void GenerateVelocitiesISPC(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float motion_scale);
 void MinMaxGeneric(abcV3& min, abcV3& max, const abcV3 *points, int num);
 void MinMaxISPC(abcV3& min, abcV3& max, const abcV3 *points, int num);
-void GenerateNormalsGeneric(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles);
-void GenerateNormalsISPC(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles);
 void GenerateTangentsGeneric(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
     int num_points, int num_triangles);

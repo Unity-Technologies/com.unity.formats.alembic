@@ -136,62 +136,6 @@ static inline void NormalizeSoAToAoS(uniform float3 dst[],
     }
 }
 
-export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
-    uniform const float3 points[], uniform const int indices[],
-    uniform const int num_points, uniform const int num_triangles)
-{
-    uniform int num_points_aligned = (num_points + (C - 1)) & ~(C - 1);
-    float * uniform mem_tmp = uniform new float[num_points_aligned * 3];
-    zeroclear(mem_tmp, num_points_aligned * 3);
-    float * uniform tnx = mem_tmp + num_points_aligned * 0;
-    float * uniform tny = mem_tmp + num_points_aligned * 1;
-    float * uniform tnz = mem_tmp + num_points_aligned * 2;
-
-    uniform int num_triangles_simd = num_triangles & ~(C - 1);
-
-    // SIMD pass
-    for(uniform int bi=0; bi < num_triangles_simd; bi += C) {
-        int ti = bi+I;
-        int ti3 = ti * 3;
-        float3 p0 = points[indices[ti3  + 0]];
-        float3 p1 = points[indices[ti3  + 1]];
-        float3 p2 = points[indices[ti3  + 2]];
-        float3 n = cross(p1 - p0, p2 - p0);
-
-        for(uniform int ci=0; ci<C; ++ci) {
-            uniform float3 cn = {extract(n.x, ci), extract(n.y, ci), extract(n.z, ci)};
-            for(uniform int i=0; i<3; ++i) {
-                uniform int ix = indices[(bi + ci) * 3 + i];
-                tnx[ix] += cn.x;
-                tny[ix] += cn.y;
-                tnz[ix] += cn.z;
-            }
-        }
-    }
-
-    // non-SIMD pass
-    for(uniform int ti=num_triangles_simd; ti < num_triangles; ++ti) {
-        uniform int ti3 = ti * 3;
-        uniform int i0 = indices[ti3 + 0];
-        uniform int i1 = indices[ti3 + 1];
-        uniform int i2 = indices[ti3 + 2];
-        uniform float3 p0 = points[i0];
-        uniform float3 p1 = points[i1];
-        uniform float3 p2 = points[i2];
-        uniform float3 n = cross(p1 - p0, p2 - p0);
-
-        for(uniform int i=0; i<3; ++i) {
-            uniform int ix = indices[ti3 + i];
-            tnx[ix] += n.x;
-            tny[ix] += n.y;
-            tnz[ix] += n.z;
-        }
-    }
-
-    NormalizeSoAToAoS(dst, tnx, tny, tnz, num_points);
-    delete[] mem_tmp;
-}
-
 export void GeneratePointNormals(uniform const int face_start_offsets[], uniform const int face_vertex_counts[], uniform const int face_indices[],
     uniform const float positions[], uniform float normals[], uniform const int remapped_indices[], uniform const int face_count,
     uniform const int remap_count, uniform const int orig_point_count)
