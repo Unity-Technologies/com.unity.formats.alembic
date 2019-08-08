@@ -29,7 +29,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             foreach (var file in deleteFileList)
             {
-                File.Delete(file);
+                AssetDatabase.DeleteAsset(file);
             }
 
             deleteFileList.Clear();
