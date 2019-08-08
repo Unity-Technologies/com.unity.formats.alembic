@@ -43,10 +43,6 @@ void MinMaxISPC(abcV3 & min, abcV3 & max, const abcV3 * points, int num)
     ispc::MinMax3((ispc::float3&)min, (ispc::float3&)max, (const ispc::float3*)points, num);
 }
 
-void GenerateNormalsISPC(abcV3 * dst, const abcV3 * points, const int * indices, int num_points, int num_triangles)
-{
-    ispc::GenerateNormalsTriangleIndexed((ispc::float3*)dst, (const ispc::float3*)points, indices, num_points, num_triangles);
-}
 
 void GenerateTangentsISPC(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
@@ -136,28 +132,6 @@ void MinMaxGeneric(abcV3 &dst_min, abcV3 &dst_max, const abcV3 *src_, int num)
     }
     dst_min = (abcV3&)rmin;
     dst_max = (abcV3&)rmax;
-}
-
-void GenerateNormalsGeneric(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles)
-{
-    memset(dst, 0, sizeof(abcV3) * num_points);
-    for (int ti = 0; ti < num_triangles; ++ti)
-    {
-        int ti3 = ti * 3;
-        auto p0 = points[indices[ti3 + 0]];
-        auto p1 = points[indices[ti3 + 1]];
-        auto p2 = points[indices[ti3 + 2]];
-        auto n = (p1 - p0).cross(p2 - p0);
-
-        for (int i = 0; i < 3; ++i)
-        {
-            dst[indices[ti3 + i]] += n;
-        }
-    }
-    for (int vi = 0; vi < num_points; ++vi)
-    {
-        dst[vi] = dst[vi].normalized();
-    }
 }
 
 void GenerateTangentsGeneric(abcV4 *dst_,
@@ -288,11 +262,6 @@ void GenerateVelocities(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, f
 void MinMax(abcV3 &min, abcV3 &max, const abcV3 *points, int num)
 {
     Impl(MinMax, min, max, points, num);
-}
-
-void GenerateNormals(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles)
-{
-    Impl(GenerateNormals, dst, points, indices, num_points, num_triangles);
 }
 
 void GenerateTangents(abcV4 *dst,
