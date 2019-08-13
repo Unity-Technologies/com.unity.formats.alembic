@@ -87,7 +87,6 @@ struct MeshRefiner
         int submesh_index = 0; // submesh index in split
         int index_count = 0; // triangulated
         int index_offset = 0;
-        int material_id = 0;
         int* dst_indices = nullptr;
     };
 
