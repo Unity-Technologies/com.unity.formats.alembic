@@ -25,7 +25,11 @@ struct MotionVertexInput
 {
     float4 vertex : POSITION;
     //>>> Alembic
+ #if UNITY_VERSION < 20192
     float3 velocity  : TEXCOORD3;
+ #else
+    float3 velocity  : TEXCOORD5;
+ #endif
     //Alembic <<<
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
