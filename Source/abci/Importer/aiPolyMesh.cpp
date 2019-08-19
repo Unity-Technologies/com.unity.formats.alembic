@@ -1018,7 +1018,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     if (sample.m_rgb_sp.valid())
     {
         IArray<abcC3> src{ sample.m_rgb_sp.getVals()->get(), sample.m_rgb_sp.getVals()->size() };
-        auto& dst = summary.constant_rgba ? m_constant_rgb : sample.m_rgb;
+        auto& dst = summary.constant_rgb ? m_constant_rgb : sample.m_rgb;
 
         has_valid_rgb = true;
         if (sample.m_rgb_sp.isIndexed() && sample.m_rgb_sp.getIndices()->size() == refiner.indices.size())
