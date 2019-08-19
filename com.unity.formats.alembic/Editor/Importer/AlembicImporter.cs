@@ -316,11 +316,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (apr != null)
             {
                 var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
+                apr.InstancedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.SetSharedMaterials(new Material[] { subassets.pointsMaterial });
-                apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
+                apr.Materials = new List<Material> { subassets.pointsMaterial };
+                apr.MotionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
             foreach (var child in node.Children)

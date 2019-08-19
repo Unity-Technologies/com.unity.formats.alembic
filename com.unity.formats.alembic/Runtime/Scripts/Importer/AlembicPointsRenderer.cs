@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -86,16 +87,28 @@ namespace UnityEngine.Formats.Alembic.Importer
         Vector3 m_scale, m_scaleOld;
 
 
-        public Mesh sharedMesh
+        /// <summary>
+        /// The mesh to be instanced for every point cloud.
+        /// </summary>
+        public Mesh InstancedMesh
         {
             get { return m_mesh; }
             set { m_mesh = value; }
         }
 
-        public Material[] GetSharedMaterials() { return m_materials; }
-        public void SetSharedMaterials(Material[] value) { m_materials = value; }
+        /// <summary>
+        /// An array of materials used for the rendering the instanced mesh. Only one material per sub-mesh will be used.
+        /// </summary>
+        public List<Material> Materials
+        {
+            get { return m_materials.ToList(); }
+            set { m_materials = value.ToArray(); }
+        }
 
-        public Material motionVectorMaterial
+        /// <summary>
+        /// Material to be used for the motion vector computation.
+        /// </summary>
+        public Material MotionVectorMaterial
         {
             get { return m_motionVectorMaterial; }
             set { m_motionVectorMaterial = value; }
@@ -106,11 +119,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             var apc = GetComponent<AlembicPointsCloud>();
 
-            var points = apc.positions;
+            var points = apc.Positions;
             int numInstances = points.Count;
             if (numInstances == 0) { return; }
-            var velocities = apc.velocities;
-            var ids = apc.ids;
+            var velocities = apc.Velocities;
+            var ids = apc.Ids;
 
             var materials = m_materials;
             var mesh = m_mesh;
@@ -188,7 +201,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             // build bounds
-            m_bounds = new Bounds(apc.boundsCenter, apc.boundsExtents + mesh.bounds.extents);
+            m_bounds = new Bounds(apc.BoundsCenter, apc.BoundsExtents + mesh.bounds.extents);
 
 
             // update materials
@@ -269,7 +282,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var material = m_motionVectorMaterial;
             var mesh = m_mesh;
             var apc = GetComponent<AlembicPointsCloud>();
-            if (mesh == null || material == null || apc.velocities.Count == 0)
+            if (mesh == null || material == null || apc.Velocities.Count == 0)
                 return;
 
             material.SetMatrix("_PreviousVP", VPMatrices.GetPrevious(Camera.current));
