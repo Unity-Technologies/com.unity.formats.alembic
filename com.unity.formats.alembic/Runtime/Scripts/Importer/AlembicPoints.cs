@@ -86,8 +86,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 abcTreeNode.gameObject.SetActive(data.visibility);
 
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
-            cloud.boundsCenter = data.boundsCenter;
-            cloud.boundsExtents = data.boundsExtents;
+            cloud.BoundsCenter = data.boundsCenter;
+            cloud.BoundsExtents = data.boundsExtents;
         }
     }
 }

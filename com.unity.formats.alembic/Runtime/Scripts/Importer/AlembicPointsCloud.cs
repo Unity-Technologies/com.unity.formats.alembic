@@ -29,24 +29,24 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// The list of point cloud positions.
         /// </summary>
-        public List<Vector3> positions => pointsList.List;
+        public List<Vector3> Positions => pointsList.List;
         /// <summary>
-        /// The list of point cloud velocities.
+        /// The list of point cloud Velocities.
         /// </summary>
-        public List<Vector3> velocities => velocitiesList.List;
+        public List<Vector3> Velocities => velocitiesList.List;
         /// <summary>
         /// The list of point cloud identifiers.
         /// </summary>
-        public List<uint> ids => idsList.List;
+        public List<uint> Ids => idsList.List;
 
         /// <summary>
         /// The center of the point cloud bounding box
         /// </summary>
-        public Vector3 boundsCenter { get; internal set; }
+        public Vector3 BoundsCenter { get; internal set; }
         /// <summary>
         /// The extent of the point cloud bounding box
         /// </summary>
-        public Vector3 boundsExtents { get; internal set; }
+        public Vector3 BoundsExtents { get; internal set; }
 
         void Reset()
         {
