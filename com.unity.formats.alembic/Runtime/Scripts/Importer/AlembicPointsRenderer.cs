@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    internal static class VPMatrices
+    static class VPMatrices
     {
         static Dictionary<Camera, Matrix4x4> s_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
         static Dictionary<Camera, Matrix4x4> s_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
@@ -55,9 +55,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
     }
 
+    /// <summary>
+    ///This component renders point clouds by instancing a mesh.
+    /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(AlembicPointsCloud))]
-    internal class AlembicPointsRenderer : MonoBehaviour
+    public class AlembicPointsRenderer : MonoBehaviour
     {
         [SerializeField] Mesh m_mesh;
         [SerializeField] Material[] m_materials;
@@ -99,11 +102,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
 
-        public void Flush()
+        void Flush()
         {
             var apc = GetComponent<AlembicPointsCloud>();
 
-            var points = apc.points;
+            var points = apc.positions;
             int numInstances = points.Count;
             if (numInstances == 0) { return; }
             var velocities = apc.velocities;
@@ -148,11 +151,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 m_cbPoints = new ComputeBuffer(numInstances, 12);
             }
-#if UNITY_2017_3_OR_NEWER
-            m_cbPoints.SetData(points.List);
-#else
-            m_cbPoints.SetData(points.Array);
-#endif
+
+            m_cbPoints.SetData(points);
 
             // update velocity buffer
             if (velocities.Count == numInstances)
@@ -167,11 +167,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_cbVelocities = new ComputeBuffer(numInstances, 12);
                 }
-#if UNITY_2017_3_OR_NEWER
-                m_cbVelocities.SetData(velocities.List);
-#else
-                m_cbVelocities.SetData(velocities.Array);
-#endif
+                m_cbVelocities.SetData(velocities);
             }
 
             // update ID buffer
@@ -187,15 +183,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_cbIDs = new ComputeBuffer(numInstances, 4);
                 }
-#if UNITY_2017_3_OR_NEWER
-                m_cbIDs.SetData(ids.List);
-#else
-                m_cbIDs.SetData(ids.Array);
-#endif
+
+                m_cbIDs.SetData(ids);
             }
 
             // build bounds
-            m_bounds = new Bounds(apc.m_boundsCenter, apc.m_boundsExtents + mesh.bounds.extents);
+            m_bounds = new Bounds(apc.boundsCenter, apc.boundsExtents + mesh.bounds.extents);
 
 
             // update materials
@@ -296,7 +289,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             Graphics.ExecuteCommandBuffer(m_cmdMotionVector);
         }
 
-        public void Release()
+        void Release()
         {
             if (m_cbArgs != null)
             {
@@ -333,7 +326,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             FlushMotionVector();
         }
 
-        private void Start()
+        void Start()
         {
             var trans = GetComponent<Transform>();
             m_position = m_positionOld = trans.position;
@@ -341,7 +334,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_scale = m_scaleOld = trans.lossyScale;
         }
 
-        private void OnDestroy()
+        void OnDestroy()
         {
             if (m_cbPoints != null)
             {
@@ -361,7 +354,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             if (m_cbArgs != null)
             {
-                Array.ForEach<ComputeBuffer>(m_cbArgs, cb => { if (cb != null) cb.Dispose(); });
+                Array.ForEach(m_cbArgs, cb => { if (cb != null) cb.Dispose(); });
             }
         }
     }
