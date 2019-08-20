@@ -38,7 +38,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public static bool TargetIsSupported(BuildTarget target)
         {
-            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64;
+            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64;
         }
     }
 
@@ -86,6 +86,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 case BuildTarget.StandaloneOSX:
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
+                case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
                     return name + "_Data/StreamingAssets";
