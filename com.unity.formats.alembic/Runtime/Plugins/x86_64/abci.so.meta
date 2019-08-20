@@ -9,6 +9,7 @@ PluginImporter:
   isPreloaded: 0
   isOverridable: 1
   isExplicitlyReferenced: 0
+  validateReferences: 1
   platformData:
   - first:
       '': Any
@@ -44,7 +45,7 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: None
+        CPU: AnyCPU
   - first:
       Standalone: Linux64
     second:
@@ -56,7 +57,7 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: x86
+        CPU: x86_64
   - first:
       Standalone: Win
     second:
@@ -68,7 +69,7 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        CPU: None
+        CPU: AnyCPU
   userData: 
   assetBundleName: 
   assetBundleVariant: 
