@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
@@ -295,6 +296,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     struct aiContext
     {
+        [NativeDisableUnsafePtrRestriction]
         internal IntPtr self;
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
         public static bool ToBool(aiContext v) { return v; }
