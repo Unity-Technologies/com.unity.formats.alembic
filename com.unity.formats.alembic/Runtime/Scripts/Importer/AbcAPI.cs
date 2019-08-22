@@ -97,7 +97,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool swapHandedness { get; set; }
         public Bool flipFaces { get; set; }
         public Bool interpolateSamples { get; set; }
-        public Bool asyncLoad { get; set; }
         public Bool importPointPolygon { get; set; }
         public Bool importLinePolygon { get; set; }
         public Bool importTrianglePolygon { get; set; }
@@ -117,7 +116,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
             swapHandedness = true;
             flipFaces = false;
             interpolateSamples = true;
-            asyncLoad = true;
             importPointPolygon = true;
             importLinePolygon = true;
             importTrianglePolygon = true;
@@ -464,7 +462,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { NativeMethods.aiPolyMeshGetSplitSummaries(self, dst); }
         public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { NativeMethods.aiPolyMeshGetSubmeshSummaries(self, dst); }
         internal void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { NativeMethods.aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
-        public void Sync() { NativeMethods.aiSampleSync(self); }
     }
 
     struct aiPointsSample
@@ -475,7 +472,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public void GetSummary(ref aiPointsSampleSummary dst) { NativeMethods.aiPointsGetSampleSummary(self, ref dst); }
         public void FillData(PinnedList<aiPointsData> dst) { NativeMethods.aiPointsFillData(self, dst); }
-        public void Sync() { NativeMethods.aiSampleSync(self); }
     }
 
 

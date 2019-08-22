@@ -112,7 +112,6 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
 
 aiPolyMeshSample::~aiPolyMeshSample()
 {
-    waitAsync();
 }
 
 void aiPolyMeshSample::reset()
@@ -251,17 +250,8 @@ void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ib
                 fillSubmeshIndices(smi, ibs[smi]);
         };
 
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_copy = std::async(std::launch::async, body);
-}
+    body();
 
-void aiPolyMeshSample::waitAsync()
-{
-    if (m_async_copy.valid())
-        m_async_copy.wait();
-    m_force_sync = false;
 }
 
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)

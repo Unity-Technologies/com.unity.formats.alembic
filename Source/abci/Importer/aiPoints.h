@@ -16,8 +16,6 @@ public:
     void fillData(aiPointsData &dst);
     void getSummary(aiPointsSampleSummary &dst);
 
-    void waitAsync() override;
-
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
@@ -30,8 +28,6 @@ public:
     RawVector<abcV3> m_velocities;
     RawVector<uint32_t> m_ids;
     abcV3 m_bb_center, m_bb_size;
-
-    std::future<void> m_async_copy;
 };
 
 struct aiPointsTraits

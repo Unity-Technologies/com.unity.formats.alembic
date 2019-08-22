@@ -75,7 +75,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal aiConfig config { get { return m_config; } }
 
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
-        public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
 
         public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
