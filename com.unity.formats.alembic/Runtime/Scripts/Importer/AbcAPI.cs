@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
@@ -454,14 +455,36 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     struct aiPolyMeshSample
     {
+        [NativeDisableUnsafePtrRestriction]
         public IntPtr self;
         public static implicit operator bool(aiPolyMeshSample v) { return v.self != IntPtr.Zero; }
         public static implicit operator aiSample(aiPolyMeshSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
 
         public void GetSummary(ref aiMeshSampleSummary dst) { NativeMethods.aiPolyMeshGetSampleSummary(self, ref dst); }
-        public void GetSplitSummaries(PinnedList<aiMeshSplitSummary> dst) { NativeMethods.aiPolyMeshGetSplitSummaries(self, dst); }
-        public void GetSubmeshSummaries(PinnedList<aiSubmeshSummary> dst) { NativeMethods.aiPolyMeshGetSubmeshSummaries(self, dst); }
-        internal void FillVertexBuffer(PinnedList<aiPolyMeshData> vbs, PinnedList<aiSubmeshData> ibs) { NativeMethods.aiPolyMeshFillVertexBuffer(self, vbs, ibs); }
+
+        public void GetSplitSummaries(NativeArray<aiMeshSplitSummary> dst)
+        {
+            unsafe
+            {
+                NativeMethods.aiPolyMeshGetSplitSummaries(self, new IntPtr(dst.GetUnsafePtr()));
+            }
+        }
+
+        public void GetSubmeshSummaries(NativeArray<aiSubmeshSummary> dst)
+        {
+            unsafe
+            {
+                NativeMethods.aiPolyMeshGetSubmeshSummaries(self, new IntPtr(dst.GetUnsafePtr()));
+            }
+        }
+
+        internal void FillVertexBuffer(NativeArray<aiPolyMeshData> vbs, NativeArray<aiSubmeshData> ibs)
+        {
+            unsafe
+            {
+                NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
+            }
+        }
     }
 
     struct aiPointsSample

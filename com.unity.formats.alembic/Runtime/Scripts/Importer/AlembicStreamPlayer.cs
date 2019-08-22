@@ -257,7 +257,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 LoadStream(false);
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
             if (abcStream != null)
                 abcStream.Dispose();
