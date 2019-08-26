@@ -1,4 +1,6 @@
 editors:
+  - version: 2018.3
+  - version: 2019.1
   - version: 2019.2
 platforms:
   - name: win
@@ -9,10 +11,6 @@ platforms:
     type: Unity::VM::osx
     image: buildfarm/mac:stable
     flavor: m1.mac
-  - name: linux
-    type: Unity::VM
-    image: package-ci/centos:stable
-    flavor: b1.large
 ---
 build_win:
   name: Build Win
@@ -42,21 +40,6 @@ build_mac:
       paths:
         - "com.unity.formats.alembic/**/*"
 
-build_linux:
-  name: Build Linux
-  agent:
-    type: Unity::VM
-    image: package-ci/centos:latest
-    flavor: b1.large
-  commands:
-    - git submodule update --init --recursive
-    - ./build.sh
-  artifacts:
-    build:
-      paths:
-        - "com.unity.formats.alembic/**/*"
-
-
 pack:
   name: Pack
   agent:
@@ -76,8 +59,6 @@ pack:
   dependencies:
     - .yamato/upm-ci.yml#build_win
     - .yamato/upm-ci.yml#build_mac
-    - .yamato/upm-ci.yml#build_linux
-
 
 {% for editor in editors %}
 {% for platform in platforms %}
