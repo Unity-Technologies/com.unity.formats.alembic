@@ -25,7 +25,7 @@ namespace UnityEngine.Formats.Alembic.Util
         /// </summary>
         TargetBranch,
     }
-    
+
     /// <summary>
     /// Settings controlling different aspects of recording.
     /// </summary>
@@ -49,7 +49,7 @@ namespace UnityEngine.Formats.Alembic.Util
         /// <summary>
         /// Alembic file options (archive type, transform format, etc)
         /// </summary>
-        public AlembicExportOptions exportOptions => conf;
+        public AlembicExportOptions ExportOptions => conf;
 
         [SerializeField]
         ExportScope scope = ExportScope.EntireScene;
@@ -73,7 +73,7 @@ namespace UnityEngine.Formats.Alembic.Util
             set { targetBranch = value; }
         }
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         bool fixDeltaTime = true;
         /// <summary>
         /// Enable this option to set Time.maximumDeltaTime using the frame rate to ensure fixed delta time.
@@ -795,19 +795,19 @@ namespace UnityEngine.Formats.Alembic.Util
             get { return m_settings; }
             set { m_settings = value; }
         }
-        
+
         /// <summary>
         /// The recording target branch. Ignored if scope is set to whole scene.
         /// </summary>
         public GameObject TargetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
-        
+
         /// <summary>
         /// Returns true if a recording session is active.
         /// </summary>
         public bool Recording { get { return m_recording; } }
-        
+
         /// <summary>
-        /// Set the frame to stop capturing at. 
+        /// Set the frame to stop capturing at.
         /// </summary>
         public int FrameCount
         {
@@ -1021,7 +1021,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 return false;
             }
 
-            m_ctx.SetConfig(m_settings.exportOptions);
+            m_ctx.SetConfig(m_settings.ExportOptions);
             if (!m_ctx.OpenArchive(m_settings.OutputPath))
             {
                 Debug.LogWarning("AlembicRecorder: failed to open file " + m_settings.OutputPath);
@@ -1043,8 +1043,8 @@ namespace UnityEngine.Formats.Alembic.Util
             m_time = m_timePrev = 0.0f;
             m_frameCount = 0;
 
-            if (m_settings.exportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
-                Time.maximumDeltaTime = (1.0f / m_settings.exportOptions.FrameRate);
+            if (m_settings.ExportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
+                Time.maximumDeltaTime = (1.0f / m_settings.ExportOptions.FrameRate);
 
             Debug.Log("AlembicRecorder: start " + m_settings.OutputPath);
             return true;
@@ -1067,7 +1067,11 @@ namespace UnityEngine.Formats.Alembic.Util
             Debug.Log("AlembicRecorder: end: " + m_settings.OutputPath);
         }
 
-        internal void ProcessRecording()
+        /// <summary>
+        /// Writes the current frame to the alembic archive. Recording should have been started previoiusly.
+        /// </summary>
+
+        public void ProcessRecording()
         {
             if (!m_recording) { return; }
 
@@ -1108,10 +1112,10 @@ namespace UnityEngine.Formats.Alembic.Util
             // advance time
             ++m_frameCount;
             m_timePrev = m_time;
-            switch (m_settings.exportOptions.TimeSamplingType)
+            switch (m_settings.ExportOptions.TimeSamplingType)
             {
                 case TimeSamplingType.Uniform:
-                    m_time = (1.0f / m_settings.exportOptions.FrameRate) * m_frameCount;
+                    m_time = (1.0f / m_settings.ExportOptions.FrameRate) * m_frameCount;
                     break;
                 case TimeSamplingType.Acyclic:
                     m_time += Time.deltaTime;
@@ -1120,7 +1124,7 @@ namespace UnityEngine.Formats.Alembic.Util
             m_elapsed = Time.realtimeSinceStartup - begin_time;
 
             // wait maximumDeltaTime if timeSamplingType is uniform
-            if (m_settings.exportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
+            if (m_settings.ExportOptions.TimeSamplingType == TimeSamplingType.Uniform && m_settings.FixDeltaTime)
                 AbcAPI.aeWaitMaxDeltaTime();
 
             if (m_settings.DetailedLog)

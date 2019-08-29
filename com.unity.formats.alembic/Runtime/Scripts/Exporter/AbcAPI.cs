@@ -122,7 +122,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
         }
-        [SerializeField]
+        [HideInInspector,SerializeField]
         float frameRate = 30;
         /// <summary>
         /// The capture frame rate. This is available only with uniform sampling
