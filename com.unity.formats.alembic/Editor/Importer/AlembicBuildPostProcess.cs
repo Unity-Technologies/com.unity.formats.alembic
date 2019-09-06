@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor.Build;
@@ -58,7 +59,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var activeScene = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
-            var players = Object.FindObjectsOfType<AlembicStreamPlayer>();
+            var players = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true));
             var pathToStreamingAssets = GetStreamingAssetsPath(report.summary);
             foreach (var p in players)
             {
