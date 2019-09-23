@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "aiMath.h"
 #include "RawVector.h"
-
+#include <numeric>
 
 // ispc implementation
 #ifdef aiEnableISPC
@@ -43,10 +43,6 @@ void MinMaxISPC(abcV3 & min, abcV3 & max, const abcV3 * points, int num)
     ispc::MinMax3((ispc::float3&)min, (ispc::float3&)max, (const ispc::float3*)points, num);
 }
 
-void GenerateNormalsISPC(abcV3 * dst, const abcV3 * points, const int * indices, int num_points, int num_triangles)
-{
-    ispc::GenerateNormalsTriangleIndexed((ispc::float3*)dst, (const ispc::float3*)points, indices, num_points, num_triangles);
-}
 
 void GenerateTangentsISPC(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
@@ -54,6 +50,14 @@ void GenerateTangentsISPC(abcV4 *dst,
 {
     ispc::GenerateTangentsTriangleIndexed(
         (ispc::float4*)dst, (const ispc::float3*)points, (const ispc::float2*)uv, (const ispc::float3*)normals, indices, num_points, num_triangles);
+}
+
+void GeneratePointNormalsISPC(const int *face_start_offsets, const int *face_vertex_counts, const int *face_indices,
+    const float *positions, float *normals, const int *remapped_indices, const int face_count, const int remapped_count, const int orig_point_count)
+{
+    std::vector<float> temp_normals(orig_point_count * 3, 0);
+    memset(normals, 0, remapped_count * 3 * sizeof(float));
+    ispc::GeneratePointNormals(face_start_offsets, face_vertex_counts, face_indices, positions, normals, remapped_indices, face_count, remapped_count, orig_point_count);
 }
 
 #endif // aiEnableISPC
@@ -130,28 +134,6 @@ void MinMaxGeneric(abcV3 &dst_min, abcV3 &dst_max, const abcV3 *src_, int num)
     dst_max = (abcV3&)rmax;
 }
 
-void GenerateNormalsGeneric(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles)
-{
-    memset(dst, 0, sizeof(abcV3) * num_points);
-    for (int ti = 0; ti < num_triangles; ++ti)
-    {
-        int ti3 = ti * 3;
-        auto p0 = points[indices[ti3 + 0]];
-        auto p1 = points[indices[ti3 + 1]];
-        auto p2 = points[indices[ti3 + 2]];
-        auto n = (p1 - p0).cross(p2 - p0);
-
-        for (int i = 0; i < 3; ++i)
-        {
-            dst[indices[ti3 + i]] += n;
-        }
-    }
-    for (int vi = 0; vi < num_points; ++vi)
-    {
-        dst[vi] = dst[vi].normalized();
-    }
-}
-
 void GenerateTangentsGeneric(abcV4 *dst_,
     const abcV3 *points_, const abcV2 *uv_, const abcV3 *normals_, const int *indices,
     int num_points, int num_triangles)
@@ -185,6 +167,39 @@ void GenerateTangentsGeneric(abcV4 *dst_,
     for (int vi = 0; vi < num_points; ++vi)
     {
         dst[vi] = orthogonalize_tangent(tangents[vi], binormals[vi], normals[vi]);
+    }
+}
+
+
+void GeneratePointNormalsGeneric(const int *face_start_offsets, const int *face_vertex_counts, const int *face_indices,
+    const float *positions, float *normals, const int *remapped_indices, const int face_count, const int remapped_count,
+    const int orig_point_count)
+{
+
+    std::vector<abcV3> tmp_normals(orig_point_count, {0.f, 0.f, 0.f});
+    for (size_t i = 0; i < face_count; ++i) {
+        int face_vert_count = face_vertex_counts[i];
+        int face_start_index = face_start_offsets[i];
+        if (face_vert_count < 3) {
+            continue;
+        }
+        for (int tri = 0; tri < face_vert_count - 2; ++tri) {
+            int i1 = face_indices[face_start_index + tri];
+            int i2 = face_indices[face_start_index + tri + 1];
+            int i3 = face_indices[face_start_index + tri + 2];
+            abcV3 p1 = reinterpret_cast<const abcV3*>(positions)[i1];
+            abcV3 p2 = reinterpret_cast<const abcV3*>(positions)[i2];
+            abcV3 p3 = reinterpret_cast<const abcV3*>(positions)[i3];
+            abcV3 tri_normal = (p3 - p1).cross(p2 - p1);
+            tmp_normals[i1] += tri_normal;
+            tmp_normals[i2] += tri_normal;
+            tmp_normals[i3] += tri_normal;
+        }
+    }
+    for (size_t i = 0; i < remapped_count; ++i) {
+        int remap = remapped_indices[i];
+        abcV3 n = tmp_normals[remap].normalize();
+        reinterpret_cast<abcV3*>(normals)[i] = abcV3{ -n.x, n.y, n.z};
     }
 }
 
@@ -249,16 +264,22 @@ void MinMax(abcV3 &min, abcV3 &max, const abcV3 *points, int num)
     Impl(MinMax, min, max, points, num);
 }
 
-void GenerateNormals(abcV3 *dst, const abcV3 *points, const int *indices, int num_points, int num_triangles)
-{
-    Impl(GenerateNormals, dst, points, indices, num_points, num_triangles);
-}
-
 void GenerateTangents(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
     int num_points, int num_triangles)
 {
     Impl(GenerateTangents, dst, points, uv, normals, indices, num_points, num_triangles);
+}
+
+void GeneratePointNormals(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
+        const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count)
+{
+    std::vector<int> face_start_indices(face_count);
+    std::partial_sum(face_vertex_counts, face_vertex_counts + face_count - 1, face_start_indices.begin() + 1);
+    memset(normals, 0, remapped_count * 3 * sizeof(float));
+    Impl(GeneratePointNormals, face_start_indices.data(), face_vertex_counts, face_indices,
+            reinterpret_cast<const float*>(points), reinterpret_cast<float*>(normals),
+            remapped_point_indices, face_count, remapped_count, orig_point_count);
 }
 
 #undef Impl
