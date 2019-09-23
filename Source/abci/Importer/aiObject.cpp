@@ -58,8 +58,13 @@ aiObject::aiObject(aiContext *ctx, aiObject *parent, const abcObject &abc)
     , m_abc(abc)
     , m_parent(parent)
 {
+#if defined(__linux__)
+    m_name = m_abc.getName();
+    m_fullname = m_abc.getFullName();
+#else
     m_name = SanitizeNodeName(m_abc.getName());
     m_fullname = SanitizeNodeName(m_abc.getFullName());
+#endif
 }
 
 aiObject::~aiObject()

@@ -137,14 +137,16 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasTangents { get; set; }
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
-        public Bool hasColors { get; set; }
+        public Bool hasRgba { get; set; }
+        public Bool hasRgb { get; set; }
         public Bool constantPoints { get; set; }
         public Bool constantVelocities { get; set; }
         public Bool constantNormals { get; set; }
         public Bool constantTangents { get; set; }
         public Bool constantUV0 { get; set; }
         public Bool constantUV1 { get; set; }
-        public Bool constantColors { get; set; }
+        public Bool constantRgba { get; set; }
+        public Bool constantRgb { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -187,7 +189,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr tangents;
         public IntPtr uv0;
         public IntPtr uv1;
-        public IntPtr colors;
+        public IntPtr rgba;
+        public IntPtr rgb;
         public IntPtr indices;
 
         public int vertexCount;
@@ -198,8 +201,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public aiPolyMeshData(
             IntPtr positions, IntPtr velocities, IntPtr normals,
-            IntPtr tangents, IntPtr uv0, IntPtr uv1, IntPtr colors,
-            IntPtr indices, int vertexCount, int indexCount,
+            IntPtr tangents, IntPtr uv0, IntPtr uv1, IntPtr rgba,
+            IntPtr rgb, IntPtr indices, int vertexCount, int indexCount,
             Vector3 center, Vector3 extents)
         {
             this.positions = positions;
@@ -208,7 +211,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
             this.tangents = tangents;
             this.uv0 = uv0;
             this.uv1 = uv1;
-            this.colors = colors;
+            this.rgba = rgba;
+            this.rgb = rgb;
             this.indices = indices;
             this.vertexCount = vertexCount;
             this.indexCount = indexCount;
