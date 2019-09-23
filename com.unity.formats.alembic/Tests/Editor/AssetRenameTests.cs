@@ -17,7 +17,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [SetUp]
         public void SetUp()
         {
-            var srcDummyFile = AssetDatabase.FindAssets("Dummy").Select(AssetDatabase.GUIDToAssetPath).SelectMany(AssetDatabase.LoadAllAssetsAtPath).OfType<AlembicStreamPlayer>().First().StreamDescriptor.PathToAbc;
+            const string dummyGUID = "1a066d124049a413fb12b82470b82811"; // GUID of DummyAlembic.abc
+            var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
+            var srcDummyFile = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AlembicStreamPlayer>().First().StreamDescriptor.PathToAbc;
             File.Copy(srcDummyFile,copiedAbcFile, true);
             AssetDatabase.Refresh();
             var asset = AssetDatabase.LoadMainAssetAtPath(copiedAbcFile);
