@@ -327,11 +327,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetUVs(3, split.velocities.List);
 #endif
                     }
+
                     if (split.rgba.Count > 0)
                         split.mesh.SetColors(split.rgba.List);
                     else if (split.rgb.Count > 0)
                         split.mesh.SetColors(split.rgb.List);
-
 
                     // update the bounds
                     var data = m_splitData[s];
