@@ -2,6 +2,8 @@ enable_testing()
 
 OPTION(USE_STATIC "Link with static libraries" ON)
 
+cmake_policy(SET CMP0074 NEW)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(OpenEXR REQUIRED)
 FIND_PACKAGE(HDF5 REQUIRED)

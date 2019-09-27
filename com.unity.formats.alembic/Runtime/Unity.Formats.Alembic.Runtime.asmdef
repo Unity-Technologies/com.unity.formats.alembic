@@ -1,12 +1,19 @@
 {
-  "name": "Unity.Formats.Alembic.Runtime",
-  "references": ["Unity.Timeline"],
-  "optionalUnityReferences": [],
-  "includePlatforms": [
-    "Editor",
-    "macOSStandalone",
-    "WindowsStandalone64"
-  ],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false
+    "name": "Unity.Formats.Alembic.Runtime",
+    "references": [
+        "Unity.Timeline"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "LinuxStandalone64",
+        "macOSStandalone",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }
