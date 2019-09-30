@@ -2,6 +2,8 @@ enable_testing()
 
 OPTION(USE_STATIC "Link with static libraries" ON)
 
+cmake_policy(SET CMP0074 NEW)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(OpenEXR REQUIRED)
 FIND_PACKAGE(HDF5 REQUIRED)
@@ -10,8 +12,10 @@ include(AddPlugin)
 
 if(WIN32)
     set(HDF5_LIBRARIES "${HDF5_LIBRARIES};${HDF5_ROOT}/lib/szip.lib;${HDF5_ROOT}/lib/zlib.lib")
-else()
+elseif(APPLE)
     set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
+else()
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread")
 endif()
 
 if(APPLE OR UNIX)

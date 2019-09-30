@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor.Build;
@@ -38,7 +39,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public static bool TargetIsSupported(BuildTarget target)
         {
-            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64;
+            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64;
         }
     }
 
@@ -58,7 +59,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var activeScene = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
-            var players = Object.FindObjectsOfType<AlembicStreamPlayer>();
+            var players = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true));
             var pathToStreamingAssets = GetStreamingAssetsPath(report.summary);
             foreach (var p in players)
             {
@@ -86,6 +87,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 case BuildTarget.StandaloneOSX:
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
+                case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
                     return name + "_Data/StreamingAssets";

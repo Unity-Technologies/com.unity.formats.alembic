@@ -39,6 +39,26 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (Path.GetExtension(from.ToLower()) != ".abc")
                 return AssetMoveResult.DidNotMove;
 
+            var importer = AssetImporter.GetAtPath(from) as AlembicImporter;
+            if (importer != null)
+            {
+                var so =new SerializedObject(importer);
+                var prop = so.FindProperty("rootGameObjectName");
+                if (prop != null && string.IsNullOrEmpty(prop.stringValue))
+                {
+                    prop.stringValue = Path.GetFileNameWithoutExtension(from);
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+                
+                prop = so.FindProperty("rootGameObjectId");
+                if (prop != null && string.IsNullOrEmpty(prop.stringValue))
+                {
+                    prop.stringValue = Path.GetFileNameWithoutExtension(from);
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+                AssetDatabase.WriteImportSettingsIfDirty(from);
+            }
+
             AlembicStream.DisconnectStreamsWithPath(from);
             AlembicStream.RemapStreamsWithPath(from, to);
 
@@ -49,12 +69,15 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(5, "abc")]
+    [ScriptedImporter(6, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
+#pragma warning disable 0649
         private string rootGameObjectId;
-
+        [SerializeField]
+        private string rootGameObjectName;
+#pragma warning restore 0649
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         public AlembicStreamSettings StreamSettings
@@ -131,7 +154,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             AlembicStream.DisconnectStreamsWithPath(path);
 
             var fileName = Path.GetFileNameWithoutExtension(path);
-            var go = new GameObject(fileName);
+            var previousGoName = fileName;
+            
+            if (!string.IsNullOrEmpty(rootGameObjectName))
+            {
+                previousGoName = rootGameObjectName;
+            }
+            var go = new GameObject(previousGoName);
 
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
             streamDescriptor.name = go.name + "_ABCDesc";
@@ -162,18 +191,14 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 AlembicStream.ReconnectStreamsWithPath(path);
 
-                if (string.IsNullOrEmpty(rootGameObjectId))
+                var prevIdName = fileName;
+                if (!string.IsNullOrEmpty(rootGameObjectId))
                 {
-                    rootGameObjectId = fileName;
-                    EditorUtility.SetDirty(this);
+                    prevIdName = rootGameObjectId;
                 }
-
-#if UNITY_2017_3_OR_NEWER
-                ctx.AddObjectToAsset(rootGameObjectId, go);
+                
+                ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
-#else
-                ctx.SetMainAsset(rootGameObjectId, go);
-#endif
             }
 
             firstImport = false;

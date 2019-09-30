@@ -136,60 +136,65 @@ static inline void NormalizeSoAToAoS(uniform float3 dst[],
     }
 }
 
-export void GenerateNormalsTriangleIndexed(uniform float3 dst[],
-    uniform const float3 points[], uniform const int indices[],
-    uniform const int num_points, uniform const int num_triangles)
+export void GeneratePointNormals(uniform const int face_start_offsets[], uniform const int face_vertex_counts[], uniform const int face_indices[],
+    uniform const float positions[], uniform float normals[], uniform const int remapped_indices[], uniform const int face_count,
+    uniform const int remap_count, uniform const int orig_point_count)
 {
-    uniform int num_points_aligned = (num_points + (C - 1)) & ~(C - 1);
-    float * uniform mem_tmp = uniform new float[num_points_aligned * 3];
-    zeroclear(mem_tmp, num_points_aligned * 3);
-    float * uniform tnx = mem_tmp + num_points_aligned * 0;
-    float * uniform tny = mem_tmp + num_points_aligned * 1;
-    float * uniform tnz = mem_tmp + num_points_aligned * 2;
+    float* uniform tmp_normals = uniform new float[orig_point_count * 3];
+    zeroclear(tmp_normals, orig_point_count * 3);
+    foreach (face_index = 0 ... face_count) {
+        int face_vert_count = face_vertex_counts[face_index];
+        int face_start_index = face_start_offsets[face_index];
+        if (face_vert_count < 3) {
+            continue;
+        }
+        for (int tri = 0; tri < face_vert_count - 2; ++tri) {
+            int i1 = face_indices[face_start_index + tri];
+            int i2 = face_indices[face_start_index + tri + 1];
+            int i3 = face_indices[face_start_index + tri + 2];
 
-    uniform int num_triangles_simd = num_triangles & ~(C - 1);
+            float3 p1 = {
+                positions[i1 * 3],
+                positions[i1 * 3 + 1],
+                positions[i1 * 3 + 2]
+            };
+            float3 p2 = {
+                positions[i2 * 3],
+                positions[i2 * 3 + 1],
+                positions[i2 * 3 + 2]
+            };
+            float3 p3 = {
+                positions[i3 * 3],
+                positions[i3 * 3 + 1],
+                positions[i3 * 3 + 2]
+            };
+            float3 tri_normal = cross(p3 - p1, p2 - p1);
+            tmp_normals[i1 * 3] += tri_normal.x;
+            tmp_normals[i1 * 3 + 1] += tri_normal.y;
+            tmp_normals[i1 * 3 + 2] += tri_normal.z;
 
-    // SIMD pass
-    for(uniform int bi=0; bi < num_triangles_simd; bi += C) {
-        int ti = bi+I;
-        int ti3 = ti * 3;
-        float3 p0 = points[indices[ti3  + 0]];
-        float3 p1 = points[indices[ti3  + 1]];
-        float3 p2 = points[indices[ti3  + 2]];
-        float3 n = cross(p1 - p0, p2 - p0);
+            tmp_normals[i2 * 3] += tri_normal.x;
+            tmp_normals[i2 * 3 + 1] += tri_normal.y;
+            tmp_normals[i2 * 3 + 2] += tri_normal.z;
 
-        for(uniform int ci=0; ci<C; ++ci) {
-            uniform float3 cn = {extract(n.x, ci), extract(n.y, ci), extract(n.z, ci)};
-            for(uniform int i=0; i<3; ++i) {
-                uniform int ix = indices[(bi + ci) * 3 + i];
-                tnx[ix] += cn.x;
-                tny[ix] += cn.y;
-                tnz[ix] += cn.z;
-            }
+            tmp_normals[i3 * 3] += tri_normal.x;
+            tmp_normals[i3 * 3 + 1] += tri_normal.y;
+            tmp_normals[i3 * 3 + 2] += tri_normal.z;
         }
     }
-
-    // non-SIMD pass
-    for(uniform int ti=num_triangles_simd; ti < num_triangles; ++ti) {
-        uniform int ti3 = ti * 3;
-        uniform int i0 = indices[ti3 + 0];
-        uniform int i1 = indices[ti3 + 1];
-        uniform int i2 = indices[ti3 + 2];
-        uniform float3 p0 = points[i0];
-        uniform float3 p1 = points[i1];
-        uniform float3 p2 = points[i2];
-        uniform float3 n = cross(p1 - p0, p2 - p0);
-
-        for(uniform int i=0; i<3; ++i) {
-            uniform int ix = indices[ti3 + i];
-            tnx[ix] += n.x;
-            tny[ix] += n.y;
-            tnz[ix] += n.z;
-        }
+    foreach (index = 0 ... remap_count) {
+        int remap = remapped_indices[index];
+        float3 n = {
+            tmp_normals[remap * 3],
+            tmp_normals[remap * 3 + 1],
+            tmp_normals[remap * 3 + 2]
+        };
+        n = normalize(n);
+        normals[index * 3] = -n.x;
+        normals[index * 3 + 1] = n.y;
+        normals[index * 3 + 2] = n.z;
     }
-
-    NormalizeSoAToAoS(dst, tnx, tny, tnz, num_points);
-    delete[] mem_tmp;
+    delete[] tmp_normals;
 }
 
 #if 0

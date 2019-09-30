@@ -1,4 +1,13 @@
 # Changes in Alembic for Unity
+## [1.0.6] - 2019-08-26
+### Changes
+- Added support for Linux
+- Fixed incorrect normal calculation when the UVs were split
+- Fixed lost references to the scene GameObject when renaming the alembic asset.
+- Fixed the LitAlembic material compatibility with HDRP 4.10 (latest 2018.4 version). For 2019.2+ HDRP standard materials support vertex motion vectors.
+-Fixed Vertex colour import from Houdini.
+
+
 ## [1.0.5] - 2019-05-10
 ### Changes
 - Fixed regression introduced in 1.0.4 where old Alembic scene instances would lose prefab connection. New scene instances made with 1.0.4 are unfortunately unrecoverable

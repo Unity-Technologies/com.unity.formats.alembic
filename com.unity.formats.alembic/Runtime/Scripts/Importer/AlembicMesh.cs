@@ -28,7 +28,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             public PinnedList<Vector4> tangents = new PinnedList<Vector4>();
             public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
             public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
-            public PinnedList<Color> colors = new PinnedList<Color>();
+            public PinnedList<Color> rgba = new PinnedList<Color>();
+            public PinnedList<Color> rgb = new PinnedList<Color>();
 
             public Mesh mesh;
             public GameObject host;
@@ -45,7 +46,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (tangents != null) tangents.Dispose();
                 if (uv0 != null) uv0.Dispose();
                 if (uv1 != null) uv1.Dispose();
-                if (colors != null) colors.Dispose();
+                if (rgba != null) rgba.Dispose();
+                if (rgb != null) rgb.Dispose();
                 if ((mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
 #if UNITY_EDITOR
@@ -194,11 +196,18 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.uv1.ResizeDiscard(0);
                 vertexData.uv1 = split.uv1;
 
-                if (m_summary.hasColors && (!m_summary.constantColors || topologyChanged))
-                    split.colors.ResizeDiscard(vertexCount);
+                if (m_summary.hasRgba && (!m_summary.constantRgba || topologyChanged))
+                    split.rgba.ResizeDiscard(vertexCount);
                 else
-                    split.colors.ResizeDiscard(0);
-                vertexData.colors = split.colors;
+                    split.rgba.ResizeDiscard(0);
+                vertexData.rgba = split.rgba;
+
+                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged)) {
+                    split.rgb.ResizeDiscard(vertexCount);
+                } else {
+                    split.rgb.ResizeDiscard(0);
+                }
+                vertexData.rgb = split.rgb;
 
                 m_splitData[spi] = vertexData;
             }
@@ -311,9 +320,18 @@ namespace UnityEngine.Formats.Alembic.Importer
                     if (split.uv1.Count > 0)
                         split.mesh.SetUVs(1, split.uv1.List);
                     if (split.velocities.Count > 0)
+                    {
+#if UNITY_2019_2_OR_NEWER
+                        split.mesh.SetUVs(5, split.velocities.List);
+#else
                         split.mesh.SetUVs(3, split.velocities.List);
-                    if (split.colors.Count > 0)
-                        split.mesh.SetColors(split.colors.List);
+#endif
+                    }
+
+                    if (split.rgba.Count > 0)
+                        split.mesh.SetColors(split.rgba.List);
+                    else if (split.rgb.Count > 0)
+                        split.mesh.SetColors(split.rgb.List);
 
                     // update the bounds
                     var data = m_splitData[s];
@@ -343,7 +361,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     else if (sum.topology == aiTopology.Quads)
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
-            }
+           }
         }
 
         Mesh AddMeshComponents(GameObject go)
