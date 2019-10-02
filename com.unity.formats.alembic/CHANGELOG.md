@@ -7,6 +7,9 @@
 - Fixed the LitAlembic material compatibility with HDRP 4.10 (latest 2018.4 version). For 2019.2+ HDRP standard materials support vertex motion vectors.
 -Fixed Vertex colour import from Houdini.
 
+### Known Issues
+- HDF5 is not supported under Linux for import or export. 
+
 
 ## [1.0.5] - 2019-05-10
 ### Changes
