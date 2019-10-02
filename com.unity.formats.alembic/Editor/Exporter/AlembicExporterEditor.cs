@@ -63,7 +63,9 @@ namespace UnityEditor.Formats.Alembic.Exporter
             // alembic settings
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
+#if !UNITY_EDITOR_LINUX
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.archiveType"));
+#endif
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.xformType"));
                 var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
                 EditorGUILayout.PropertyField(timeSamplingType);
