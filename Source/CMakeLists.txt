@@ -15,7 +15,7 @@ if(WIN32)
 elseif(APPLE)
     set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
 else()
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread")
+    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
 endif()
 
 if(APPLE OR UNIX)
