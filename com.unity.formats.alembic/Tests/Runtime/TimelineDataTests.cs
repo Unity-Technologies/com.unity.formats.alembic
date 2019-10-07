@@ -92,7 +92,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return TestCubeContents(go);
         }
 
-        [UnityTest]
+        [UnityTest, UnityPlatform(exclude = new[]{RuntimePlatform.LinuxEditor})]
         public IEnumerator TestArchiveType([Values(aeArchiveType.Ogawa, aeArchiveType.HDF5)] int archiveType)
         {
             director.Play();
