@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -101,7 +100,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public List<Material> Materials
         {
-            get { return m_materials.ToList(); }
+            get
+            {
+                var ret = new List<Material>(m_materials.Length);
+                foreach (var t in m_materials)
+                {
+                    ret[0] = t;
+                }
+                return ret;
+            }
             set { m_materials = value.ToArray(); }
         }
 
