@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     /// <summary>
     /// Alembic archive type
     /// </summary>
-    public enum ArchiveType
+    internal enum ArchiveType
     {
         /// <summary>
         /// HDF5 format (Deprecated)
@@ -107,7 +107,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         /// <summary>
         /// Alembic output file format type.
         /// </summary>
-        public ArchiveType ArchiveType
+        internal ArchiveType ArchiveType
         {
             get { return archiveType; }
             set { archiveType = value; }
