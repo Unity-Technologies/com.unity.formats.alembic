@@ -110,7 +110,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         bool asyncLoad = true;
-
+        
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;

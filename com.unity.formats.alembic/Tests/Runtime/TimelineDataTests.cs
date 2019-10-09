@@ -76,7 +76,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestTimeSampling([Values(TimeSamplingType.Acyclic, TimeSamplingType.Uniform)] int sampleType)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.TimeSamplingType = (TimeSamplingType)sampleType;
+            exporter.Recorder.Settings.ExportOptions.TimeSamplingType = (TimeSamplingType)sampleType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -87,7 +87,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestXForm([Values(TransformType.Matrix, TransformType.TRS)] int xFormType)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.TranformType = (TransformType)xFormType;
+            exporter.Recorder.Settings.ExportOptions.TranformType = (TransformType)xFormType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -95,10 +95,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest, UnityPlatform(exclude = new[]{RuntimePlatform.LinuxEditor})]
-        public IEnumerator TestArchiveType([Values(aeArchiveType.Ogawa, aeArchiveType.HDF5)] int archiveType)
+        public IEnumerator TestArchiveType([Values(ArchiveType.Ogawa, ArchiveType.HDF5)] int archiveType)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.ArchiveType = (ArchiveType)archiveType;
+            exporter.Recorder.Settings.ExportOptions.ArchiveType = (ArchiveType)archiveType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -109,7 +109,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestSwapHandedness([Values(true, false)] bool swap)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.SwapHandedness = swap;
+            exporter.Recorder.Settings.ExportOptions.SwapHandedness = swap;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -120,7 +120,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestSwapFaces([Values(true, false)] bool swap)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.SwapFaces = swap;
+            exporter.Recorder.Settings.ExportOptions.SwapFaces = swap;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -131,7 +131,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestScaleFactor()
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.ScaleFactor = 1;
+            exporter.Recorder.Settings.ExportOptions.ScaleFactor = 1;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -142,7 +142,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestFrameRate([Values(12, 120)] float frameRate)
         {
             director.Play();
-            exporter.Recorder.Settings.exportOptions.FrameRate = frameRate;
+            exporter.Recorder.Settings.ExportOptions.FrameRate = frameRate;
             exporter.MaxCaptureFrame = 30;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
