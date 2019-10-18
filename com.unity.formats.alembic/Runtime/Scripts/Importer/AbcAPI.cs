@@ -90,7 +90,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public NormalsMode normalsMode { get; set; }
         public TangentsMode tangentsMode { get; set; }
         public float scaleFactor { get; set; }
-        public float aspectRatio { get; set; } // Broken
+        public float aspectRatio { get; set; } // Broken/Unimplemented , not connected to any code path.
         public float vertexMotionScale { get; set; }
         public int splitUnit { get; set; }
         public Bool swapHandedness { get; set; }

@@ -130,7 +130,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public float FrameRate
         {
             get { return frameRate; }
-            set { frameRate = Mathf.Max(value, Mathf.Epsilon); }
+            set { frameRate = Mathf.Max(value, Mathf.Epsilon); } // Prevent divisions by 0
         }
         [SerializeField]
         TransformType xformType = TransformType.TRS;

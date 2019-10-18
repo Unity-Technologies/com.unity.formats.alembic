@@ -35,7 +35,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// Camera aspect ratio import options.
         /// </summary>
-        internal AspectRatioMode CameraAspectRatio // Broken
+        internal AspectRatioMode CameraAspectRatio // Broken/Unimplemented , not connected to any code path.
         {
             get { return cameraAspectRatio; }
             set { cameraAspectRatio = value; }
@@ -98,7 +98,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         bool importPointPolygon = true;
-        internal bool ImportPointPolygon // Broken
+        internal bool ImportPointPolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importPointPolygon; }
             set { importPointPolygon = value; }
@@ -106,7 +106,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         bool importLinePolygon = true;
-        internal bool ImportLinePolygon // Broken
+        internal bool ImportLinePolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importLinePolygon; }
             set { importLinePolygon = value; }
@@ -114,7 +114,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField]
         bool importTrianglePolygon = true;
-        internal bool ImportTrianglePolygon // Broken
+        internal bool ImportTrianglePolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importTrianglePolygon; }
             set { importTrianglePolygon = value; }

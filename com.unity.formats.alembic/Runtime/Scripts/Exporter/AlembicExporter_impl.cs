@@ -799,7 +799,11 @@ namespace UnityEngine.Formats.Alembic.Util
         /// <summary>
         /// The recording target branch. Ignored if scope is set to whole scene.
         /// </summary>
-        public GameObject TargetBranch { get { return m_settings.TargetBranch; } set { m_settings.TargetBranch = value; } }
+        public GameObject TargetBranch
+        {
+            get { return m_settings.TargetBranch; }
+            set { m_settings.TargetBranch = value; }
+        }
 
         /// <summary>
         /// Returns true if a recording session is active.

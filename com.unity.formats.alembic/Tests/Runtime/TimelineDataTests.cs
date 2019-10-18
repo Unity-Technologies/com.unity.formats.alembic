@@ -152,7 +152,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
         // PublicAPI tests
         [UnityTest]
-        public IEnumerator  TestAlembicStreamPlayerTimeFieldsClampToValidRange()
+        public IEnumerator TestAlembicStreamPlayerTimeFieldsClampToValidRange()
         {
             director.Play();
             exporter.Recorder.Settings.Scope = ExportScope.TargetBranch;
@@ -160,14 +160,17 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
-            //yield return TestCubeContents(go);
             var player = go.GetComponentInChildren<AlembicStreamPlayer>();
+            
             player.StartTime = player.StreamDescriptor.mediaStartTime-1;
             Assert.AreEqual(player.StartTime,player.StreamDescriptor.mediaStartTime);
+            
             player.EndTime = (float)player.StreamDescriptor.mediaEndTime + 1;
             Assert.AreEqual(player.EndTime,(float)player.StreamDescriptor.mediaEndTime);
+            
             player.CurrentTime = (player.StartTime + player.EndTime) / 2;
             Assert.AreEqual(player.CurrentTime, (player.StartTime + player.EndTime) / 2);
+            
             player.CurrentTime = player.EndTime + 1;
             Assert.AreEqual(player.CurrentTime, player.EndTime);
         }
