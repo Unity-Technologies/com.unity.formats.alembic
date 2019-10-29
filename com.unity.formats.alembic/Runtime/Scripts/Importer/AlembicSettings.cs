@@ -1,37 +1,51 @@
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    /// <summary>
+    /// This class contains stream reading options.
+    /// </summary>
     [System.Serializable]
-    internal class AlembicStreamSettings
+    public class AlembicStreamSettings
     {
         [SerializeField]
-        private aiNormalsMode normals = aiNormalsMode.CalculateIfMissing;
-        public aiNormalsMode Normals
+        NormalsMode normals = NormalsMode.CalculateIfMissing;
+        /// <summary>
+        /// Normal computation options.
+        /// </summary>
+        public NormalsMode Normals
         {
             get { return normals; }
             set { normals = value; }
         }
 
         [SerializeField]
-        private aiTangentsMode tangents = aiTangentsMode.Calculate;
-        public aiTangentsMode Tangents
+        TangentsMode tangents = TangentsMode.Calculate;
+        /// <summary>
+        /// Tangent computation options.
+        /// </summary>
+        public TangentsMode Tangents
         {
             get { return tangents; }
             set { tangents = value; }
         }
 
         [SerializeField]
-        private aiAspectRatioMode cameraAspectRatio = aiAspectRatioMode.CameraAperture;
-        public aiAspectRatioMode CameraAspectRatio
+        AspectRatioMode cameraAspectRatio = AspectRatioMode.CameraAperture;
+        /// <summary>
+        /// Camera aspect ratio import options.
+        /// </summary>
+        internal AspectRatioMode CameraAspectRatio // Broken/Unimplemented , not connected to any code path.
         {
             get { return cameraAspectRatio; }
             set { cameraAspectRatio = value; }
         }
 
         [SerializeField]
-        private bool importVisibility = true;
+        bool importVisibility = true;
+        /// <summary>
+        /// Enables or disables the control of the active state of objects.
+        /// </summary>
         public bool ImportVisibility
         {
             get { return importVisibility; }
@@ -39,7 +53,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private float scaleFactor = 0.01f;
+        float scaleFactor = 0.01f;
+        /// <summary>
+        /// The world scale factor conversion between the Alembic file and unity.
+        /// </summary>
         public float ScaleFactor
         {
             get { return scaleFactor; }
@@ -47,7 +64,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool swapHandedness = true;
+        bool swapHandedness = true;
+        /// <summary>
+        /// Switch the X-axis direction to convert between Left and Right handed coordinate systems.
+        /// </summary>
         public bool SwapHandedness
         {
             get { return swapHandedness; }
@@ -55,7 +75,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool flipFaces = false;
+        bool flipFaces = false;
+        /// <summary>
+        /// Invert the orientations of the polygons.
+        /// </summary>
         public bool FlipFaces
         {
             get { return flipFaces; }
@@ -63,7 +86,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool interpolateSamples = true;
+        bool interpolateSamples = true;
+        /// <summary>
+        /// Linearly interpolate between Alembic samples for which the topology does not change.
+        /// </summary>
         public bool InterpolateSamples
         {
             get { return interpolateSamples; }
@@ -71,31 +97,34 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool importPointPolygon = true;
-        public bool ImportPointPolygon
+        bool importPointPolygon = true;
+        internal bool ImportPointPolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importPointPolygon; }
             set { importPointPolygon = value; }
         }
 
         [SerializeField]
-        private bool importLinePolygon = true;
-        public bool ImportLinePolygon
+        bool importLinePolygon = true;
+        internal bool ImportLinePolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importLinePolygon; }
             set { importLinePolygon = value; }
         }
 
         [SerializeField]
-        private bool importTrianglePolygon = true;
-        public bool ImportTrianglePolygon
+        bool importTrianglePolygon = true;
+        internal bool ImportTrianglePolygon // Broken/Unimplemented , not connected to any code path.
         {
             get { return importTrianglePolygon; }
             set { importTrianglePolygon = value; }
         }
 
         [SerializeField]
-        private bool importXform = true;
+        bool importXform = true;
+        /// <summary>
+        /// Enables or disable the import of transforms.
+        /// </summary>
         public bool ImportXform
         {
             get { return importXform; }
@@ -103,7 +132,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool importCameras = true;
+        bool importCameras = true;
+        /// <summary>
+        /// Enables or disable the import of cameras.
+        /// </summary>
         public bool ImportCameras
         {
             get { return importCameras; }
@@ -111,7 +143,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool importMeshes = true;
+        bool importMeshes = true;
+        /// <summary>
+        /// Enables or disable the import of meshes.
+        /// </summary>
         public bool ImportMeshes
         {
             get { return importMeshes; }
@@ -119,7 +154,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField]
-        private bool importPoints = false;
+        bool importPoints = false;
+        /// <summary>
+        /// Enables or disable the import of points.
+        /// </summary>
         public bool ImportPoints
         {
             get { return importPoints; }

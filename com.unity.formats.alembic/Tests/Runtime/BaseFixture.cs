@@ -28,7 +28,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.That(go, Is.Not.Null);
 
             var player = go.GetComponent<AlembicStreamPlayer>();
-            Assert.GreaterOrEqual(player.duration, minDuration); // More than empty
+            Assert.GreaterOrEqual(player.Duration, minDuration); // More than empty
 
             return go;
         }
@@ -36,12 +36,12 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected IEnumerator RecordAlembic()
         {
             exporter.BeginRecording();
-            while (!exporter.recorder.recording)
+            while (!exporter.Recorder.Recording)
             {
                 yield return null;
             }
 
-            while (exporter.recorder.recording)
+            while (exporter.Recorder.Recording)
             {
                 yield return null;
             }
@@ -54,10 +54,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             SceneManager.SetActiveScene(scene);
             var go = new GameObject("Recorder");
             exporter = go.AddComponent<AlembicExporter>();
-            exporter.maxCaptureFrame = 10;
-            exporter.recorder.settings.OutputPath =
+            exporter.MaxCaptureFrame = 10;
+            exporter.Recorder.Settings.OutputPath =
                 "Assets/" + Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".abc";
-            exporter.captureOnStart = false;
+            exporter.CaptureOnStart = false;
 
             var cam = new GameObject("Cam");
             cam.AddComponent<Camera>();

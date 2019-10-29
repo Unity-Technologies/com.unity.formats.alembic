@@ -7,8 +7,11 @@ using UnityEngine.Formats.Alembic.Util;
 
 namespace UnityEngine.Formats.Alembic.Exporter
 {
+    /// <summary>
+    /// Component that records the Unity Scene state and exports as an Alembic file. This class records only in Playmode.
+    /// </summary>
     [ExecuteInEditMode]
-    internal class AlembicExporter : MonoBehaviour
+    public class AlembicExporter : MonoBehaviour
     {
         #region fields
         [SerializeField] AlembicRecorder m_recorder = new AlembicRecorder();
@@ -21,10 +24,22 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 
         #region properties
-        public AlembicRecorder recorder { get { return m_recorder; } }
-        public bool captureOnStart { get { return m_captureOnStart; } set { m_captureOnStart = value; } }
-        public bool ignoreFirstFrame { get { return m_ignoreFirstFrame; } set { m_ignoreFirstFrame = value; } }
-        public int maxCaptureFrame { get { return m_maxCaptureFrame; } set { m_maxCaptureFrame = value; } }
+        /// <summary>
+        /// Reference to the alembic recorder (lower level class that implements most of the functionality)
+        /// </summary>
+        public AlembicRecorder Recorder { get { return m_recorder; } }
+        /// <summary>
+        /// If true, start capturing immediately after entering play mode.
+        /// </summary>
+        public bool CaptureOnStart { get { return m_captureOnStart; } set { m_captureOnStart = value; } }
+        /// <summary>
+        /// If set, ignores the first frame.
+        /// </summary>
+        public bool IgnoreFirstFrame { get { return m_ignoreFirstFrame; } set { m_ignoreFirstFrame = value; } }
+        /// <summary>
+        /// Number of frames to capture. If set to 0, captures indefinitely.
+        /// </summary>
+        public int MaxCaptureFrame { get { return m_maxCaptureFrame; } set { m_maxCaptureFrame = value; } }
         #endregion
 
 
@@ -32,7 +47,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         void InitializeOutputPath()
         {
-            var settings = m_recorder.settings;
+            var settings = m_recorder.Settings;
             if (string.IsNullOrEmpty(settings.OutputPath))
             {
                 settings.OutputPath = "Output/" + gameObject.name + ".abc";
@@ -43,7 +58,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
         {
             yield return new WaitForEndOfFrame();
 
-            if (!m_recorder.recording || Time.frameCount == m_prevFrame) { yield break; }
+            if (!m_recorder.Recording || Time.frameCount == m_prevFrame) { yield break; }
             m_prevFrame = Time.frameCount;
             if (m_captureOnStart && m_ignoreFirstFrame && m_firstFrame)
             {
@@ -53,7 +68,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
             m_recorder.ProcessRecording();
 
-            if (m_maxCaptureFrame > 0 && m_recorder.frameCount >= m_maxCaptureFrame)
+            if (m_maxCaptureFrame > 0 && m_recorder.FrameCount >= m_maxCaptureFrame)
                 EndRecording();
         }
 
@@ -61,6 +76,9 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 
         #region public methods
+        /// <summary>
+        /// Starts a recording session.
+        /// </summary>
         public void BeginRecording()
         {
             m_firstFrame = true;
@@ -68,11 +86,17 @@ namespace UnityEngine.Formats.Alembic.Exporter
             m_recorder.BeginRecording();
         }
 
+        /// <summary>
+        /// Ends a recording session.
+        /// </summary>
         public void EndRecording()
         {
             m_recorder.EndRecording();
         }
 
+        /// <summary>
+        /// Exports only 1 frame.
+        /// </summary>
         public void OneShot()
         {
             BeginRecording();
@@ -112,7 +136,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         void Update()
         {
-            if (m_recorder.recording)
+            if (m_recorder.Recording)
             {
                 StartCoroutine(ProcessRecording());
             }
@@ -125,7 +149,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         void OnDestroy()
         {
-            if (recorder != null) recorder.Dispose();
+            if (Recorder != null) Recorder.Dispose();
         }
 
         #endregion

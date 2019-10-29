@@ -10,22 +10,49 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    enum aeArchiveType
+    /// <summary>
+    /// Alembic archive type
+    /// </summary>
+    internal enum ArchiveType
     {
+        /// <summary>
+        /// HDF5 format (Deprecated)
+        /// </summary>
         HDF5,
+        /// <summary>
+        /// Ogawa format
+        /// </summary>
         Ogawa,
     };
 
-    enum aeTimeSamplingType
+    /// <summary>
+    /// Time sampling scheme for the Alembic file
+    /// </summary>
+    public enum TimeSamplingType
     {
+        /// <summary>
+        /// Uniform interval sampling
+        /// </summary>
         Uniform = 0,
         // Cyclic = 1,
+        /// <summary>
+        /// Arbitrary interval sampling
+        /// </summary>
         Acyclic = 2,
     };
 
-    enum aeXformType
+    /// <summary>
+    /// Transform format
+    /// </summary>
+    public enum TransformType
     {
+        /// <summary>
+        /// Write the whole matrix transform
+        /// </summary>
         Matrix,
+        /// <summary>
+        /// Write animation in TRS format (translation, rotation, scale)
+        /// </summary>
         TRS,
     };
 
@@ -68,74 +95,82 @@ namespace UnityEngine.Formats.Alembic.Sdk
         ArrayTypeEnd = Float4x4Array,
     };
 
+    /// <summary>
+    /// Class containing Alembic file format options.
+    /// </summary>
     [Serializable]
-    struct aeConfig
+    [StructLayout(LayoutKind.Sequential)]
+    public class AlembicExportOptions
     {
         [SerializeField]
-        private aeArchiveType archiveType;
-        public aeArchiveType ArchiveType
+        ArchiveType archiveType = ArchiveType.Ogawa;
+        /// <summary>
+        /// Alembic output file format type.
+        /// </summary>
+        internal ArchiveType ArchiveType
         {
             get { return archiveType; }
             set { archiveType = value; }
         }
         [SerializeField]
-        private aeTimeSamplingType timeSamplingType;
-        public aeTimeSamplingType TimeSamplingType
+        TimeSamplingType timeSamplingType = TimeSamplingType.Uniform;
+        /// <summary>
+        /// The time sampling type (Uniform or Acyclic)
+        /// </summary>
+        public TimeSamplingType TimeSamplingType
         {
             get { return timeSamplingType; }
             set { timeSamplingType = value; }
         }
-        [SerializeField]
-        private float frameRate;
+        [HideInInspector,SerializeField]
+        float frameRate = 30;
+        /// <summary>
+        /// The capture frame rate. This is available only with uniform sampling
+        /// </summary>
         public float FrameRate
         {
             get { return frameRate; }
-            set { frameRate = value; }
+            set { frameRate = Mathf.Max(value, Mathf.Epsilon); } // Prevent divisions by 0
         }
         [SerializeField]
-        private aeXformType xformType;
-        public aeXformType XformType
+        TransformType xformType = TransformType.TRS;
+        /// <summary>
+        /// The transform format.
+        /// </summary>
+        public TransformType TranformType
         {
             get { return xformType; }
             set { xformType = value; }
         }
         [SerializeField]
-        private Bool swapHandedness;
-        public Bool SwapHandedness
+        Bool swapHandedness = true;
+        /// <summary>
+        /// Enable to change from a left hand coordinate system (Unity) to a right hand coordinate system (Autodesk® Maya®).
+        /// </summary>
+        public bool SwapHandedness
         {
             get { return swapHandedness; }
             set { swapHandedness = value; }
         }
         [SerializeField]
-        private Bool swapFaces;
-        public Bool SwapFaces
+        Bool swapFaces = false;
+        /// <summary>
+        /// Enable to reverse the front and back of all faces.
+        /// </summary>
+        public bool SwapFaces
         {
             get { return swapFaces; }
             set { swapFaces = value; }
         }
         [SerializeField]
-        private float scaleFactor;
+        float scaleFactor = 100;
+        /// <summary>
+        /// Set scale factor to convert between different system units. For example, using 0.1 converts the Unity units to 1/10 of their value in the resulting Alembic file. This also affects position and speed.
+        /// </summary>
         public float ScaleFactor
         {
             get { return scaleFactor; }
             set { scaleFactor = value; }
-        }
-
-        public static aeConfig defaultValue
-        {
-            get
-            {
-                return new aeConfig
-                {
-                    ArchiveType = aeArchiveType.Ogawa,
-                    TimeSamplingType = aeTimeSamplingType.Uniform,
-                    FrameRate = 30.0f,
-                    XformType = aeXformType.TRS,
-                    SwapHandedness = true,
-                    SwapFaces = false,
-                    ScaleFactor = 100.0f,
-                };
-            }
         }
     }
 
@@ -220,7 +255,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public static aeContext Create() { return NativeMethods.aeCreateContext(); }
         public void Destroy() { NativeMethods.aeDestroyContext(self); self = IntPtr.Zero; }
-        public void SetConfig(ref aeConfig conf) { NativeMethods.aeSetConfig(self, ref conf); }
+        public void SetConfig(AlembicExportOptions conf) { NativeMethods.aeSetConfig(self, conf); }
         public bool OpenArchive(string path) { return NativeMethods.aeOpenArchive(self, path); }
         public int AddTimeSampling(float start_time) { return NativeMethods.aeAddTimeSampling(self, start_time); }
         public void AddTime(float start_time) { NativeMethods.aeAddTime(self, start_time); }
@@ -276,7 +311,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-    static partial class AbcAPI
+    static class AbcAPI
     {
         public static void aeWaitMaxDeltaTime()
         {
@@ -286,12 +321,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
-    internal static class NativeMethods
+    static class NativeMethods
     {
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
 
-        [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, ref aeConfig conf);
+        [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, AlembicExportOptions conf);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
@@ -338,7 +373,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
-        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, ref double begin, ref double end);
+        [DllImport(Abci.Lib)] public static extern void aiContextGetTimeRange(IntPtr ctx, out double begin, out double end);
         [DllImport(Abci.Lib)] public static extern aiObject aiContextGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aiContextUpdateSamples(IntPtr ctx, double time);
 
