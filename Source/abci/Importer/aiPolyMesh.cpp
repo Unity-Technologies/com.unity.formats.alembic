@@ -242,16 +242,11 @@ void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data
 
 void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
 {
-    auto body = [this, vbs, ibs]() {
-            auto& refiner = m_topology->m_refiner;
-            for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
-                fillSplitVertices(spi, vbs[spi]);
-            for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
-                fillSubmeshIndices(smi, ibs[smi]);
-        };
-
-    body();
-
+    auto &refiner = m_topology->m_refiner;
+    for (int spi = 0; spi < (int) refiner.splits.size(); ++spi)
+        fillSplitVertices(spi, vbs[spi]);
+    for (int smi = 0; smi < (int) refiner.submeshes.size(); ++smi)
+        fillSubmeshIndices(smi, ibs[smi]);
 }
 
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)

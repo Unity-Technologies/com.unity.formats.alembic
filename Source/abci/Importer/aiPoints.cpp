@@ -39,33 +39,29 @@ aiPointsSample::~aiPointsSample()
 
 void aiPointsSample::fillData(aiPointsData &data)
 {
-    auto body = [this, &data]() {
-            data.visibility = visibility;
+    data.visibility = visibility;
+    if (data.points)
+    {
+        if (!m_points_ref.empty())
+            m_points_ref.copy_to(data.points);
+    }
+    if (data.velocities)
+    {
+        if (!m_velocities.empty())
+            m_velocities.copy_to(data.velocities);
+        else
+            memset(data.velocities, 0, m_points_ref.size() * sizeof(abcV3));
+    }
 
-            if (data.points)
-            {
-                if (!m_points_ref.empty())
-                    m_points_ref.copy_to(data.points);
-            }
-            if (data.velocities)
-            {
-                if (!m_velocities.empty())
-                    m_velocities.copy_to(data.velocities);
-                else
-                    memset(data.velocities, 0, m_points_ref.size() * sizeof(abcV3));
-            }
-            if (data.ids)
-            {
-                if (!m_ids.empty())
-                    m_ids.copy_to(data.ids);
-                else
-                    memset(data.ids, 0, m_points_ref.size() * sizeof(uint32_t));
-            }
-            data.center = m_bb_center;
-            data.size = m_bb_size;
-        };
-
-    body();
+    if (data.ids)
+    {
+        if (!m_ids.empty())
+            m_ids.copy_to(data.ids);
+        else
+            memset(data.ids, 0, m_points_ref.size() * sizeof(uint32_t));
+    }
+    data.center = m_bb_center;
+    data.size = m_bb_size;
 }
 
 void aiPointsSample::getSummary(aiPointsSampleSummary & dst)

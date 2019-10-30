@@ -113,21 +113,12 @@ public:
     virtual void readSample(Sample& sample, uint64_t idx)
     {
         m_force_update_local = m_force_update;
-
-        auto body = [this, &sample, idx]() {
-                readSampleBody(sample, idx);
-            };
-
-        body();
+        readSampleBody(sample, idx);
     }
 
     virtual void cookSample(Sample& sample)
     {
-        auto body = [this, &sample]() {
-                cookSampleBody(sample);
-            };
-
-        body();
+        cookSampleBody(sample);
     }
 
 
