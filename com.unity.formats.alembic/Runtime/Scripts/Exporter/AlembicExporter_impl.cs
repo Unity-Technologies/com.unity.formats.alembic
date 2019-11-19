@@ -99,7 +99,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool captureMeshRenderer = true;
         /// <summary>
-        /// Enable to capture Mesh components.
+        /// Enable to capture Mesh assets.
         /// </summary>
         public bool CaptureMeshRenderer
         {
@@ -110,7 +110,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool captureSkinnedMeshRenderer = true;
         /// <summary>
-        /// Enable to capture Skinned Mesh components.
+        /// Enable to capture Skinned Mesh assets.
         /// </summary>
         public bool CaptureSkinnedMeshRenderer
         {
