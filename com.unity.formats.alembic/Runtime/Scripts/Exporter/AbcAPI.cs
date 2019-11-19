@@ -11,47 +11,47 @@ using UnityEngine;
 namespace UnityEngine.Formats.Alembic.Sdk
 {
     /// <summary>
-    /// Alembic archive type
+    /// The Alembic file format.
     /// </summary>
     internal enum ArchiveType
     {
         /// <summary>
-        /// HDF5 format (Deprecated)
+        /// HDF5 format (Deprecated).
         /// </summary>
         HDF5,
         /// <summary>
-        /// Ogawa format
+        /// Ogawa format.
         /// </summary>
         Ogawa,
     };
 
     /// <summary>
-    /// Time sampling scheme for the Alembic file
+    /// The time sampling mode for the Alembic file.
     /// </summary>
     public enum TimeSamplingType
     {
         /// <summary>
-        /// Uniform interval sampling
+        /// The interval between frames on the Alembic side is always constant.
         /// </summary>
         Uniform = 0,
         // Cyclic = 1,
         /// <summary>
-        /// Arbitrary interval sampling
+        /// The delta time in Unity is the interval between the frames on the Alembic side. The interval is not constant, but the impact on the game progress is minimal. It is a mode mainly assuming 3D recording of games.
         /// </summary>
         Acyclic = 2,
     };
 
     /// <summary>
-    /// Transform format
+    /// The transform format (Xform Type).
     /// </summary>
     public enum TransformType
     {
         /// <summary>
-        /// Write the whole matrix transform
+        /// Record the full transformation matrix.
         /// </summary>
         Matrix,
         /// <summary>
-        /// Write animation in TRS format (translation, rotation, scale)
+        /// Record the animation in TRS format (translation, rotation, scale).
         /// </summary>
         TRS,
     };
@@ -105,7 +105,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [SerializeField]
         ArchiveType archiveType = ArchiveType.Ogawa;
         /// <summary>
-        /// Alembic output file format type.
+        /// Get or set the Alembic output file format.
         /// </summary>
         internal ArchiveType ArchiveType
         {
@@ -115,7 +115,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [SerializeField]
         TimeSamplingType timeSamplingType = TimeSamplingType.Uniform;
         /// <summary>
-        /// The time sampling type (Uniform or Acyclic)
+        /// Get or set the time sampling type (Uniform or Acyclic).
         /// </summary>
         public TimeSamplingType TimeSamplingType
         {
@@ -125,7 +125,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [HideInInspector,SerializeField]
         float frameRate = 30;
         /// <summary>
-        /// The capture frame rate. This is available only with uniform sampling
+        /// Get or set the capture frame rate. Only available when TimeSamplingType is set to Uniform.
         /// </summary>
         public float FrameRate
         {
@@ -135,7 +135,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [SerializeField]
         TransformType xformType = TransformType.TRS;
         /// <summary>
-        /// The transform format.
+        /// Get or set the transform format (full matrix or TRS).
         /// </summary>
         public TransformType TranformType
         {
@@ -165,7 +165,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [SerializeField]
         float scaleFactor = 100;
         /// <summary>
-        /// Set scale factor to convert between different system units. For example, using 0.1 converts the Unity units to 1/10 of their value in the resulting Alembic file. This also affects position and speed.
+        /// Get or set the scale factor to convert between different system units. For example, using 0.1 converts the Unity units to 1/10 of their value in the resulting Alembic file. This also affects position and speed.
         /// </summary>
         public float ScaleFactor
         {

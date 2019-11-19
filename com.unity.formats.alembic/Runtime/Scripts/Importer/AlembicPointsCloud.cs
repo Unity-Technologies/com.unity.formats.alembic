@@ -5,7 +5,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     /// <summary>
-    /// This class is the scene data container for animated point clouds.
+    /// The Scene data container for animated point clouds.
     /// </summary>
     [ExecuteInEditMode]
     public class AlembicPointsCloud : MonoBehaviour
@@ -31,7 +31,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public List<Vector3> Positions => pointsList.List;
         /// <summary>
-        /// The list of point cloud Velocities.
+        /// The list of point cloud velocities.
         /// </summary>
         public List<Vector3> Velocities => velocitiesList.List;
         /// <summary>
@@ -40,11 +40,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         public List<uint> Ids => idsList.List;
 
         /// <summary>
-        /// The center of the point cloud bounding box
+        /// The center of the point cloud bounding box.
         /// </summary>
         public Vector3 BoundsCenter { get; internal set; }
         /// <summary>
-        /// The extent of the point cloud bounding box
+        /// The extent of the point cloud bounding box.
         /// </summary>
         public Vector3 BoundsExtents { get; internal set; }
 
