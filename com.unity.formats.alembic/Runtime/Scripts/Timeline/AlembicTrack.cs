@@ -4,7 +4,7 @@ using UnityEngine.Timeline;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     /// <summary>
-    /// Timeline integration class for the Alembic Recorder
+    /// Timeline integration class for the Alembic Recorder.
     /// </summary>
     [System.Serializable]
     [TrackClipType(typeof(AlembicShotAsset))]

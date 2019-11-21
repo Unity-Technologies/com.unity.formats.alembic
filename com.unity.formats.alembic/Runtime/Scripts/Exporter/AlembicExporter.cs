@@ -8,7 +8,7 @@ using UnityEngine.Formats.Alembic.Util;
 namespace UnityEngine.Formats.Alembic.Exporter
 {
     /// <summary>
-    /// Component that records the Unity Scene state and exports as an Alembic file. This class records only in Playmode.
+    /// Component that records the Unity Scene state and exports it as an Alembic file. This class records only in Play Mode.
     /// </summary>
     [ExecuteInEditMode]
     public class AlembicExporter : MonoBehaviour
@@ -25,19 +25,19 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         #region properties
         /// <summary>
-        /// Reference to the alembic recorder (lower level class that implements most of the functionality)
+        /// Reference to the Alembic recorder (lower level class that implements most of the functionality).
         /// </summary>
         public AlembicRecorder Recorder { get { return m_recorder; } }
         /// <summary>
-        /// If true, start capturing immediately after entering play mode.
+        /// Enable to start capturing immediately after entering the Play Mode.
         /// </summary>
         public bool CaptureOnStart { get { return m_captureOnStart; } set { m_captureOnStart = value; } }
         /// <summary>
-        /// If set, ignores the first frame.
+        /// Enable to skip capturing the first frame (only available when CaptureOnStart is enabled).
         /// </summary>
         public bool IgnoreFirstFrame { get { return m_ignoreFirstFrame; } set { m_ignoreFirstFrame = value; } }
         /// <summary>
-        /// Number of frames to capture. If set to 0, captures indefinitely.
+        /// Get or set the number of frames to capture. If set to 0, the capture runs indefinitely.
         /// </summary>
         public int MaxCaptureFrame { get { return m_maxCaptureFrame; } set { m_maxCaptureFrame = value; } }
         #endregion
@@ -77,7 +77,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         #region public methods
         /// <summary>
-        /// Starts a recording session.
+        /// Starts a recording session. Use this method if CaptureOnStart is disabled.
         /// </summary>
         public void BeginRecording()
         {
@@ -87,7 +87,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
         }
 
         /// <summary>
-        /// Ends a recording session.
+        /// Ends the recording session.
         /// </summary>
         public void EndRecording()
         {
@@ -95,7 +95,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
         }
 
         /// <summary>
-        /// Exports only 1 frame.
+        /// Exports only the current frame.
         /// </summary>
         public void OneShot()
         {

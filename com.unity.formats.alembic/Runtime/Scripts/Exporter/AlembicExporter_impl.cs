@@ -12,7 +12,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Util
 {
     /// <summary>
-    /// Controls the scope of Alembic export.
+    /// The scope of the Alembic export.
     /// </summary>
     public enum ExportScope
     {
@@ -21,13 +21,13 @@ namespace UnityEngine.Formats.Alembic.Util
         /// </summary>
         EntireScene,
         /// <summary>
-        /// Export only a branch (or hierarchy) of the Scene.
+        /// Export only a branch (or hierarchy) of the Scene. Requires a TargetBranch value to be set.
         /// </summary>
         TargetBranch,
     }
 
     /// <summary>
-    /// Settings controlling different aspects of recording.
+    /// Settings controlling various aspects of the recording in Alembic exporter.
     /// </summary>
     [Serializable]
     public class AlembicRecorderSettings
@@ -35,7 +35,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         string outputPath = "Output/Output.abc";
         /// <summary>
-        /// Specify the location to save the Alembic file to.
+        /// Get or set the location to save the exported Alembic file to.
         /// </summary>
         public string OutputPath
         {
@@ -47,14 +47,14 @@ namespace UnityEngine.Formats.Alembic.Util
         AlembicExportOptions conf = new AlembicExportOptions();
 
         /// <summary>
-        /// Alembic file options (archive type, transform format, etc)
+        /// Alembic file options (archive type, transform format, etc.)
         /// </summary>
         public AlembicExportOptions ExportOptions => conf;
 
         [SerializeField]
         ExportScope scope = ExportScope.EntireScene;
         /// <summary>
-        /// Choose the scope of the export.
+        /// Get or set the scope of the export (entire Scene or selected branch).
         /// </summary>
         public ExportScope Scope
         {
@@ -65,7 +65,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         GameObject targetBranch;
         /// <summary>
-        /// Export only a branch (or hierarchy) of the Scene. This options is used only if Export Scope is set to Branch.
+        /// Get or set the branch (or hierarchy) of the Scene that is exported. Use this option only if ExportScope is set to TargetBranch.
         /// </summary>
         public GameObject TargetBranch
         {
@@ -76,7 +76,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField, HideInInspector]
         bool fixDeltaTime = true;
         /// <summary>
-        /// Enable this option to set Time.maximumDeltaTime using the frame rate to ensure fixed delta time.
+        /// Enable to set Time.maximumDeltaTime using the frame rate to ensure fixed delta time. Only available when TimeSamplingType is set to Uniform.
         /// </summary>
         public bool FixDeltaTime
         {
@@ -88,7 +88,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [Tooltip("Assume only GameObjects with a SkinnedMeshRenderer component change over time.")]
         bool assumeNonSkinnedMeshesAreConstant = true;
         /// <summary>
-        /// Enable this option to skip capturing animation on static Meshes.
+        /// Enable to skip capturing animation on static Meshes.
         /// </summary>
         public bool AssumeNonSkinnedMeshesAreConstant
         {
@@ -99,7 +99,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool captureMeshRenderer = true;
         /// <summary>
-        /// Enable to capture Meshes.
+        /// Enable to capture Mesh assets.
         /// </summary>
         public bool CaptureMeshRenderer
         {
@@ -110,7 +110,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool captureSkinnedMeshRenderer = true;
         /// <summary>
-        /// Enable to capture Skinned Meshes.
+        /// Enable to capture Skinned Mesh assets.
         /// </summary>
         public bool CaptureSkinnedMeshRenderer
         {
@@ -129,7 +129,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool captureCamera = true;
         /// <summary>
-        /// Enable to capture Cameras.
+        /// Enable to capture Camera components.
         /// </summary>
         public bool CaptureCamera
         {
@@ -173,7 +173,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool meshColors = true;
         /// <summary>
-        /// Enable to export Mesh Vertex Colour.
+        /// Enable to export Mesh vertex colors.
         /// </summary>
         public bool MeshColors
         {
@@ -195,7 +195,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool detailedLog = false;
         /// <summary>
-        /// Enable the Detailed Log option to provide Debug logging for each captured frame.
+        /// Enable to provide Debug logging for each captured frame.
         /// </summary>
         public bool DetailedLog
         {
@@ -230,7 +230,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
     /// <summary>
-    /// Class that implements recording of Unity scene elements in the Alembic format.
+    /// Class that implements the recording of Unity Scene elements in the Alembic format.
     /// </summary>
     [Serializable]
     public sealed class AlembicRecorder : IDisposable
@@ -788,7 +788,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         #region properties
         /// <summary>
-        /// The Recorder settings.
+        /// Get or set the Recorder settings.
         /// </summary>
         public AlembicRecorderSettings Settings
         {
@@ -797,7 +797,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         /// <summary>
-        /// The recording target branch. Ignored if scope is set to whole scene.
+        /// Get or set the recording target branch. Ignored if Scope is set to EntireScene.
         /// </summary>
         public GameObject TargetBranch
         {
@@ -806,12 +806,13 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         /// <summary>
-        /// Returns true if a recording session is active.
+        /// Get the recording status.
         /// </summary>
+        /// <returns>True if a recording session is active.</returns>
         public bool Recording { get { return m_recording; } }
 
         /// <summary>
-        /// Set the frame to stop capturing at.
+        /// Get or set the frame number the capture stops at.
         /// </summary>
         public int FrameCount
         {
@@ -986,7 +987,7 @@ namespace UnityEngine.Formats.Alembic.Util
         /// <summary>
         /// Starts a recording session.
         /// </summary>
-        /// <returns>True if succeeded, false otherwise. </returns>
+        /// <returns>True if succeeded, false otherwise.</returns>
         public bool BeginRecording()
         {
             if (m_recording)
@@ -1072,7 +1073,7 @@ namespace UnityEngine.Formats.Alembic.Util
         }
 
         /// <summary>
-        /// Writes the current frame to the alembic archive. Recording should have been started previoiusly.
+        /// Writes the current frame to the Alembic archive. Recording should have been previously started.
         /// </summary>
 
         public void ProcessRecording()

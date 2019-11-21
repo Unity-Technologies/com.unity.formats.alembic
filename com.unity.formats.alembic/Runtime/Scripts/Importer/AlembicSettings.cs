@@ -3,7 +3,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     /// <summary>
-    /// This class contains stream reading options.
+    /// This class contains stream reading options for Alembic file import.
     /// </summary>
     [System.Serializable]
     public class AlembicStreamSettings
@@ -11,7 +11,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         NormalsMode normals = NormalsMode.CalculateIfMissing;
         /// <summary>
-        /// Normal computation options.
+        /// Get or set the Normals computation mode on import.
         /// </summary>
         public NormalsMode Normals
         {
@@ -22,7 +22,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         TangentsMode tangents = TangentsMode.Calculate;
         /// <summary>
-        /// Tangent computation options.
+        /// Get or set the Tangents computation mode on import.
         /// </summary>
         public TangentsMode Tangents
         {
@@ -33,7 +33,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         AspectRatioMode cameraAspectRatio = AspectRatioMode.CameraAperture;
         /// <summary>
-        /// Camera aspect ratio import options.
+        /// Get or set the Camera aspect ratio on import.
         /// </summary>
         internal AspectRatioMode CameraAspectRatio // Broken/Unimplemented , not connected to any code path.
         {
@@ -55,7 +55,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         float scaleFactor = 0.01f;
         /// <summary>
-        /// The world scale factor conversion between the Alembic file and unity.
+        /// The world scale factor to convert between the Alembic file and Unity.
         /// </summary>
         public float ScaleFactor
         {
@@ -66,7 +66,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool swapHandedness = true;
         /// <summary>
-        /// Switch the X-axis direction to convert between Left and Right handed coordinate systems.
+        /// Enable to switch the X-axis direction between Left and Right handed coordinate systems.
         /// </summary>
         public bool SwapHandedness
         {
@@ -77,7 +77,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool flipFaces = false;
         /// <summary>
-        /// Invert the orientations of the polygons.
+        /// Enable to invert the orientation of the polygons.
         /// </summary>
         public bool FlipFaces
         {
@@ -88,7 +88,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool interpolateSamples = true;
         /// <summary>
-        /// Linearly interpolate between Alembic samples for which the topology does not change.
+        /// Enable to linearly interpolate between Alembic samples for which the topology does not change.
         /// </summary>
         public bool InterpolateSamples
         {
@@ -123,7 +123,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool importXform = true;
         /// <summary>
-        /// Enables or disable the import of transforms.
+        /// Enable or disable the import of Transform (Xform) data.
         /// </summary>
         public bool ImportXform
         {
@@ -134,7 +134,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool importCameras = true;
         /// <summary>
-        /// Enables or disable the import of cameras.
+        /// Enable or disable the import of Camera data.
         /// </summary>
         public bool ImportCameras
         {
@@ -145,7 +145,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool importMeshes = true;
         /// <summary>
-        /// Enables or disable the import of meshes.
+        /// Enable or disable the import of Mesh data.
         /// </summary>
         public bool ImportMeshes
         {
@@ -156,7 +156,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool importPoints = false;
         /// <summary>
-        /// Enables or disable the import of points.
+        /// Enable or disable the import of Point (particle cloud) data.
         /// </summary>
         public bool ImportPoints
         {

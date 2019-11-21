@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     /// <summary>
-    /// This component allows data streaming from alembic files. It updates children nodes (meshes, transforms, cameras, etc) to reflect the alembic data at the given time.
+    /// This component allows data streaming from Alembic files. It updates children nodes (Meshes, Transforms, Cameras, etc.) to reflect the Alembic data at the given time.
     /// </summary>
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
@@ -26,7 +26,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         float startTime = float.MinValue;
         /// <summary>
-        /// The beginning of the streaming time window. This is clamped to the time range of the alembic source file.
+        /// Get or set the start timestamp of the streaming time window (scale in seconds). This is clamped to the time range of the Alembic source file.
         /// </summary>
         public float StartTime
         {
@@ -43,7 +43,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         float endTime = float.MaxValue;
         /// <summary>
-        /// The end of the streaming time window. This is clamped to the time range of the alembic source file.
+        /// Get or set the end timestamp of the streaming time window (scale in seconds). This is clamped to the time range of the Alembic source file.
         /// </summary>
         public float EndTime
         {
@@ -60,7 +60,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         float currentTime;
         /// <summary>
-        /// The time relative to the alembic time range. This is clamped between 0 and the alembic time duration.
+        /// Get or set the current time relative to the Alembic file time range (scale in seconds). This is clamped between 0 and the alembic time duration.
         /// </summary>
         public float CurrentTime
         {
@@ -69,14 +69,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         /// <summary>
-        /// The duration of the Alembic file.
+        /// Get the duration of the Alembic file (in seconds).
         /// </summary>
         public float Duration { get { return EndTime - StartTime; } }
 
         [SerializeField]
         float vertexMotionScale = 1.0f;
         /// <summary>
-        /// Scalar multiplier to the Alembic vertex speed. Default value is 1.
+        /// Get or set the scalar multiplier to the Alembic vertex speed (magnification factor for velocity). Default value is 1.
         /// </summary>
         public float VertexMotionScale
         {
@@ -85,16 +85,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
         
         /// <summary>
-        /// The start timestamp of the Alembic file.
+        /// The start timestamp of the Alembic file (scale in seconds).
         /// </summary>
         public float MediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
         /// <summary>
-        /// The end timestamp of the Alembic file.
+        /// The end timestamp of the Alembic file (scale in seconds).
         /// </summary>
         public float MediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
 
         /// <summary>
-        /// The duration of the Alembic file.
+        /// The duration of the Alembic file (in seconds).
         /// </summary>
         public float MediaDuration => MediaEndTime - MediaStartTime;
 
@@ -117,9 +117,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
 
         /// <summary>
-        /// Update the child game object's data to the CurrentTime (The regular update happens during the LateUpdate phase).
+        /// Update the child GameObject's data to the CurrentTime (The regular update happens during the LateUpdate phase).
         /// </summary>
-        /// <param name="time">The time stamp to stream from the asset file</param>
+        /// <param name="time">The timestamp to stream from the asset file.</param>
         public void UpdateImmediately(float time)
         {
             CurrentTime = time;
@@ -128,7 +128,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
         
         /// <summary>
-        /// Loads a different alembic file.
+        /// Loads a different Alembic file.
         /// </summary>
         /// <param name="newPath">Path to the new file.</param>
         /// <returns>True if the load succeeded, false otherwise.</returns>

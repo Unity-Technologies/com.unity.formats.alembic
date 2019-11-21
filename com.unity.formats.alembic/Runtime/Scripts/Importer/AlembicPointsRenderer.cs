@@ -56,7 +56,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     }
 
     /// <summary>
-    ///This component renders point clouds by instancing a mesh.
+    /// Component that renders point clouds by instancing a mesh.
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(AlembicPointsCloud))]
@@ -87,7 +87,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
 
         /// <summary>
-        /// The mesh to be instanced for every point cloud.
+        /// Get or set the reference to the Mesh instanced for every point cloud.
         /// </summary>
         public Mesh InstancedMesh
         {
@@ -96,7 +96,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         /// <summary>
-        /// An array of materials used for the rendering the instanced mesh. Only one material per sub-mesh will be used.
+        /// Get or set the array of Materials used for the rendering of the instanced Mesh. Only one Material per sub-Mesh will be used.
         /// </summary>
         public List<Material> Materials
         {
@@ -113,7 +113,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         /// <summary>
-        /// Material to be used for the motion vector computation.
+        /// Get or set the reference to the Material used for the motion vector computation.
         /// </summary>
         public Material MotionVectorMaterial
         {

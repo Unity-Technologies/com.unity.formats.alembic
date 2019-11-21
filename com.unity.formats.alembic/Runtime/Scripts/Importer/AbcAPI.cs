@@ -14,28 +14,34 @@ namespace UnityEngine.Formats.Alembic.Sdk
         CameraAperture
     };
 
+    /// <summary>
+    /// The normals processing mode on Alembic file import.
+    /// </summary>
     public enum NormalsMode
     {
         //Import,
         /// <summary>
-        /// If Alembic file has no normals, compute them
+        /// Use Alembic file normals if they exist, otherwise compute them.
         /// </summary>
         CalculateIfMissing = 1,
         /// <summary>
-        /// Ignore normals from the Alembic file and always recompute.
+        /// Ignore normals from the Alembic file and always recompute them.
         /// </summary>
         AlwaysCalculate = 2,
         //None
     }
 
+    /// <summary>
+    /// The tangents processing mode on Alembic file import.
+    /// </summary>
     public enum TangentsMode
     {
         /// <summary>
-        /// Do not compute tangents.
+        /// Do not compute tangents. As tangents are not stored in Alembic, there will be no tangent data.
         /// </summary>
         None,
         /// <summary>
-        /// Compute and set mesh tangents. Needs normals and UVs.
+        /// Compute and set mesh tangents. Requires normals and UV data.
         /// </summary>
         Calculate,
     }

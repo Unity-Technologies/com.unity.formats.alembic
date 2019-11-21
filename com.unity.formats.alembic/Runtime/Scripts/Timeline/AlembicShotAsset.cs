@@ -5,7 +5,7 @@ using UnityEngine.Timeline;
 namespace UnityEngine.Formats.Alembic.Timeline
 {
     /// <summary>
-    /// Clip representing the playback range of an Alembic asset
+    /// Clip representing the playback range of an Alembic asset.
     /// </summary>
     [System.ComponentModel.DisplayName("Alembic Shot")]
     public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset, IPropertyPreview
