@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "aiMeshOps.h"
+#include <unordered_set>
 
 
 namespace impl
@@ -234,6 +235,9 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     int num_splits = (int)splits.size();
     int offset_faces = 0;
     RawVector<Submesh> tmp_submeshes;
+    RawVector<int> materialOrder;
+    std::unordered_set<int> materialSet;
+
 
     for (int spi = 0; spi < num_splits; ++spi)
     {
@@ -254,9 +258,13 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                     {
                         int id = (int)tmp_submeshes.size();
                         tmp_submeshes.push_back({});
-                        tmp_submeshes.back().material_id = id - 1;
                     }
                     tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
+                    if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end() )
+                    {
+                        materialSet.insert(mid);
+                        materialOrder.push_back(mid);
+                    }
                 }
             }
 
@@ -281,8 +289,9 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                 }
             }
 
-            for (int mi = 0; mi < (int)tmp_submeshes.size(); ++mi)
+            for(int i=0; i < materialOrder.size(); ++i)
             {
+                auto mi = materialOrder[i];
                 auto& sm = tmp_submeshes[mi];
                 if (sm.index_count > 0)
                 {
@@ -320,6 +329,8 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
         offset_faces += split.face_count;
         tmp_submeshes.clear();
+        materialOrder.clear();
+        materialSet.clear();
     }
     setupSubmeshes();
 }
