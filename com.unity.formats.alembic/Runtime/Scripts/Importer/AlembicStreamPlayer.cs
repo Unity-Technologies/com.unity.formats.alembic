@@ -223,7 +223,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (lastUpdateTime != CurrentTime || forceUpdate)
             {
                 abcStream.SetVertexMotionScale(VertexMotionScale);
-                abcStream.SetAsyncLoad(asyncLoad);
+
                 if (abcStream.AbcUpdateBegin(StartTime + CurrentTime))
                 {
                     lastUpdateTime = CurrentTime;
@@ -257,7 +257,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 LoadStream(false);
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
             if (abcStream != null)
                 abcStream.Dispose();

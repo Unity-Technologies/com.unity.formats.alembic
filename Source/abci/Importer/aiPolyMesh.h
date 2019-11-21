@@ -75,8 +75,6 @@ public:
     void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-    void waitAsync() override;
-
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
@@ -63,10 +65,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         aiPolyMesh m_abcSchema;
         aiMeshSummary m_summary;
         aiMeshSampleSummary m_sampleSummary;
-        PinnedList<aiMeshSplitSummary> m_splitSummaries = new PinnedList<aiMeshSplitSummary>();
-        PinnedList<aiSubmeshSummary> m_submeshSummaries = new PinnedList<aiSubmeshSummary>();
-        PinnedList<aiPolyMeshData> m_splitData = new PinnedList<aiPolyMeshData>();
-        PinnedList<aiSubmeshData> m_submeshData = new PinnedList<aiSubmeshData>();
+        NativeArray<aiMeshSplitSummary> m_splitSummaries;
+        NativeArray<aiSubmeshSummary> m_submeshSummaries;
+        NativeArray<aiPolyMeshData> m_splitData;
+        NativeArray<aiSubmeshData> m_submeshData;
+
+        JobHandle fillVertexBufferHandle;
 
         List<Split> m_splits = new List<Split>();
         List<Submesh> m_submeshes = new List<Submesh>();
@@ -84,6 +88,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 split.Dispose();
             }
+
+            m_splitSummaries.Dispose();
+            m_submeshSummaries.Dispose();;
+            m_splitData.Dispose();;
+            m_submeshData.Dispose();;
         }
 
         void UpdateSplits(int numSplits)
@@ -139,10 +148,42 @@ namespace UnityEngine.Formats.Alembic.Importer
             int splitCount = m_sampleSummary.splitCount;
             int submeshCount = m_sampleSummary.submeshCount;
 
-            m_splitSummaries.ResizeDiscard(splitCount);
-            m_splitData.ResizeDiscard(splitCount);
-            m_submeshSummaries.ResizeDiscard(submeshCount);
-            m_submeshData.ResizeDiscard(submeshCount);
+            if (m_splitSummaries.Length != splitCount)
+            {
+                if (m_splitSummaries.IsCreated)
+                {
+                    m_splitSummaries.Dispose();
+                }
+                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount,Allocator.Persistent);
+            }
+
+            if (m_splitData.Length != splitCount)
+            {
+                if (m_splitData.IsCreated)
+                {
+                    m_splitData.Dispose();
+                }
+                m_splitData = new NativeArray<aiPolyMeshData>(splitCount,Allocator.Persistent);
+            }
+
+            if (m_submeshSummaries.Length != submeshCount)
+            {
+                if (m_submeshSummaries.IsCreated)
+                {
+                    m_submeshSummaries.Dispose();
+                }
+                m_submeshSummaries = new NativeArray<aiSubmeshSummary>(submeshCount, Allocator.Persistent);
+            }
+
+            if (m_submeshData.Length != submeshCount)
+            {
+                if (m_submeshData.IsCreated)
+                {
+                    m_submeshData.Dispose();
+                }
+
+                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount,Allocator.Persistent);
+            }
 
             sample.GetSplitSummaries(m_splitSummaries);
             sample.GetSubmeshSummaries(m_submeshSummaries);
@@ -229,12 +270,25 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
             }
 
-            // kick async copy
-            sample.FillVertexBuffer(m_splitData, m_submeshData);
+            var job = new FillVertexBufferJob {sample = sample, splitData = m_splitData, submeshData = m_submeshData};
+
+            fillVertexBufferHandle = job.Schedule();
+        }
+
+        struct FillVertexBufferJob : IJob
+        {
+            public aiPolyMeshSample sample;
+            public NativeArray<aiPolyMeshData> splitData;
+            public NativeArray<aiSubmeshData> submeshData;
+            public void Execute()
+            {
+                sample.FillVertexBuffer(splitData, submeshData);
+            }
         }
 
         public override void AbcSyncDataEnd()
         {
+            fillVertexBufferHandle.Complete();
 #if UNITY_EDITOR
             for (int s = 0; s < m_splits.Count; ++s)
             {
@@ -250,10 +304,6 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
-
-            // wait async copy complete
-            var sample = m_abcSchema.sample;
-            sample.Sync();
 
             bool topologyChanged = m_sampleSummary.topologyChanged;
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)

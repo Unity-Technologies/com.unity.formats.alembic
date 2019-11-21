@@ -112,7 +112,6 @@ aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
 
 aiPolyMeshSample::~aiPolyMeshSample()
 {
-    waitAsync();
 }
 
 void aiPolyMeshSample::reset()
@@ -243,25 +242,11 @@ void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data
 
 void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
 {
-    auto body = [this, vbs, ibs]() {
-            auto& refiner = m_topology->m_refiner;
-            for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
-                fillSplitVertices(spi, vbs[spi]);
-            for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
-                fillSubmeshIndices(smi, ibs[smi]);
-        };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_copy = std::async(std::launch::async, body);
-}
-
-void aiPolyMeshSample::waitAsync()
-{
-    if (m_async_copy.valid())
-        m_async_copy.wait();
-    m_force_sync = false;
+    auto &refiner = m_topology->m_refiner;
+    for (int spi = 0; spi < (int) refiner.splits.size(); ++spi)
+        fillSplitVertices(spi, vbs[spi]);
+    for (int smi = 0; smi < (int) refiner.submeshes.size(); ++smi)
+        fillSubmeshIndices(smi, ibs[smi]);
 }
 
 aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
