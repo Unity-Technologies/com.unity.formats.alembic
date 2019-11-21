@@ -18,6 +18,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         /// <summary>
         /// HDF5 format (Deprecated).
         /// </summary>
+        [Obsolete]
         HDF5,
         /// <summary>
         /// Ogawa format.
@@ -370,6 +371,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);

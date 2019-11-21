@@ -247,6 +247,7 @@ abciAPI void            aiClearContextsWithPath(const char *path);
 abciAPI aiContext*      aiContextCreate(int uid);
 abciAPI void            aiContextDestroy(aiContext* ctx);
 abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
+abciAPI bool            aiContextGetIsHDF5(aiContext* ctx);
 abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI int             aiContextGetTimeSamplingCount(aiContext* ctx);
 abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i);

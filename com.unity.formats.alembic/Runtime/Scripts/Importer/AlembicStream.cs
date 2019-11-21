@@ -74,6 +74,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         public bool abcIsValid { get { return m_context; } }
         internal aiConfig config { get { return m_config; } }
 
+        internal bool IsHDF5()
+        {
+            return m_context.IsHDF5();
+        }
+
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
 
         public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
