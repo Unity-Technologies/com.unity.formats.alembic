@@ -138,9 +138,10 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
 
     // velocities
     sample.m_velocities_sp.reset();
-    if (m_summary.has_velocities)
+    auto velocityProp = m_schema.getVelocitiesProperty();
+    if (velocityProp.valid())
     {
-        m_schema.getVelocitiesProperty().get(sample.m_velocities_sp, ss);
+        velocityProp.get(sample.m_velocities_sp, ss);
     }
 
     // IDs
