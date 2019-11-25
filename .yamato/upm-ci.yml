@@ -107,7 +107,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 
 test_trigger:
-  name: Tests Trigger
+  name: TestsTrigger
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
@@ -131,7 +131,9 @@ test_trigger:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
+    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    {% endif %}  
     {% endfor %}
     {% endfor %}
 
@@ -158,9 +160,4 @@ publish:
       paths:
         - "upm-ci~/package/*.tgz"
   dependencies:
-    - .yamato/upm-ci.yml#pack
-  {% for editor in editors %}
-  {% for platform in platforms %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endfor %}  
-  {% endfor %}
+    - .yamato/upm-ci.yml#TestsTrigger
