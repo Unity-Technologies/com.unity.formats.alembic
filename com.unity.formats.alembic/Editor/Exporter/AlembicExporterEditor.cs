@@ -64,7 +64,23 @@ namespace UnityEditor.Formats.Alembic.Exporter
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
 #if !UNITY_EDITOR_LINUX
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.archiveType"));
+                var archiveProp = so.FindProperty(pathSettings + "conf.archiveType");
+                using (var hScope = new EditorGUILayout.HorizontalScope())
+                {
+                    using (var propertyScope = new EditorGUI.PropertyScope(hScope.rect,
+                        new GUIContent(archiveProp.displayName), archiveProp))
+                    {
+                        using (var changeScope = new EditorGUI.ChangeCheckScope())
+                        {
+                            var val = EditorGUILayout.EnumPopup(propertyScope.content, (ArchiveType) archiveProp.intValue, null,
+                                true);
+                            if (changeScope.changed)
+                            {
+                                archiveProp.intValue = (int)(ArchiveType)val;
+                            }
+                        }
+                    }
+                }
 #endif
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.xformType"));
                 var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");

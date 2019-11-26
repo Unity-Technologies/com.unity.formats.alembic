@@ -69,7 +69,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(6, "abc")]
+    [ScriptedImporter(7, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -120,6 +120,12 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
 
         [SerializeField] bool firstImport = true;
+
+        internal bool IsHDF5
+        {
+            get { return isHDF5;}
+        }
+        [SerializeField] bool isHDF5;
 
         void OnValidate()
         {
@@ -187,6 +193,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
+                isHDF5 = abcStream.IsHDF5();
+                if (IsHDF5)
+                {
+                    Debug.LogWarning(path+": Deprecated HDF5 file format. Consider converting to Ogawa.");
+                }
             }
 
             firstImport = false;

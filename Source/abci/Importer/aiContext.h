@@ -73,6 +73,7 @@ public:
 
     void queueAsync(aiAsync& task);
     void waitAsync();
+    bool getIsHDF5() const { return m_isHDF5; }
 
     template<class F>
     void eachNodes(const F &f);
@@ -91,6 +92,7 @@ private:
     aiConfig m_config;
 
     std::vector<aiAsync*> m_async_tasks;
+    bool m_isHDF5;
 };
 
 #include "aiObject.h"
