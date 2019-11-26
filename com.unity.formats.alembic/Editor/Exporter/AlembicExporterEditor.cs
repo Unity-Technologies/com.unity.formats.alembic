@@ -130,8 +130,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshNormals"), new GUIContent("Normals"));
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV0"), new GUIContent("UV 1"));
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV1"), new GUIContent("UV 2"));
+                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV0"), new GUIContent("UV 0"));
+                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV1"), new GUIContent("UV 1"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshColors"), new GUIContent("Vertex Color"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshSubmeshes"), new GUIContent("Submeshes"));
                 EditorGUI.indentLevel--;
