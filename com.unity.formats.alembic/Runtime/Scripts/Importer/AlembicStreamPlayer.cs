@@ -108,9 +108,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public AlembicStreamSettings Settings => StreamDescriptor !=null ? StreamDescriptor.Settings : null;
 
-        [SerializeField]
-        bool asyncLoad = true;
-        
         float lastUpdateTime;
         bool forceUpdate = false;
         bool updateStarted = false;
