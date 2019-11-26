@@ -17,8 +17,8 @@
     "repository": {
         "type": "git", 
         "revision": "@PACKAGE_REVISION@",
-        "url": "ssh://git@github.com/unity3d-jp/AlembicForUnity.git"
+        "url": "ssh://git@github.com:Unity-Technologies/AlembicForUnity.git"
     }, 
-    "unity": "2019.2",
+    "unity": "2019.3",
     "version": "2.0.0-preview.1"
 }
