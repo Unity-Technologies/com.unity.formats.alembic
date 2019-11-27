@@ -40,7 +40,7 @@ Use these settings to define the properties of the Alembic output.
 | ***Property***      |             | ***Description***                                            |
 | :------------------ | :---------- | :----------------------------------------------------------- |
 | __Archive Type__    |             | Choose the Alembic format specification.                     |
-|                     | __HDF5__    | This is a common hierarchical data format for Alembic.       |
+|                     | __HDF5__    | Common (now deprecated) hierarchical data format for Alembic. |
 |                     | __Ogawa__   | This format produces smaller files and better performance than HDF5. This is the default format. |
 | __Xform Type__      |             | Choose the transform type.                                   |
 |                     | __Matrix__  | Record the full transformation matrix.                       |
@@ -93,7 +93,6 @@ Use these settings to define which components to save data for.
 | :---------------------- | :----------------------------------------------------------- |
 | __MeshRenderer__        | Enable to export [MeshRenderer](https://docs.unity3d.com/Manual/class-MeshRenderer.html) components. |
 | __SkinnedMeshRenderer__ | Enable to export [SkinnedMeshRenderer](https://docs.unity3d.com/Manual/class-SkinnedMeshRenderer.html) components. |
-| __ParticleSystem__      | Enable to export [ParticleSystem](https://docs.unity3d.com/Manual/class-ParticleSystem.html) components. |
 | __Camera__              | Enable to export [Camera](https://docs.unity3d.com/Manual/class-Camera.html) components. |
 
 
@@ -111,8 +110,8 @@ Use these settings to fine-tune the Mesh data you are saving.
 | ***Property***   | ***Description***               |
 | :--------------- | :------------------------------ |
 | __Normals__      | Enable to export Mesh normals.  |
-| __UV1__          | Enable to export Mesh UV1.      |
-| __UV2__          | Enable to export Mesh UV2.      |
+| __UV 0__         | Enable to export the base texture coordinates of the Mesh.|
+| __UV 1__         | Enable to export the second texture coordinate set of the Mesh.|
 | __Vertex Color__ | Enable to export vertex colors. |
 | __Submeshes__    | Enable to export sub-Meshes.    |
 
