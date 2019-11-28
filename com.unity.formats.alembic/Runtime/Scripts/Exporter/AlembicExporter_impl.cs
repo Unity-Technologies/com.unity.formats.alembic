@@ -151,7 +151,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool meshUV0 = true;
         /// <summary>
-        /// Enable to export Mesh UV0.
+        /// Enable to export the base texture coordinate set of the Mesh.
         /// </summary>
         public bool MeshUV0
         {
@@ -162,7 +162,7 @@ namespace UnityEngine.Formats.Alembic.Util
         [SerializeField]
         bool meshUV1 = true;
         /// <summary>
-        /// Enable to export Mesh UV1.
+        /// Enable to export the second texture coordinate set of the Mesh.
         /// </summary>
         public bool MeshUV1
         {
