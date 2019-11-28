@@ -1,12 +1,12 @@
 # Changes in Alembic for Unity
 ## [2.0.0-preview.1] - 2019-08-07
 ### Changes
-- Minimum unity version is  2019.3.
+- Minimum Unity version is 2019.3.
 - Introduced public API for Alembic playback and recording. 
-- Multithread the loading of alembic files.
-- Removed the LitAlembic HDRP shader. The same features are supported by HDRP native shaders enabling 'Additional Velocity Change'.
+- Loading of Alembic files is now multi-threaded.
+- Removed the LitAlembic HDRP shader that has been obsoleted by HDRP native shaders that now offers the once missing velocity option.
 - HDF5 format is Obsolete.
-- Fixed a bug, where the face-id were being sorted in ascending order.
+- Fixed a bug where the face-id were being sorted in ascending order.
 - Fixed a bug that caused crashes when importing point clouds that had no velocity information.
 
 
