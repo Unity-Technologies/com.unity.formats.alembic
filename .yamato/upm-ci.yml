@@ -152,7 +152,7 @@ publish:
   triggers:
     tags:
       only:
-        - /^(v|V)[0-9]+.[0-9]+.[0-9]+/
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
   artifacts:
     logs.zip:
       paths:
