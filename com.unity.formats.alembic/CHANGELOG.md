@@ -8,7 +8,7 @@
 - HDF5 format is Obsolete.
 - Fixed a bug where the face-id were being sorted in ascending order.
 - Fixed a bug that caused crashes when importing point clouds that had no velocity information.
-
+- Fixed a bug that caused exported geometries to have too many triangles.
 
 ## [1.0.6] - 2019-08-26
 ### Changes
