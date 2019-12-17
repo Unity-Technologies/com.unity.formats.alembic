@@ -179,7 +179,8 @@ aiContextManager::~aiContextManager()
 }
 
 aiContext::aiContext(int uid)
-    : m_uid(uid)
+    : m_uid(uid),
+      m_isHDF5(false)
 {
 }
 
@@ -329,6 +330,7 @@ bool aiContext::load(const char *in_path)
             Alembic::AbcCoreOgawa::ReadArchive archive_reader(m_streams);
             m_archive = Abc::IArchive(archive_reader(m_path), Abc::kWrapExisting, Abc::ErrorHandler::kThrowPolicy);
             DebugLog("Successfully opened Ogawa archive");
+            m_isHDF5 = false;
         }
         catch (Alembic::Util::Exception e)
         {
@@ -344,6 +346,7 @@ bool aiContext::load(const char *in_path)
             {
                 m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
                 DebugLog("Successfully opened HDF5 archive");
+                m_isHDF5 = true;
             }
             catch (Alembic::Util::Exception e2)
             {

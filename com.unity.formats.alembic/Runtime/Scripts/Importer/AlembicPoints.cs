@@ -53,17 +53,17 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             // setup buffers
             var data = default(aiPointsData);
-            cloud.m_points.ResizeDiscard(m_sampleSummary.count);
-            data.points = cloud.m_points;
+            cloud.pointsList.ResizeDiscard(m_sampleSummary.count);
+            data.points = cloud.pointsList;
             if (m_summary.hasVelocities)
             {
-                cloud.m_velocities.ResizeDiscard(m_sampleSummary.count);
-                data.velocities = cloud.m_velocities;
+                cloud.velocitiesList.ResizeDiscard(m_sampleSummary.count);
+                data.velocities = cloud.velocitiesList;
             }
             if (m_summary.hasIDs)
             {
-                cloud.m_ids.ResizeDiscard(m_sampleSummary.count);
-                data.ids = cloud.m_ids;
+                cloud.idsList.ResizeDiscard(m_sampleSummary.count);
+                data.ids = cloud.idsList;
             }
             m_abcData[0] = data;
 
@@ -75,19 +75,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
-
-            var sample = m_abcSchema.sample;
-            // wait async copy complete
-            sample.Sync();
-
+            
             var data = m_abcData[0];
 
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
                 abcTreeNode.gameObject.SetActive(data.visibility);
 
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
-            cloud.m_boundsCenter = data.boundsCenter;
-            cloud.m_boundsExtents = data.boundsExtents;
+            cloud.BoundsCenter = data.boundsCenter;
+            cloud.BoundsExtents = data.boundsExtents;
         }
     }
 }

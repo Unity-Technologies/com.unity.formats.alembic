@@ -17,6 +17,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             var importer = serializedObject.targetObject as AlembicImporter;
             var pathSettings = "streamSettings.";
 
+            if (importer.IsHDF5)
+            {
+                EditorGUILayout.HelpBox("Deprecated HDF5 file format. Consider converting to Ogawa.", MessageType.Warning);
+            }
+
             EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
@@ -88,8 +93,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(aiNormalsMode)));
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(aiTangentsMode)));
+                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(NormalsMode)));
+                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(TangentsMode)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "flipFaces"));
                 EditorGUI.indentLevel--;
             }
@@ -98,7 +103,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(aiAspectRatioMode)),
+                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(AspectRatioMode)),
                     new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }

@@ -19,8 +19,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
         public override void OnInspectorGUI()
         {
             var t = target as AlembicExporter;
-            var recorder = t.recorder;
-            var settings = recorder.settings;
+            var recorder = t.Recorder;
+            var settings = recorder.Settings;
             var so = serializedObject;
 
             bool dirty = false;
@@ -64,12 +64,28 @@ namespace UnityEditor.Formats.Alembic.Exporter
             EditorGUILayout.LabelField("Alembic Settings", EditorStyles.boldLabel);
             {
 #if !UNITY_EDITOR_LINUX
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.archiveType"));
+                var archiveProp = so.FindProperty(pathSettings + "conf.archiveType");
+                using (var hScope = new EditorGUILayout.HorizontalScope())
+                {
+                    using (var propertyScope = new EditorGUI.PropertyScope(hScope.rect,
+                        new GUIContent(archiveProp.displayName), archiveProp))
+                    {
+                        using (var changeScope = new EditorGUI.ChangeCheckScope())
+                        {
+                            var val = EditorGUILayout.EnumPopup(propertyScope.content, (ArchiveType) archiveProp.intValue, null,
+                                true);
+                            if (changeScope.changed)
+                            {
+                                archiveProp.intValue = (int)(ArchiveType)val;
+                            }
+                        }
+                    }
+                }
 #endif
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.xformType"));
                 var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
                 EditorGUILayout.PropertyField(timeSamplingType);
-                if (timeSamplingType.intValue == (int)aeTimeSamplingType.Uniform)
+                if (timeSamplingType.intValue == (int)TimeSamplingType.Uniform)
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.frameRate"));
@@ -114,8 +130,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshNormals"), new GUIContent("Normals"));
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV0"), new GUIContent("UV 1"));
-                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV1"), new GUIContent("UV 2"));
+                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV0"), new GUIContent("UV 0"));
+                EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshUV1"), new GUIContent("UV 1"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshColors"), new GUIContent("Vertex Color"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshSubmeshes"), new GUIContent("Submeshes"));
                 EditorGUI.indentLevel--;
@@ -151,7 +167,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
             {
                 // capture control
                 EditorGUILayout.LabelField("Capture Control", EditorStyles.boldLabel);
-                if (recorder.recording)
+                if (recorder.Recording)
                 {
                     if (GUILayout.Button("End Recording"))
                         t.EndRecording();

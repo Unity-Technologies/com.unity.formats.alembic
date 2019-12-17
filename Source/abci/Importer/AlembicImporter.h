@@ -30,15 +30,15 @@ class aiPolyMesh; // : aiSchema
 class aiPoints;   // : aiSchema
 class aiProperty;
 
-enum class aiNormalsMode
+enum class NormalsMode
 {
-    ReadFromFile,
-    ComputeIfMissing,
-    AlwaysCompute,
-    Ignore
+    //ReadFromFile,
+    ComputeIfMissing = 1,
+    AlwaysCompute = 2,
+    //Ignore
 };
 
-enum class aiTangentsMode
+enum class TangentsMode
 {
     None,
     Compute,
@@ -99,8 +99,8 @@ enum class aiPropertyType
 
 struct aiConfig
 {
-    aiNormalsMode normals_mode = aiNormalsMode::ComputeIfMissing;
-    aiTangentsMode tangents_mode = aiTangentsMode::None;
+    NormalsMode normals_mode = NormalsMode::ComputeIfMissing;
+    TangentsMode tangents_mode = TangentsMode::None;
     float scale_factor = 1.0f;
     float aspect_ratio = -1.0f;
     float vertex_motion_scale = 1.0f;
@@ -108,8 +108,6 @@ struct aiConfig
     bool swap_handedness = true;
     bool swap_face_winding = false;
     bool interpolate_samples = true;
-    bool async_load = false;
-
     bool import_point_polygon = true;
     bool import_line_polygon = true;
     bool import_triangle_polygon = true;
@@ -249,6 +247,7 @@ abciAPI void            aiClearContextsWithPath(const char *path);
 abciAPI aiContext*      aiContextCreate(int uid);
 abciAPI void            aiContextDestroy(aiContext* ctx);
 abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
+abciAPI bool            aiContextGetIsHDF5(aiContext* ctx);
 abciAPI void            aiContextSetConfig(aiContext* ctx, const aiConfig* conf);
 abciAPI int             aiContextGetTimeSamplingCount(aiContext* ctx);
 abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i);
@@ -280,8 +279,6 @@ abciAPI bool            aiSchemaIsDataUpdated(aiSchema* schema);
 abciAPI int             aiSchemaGetNumProperties(aiSchema* schema);
 abciAPI aiProperty*     aiSchemaGetPropertyByIndex(aiSchema* schema, int i);
 abciAPI aiProperty*     aiSchemaGetPropertyByName(aiSchema* schema, const char *name);
-
-abciAPI void            aiSampleSync(aiSample* sample);
 
 abciAPI void            aiXformGetData(aiXformSample* sample, aiXformData *dst);
 

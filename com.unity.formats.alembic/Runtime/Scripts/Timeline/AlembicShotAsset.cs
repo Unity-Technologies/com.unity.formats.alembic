@@ -1,36 +1,33 @@
-using System;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
 namespace UnityEngine.Formats.Alembic.Timeline
 {
+    /// <summary>
+    /// Clip representing the playback range of an Alembic asset.
+    /// </summary>
     [System.ComponentModel.DisplayName("Alembic Shot")]
-    internal class AlembicShotAsset : PlayableAsset, ITimelineClipAsset, IPropertyPreview
+    public class AlembicShotAsset : PlayableAsset, ITimelineClipAsset, IPropertyPreview
     {
         AlembicStreamPlayer m_stream;
 
         [Tooltip("Alembic asset to play")]
         [SerializeField]
         private ExposedReference<AlembicStreamPlayer> streamPlayer;
+
+        ClipCaps ITimelineClipAsset.clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
+        
+        /// <summary>
+        /// The AlembicStreamPlayer to play.
+        /// </summary>
         public ExposedReference<AlembicStreamPlayer> StreamPlayer
         {
             get { return streamPlayer; }
             set { streamPlayer = value; }
         }
 
-        [Tooltip("Amount of time to clip off the end of the alembic asset from playback.")]
-        [SerializeField]
-        private float endOffset;
-        public float EndOffset
-        {
-            get { return endOffset; }
-            set { endOffset = value; }
-        }
-
-        public ClipCaps clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
-
+        /// <inheritdoc/>
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
             var playable = ScriptPlayable<AlembicShotPlayable>.Create(graph);
@@ -40,14 +37,16 @@ namespace UnityEngine.Formats.Alembic.Timeline
             return playable;
         }
 
+        /// <inheritdoc/>
         public override double duration
         {
             get
             {
-                return m_stream == null ? 0 : m_stream.duration;
+                return m_stream == null ? 0 : m_stream.Duration;
             }
         }
 
+        /// <inheritdoc/>
         public void GatherProperties(PlayableDirector director, IPropertyCollector driver)
         {
             var streamComponent = streamPlayer.Resolve(director);

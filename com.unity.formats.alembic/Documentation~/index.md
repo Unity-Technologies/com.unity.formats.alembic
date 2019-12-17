@@ -27,7 +27,6 @@ The package is available on these 64-bit desktop platforms:
 ## Known limitations
 
 * Alembic does not support Material import and export.
-* There is no exposed public API in the Alembic package.
 
 ## Feedback
 

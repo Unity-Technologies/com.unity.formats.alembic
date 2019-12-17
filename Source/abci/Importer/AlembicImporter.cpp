@@ -44,6 +44,11 @@ abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
     return ctx ? ctx->load(path) : false;
 }
 
+abciAPI bool aiContextGetIsHDF5(aiContext* ctx)
+{
+    return ctx ? ctx->getIsHDF5() : false;
+}
+
 abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
 {
     if (ctx)
@@ -156,9 +161,7 @@ abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 
 abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
 {
-    if (schema)
-    {
-        schema->markForceSync();
+    if (schema) {
         schema->markForceUpdate();
         schema->updateSample(*ss);
     }
@@ -193,12 +196,6 @@ abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchema* schema, int i)
 abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name)
 {
     return schema->getPropertyByName(name);
-}
-
-abciAPI void aiSampleSync(aiSample * sample)
-{
-    if (sample)
-        sample->waitAsync();
 }
 
 abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)

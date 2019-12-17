@@ -35,53 +35,38 @@ aiPointsSample::aiPointsSample(aiPoints *schema)
 
 aiPointsSample::~aiPointsSample()
 {
-    waitAsync();
 }
 
 void aiPointsSample::fillData(aiPointsData &data)
 {
-    auto body = [this, &data]() {
-            data.visibility = visibility;
+    data.visibility = visibility;
+    if (data.points)
+    {
+        if (!m_points_ref.empty())
+            m_points_ref.copy_to(data.points);
+    }
+    if (data.velocities)
+    {
+        if (!m_velocities.empty())
+            m_velocities.copy_to(data.velocities);
+        else
+            memset(data.velocities, 0, m_points_ref.size() * sizeof(abcV3));
+    }
 
-            if (data.points)
-            {
-                if (!m_points_ref.empty())
-                    m_points_ref.copy_to(data.points);
-            }
-            if (data.velocities)
-            {
-                if (!m_velocities.empty())
-                    m_velocities.copy_to(data.velocities);
-                else
-                    memset(data.velocities, 0, m_points_ref.size() * sizeof(abcV3));
-            }
-            if (data.ids)
-            {
-                if (!m_ids.empty())
-                    m_ids.copy_to(data.ids);
-                else
-                    memset(data.ids, 0, m_points_ref.size() * sizeof(uint32_t));
-            }
-            data.center = m_bb_center;
-            data.size = m_bb_size;
-        };
-
-    if (m_force_sync || !getConfig().async_load)
-        body();
-    else
-        m_async_copy = std::async(std::launch::async, body);
+    if (data.ids)
+    {
+        if (!m_ids.empty())
+            m_ids.copy_to(data.ids);
+        else
+            memset(data.ids, 0, m_points_ref.size() * sizeof(uint32_t));
+    }
+    data.center = m_bb_center;
+    data.size = m_bb_size;
 }
 
 void aiPointsSample::getSummary(aiPointsSampleSummary & dst)
 {
     dst.count = (int)m_points.size();
-}
-
-void aiPointsSample::waitAsync()
-{
-    if (m_async_copy.valid())
-        m_async_copy.wait();
-    m_force_sync = false;
 }
 
 aiPoints::aiPoints(aiObject *parent, const abcObject &abc)
@@ -153,9 +138,10 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
 
     // velocities
     sample.m_velocities_sp.reset();
-    if (m_summary.has_velocities)
+    auto velocityProp = m_schema.getVelocitiesProperty();
+    if (velocityProp.valid())
     {
-        m_schema.getVelocitiesProperty().get(sample.m_velocities_sp, ss);
+        velocityProp.get(sample.m_velocities_sp, ss);
     }
 
     // IDs

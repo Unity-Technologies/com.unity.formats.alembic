@@ -69,7 +69,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(6, "abc")]
+    [ScriptedImporter(7, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -118,19 +118,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             get { return importWarning; }
             set { importWarning = value; }
         }
-        [SerializeField]
-        private List<string> varyingTopologyMeshNames = new List<string>();
-        public List<string> VaryingTopologyMeshNames
-        {
-            get { return varyingTopologyMeshNames; }
-        }
-        [SerializeField]
-        private List<string> splittingMeshNames = new List<string>();
-        public List<string> SplittingMeshNames
-        {
-            get { return splittingMeshNames; }
-        }
+
         [SerializeField] bool firstImport = true;
+
+        internal bool IsHDF5
+        {
+            get { return isHDF5;}
+        }
+        [SerializeField] bool isHDF5;
 
         void OnValidate()
         {
@@ -170,20 +165,19 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (var abcStream = new AlembicStream(go, streamDescriptor))
             {
                 abcStream.AbcLoad(true, true);
-
-                abcStream.GetTimeRange(ref abcStartTime, ref abcEndTime);
+                abcStream.GetTimeRange(out abcStartTime, out abcEndTime);
                 if (firstImport)
                 {
                     startTime = abcStartTime;
                     endTime = abcEndTime;
                 }
-                streamDescriptor.abcStartTime = abcStartTime;
-                streamDescriptor.abcEndTime = abcEndTime;
+                streamDescriptor.mediaStartTime = (float)abcStartTime;
+                streamDescriptor.mediaEndTime = (float)abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.StreamDescriptor = streamDescriptor;
-                streamPlayer.StartTime = StartTime;
-                streamPlayer.EndTime = EndTime;
+                streamPlayer.StartTime = (float)StartTime;
+                streamPlayer.EndTime = (float)EndTime;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
@@ -199,6 +193,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
+                isHDF5 = abcStream.IsHDF5();
+                if (IsHDF5)
+                {
+                    Debug.LogWarning(path+": Deprecated HDF5 file format. Consider converting to Ogawa.");
+                }
             }
 
             firstImport = false;
@@ -282,7 +281,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
-            if (streamDescr.duration > 0)
+            if (streamDescr.mediaDuration > 0)
             {
                 // AnimationClip for time
                 {
@@ -290,8 +289,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     frames[0].value = 0.0f;
                     frames[0].time = 0.0f;
                     frames[0].outTangent = 1.0f;
-                    frames[1].value = (float)streamDescr.duration;
-                    frames[1].time = (float)streamDescr.duration;
+                    frames[1].value = streamDescr.mediaDuration;
+                    frames[1].time = streamDescr.mediaDuration;
                     frames[1].inTangent = 1.0f;
 
                     var curve = new AnimationCurve(frames);
@@ -324,26 +323,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
-            varyingTopologyMeshNames = new List<string>();
-            splittingMeshNames = new List<string>();
 
             CollectSubAssets(subassets, root);
-
-            streamDescr.HasVaryingTopology = VaryingTopologyMeshNames.Count > 0;
         }
 
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
-            var mesh = node.GetAlembicObj<AlembicMesh>();
-            if (mesh != null)
-            {
-                var sum = mesh.summary;
-                if (mesh.summary.topologyVariance == aiTopologyVariance.Heterogeneous)
-                    VaryingTopologyMeshNames.Add(node.gameObject.name);
-                else if (mesh.sampleSummary.splitCount > 1)
-                    SplittingMeshNames.Add(node.gameObject.name);
-            }
-
             int submeshCount = 0;
             var meshFilter = node.gameObject.GetComponent<MeshFilter>();
             if (meshFilter != null)
@@ -367,11 +352,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (apr != null)
             {
                 var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                apr.sharedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
+                apr.InstancedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.SetSharedMaterials(new Material[] { subassets.pointsMaterial });
-                apr.motionVectorMaterial = subassets.pointsMotionVectorMaterial;
+                apr.Materials = new List<Material> { subassets.pointsMaterial };
+                apr.MotionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
             foreach (var child in node.Children)

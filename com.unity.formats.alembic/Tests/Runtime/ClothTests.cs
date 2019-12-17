@@ -16,11 +16,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var meshFiler = root.GetComponentInChildren<MeshFilter>();
             player.CurrentTime = 0;
             yield return new WaitForEndOfFrame();
-            var t0 = meshFiler.sharedMesh.vertices[0];
-            player.CurrentTime = (float)player.duration;
+            var vt0 = meshFiler.sharedMesh.vertices[0];
+            var vCount0 = meshFiler.sharedMesh.vertices.Length;
+            var idxCount0 = meshFiler.sharedMesh.GetIndexCount(0);
+            var subMeshCount0 = meshFiler.sharedMesh.subMeshCount;
+            player.CurrentTime = (float)player.Duration;
             yield return new WaitForEndOfFrame();
-            var t1 = meshFiler.sharedMesh.vertices[0];
-            Assert.AreNotEqual(t0, t1);
+            var vt1 = meshFiler.sharedMesh.vertices[0];
+            var vCount1 = meshFiler.sharedMesh.vertices.Length;
+            var idxCount1 = meshFiler.sharedMesh.GetIndexCount(0);
+            var subMeshCount1 = meshFiler.sharedMesh.subMeshCount;
+
+            Assert.AreNotEqual(vt0, vt1); // It moves
+
+            // Geom does not grow
+            Assert.AreEqual(vCount0, vCount1);
+            Assert.AreEqual(idxCount0, idxCount1);
+            Assert.AreEqual(subMeshCount0, subMeshCount1);
         }
 
         [SetUp]
@@ -38,8 +50,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator TestDefaultExportParams()
         {
             yield return RecordAlembic();
-            deleteFileList.Add(exporter.recorder.settings.OutputPath);
-            var go = TestAbcImported(exporter.recorder.settings.OutputPath);
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
             yield return TestPlaneContents(go);
         }
     }

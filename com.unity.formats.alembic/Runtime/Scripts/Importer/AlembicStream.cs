@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Jobs;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,6 +11,16 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     internal sealed class AlembicStream : IDisposable
     {
+        public struct UpdateSamplesJob : IJob
+        {
+            public aiContext context;
+            public double time;
+            public void Execute()
+            {
+                context.UpdateSamples(time);
+            }
+        }
+
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
         public static void DisconnectStreamsWithPath(string path)
@@ -55,6 +66,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         double m_time;
         bool m_loaded;
         bool m_streamInterupted;
+        JobHandle udateJobHandle;
 
         internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
@@ -62,10 +74,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         public bool abcIsValid { get { return m_context; } }
         internal aiConfig config { get { return m_config; } }
 
-        public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
-        public void SetAsyncLoad(bool value) { m_config.asyncLoad = value; }
+        internal bool IsHDF5()
+        {
+            return m_context.IsHDF5();
+        }
 
-        public void GetTimeRange(ref double begin, ref double end) { m_context.GetTimeRange(ref begin, ref end); }
+        public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
+
+        public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
 
         internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
@@ -108,18 +124,21 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_time = time;
             m_context.SetConfig(ref m_config);
             AbcBeforeUpdateSamples(m_abcTreeRoot);
-            m_context.UpdateSamples(m_time);
+
+            var updateJob = new UpdateSamplesJob {context = m_context, time = m_time};
+            udateJobHandle = updateJob.Schedule();
             return true;
         }
 
         // returns false if the context needs to be recovered.
         public void AbcUpdateEnd()
         {
+            udateJobHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public void AbcLoad(bool createMissingNodes, bool initialImport)
+        public bool AbcLoad(bool createMissingNodes, bool initialImport)
         {
             m_time = 0.0f;
             m_context = aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID());
@@ -142,12 +161,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (m_loaded)
             {
                 UpdateAbcTree(m_context, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
-                AlembicStream.s_streams.Add(this);
+                s_streams.Add(this);
             }
             else
             {
                 Debug.LogError("failed to load alembic at " + m_streamDesc.PathToAbc);
             }
+
+            return m_loaded;
         }
 
         public void Dispose()
@@ -270,13 +291,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             ic.alembicTreeNode = treeNode;
         }
 
-        internal static float GetAspectRatio(aiAspectRatioMode mode)
+        internal static float GetAspectRatio(AspectRatioMode mode)
         {
-            if (mode == aiAspectRatioMode.CameraAperture)
+            if (mode == AspectRatioMode.CameraAperture)
             {
                 return 0.0f;
             }
-            else if (mode == aiAspectRatioMode.CurrentResolution)
+            else if (mode == AspectRatioMode.CurrentResolution)
             {
                 return (float)Screen.width / (float)Screen.height;
             }

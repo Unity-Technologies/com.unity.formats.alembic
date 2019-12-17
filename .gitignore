@@ -52,6 +52,7 @@ External/install/**
 com.unity.formats.alembic/.npmignore
 com.unity.formats.alembic/package.json
 com.unity.formats.alembic/LICENSE.md
+com.unity.formats.alembic/Runtime/Plugins/x86_64/*.so
 automation
 cmake-build-debug
 *.csproj
