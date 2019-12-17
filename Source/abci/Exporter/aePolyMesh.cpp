@@ -105,14 +105,11 @@ void aePolyMesh::writeSampleBody()
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
-    // if face counts are empty, assume all faces are triangles
-    if (m_buf_faces.empty())
-    {
-        m_buf_faces.resize((int)(m_buf_indices.size() / 3), 3);
-    }
-
     // process submesh data if present
     {
+        m_buf_indices.resize(0);
+        m_buf_faces.resize(0);
+
         int offset_faces = 0;
         for (size_t smi = 0; smi < m_buf_submeshes.size(); ++smi)
         {

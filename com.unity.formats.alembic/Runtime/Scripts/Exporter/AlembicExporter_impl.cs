@@ -658,7 +658,9 @@ namespace UnityEngine.Formats.Alembic.Util
                     else
                     {
                         if (m_meshBake == null)
-                            m_meshBake = new Mesh();
+                        {
+                            m_meshBake = new Mesh {name = m_target.name};
+                        }
 
                         m_meshBake.Clear();
                         m_target.BakeMesh(m_meshBake);
