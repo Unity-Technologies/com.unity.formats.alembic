@@ -120,8 +120,6 @@ test_trigger:
     branches:
       only:
         - "/.*/"
-      except:
-        - master
   artifacts:
     logs:
       paths:
@@ -162,4 +160,4 @@ publish:
       paths:
         - "upm-ci~/package/*.tgz"
   dependencies:
-    - .yamato/upm-ci.yml#TestsTrigger
+    - .yamato/upm-ci.yml#test_trigger
