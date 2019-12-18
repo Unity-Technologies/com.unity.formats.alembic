@@ -13,12 +13,6 @@
         "simulation"
     ], 
     "name": "com.unity.formats.alembic",
-    "repoPackagePath": "build/install/com.unity.formats.alembic", 
-    "repository": {
-        "type": "git", 
-        "revision": "@PACKAGE_REVISION@",
-        "url": "ssh://git@github.com/unity3d-jp/AlembicForUnity.git"
-    }, 
     "unity": "2018.3",
     "unityRelease": "4f1",
     "version": "1.0.6"
