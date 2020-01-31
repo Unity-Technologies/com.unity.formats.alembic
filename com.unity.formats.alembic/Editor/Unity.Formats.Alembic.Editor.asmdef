@@ -1,11 +1,25 @@
 {
     "name": "Unity.Formats.Alembic.Editor",
-  "references": [
-    "Unity.Formats.Alembic.Runtime",
-    "Unity.Timeline"
-  ],
+    "references": [
+        "Unity.Formats.Alembic.Runtime",
+        "Unity.Timeline",
+        "Unity.Recorder.Editor"
+    ],
     "includePlatforms": [
         "Editor"
     ],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.recorder",
+            "expression": "2.1.0-preview.1",
+            "define": "RECORDER_AVAILABLE"
+        }
+    ],
+    "noEngineReferences": false
 }

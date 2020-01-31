@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -11,53 +10,54 @@ using UnityEngine.Formats.Alembic.Util;
 namespace UnityEditor.Formats.Alembic.Exporter
 {
     [CustomEditor(typeof(AlembicExporter))]
-    internal class AlembicExporterEditor : Editor
+    class AlembicExporterEditor : Editor
     {
         bool m_foldCaptureComponents;
         bool m_foldMeshComponents;
 
-        public override void OnInspectorGUI()
+        internal static bool DrawSettings(SerializedObject so,
+            UnityEngine.Formats.Alembic.Util.AlembicRecorderSettings settings,
+            string pathSettings, ref bool foldCaptureComponents, ref bool foldMeshComponents, bool recorder)
         {
-            var t = target as AlembicExporter;
-            var recorder = t.Recorder;
-            var settings = recorder.Settings;
-            var so = serializedObject;
-
             bool dirty = false;
-            var pathSettings = "m_recorder.m_settings.";
-
-            // output path
-            GUILayout.Space(5);
-            EditorGUILayout.LabelField("Output Path", EditorStyles.boldLabel);
+            if (!recorder)
             {
-                EditorGUILayout.BeginHorizontal();
-
-                EditorGUI.BeginChangeCheck();
-                settings.OutputPath = EditorGUILayout.TextField(settings.OutputPath);
-                if (EditorGUI.EndChangeCheck())
-                    dirty = true;
-
-                if (GUILayout.Button("...", GUILayout.Width(24)))
+                // output path
+                GUILayout.Space(5);
+                EditorGUILayout.LabelField("Output Path", EditorStyles.boldLabel);
                 {
-                    var dir = "";
-                    var filename = "";
-                    try
-                    {
-                        dir = Path.GetDirectoryName(settings.OutputPath);
-                        filename = Path.GetFileName(settings.OutputPath);
-                    }
-                    catch (Exception) {}
+                    EditorGUILayout.BeginHorizontal();
 
-                    var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
-                    if (path.Length > 0)
-                    {
-                        settings.OutputPath = path;
+                    EditorGUI.BeginChangeCheck();
+                    settings.OutputPath = EditorGUILayout.TextField(settings.OutputPath);
+                    if (EditorGUI.EndChangeCheck())
                         dirty = true;
+
+                    if (GUILayout.Button("...", GUILayout.Width(24)))
+                    {
+                        var dir = "";
+                        var filename = "";
+                        try
+                        {
+                            dir = Path.GetDirectoryName(settings.OutputPath);
+                            filename = Path.GetFileName(settings.OutputPath);
+                        }
+                        catch (Exception)
+                        {
+                        }
+
+                        var path = EditorUtility.SaveFilePanel("Output Path", dir, filename, "abc");
+                        if (path.Length > 0)
+                        {
+                            settings.OutputPath = path;
+                            dirty = true;
+                        }
                     }
+
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
+                GUILayout.Space(5);
             }
-            GUILayout.Space(5);
 
 
             // alembic settings
@@ -83,15 +83,19 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 }
 #endif
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.xformType"));
-                var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
-                EditorGUILayout.PropertyField(timeSamplingType);
-                if (timeSamplingType.intValue == (int)TimeSamplingType.Uniform)
+                if (!recorder)
                 {
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.frameRate"));
-                    EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "fixDeltaTime"));
-                    EditorGUI.indentLevel--;
+                    var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
+                    EditorGUILayout.PropertyField(timeSamplingType);
+                    if (timeSamplingType.intValue == (int) TimeSamplingType.Uniform)
+                    {
+                        EditorGUI.indentLevel++;
+                        EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.frameRate"));
+                        EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "fixDeltaTime"));
+                        EditorGUI.indentLevel--;
+                    }
                 }
+
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.swapHandedness"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.swapFaces"));
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.scaleFactor"));
@@ -115,8 +119,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "assumeNonSkinnedMeshesAreConstant"), new GUIContent("Static MeshRenderers"));
             GUILayout.Space(5);
 
-            m_foldCaptureComponents = EditorGUILayout.Foldout(m_foldCaptureComponents, "Capture Components");
-            if (m_foldCaptureComponents)
+            foldCaptureComponents = EditorGUILayout.Foldout(foldCaptureComponents, "Capture Components");
+            if (foldCaptureComponents)
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "captureMeshRenderer"), new GUIContent("MeshRenderer"));
@@ -125,8 +129,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorGUI.indentLevel--;
             }
 
-            m_foldMeshComponents = EditorGUILayout.Foldout(m_foldMeshComponents, "Mesh Components");
-            if (m_foldMeshComponents)
+            foldMeshComponents = EditorGUILayout.Foldout(foldMeshComponents, "Mesh Components");
+            if (foldMeshComponents)
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshNormals"), new GUIContent("Normals"));
@@ -136,6 +140,20 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "meshSubmeshes"), new GUIContent("Submeshes"));
                 EditorGUI.indentLevel--;
             }
+
+            return dirty;
+        }
+
+        public override void OnInspectorGUI()
+        {
+            var t = target as AlembicExporter;
+            var recorder = t.Recorder;
+            var settings = recorder.Settings;
+            var so = serializedObject;
+
+            var pathSettings = "m_recorder.m_settings.";
+            var dirty = DrawSettings(so, settings, pathSettings, ref m_foldCaptureComponents, ref m_foldMeshComponents, false);
+
             {
                 var m_captureOnStart = so.FindProperty("m_captureOnStart");
                 EditorGUILayout.PropertyField(m_captureOnStart);
