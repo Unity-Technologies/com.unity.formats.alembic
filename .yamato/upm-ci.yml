@@ -137,6 +137,31 @@ test_trigger:
     {% endfor %}
     {% endfor %}
 
+nightly_test_trigger:
+  name: Nightly tests Trigger
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    - dir
+  triggers:
+    recurring:
+      - branch: dev
+        frequency: daily
+      - branch: master
+        frequency: daily
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+    packages:
+      paths:
+        - "upm-ci~/packages/**/*"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+    - .yamato/upm-ci.yml#test_trigger
+
 publish:
   name: Publish
   agent:
