@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
         bool m_foldMeshComponents;
 
         internal static bool DrawSettings(SerializedObject so,
-            UnityEngine.Formats.Alembic.Util.AlembicRecorderSettings settings,
+            AlembicRecorderSettings settings,
             string pathSettings, ref bool foldCaptureComponents, ref bool foldMeshComponents, bool recorder)
         {
             bool dirty = false;

@@ -1,6 +1,8 @@
 #if RECORDER_AVAILABLE
 using UnityEditor.Formats.Alembic.Exporter;
 using UnityEditor.Recorder;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 namespace UnityEditor.Formats.Alembic.Recorder
 {
@@ -13,9 +15,16 @@ namespace UnityEditor.Formats.Alembic.Recorder
         {
             base.OnInspectorGUI();
             var t = target as AlembicRecorderSettings;
-            AlembicExporterEditor.DrawSettings(serializedObject,
+            var dirty = AlembicExporterEditor.DrawSettings(serializedObject,
                 t.Settings,
                 "settings.", ref m_foldCaptureComponents, ref m_foldMeshComponents, true);
+
+            serializedObject.ApplyModifiedProperties();
+            if (dirty)
+            {
+                EditorUtility.SetDirty(target);
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            }
         }
     }
 }
