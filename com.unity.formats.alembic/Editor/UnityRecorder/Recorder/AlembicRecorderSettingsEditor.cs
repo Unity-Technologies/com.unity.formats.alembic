@@ -11,6 +11,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
         bool m_foldMeshComponents;
         public override void OnInspectorGUI()
         {
+            base.OnInspectorGUI();
             var t = target as AlembicRecorderSettings;
             AlembicExporterEditor.DrawSettings(serializedObject,
                 t.Settings,
