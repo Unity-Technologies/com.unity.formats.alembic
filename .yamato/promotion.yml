@@ -55,6 +55,8 @@ promotion_test_trigger:
     type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.large
+  commands:
+    - dir
   artifacts:
     logs:
       paths:
