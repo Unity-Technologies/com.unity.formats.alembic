@@ -1,5 +1,6 @@
 #if RECORDER_AVAILABLE
 using UnityEditor.Recorder;
+using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEditor.Formats.Alembic.Recorder
 {
@@ -12,6 +13,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
             recorder = new UnityEngine.Formats.Alembic.Util.AlembicRecorder {Settings = abcSettings.Settings};
             recorder.Settings.FixDeltaTime = true;
             recorder.Settings.ExportOptions.FrameRate = abcSettings.FrameRate;
+            recorder.Settings.ExportOptions.TimeSamplingType = TimeSamplingType.Uniform;
 
             abcSettings.FileNameGenerator.CreateDirectory(session);
             var absolutePath = FileNameGenerator.SanitizePath(abcSettings.FileNameGenerator.BuildAbsolutePath(session));
