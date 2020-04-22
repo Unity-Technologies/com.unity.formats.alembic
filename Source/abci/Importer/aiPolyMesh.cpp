@@ -298,7 +298,6 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
 
 aiPolyMesh::~aiPolyMesh()
 {
-    waitAsync();
 }
 
 void aiPolyMesh::updateSummary()
