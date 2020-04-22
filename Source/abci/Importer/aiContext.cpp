@@ -179,7 +179,14 @@ aiContextManager::~aiContextManager()
 }
 
 aiContext::aiContext(int uid)
-    : m_uid(uid),
+    : m_path(),
+      m_streams(),
+      m_archive(),
+      m_top_node(),
+      m_timesamplings(),
+      m_uid(uid),
+      m_config(),
+      m_async_tasks(),
       m_isHDF5(false)
 {
 }
