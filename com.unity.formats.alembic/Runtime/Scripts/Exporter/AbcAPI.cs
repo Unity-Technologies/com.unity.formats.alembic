@@ -295,7 +295,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             if (!name.Contains("/")) return name;
 
             var ret =  name.Replace('/', '_');
-            Debug.Log($"AlembicExporter: Object name {name} is  invalid. Replaced with {ret}");
+            Debug.LogWarning($"AlembicExporter: Illegal character '/' in Alembic object name '{name}'. Replaced with {ret}");
             return ret;
         }
     }
