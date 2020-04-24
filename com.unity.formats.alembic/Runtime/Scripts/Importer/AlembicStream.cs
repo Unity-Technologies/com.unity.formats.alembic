@@ -15,9 +15,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// This class hides the context. The reason for that it that there are Jobs depending on it and we need
         /// to ensure they get completed before any set happens on the context
         /// </summary>
-        public struct ContextPair
+        public struct SafeContext
         {
-            public ContextPair(aiContext c)
+            public SafeContext(aiContext c)
             {
                 context = c;
                 updateJobHandle = new JobHandle();
@@ -84,7 +84,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = true;
-                    s.context = new ContextPair(default);
+                    s.m_context = new SafeContext(default);
                     s.m_loaded = false;
                 }
             });
@@ -116,25 +116,25 @@ namespace UnityEngine.Formats.Alembic.Importer
         AlembicStreamDescriptor m_streamDesc;
         AlembicTreeNode m_abcTreeRoot;
         aiConfig m_config;
-        ContextPair context;
+        SafeContext m_context;
         double m_time;
         bool m_loaded;
         bool m_streamInterupted;
 
         internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
-        internal ContextPair abcContext { get { return context; } }
-        public bool abcIsValid { get { return context.isValid; } }
+        internal SafeContext abcContext { get { return m_context; } }
+        public bool abcIsValid { get { return m_context.isValid; } }
         internal aiConfig config { get { return m_config; } }
 
         internal bool IsHDF5()
         {
-            return context.IsHDF5();
+            return m_context.IsHDF5();
         }
 
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
 
-        public void GetTimeRange(out double begin, out double end) { context.GetTimeRange(out begin, out end); }
+        public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
 
         internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
@@ -175,16 +175,16 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!abcIsValid || !m_loaded) return false;
 
             m_time = time;
-            context.SetConfig(ref m_config);
+            m_context.SetConfig(ref m_config);
             AbcBeforeUpdateSamples(m_abcTreeRoot);
-            context.ScheduleUpdateSamples(time);
+            m_context.ScheduleUpdateSamples(time);
             return true;
         }
 
         // returns false if the context needs to be recovered.
         public void AbcUpdateEnd()
         {
-            context.updateJobHandle.Complete();
+            m_context.updateJobHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);
         }
@@ -192,7 +192,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public bool AbcLoad(bool createMissingNodes, bool initialImport)
         {
             m_time = 0.0f;
-            context = new ContextPair(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
+            m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
 
             var settings = m_streamDesc.Settings;
             m_config.swapHandedness = settings.SwapHandedness;
@@ -206,12 +206,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_config.importLinePolygon = settings.ImportLinePolygon;
             m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
-            context.SetConfig(ref m_config);
-            m_loaded = context.Load(m_streamDesc.PathToAbc);
+            m_context.SetConfig(ref m_config);
+            m_loaded = m_context.Load(m_streamDesc.PathToAbc);
 
             if (m_loaded)
             {
-                UpdateAbcTree(context.root, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
+                UpdateAbcTree(m_context.root, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
                 s_streams.Add(this);
             }
             else
@@ -233,7 +233,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (abcIsValid)
             {
-                context.Destroy();
+                m_context.Destroy();
             }
         }
 
