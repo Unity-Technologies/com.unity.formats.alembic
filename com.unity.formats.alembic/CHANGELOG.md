@@ -1,4 +1,8 @@
 # Changes in Alembic for Unity
+
+## Unreleased version
+### Changes
+
 ## [2.0.0-preview.1] - 2019-08-07
 ### Changes
 - Minimum Unity version is 2019.3.
