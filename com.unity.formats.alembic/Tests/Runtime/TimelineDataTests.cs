@@ -234,5 +234,16 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                yield return null;
            }
         }
+
+        [UnityTest]
+        public IEnumerator  TestInvalidName()
+        {
+            cube.name = "a/b";
+            director.Play();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            exporter.OneShot();
+            yield return null;
+            TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
+        }
     }
 }
