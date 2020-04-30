@@ -82,6 +82,9 @@ namespace Tests
             var player = go.AddComponent<AlembicStreamPlayer>();
             var ret = player.LoadFromFile(outputFile+".abc");
             Assert.IsTrue(ret);
+            player.UpdateImmediately(5);
+            var pos = go.GetComponentInChildren<MeshFilter>().transform.position;
+            Assert.IsTrue(Vector3.Distance(pos, new Vector3(4.96666f,0,0)) < 1e-3);
         }
     }
 }
