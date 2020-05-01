@@ -54,7 +54,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             SceneManager.SetActiveScene(scene);
             var go = new GameObject("Recorder");
             exporter = go.AddComponent<AlembicExporter>();
-            exporter.MaxCaptureFrame = 10;
+            exporter.MaxCaptureFrame = 20;
             exporter.Recorder.Settings.OutputPath =
                 "Assets/" + Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".abc";
             exporter.CaptureOnStart = false;
