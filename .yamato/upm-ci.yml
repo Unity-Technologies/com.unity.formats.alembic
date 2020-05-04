@@ -14,7 +14,7 @@ platforms:
     flavor: m1.mac
   - name: centOS
     type: Unity::VM
-    image: package-ci/centos:latest
+    image: package-ci/centos:v0.0.17-495923
     flavor: b1.large
 
 ---
@@ -50,7 +50,7 @@ build_centOS:
   name: Build CentOS
   agent:
     type: Unity::VM
-    image: package-ci/centos:latest
+    image: package-ci/centos:v0.0.17-495923
     flavor: b1.large
   commands:
     -  git submodule update --init --recursive 
