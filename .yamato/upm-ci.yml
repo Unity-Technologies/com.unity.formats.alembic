@@ -14,7 +14,7 @@ platforms:
     flavor: m1.mac
   - name: centOS
     type: Unity::VM
-    image: package-ci/centos:v0.0.17-495923
+    image: package-ci/centos:latest
     flavor: b1.large
 
 ---
@@ -50,11 +50,11 @@ build_centOS:
   name: Build CentOS
   agent:
     type: Unity::VM
-    image: package-ci/centos:v0.0.17-495923
+    image: package-ci/centos:latest
     flavor: b1.large
   commands:
     -  git submodule update --init --recursive 
-    -  scl enable devtoolset-6 ./build.sh
+    -  scl enable devtoolset-7 ./build.sh
       
   artifacts:
     build:
@@ -131,9 +131,7 @@ test_trigger:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
 
@@ -188,8 +186,6 @@ publish:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
