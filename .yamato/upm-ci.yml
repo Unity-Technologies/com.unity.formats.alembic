@@ -13,7 +13,7 @@ platforms:
     image: buildfarm/mac:stable
     flavor: m1.mac
   - name: centOS
-    type: Unity::VM
+    type: Unity::VM::GPU
     image: package-ci/centos:latest
     flavor: b1.large
 
@@ -49,12 +49,12 @@ build_mac:
 build_centOS:
   name: Build CentOS
   agent:
-    type: Unity::VM
+    type: Unity::VM::GPU
     image: package-ci/centos:latest
     flavor: b1.large
   commands:
     -  git submodule update --init --recursive 
-    -  scl enable devtoolset-6 ./build.sh
+    -  scl enable devtoolset-7 ./build.sh
       
   artifacts:
     build:
@@ -93,7 +93,11 @@ test_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% if platform.name == 'centOS' %}   
+     - DISPLAY=:0 upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% else %}
+     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'  
+     {% endif %}
   artifacts:
     logs.zip:
       paths:
@@ -131,9 +135,7 @@ test_trigger:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
 
@@ -188,8 +190,6 @@ publish:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
