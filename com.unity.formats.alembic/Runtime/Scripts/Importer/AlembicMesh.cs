@@ -158,7 +158,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitSummaries.Dispose();
                 }
-                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount,Allocator.Persistent);
+                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount, Allocator.Persistent);
             }
 
             if (m_splitData.Length != splitCount)
@@ -167,7 +167,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitData.Dispose();
                 }
-                m_splitData = new NativeArray<aiPolyMeshData>(splitCount,Allocator.Persistent);
+                m_splitData = new NativeArray<aiPolyMeshData>(splitCount, Allocator.Persistent);
             }
 
             if (m_submeshSummaries.Length != submeshCount)
@@ -186,7 +186,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     m_submeshData.Dispose();
                 }
 
-                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount,Allocator.Persistent);
+                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount, Allocator.Persistent);
             }
 
             sample.GetSplitSummaries(m_splitSummaries);
@@ -247,9 +247,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.rgba.ResizeDiscard(0);
                 vertexData.rgba = split.rgba;
 
-                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged)) {
+                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged))
+                {
                     split.rgb.ResizeDiscard(vertexCount);
-                } else {
+                }
+                else
+                {
                     split.rgb.ResizeDiscard(0);
                 }
                 vertexData.rgb = split.rgb;
@@ -291,7 +294,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [BurstCompile]
-        struct MultiplyByConstant: IJobParallelFor
+        struct MultiplyByConstant : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction]
             public IntPtr data;
@@ -299,7 +302,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public unsafe void Execute(int index)
             {
-                ((Vector3*) data)[index] = scalar * ((Vector3*) data)[index];
+                ((Vector3*)data)[index] = scalar * ((Vector3*)data)[index];
             }
         }
 
@@ -319,7 +322,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 #endif
 
-            for (var i=0;i<m_splits.Count;++i)
+            for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
                 if (split.active &&  split.velocities.Count > 0)
@@ -443,7 +446,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     else if (sum.topology == aiTopology.Quads)
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
-           }
+            }
         }
 
         Mesh AddMeshComponents(GameObject go)

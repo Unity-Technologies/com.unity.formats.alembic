@@ -17,7 +17,7 @@ namespace UnityEngine.Formats.Alembic.Timeline
         private ExposedReference<AlembicStreamPlayer> streamPlayer;
 
         ClipCaps ITimelineClipAsset.clipCaps { get { return ClipCaps.Extrapolation | ClipCaps.Looping | ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;  } }
-        
+
         /// <summary>
         /// The AlembicStreamPlayer to play.
         /// </summary>
