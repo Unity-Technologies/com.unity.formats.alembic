@@ -49,7 +49,7 @@ build_mac:
 build_centOS:
   name: Build CentOS
   agent:
-    type: Unity::VM::GPU
+    type: Unity::VM
     image: package-ci/centos:latest
     flavor: b1.large
   commands:
