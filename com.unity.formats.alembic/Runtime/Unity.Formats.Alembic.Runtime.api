@@ -1,0 +1,174 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEngine.Formats.Alembic.Exporter
+{
+    [UnityEngine.ExecuteInEditMode] public class AlembicExporter : UnityEngine.MonoBehaviour
+    {
+        public bool CaptureOnStart { get; set; }
+        public bool IgnoreFirstFrame { get; set; }
+        public int MaxCaptureFrame { get; set; }
+        public UnityEngine.Formats.Alembic.Util.AlembicRecorder Recorder { get; }
+        public AlembicExporter() {}
+        public void BeginRecording();
+        public void EndRecording();
+        public void OneShot();
+    }
+}
+
+namespace UnityEngine.Formats.Alembic.Importer
+{
+    [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour
+    {
+        public UnityEngine.Vector3 BoundsCenter { get; }
+        public UnityEngine.Vector3 BoundsExtents { get; }
+        public System.Collections.Generic.List<System.UInt32> Ids { get; }
+        public System.Collections.Generic.List<UnityEngine.Vector3> Positions { get; }
+        public System.Collections.Generic.List<UnityEngine.Vector3> Velocities { get; }
+        public AlembicPointsCloud() {}
+    }
+
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.RequireComponent(typeof(UnityEngine.Formats.Alembic.Importer.AlembicPointsCloud))] public class AlembicPointsRenderer : UnityEngine.MonoBehaviour
+    {
+        public UnityEngine.Mesh InstancedMesh { get; set; }
+        public System.Collections.Generic.List<UnityEngine.Material> Materials { get; set; }
+        public UnityEngine.Material MotionVectorMaterial { get; set; }
+        public AlembicPointsRenderer() {}
+    }
+
+    [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
+    {
+        public float CurrentTime { get; set; }
+        public float Duration { get; }
+        public float EndTime { get; set; }
+        public float MediaDuration { get; }
+        public float MediaEndTime { get; }
+        public float MediaStartTime { get; }
+        public string PathToAbc { get; }
+        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; }
+        public float StartTime { get; set; }
+        public float VertexMotionScale { get; set; }
+        public AlembicStreamPlayer() {}
+        public bool LoadFromFile(string newPath);
+        public void UpdateImmediately(float time);
+    }
+
+    public class AlembicStreamSettings
+    {
+        public bool FlipFaces { get; set; }
+        public bool ImportCameras { get; set; }
+        public bool ImportMeshes { get; set; }
+        public bool ImportPoints { get; set; }
+        public bool ImportVisibility { get; set; }
+        public bool ImportXform { get; set; }
+        public bool InterpolateSamples { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.NormalsMode Normals { get; set; }
+        public float ScaleFactor { get; set; }
+        public bool SwapHandedness { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.TangentsMode Tangents { get; set; }
+        public AlembicStreamSettings() {}
+    }
+}
+
+namespace UnityEngine.Formats.Alembic.Sdk
+{
+    public class AlembicExportOptions
+    {
+        public float FrameRate { get; set; }
+        public float ScaleFactor { get; set; }
+        public bool SwapFaces { get; set; }
+        public bool SwapHandedness { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.TimeSamplingType TimeSamplingType { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.TransformType TranformType { get; set; }
+        public AlembicExportOptions() {}
+    }
+
+    public enum NormalsMode
+    {
+        public const UnityEngine.Formats.Alembic.Sdk.NormalsMode AlwaysCalculate = 2;
+        public const UnityEngine.Formats.Alembic.Sdk.NormalsMode CalculateIfMissing = 1;
+        public int value__;
+    }
+
+    public enum TangentsMode
+    {
+        public const UnityEngine.Formats.Alembic.Sdk.TangentsMode Calculate = 1;
+        public const UnityEngine.Formats.Alembic.Sdk.TangentsMode None = 0;
+        public int value__;
+    }
+
+    public enum TimeSamplingType
+    {
+        public const UnityEngine.Formats.Alembic.Sdk.TimeSamplingType Acyclic = 2;
+        public const UnityEngine.Formats.Alembic.Sdk.TimeSamplingType Uniform = 0;
+        public int value__;
+    }
+
+    public enum TransformType
+    {
+        public const UnityEngine.Formats.Alembic.Sdk.TransformType Matrix = 0;
+        public const UnityEngine.Formats.Alembic.Sdk.TransformType TRS = 1;
+        public int value__;
+    }
+}
+
+namespace UnityEngine.Formats.Alembic.Timeline
+{
+    [System.ComponentModel.DisplayName(@"Alembic Shot")] public class AlembicShotAsset : UnityEngine.Playables.PlayableAsset, UnityEngine.Timeline.IPropertyPreview, UnityEngine.Timeline.ITimelineClipAsset
+    {
+        public virtual double duration { get; }
+        public UnityEngine.ExposedReference<UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer> StreamPlayer { get; set; }
+        public AlembicShotAsset() {}
+        public virtual UnityEngine.Playables.Playable CreatePlayable(UnityEngine.Playables.PlayableGraph graph, UnityEngine.GameObject owner);
+        public virtual void GatherProperties(UnityEngine.Playables.PlayableDirector director, UnityEngine.Timeline.IPropertyCollector driver);
+    }
+
+    [UnityEngine.Timeline.TrackClipType(typeof(UnityEngine.Formats.Alembic.Timeline.AlembicShotAsset))] [UnityEngine.Timeline.TrackColor(0.53, 0, 0.08)] public class AlembicTrack : UnityEngine.Timeline.TrackAsset
+    {
+        public AlembicTrack() {}
+    }
+}
+
+namespace UnityEngine.Formats.Alembic.Util
+{
+    public sealed class AlembicRecorder : System.IDisposable
+    {
+        public int FrameCount { get; set; }
+        public bool Recording { get; }
+        public UnityEngine.Formats.Alembic.Util.AlembicRecorderSettings Settings { get; set; }
+        public UnityEngine.GameObject TargetBranch { get; set; }
+        public AlembicRecorder() {}
+        public bool BeginRecording();
+        public virtual void Dispose();
+        public void EndRecording();
+        public static void ForceDisableBatching();
+        public void ProcessRecording();
+    }
+
+    public class AlembicRecorderSettings
+    {
+        public bool AssumeNonSkinnedMeshesAreConstant { get; set; }
+        public bool CaptureCamera { get; set; }
+        public bool CaptureMeshRenderer { get; set; }
+        public bool CaptureSkinnedMeshRenderer { get; set; }
+        public bool DetailedLog { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.AlembicExportOptions ExportOptions { get; }
+        public bool FixDeltaTime { get; set; }
+        public bool MeshColors { get; set; }
+        public bool MeshNormals { get; set; }
+        public bool MeshSubmeshes { get; set; }
+        public bool MeshUV0 { get; set; }
+        public bool MeshUV1 { get; set; }
+        public string OutputPath { get; set; }
+        public UnityEngine.Formats.Alembic.Util.ExportScope Scope { get; set; }
+        public UnityEngine.GameObject TargetBranch { get; set; }
+        public AlembicRecorderSettings() {}
+    }
+
+    public enum ExportScope
+    {
+        public const UnityEngine.Formats.Alembic.Util.ExportScope EntireScene = 0;
+        public const UnityEngine.Formats.Alembic.Util.ExportScope TargetBranch = 1;
+        public int value__;
+    }
+}

@@ -94,7 +94,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return TestCubeContents(go);
         }
 
-        [UnityTest, UnityPlatform(exclude = new[]{RuntimePlatform.LinuxEditor})]
+        [UnityTest, UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
         public IEnumerator TestArchiveType([Values(ArchiveType.Ogawa, ArchiveType.HDF5)] int archiveType)
         {
             director.Play();
@@ -161,16 +161,16 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
             var player = go.GetComponentInChildren<AlembicStreamPlayer>();
-            
-            player.StartTime = player.StreamDescriptor.mediaStartTime-1;
-            Assert.AreEqual(player.StartTime,player.StreamDescriptor.mediaStartTime);
-            
+
+            player.StartTime = player.StreamDescriptor.mediaStartTime - 1;
+            Assert.AreEqual(player.StartTime, player.StreamDescriptor.mediaStartTime);
+
             player.EndTime = (float)player.StreamDescriptor.mediaEndTime + 1;
-            Assert.AreEqual(player.EndTime,(float)player.StreamDescriptor.mediaEndTime);
-            
+            Assert.AreEqual(player.EndTime, (float)player.StreamDescriptor.mediaEndTime);
+
             player.CurrentTime = (player.StartTime + player.EndTime) / 2;
             Assert.AreEqual(player.CurrentTime, (player.StartTime + player.EndTime) / 2);
-            
+
             player.CurrentTime = player.EndTime + 1;
             Assert.AreEqual(player.CurrentTime, player.EndTime);
         }
@@ -199,7 +199,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             var go = new GameObject("abc");
             var player = go.AddComponent<AlembicStreamPlayer>();
-            LogAssert.Expect(LogType.Error,new Regex("failed to load alembic at"));
+            LogAssert.Expect(LogType.Error, new Regex("failed to load alembic at"));
             var ret = player.LoadFromFile("DoesNotExist");
 
             Assert.IsFalse(ret);
@@ -212,27 +212,27 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             exporter.MaxCaptureFrame = 30;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
-            
+
             var sceneName = GUID.Generate().ToString();
             var scene = SceneManager.CreateScene(sceneName);
-           SceneManager.SetActiveScene(scene);
-           var go = new GameObject("abc");
-           var player = go.AddComponent<AlembicStreamPlayer>();
-           var ret = player.LoadFromFile(exporter.Recorder.Settings.OutputPath);
-           Assert.IsTrue(ret);
-           
-           var cubeGO = go.GetComponentInChildren<MeshRenderer>().gameObject;
-           player.UpdateImmediately(0);
-           var t0 = cubeGO.transform.position;
-           player.UpdateImmediately(player.Duration);
-           var t1  = cubeGO.transform.position;
-           Assert.AreNotEqual(t0, t1);
-           
-           var asyncOperation = SceneManager.UnloadSceneAsync(sceneName);
-           while (!asyncOperation.isDone)
-           {
-               yield return null;
-           }
+            SceneManager.SetActiveScene(scene);
+            var go = new GameObject("abc");
+            var player = go.AddComponent<AlembicStreamPlayer>();
+            var ret = player.LoadFromFile(exporter.Recorder.Settings.OutputPath);
+            Assert.IsTrue(ret);
+
+            var cubeGO = go.GetComponentInChildren<MeshRenderer>().gameObject;
+            player.UpdateImmediately(0);
+            var t0 = cubeGO.transform.position;
+            player.UpdateImmediately(player.Duration);
+            var t1  = cubeGO.transform.position;
+            Assert.AreNotEqual(t0, t1);
+
+            var asyncOperation = SceneManager.UnloadSceneAsync(sceneName);
+            while (!asyncOperation.isDone)
+            {
+                yield return null;
+            }
         }
 
         [UnityTest]
