@@ -69,7 +69,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(7, "abc")]
+    [ScriptedImporter(8, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -178,6 +178,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 streamPlayer.StreamDescriptor = streamDescriptor;
                 streamPlayer.StartTime = (float)StartTime;
                 streamPlayer.EndTime = (float)EndTime;
+                streamPlayer.ExternalReference = false;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);

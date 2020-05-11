@@ -119,7 +119,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             base.ApplyRevertGUI();
         }
 
-        static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
+        internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
         {
             if (guicontent == null)
                 guicontent = new GUIContent(prop.displayName);

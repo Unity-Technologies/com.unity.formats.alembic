@@ -496,7 +496,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 dst.inherits = m_inherits;
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up); // rotate around Y 180deg: z => -z
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);  // rotate around Y 180deg: z => -z
                 }
                 if (m_inherits)
                 {
@@ -513,7 +513,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up);
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);
                 }
             }
         }

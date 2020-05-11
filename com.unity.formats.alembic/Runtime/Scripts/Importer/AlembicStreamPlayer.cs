@@ -10,6 +10,13 @@ namespace UnityEngine.Formats.Alembic.Importer
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
+        [SerializeField] bool externalReference = true;
+        internal bool ExternalReference
+        {
+            get => externalReference;
+            set => externalReference = value;
+        }
+
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         AlembicStream abcStream { get; set; }
         [SerializeField]
@@ -106,7 +113,21 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// The stream import options.
         /// </summary>
-        public AlembicStreamSettings Settings => StreamDescriptor != null ? StreamDescriptor.Settings : null;
+        public AlembicStreamSettings Settings
+        {
+            get { return StreamDescriptor != null ? StreamDescriptor.Settings : null; }
+            set
+            {
+                if (StreamDescriptor == null)
+                {
+                    StreamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+                }
+
+                StreamDescriptor.Settings = value;
+                abcStream?.Dispose();
+                LoadStream(false);
+            }
+        }
 
         float lastUpdateTime;
         bool forceUpdate = false;

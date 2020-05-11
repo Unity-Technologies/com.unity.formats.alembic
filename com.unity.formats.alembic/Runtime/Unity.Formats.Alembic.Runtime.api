@@ -45,7 +45,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public float MediaEndTime { get; }
         public float MediaStartTime { get; }
         public string PathToAbc { get; }
-        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; }
+        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; set; }
         public float StartTime { get; set; }
         public float VertexMotionScale { get; set; }
         public AlembicStreamPlayer() {}
