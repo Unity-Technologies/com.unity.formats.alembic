@@ -57,11 +57,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                     return hashCode;
                 }
             }
-
-            static bool NearlyEqual(float f1, float f2, float eps = 1e-5f)
-            {
-                return Mathf.Abs(f1 - f2) < eps;
-            }
         }
 
         CamParams camParams = new CamParams {focalLength = 300, filmBack = new Vector2(200, 300), nearFar = new Vector2(0.1f, 500)};
