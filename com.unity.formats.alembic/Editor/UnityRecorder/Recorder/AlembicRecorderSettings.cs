@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace UnityEditor.Formats.Alembic.Recorder
 {
+    /// <inheritdoc/>
     [RecorderSettings(typeof(AlembicRecorder), "Alembic Clip", "alembic_recorder")]
     public class AlembicRecorderSettings : RecorderSettings
     {
@@ -65,6 +66,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
 
             BindingManager.Duplicate(src, dst);
         }
+
         static string GenerateBindingId()
         {
             return GUID.Generate().ToString();

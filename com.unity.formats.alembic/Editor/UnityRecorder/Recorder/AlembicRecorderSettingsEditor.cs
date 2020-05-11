@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 namespace UnityEditor.Formats.Alembic.Recorder
 {
     [CustomEditor(typeof(AlembicRecorderSettings))]
-    public class AlembicRecorderSettingsEditor : RecorderEditor
+    class AlembicRecorderSettingsEditor : RecorderEditor
     {
         bool m_foldCaptureComponents;
         bool m_foldMeshComponents;

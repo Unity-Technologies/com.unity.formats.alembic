@@ -9,7 +9,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
 {
     [Serializable]
     [DisplayName("Alembic")]
-    public class AlembicInputSettings : RecorderInputSettings
+    class AlembicInputSettings : RecorderInputSettings
     {
         protected override Type InputType => typeof(AlembicInput);
 

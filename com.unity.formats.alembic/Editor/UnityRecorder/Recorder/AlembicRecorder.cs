@@ -9,7 +9,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
         UnityEngine.Formats.Alembic.Util.AlembicRecorder recorder;
         protected override bool BeginRecording(RecordingSession session)
         {
-            var abcSettings =  Settings ;
+            var abcSettings =  Settings;
             recorder = new UnityEngine.Formats.Alembic.Util.AlembicRecorder {Settings = abcSettings.Settings};
             recorder.Settings.FixDeltaTime = true;
             recorder.Settings.ExportOptions.FrameRate = abcSettings.FrameRate;

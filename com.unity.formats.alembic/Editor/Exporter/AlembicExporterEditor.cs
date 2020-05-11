@@ -87,7 +87,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 {
                     var timeSamplingType = so.FindProperty(pathSettings + "conf.timeSamplingType");
                     EditorGUILayout.PropertyField(timeSamplingType);
-                    if (timeSamplingType.intValue == (int) TimeSamplingType.Uniform)
+                    if (timeSamplingType.intValue == (int)TimeSamplingType.Uniform)
                     {
                         EditorGUI.indentLevel++;
                         EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "conf.frameRate"));
