@@ -514,7 +514,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 dst.visibility = src.gameObject.activeSelf;
                 dst.inherits = m_inherits;
-                if (m_invertForward) { src.forward = src.forward * -1.0f; }
+                if (m_invertForward)
+                {
+                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up); // rotate around Y 180deg: z => -z
+                }
                 if (m_inherits)
                 {
                     dst.translation = m_capturePosition ? src.localPosition : Vector3.zero;
@@ -527,7 +530,11 @@ namespace UnityEngine.Formats.Alembic.Util
                     dst.rotation = m_captureRotation ? src.rotation : Quaternion.identity;
                     dst.scale = m_captureScale ? src.lossyScale : Vector3.one;
                 }
-                if (m_invertForward) { src.forward = src.forward * -1.0f; }
+
+                if (m_invertForward)
+                {
+                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up);
+                }
             }
         }
 

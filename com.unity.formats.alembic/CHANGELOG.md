@@ -3,6 +3,8 @@
 ## Unreleased version
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
+- Fix a bug where  the Alembic motion vector direction were inverted.
+
 ## [2.0.0-preview.1] - 2019-08-07
 ### Changes
 - Minimum Unity version is 2019.3.

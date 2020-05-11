@@ -83,7 +83,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return vertexMotionScale; }
             set { vertexMotionScale = value; }
         }
-        
+
         /// <summary>
         /// The start timestamp of the Alembic file (scale in seconds).
         /// </summary>
@@ -102,11 +102,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// The path to the Alembic asset. When in a standalone build, the returned path is prepended by the streamingAssets path.
         /// </summary>
         public string PathToAbc => StreamDescriptor != null ? StreamDescriptor.PathToAbc : "";
-        
+
         /// <summary>
         /// The stream import options.
         /// </summary>
-        public AlembicStreamSettings Settings => StreamDescriptor !=null ? StreamDescriptor.Settings : null;
+        public AlembicStreamSettings Settings => StreamDescriptor != null ? StreamDescriptor.Settings : null;
 
         float lastUpdateTime;
         bool forceUpdate = false;
@@ -123,7 +123,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             Update();
             LateUpdate();
         }
-        
+
         /// <summary>
         /// Loads a different Alembic file.
         /// </summary>
@@ -148,12 +148,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             //abcStream.AbcLoad(true, true);
             double start, end;
             abcStream.GetTimeRange(out start, out end);
-            startTime = (float) start;
-            endTime = (float) end;
+            startTime = (float)start;
+            endTime = (float)end;
 
-            streamDescriptor.mediaStartTime = (float) start;
-            streamDescriptor.mediaEndTime = (float) end;
-            
+            streamDescriptor.mediaStartTime = (float)start;
+            streamDescriptor.mediaEndTime = (float)end;
+
             var pipelineAsset = GraphicsSettings.renderPipelineAsset;
             var defaultMat = pipelineAsset != null
                 ? pipelineAsset.defaultMaterial

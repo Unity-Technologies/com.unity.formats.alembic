@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 
@@ -71,8 +71,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         NativeArray<aiSubmeshData> m_submeshData;
 
         JobHandle fillVertexBufferHandle;
-
         List<Split> m_splits = new List<Split>();
+        List<JobHandle> m_PostProcessJobs = new List<JobHandle>();
         List<Submesh> m_submeshes = new List<Submesh>();
 
         internal override aiSchema abcSchema { get { return m_abcSchema; } }
@@ -104,7 +104,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 for (int i = 0; i < numSplits; ++i)
                 {
                     if (i >= m_splits.Count)
+                    {
                         m_splits.Add(new Split());
+                        m_PostProcessJobs.Add(new JobHandle());
+                    }
                     else
                         m_splits[i].active = true;
                 }
@@ -118,6 +121,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                         host = abcTreeNode.gameObject,
                     };
                     m_splits.Add(split);
+                    m_PostProcessJobs.Add(new JobHandle());
                 }
                 else
                 {
@@ -154,7 +158,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitSummaries.Dispose();
                 }
-                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount,Allocator.Persistent);
+                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount, Allocator.Persistent);
             }
 
             if (m_splitData.Length != splitCount)
@@ -163,7 +167,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitData.Dispose();
                 }
-                m_splitData = new NativeArray<aiPolyMeshData>(splitCount,Allocator.Persistent);
+                m_splitData = new NativeArray<aiPolyMeshData>(splitCount, Allocator.Persistent);
             }
 
             if (m_submeshSummaries.Length != submeshCount)
@@ -182,7 +186,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     m_submeshData.Dispose();
                 }
 
-                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount,Allocator.Persistent);
+                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount, Allocator.Persistent);
             }
 
             sample.GetSplitSummaries(m_splitSummaries);
@@ -243,9 +247,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.rgba.ResizeDiscard(0);
                 vertexData.rgba = split.rgba;
 
-                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged)) {
+                if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged))
+                {
                     split.rgb.ResizeDiscard(vertexCount);
-                } else {
+                }
+                else
+                {
                     split.rgb.ResizeDiscard(0);
                 }
                 vertexData.rgb = split.rgb;
@@ -286,6 +293,19 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
         }
 
+        [BurstCompile]
+        struct MultiplyByConstant : IJobParallelFor
+        {
+            [NativeDisableUnsafePtrRestriction]
+            public IntPtr data;
+            public float scalar;
+
+            public unsafe void Execute(int index)
+            {
+                ((Vector3*)data)[index] = scalar * ((Vector3*)data)[index];
+            }
+        }
+
         public override void AbcSyncDataEnd()
         {
             fillVertexBufferHandle.Complete();
@@ -301,6 +321,20 @@ namespace UnityEngine.Formats.Alembic.Importer
                     mf.sharedMesh = split.mesh;
             }
 #endif
+
+            for (var i = 0; i < m_splits.Count; ++i)
+            {
+                var split = m_splits[i];
+                if (split.active &&  split.velocities.Count > 0)
+                {
+                    var job = new MultiplyByConstant
+                    {
+                        data = split.velocities.Pointer,
+                        scalar = -1
+                    };
+                    m_PostProcessJobs[i] = job.Schedule(split.velocities.Count, 2048);
+                }
+            }
 
             if (!m_abcSchema.schema.isDataUpdated)
                 return;
@@ -371,6 +405,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetUVs(1, split.uv1.List);
                     if (split.velocities.Count > 0)
                     {
+                        m_PostProcessJobs[s].Complete();
 #if UNITY_2019_2_OR_NEWER
                         split.mesh.SetUVs(5, split.velocities.List);
 #else
@@ -411,7 +446,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     else if (sum.topology == aiTopology.Quads)
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
-           }
+            }
         }
 
         Mesh AddMeshComponents(GameObject go)

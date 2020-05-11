@@ -72,7 +72,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                     {
                         using (var changeScope = new EditorGUI.ChangeCheckScope())
                         {
-                            var val = EditorGUILayout.EnumPopup(propertyScope.content, (ArchiveType) archiveProp.intValue, null,
+                            var val = EditorGUILayout.EnumPopup(propertyScope.content, (ArchiveType)archiveProp.intValue, null,
                                 true);
                             if (changeScope.changed)
                             {
