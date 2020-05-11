@@ -49,23 +49,18 @@ namespace UnityEditor.Formats.Alembic.Importer
                 SerializedProperty startTimeProp = serializedObject.FindProperty("startTime");
                 SerializedProperty endTimeProp = serializedObject.FindProperty("endTime");
 
-                float abcStart = (float)importer.AbcStartTime;
-                float abcEnd = (float)importer.AbcEndTime;
-
                 EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
                 float startTime = (float)startTimeProp.doubleValue;
                 float endTime = (float)endTimeProp.doubleValue;
-
+                float abcStart = (float)importer.AbcStartTime;
+                float abcEnd = (float)importer.AbcEndTime;
                 EditorGUI.BeginChangeCheck();
-                EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
+                EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, abcStart, abcEnd);
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    startTimeProp.doubleValue = Mathf.Clamp(startTime, abcStart, startTime);
-                    endTimeProp.doubleValue = Mathf.Clamp(endTime, startTime , abcEnd);
-                    Debug.Log("endTimeProp = " + endTimeProp.doubleValue);
-                    Debug.Log("endTime = " + endTime);
-                    Debug.Log("abcEnd = " + abcEnd);
+                    startTimeProp.doubleValue = startTime;
+                    endTimeProp.doubleValue = endTime;
                 }
 
                 EditorGUILayout.BeginHorizontal();
@@ -78,8 +73,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    startTimeProp.doubleValue = Mathf.Clamp(newStartTime, abcStart, newEndTime);
-                    endTimeProp.doubleValue = Mathf.Clamp(newEndTime, newStartTime, abcEnd);
+                    startTimeProp.doubleValue = newStartTime;
+                    endTimeProp.doubleValue = newEndTime;
                 }
 
                 EditorGUILayout.EndHorizontal();
