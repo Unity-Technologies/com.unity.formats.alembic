@@ -217,8 +217,6 @@ publish:
     {% for editor in editors %}
     {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
