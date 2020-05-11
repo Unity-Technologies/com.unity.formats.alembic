@@ -427,9 +427,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!hasMesh)
             {
                 mesh = new Mesh { name = "dyn: " + go.name };
-#if UNITY_2017_3_OR_NEWER
                 mesh.indexFormat = IndexFormat.UInt32;
-#endif
                 mesh.MarkDynamic();
 
                 if (meshFilter == null)
@@ -441,6 +439,14 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     renderer = go.AddComponent<MeshRenderer>();
                     var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                    if (material == null)
+                    {
+                        var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+                        material = pipelineAsset != null
+                            ? pipelineAsset.defaultMaterial
+                            : new Material(Shader.Find("Standard"));
+                    }
+
                     renderer.sharedMaterial = material;
                 }
             }

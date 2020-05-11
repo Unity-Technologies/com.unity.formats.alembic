@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -10,6 +11,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
             EditorGUI.BeginDisabledGroup((target.hideFlags & HideFlags.NotEditable) != HideFlags.None);
 
             SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
@@ -18,15 +20,44 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var streamPlayer = target as AlembicStreamPlayer;
             var targetStreamDesc = streamPlayer.StreamDescriptor;
-            var multipleTimeRanges = false;
-            foreach (AlembicStreamPlayer player in targets)
+
+            if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
             {
-                //
+                var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
+                var filePath = initialFilePath;
+                EditorGUILayout.LabelField(new GUIContent("Alembic File"));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    filePath = EditorGUILayout.DelayedTextField(filePath);
+                    if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
+                    {
+                        var path = EditorUtility.OpenFilePanel("Load Alembic File", "", "abc");
+                        if (!string.IsNullOrWhiteSpace(path))
+                            filePath = path;
+                    }
+                }
+
+                if (filePath != initialFilePath)
+                {
+                    Undo.RegisterCompleteObjectUndo(streamPlayer, "Load Alembic File");
+                    streamPlayer.LoadFromFile(filePath);
+                }
+
+                EditorGUILayout.HelpBox(
+                    "Alembic File is streamed. Selecting a new file will rebuild the GameObject or Prefab hierarchy.",
+                    MessageType.Info);
+                if (streamDescriptorObj.objectReferenceValue == null)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(streamDescriptorObj);
+                EditorGUI.EndDisabledGroup();
             }
 
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.ObjectField(streamDescriptorObj);
-            EditorGUI.EndDisabledGroup();
             if (streamDescriptorObj.objectReferenceValue == null)
             {
                 EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
@@ -34,7 +65,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             EditorGUILayout.LabelField(new GUIContent("Time Range"));
-            EditorGUI.BeginDisabledGroup(multipleTimeRanges);
 
             var abcStart = targetStreamDesc.mediaStartTime;
             var abcEnd = targetStreamDesc.mediaEndTime;
@@ -66,7 +96,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             EditorGUILayout.EndHorizontal();
-            EditorGUI.EndDisabledGroup();
             EditorGUIUtility.labelWidth = 0.0f;
 
             GUIStyle style = new GUIStyle();
@@ -80,12 +109,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
             EditorGUILayout.Space();
 
-#if UNITY_2018_3_OR_NEWER
             var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
             if (prefabStatus == PrefabInstanceStatus.NotAPrefab || prefabStatus == PrefabInstanceStatus.Disconnected)
-#else
-            if (PrefabUtility.GetPrefabType(streamPlayer.gameObject) == PrefabType.DisconnectedModelPrefabInstance)
-#endif
             {
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.Space(16);
@@ -97,8 +122,80 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             EditorGUI.EndDisabledGroup();
+            if (!serializedObject.isEditingMultipleObjects)
+            {
+                DrawStreamSettings(streamPlayer);
+            }
 
-            this.serializedObject.ApplyModifiedProperties();
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        static void DrawStreamSettings(AlembicStreamPlayer player)
+        {
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                // Draw the stream proeprties
+                var pathSettings = "streamSettings.";
+
+                var so = new SerializedObject(player.StreamDescriptor);
+                so.Update();
+                var settings = so.FindProperty("settings");
+
+                EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("scaleFactor"),
+                        new GUIContent("Scale Factor",
+                            "How much to scale the models compared to what is in the source file."));
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("swapHandedness"),
+                        new GUIContent("Swap Handedness", "Swap X coordinate"));
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("interpolateSamples"),
+                        new GUIContent("Interpolate Samples",
+                            "Interpolate transforms and vertices (if topology is constant)."));
+                    EditorGUILayout.Separator();
+
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importVisibility"),
+                        new GUIContent("Import Visibility", "Import visibility animation."));
+
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importCameras"),
+                        new GUIContent("Import Cameras", ""));
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importMeshes"),
+                        new GUIContent("Import Meshes", ""));
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importPoints"),
+                        new GUIContent("Import Points", ""));
+                    EditorGUILayout.Separator();
+
+                    EditorGUI.indentLevel--;
+                }
+
+                EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
+                {
+                    EditorGUI.indentLevel++;
+                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("normals"),
+                        Enum.GetNames(typeof(NormalsMode)));
+                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("tangents"),
+                        Enum.GetNames(typeof(TangentsMode)));
+                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("flipFaces"));
+                    EditorGUI.indentLevel--;
+                }
+                EditorGUILayout.Separator();
+
+                EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
+                {
+                    EditorGUI.indentLevel++;
+                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("cameraAspectRatio"),
+                        Enum.GetNames(typeof(AspectRatioMode)),
+                        new GUIContent("Aspect Ratio", ""));
+                    EditorGUI.indentLevel--;
+                }
+                EditorGUILayout.Separator();
+
+                so.ApplyModifiedProperties();
+                if (check.changed)
+                {
+                    player.Settings = player.StreamDescriptor.Settings;
+                }
+            }
         }
     }
 }
