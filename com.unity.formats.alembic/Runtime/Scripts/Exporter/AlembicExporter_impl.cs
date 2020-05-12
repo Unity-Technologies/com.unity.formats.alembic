@@ -496,7 +496,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 dst.inherits = m_inherits;
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up); // rotate around Y 180deg: z => -z
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);  // rotate around Y 180deg: z => -z
                 }
                 if (m_inherits)
                 {
@@ -513,7 +513,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up);
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);
                 }
             }
         }
@@ -579,7 +579,10 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Setup(Component c)
             {
                 m_target = c as MeshRenderer;
-                var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                MeshFilter meshFilter = m_target.GetComponent<MeshFilter>();
+                if (meshFilter == null)
+                    return;
+                Mesh mesh = meshFilter.mesh;
                 if (mesh == null)
                     return;
 
@@ -598,6 +601,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 {
                     m_mbuf.visibility = m_target.gameObject.activeSelf;
                     var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                    // && mesh != null?
                     if (!recorder.m_settings.AssumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
                         m_mbuf.Capture(mesh, recorder.m_settings);
                 }
