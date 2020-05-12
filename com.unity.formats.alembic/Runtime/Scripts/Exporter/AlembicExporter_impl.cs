@@ -581,7 +581,11 @@ namespace UnityEngine.Formats.Alembic.Util
                 m_target = c as MeshRenderer;
                 MeshFilter meshFilter = m_target.GetComponent<MeshFilter>();
                 if (meshFilter == null)
+                {
+                    m_target = null;
                     return;
+                }
+
                 Mesh mesh = meshFilter.mesh;
                 if (mesh == null)
                     return;
@@ -601,7 +605,6 @@ namespace UnityEngine.Formats.Alembic.Util
                 {
                     m_mbuf.visibility = m_target.gameObject.activeSelf;
                     var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
-                    // && mesh != null?
                     if (!recorder.m_settings.AssumeNonSkinnedMeshesAreConstant || m_mbuf.points.Capacity == 0)
                         m_mbuf.Capture(mesh, recorder.m_settings);
                 }
