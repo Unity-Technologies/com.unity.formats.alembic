@@ -1,6 +1,4 @@
 #pragma once
-#include "aiAsync.h"
-
 
 class aiSample
 {
@@ -104,10 +102,7 @@ public:
 
     void updateSample(const abcSampleSelector& ss) override
     {
-        m_async_load.reset();
         updateSampleBody(ss);
-        if (m_async_load.ready())
-            getContext()->queueAsync(m_async_load);
     }
 
     virtual void readSample(Sample& sample, uint64_t idx)
@@ -220,7 +215,4 @@ protected:
     bool m_sample_index_changed = false;
 
     bool m_force_update_local = false; // m_force_update for worker thread
-
-private:
-    aiAsyncLoad m_async_load;
 };

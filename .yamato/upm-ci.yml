@@ -10,10 +10,10 @@ platforms:
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
+    image: package-ci/mac:latest
     flavor: m1.mac
   - name: centOS
-    type: Unity::VM
+    type: Unity::VM::GPU
     image: package-ci/centos:latest
     flavor: b1.large
 
@@ -36,7 +36,7 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
+    image: package-ci/mac:latest
     flavor: m1.mac
   commands:
     - git submodule update --init --recursive
@@ -54,7 +54,7 @@ build_centOS:
     flavor: b1.large
   commands:
     -  git submodule update --init --recursive 
-    -  scl enable devtoolset-6 ./build.sh
+    -  scl enable devtoolset-7 ./build.sh
       
   artifacts:
     build:
@@ -65,10 +65,10 @@ pack:
   name: Pack
   agent:
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
+    image: package-ci/mac:latest
     flavor: m1.mac
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package pack --package-path com.unity.formats.alembic
   artifacts:
    packages:
@@ -92,8 +92,12 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     {% if platform.name == 'centOS' %}   
+     - DISPLAY=:0 upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% else %}
+     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'  
+     {% endif %}
   artifacts:
     logs.zip:
       paths:
@@ -131,9 +135,7 @@ test_trigger:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
 
@@ -170,7 +172,7 @@ publish:
     flavor: b1.large
     name: Runner
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package publish --package-path com.unity.formats.alembic
   triggers:
     tags:
@@ -188,8 +190,6 @@ publish:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {% if platform.name != 'centOS' %} 
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    {% endif %}  
     {% endfor %}
     {% endfor %}
