@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Reflection;
-using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -266,7 +264,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
             }
 
-            public void Capture(Mesh mesh,
+            public void Capture(Mesh mesh, Vector3 scale,
                 bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 if (mesh == null)
@@ -275,7 +273,23 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 
-                points.LockList(ls => mesh.GetVertices(ls));
+                if (scale != new Vector3(1, 1, 1))
+                {
+                    var verts = new List<Vector3>();
+                    mesh.GetVertices(verts);
+                    for (var i = 0; i < verts.Count; ++i)
+                    {
+                        var v = verts[i];
+                        verts[i] = new Vector3(scale.x * v.x, scale.x * v.y, scale.x * v.z);
+                    }
+
+                    points.Assign(verts);
+                }
+                else
+                {
+                    points.LockList(ls => mesh.GetVertices(ls));
+                }
+
 
                 if (captureNormals)
                     normals.LockList(ls => mesh.GetNormals(ls));
@@ -325,7 +339,12 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Capture(Mesh mesh, AlembicRecorderSettings settings)
             {
-                Capture(mesh, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+                Capture(mesh, new Vector3(1, 1, 1), settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+            }
+
+            public void Capture(Mesh mesh, Vector3 scale, AlembicRecorderSettings settings)
+            {
+                Capture(mesh, scale, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
             public void WriteSample(aeObject abc)
@@ -365,7 +384,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
-                mbuf.Capture(mesh, false, false, false, false);
+                mbuf.Capture(mesh, new Vector3(1, 1, 1), false, false, false, false);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
@@ -496,7 +515,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 dst.inherits = m_inherits;
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up); // rotate around Y 180deg: z => -z
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);  // rotate around Y 180deg: z => -z
                 }
                 if (m_inherits)
                 {
@@ -513,7 +532,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 if (m_invertForward)
                 {
-                    src.rotation = Quaternion.LookRotation( -1 * src.forward, src.up);
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);
                 }
             }
         }
@@ -671,7 +690,14 @@ namespace UnityEngine.Formats.Alembic.Util
 
                         m_meshBake.Clear();
                         m_target.BakeMesh(m_meshBake);
-                        m_mbuf.Capture(m_meshBake, recorder.m_settings);
+                        var w2l = m_target.worldToLocalMatrix;
+                        var scale = new Vector3(
+                            w2l.GetColumn(0).magnitude,
+                            w2l.GetColumn(1).magnitude,
+                            w2l.GetColumn(2).magnitude
+                        );
+                        // The bake mesh is ignoring the world scale.
+                        m_mbuf.Capture(m_meshBake, scale, recorder.m_settings);
                     }
                 }
                 m_mbuf.WriteSample(abcObject);
