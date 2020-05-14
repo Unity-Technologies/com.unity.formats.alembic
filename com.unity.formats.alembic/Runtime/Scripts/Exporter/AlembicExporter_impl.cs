@@ -689,6 +689,10 @@ namespace UnityEngine.Formats.Alembic.Util
                         }
 
                         m_meshBake.Clear();
+#if UNITY_2020_2_OR_NEWER
+                        m_target.BakeMesh(m_meshBake, true);
+                        m_mbuf.Capture(m_meshBake, new Vector3(1, 1, 1), recorder.m_settings);
+#else
                         m_target.BakeMesh(m_meshBake);
                         var w2l = m_target.worldToLocalMatrix;
                         var scale = new Vector3(
@@ -698,6 +702,7 @@ namespace UnityEngine.Formats.Alembic.Util
                         );
                         // The bake mesh is ignoring the world scale.
                         m_mbuf.Capture(m_meshBake, scale, recorder.m_settings);
+#endif
                     }
                 }
                 m_mbuf.WriteSample(abcObject);
