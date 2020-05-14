@@ -3,7 +3,8 @@
 ## Unreleased version
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
-- Fix a bug where  the Alembic motion vector direction were inverted.
+- Fixed a bug where  the Alembic motion vector direction were inverted.
+- Fixed a bug where the time range slider in the importer inspector would go beyond the upper bound.
 
 ## [2.0.0-preview.1] - 2019-08-07
 ### Changes
