@@ -70,6 +70,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             exporter.OneShot();
             yield return null;
+            yield return new WaitForSeconds(2);
             TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
         }
 
