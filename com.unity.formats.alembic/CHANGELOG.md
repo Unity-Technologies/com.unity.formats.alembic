@@ -1,9 +1,11 @@
 # Changes in Alembic for Unity
 
+
 ## Unreleased version
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
-- Fix a bug where  the Alembic motion vector direction were inverted.
+- Fixed a bug where the Alembic motion vector direction were inverted.
+- Fixed a bug where the time range slider in the importer inspector breaks when going beyond the upper bounds
 - Fixed a crash in the Alembic Streamer when the object was being enabled and disabled very quickly. 
 
 ## [2.0.0-preview.1] - 2019-08-07
