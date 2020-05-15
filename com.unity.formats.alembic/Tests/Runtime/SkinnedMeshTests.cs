@@ -19,11 +19,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var skinnedCube = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             rootScaled = PrefabUtility.InstantiatePrefab(skinnedCube) as GameObject;
             rootScaled.name = "RootScaled";
-            rootScaled.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            rootScaled.transform.localScale = new Vector3(0.1f, 0.2f, 0.3f);
             boneScaled = PrefabUtility.InstantiatePrefab(skinnedCube) as GameObject;
             boneScaled.name = "BoneScaled";
             var joint = boneScaled.transform.GetChild(0);
-            joint.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            joint.transform.localScale = new Vector3(0.1f, 0.2f, 0.3f);
         }
 
         [UnityTest]

@@ -280,7 +280,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     for (var i = 0; i < verts.Count; ++i)
                     {
                         var v = verts[i];
-                        verts[i] = new Vector3(scale.x * v.x, scale.x * v.y, scale.x * v.z);
+                        verts[i] = new Vector3(scale.x * v.x, scale.y * v.y, scale.z * v.z);
                     }
 
                     points.Assign(verts);
