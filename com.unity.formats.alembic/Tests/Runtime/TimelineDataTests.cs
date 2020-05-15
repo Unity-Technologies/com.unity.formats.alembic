@@ -2,7 +2,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Assertions;
+//using UnityEngine.Assertions;
 using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
