@@ -335,7 +335,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                             if (trans == null)
                             {
-                                GameObject go = new GameObject();
+                                GameObject go = Utils.CreateGameObjectWithUndo("Create AlembicObject");
                                 go.name = name;
 
                                 trans = go.GetComponent<Transform>();

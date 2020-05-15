@@ -309,7 +309,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         obj.SetEnabled(true);
                     }
 
-                    childGO = new GameObject { name = childName };
+                    childGO = Utils.CreateGameObjectWithUndo("Create AlembicObject");
+                    childGO.name = childName;
                     childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
                 }
                 else
