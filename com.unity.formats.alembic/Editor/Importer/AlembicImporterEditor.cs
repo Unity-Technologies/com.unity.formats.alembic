@@ -60,8 +60,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (EditorGUI.EndChangeCheck())
                 {
                     startTimeProp.doubleValue = startTime;
-                    if (Math.Abs(endTimeProp.doubleValue - endTime) > 0.000001 * endTime)
-                        endTimeProp.doubleValue = endTime;
+                    endTime = (float)Math.Round(endTime, 5);
+                    endTimeProp.doubleValue = endTime;
                 }
 
                 EditorGUILayout.BeginHorizontal();
