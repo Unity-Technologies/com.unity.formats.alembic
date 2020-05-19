@@ -695,9 +695,13 @@ namespace UnityEngine.Formats.Alembic.Util
 #else
                         m_target.BakeMesh(m_meshBake);
 
-                        var scale = m_target.worldToLocalMatrix.ExtractScale();
+                        // var scale = m_target.ScaleFromHierarchy();//ExtractScale();
 
+                        var scale = m_target.transform.worldToLocalMatrix.ExtractScale();
+                        //scale *= Mathf.Sqrt(2);
                         // The bake mesh is ignoring the world scale.
+                        scale = m_target.transform.lossyScale;
+                        scale = new Vector3(1 / scale.x, 1 / scale.y, 1 / scale.z);
                         m_mbuf.Capture(m_meshBake, scale, recorder.m_settings);
 #endif
                     }
