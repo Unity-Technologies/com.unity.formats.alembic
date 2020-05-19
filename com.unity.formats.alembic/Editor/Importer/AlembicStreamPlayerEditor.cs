@@ -8,8 +8,6 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
     internal class AlembicStreamPlayerEditor : Editor
     {
-        bool m_foldMisc = false;
-
         public override void OnInspectorGUI()
         {
             EditorGUI.BeginDisabledGroup((target.hideFlags & HideFlags.NotEditable) != HideFlags.None);
@@ -81,14 +79,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
             EditorGUILayout.Space();
-
-            m_foldMisc = EditorGUILayout.Foldout(m_foldMisc, "Misc");
-            if (m_foldMisc)
-            {
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("asyncLoad"));
-                EditorGUI.indentLevel--;
-            }
 
 #if UNITY_2018_3_OR_NEWER
             var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
