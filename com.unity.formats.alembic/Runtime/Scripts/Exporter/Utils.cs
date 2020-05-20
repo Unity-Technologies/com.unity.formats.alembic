@@ -45,6 +45,15 @@ namespace UnityEngine.Formats.Alembic.Util
             return new Vector3(x, y, z);
         }
 
+        public static Matrix4x4 WorldNoScale(this Transform transform)
+        {
+            var pos = transform.position;
+            var rot = Matrix4x4.Rotate(transform.rotation);
+            rot = rot.transpose;
+            var t = rot.MultiplyPoint(-pos);
+            return Matrix4x4.TRS(t, Quaternion.Inverse(transform.rotation), new Vector3(1, 1, 1));
+        }
+
         /*   static float3 cross(this float3 a, float3 b)
            {
                return Vector3.Cross(a, b);

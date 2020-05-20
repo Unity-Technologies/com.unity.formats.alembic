@@ -264,7 +264,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
             }
 
-            public void Capture(Mesh mesh, Vector3 scale,
+            public void Capture(Mesh mesh, Matrix4x4 scale,
                 bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 if (mesh == null)
@@ -273,14 +273,15 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 
-                if (scale != new Vector3(1, 1, 1))
+                if (scale != Matrix4x4.identity)
                 {
                     var verts = new List<Vector3>();
                     mesh.GetVertices(verts);
                     for (var i = 0; i < verts.Count; ++i)
                     {
                         var v = verts[i];
-                        verts[i] = new Vector3(scale.x * v.x, scale.y * v.y, scale.z * v.z);
+                        verts[i] = scale.MultiplyPoint(v);
+                        //verts[i] = new Vector3(scale.x * v.x, scale.y * v.y, scale.z * v.z);
                     }
 
                     points.Assign(verts);
@@ -339,10 +340,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Capture(Mesh mesh, AlembicRecorderSettings settings)
             {
-                Capture(mesh, new Vector3(1, 1, 1), settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+                Capture(mesh, Matrix4x4.identity, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
-            public void Capture(Mesh mesh, Vector3 scale, AlembicRecorderSettings settings)
+            public void Capture(Mesh mesh, Matrix4x4 scale, AlembicRecorderSettings settings)
             {
                 Capture(mesh, scale, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
@@ -384,7 +385,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
-                mbuf.Capture(mesh, new Vector3(1, 1, 1), false, false, false, false);
+                mbuf.Capture(mesh, Matrix4x4.identity, false, false, false, false);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
@@ -690,8 +691,31 @@ namespace UnityEngine.Formats.Alembic.Util
 
                         m_meshBake.Clear();
 #if UNITY_2020_2_OR_NEWER
-                        m_target.BakeMesh(m_meshBake, true);
-                        m_mbuf.Capture(m_meshBake, new Vector3(1, 1, 1), recorder.m_settings);
+                        m_target.BakeMesh(m_meshBake, false);
+                        var noScale =
+                            new Matrix4x4(new Vector4(0.838670611f, 0, 0.544638932f, 0),
+                                new Vector4(0f, 1f, 0, 0f),
+                                new Vector4(-0.544638932f, 0, 0.838670611f, 0),
+                                new Vector4(0f, -0f, -0f, 1f));
+
+                        var withScale = m_target.transform.worldToLocalMatrix;/*new Matrix4x4(new Vector4(1.67734122f, 0, 1.08927786f, 0),
+                            new Vector4(0, 1, 0, 0),
+                            new Vector4(-0.544638932f, 0, 0.838670611f),
+                            new Vector4(0, 0, 0, 1));*/
+                        noScale = m_target.transform.WorldNoScale();
+                        m_mbuf.Capture(m_meshBake, withScale * noScale.inverse, recorder.m_settings);
+                        /* false
+                         [0] =  new Vector4(0.838670611,0,0.544638932,0),
+                                new Vector4(0,1,0,0),
+                                new Vector4(-0.544638932,0,0.838670611,0)
+                                ,0,-0, -0,1*/
+
+                        /*true
+                             [0] = new Vector4(1.67734122,0,1.08927786,0)
+                             new Vector4(0,1,0,0)
+                             new Vector4(-0.544638932,0,0.838670611)
+                             new Vector4(0,0,0,0,1)
+    [15] = 1*/
 #else
                         m_target.BakeMesh(m_meshBake);
 
