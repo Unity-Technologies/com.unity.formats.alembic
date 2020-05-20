@@ -14,6 +14,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
             var importer = serializedObject.targetObject as AlembicImporter;
             var pathSettings = "streamSettings.";
 
@@ -115,7 +116,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
             //EditorGUILayout.Separator();
 
-
+            serializedObject.ApplyModifiedProperties();
             base.ApplyRevertGUI();
         }
 
