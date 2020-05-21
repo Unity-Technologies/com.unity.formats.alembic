@@ -5,7 +5,7 @@
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
 - Fixed a bug where the Alembic motion vector direction were inverted.
-- Fixed a bug where the time range slider in the importer inspector breaks when going beyond the upper bounds
+- Fixed a bug where the time range slider in the importer inspector breaks when going beyond the upper bound
 - Fixed a crash in the Alembic Streamer when the object was being enabled and disabled very quickly.
 - Fixed a bug where the exported SkinnedMesh scale was wrong if the transform contained a scale change.
 
