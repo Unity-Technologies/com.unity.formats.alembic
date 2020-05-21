@@ -264,7 +264,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
             }
 
-            public void Capture(Mesh mesh, Matrix4x4 scale,
+            public void Capture(Mesh mesh, Matrix4x4 world2local,
                 bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 if (mesh == null)
@@ -273,15 +273,14 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 
-                if (scale != Matrix4x4.identity)
+                if (world2local != Matrix4x4.identity)
                 {
                     var verts = new List<Vector3>();
                     mesh.GetVertices(verts);
                     for (var i = 0; i < verts.Count; ++i)
                     {
                         var v = verts[i];
-                        verts[i] = scale.MultiplyPoint(v);
-                        //verts[i] = new Vector3(scale.x * v.x, scale.y * v.y, scale.z * v.z);
+                        verts[i] = world2local.MultiplyPoint(v);
                     }
 
                     points.Assign(verts);
@@ -343,9 +342,9 @@ namespace UnityEngine.Formats.Alembic.Util
                 Capture(mesh, Matrix4x4.identity, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
-            public void Capture(Mesh mesh, Matrix4x4 scale, AlembicRecorderSettings settings)
+            public void Capture(Mesh mesh, Matrix4x4 world2local, AlembicRecorderSettings settings)
             {
-                Capture(mesh, scale, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+                Capture(mesh, world2local, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
             public void WriteSample(aeObject abc)
