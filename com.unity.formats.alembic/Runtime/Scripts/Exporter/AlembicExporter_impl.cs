@@ -292,7 +292,23 @@ namespace UnityEngine.Formats.Alembic.Util
 
 
                 if (captureNormals)
-                    normals.LockList(ls => mesh.GetNormals(ls));
+                {
+                    if (world2local != Matrix4x4.identity)
+                    {
+                        var meshNormals = new List<Vector3>();
+                        mesh.GetNormals(meshNormals);
+                        for (var i = 0; i < meshNormals.Count; ++i)
+                        {
+                            var n = meshNormals[i];
+                            meshNormals[i] = world2local.MultiplyVector(n);
+                        }
+                        normals.Assign(meshNormals);
+                    }
+                    else
+                    {
+                        normals.LockList(ls => mesh.GetNormals(ls));
+                    }
+                }
                 else
                     normals.Clear();
 
