@@ -692,35 +692,14 @@ namespace UnityEngine.Formats.Alembic.Util
                         m_meshBake.Clear();
 #if UNITY_2020_2_OR_NEWER
                         m_target.BakeMesh(m_meshBake, true);
-
                         m_mbuf.Capture(m_meshBake, Matrix4x4.identity, recorder.m_settings);
-                        /* false
-                         [0] =  new Vector4(0.838670611,0,0.544638932,0),
-                                new Vector4(0,1,0,0),
-                                new Vector4(-0.544638932,0,0.838670611,0)
-                                ,0,-0, -0,1*/
-
-                        /*true
-                             [0] = new Vector4(1.67734122,0,1.08927786,0)
-                             new Vector4(0,1,0,0)
-                             new Vector4(-0.544638932,0,0.838670611)
-                             new Vector4(0,0,0,0,1)
-    [15] = 1*/
 #else
                         m_target.BakeMesh(m_meshBake);
-                        var noScale =
-                            new Matrix4x4(new Vector4(0.838670611f, 0, 0.544638932f, 0),
-                                new Vector4(0f, 1f, 0, 0f),
-                                new Vector4(-0.544638932f, 0, 0.838670611f, 0),
-                                new Vector4(0f, -0f, -0f, 1f));
 
-                        var withScale = m_target.transform.worldToLocalMatrix;/*new Matrix4x4(new Vector4(1.67734122f, 0, 1.08927786f, 0),
-                            new Vector4(0, 1, 0, 0),
-                            new Vector4(-0.544638932f, 0, 0.838670611f),
-                            new Vector4(0, 0, 0, 1));*/
-                        noScale = m_target.transform.WorldNoScale();
-
-
+                        var withScale = m_target.transform.worldToLocalMatrix;
+                        var noScale = m_target.transform.WorldNoScale();
+                        // The Skinned mesh baker disregards the world scale.
+                        // This matrix transform inverts the wrong Unity transforms are reapplies the full world scale.
                         m_mbuf.Capture(m_meshBake, withScale * noScale.inverse, recorder.m_settings);
 #endif
                     }
