@@ -14,6 +14,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     {
         internal AlembicExporter exporter;
         protected readonly List<string> deleteFileList = new List<string>();
+        protected GameObject camera;
         const string sceneName = "Scene";
 
         protected GameObject TestAbcImported(string abcPath, double minDuration = 0.1)
@@ -47,6 +48,30 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             }
         }
 
+        protected static bool NearlyEqual(float f1, float f2, float eps = 1e-5f)
+        {
+            return Mathf.Abs(f1 - f2) < eps;
+        }
+
+        protected static bool NearlyEqual(Vector3 v1, Vector3 v2, float eps = Vector3.kEpsilon)
+        {
+            return NearlyEqual(v1.x, v2.x, eps) &&
+                NearlyEqual(v1.y, v2.y, eps) &&
+                NearlyEqual(v1.z, v2.z, eps);
+        }
+
+        protected static bool NearlyEqual(Quaternion v1, Quaternion v2, float eps = Quaternion.kEpsilon)
+        {
+            return NearlyEqual(v1.x, v2.x, eps) &&
+                NearlyEqual(v1.y, v2.y, eps) &&
+                NearlyEqual(v1.z, v2.z, eps) &&
+                NearlyEqual(v1.w, v2.w, eps) ||
+                NearlyEqual(v1.x, -v2.x, eps) &&
+                NearlyEqual(v1.y, -v2.y, eps) &&
+                NearlyEqual(v1.z, -v2.z, eps) &&
+                NearlyEqual(v1.w, -v2.w, eps);
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -59,9 +84,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                 "Assets/" + Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".abc";
             exporter.CaptureOnStart = false;
 
-            var cam = new GameObject("Cam");
-            cam.AddComponent<Camera>();
-            cam.transform.localPosition = new Vector3(0, 1, -10);
+            camera = new GameObject("Cam");
+            camera.AddComponent<Camera>();
+            camera.transform.localPosition = new Vector3(0, 1, -10);
         }
 
         [UnityTearDown]

@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Reflection;
-using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -266,7 +264,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     abc.AddFaceSet(string.Format("submesh[{0}]", smi));
             }
 
-            public void Capture(Mesh mesh,
+            public void Capture(Mesh mesh, Matrix4x4 world2local,
                 bool captureNormals, bool captureUV0, bool captureUV1, bool captureColors)
             {
                 if (mesh == null)
@@ -275,10 +273,42 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 
-                points.LockList(ls => mesh.GetVertices(ls));
+                if (world2local != Matrix4x4.identity)
+                {
+                    var verts = new List<Vector3>();
+                    mesh.GetVertices(verts);
+                    for (var i = 0; i < verts.Count; ++i)
+                    {
+                        var v = verts[i];
+                        verts[i] = world2local.MultiplyPoint(v);
+                    }
+
+                    points.Assign(verts);
+                }
+                else
+                {
+                    points.LockList(ls => mesh.GetVertices(ls));
+                }
+
 
                 if (captureNormals)
-                    normals.LockList(ls => mesh.GetNormals(ls));
+                {
+                    if (world2local != Matrix4x4.identity)
+                    {
+                        var meshNormals = new List<Vector3>();
+                        mesh.GetNormals(meshNormals);
+                        for (var i = 0; i < meshNormals.Count; ++i)
+                        {
+                            var n = meshNormals[i];
+                            meshNormals[i] = world2local.MultiplyVector(n);
+                        }
+                        normals.Assign(meshNormals);
+                    }
+                    else
+                    {
+                        normals.LockList(ls => mesh.GetNormals(ls));
+                    }
+                }
                 else
                     normals.Clear();
 
@@ -325,7 +355,12 @@ namespace UnityEngine.Formats.Alembic.Util
 
             public void Capture(Mesh mesh, AlembicRecorderSettings settings)
             {
-                Capture(mesh, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+                Capture(mesh, Matrix4x4.identity, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
+            }
+
+            public void Capture(Mesh mesh, Matrix4x4 world2local, AlembicRecorderSettings settings)
+            {
+                Capture(mesh, world2local, settings.MeshNormals, settings.MeshUV0, settings.MeshUV1, settings.MeshColors);
             }
 
             public void WriteSample(aeObject abc)
@@ -365,7 +400,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
             void GenerateRemapIndices(Mesh mesh, MeshBuffer mbuf)
             {
-                mbuf.Capture(mesh, false, false, false, false);
+                mbuf.Capture(mesh, Matrix4x4.identity, false, false, false, false);
                 var weights4 = new PinnedList<BoneWeight>();
                 weights4.LockList(l => { mesh.GetBoneWeights(l); });
 
@@ -494,7 +529,10 @@ namespace UnityEngine.Formats.Alembic.Util
 
                 dst.visibility = src.gameObject.activeSelf;
                 dst.inherits = m_inherits;
-                if (m_invertForward) { src.forward = src.forward * -1.0f; }
+                if (m_invertForward)
+                {
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);  // rotate around Y 180deg: z => -z
+                }
                 if (m_inherits)
                 {
                     dst.translation = m_capturePosition ? src.localPosition : Vector3.zero;
@@ -507,7 +545,11 @@ namespace UnityEngine.Formats.Alembic.Util
                     dst.rotation = m_captureRotation ? src.rotation : Quaternion.identity;
                     dst.scale = m_captureScale ? src.lossyScale : Vector3.one;
                 }
-                if (m_invertForward) { src.forward = src.forward * -1.0f; }
+
+                if (m_invertForward)
+                {
+                    src.rotation = Quaternion.LookRotation(-1 * src.forward, src.up);
+                }
             }
         }
 
@@ -663,8 +705,18 @@ namespace UnityEngine.Formats.Alembic.Util
                         }
 
                         m_meshBake.Clear();
+#if UNITY_2020_2_OR_NEWER
+                        m_target.BakeMesh(m_meshBake, true);
+                        m_mbuf.Capture(m_meshBake, Matrix4x4.identity, recorder.m_settings);
+#else
                         m_target.BakeMesh(m_meshBake);
-                        m_mbuf.Capture(m_meshBake, recorder.m_settings);
+
+                        var withScale = m_target.transform.worldToLocalMatrix;
+                        var noScale = m_target.transform.WorldNoScale();
+                        // The Skinned mesh baker disregards the world scale.
+                        // This matrix transform inverts the wrong Unity transforms are reapplies the full world scale.
+                        m_mbuf.Capture(m_meshBake, withScale * noScale.inverse, recorder.m_settings);
+#endif
                     }
                 }
                 m_mbuf.WriteSample(abcObject);

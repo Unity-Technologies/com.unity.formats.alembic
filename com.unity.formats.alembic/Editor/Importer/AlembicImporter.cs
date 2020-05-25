@@ -42,14 +42,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             var importer = AssetImporter.GetAtPath(from) as AlembicImporter;
             if (importer != null)
             {
-                var so =new SerializedObject(importer);
+                var so = new SerializedObject(importer);
                 var prop = so.FindProperty("rootGameObjectName");
                 if (prop != null && string.IsNullOrEmpty(prop.stringValue))
                 {
                     prop.stringValue = Path.GetFileNameWithoutExtension(from);
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
-                
+
                 prop = so.FindProperty("rootGameObjectId");
                 if (prop != null && string.IsNullOrEmpty(prop.stringValue))
                 {
@@ -134,7 +134,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (startTime < abcStartTime)
                     startTime = abcStartTime;
                 if (endTime > abcEndTime)
-                    endTime = abcStartTime;
+                    endTime = abcEndTime;
             }
         }
 
@@ -150,7 +150,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var fileName = Path.GetFileNameWithoutExtension(path);
             var previousGoName = fileName;
-            
+
             if (!string.IsNullOrEmpty(rootGameObjectName))
             {
                 previousGoName = rootGameObjectName;
@@ -190,13 +190,13 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     prevIdName = rootGameObjectId;
                 }
-                
+
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
                 isHDF5 = abcStream.IsHDF5();
                 if (IsHDF5)
                 {
-                    Debug.LogWarning(path+": Deprecated HDF5 file format. Consider converting to Ogawa.");
+                    Debug.LogWarning(path + ": Deprecated HDF5 file format. Consider converting to Ogawa.");
                 }
             }
 

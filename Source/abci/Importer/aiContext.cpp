@@ -2,7 +2,6 @@
 #include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
-#include "aiAsync.h"
 #include <istream>
 #ifdef WIN32
     #include <windows.h>
@@ -179,7 +178,13 @@ aiContextManager::~aiContextManager()
 }
 
 aiContext::aiContext(int uid)
-    : m_uid(uid),
+    : m_path(),
+      m_streams(),
+      m_archive(),
+      m_top_node(),
+      m_timesamplings(),
+      m_uid(uid),
+      m_config(),
       m_isHDF5(false)
 {
 }
@@ -277,7 +282,6 @@ void aiContext::gatherNodesRecursive(aiObject *n)
 
 void aiContext::reset()
 {
-    waitAsync();
     m_top_node.reset();
     m_timesamplings.clear();
     m_archive.reset();
@@ -388,28 +392,12 @@ aiObject* aiContext::getTopObject() const
 
 void aiContext::updateSamples(double time)
 {
-    waitAsync();
-
     auto ss = aiTimeToSampleSelector(time);
     eachNodes([ss](aiObject& o) {
         o.updateSample(ss);
     });
-
-    // kick async tasks!
-    if (!m_async_tasks.empty())
-    {
-        aiAsyncManager::instance().queue(m_async_tasks.data(), m_async_tasks.size());
-    }
 }
 
-void aiContext::queueAsync(aiAsync& task)
-{
-    m_async_tasks.push_back(&task);
-}
 
-void aiContext::waitAsync()
-{
-    for (auto task : m_async_tasks)
-        task->wait();
-    m_async_tasks.clear();
-}
+
+
