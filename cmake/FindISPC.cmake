@@ -4,42 +4,31 @@ endif()
 
 include(CMakeParseArguments)
 
-find_program(ISPC ispc)
 find_program(7ZA 7za HINTS ${CMAKE_SOURCE_DIR}/External/7z)
 
-if (NOT EXISTS ${ISPC})
-    set(ISPC_VERSION 1.9.2)
+set(ISPC_VERSION 1.9.2)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-linux")
-        set(ISPC_ARCHIVE_EXT ".tar.gz")
+        execute_process(
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND tar -xf ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.tar.gz
+        )
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-osx")
-        set(ISPC_ARCHIVE_EXT ".tar.gz")
+        execute_process(
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND tar -xf ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.tar.gz
+        )
+
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-windows")
-        set(ISPC_ARCHIVE_EXT ".zip")
+        execute_process(
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND ${7ZA} x -aoa ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.zip
+        )
     endif()
 
     set(ISPC "${CMAKE_BINARY_DIR}/${ISPC_DIR}/ispc" CACHE PATH "" FORCE)
-    set(ISPC_ARCHIVE_FILE "${ISPC_DIR}${ISPC_ARCHIVE_EXT}")
-    set(ISPC_ARCHIVE_URL "http://downloads.sourceforge.net/project/ispcmirror/v${ISPC_VERSION}/${ISPC_ARCHIVE_FILE}")
-    set(ISPC_ARCHIVE_PATH "${CMAKE_BINARY_DIR}/${ISPC_ARCHIVE_FILE}")
-
-    if(NOT EXISTS ${ISPC_ARCHIVE_PATH})
-        file(DOWNLOAD ${ISPC_ARCHIVE_URL} ${ISPC_ARCHIVE_PATH} SHOW_PROGRESS)
-    endif()
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        execute_process(
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND tar -xf ${ISPC_ARCHIVE_PATH}
-        )
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        execute_process(
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND ${7ZA} x -aoa ${ISPC_ARCHIVE_PATH}
-        )
-    endif()
-endif()
 
 # e.g:
 #add_ispc_targets(
