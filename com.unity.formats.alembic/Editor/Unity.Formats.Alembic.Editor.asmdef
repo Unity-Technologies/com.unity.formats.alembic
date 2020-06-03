@@ -17,7 +17,7 @@
     "versionDefines": [
         {
             "name": "com.unity.recorder",
-            "expression": "2.1.0-preview.1",
+            "expression": "2.2.0-preview.1",
             "define": "RECORDER_AVAILABLE"
         }
     ],
