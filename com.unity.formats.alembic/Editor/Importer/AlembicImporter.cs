@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.Experimental;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -69,7 +72,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(7, "abc")]
+    [ScriptedImporter(8, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -138,12 +141,16 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
+        internal const string renderPipepineDependency = "AlembicRenderPipelineDependency";
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
             if (ctx == null)
             {
                 return;
             }
+
+            ctx.DependsOnCustomDependency(renderPipepineDependency);
 
             var path = ctx.assetPath;
             AlembicStream.DisconnectStreamsWithPath(path);
@@ -193,6 +200,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
+
                 isHDF5 = abcStream.IsHDF5();
                 if (IsHDF5)
                 {
@@ -201,6 +209,27 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             firstImport = false;
+        }
+
+        [InitializeOnLoadMethod]
+        static void InitializeEditorCallback()
+        {
+            EditorApplication.update += DirtyCustomDependencies; //
+        }
+
+        static string pipelineName = string.Empty;
+        static void DirtyCustomDependencies()
+        {
+            var newPipelineName = GraphicsSettings.currentRenderPipeline == null
+                ? ""
+                : GraphicsSettings.currentRenderPipeline.ToString();
+            if (pipelineName != newPipelineName)
+            {
+                var hash =  Hash128.Compute(newPipelineName);
+                AssetDatabaseExperimental.RegisterCustomDependency(renderPipepineDependency,hash);
+                AssetDatabase.Refresh();
+                pipelineName = newPipelineName;
+            }
         }
 
         class Subassets
