@@ -264,10 +264,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!initialImport)
             {
-                foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
+                /*foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
                 {
                     meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
-                }
+                }*/
             }
 
             m_importContext = null;

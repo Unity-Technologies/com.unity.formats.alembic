@@ -466,20 +466,20 @@ namespace UnityEngine.Formats.Alembic.Importer
                 meshFilter.sharedMesh = mesh;
 
                 var renderer = go.GetComponent<MeshRenderer>();
-                if (renderer == null)
-                {
-                    renderer = go.AddComponent<MeshRenderer>();
-                    var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
-                    if (material == null)
-                    {
-                        var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-                        material = pipelineAsset != null
-                            ? pipelineAsset.defaultMaterial
-                            : new Material(Shader.Find("Standard"));
-                    }
+                /*  if (renderer == null)
+                  {
+                      renderer = go.AddComponent<MeshRenderer>();
+                      var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                      if (material == null)
+                      {
+                          var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+                          material = pipelineAsset != null
+                              ? pipelineAsset.defaultMaterial
+                              : new Material(Shader.Find("Standard"));
+                      }
 
-                    renderer.sharedMaterial = material;
-                }
+                      renderer.sharedMaterial = material;
+                  }*/
             }
             else
             {

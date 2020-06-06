@@ -163,7 +163,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         bool InitializeAfterLoad()
         {
-            var ret = LoadStream(true);
+            var ret = LoadStream(false);
             if (!ret)
                 return false;
             //abcStream.AbcLoad(true, true);
@@ -180,11 +180,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 ? pipelineAsset.defaultMaterial
                 : new Material(Shader.Find("Standard"));
 
-            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
-            {
-                var mats = new Material[meshRenderer.sharedMaterials.Length];
-                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
-            }
+            /* foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+             {
+                 var mats = new Material[meshRenderer.sharedMaterials.Length];
+                 meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+             }*/
 
             foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())
             {
