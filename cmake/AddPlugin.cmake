@@ -100,10 +100,9 @@ function(add_plugin name)
             SET(strip_filename $<TARGET_FILE_NAME:${name}>)
         endif()
         add_custom_target("Deploy${name}" ALL
-            ${CMAKE_COMMAND} -E copy ${strip_filename} ${arg_PLUGINS_DIR}
-            #COMMAND rm -rf "${arg_PLUGINS_DIR}/${target_filename}"
-            #COMMAND cp -rp "${target_filename}" "${arg_PLUGINS_DIR}"
-            #COMMAND strip -x "${arg_PLUGINS_DIR}/${strip_filename}"
+            COMMAND rm -rf "${arg_PLUGINS_DIR}/${target_filename}"
+            COMMAND cp -rp "${target_filename}" "${arg_PLUGINS_DIR}"
+            COMMAND strip -x "${arg_PLUGINS_DIR}/${strip_filename}"
             DEPENDS ${name}
         )
     endif()

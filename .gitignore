@@ -75,5 +75,3 @@ InitTestScene*.unity.meta
 
 TestProjects/AlembicImporter/Assets/Plugins.meta
 TestProjects/AlembicImporter/Assets/Plugins/Editor/JetBrains.meta
-/out
-/CMakeSettings.json
