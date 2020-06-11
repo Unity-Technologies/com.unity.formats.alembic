@@ -2,7 +2,7 @@
 
 You have two different options to export Unity GameObjects to Alembic:
 - The [Alembic Exporter component](#alembic-exporter-component) (available by default in the Alembic package).
-- The [Alembic Clip Recorder](#alembic-recorder) (only available if you installed the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package).
+- The [Alembic Clip Recorder](#alembic-recorder) (only available if you installed the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package, minimum version: 2.0.0).
 
 Both options support exporting single frame and multi-frame Alembic files, and can export GameObjects with the following components:
 
