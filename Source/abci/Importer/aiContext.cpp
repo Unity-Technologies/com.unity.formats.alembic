@@ -7,6 +7,7 @@
     #include <windows.h>
     #include <io.h>
     #include <fcntl.h>
+    #include <errno.h>
 #endif
 
 static std::wstring L(const std::string& s)
@@ -51,10 +52,29 @@ static std::string NormalizePath(const char *in_path)
 class lockFreeIStream : public std::ifstream
 {
 private:
-    HANDLE _handle;
+    static bool updatedIOLimit;
+    HANDLE _handle = INVALID_HANDLE_VALUE;
+    int _osFD  = -1;
+    FILE* _osFH;
 
     FILE *Init(const wchar_t *name)
     {
+        if (!updatedIOLimit)
+        {
+            const int MAX_IO_LIMIT = 2048;
+            auto maxstdio = _getmaxstdio();
+            if (maxstdio < MAX_IO_LIMIT)
+            {
+                auto ret = _setmaxstdio(MAX_IO_LIMIT);
+                if (ret == -1)
+                {
+                    std::cerr << "Alembic: Unable to  set the maximum file limit to 2028" << std::endl;
+                    return nullptr;
+                }
+            }
+            updatedIOLimit = true;
+        }
+
         _handle = CreateFileW(name,
             GENERIC_READ,
             FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -69,21 +89,26 @@ private:
             return nullptr;
         }
 
-        int nHandle = _open_osfhandle((long)_handle, _O_RDONLY);
+        _osFD = _open_osfhandle((long)_handle, _O_RDONLY);
 
-        if (nHandle == -1)
+        if (_osFD == -1)
         {
             ::CloseHandle(_handle);
             return nullptr;
         }
 
-        auto fh = _fdopen(nHandle, "rb");
-        if (!fh)
+        _osFH = _fdopen(_osFD, "rb");
+        if (!_osFH)
         {
+            _close(_osFD);
+
+            auto errorString = strerror(errno);
+            std::cerr << "Alembic cannot open:" << name << ":" << errorString << std::endl;
             ::CloseHandle(_handle);
+            return nullptr;
         }
 
-        return fh;
+        return _osFH;
     }
 
 public:
@@ -91,6 +116,16 @@ public:
     {}
     ~lockFreeIStream()
     {
+        if (_osFH != nullptr)
+        {
+            fclose(_osFH);
+        }
+
+        if (_osFD !=-1)
+        {
+            _close(_osFD);
+        }
+
         if (_handle != INVALID_HANDLE_VALUE)
         {
             auto errorMsg = GetLastErrorAsString();
@@ -122,6 +157,8 @@ private:
         return message;
     }
 };
+
+bool lockFreeIStream::updatedIOLimit = false;
 #endif
 
 aiContextManager aiContextManager::s_instance;
