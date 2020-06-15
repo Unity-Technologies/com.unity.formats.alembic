@@ -1,4 +1,9 @@
 # Changes in Alembic for Unity
+
+## [1.0.7] - 2020-06-15
+### Changes
+
+
 ## [1.0.6] - 2019-08-26
 ### Changes
 - Added support for Linux
