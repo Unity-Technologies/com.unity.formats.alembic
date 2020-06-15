@@ -1,7 +1,5 @@
 editors:
-  - version: 2018.4
-  - version: 2019.2
-  - version: 2019.3  
+  - version: 2019.4  
 platforms:
   - name: win
     type: Unity::VM
@@ -9,8 +7,13 @@ platforms:
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
+    image: package-ci/mac:latest
     flavor: m1.mac
+  - name: centOS
+    type: Unity::VM::GPU
+    image: package-ci/centos:latest
+    flavor: b1.large
+
 ---
 build_win:
   name: Build Win
@@ -30,7 +33,7 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: buildfarm/mac:stable
+    image: package-ci/mac:latest
     flavor: m1.mac
   commands:
     - git submodule update --init --recursive
@@ -40,14 +43,29 @@ build_mac:
       paths:
         - "com.unity.formats.alembic/**/*"
 
+build_centOS:
+  name: Build CentOS
+  agent:
+    type: Unity::VM
+    image: package-ci/centos:latest
+    flavor: b1.large
+  commands:
+    -  git submodule update --init --recursive 
+    -  scl enable devtoolset-7 ./build.sh
+      
+  artifacts:
+    build:
+      paths:
+        - "com.unity.formats.alembic/**/*"
+
 pack:
   name: Pack
   agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
+    type: Unity::VM::osx
+    image: package-ci/mac:latest
+    flavor: m1.mac
   commands:
-    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package pack --package-path com.unity.formats.alembic
   artifacts:
    packages:
@@ -59,6 +77,8 @@ pack:
   dependencies:
     - .yamato/upm-ci.yml#build_win
     - .yamato/upm-ci.yml#build_mac
+    - .yamato/upm-ci.yml#build_centOS
+
 
 {% for editor in editors %}
 {% for platform in platforms %}
@@ -69,8 +89,12 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm 
-    - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     {% if platform.name == 'centOS' %}   
+     - DISPLAY=:0 upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% else %}
+     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'  
+     {% endif %}
   artifacts:
     logs.zip:
       paths:
@@ -86,7 +110,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 
 test_trigger:
-  name: Tests Trigger
+  name: TestsTrigger
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
@@ -97,8 +121,6 @@ test_trigger:
     branches:
       only:
         - "/.*/"
-      except:
-        - master
   artifacts:
     logs:
       paths:
@@ -122,12 +144,12 @@ publish:
     flavor: b1.large
     name: Runner
   commands:
-    - npm install upm-ci-utils -g --registry https://api.bintray.com/npm/unity/unity-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package publish --package-path com.unity.formats.alembic
   triggers:
     tags:
       only:
-        - /^(v|V)[0-9]+.[0-9]+.[0-9]+/
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
   artifacts:
     logs.zip:
       paths:
@@ -138,8 +160,8 @@ publish:
         - "upm-ci~/package/*.tgz"
   dependencies:
     - .yamato/upm-ci.yml#pack
-  {% for editor in editors %}
-  {% for platform in platforms %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
-  {% endfor %}  
-  {% endfor %}
+    {% for editor in editors %}
+    {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    {% endfor %}
+    {% endfor %}
