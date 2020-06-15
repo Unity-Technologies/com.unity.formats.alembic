@@ -53,8 +53,6 @@ class lockFreeIStream : public std::ifstream
 {
 private:
     static bool updatedIOLimit;
-    HANDLE _handle = INVALID_HANDLE_VALUE;
-    int _osFD  = -1;
     FILE* _osFH;
 
     FILE *Init(const wchar_t *name)
@@ -75,36 +73,36 @@ private:
             updatedIOLimit = true;
         }
 
-        _handle = CreateFileW(name,
+        auto handle = CreateFileW(name,
             GENERIC_READ,
             FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
             NULL);
-        if (_handle == INVALID_HANDLE_VALUE)
+        if ( handle == INVALID_HANDLE_VALUE)
         {
             auto errorMsg = GetLastErrorAsString();
             std::cerr << "Alembic cannot open:" << name << ":" << errorMsg << std::endl;
             return nullptr;
         }
 
-        _osFD = _open_osfhandle((long)_handle, _O_RDONLY);
+        auto osFD = _open_osfhandle((long)handle, _O_RDONLY);
 
-        if (_osFD == -1)
+        if (osFD == -1)
         {
-            ::CloseHandle(_handle);
+            ::CloseHandle(handle);
             return nullptr;
         }
 
-        _osFH = _fdopen(_osFD, "rb");
+        _osFH = _fdopen(osFD, "rb");
         if (!_osFH)
         {
-            _close(_osFD);
+            _close(osFD);
 
             auto errorString = strerror(errno);
             std::cerr << "Alembic cannot open:" << name << ":" << errorString << std::endl;
-            ::CloseHandle(_handle);
+            ::CloseHandle(handle);
             return nullptr;
         }
 
@@ -119,18 +117,6 @@ public:
         if (_osFH != nullptr)
         {
             fclose(_osFH);
-        }
-
-        if (_osFD !=-1)
-        {
-            _close(_osFD);
-        }
-
-        if (_handle != INVALID_HANDLE_VALUE)
-        {
-            auto errorMsg = GetLastErrorAsString();
-            std::cerr << "Alembic cannot close HANDLE:" << errorMsg << std::endl;
-            ::CloseHandle(_handle);
         }
     }
 
