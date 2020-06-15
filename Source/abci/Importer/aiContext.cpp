@@ -53,10 +53,14 @@ class lockFreeIStream : public std::ifstream
 {
 private:
     static bool updatedIOLimit;
-    FILE* _osFH;
+    FILE* _osFH ;
 
     FILE *Init(const wchar_t *name)
     {
+        HANDLE handle = INVALID_HANDLE_VALUE;
+        int osFD = -1;
+        _osFH = nullptr;
+
         if (!updatedIOLimit)
         {
             const int MAX_IO_LIMIT = 2048;
@@ -73,7 +77,7 @@ private:
             updatedIOLimit = true;
         }
 
-        auto handle = CreateFileW(name,
+        handle = CreateFileW(name,
             GENERIC_READ,
             FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL,
@@ -87,10 +91,11 @@ private:
             return nullptr;
         }
 
-        auto osFD = _open_osfhandle((long)handle, _O_RDONLY);
+        osFD = _open_osfhandle((long)handle, _O_RDONLY);
 
         if (osFD == -1)
         {
+             std::cerr << "Alembic cannot open:" << name << ":" << "_open_osfhandle failed" << std::endl;
             ::CloseHandle(handle);
             return nullptr;
         }
@@ -98,10 +103,9 @@ private:
         _osFH = _fdopen(osFD, "rb");
         if (!_osFH)
         {
-            _close(osFD);
-
             auto errorString = strerror(errno);
             std::cerr << "Alembic cannot open:" << name << ":" << errorString << std::endl;
+            _close(osFD);
             ::CloseHandle(handle);
             return nullptr;
         }
