@@ -118,6 +118,8 @@ public:
     {}
     ~lockFreeIStream()
     {
+       // The FILE owns all the handles associated with it and closing this should
+       // free the HANDLE and the OS file handle.
         if (_osFH != nullptr)
         {
             fclose(_osFH);
