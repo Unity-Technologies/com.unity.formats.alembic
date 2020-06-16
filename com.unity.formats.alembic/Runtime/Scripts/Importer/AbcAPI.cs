@@ -232,9 +232,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     struct aiSubmeshData
     {
         public IntPtr indexes;
+        public unsafe fixed char facesetNames[255];
     }
 
     [StructLayout(LayoutKind.Sequential)]

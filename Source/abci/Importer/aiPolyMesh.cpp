@@ -233,12 +233,14 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
 {
-    if (!data.indices)
+    if (!data.indices || !data.facesetName)
         return;
 
     auto& refiner = m_topology->m_refiner;
     auto& submesh = refiner.submeshes[submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
+    strncpy(data.facesetName, submesh.facesetName, 255 );
+
 }
 
 void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
@@ -1052,7 +1054,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
                 }
             }
         }
-        refiner.genSubmeshes(topology.m_material_ids);
+        refiner.genSubmeshes(topology.m_material_ids, topology.m_faceset_names);
     }
     else
     {
