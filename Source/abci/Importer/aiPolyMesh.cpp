@@ -233,13 +233,13 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
 
 void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
 {
-    if (!data.indices || !data.facesetName)
+    if (!data.indices )
         return;
 
     auto& refiner = m_topology->m_refiner;
     auto& submesh = refiner.submeshes[submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
-    strncpy(data.facesetName, submesh.facesetName, 255 );
+    strncpy(data.facesetName, submesh.facesetName.c_str(), 255 );
 
 }
 

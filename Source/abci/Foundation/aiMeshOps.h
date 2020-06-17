@@ -88,7 +88,7 @@ struct MeshRefiner
         int index_count = 0; // triangulated
         int index_offset = 0;
         int* dst_indices = nullptr;
-        char facesetName[255];
+        std::string facesetName;
     };
 
     struct Split

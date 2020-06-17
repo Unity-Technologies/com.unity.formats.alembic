@@ -234,7 +234,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
-    RawVector<Submesh> tmp_submeshes;
+    std::vector<Submesh> tmp_submeshes;
     RawVector<int> materialOrder;
     std::unordered_set<int> materialSet;
 
@@ -298,11 +298,11 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                 if (sm.index_count > 0)
                 {
                     ++split.submesh_count;
-                    submeshes.push_back(sm);
                     if (copyFacesetNames)
                     {
-                        std::strncpy(sm.facesetName, facesetNames[mi].c_str(),  255);
+                        sm.facesetName = facesetNames[mi];
                     }
+                    submeshes.push_back(sm);
                 }
             }
         }
