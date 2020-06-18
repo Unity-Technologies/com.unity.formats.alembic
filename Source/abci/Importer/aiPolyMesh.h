@@ -1,6 +1,6 @@
 #pragma once
 #include "aiMeshOps.h"
-
+#include <string>
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
@@ -43,6 +43,7 @@ public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
     abcFaceSetSamples m_faceset_sps;
+    std::vector<std::string> m_faceset_names;
     RawVector<int> m_material_ids;
 
     MeshRefiner m_refiner;

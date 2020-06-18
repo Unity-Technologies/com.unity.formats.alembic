@@ -112,6 +112,35 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
+{% for editor in editors %}
+{% for platform in platforms %}
+testProject_{{ platform.name }}_{{ editor.version }}:
+  name : Test Project version {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     {% if platform.name == 'centOS' %}   
+     - DISPLAY=:0 upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% else %}
+     - upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+     {% endif %} 
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    artifacts.zip:
+      paths:
+        - "upm-ci~/packages/**/*"
+        - "upm-ci~/templates/**/*"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+{% endfor %}
+{% endfor %}
+
 test_trigger:
   name: TestsTrigger
   agent:
@@ -136,6 +165,7 @@ test_trigger:
     {% for editor in editors %}
     {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
 
@@ -191,5 +221,6 @@ publish:
     {% for editor in editors %}
     {% for platform in platforms %}
     - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}

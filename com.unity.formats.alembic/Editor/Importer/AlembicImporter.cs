@@ -134,7 +134,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (startTime < abcStartTime)
                     startTime = abcStartTime;
                 if (endTime > abcEndTime)
-                    endTime = abcStartTime;
+                    endTime = abcEndTime;
             }
         }
 

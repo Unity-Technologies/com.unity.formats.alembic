@@ -8,7 +8,7 @@ tgzdir=$(pwd)
 # Note that cmake seems to clobber the -O3 with a -O2, but we can dream.
 export CXXFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export CFLAGS="-O3 -fomit-frame-pointer -fPIC"
-export MAKEFLAGS="-j4"
+export MAKEFLAGS="-j12"
 
 hdf5_version=1.10.1
 hdf5_arch=$(uname)

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -14,6 +16,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal class Submesh : IDisposable
         {
             public PinnedList<int> indexes = new PinnedList<int>();
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 255)]
+            public readonly char[] facesetName = new char[255];
             public bool update = true;
 
             public void Dispose()
@@ -80,6 +85,25 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public aiMeshSummary summary { get { return m_summary; } }
         public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
+
+        public List<string> GetFacesetNames()
+        {
+            var ret = new List<string>();
+            foreach (var su in m_submeshData)
+            {
+                var str = string.Empty;
+                try
+                {
+                    str = Marshal.PtrToStringAnsi(su.facesetName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                ret.Add(str);
+            }
+            return ret;
+        }
 
         protected override void Dispose(bool v)
         {
@@ -269,11 +293,19 @@ namespace UnityEngine.Formats.Alembic.Importer
                 var submeshData = default(aiSubmeshData);
                 for (int smi = 0; smi < submeshCount; ++smi)
                 {
-                    var submesh = m_submeshes[smi];
-                    m_submeshes[smi].update = true;
-                    submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
-                    submeshData.indexes = submesh.indexes;
-                    m_submeshData[smi] = submeshData;
+                    unsafe
+                    {
+                        var submesh = m_submeshes[smi];
+                        m_submeshes[smi].update = true;
+                        submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
+                        submeshData.indexes = submesh.indexes;
+                        fixed(char* s = submesh.facesetName)
+                        {
+                            submeshData.facesetName = new IntPtr(s);
+                        }
+
+                        m_submeshData[smi] = submeshData;
+                    }
                 }
             }
 

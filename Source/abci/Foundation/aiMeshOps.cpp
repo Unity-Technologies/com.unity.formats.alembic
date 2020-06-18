@@ -217,7 +217,7 @@ void MeshRefiner::retopology(bool swap_faces)
     }
 }
 
-void MeshRefiner::genSubmeshes(IArray<int> material_ids)
+void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string> &facesetNames)
 {
     if (material_ids.empty())
     {
@@ -234,7 +234,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
-    RawVector<Submesh> tmp_submeshes;
+    std::vector<Submesh> tmp_submeshes;
     RawVector<int> materialOrder;
     std::unordered_set<int> materialSet;
 
@@ -289,6 +289,8 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                 }
             }
 
+            auto copyFacesetNames = materialOrder.size() == facesetNames.size();
+
             for(int i=0; i < materialOrder.size(); ++i)
             {
                 auto mi = materialOrder[i];
@@ -296,6 +298,10 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                 if (sm.index_count > 0)
                 {
                     ++split.submesh_count;
+                    if (copyFacesetNames)
+                    {
+                        sm.facesetName = facesetNames[mi];
+                    }
                     submeshes.push_back(sm);
                 }
             }
