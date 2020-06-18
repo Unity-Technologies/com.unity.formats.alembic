@@ -2,6 +2,7 @@
 
 ## [1.0.7] - 2020-06-15
 ### Changes
+- Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
 
 
 ## [1.0.6] - 2019-08-26
