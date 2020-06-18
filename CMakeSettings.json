@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "OPENEXR_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/${configurationType}/include/OpenEXR",
+          "value": "${projectDir}/External/install/configurationType}/include/OpenEXR",
           "type": "PATH"
         },
         {
@@ -81,57 +81,57 @@
       "variables": [
         {
           "name": "OPENEXR_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/${configurationType}/include/OpenEXR",
+          "value": "${projectDir}/External/install/include/OpenEXR",
           "type": "PATH"
         },
         {
           "name": "OPENEXR_LIBRARY_DIR",
-          "value": "${projectDir}/External/install/${configurationType}/lib",
+          "value": "${projectDir}/External/install/lib",
           "type": "PATH"
         },
         {
           "name": "HDF5_DIR",
-          "value": "${projectDir}/External/install/${configurationType}",
+          "value": "${projectDir}/External/install/",
           "type": "PATH"
         },
         {
           "name": "HDF5_C_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/${configurationType}/include",
+          "value": "${projectDir}/External/install/include",
           "type": "PATH"
         },
         {
           "name": "HDF5_hdf5_LIBRARY_DEBUG",
-          "value": "${projectDir}/External/install/${configurationType}/lib/hdf5.lib",
+          "value": "${projectDir}/External/install/lib/hdf5.lib",
           "type": "FILEPATH"
         },
         {
           "name": "HDF5_ROOT",
-          "value": "${projectDir}/External/install/${configurationType}",
+          "value": "${projectDir}/External/install/",
           "type": "PATH"
         },
         {
           "name": "ALEMBIC_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/${configurationType}/include",
+          "value": "${projectDir}/External/install/include",
           "type": "PATH"
         },
         {
           "name": "ALEMBIC_LIBRARY",
-          "value": "${projectDir}/External/install/${configurationType}/lib/Alembic.lib",
+          "value": "${projectDir}/External/install/lib/Alembic.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_Half_LIBRARY",
-          "value": "${projectDir}/External/install/${configurationType}/lib/Half.lib",
+          "value": "${projectDir}/External/install/lib/Half.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_Iex_LIBRARY",
-          "value": "${projectDir}/External/install/${configurationType}/lib/Iex.lib",
+          "value": "${projectDir}/External/install/lib/Iex.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_IexMath_LIBRARY",
-          "value": "${projectDir}/External/install/${configurationType}/lib/IexMath.lib",
+          "value": "${projectDir}/External/install/lib/IexMath.lib",
           "type": "FILEPATH"
         }
       ]

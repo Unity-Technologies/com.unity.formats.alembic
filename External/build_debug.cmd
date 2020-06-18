@@ -2,11 +2,11 @@
 
 set PATH=%PATH%;%cd%\7z
 
-set installdir=%cd%\install
+set installdir=%cd%\install\Debug
 set tgzdir=%cd%
 
-if exist install(
-    rmdir /s /q install
+if exist install\Debug (
+    rmdir /s /q install\Debug
 )
 mkdir %installdir%
 
@@ -26,13 +26,13 @@ if exist ilmbase-build (
 )
 mkdir ilmbase-build
 cd ilmbase-build
-cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
+cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Release
+cmake --build . --target install --config Debug
 cd ..
 
 if exist alembic-build (
@@ -40,7 +40,7 @@ if exist alembic-build (
 )
 mkdir alembic-build
 cd alembic-build
-cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
+cmake ..\alembic -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
     -DUSE_BINARIES=OFF ^
@@ -53,5 +53,5 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DILMBASE_ROOT=%installdir% ^
     -DHDF5_ROOT=%installdir% ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Release
+cmake --build . --target install --config Debug
 cd ..
