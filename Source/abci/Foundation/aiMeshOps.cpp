@@ -244,6 +244,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
         auto& split = splits[spi];
         int offset_vertices = split.vertex_offset;
 
+        std::vector<int> tmp_materialOrder;
         // triangles
         if (split.index_count_tri > 0)
         {
@@ -264,6 +265,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                     {
                         materialSet.insert(mid);
                         materialOrder.push_back(mid);
+                        tmp_materialOrder.push_back(mid);
                     }
                 }
             }
@@ -300,10 +302,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                     ++split.submesh_count;
                     if (copyFacesetNames)
                     {
-                        // Array OOB temp workaround
-                        if (mi < facesetNames.size()) {
-                            sm.facesetName = facesetNames[mi];
-                        }
+                        sm.facesetName = facesetNames[mi-1];
                     }
                     submeshes.push_back(sm);
                 }
