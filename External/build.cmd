@@ -2,11 +2,11 @@
 
 set PATH=%PATH%;%cd%\7z
 
-set installdir=%cd%\install
+set installdir=%cd%\install\Release
 set tgzdir=%cd%
 
-if exist install (
-    rmdir /s /q install
+if exist install\Release (
+    rmdir /s /q install\Release
 )
 mkdir %installdir%
 

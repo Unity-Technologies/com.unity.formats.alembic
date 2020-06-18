@@ -44,7 +44,9 @@ target_link_libraries(abci
         ${HDF5_LIBRARIES}
 )
 
-install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
+set(ABC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Plugins/x86_64)
+file(MAKE_DIRECTORY ${ABC_INSTALL_DIR})
+install(TARGETS abci DESTINATION ${ABC_INSTALL_DIR})
 
 ########################################
 # Unit tests

@@ -300,7 +300,10 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                     ++split.submesh_count;
                     if (copyFacesetNames)
                     {
-                        sm.facesetName = facesetNames[mi];
+                        // Array OOB temp workaround
+                        if (mi < facesetNames.size()) {
+                            sm.facesetName = facesetNames[mi];
+                        }
                     }
                     submeshes.push_back(sm);
                 }

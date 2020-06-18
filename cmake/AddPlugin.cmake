@@ -100,7 +100,7 @@ function(add_plugin name)
             SET(strip_filename $<TARGET_FILE_NAME:${name}>)
         endif()
         add_custom_target("Deploy${name}" ALL
-            ${CMAKE_COMMAND} -E copy ${strip_filename} ${arg_PLUGINS_DIR}
+            ${CMAKE_COMMAND} -E copy ${strip_filename} ${arg_PLUGINS_DIR}/${strip_filename}
             DEPENDS ${name}
         )
     endif()

@@ -1,9 +1,9 @@
 {
   "configurations": [
     {
-      "name": "x64-Release",
+      "name": "x64-Debug",
       "generator": "Ninja",
-      "configurationType": "Release",
+      "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
@@ -13,57 +13,125 @@
       "variables": [
         {
           "name": "OPENEXR_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/include/OpenEXR",
+          "value": "${projectDir}/External/install/${configurationType}/include/OpenEXR",
           "type": "PATH"
         },
         {
           "name": "OPENEXR_LIBRARY_DIR",
-          "value": "${projectDir}/External/install/lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib",
           "type": "PATH"
         },
         {
           "name": "HDF5_DIR",
-          "value": "${projectDir}/External/install",
+          "value": "${projectDir}/External/install/${configurationType}",
           "type": "PATH"
         },
         {
           "name": "HDF5_C_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/include",
+          "value": "${projectDir}/External/install/${configurationType}/include",
           "type": "PATH"
         },
         {
           "name": "HDF5_hdf5_LIBRARY_DEBUG",
-          "value": "${projectDir}/External/install/lib/hdf5.lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib/hdf5.lib",
           "type": "FILEPATH"
         },
         {
           "name": "HDF5_ROOT",
-          "value": "${projectDir}/External/install",
+          "value": "${projectDir}/External/install/${configurationType}",
           "type": "PATH"
         },
         {
           "name": "ALEMBIC_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/include",
+          "value": "${projectDir}/External/install/${configurationType}/include",
           "type": "PATH"
         },
         {
           "name": "ALEMBIC_LIBRARY",
-          "value": "${projectDir}/External/install/lib/Alembic.lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Alembic.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_Half_LIBRARY",
-          "value": "${projectDir}/External/install/lib/Half.lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Half.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_Iex_LIBRARY",
-          "value": "${projectDir}/External/install/lib/Iex.lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Iex.lib",
           "type": "FILEPATH"
         },
         {
           "name": "OPENEXR_IexMath_LIBRARY",
-          "value": "${projectDir}/External/install/lib/IexMath.lib",
+          "value": "${projectDir}/External/install/${configurationType}/lib/IexMath.lib",
+          "type": "FILEPATH"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "OPENEXR_INCLUDE_DIR",
+          "value": "${projectDir}/External/install/${configurationType}/include/OpenEXR",
+          "type": "PATH"
+        },
+        {
+          "name": "OPENEXR_LIBRARY_DIR",
+          "value": "${projectDir}/External/install/${configurationType}/lib",
+          "type": "PATH"
+        },
+        {
+          "name": "HDF5_DIR",
+          "value": "${projectDir}/External/install/${configurationType}",
+          "type": "PATH"
+        },
+        {
+          "name": "HDF5_C_INCLUDE_DIR",
+          "value": "${projectDir}/External/install/${configurationType}/include",
+          "type": "PATH"
+        },
+        {
+          "name": "HDF5_hdf5_LIBRARY_DEBUG",
+          "value": "${projectDir}/External/install/${configurationType}/lib/hdf5.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "HDF5_ROOT",
+          "value": "${projectDir}/External/install/${configurationType}",
+          "type": "PATH"
+        },
+        {
+          "name": "ALEMBIC_INCLUDE_DIR",
+          "value": "${projectDir}/External/install/${configurationType}/include",
+          "type": "PATH"
+        },
+        {
+          "name": "ALEMBIC_LIBRARY",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Alembic.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "OPENEXR_Half_LIBRARY",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Half.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "OPENEXR_Iex_LIBRARY",
+          "value": "${projectDir}/External/install/${configurationType}/lib/Iex.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "OPENEXR_IexMath_LIBRARY",
+          "value": "${projectDir}/External/install/${configurationType}/lib/IexMath.lib",
           "type": "FILEPATH"
         }
       ]
