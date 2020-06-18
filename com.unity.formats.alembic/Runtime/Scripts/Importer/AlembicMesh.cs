@@ -86,6 +86,25 @@ namespace UnityEngine.Formats.Alembic.Importer
         public aiMeshSummary summary { get { return m_summary; } }
         public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
 
+        public List<string> GetFacesetNames()
+        {
+            var ret = new List<string>();
+            foreach (var su in m_submeshData)
+            {
+                var str = string.Empty;
+                try
+                {
+                    str = Marshal.PtrToStringAnsi(su.facesetName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                ret.Add(str);
+            }
+            return ret;
+        }
+
         protected override void Dispose(bool v)
         {
             base.Dispose(v);

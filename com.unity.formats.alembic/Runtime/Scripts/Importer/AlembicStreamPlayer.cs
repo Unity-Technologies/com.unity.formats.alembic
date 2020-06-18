@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 
@@ -138,6 +139,20 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             StreamDescriptor.PathToAbc = newPath;
             return InitializeAfterLoad();
+        }
+
+        public Dictionary<GameObject, List<string>> GetMaterialNames()
+        {
+            UpdateImmediately(CurrentTime);
+            var ret = new Dictionary<GameObject, List<string>>();
+            abcStream.EachNode((node) =>
+            {
+                if (node.abcObject is AlembicMesh abcMesh)
+                {
+                    ret[node.gameObject] = abcMesh.GetFacesetNames();
+                }
+            });
+            return ret;
         }
 
         bool InitializeAfterLoad()

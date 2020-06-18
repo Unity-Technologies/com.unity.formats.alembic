@@ -226,6 +226,26 @@ namespace UnityEngine.Formats.Alembic.Importer
             return m_loaded;
         }
 
+        public bool EachNode(Action<AlembicTreeNode> act)
+        {
+            if (abcTreeRoot == null)
+                return false;
+            EachNode(abcTreeRoot, act);
+            return true;
+        }
+
+        static  void  EachNode(AlembicTreeNode root, Action<AlembicTreeNode> act)
+        {
+            if (root == null)
+                return;
+
+            act.Invoke(root);
+            foreach (var node in root.Children)
+            {
+                EachNode(node, act);
+            }
+        }
+
         public void Dispose()
         {
             AlembicStream.s_streams.Remove(this);
