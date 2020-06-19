@@ -5,7 +5,7 @@ set PATH=%PATH%;%cd%\7z
 set installdir=%cd%\install
 set tgzdir=%cd%
 
-if exist install(
+if exist install (
     rmdir /s /q install
 )
 mkdir %installdir%
@@ -32,7 +32,7 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Release
+cmake --build . --target install --config Release -j
 cd ..
 
 if exist alembic-build (
@@ -53,5 +53,5 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DILMBASE_ROOT=%installdir% ^
     -DHDF5_ROOT=%installdir% ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Release
+cmake --build . --target install --config Release -j
 cd ..

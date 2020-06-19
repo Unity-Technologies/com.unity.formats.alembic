@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "OPENEXR_INCLUDE_DIR",
-          "value": "${projectDir}/External/install/configurationType}/include/OpenEXR",
+          "value": "${projectDir}/External/install/${configurationType}/include/OpenEXR",
           "type": "PATH"
         },
         {

@@ -32,7 +32,7 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Debug ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Debug
+cmake --build . --target install --config Debug -j 
 cd ..
 
 if exist alembic-build (
@@ -53,5 +53,5 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Debug ^
     -DILMBASE_ROOT=%installdir% ^
     -DHDF5_ROOT=%installdir% ^
     -G "Visual Studio 14 2015 Win64"
-cmake --build . --target install --config Debug
+cmake --build . --target install --config Debug -j
 cd ..

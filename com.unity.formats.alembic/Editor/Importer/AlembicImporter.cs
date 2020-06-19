@@ -344,8 +344,29 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (renderer != null)
             {
                 var mats = new Material[submeshCount];
-                for (int i = 0; i < submeshCount; ++i)
-                    mats[i] = subassets.defaultMaterial;
+                if (node.abcObject is AlembicMesh mesh)
+                {
+                    var facesetNames = mesh.GetFacesetNames();
+                    for (int i = 0; i < facesetNames.Count; ++i)
+                    {
+                        var name = facesetNames[i];
+                        if (name.Length == 0)
+                        {
+                            mats[i] = subassets.defaultMaterial;
+                        }
+                        else
+                        {
+                            var material = new Material(subassets.defaultMaterial) {name = facesetNames[i]};
+                            subassets.Add(material.name, material);
+                            mats[i] = material;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < submeshCount; ++i)
+                        mats[i] = subassets.defaultMaterial;
+                }
                 renderer.sharedMaterials = mats;
             }
 

@@ -194,12 +194,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             var defaultMat = pipelineAsset != null
                 ? pipelineAsset.defaultMaterial
                 : new Material(Shader.Find("Standard"));
-
-            /* foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
-             {
-                 var mats = new Material[meshRenderer.sharedMaterials.Length];
-                 meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
-             }*/
+            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var mats = new Material[meshRenderer.sharedMaterials.Length];
+                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+            }
 
             foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())
             {

@@ -19,6 +19,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 255)]
             public readonly char[] facesetName = new char[255];
+
             public bool update = true;
 
             public void Dispose()
@@ -80,11 +81,25 @@ namespace UnityEngine.Formats.Alembic.Importer
         List<JobHandle> m_PostProcessJobs = new List<JobHandle>();
         List<Submesh> m_submeshes = new List<Submesh>();
 
-        internal override aiSchema abcSchema { get { return m_abcSchema; } }
-        public override bool visibility { get { return m_sampleSummary.visibility; } }
+        internal override aiSchema abcSchema
+        {
+            get { return m_abcSchema; }
+        }
 
-        public aiMeshSummary summary { get { return m_summary; } }
-        public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
+        public override bool visibility
+        {
+            get { return m_sampleSummary.visibility; }
+        }
+
+        public aiMeshSummary summary
+        {
+            get { return m_summary; }
+        }
+
+        public aiMeshSampleSummary sampleSummary
+        {
+            get { return m_sampleSummary; }
+        }
 
         public List<string> GetFacesetNames()
         {
@@ -100,8 +115,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     Console.WriteLine(e);
                 }
+
                 ret.Add(str);
             }
+
             return ret;
         }
 
@@ -114,9 +131,9 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             m_splitSummaries.Dispose();
-            m_submeshSummaries.Dispose();;
-            m_splitData.Dispose();;
-            m_submeshData.Dispose();;
+            m_submeshSummaries.Dispose();
+            m_splitData.Dispose();
+            m_submeshData.Dispose();
         }
 
         void UpdateSplits(int numSplits)
@@ -160,7 +177,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             base.AbcSetup(abcObj, abcSchema);
-            m_abcSchema = (aiPolyMesh)abcSchema;
+            m_abcSchema = (aiPolyMesh) abcSchema;
 
             m_abcSchema.GetSummary(ref m_summary);
         }
@@ -182,6 +199,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitSummaries.Dispose();
                 }
+
                 m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount, Allocator.Persistent);
             }
 
@@ -191,6 +209,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_splitData.Dispose();
                 }
+
                 m_splitData = new NativeArray<aiPolyMeshData>(splitCount, Allocator.Persistent);
             }
 
@@ -200,6 +219,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     m_submeshSummaries.Dispose();
                 }
+
                 m_submeshSummaries = new NativeArray<aiSubmeshSummary>(submeshCount, Allocator.Persistent);
             }
 
@@ -279,6 +299,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     split.rgb.ResizeDiscard(0);
                 }
+
                 vertexData.rgb = split.rgb;
 
                 m_splitData[spi] = vertexData;
@@ -299,7 +320,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                         m_submeshes[smi].update = true;
                         submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
                         submeshData.indexes = submesh.indexes;
-                        fixed(char* s = submesh.facesetName)
+                        fixed (char* s = submesh.facesetName)
                         {
                             submeshData.facesetName = new IntPtr(s);
                         }
@@ -319,6 +340,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public aiPolyMeshSample sample;
             public NativeArray<aiPolyMeshData> splitData;
             public NativeArray<aiSubmeshData> submeshData;
+
             public void Execute()
             {
                 sample.FillVertexBuffer(splitData, submeshData);
@@ -328,13 +350,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         [BurstCompile]
         struct MultiplyByConstant : IJobParallelFor
         {
-            [NativeDisableUnsafePtrRestriction]
-            public IntPtr data;
+            [NativeDisableUnsafePtrRestriction] public IntPtr data;
             public float scalar;
 
             public unsafe void Execute(int index)
             {
-                ((Vector3*)data)[index] = scalar * ((Vector3*)data)[index];
+                ((Vector3*) data)[index] = scalar * ((Vector3*) data)[index];
             }
         }
 
@@ -357,7 +378,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
-                if (split.active &&  split.velocities.Count > 0)
+                if (split.active && split.velocities.Count > 0)
                 {
                     var job = new MultiplyByConstant
                     {
@@ -485,11 +506,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             Mesh mesh = null;
             var meshFilter = go.GetComponent<MeshFilter>();
-            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null &&
+                           meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
             if (!hasMesh)
             {
-                mesh = new Mesh { name = "dyn: " + go.name };
+                mesh = new Mesh {name = "dyn: " + go.name};
                 mesh.indexFormat = IndexFormat.UInt32;
                 mesh.MarkDynamic();
 
@@ -498,20 +520,26 @@ namespace UnityEngine.Formats.Alembic.Importer
                 meshFilter.sharedMesh = mesh;
 
                 var renderer = go.GetComponent<MeshRenderer>();
-                /*  if (renderer == null)
-                  {
-                      renderer = go.AddComponent<MeshRenderer>();
-                      var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
-                      if (material == null)
-                      {
-                          var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-                          material = pipelineAsset != null
-                              ? pipelineAsset.defaultMaterial
-                              : new Material(Shader.Find("Standard"));
-                      }
+                if (renderer == null)
+                {
+                    renderer = go.AddComponent<MeshRenderer>();
+                    Debug.Log($"Materials intially: {renderer.sharedMaterials.Length}");
+                    var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                    if (material == null)
+                    {
+                        var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+                        material = pipelineAsset != null
+                            ? pipelineAsset.defaultMaterial
+                            : new Material(Shader.Find("Standard"));
+                    }
 
-                      renderer.sharedMaterial = material;
-                  }*/
+                    Material[] materials = new Material[names.Count];
+                    for (int i = 0; i < names.Count; ++i)
+                    {
+                        materials[i] = new Material(material.shader){name = names[i]};
+                    }
+                    renderer.sharedMaterials = materials;
+                }
             }
             else
             {
