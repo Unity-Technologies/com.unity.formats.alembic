@@ -155,6 +155,11 @@ abciAPI aiPoints* aiObjectAsPoints(aiObject* obj)
     return obj ? dynamic_cast<aiPoints*>(obj) : nullptr;
 }
 
+abciAPI aiCurves* aiObjectAsCurves(aiObject* obj)
+{
+    return obj ? dynamic_cast<aiCurves*>(obj) : nullptr;
+}
+
 abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 {
     return schema ? schema->getSample() : nullptr;
@@ -255,6 +260,12 @@ abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
     if (schema)
         schema->setSort(v);
+}
+
+abciAPI void aiCurvesGetSummary(aiCurves *schema, aiCurvesSummary *dst)
+{
+    if (schema)
+        *dst = schema->getSummary();
 }
 
 abciAPI void aiCurvesGetSampleSummary(aiCurvesSample * sample, aiCurvesSampleSummary * dst)

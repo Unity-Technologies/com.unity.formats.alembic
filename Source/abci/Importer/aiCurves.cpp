@@ -30,8 +30,10 @@ void aiCurvesSample::fillData(aiCurvesData data)
     data.visibility = visibility;
     if (data.positions)
     {
-        if (!m_positions.empty())
-            m_positions.copy_to(data.positions);
+        if (!m_positions.empty()) {
+            m_positions_ref.copy_to(data.positions);
+            data.count = m_positions_ref.size();
+        }
     }
 }
 
@@ -93,6 +95,6 @@ void aiCurves::updateSummary()
     auto pos = m_schema.getPositionsProperty();
     m_summary.has_position = pos.valid() && pos.getNumSamples() > 0;
     if (m_summary.has_position)
-        m_summary.copnstant_position = pos.isConstant();
+        m_summary.constant_position = pos.isConstant();
 
 }

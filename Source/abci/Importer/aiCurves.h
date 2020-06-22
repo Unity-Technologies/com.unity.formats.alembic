@@ -41,15 +41,8 @@ public:
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
-private:
-    struct aiCurvesSummary
-    {
-        bool has_position = false;
-        bool copnstant_position = false;
-    };
-
-    void updateSummary();
     const aiCurvesSummary& getSummary() const {return m_summary;}
+private:
+    void updateSummary();
     aiCurvesSummary m_summary;
-
 };

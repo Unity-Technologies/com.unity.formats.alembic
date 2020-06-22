@@ -14,6 +14,7 @@ class aiXformSample;        // : aiSample
 class aiCameraSample;       // : aiSample
 class aiPolyMeshSample;     // : aiSample
 class aiPointsSample;       // : aiSample
+class aiCurves;
 #else
 // force make castable
 using aiSchema         = void;
@@ -200,6 +201,12 @@ struct aiSubmeshData
     int *indices = nullptr;
 };
 
+struct aiCurvesSummary
+{
+    bool has_position = false;
+    bool constant_position = false;
+};
+
 struct aiPointsSummary
 {
     bool has_points = false;
@@ -288,6 +295,7 @@ abciAPI aiXform*        aiObjectAsXform(aiObject* obj);
 abciAPI aiPolyMesh*     aiObjectAsPolyMesh(aiObject* obj);
 abciAPI aiCamera*       aiObjectAsCamera(aiObject* obj);
 abciAPI aiPoints*       aiObjectAsPoints(aiObject* obj);
+abciAPI aiCurves*       aiObjectAsCurves(aiObject* obj);
 
 abciAPI aiSample*       aiSchemaGetSample(aiSchema* schema);
 abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss);
@@ -309,6 +317,9 @@ abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiP
 abciAPI void            aiCameraGetData(aiCameraSample* sample, CameraData *dst);
 
 abciAPI void            aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst);
+
+abciAPI void            aiCurvesGetSummary(aiCurves *schema, aiCurvesSummary *dst);
+
 abciAPI void            aiPointsSetSort(aiPoints* schema, bool v);
 abciAPI void            aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v);
 abciAPI void            aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary *dst);
