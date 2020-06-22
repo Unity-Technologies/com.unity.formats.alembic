@@ -293,7 +293,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     struct aiCurvesSampleSummary
     {
-        public int count { get; set; }
+        public int positionCount { get; set; }
+        public int numVerticesCount { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -302,6 +303,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool visibility;
 
         public IntPtr positions;
+        public IntPtr numVertices;
         public int count;
         /* public IntPtr velocities;
          public IntPtr ids;

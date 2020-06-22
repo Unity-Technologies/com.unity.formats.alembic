@@ -18,11 +18,13 @@ public:
     // void fillData(aiPointsData &dst);
     // void getSummary(aiPointsSampleSummary &dst);
     Abc::P3fArraySamplePtr m_position_sp/*, m_position_sp2*/;
+    Abc::Int32ArraySamplePtr m_numVertices_sp;
 
     RawVector<abcV3> m_positions;
-    IArray<abcV3> m_positions_ref;
+    RawVector<int32_t> m_numVertices;
+    //IArray<abcV3> m_positions_ref;
 
-    void fillData(aiCurvesData data);
+    void fillData(aiCurvesData& data);
 };
 
 struct aiCurvesTraits

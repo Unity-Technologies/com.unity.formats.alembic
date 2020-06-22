@@ -45,13 +45,26 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             var data = default(aiCurvesData);
 
-            cloud.positionsList.ResizeDiscard(m_sampleSummary.count);
+            cloud.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
+            cloud.numVerticesList.ResizeDiscard(m_sampleSummary.numVerticesCount);
             data.positions = cloud.positionsList;
+            data.numVertices = cloud.numVerticesList;
 
             m_abcData[0] = data;
 
             // kick async copy
             sample.FillData(m_abcData);
+        }
+
+        public override void AbcSyncDataEnd()
+        {
+            if (!m_abcSchema.schema.isDataUpdated)
+                return;
+
+            var data = m_abcData[0];
+
+            if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
+                abcTreeNode.gameObject.SetActive(data.visibility);
         }
     }
 }

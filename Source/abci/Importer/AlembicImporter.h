@@ -224,7 +224,8 @@ struct aiPointsSampleSummary
 
 struct aiCurvesSampleSummary
 {
-    int count = 0;
+    int positionCount = 0;
+    int numVerticesCount = 0;
 };
 
 struct aiCurvesData
@@ -232,6 +233,7 @@ struct aiCurvesData
     bool        visibility = true;
 
     abcV3       *positions = nullptr;
+    int32_t     *numVertices = nullptr;
     //abcV3       *velocities = nullptr;
     //uint32_t    *ids = nullptr;
     int32_t     count = 0;

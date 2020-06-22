@@ -22,17 +22,19 @@ aiCurvesSample::aiCurvesSample(aiCurves *schema) : super(schema)
 
 void aiCurvesSample::getSummary(aiCurvesSampleSummary &dst)
 {
-    dst.count = (int)m_positions.size();
+    dst.positionCount = m_positions.size();
+    dst.numVerticesCount = m_numVertices.size();
 }
 
-void aiCurvesSample::fillData(aiCurvesData data)
+void aiCurvesSample::fillData(aiCurvesData& data)
 {
     data.visibility = visibility;
     if (data.positions)
     {
         if (!m_positions.empty()) {
-            m_positions_ref.copy_to(data.positions);
-            data.count = m_positions_ref.size();
+            m_positions.copy_to(data.positions);
+            m_numVertices.copy_to(data.numVertices);
+            data.count = m_positions.size();
         }
     }
 }
@@ -58,8 +60,14 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
     // points
     if (m_summary.has_position)
     {
-        auto prop = m_schema.getPositionsProperty();
-        prop.get(sample.m_position_sp, ss);
+        {
+            auto prop = m_schema.getPositionsProperty();
+            prop.get(sample.m_position_sp, ss);
+        }
+        {
+            auto prop = m_schema.getNumVerticesProperty();
+            prop.get(sample.m_numVertices_sp);
+        }
        /* if (summary.interpolate_points)
         {
             prop.get(sample.m_points_sp2, ss2);
@@ -76,6 +84,7 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
     if (m_sample_index_changed)
     {
         Assign(sample.m_positions, sample.m_position_sp, point_count);
+        Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
     }
     // interpolate
     if (config.swap_handedness)
@@ -87,7 +96,7 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
         ApplyScale(sample.m_positions.data(), (int) sample.m_positions.size(), config.scale_factor);
     }
 
-   sample.m_positions_ref = sample.m_positions; // or interpolate
+   //sample.m_positions_ref = sample.m_positions; // or interpolate
 }
 
 void aiCurves::updateSummary()
