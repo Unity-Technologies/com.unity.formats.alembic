@@ -215,6 +215,24 @@ struct aiPointsSampleSummary
     int count = 0;
 };
 
+struct aiCurvesSampleSummary
+{
+    int count = 0;
+};
+
+struct aiCurvesData
+{
+    bool        visibility = true;
+
+    abcV3       *positions = nullptr;
+    //abcV3       *velocities = nullptr;
+    //uint32_t    *ids = nullptr;
+    int32_t     count = 0;
+
+    //abcV3       center = { 0.0f, 0.0f, 0.0f };
+    //abcV3       size = { 0.0f, 0.0f, 0.0f };
+};
+
 struct aiPointsData
 {
     bool        visibility = true;
