@@ -37,18 +37,18 @@ namespace UnityEngine.Formats.Alembic.Importer
             sample.GetSummary(ref m_sampleSummary);
 
             // get points cloud component
-            var cloud = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
-            if (cloud == null)
+            var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
+            if (curves == null)
             {
-                cloud = abcTreeNode.gameObject.AddComponent<AlembicCurves>();
+                curves = abcTreeNode.gameObject.AddComponent<AlembicCurves>();
                 //  abcTreeNode.gameObject.AddComponent<AlembicPointsRenderer>(); // Need rendering
             }
             var data = default(aiCurvesData);
 
-            cloud.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
-            cloud.positionOffsetBuffer.ResizeDiscard(m_sampleSummary.numVerticesCount);
-            data.positions = cloud.positionsList;
-            data.numVertices = cloud.positionOffsetBuffer;
+            curves.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
+            curves.positionOffsetBuffer.ResizeDiscard(m_sampleSummary.numVerticesCount);
+            data.positions = curves.positionsList;
+            data.numVertices = curves.positionOffsetBuffer;
 
             m_abcData[0] = data;
 
@@ -65,6 +65,16 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
                 abcTreeNode.gameObject.SetActive(data.visibility);
+
+            var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
+
+            var cnt = 0;
+            for (var i = 0; i < curves.PositionsOffsetBuffer.Count; ++i)
+            {
+                var v = curves.PositionsOffsetBuffer[i];
+                curves.PositionsOffsetBuffer[i] = cnt;
+                cnt += v;
+            }
         }
     }
 }
