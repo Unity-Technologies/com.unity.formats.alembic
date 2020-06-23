@@ -46,9 +46,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             var data = default(aiCurvesData);
 
             curves.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
+            curves.uvs.ResizeDiscard(m_sampleSummary.positionCount);
+            curves.widths.ResizeDiscard(m_sampleSummary.positionCount);
             curves.positionOffsetBuffer.ResizeDiscard(m_sampleSummary.numVerticesCount);
             data.positions = curves.positionsList;
             data.numVertices = curves.positionOffsetBuffer;
+            data.uvs = curves.uvs;
+            data.widths = curves.widths;
 
             m_abcData[0] = data;
 

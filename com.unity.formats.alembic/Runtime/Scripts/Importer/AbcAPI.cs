@@ -287,6 +287,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         //public Bool hasVelocities { get; set; }
         //public Bool hasIDs { get; set; }
         public Bool constantPositions { get; set; }
+        public Bool hasUVs { get; set; }
+        public Bool hasWidths { get; set; }
         // public Bool constantVelocities { get; set; }
         // public Bool constantIDs { get; set; }
     };
@@ -304,6 +306,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public IntPtr positions;
         public IntPtr numVertices;
+        public IntPtr uvs;
+        public IntPtr widths;
         public int count;
         /* public IntPtr velocities;
          public IntPtr ids;

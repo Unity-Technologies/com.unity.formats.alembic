@@ -13,5 +13,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         PinnedList<int> m_positionsOffsetBuffer = new PinnedList<int>();
         internal PinnedList<int> positionOffsetBuffer { get { return m_positionsOffsetBuffer; } }
         public List<int> PositionsOffsetBuffer => positionOffsetBuffer.List;
+
+        PinnedList<Vector2> m_uvs = new PinnedList<Vector2>();
+        internal PinnedList<Vector2> uvs { get { return m_uvs; } }
+        public List<Vector2> UVs => uvs.List;
+
+        PinnedList<float> m_widths = new PinnedList<float>();
+        internal PinnedList<float> widths { get { return m_widths; } }
+        public List<float> Widths => widths.List;
     }
 }

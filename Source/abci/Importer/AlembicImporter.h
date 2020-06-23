@@ -205,6 +205,8 @@ struct aiCurvesSummary
 {
     bool has_position = false;
     bool constant_position = false;
+    bool has_UVs = false;
+    bool has_widths = false;
 };
 
 struct aiPointsSummary
@@ -234,8 +236,9 @@ struct aiCurvesData
 
     abcV3       *positions = nullptr;
     int32_t     *numVertices = nullptr;
+    abcV2       *uvs = nullptr;
+    float       *widths = nullptr;
     //abcV3       *velocities = nullptr;
-    //uint32_t    *ids = nullptr;
     int32_t     count = 0;
 
     //abcV3       center = { 0.0f, 0.0f, 0.0f };
