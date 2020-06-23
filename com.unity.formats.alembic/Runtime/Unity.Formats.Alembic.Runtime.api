@@ -18,6 +18,15 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    public class AlembicCurves : UnityEngine.MonoBehaviour
+    {
+        public System.Collections.Generic.List<UnityEngine.Vector3> Positions { get; }
+        public System.Collections.Generic.List<int> PositionsOffsetBuffer { get; }
+        public System.Collections.Generic.List<UnityEngine.Vector2> UVs { get; }
+        public System.Collections.Generic.List<float> Widths { get; }
+        public AlembicCurves() {}
+    }
+
     [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour
     {
         public UnityEngine.Vector3 BoundsCenter { get; }
@@ -57,6 +66,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     {
         public bool FlipFaces { get; set; }
         public bool ImportCameras { get; set; }
+        public bool ImportCurves { get; set; }
         public bool ImportMeshes { get; set; }
         public bool ImportPoints { get; set; }
         public bool ImportVisibility { get; set; }

@@ -284,9 +284,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     struct aiCurvesSummary
     {
-        //public Bool hasVelocities { get; set; }
-        //public Bool hasIDs { get; set; }
-        public Bool constantPositions { get; set; }
+        public Bool hasPositions { get; set; }
         public Bool hasUVs { get; set; }
         public Bool hasWidths { get; set; }
         // public Bool constantVelocities { get; set; }

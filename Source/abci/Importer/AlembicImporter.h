@@ -204,7 +204,6 @@ struct aiSubmeshData
 struct aiCurvesSummary
 {
     bool has_position = false;
-    bool constant_position = false;
     bool has_UVs = false;
     bool has_widths = false;
 };

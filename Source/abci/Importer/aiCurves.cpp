@@ -134,8 +134,11 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
     {
         Assign(sample.m_positions, sample.m_position_sp, point_count);
         Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
-        Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
-        Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_uvs_sp.getVals()->size());
+        if (m_summary.has_UVs)
+            Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
+
+        if (m_summary.has_widths)
+            Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_widths_sp.getVals()->size());
     }
     // interpolate
     if (config.swap_handedness)
@@ -155,8 +158,6 @@ void aiCurves::updateSummary()
     {
         auto prop = m_schema.getPositionsProperty();
         m_summary.has_position = prop.valid() && prop.getNumSamples() > 0;
-        if (m_summary.has_position)
-            m_summary.constant_position = prop.isConstant();
     }
     {
         auto prop = m_schema.getUVsParam();
