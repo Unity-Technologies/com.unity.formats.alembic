@@ -327,7 +327,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
                 else if (obj.AsCurves() && m_streamDesc.Settings.ImportCurves)
-                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCurves>();
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCurvesElement>();
                 if (elem != null)
                 {
                     elem.AbcSetup(obj, schema);
