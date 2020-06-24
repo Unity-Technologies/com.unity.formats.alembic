@@ -91,36 +91,42 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     auto& summary = getSummary();
+    bool interpolate = getConfig().interpolate_samples && m_current_time_offset > 0;
 
     readVisibility(sample, ss);
 
     // points
-    if (m_summary.has_position)
+    if (summary.has_position)
     {
         {
             auto prop = m_schema.getPositionsProperty();
             prop.get(sample.m_position_sp, ss);
+            if (interpolate)
+            {
+                prop.get(sample.m_position_sp2, ss2);
+            }
         }
         {
-            auto prop = m_schema.getNumVerticesProperty();
+            auto prop = m_schema.getNumVerticesProperty(); // Assume the same number
             prop.get(sample.m_numVertices_sp);
         }
-       /* if (summary.interpolate_points)
-        {
-            prop.get(sample.m_points_sp2, ss2);
-        }*/
+
     }
 
-    if (m_summary.has_UVs)
+    if (summary.has_UVs)
     {
         auto prop = m_schema.getUVsParam();
         prop.getExpanded(sample.m_uvs_sp, ss);
+        if (interpolate)
+            prop.getExpanded(sample.m_uvs_sp2, ss2);
     }
 
-    if (m_summary.has_widths)
+    if (summary.has_widths)
     {
         auto prop = m_schema.getWidthsParam();
         prop.getExpanded(sample.m_widths_sp, ss);
+        if (interpolate)
+            prop.getExpanded(sample.m_widths_sp2, ss2);
     }
 
 }
@@ -128,29 +134,55 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
 void aiCurves::cookSampleBody(aiCurvesSample &sample)
 {
     auto& config = getConfig();
-
     int point_count = (int)sample.m_position_sp->size();
+    bool interpolate = config.interpolate_samples && m_current_time_offset > 0;
+
     if (m_sample_index_changed)
     {
-        Assign(sample.m_positions, sample.m_position_sp, point_count);
-        Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
+		if (m_summary.has_position)
+		{
+			Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
+			Assign(sample.m_positions, sample.m_position_sp, point_count);
+			if (interpolate)
+			{
+				Assign(sample.m_positions2, sample.m_position_sp2, point_count);
+				Lerp(sample.m_positions.data(), sample.m_positions.data(), sample.m_positions2.data(),
+					point_count, m_current_time_offset);
+			}
+
+		}
+
         if (m_summary.has_UVs)
-            Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
+		{
+			Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
+			if (interpolate)
+			{
+				Assign(sample.m_uvs2, sample.m_uvs_sp2.getVals(), sample.m_uvs_sp2.getVals()->size());
+				Lerp(sample.m_uvs.data(), sample.m_uvs.data(), sample.m_uvs2.data(),
+					sample.m_uvs.size(), m_current_time_offset);
+			}
+		}
 
         if (m_summary.has_widths)
-            Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_widths_sp.getVals()->size());
-    }
-    // interpolate
-    if (config.swap_handedness)
-    {
-        SwapHandedness(sample.m_positions.data(), (int) sample.m_positions.size());
-    }
-    if (config.scale_factor != 1.0f)
-    {
-        ApplyScale(sample.m_positions.data(), (int) sample.m_positions.size(), config.scale_factor);
-    }
+		{
+			Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_widths_sp.getVals()->size());
+			if (interpolate)
+			{
+				Assign(sample.m_widths2, sample.m_widths_sp2.getVals(), sample.m_widths_sp2.getVals()->size());
+				Lerp(sample.m_widths.data(), sample.m_widths.data(), sample.m_widths2.data(),
+					sample.m_widths.size(), m_current_time_offset);
+			}
+		}
 
-   //sample.m_positions_ref = sample.m_positions; // or interpolate
+        if (config.swap_handedness)
+        {
+            SwapHandedness(sample.m_positions.data(), (int) sample.m_positions.size());
+        }
+        if (config.scale_factor != 1.0f)
+        {
+            ApplyScale(sample.m_positions.data(), (int) sample.m_positions.size(), config.scale_factor);
+        }
+    }
 }
 
 void aiCurves::updateSummary()

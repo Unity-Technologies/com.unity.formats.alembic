@@ -15,19 +15,18 @@ public:
     void getSummary(aiCurvesSampleSummary &dst);
 
     ~aiCurvesSample(){}
-    Abc::P3fArraySamplePtr m_position_sp;
-    RawVector<abcV3> m_positions;
+    Abc::P3fArraySamplePtr m_position_sp,m_position_sp2;
+    RawVector<abcV3> m_positions, m_positions2;
 
-    Abc::Int32ArraySamplePtr m_numVertices_sp;
-    RawVector<int32_t> m_numVertices;
+    Abc::Int32ArraySamplePtr m_numVertices_sp, m_numVertices_sp2;
+    RawVector<int32_t> m_numVertices, m_numVertices2;
 
-    AbcGeom::ITypedGeomParam<Abc::V2fTPTraits>::sample_type m_uvs_sp;
-    RawVector<abcV2> m_uvs;
-    RawVector<int> m_remap_uvs;
+    AbcGeom::ITypedGeomParam<Abc::V2fTPTraits>::sample_type m_uvs_sp, m_uvs_sp2;
+    RawVector<abcV2> m_uvs, m_uvs2;
 
-    AbcGeom::ITypedGeomParam<Abc::Float32TPTraits>::sample_type m_widths_sp;
-    RawVector<float> m_widths;
-    RawVector<int> m_remap_widths;
+    AbcGeom::ITypedGeomParam<Abc::Float32TPTraits>::sample_type m_widths_sp, m_widths_sp2;
+
+    RawVector<float> m_widths, m_widths2;
 
     void fillData(aiCurvesData& data);
 };
