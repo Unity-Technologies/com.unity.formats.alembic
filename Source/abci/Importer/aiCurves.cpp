@@ -96,8 +96,9 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
+
     auto& summary = getSummary();
-    bool interpolate = getConfig().interpolate_samples && m_current_time_offset > 0;
+    bool interpolate = getConfig().interpolate_samples;
 
     readVisibility(sample, ss);
 
@@ -147,10 +148,10 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
 {
 	auto& config = getConfig();
 	int point_count = (int)sample.m_position_sp->size();
-	bool interpolate = config.interpolate_samples && m_current_time_offset > 0;
+	bool interpolate = config.interpolate_samples;
 
-	if (!m_sample_index_changed)
-		return;
+	//if (!m_sample_index_changed)
+	//	return;
 
 	if (!getSummary().has_velocity)
 		sample.m_positions.swap(sample.m_positions_prev);
