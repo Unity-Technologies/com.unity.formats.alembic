@@ -306,11 +306,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr numVertices;
         public IntPtr uvs;
         public IntPtr widths;
+        public IntPtr velocities;
         public int count;
-        /* public IntPtr velocities;
-         public IntPtr ids;
-
-
+        /*
          public Vector3 boundsCenter;
          public Vector3 boundsExtents;*/
     }

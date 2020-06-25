@@ -7,6 +7,11 @@
 
 class aiCurves;
 
+struct aiCurvesSummaryInternal : aiCurvesSummary
+{
+	bool has_velocity;
+};
+
 class aiCurvesSample : public aiSample
 {
     using super = aiSample;
@@ -16,10 +21,10 @@ public:
 
     ~aiCurvesSample(){}
     Abc::P3fArraySamplePtr m_position_sp,m_position_sp2;
-    RawVector<abcV3> m_positions, m_positions2;
+    RawVector<abcV3> m_positions, m_positions2, m_positions_prev;
 
-    Abc::Int32ArraySamplePtr m_numVertices_sp, m_numVertices_sp2;
-    RawVector<int32_t> m_numVertices, m_numVertices2;
+    Abc::Int32ArraySamplePtr m_numVertices_sp;
+    RawVector<int32_t> m_numVertices;
 
     AbcGeom::ITypedGeomParam<Abc::V2fTPTraits>::sample_type m_uvs_sp, m_uvs_sp2;
     RawVector<abcV2> m_uvs, m_uvs2;
@@ -27,6 +32,9 @@ public:
     AbcGeom::ITypedGeomParam<Abc::Float32TPTraits>::sample_type m_widths_sp, m_widths_sp2;
 
     RawVector<float> m_widths, m_widths2;
+
+	Abc::V3fArraySamplePtr m_velocities_sp;
+	RawVector<abcV3> m_velocities;
 
     void fillData(aiCurvesData& data);
 };
@@ -47,8 +55,8 @@ public:
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
-    const aiCurvesSummary& getSummary() const {return m_summary;}
+    const aiCurvesSummaryInternal& getSummary() const {return m_summary;}
 private:
     void updateSummary();
-    aiCurvesSummary m_summary;
+	aiCurvesSummaryInternal m_summary;
 };

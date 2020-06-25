@@ -237,7 +237,7 @@ struct aiCurvesData
     int32_t     *numVertices = nullptr;
     abcV2       *uvs = nullptr;
     float       *widths = nullptr;
-    //abcV3       *velocities = nullptr;
+    abcV3       *velocities = nullptr;
     int32_t     count = 0;
 
     //abcV3       center = { 0.0f, 0.0f, 0.0f };

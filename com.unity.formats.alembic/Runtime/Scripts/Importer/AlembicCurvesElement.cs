@@ -45,13 +45,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             var data = default(aiCurvesData);
 
-
-            curves.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
-
-            if (m_summary.hasWidths)
+            if (m_summary.hasPositions)
             {
+                curves.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
+                curves.velocitiesList.ResizeDiscard(m_sampleSummary.positionCount);
+
                 curves.positionOffsetBuffer.ResizeDiscard(m_sampleSummary.numVerticesCount);
                 data.positions = curves.positionsList;
+                data.velocities = curves.velocitiesList;
                 data.numVertices = curves.positionOffsetBuffer;
             }
 

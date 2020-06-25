@@ -21,5 +21,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         PinnedList<float> m_widths = new PinnedList<float>();
         internal PinnedList<float> widths { get { return m_widths; } }
         public List<float> Widths => widths.List;
+
+        PinnedList<Vector3> m_velocities = new PinnedList<Vector3>();
+        internal PinnedList<Vector3> velocitiesList { get { return m_velocities; } }
+        public List<Vector3> Velocities => velocitiesList.List;
     }
 }

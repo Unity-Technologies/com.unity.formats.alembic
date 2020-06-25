@@ -74,6 +74,12 @@ void aiCurvesSample::fillData(aiCurvesData& data)
         if (!m_widths.empty())
             m_widths.copy_to(data.widths);
     }
+
+	if (data.velocities)
+	{
+		if (!m_velocities.empty())
+			m_velocities.copy_to(data.velocities);
+	}
 }
 
 aiCurves::aiCurves(aiObject *parent, const abcObject &abc) : super(parent, abc)
@@ -129,60 +135,89 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
             prop.getExpanded(sample.m_widths_sp2, ss2);
     }
 
+    if (summary.has_velocity)
+	{
+		auto prop = m_schema.getVelocitiesProperty();
+		prop.get(sample.m_velocities_sp, ss);
+	}
+
 }
 
 void aiCurves::cookSampleBody(aiCurvesSample &sample)
 {
-    auto& config = getConfig();
-    int point_count = (int)sample.m_position_sp->size();
-    bool interpolate = config.interpolate_samples && m_current_time_offset > 0;
+	auto& config = getConfig();
+	int point_count = (int)sample.m_position_sp->size();
+	bool interpolate = config.interpolate_samples && m_current_time_offset > 0;
 
-    if (m_sample_index_changed)
-    {
-		if (m_summary.has_position)
+	if (!m_sample_index_changed)
+		return;
+
+	if (!getSummary().has_velocity)
+		sample.m_positions.swap(sample.m_positions_prev);
+
+	if (m_summary.has_position)
+	{
+		Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
+		Assign(sample.m_positions, sample.m_position_sp, point_count);
+		if (interpolate)
 		{
-			Assign(sample.m_numVertices, sample.m_numVertices_sp, sample.m_numVertices_sp->size());
-			Assign(sample.m_positions, sample.m_position_sp, point_count);
-			if (interpolate)
-			{
-				Assign(sample.m_positions2, sample.m_position_sp2, point_count);
-				Lerp(sample.m_positions.data(), sample.m_positions.data(), sample.m_positions2.data(),
-					point_count, m_current_time_offset);
-			}
-
+			Assign(sample.m_positions2, sample.m_position_sp2, point_count);
+			Lerp(sample.m_positions.data(), sample.m_positions.data(), sample.m_positions2.data(),
+				point_count, m_current_time_offset);
 		}
 
-        if (m_summary.has_UVs)
-		{
-			Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
-			if (interpolate)
-			{
-				Assign(sample.m_uvs2, sample.m_uvs_sp2.getVals(), sample.m_uvs_sp2.getVals()->size());
-				Lerp(sample.m_uvs.data(), sample.m_uvs.data(), sample.m_uvs2.data(),
-					sample.m_uvs.size(), m_current_time_offset);
-			}
-		}
+	}
 
-        if (m_summary.has_widths)
+	if (m_summary.has_UVs)
+	{
+		Assign(sample.m_uvs, sample.m_uvs_sp.getVals(), sample.m_uvs_sp.getVals()->size());
+		if (interpolate)
 		{
-			Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_widths_sp.getVals()->size());
-			if (interpolate)
-			{
-				Assign(sample.m_widths2, sample.m_widths_sp2.getVals(), sample.m_widths_sp2.getVals()->size());
-				Lerp(sample.m_widths.data(), sample.m_widths.data(), sample.m_widths2.data(),
-					sample.m_widths.size(), m_current_time_offset);
-			}
+			Assign(sample.m_uvs2, sample.m_uvs_sp2.getVals(), sample.m_uvs_sp2.getVals()->size());
+			Lerp(sample.m_uvs.data(), sample.m_uvs.data(), sample.m_uvs2.data(),
+				sample.m_uvs.size(), m_current_time_offset);
 		}
+	}
 
-        if (config.swap_handedness)
-        {
-            SwapHandedness(sample.m_positions.data(), (int) sample.m_positions.size());
-        }
-        if (config.scale_factor != 1.0f)
-        {
-            ApplyScale(sample.m_positions.data(), (int) sample.m_positions.size(), config.scale_factor);
-        }
-    }
+	if (m_summary.has_widths)
+	{
+		Assign(sample.m_widths, sample.m_widths_sp.getVals(), sample.m_widths_sp.getVals()->size());
+		if (interpolate)
+		{
+			Assign(sample.m_widths2, sample.m_widths_sp2.getVals(), sample.m_widths_sp2.getVals()->size());
+			Lerp(sample.m_widths.data(), sample.m_widths.data(), sample.m_widths2.data(),
+				sample.m_widths.size(), m_current_time_offset);
+		}
+	}
+
+	if (config.swap_handedness)
+	{
+		SwapHandedness(sample.m_positions.data(), (int)sample.m_positions.size());
+	}
+	if (config.scale_factor != 1.0f)
+	{
+		ApplyScale(sample.m_positions.data(), (int)sample.m_positions.size(), config.scale_factor);
+	}
+
+	if (m_summary.has_velocity)
+	{
+		Assign(sample.m_velocities, sample.m_velocities_sp, point_count);
+		if (config.swap_handedness)
+		{
+			SwapHandedness(sample.m_velocities.data(), (int)sample.m_velocities.size());
+			for (int i=0;i<sample.m_velocities.size();++i)
+				sample.m_velocities[i] -= sample.m_velocities[i];
+		}
+	}
+	else
+	{
+		if (sample.m_positions_prev.empty())
+			sample.m_velocities.resize_zeroclear(sample.m_positions.size());
+		else
+			GenerateVelocities(sample.m_velocities.data(), sample.m_positions.data(), sample.m_positions_prev.data(),
+				(int)sample.m_positions.size(), -1 * config.vertex_motion_scale);
+	}
+
 }
 
 void aiCurves::updateSummary()
@@ -199,4 +234,8 @@ void aiCurves::updateSummary()
         auto prop = m_schema.getWidthsParam();
         m_summary.has_widths = prop.valid() && prop.getNumSamples() > 0;
     }
+	{
+		auto prop = m_schema.getVelocitiesProperty();
+		m_summary.has_velocity = prop.valid() && prop.getNumSamples() > 0;
+	}
 }
