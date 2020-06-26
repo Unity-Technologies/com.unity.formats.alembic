@@ -1,45 +1,7 @@
 #include "pch.h"
 #include <Foundation/aiMath.h>
 #include "aiCurves.h"
-
-
-namespace
-{
-    template<class T, class U>
-    inline void Assign(RawVector<T>& dst, const U& src, int point_count)
-    {
-        dst.resize_discard(point_count);
-        size_t count = std::min<size_t>(point_count, src->size());
-        auto src_data = src->get();
-        for (size_t i = 0; i < count; ++i)
-            dst[i] = (T)src_data[i];
-    }
-
-    template<class T, class AbcArraySample>
-    inline void Remap(RawVector<T>& dst, const AbcArraySample& src, const RawVector<int>& indices)
-    {
-        if (indices.empty())
-        {
-            dst.assign(src.get(), src.get() + src.size());
-        }
-        else
-        {
-            dst.resize_discard(indices.size());
-            CopyWithIndices(dst.data(), src.get(), indices);
-        }
-    }
-
-    template<class T, class IndexArray>
-    inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
-    {
-        if (!dst || !src) { return; }
-        size_t size = indices.size();
-        for (size_t i = 0; i < (int)size; ++i)
-        {
-            dst[i] = src[indices[i]];
-        }
-    }
-}
+#include "aiUtils.h"
 
 aiCurvesSample::aiCurvesSample(aiCurves *schema) : super(schema)
 {
