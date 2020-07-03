@@ -67,9 +67,15 @@ void aiMeshTopology::clear()
     m_indices_sp.reset();
     m_counts_sp.reset();
     m_faceset_sps.clear();
-
+	m_material_ids.clear();
     m_refiner.clear();
-    m_material_ids.clear();
+	m_remap_points.clear();
+	m_remap_normals.clear();
+	m_remap_uv0.clear();
+	m_remap_uv1.clear();
+	m_remap_rgba.clear();
+	m_remap_rgb.clear();
+
     m_vertex_count = 0;
     m_index_count = 0;
 }

@@ -4,6 +4,7 @@
 ### Changes
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 - Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
+- Fixed a memory leak when using varying topology meshes.
 
 ## [2.0.1-preview.1] - 2019-08-07
 ### Changes
