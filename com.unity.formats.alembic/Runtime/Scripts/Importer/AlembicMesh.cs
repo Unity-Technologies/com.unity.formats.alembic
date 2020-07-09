@@ -523,7 +523,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (renderer == null)
                 {
                     renderer = go.AddComponent<MeshRenderer>();
-                    Debug.Log($"Materials intially: {renderer.sharedMaterials.Length}");
                     var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
                     if (material == null)
                     {
@@ -533,6 +532,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                             : new Material(Shader.Find("Standard"));
                     }
 
+                    var names = GetFacesetNames();
                     Material[] materials = new Material[names.Count];
                     for (int i = 0; i < names.Count; ++i)
                     {
