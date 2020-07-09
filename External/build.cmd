@@ -31,7 +31,7 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
-    -G "Visual Studio 14 2015 Win64"
+    -G "Visual Studio 16 2019"
 cmake --build . --target install --config Release -j
 cd ..
 
@@ -52,6 +52,6 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DUSE_STATIC_HDF5=ON ^
     -DILMBASE_ROOT=%installdir% ^
     -DHDF5_ROOT=%installdir% ^
-    -G "Visual Studio 14 2015 Win64"
+    -G "Visual Studio 16 2019"
 cmake --build . --target install --config Release -j
 cd ..
