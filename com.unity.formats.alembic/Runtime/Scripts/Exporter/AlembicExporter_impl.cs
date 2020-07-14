@@ -67,9 +67,29 @@ namespace UnityEngine.Formats.Alembic.Util
         /// </summary>
         public GameObject TargetBranch
         {
-            get { return targetBranch; }
-            set { targetBranch = value; }
+            get
+            {
+                return getTargetBranch != null ? getTargetBranch() : targetBranch;
+            }
+            set
+            {
+                if (setTargetBranch != null)
+                {
+                    setTargetBranch(value);
+                }
+                else
+                {
+                    targetBranch = value;
+                }
+            }
         }
+
+        // Allow the GameObject target to be (de)serialized in a different way (the UnityRecorder saves asset and have a different mechanism to serialize scene references)
+        internal SetTargetBranch setTargetBranch;
+        internal GetTargetBranch getTargetBranch;
+
+        internal delegate void SetTargetBranch(GameObject go);
+        internal delegate GameObject GetTargetBranch();
 
         [SerializeField, HideInInspector]
         bool fixDeltaTime = true;
@@ -614,7 +634,14 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Setup(Component c)
             {
                 m_target = c as MeshRenderer;
-                var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                MeshFilter meshFilter = m_target.GetComponent<MeshFilter>();
+                if (meshFilter == null)
+                {
+                    m_target = null;
+                    return;
+                }
+
+                Mesh mesh = meshFilter.mesh;
                 if (mesh == null)
                     return;
 
