@@ -8,6 +8,9 @@ if [[ -e build ]]; then
     rm -rf build
 fi
 
+export MAKEFLAGS="-j12"
+
+
 depsdir=${PWD}/External/install
 installdir=${PWD}
 mkdir -p build

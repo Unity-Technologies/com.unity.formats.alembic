@@ -7,6 +7,7 @@
     #include <windows.h>
     #include <io.h>
     #include <fcntl.h>
+    #include <errno.h>
 #endif
 
 static std::wstring L(const std::string& s)
@@ -51,39 +52,65 @@ static std::string NormalizePath(const char *in_path)
 class lockFreeIStream : public std::ifstream
 {
 private:
-    HANDLE _handle;
+    static bool updatedIOLimit;
+    FILE* _osFH ;
 
     FILE *Init(const wchar_t *name)
     {
-        _handle = CreateFileW(name,
+        HANDLE handle = INVALID_HANDLE_VALUE;
+        int osFD = -1;
+        _osFH = nullptr;
+
+        if (!updatedIOLimit)
+        {
+            const int MAX_IO_LIMIT = 2048;
+            auto maxstdio = _getmaxstdio();
+            if (maxstdio < MAX_IO_LIMIT)
+            {
+                auto ret = _setmaxstdio(MAX_IO_LIMIT);
+                if (ret == -1)
+                {
+                    std::cerr << "Alembic: Unable to  set the maximum file limit to 2028" << std::endl;
+                    return nullptr;
+                }
+            }
+            updatedIOLimit = true;
+        }
+
+        handle = CreateFileW(name,
             GENERIC_READ,
             FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
             NULL);
-        if (_handle == INVALID_HANDLE_VALUE)
+        if ( handle == INVALID_HANDLE_VALUE)
         {
             auto errorMsg = GetLastErrorAsString();
             std::cerr << "Alembic cannot open:" << name << ":" << errorMsg << std::endl;
             return nullptr;
         }
 
-        int nHandle = _open_osfhandle((long)_handle, _O_RDONLY);
+        osFD = _open_osfhandle((long)handle, _O_RDONLY);
 
-        if (nHandle == -1)
+        if (osFD == -1)
         {
-            ::CloseHandle(_handle);
+             std::cerr << "Alembic cannot open:" << name << ":" << "_open_osfhandle failed" << std::endl;
+            ::CloseHandle(handle);
             return nullptr;
         }
 
-        auto fh = _fdopen(nHandle, "rb");
-        if (!fh)
+        _osFH = _fdopen(osFD, "rb");
+        if (!_osFH)
         {
-            ::CloseHandle(_handle);
+            auto errorString = strerror(errno);
+            std::cerr << "Alembic cannot open:" << name << ":" << errorString << std::endl;
+            _close(osFD);
+            ::CloseHandle(handle);
+            return nullptr;
         }
 
-        return fh;
+        return _osFH;
     }
 
 public:
@@ -91,11 +118,11 @@ public:
     {}
     ~lockFreeIStream()
     {
-        if (_handle != INVALID_HANDLE_VALUE)
+       // The FILE owns all the handles associated with it and closing this should
+       // free the HANDLE and the OS file handle.
+        if (_osFH != nullptr)
         {
-            auto errorMsg = GetLastErrorAsString();
-            std::cerr << "Alembic cannot close HANDLE:" << errorMsg << std::endl;
-            ::CloseHandle(_handle);
+            fclose(_osFH);
         }
     }
 
@@ -122,6 +149,8 @@ private:
         return message;
     }
 };
+
+bool lockFreeIStream::updatedIOLimit = false;
 #endif
 
 aiContextManager aiContextManager::s_instance;
