@@ -134,7 +134,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         bool forceUpdate = false;
         bool updateStarted = false;
 
-
+        Dictionary<string, Material[]> _materials = new Dictionary<string, Material[]>();
+        
         /// <summary>
         /// Update the child GameObject's data to the CurrentTime (The regular update happens during the LateUpdate phase).
         /// </summary>
@@ -159,6 +160,23 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             StreamDescriptor.PathToAbc = newPath;
+            Component[] streamPlayers;
+            if ((streamPlayers = GetComponents(typeof(AlembicStreamPlayer))).Length > 1)
+            {
+                foreach (var streamPlayer in streamPlayers)
+                {
+                    if (streamPlayer != this)
+                    {
+                        AlembicStreamPlayer sp = streamPlayer as AlembicStreamPlayer;
+                        foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>(true))
+                        {
+                            _materials[meshRenderer.gameObject.name] = meshRenderer.sharedMaterials;
+                        }
+                        this.Settings = sp.Settings;
+                        DestroyImmediate(sp);
+                    }
+                }    
+            }
             return InitializeAfterLoad();
         }
 
@@ -196,8 +214,15 @@ namespace UnityEngine.Formats.Alembic.Importer
                 : new Material(Shader.Find("Standard"));
             foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
             {
-                var mats = new Material[meshRenderer.sharedMaterials.Length];
-                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+                if (_materials.Count > 0)
+                {
+                    meshRenderer.sharedMaterials = _materials[meshRenderer.gameObject.name];
+                }
+                else
+                {
+                    var mats = new Material[meshRenderer.sharedMaterials.Length];
+                    meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+                }
             }
 
             foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())

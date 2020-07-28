@@ -6,7 +6,6 @@
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
@@ -65,6 +64,11 @@
           "name": "OPENEXR_IexMath_LIBRARY",
           "value": "${projectDir}/External/install/${configurationType}/lib/IexMath.lib",
           "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_INSTALL_PREFIX",
+          "value": "${projectDir}",
+          "type": "PATH"
         }
       ]
     },

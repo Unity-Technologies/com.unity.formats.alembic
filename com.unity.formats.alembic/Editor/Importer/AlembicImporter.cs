@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Importer
@@ -56,6 +57,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     prop.stringValue = Path.GetFileNameWithoutExtension(from);
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
+
                 AssetDatabase.WriteImportSettingsIfDirty(from);
             }
 
@@ -75,44 +77,49 @@ namespace UnityEditor.Formats.Alembic.Importer
         [SerializeField]
 #pragma warning disable 0649
         private string rootGameObjectId;
-        [SerializeField]
-        private string rootGameObjectName;
+
+        [SerializeField] private string rootGameObjectName;
 #pragma warning restore 0649
-        [SerializeField]
-        private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
+        [SerializeField] private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
+
         public AlembicStreamSettings StreamSettings
         {
             get { return streamSettings; }
             set { streamSettings = value; }
         }
-        [SerializeField]
-        private double abcStartTime; // read only
+
+        [SerializeField] private double abcStartTime; // read only
+
         public double AbcStartTime
         {
             get { return abcStartTime; }
         }
-        [SerializeField]
-        private double abcEndTime; // read only
+
+        [SerializeField] private double abcEndTime; // read only
+
         public double AbcEndTime
         {
             get { return abcEndTime; }
         }
-        [SerializeField]
-        private double startTime = double.MinValue;
+
+        [SerializeField] private double startTime = double.MinValue;
+
         public double StartTime
         {
             get { return startTime; }
             set { startTime = value; }
         }
-        [SerializeField]
-        private double endTime = double.MaxValue;
+
+        [SerializeField] private double endTime = double.MaxValue;
+
         public double EndTime
         {
             get { return endTime; }
             set { endTime = value; }
         }
-        [SerializeField]
-        private string importWarning;
+
+        [SerializeField] private string importWarning;
+
         public string ImportWarning
         {
             get { return importWarning; }
@@ -123,8 +130,9 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal bool IsHDF5
         {
-            get { return isHDF5;}
+            get { return isHDF5; }
         }
+
         [SerializeField] bool isHDF5;
 
         void OnValidate()
@@ -155,6 +163,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 previousGoName = rootGameObjectName;
             }
+
             var go = new GameObject(previousGoName);
 
             var streamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
@@ -171,13 +180,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                     startTime = abcStartTime;
                     endTime = abcEndTime;
                 }
-                streamDescriptor.mediaStartTime = (float)abcStartTime;
-                streamDescriptor.mediaEndTime = (float)abcEndTime;
+
+                streamDescriptor.mediaStartTime = (float) abcStartTime;
+                streamDescriptor.mediaEndTime = (float) abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
                 streamPlayer.StreamDescriptor = streamDescriptor;
-                streamPlayer.StartTime = (float)StartTime;
-                streamPlayer.EndTime = (float)EndTime;
+                streamPlayer.StartTime = (float) StartTime;
+                streamPlayer.EndTime = (float) EndTime;
                 streamPlayer.ExternalReference = false;
 
                 var subassets = new Subassets(ctx);
@@ -222,11 +232,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        m_defaultMaterial = GetMaterial("Standard.shader");
+                        var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+                        m_defaultMaterial = pipelineAsset != null
+                            ? pipelineAsset.defaultMaterial
+                            : GetMaterial("Standard.shader");
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
-                        Add("Default Material", m_defaultMaterial);
                     }
+
                     return m_defaultMaterial;
                 }
             }
@@ -242,6 +255,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         m_defaultPointsMaterial.name = "Default Points";
                         Add("Default Points", m_defaultPointsMaterial);
                     }
+
                     return m_defaultPointsMaterial;
                 }
             }
@@ -257,6 +271,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         m_defaultPointsMotionVectorMaterial.name = "Points Motion Vector";
                         Add("Points Motion Vector", m_defaultPointsMotionVectorMaterial);
                     }
+
                     return m_defaultPointsMotionVectorMaterial;
                 }
             }
@@ -347,18 +362,25 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (node.abcObject is AlembicMesh mesh)
                 {
                     var facesetNames = mesh.GetFacesetNames();
-                    for (int i = 0; i < facesetNames.Count; ++i)
+                    if (facesetNames.Count == 0)
                     {
-                        var name = facesetNames[i];
-                        if (name.Length == 0)
+                        subassets.Add(subassets.defaultMaterial.name, subassets.defaultMaterial);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < facesetNames.Count; ++i)
                         {
-                            mats[i] = subassets.defaultMaterial;
-                        }
-                        else
-                        {
-                            var material = new Material(subassets.defaultMaterial) {name = facesetNames[i]};
-                            subassets.Add(material.name, material);
-                            mats[i] = material;
+                            var name = facesetNames[i];
+                            if (name.Length == 0)
+                            {
+                                mats[i] = subassets.defaultMaterial;
+                            }
+                            else
+                            {
+                                var material = new Material(subassets.defaultMaterial) {name = facesetNames[i]};
+                                subassets.Add(material.name, material);
+                                mats[i] = material;
+                            }
                         }
                     }
                 }
@@ -367,6 +389,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     for (int i = 0; i < submeshCount; ++i)
                         mats[i] = subassets.defaultMaterial;
                 }
+
                 renderer.sharedMaterials = mats;
             }
 
@@ -377,7 +400,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 apr.InstancedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
                 DestroyImmediate(cubeGO);
 
-                apr.Materials = new List<Material> { subassets.pointsMaterial };
+                apr.Materials = new List<Material> {subassets.pointsMaterial};
                 apr.MotionVectorMaterial = subassets.pointsMotionVectorMaterial;
             }
 
@@ -395,11 +418,12 @@ namespace UnityEditor.Formats.Alembic.Importer
             for (int i = 0; i < n; ++i)
             {
                 var ev = new AnimationEvent();
-                ev.time = (float)ts.GetTime(i);
+                ev.time = (float) ts.GetTime(i);
                 ev.intParameter = i;
                 ev.functionName = "AbcOnFrameChange";
                 events[i] = ev;
             }
+
             AnimationUtility.SetAnimationEvents(clip, events);
             return true;
         }
