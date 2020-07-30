@@ -355,22 +355,24 @@ namespace UnityEditor.Formats.Alembic.Importer
                     {
                         for (int i = 0; i < facesetNames.Count; ++i)
                         {
+                            var material = new Material(subassets.defaultMaterial);
                             var name = facesetNames[i];
                             if (name.Length == 0)
                             {
-                                mats[i] = subassets.defaultMaterial;
+                                material.name = node.gameObject.name;
+                                subassets.Add(material.name, material);
                             }
                             else
                             {
-                                var material = new Material(subassets.defaultMaterial) {name = facesetNames[i]};
+                                material.name = name;
                                 subassets.Add(material.name, material);
-                                mats[i] = material;
                             }
+                            mats[i] = material;
                         }
                     }
                     else
                     {
-                        subassets.Add(subassets.defaultMaterial.name, subassets.defaultMaterial);
+                        subassets.Add(node.gameObject.name, subassets.defaultMaterial);
                     }
                 }
                 else
