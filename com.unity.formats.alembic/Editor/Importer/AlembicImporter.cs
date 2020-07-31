@@ -332,6 +332,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             CollectSubAssets(subassets, root);
         }
 
+        private Dictionary<string, Material> m_Materials = new Dictionary<string, Material>();
+
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
             int submeshCount = 0;
@@ -360,12 +362,28 @@ namespace UnityEditor.Formats.Alembic.Importer
                             if (name.Length == 0)
                             {
                                 material.name = node.gameObject.name;
-                                subassets.Add(material.name, material);
+                                if (m_Materials.ContainsKey(material.name))
+                                {
+                                    material = m_Materials[material.name];
+                                }
+                                else
+                                {
+                                    subassets.Add(material.name, material);
+                                    m_Materials[material.name] = material;
+                                }
                             }
                             else
                             {
                                 material.name = name;
-                                subassets.Add(material.name, material);
+                                if (m_Materials.ContainsKey(material.name))
+                                {
+                                    material = m_Materials[material.name];
+                                }
+                                else
+                                {
+                                    subassets.Add(material.name, material);
+                                    m_Materials[material.name] = material;
+                                }
                             }
                             mats[i] = material;
                         }
