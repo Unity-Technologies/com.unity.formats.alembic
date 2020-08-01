@@ -362,28 +362,20 @@ namespace UnityEditor.Formats.Alembic.Importer
                             if (name.Length == 0)
                             {
                                 material.name = node.gameObject.name;
-                                if (m_Materials.ContainsKey(material.name))
-                                {
-                                    material = m_Materials[material.name];
-                                }
-                                else
-                                {
-                                    subassets.Add(material.name, material);
-                                    m_Materials[material.name] = material;
-                                }
                             }
                             else
                             {
                                 material.name = name;
-                                if (m_Materials.ContainsKey(material.name))
-                                {
-                                    material = m_Materials[material.name];
-                                }
-                                else
-                                {
-                                    subassets.Add(material.name, material);
-                                    m_Materials[material.name] = material;
-                                }
+                            }
+                            
+                            if (m_Materials.ContainsKey(material.name))
+                            {
+                                material = m_Materials[material.name];
+                            }
+                            else
+                            {
+                                subassets.Add(material.name, material);
+                                m_Materials[material.name] = material;
                             }
                             mats[i] = material;
                         }
