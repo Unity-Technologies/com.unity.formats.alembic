@@ -33,14 +33,17 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 return context.GetTimeSampling(i);
             }
+
             public bool IsHDF5()
             {
                 return context.IsHDF5();
             }
+
             public void GetTimeRange(out double begin, out double end)
             {
                 context.GetTimeRange(out begin, out end);
             }
+
             public void SetConfig(ref aiConfig conf)
             {
                 updateJobHandle.Complete();
@@ -58,6 +61,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 updateJobHandle.Complete();
                 context.Destroy();
             }
+
             public void ScheduleUpdateSamples(double time)
             {
                 var updateJob = new UpdateSamplesJob {context = context, time = time};

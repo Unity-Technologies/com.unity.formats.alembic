@@ -1,4 +1,4 @@
-# Tutorial: Import and play back Alembic
+# Tutorial – Import and play back Alembic
 
 This quick tutorial covers adding Alembic assets to your Project and using them in Unity. It demonstrates importing and playing back Alembic content.
 

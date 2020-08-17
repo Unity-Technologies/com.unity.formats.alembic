@@ -56,20 +56,20 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected static bool NearlyEqual(Vector3 v1, Vector3 v2, float eps = Vector3.kEpsilon)
         {
             return NearlyEqual(v1.x, v2.x, eps) &&
-                   NearlyEqual(v1.y, v2.y, eps) &&
-                   NearlyEqual(v1.z, v2.z, eps);
+                NearlyEqual(v1.y, v2.y, eps) &&
+                NearlyEqual(v1.z, v2.z, eps);
         }
 
         protected static bool NearlyEqual(Quaternion v1, Quaternion v2, float eps = Quaternion.kEpsilon)
         {
             return NearlyEqual(v1.x, v2.x, eps) &&
-                   NearlyEqual(v1.y, v2.y, eps) &&
-                   NearlyEqual(v1.z, v2.z, eps) &&
-                   NearlyEqual(v1.w, v2.w, eps) ||
-                   NearlyEqual(v1.x, -v2.x, eps) &&
-                   NearlyEqual(v1.y, -v2.y, eps) &&
-                   NearlyEqual(v1.z, -v2.z, eps) &&
-                   NearlyEqual(v1.w, -v2.w, eps);
+                NearlyEqual(v1.y, v2.y, eps) &&
+                NearlyEqual(v1.z, v2.z, eps) &&
+                NearlyEqual(v1.w, v2.w, eps) ||
+                NearlyEqual(v1.x, -v2.x, eps) &&
+                NearlyEqual(v1.y, -v2.y, eps) &&
+                NearlyEqual(v1.z, -v2.z, eps) &&
+                NearlyEqual(v1.w, -v2.w, eps);
         }
 
         [SetUp]
@@ -84,7 +84,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                 "Assets/" + Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".abc";
             exporter.CaptureOnStart = false;
 
-            camera= new GameObject("Cam");
+            camera = new GameObject("Cam");
             camera.AddComponent<Camera>();
             camera.transform.localPosition = new Vector3(0, 1, -10);
         }
