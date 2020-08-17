@@ -217,9 +217,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var cubeGO = root.GetComponentInChildren<MeshRenderer>().gameObject;
             director.time = 0;
             director.Evaluate();
+            yield return null;
             var t0 = cubeGO.transform.position;
             director.time = player.Duration;
             director.Evaluate();
+            yield return null;
             var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }
