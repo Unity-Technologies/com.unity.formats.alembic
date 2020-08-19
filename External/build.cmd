@@ -26,11 +26,15 @@ if exist ilmbase-build (
 )
 mkdir ilmbase-build
 cd ilmbase-build
-cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
+cmake ..\OpenExr -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
-    -DNAMESPACE_VERSIONING=OFF ^
-    -DBUILD_SHARED_LIBS=OFF ^
+    -DOPENEXR_NAMESPACE_VERSIONING=OFF ^
+    -DOPENEXR_BUILD_SHARED=OFF ^
+    -DOPENEXR_BUILD_STATIC=ON ^
+    -DOPENEXR_BUILD_OPENEXR=OFF ^
+    -DOPENEXR_BUILD_PYTHON_LIBS=OFF ^
+    -DBUILD_TESTING=OFF ^
     -G "Visual Studio 16 2019"
 cmake --build . --target install --config Release -j
 cd ..
@@ -43,6 +47,11 @@ cd alembic-build
 cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
+    -DALEMBIC_ILMBASE_HALF_LIB=%installdir%\lib\Half_s.lib ^
+    -DALEMBIC_ILMBASE_IEXMATH_LIB=%installdir%\lib\IexMath_s.lib ^
+    -DALEMBIC_ILMBASE_ILMTHREAD_LIB=%installdir%\lib\IlmThread_s.lib ^
+    -DALEMBIC_ILMBASE_IEX_LIB=%installdir%\lib\Iex_s.lib ^
+    -DALEMBIC_ILMBASE_IMATH_LIB=%installdir%\lib\Imath_s.lib ^
     -DUSE_BINARIES=OFF ^
     -DUSE_TESTS=OFF ^
     -DALEMBIC_SHARED_LIBS=OFF ^
