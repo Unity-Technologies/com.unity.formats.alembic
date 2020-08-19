@@ -9,4 +9,3 @@ add_subdirectory("Source/")
 install(DIRECTORY com.unity.formats.alembic/ DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic PATTERN *.in EXCLUDE)
 install(FILES
         DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
-install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.md  DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic)
