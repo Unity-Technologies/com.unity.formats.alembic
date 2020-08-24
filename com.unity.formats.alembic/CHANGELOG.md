@@ -1,9 +1,12 @@
 # Changes in Alembic for Unity
 
-## [Unreleased]
-### Changes
+## [2.1.0-preview.1] - 2020-06-16
+### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
+
+### Changes
 - Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
+- Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
 
 ## [2.0.1-preview.1] - 2019-08-07
 ### Changes
