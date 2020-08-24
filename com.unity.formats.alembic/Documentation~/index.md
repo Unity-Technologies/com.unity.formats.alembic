@@ -13,7 +13,9 @@ The Alembic package supports these features:
 - Customizing [particle and point cloud effects](particles.md).
 - Playing animation by streaming data through [Timeline](timeline.md) or [Unity Animation](animClip.md).
 - Playing Alembic animation [using imported animation clips](time_ImportedClip.md).
-- [Exporting](export.md) Unity GameObjects to an Alembic file.
+- [Exporting](export.md) Unity GameObjects to an Alembic file (through Exporter or Recorder).
+
+> **Note:** If you need to use the Alembic Clip Recorder feature, you must also install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package (minimum version: 2.0.0).
 
 ## Requirements
 

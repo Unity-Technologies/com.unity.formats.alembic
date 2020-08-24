@@ -3,6 +3,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using UnityEngine.Formats.Alembic.Importer;
@@ -10,6 +12,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Assert = NUnit.Framework.Assert;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -274,6 +277,21 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var meshNames = go.GetComponentsInChildren<MeshRenderer>(true).Select(x => x.transform.parent.parent.name).ToArray();
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("10")));
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("30")));
+        }
+        
+        [UnityTest]
+        public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
+        {
+            var go = new GameObject("mrgo");
+            go.AddComponent<MeshRenderer>();
+            go.AddComponent<AlembicExporter>();
+
+            director.Play();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            exporter.OneShot();
+            yield return null;
+            TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
+            Assert.IsTrue(true);
         }
     }
 }

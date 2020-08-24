@@ -5,7 +5,11 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
+#if UNITY_2020_2_OR_NEWER
+using UnityEditor.AssetImporters;
+#else
 using UnityEditor.Experimental.AssetImporters;
+#endif
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -14,6 +18,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
             var importer = serializedObject.targetObject as AlembicImporter;
             var pathSettings = "streamSettings.";
 
@@ -45,22 +50,26 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUILayout.Separator();
 
                 // time range
-                var startTimeProp = serializedObject.FindProperty("startTime");
-                var endTimeProp = serializedObject.FindProperty("endTime");
-                if (startTimeProp.doubleValue == endTimeProp.doubleValue)
-                {
-                    startTimeProp.doubleValue = importer.AbcStartTime;
-                    endTimeProp.doubleValue = importer.AbcEndTime;
-                }
-
-                var startTime = (float)startTimeProp.doubleValue;
-                var endTime = (float)endTimeProp.doubleValue;
+                SerializedProperty startTimeProp = serializedObject.FindProperty("startTime");
+                SerializedProperty endTimeProp = serializedObject.FindProperty("endTime");
 
                 EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
+                float startTime = (float)startTimeProp.doubleValue;
+                float endTime = (float)endTimeProp.doubleValue;
+                float abcStart = (float)importer.AbcStartTime;
+                float abcEnd = (float)importer.AbcEndTime;
                 EditorGUI.BeginChangeCheck();
-                EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
+                EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, abcStart, abcEnd);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    startTimeProp.doubleValue = startTime;
+                    endTime = (float)Math.Round(endTime, 5);
+                    endTimeProp.doubleValue = endTime;
+                }
 
                 EditorGUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
                 EditorGUI.showMixedValue = startTimeProp.hasMultipleDifferentValues;
                 var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ", "Start time"), startTime, GUILayout.MinWidth(90.0f));
                 EditorGUI.showMixedValue = endTimeProp.hasMultipleDifferentValues;
@@ -69,23 +78,21 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    if (startTime != newStartTime)
-                        newStartTime = Mathf.Clamp(newStartTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
-                    if (endTime != newEndTime)
-                        newEndTime = Mathf.Clamp(newEndTime, (float)importer.AbcStartTime, (float)importer.AbcEndTime);
                     startTimeProp.doubleValue = newStartTime;
                     endTimeProp.doubleValue = newEndTime;
                 }
-                EditorGUI.EndDisabledGroup();
+
                 EditorGUILayout.EndHorizontal();
 
-                float duration = endTime - startTime;
+                EditorGUI.EndDisabledGroup();
+
+
                 GUIStyle style = new GUIStyle();
                 style.alignment = TextAnchor.LowerRight;
                 style.normal.textColor = Color.gray;
                 if (!startTimeProp.hasMultipleDifferentValues && !endTimeProp.hasMultipleDifferentValues)
                 {
-                    EditorGUILayout.LabelField(new GUIContent(duration.ToString("0.000") + "s"), style);
+                    EditorGUILayout.LabelField(new GUIContent((endTime - startTime).ToString("0.000") + "s"), style);
                 }
                 EditorGUI.indentLevel--;
             }
@@ -115,7 +122,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
             //EditorGUILayout.Separator();
 
-
+            serializedObject.ApplyModifiedProperties();
             base.ApplyRevertGUI();
         }
 
