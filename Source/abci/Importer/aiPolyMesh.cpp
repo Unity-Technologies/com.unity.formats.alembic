@@ -500,8 +500,6 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
 
-    readVisibility(sample, ss);
-
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& summary = m_summary;
