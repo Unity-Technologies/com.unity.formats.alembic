@@ -30,8 +30,7 @@ void aiXform::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-
-    readVisibility(sample, ss);
+    
     m_schema.get(sample.xf_sp, ss);
     m_schema.get(sample.xf_sp2, ss2);
 }

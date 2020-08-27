@@ -31,7 +31,6 @@ void aiCamera::readSampleBody(Sample& sample, uint64_t idx)
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
 
-    readVisibility(sample, ss);
     m_schema.get(sample.cam_sp, ss);
     m_schema.get(sample.cam_sp2, ss2);
 }
