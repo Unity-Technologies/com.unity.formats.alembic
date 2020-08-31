@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,6 +10,7 @@ using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Timeline;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -195,6 +197,36 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.UpdateImmediately(0);
             var t0 = cubeGO.transform.position;
             player.UpdateImmediately(player.Duration);
+            var t1  = cubeGO.transform.position;
+            Assert.AreNotEqual(t0, t1);
+        }
+
+        [UnityTest]
+        public IEnumerator TestTimelineTrack()
+        {
+            director.Play();
+            exporter.MaxCaptureFrame = 30;
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
+            var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
+            var player = root.GetComponent<AlembicStreamPlayer>();
+            var timeline = director.playableAsset as TimelineAsset;
+            var abcTrack = timeline.CreateTrack<AlembicTrack>();
+            var clip = abcTrack.CreateClip<AlembicShotAsset>();
+            var abcAsset = clip.asset as AlembicShotAsset;
+            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            abcAsset.StreamPlayer = refAbc;
+            director.SetReferenceValue(refAbc.exposedName, player);
+            director.RebuildGraph();
+            var cubeGO = root.GetComponentInChildren<MeshRenderer>().gameObject;
+            director.time = 0;
+            director.Evaluate();
+            yield return null;
+            var t0 = cubeGO.transform.position;
+            director.time = player.Duration;
+            director.Evaluate();
+            yield return null;
             var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }

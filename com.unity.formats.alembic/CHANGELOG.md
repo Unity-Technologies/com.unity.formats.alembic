@@ -1,5 +1,10 @@
 # Changes in Alembic for Unity
 
+## ## [Unreleased] - 2020-06-16
+### Changes
+- Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
+- When the timeline does discontinuous updates, the alembic updates the scene synchronously.
+
 ## [2.1.0-preview.1] - 2020-06-16
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
@@ -7,6 +12,7 @@
 ### Changes
 - Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
 - Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
+
 
 ## [2.0.1-preview.1] - 2019-08-07
 ### Changes
