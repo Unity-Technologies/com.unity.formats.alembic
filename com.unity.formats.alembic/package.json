@@ -1,7 +1,6 @@
 {
   "dependencies": {
-    "com.unity.timeline": "1.0.0",
-    "com.unity.burst": "1.2.3"
+    "com.unity.timeline": "1.0.0"
   },
   "description": "The Alembic package provides support to import and export Alembic files (.abc). Alembic is a format commonly used in animation to transfer facial, cloth, and other simulation between applications.",
   "displayName": "Alembic",

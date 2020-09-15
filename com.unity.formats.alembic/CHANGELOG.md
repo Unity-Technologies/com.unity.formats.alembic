@@ -4,6 +4,7 @@
 ### Changes
 - Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
 - When the timeline does discontinuous updates, the alembic updates the scene synchronously.
+- Add a conditinal dependency on Burst >= 1.2.0
 
 ## [2.1.0-preview.1] - 2020-06-16
 ### Feature
