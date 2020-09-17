@@ -7,6 +7,7 @@ using System.Text;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
+using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -21,6 +22,12 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             if (!TargetIsSupported(target))
             {
+                if (FilesToCopy.Count > 0)
+                {
+                    Debug.LogError(
+                        "Alembic does not support your current standalone build target. The currently supported targets are: Win64, OSX and Linux 64. ");
+                }
+
                 return;
             }
 
