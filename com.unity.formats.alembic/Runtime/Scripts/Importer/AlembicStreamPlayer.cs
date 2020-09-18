@@ -163,7 +163,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         bool InitializeAfterLoad()
         {
-            var ret = LoadStream(true);
+            var ret = LoadStream(true, true);
             if (!ret)
                 return false;
             //abcStream.AbcLoad(true, true);
@@ -186,11 +186,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
             }
 
-            foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())
-            {
-                meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
-            }
-
             return true;
         }
 
@@ -199,12 +194,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
         }
 
-        internal bool  LoadStream(bool createMissingNodes)
+        internal bool  LoadStream(bool createMissingNodes, bool serializeMesh = false)
         {
             if (StreamDescriptor == null)
                 return false;
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
-            var ret = abcStream.AbcLoad(createMissingNodes, false);
+            var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
             forceUpdate = true;
             return ret;
         }

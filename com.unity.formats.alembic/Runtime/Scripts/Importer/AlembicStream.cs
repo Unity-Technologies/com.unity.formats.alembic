@@ -193,7 +193,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public bool AbcLoad(bool createMissingNodes, bool initialImport)
+        public bool AbcLoad(bool createMissingNodes, bool serializeMesh)
         {
             m_time = 0.0f;
             m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
@@ -215,7 +215,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (m_loaded)
             {
-                UpdateAbcTree(m_context.root, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
+                UpdateAbcTree(m_context.root, m_abcTreeRoot, m_time, createMissingNodes, serializeMesh);
                 s_streams.Add(this);
             }
             else
@@ -249,7 +249,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiObject top, AlembicTreeNode node, double time, bool createMissingNodes, bool initialImport)
+        void UpdateAbcTree(aiObject top, AlembicTreeNode node, double time, bool createMissingNodes, bool serializeMesh)
         {
             if (!top)
                 return;
@@ -262,7 +262,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             };
             top.EachChild(ImportCallback);
 
-            if (!initialImport)
+            if (!serializeMesh)
             {
                 foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
                 {
