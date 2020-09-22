@@ -25,7 +25,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (FilesToCopy.Count > 0)
                 {
                     Debug.LogError(
-                        "Alembic does not support your current standalone build target. The currently supported targets are: Win64, OSX and Linux 64. ");
+                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, or Linux 64-bit.");
                 }
 
                 return;
