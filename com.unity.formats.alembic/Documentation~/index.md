@@ -23,10 +23,6 @@ The Alembic package supports these features:
 
 ## Package technical details
 
-### Preview package
-
-This package is in preview, so it is not ready for production use. The features and documentation in this package might change before it is verified for release.
-
 ### Installation
 
 To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Manual/upm-ui-install.html).
@@ -35,7 +31,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 This version of Alembic for Unity is compatible with the following versions of the Unity Editor:
 
-* 2018.1 and later (recommended)
+* 2019.3 and later (recommended)
 
 Alembic for Unity is available on these 64-bit desktop platforms:
 * Microsoft® Windows® 10
@@ -45,8 +41,8 @@ Alembic for Unity is available on these 64-bit desktop platforms:
 ### Known issues and limitations
 
 * Alembic for Unity **only supports** the following build targets: **Windows 64-bit**, **MacOS X** and **Linux 64-bit**.
-* Alembic does not support Material import and export.
-* Importing non-convex meshes results in malformed geometry (for example, triangles with flipped normals).
+* The Alembic format does not support Material import and export.
+* Importing meshes with non-convex polygons results in malformed geometry (for example, triangles with flipped normals).
 * Adding an FBX GameObject as a child of an Alembic Prefab prevents you from building your project. Instead, Create a new Prefab with both the FBX GameObject and the Alembic Prefab as children.
 
 
