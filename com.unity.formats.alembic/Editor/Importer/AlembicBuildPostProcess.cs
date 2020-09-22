@@ -17,16 +17,19 @@ namespace UnityEditor.Formats.Alembic.Importer
     static class AlembicBuildPostProcess
     {
         internal static readonly List<KeyValuePair<string, string>> FilesToCopy = new List<KeyValuePair<string, string>>();
+        internal static bool HaveAlembicInstances = false;
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
             if (!TargetIsSupported(target))
             {
-                if (FilesToCopy.Count > 0)
+                if (HaveAlembicInstances)
                 {
                     Debug.LogError(
                         "Alembic only supports the following build targets: Windows 64-bit, MacOS X, or Linux 64-bit.");
                 }
+
+                HaveAlembicInstances = false;
 
                 return;
             }
@@ -61,6 +64,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
+                AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
                 return;
             }
 
