@@ -7,6 +7,7 @@ using System.Text;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
+using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -16,11 +17,20 @@ namespace UnityEditor.Formats.Alembic.Importer
     static class AlembicBuildPostProcess
     {
         internal static readonly List<KeyValuePair<string, string>> FilesToCopy = new List<KeyValuePair<string, string>>();
+        internal static bool HaveAlembicInstances = false;
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
             if (!TargetIsSupported(target))
             {
+                if (HaveAlembicInstances)
+                {
+                    Debug.LogWarning(
+                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, or Linux 64-bit.");
+                }
+
+                HaveAlembicInstances = false;
+
                 return;
             }
 
@@ -54,6 +64,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
+                AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
+                    .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
                 return;
             }
 
