@@ -14,7 +14,7 @@
 - Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
 
 
-## [2.0.1-preview.1] - 2019-08-07
+## [2.0.1-preview.1] - 2020-05-29
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
 - Fixed a bug where the Alembic motion vector direction was inverted.
@@ -23,7 +23,7 @@
 - Fixed a bug where the exported SkinnedMesh scale was wrong if the transform contained a scale change.
 - Fixed a bug where the exporter was writing the incorrect Camera rotation parameters. 
 
-## [2.0.0-preview.1] - 2019-08-07
+## [2.0.0-preview.1] - 2019-12-20
 ### Changes
 - Minimum Unity version is 2019.3.
 - Introduced public API for Alembic playback and recording. 
