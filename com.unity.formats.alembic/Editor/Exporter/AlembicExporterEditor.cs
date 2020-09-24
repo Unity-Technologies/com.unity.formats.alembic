@@ -12,12 +12,12 @@ namespace UnityEditor.Formats.Alembic.Exporter
     [CustomEditor(typeof(AlembicExporter))]
     class AlembicExporterEditor : Editor
     {
-        bool m_foldCaptureComponents;
-        bool m_foldMeshComponents;
+        SavedBool m_foldCaptureComponents;
+        SavedBool m_foldMeshComponents;
 
         internal static bool DrawSettings(SerializedObject so,
             AlembicRecorderSettings settings,
-            string pathSettings, ref bool foldCaptureComponents, ref bool foldMeshComponents, bool recorder)
+            string pathSettings, ref SavedBool foldCaptureComponents, ref SavedBool foldMeshComponents, bool recorder)
         {
             bool dirty = false;
             if (!recorder)
@@ -119,7 +119,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
             EditorGUILayout.PropertyField(so.FindProperty(pathSettings + "assumeNonSkinnedMeshesAreConstant"), new GUIContent("Static MeshRenderers"));
             GUILayout.Space(5);
 
-            foldCaptureComponents = EditorGUILayout.Foldout(foldCaptureComponents, "Capture Components");
+            foldCaptureComponents.value = EditorGUILayout.Foldout(foldCaptureComponents, "Capture Components");
             if (foldCaptureComponents)
             {
                 EditorGUI.indentLevel++;
@@ -129,7 +129,8 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorGUI.indentLevel--;
             }
 
-            foldMeshComponents = EditorGUILayout.Foldout(foldMeshComponents, "Mesh Components");
+
+            foldMeshComponents.value = EditorGUILayout.Foldout(foldMeshComponents, "Mesh Components");
             if (foldMeshComponents)
             {
                 EditorGUI.indentLevel++;
@@ -142,6 +143,12 @@ namespace UnityEditor.Formats.Alembic.Exporter
             }
 
             return dirty;
+        }
+
+        public void OnEnable()
+        {
+            m_foldCaptureComponents = new SavedBool($"{target.GetType()}.m_foldCaptureComponents", false);
+            m_foldMeshComponents = new SavedBool($"{target.GetType()}.m_foldMeshComponents", false);
         }
 
         public override void OnInspectorGUI()
@@ -199,6 +206,44 @@ namespace UnityEditor.Formats.Alembic.Exporter
                         t.OneShot();
                 }
             }
+        }
+    }
+
+    class SavedBool
+    {
+        bool m_Value;
+        string m_Name;
+        bool m_Loaded;
+        public SavedBool(string name, bool value)
+        {
+            m_Name = name;
+            m_Loaded = false;
+            m_Value = value;
+        }
+
+        private void Load()
+        {
+            if (m_Loaded)
+                return;
+            m_Loaded = true;
+            m_Value = EditorPrefs.GetBool(m_Name, m_Value);
+        }
+
+        public bool value
+        {
+            get { Load(); return m_Value; }
+            set
+            {
+                Load();
+                if (m_Value == value)
+                    return;
+                m_Value = value;
+                EditorPrefs.SetBool(m_Name, value);
+            }
+        }
+        public static implicit operator bool(SavedBool s)
+        {
+            return s.value;
         }
     }
 }

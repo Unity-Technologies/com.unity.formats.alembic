@@ -127,7 +127,10 @@ protected:
         int64_t sample_index = getSampleIndex(ss);
         auto& config = getConfig();
 
-        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update)
+        auto visible = readVisibility(ss) != 0;
+        auto updateVisibility = m_sample && m_sample->visibility != visible;
+        if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update ||
+                updateVisibility)
         {
             m_sample_index_changed = true;
             if (!m_sample)
@@ -145,6 +148,7 @@ protected:
 
         if (sample && config.interpolate_samples)
         {
+            sample->visibility = visible; // read the visibility
             auto& ts = *m_time_sampling;
             double requested_time = ss.getRequestedTime();
             double index_time = ts.getSampleTime(sample_index);
@@ -165,7 +169,7 @@ protected:
             m_current_time_interval = (float)interval;
 
             // skip if time offset is not changed
-            if (sample_index == m_last_sample_index && prev_offset == m_current_time_offset && !m_force_update)
+            if (sample_index == m_last_sample_index && prev_offset == m_current_time_offset && !m_force_update && !updateVisibility)
                 sample = nullptr;
         }
 
@@ -193,14 +197,16 @@ protected:
         return m_schema.getUserProperties();
     }
 
-    void readVisibility(Sample& sample, const abcSampleSelector& ss)
+    int8_t readVisibility(const abcSampleSelector& ss)
     {
         if (m_visibility_prop.valid() && m_visibility_prop.getNumSamples() > 0)
         {
             int8_t v;
             m_visibility_prop.get(v, ss);
-            sample.visibility = v != 0;
+            return v;
         }
+
+        return 1; // -1 deffered, 0 invisible, 1 visible
     }
 
 protected:

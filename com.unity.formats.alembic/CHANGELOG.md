@@ -1,14 +1,17 @@
 # Changes in Alembic for Unity
 
-## [2.1.0-preview.1] - 2020-06-16
+## [2.1.0-preview.2] - 2020-09-24
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 
 ### Changes
 - Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
 - Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
+- Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
+- When the timeline does discontinuous time updates (scrubbing), the alembic updates the scene synchronously.
+- Updated dependency to Burst 1.3.6 (Eliminate the need to have a C++ compiler for x86-64 Mono builds).
 
-## [2.0.1-preview.1] - 2019-08-07
+## [2.0.1-preview.1] - 2020-05-29
 ### Changes
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
 - Fixed a bug where the Alembic motion vector direction was inverted.
@@ -17,7 +20,7 @@
 - Fixed a bug where the exported SkinnedMesh scale was wrong if the transform contained a scale change.
 - Fixed a bug where the exporter was writing the incorrect Camera rotation parameters. 
 
-## [2.0.0-preview.1] - 2019-08-07
+## [2.0.0-preview.1] - 2019-12-20
 ### Changes
 - Minimum Unity version is 2019.3.
 - Introduced public API for Alembic playback and recording. 

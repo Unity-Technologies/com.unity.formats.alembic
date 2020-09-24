@@ -123,8 +123,6 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     auto& summary = getSummary();
 
-    readVisibility(sample, ss);
-
     // points
     if (m_summary.has_points)
     {
