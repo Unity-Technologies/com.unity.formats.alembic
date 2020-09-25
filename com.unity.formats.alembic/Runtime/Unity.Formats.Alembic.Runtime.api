@@ -49,7 +49,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         public float StartTime { get; set; }
         public float VertexMotionScale { get; set; }
         public AlembicStreamPlayer() {}
-        public bool LoadFromFile(string newPath);
         public void UpdateImmediately(float time);
     }
 

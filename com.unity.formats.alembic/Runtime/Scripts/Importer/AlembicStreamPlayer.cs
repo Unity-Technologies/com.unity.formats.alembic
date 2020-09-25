@@ -129,7 +129,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         /// <param name="newPath">Path to the new file.</param>
         /// <returns>True if the load succeeded, false otherwise.</returns>
-        public bool LoadFromFile(string newPath)
+        internal bool LoadFromFile(string newPath)
         {
             if (StreamDescriptor == null)
             {
