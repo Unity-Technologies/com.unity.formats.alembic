@@ -1,6 +1,6 @@
 # Changes in Alembic for Unity
 
-## [2.1.0-preview.2] - 2020-09-24
+## [2.1.0-preview.3] - 2020-09-24
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 
