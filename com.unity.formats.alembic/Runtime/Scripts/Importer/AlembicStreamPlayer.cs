@@ -104,7 +104,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public string PathToAbc => StreamDescriptor != null ? StreamDescriptor.PathToAbc : "";
 
         /// <summary>
-        /// The stream import options.
+        /// The stream import options. NOTE: these options are shared between all instances of this asset.
         /// </summary>
         public AlembicStreamSettings Settings => StreamDescriptor != null ? StreamDescriptor.Settings : null;
 
