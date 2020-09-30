@@ -27,7 +27,12 @@ namespace UnityEngine.Formats.Alembic.Timeline
             set { streamPlayer = value; }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// For more information see [CreatePlayable](xref:UnityEngine.Timeline.CreatePlayable).
+        /// </summary>
+        /// <param name="graph">The Playable Graph</param>
+        /// <param name="owner">The GameObject containing the PlayableDirector.</param>
+        /// <returns>The Alembic playable.</returns>
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
             var playable = ScriptPlayable<AlembicShotPlayable>.Create(graph);
@@ -37,7 +42,9 @@ namespace UnityEngine.Formats.Alembic.Timeline
             return playable;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Return the duration in seconds of the Alembic asset.
+        /// </summary>
         public override double duration
         {
             get
