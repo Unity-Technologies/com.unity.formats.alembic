@@ -6,7 +6,7 @@ This section covers all properties specific to the Alembic Clip Recorder type.
 > * You must install the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) package (minimum version: 2.0.0) to use the Alembic Clip Recorder.
 > * To fully configure an Alembic Clip Recorder, you must also set the global Recording Properties for the capture (properties shared with the other recorders, such as the frames to record). The [Unity Recorder documentation](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html) describes these properties in detail.
 
-![](Images/alembic-recorder-window.png)
+![](images/alembic-recorder-window.png)
 
 The Alembic Clip Recorder properties fall into three main categories:
 * [Output File](#output-file)

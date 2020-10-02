@@ -129,6 +129,7 @@ namespace UnityEditor.Formats.Alembic.Exporter
                 EditorGUI.indentLevel--;
             }
 
+
             foldMeshComponents.value = EditorGUILayout.Foldout(foldMeshComponents, "Mesh Components");
             if (foldMeshComponents)
             {

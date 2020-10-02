@@ -212,7 +212,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
             var player = root.GetComponent<AlembicStreamPlayer>();
             var timeline = director.playableAsset as TimelineAsset;
-            var abcTrack = timeline.CreateTrack<AlembicTrack>();
+            var abcTrack = timeline.CreateTrack<AlembicTrack>(null,"");
             var clip = abcTrack.CreateClip<AlembicShotAsset>();
             var abcAsset = clip.asset as AlembicShotAsset;
             var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
