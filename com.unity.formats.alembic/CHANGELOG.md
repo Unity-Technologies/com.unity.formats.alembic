@@ -1,6 +1,6 @@
 # Changes in Alembic for Unity
 
-## [2.1.0-preview.4] - 2020-09-24
+## [2.1.1-pre.1] - 2020-10-21
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 
@@ -9,7 +9,7 @@
 - Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
 - Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
 - When the timeline does discontinuous time updates (scrubbing), the alembic updates the scene synchronously.
-- Updated dependency to Burst 1.3.6 (Eliminate the need to have a C++ compiler for x86-64 Mono builds).
+- Updated optional dependency to Burst 1.1.1 or newer.
 
 ## [2.0.1-preview.1] - 2020-05-29
 ### Changes
