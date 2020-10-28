@@ -1,5 +1,5 @@
 {
-    "name": "Unity.Formats.Alembic.RecorderTests.Runtime",
+    "name": "Unity.Formats.Alembic.RecorderTests.Editor",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",

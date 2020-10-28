@@ -12,7 +12,7 @@ namespace UnityEditor.Formats.Alembic.Recorder
         SavedBool m_foldCaptureComponents;
         SavedBool m_foldMeshComponents;
 
-        public void OnEnable()
+        protected override void OnEnable()
         {
             base.OnEnable();
             m_foldCaptureComponents = new SavedBool($"{target.GetType()}.m_foldCaptureComponents", false);

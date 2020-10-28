@@ -16,6 +16,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "1.1.1",
+            "define": "BURST_AVAILABLE"
+        }
+    ],
     "noEngineReferences": false
 }
