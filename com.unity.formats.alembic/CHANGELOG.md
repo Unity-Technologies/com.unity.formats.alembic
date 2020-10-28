@@ -47,7 +47,7 @@
 ### Changes
 - Fixed regression introduced in 1.0.4 where old Alembic scene instances would lose prefab connection. New scene instances made with 1.0.4 are unfortunately unrecoverable
 
-## [1.0.4] - 2019-05-2
+## [1.0.4] - 2019-05-02
 ### Changes
 - Fixed crash in the Exporter when using SwapFaces
 - Fixed Branch recording mode in the Exporter
@@ -57,7 +57,7 @@
 - Fixed regression, where absolute paths to alembic assets were stored
 - Alembic importer and Exporter correctly deals with physical Camera parameters
 
-## [1.0.3] - 2019-04-9
+## [1.0.3] - 2019-04-09
 ### Changes
 - Do not lock Alembic files when Windows
 - Fix InheritXform on files from Blender
