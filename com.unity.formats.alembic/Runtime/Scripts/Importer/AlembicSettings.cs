@@ -167,7 +167,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         [SerializeField]
         bool importCurves = true;
         /// <summary>
-        /// Enable or disable the import of Point (particle cloud) data.
+        /// Enable or disable the import of Curve data.
         /// </summary>
         public bool ImportCurves
         {
