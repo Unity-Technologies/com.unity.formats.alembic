@@ -26,7 +26,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (HaveAlembicInstances)
                 {
                     Debug.LogWarning(
-                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, or Linux 64-bit.");
+                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, Linux 64-bit or Stadia");
                 }
 
                 HaveAlembicInstances = false;
