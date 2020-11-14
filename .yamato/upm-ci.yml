@@ -122,7 +122,7 @@ testProject_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      {% if platform.name == 'centOS' %}   
      - DISPLAY=:0 upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
      {% else %}
@@ -182,8 +182,10 @@ nightly_test_trigger:
     recurring:
       - branch: dev
         frequency: daily
+        rerun: always    
       - branch: master
         frequency: daily
+        rerun: always  
   artifacts:
     logs:
       paths:
