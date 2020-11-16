@@ -1,5 +1,9 @@
 # Changes in Alembic for Unity
 
+## [Unreleased]
+### Feature
+- Updated base libAlembic to 1.7.16.
+
 ## [2.1.1-pre.1] - 2020-10-21
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
