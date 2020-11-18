@@ -22,11 +22,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             var importer = serializedObject.targetObject as AlembicImporter;
             var pathSettings = "streamSettings.";
 
-            if (importer.IsHDF5)
-            {
-                EditorGUILayout.HelpBox("Deprecated HDF5 file format. Consider converting to Ogawa.", MessageType.Warning);
-            }
-
             EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;

@@ -213,8 +213,7 @@ aiContext::aiContext(int uid)
       m_top_node(),
       m_timesamplings(),
       m_uid(uid),
-      m_config(),
-      m_isHDF5(false)
+      m_config()
 {
 }
 
@@ -363,7 +362,6 @@ bool aiContext::load(const char *in_path)
             Alembic::AbcCoreOgawa::ReadArchive archive_reader(m_streams);
             m_archive = Abc::IArchive(archive_reader(m_path), Abc::kWrapExisting, Abc::ErrorHandler::kThrowPolicy);
             DebugLog("Successfully opened Ogawa archive");
-            m_isHDF5 = false;
         }
         catch (Alembic::Util::Exception e)
         {

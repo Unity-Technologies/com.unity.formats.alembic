@@ -69,14 +69,7 @@ bool aeContext::openArchive(const char *path)
     DebugLog("aeContext::openArchive() %s", path);
     try
     {
-        if (m_config.archive_type == aeArchiveType::Ogawa)
-        {
-            m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
-        }
-        else
-        {
-            return false;
-        }
+        m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
     }
     catch (Alembic::Util::Exception e)
     {

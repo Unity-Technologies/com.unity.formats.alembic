@@ -12,22 +12,6 @@ using UnityEngine;
 namespace UnityEngine.Formats.Alembic.Sdk
 {
     /// <summary>
-    /// The Alembic file format.
-    /// </summary>
-    internal enum ArchiveType
-    {
-        /// <summary>
-        /// HDF5 format (Deprecated).
-        /// </summary>
-        [Obsolete]
-        HDF5,
-        /// <summary>
-        /// Ogawa format.
-        /// </summary>
-        Ogawa,
-    };
-
-    /// <summary>
     /// The time sampling mode for the Alembic file.
     /// </summary>
     public enum TimeSamplingType
@@ -104,16 +88,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     public class AlembicExportOptions
     {
-        [SerializeField]
-        ArchiveType archiveType = ArchiveType.Ogawa;
-        /// <summary>
-        /// Get or set the Alembic output file format.
-        /// </summary>
-        internal ArchiveType ArchiveType
-        {
-            get { return archiveType; }
-            set { archiveType = value; }
-        }
         [SerializeField]
         TimeSamplingType timeSamplingType = TimeSamplingType.Uniform;
         /// <summary>
@@ -381,7 +355,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
-        [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);

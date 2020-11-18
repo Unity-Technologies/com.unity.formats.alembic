@@ -5,9 +5,9 @@ using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
-    using UnityEditor.AssetImporters;
+using UnityEditor.AssetImporters;
 #else
-    using UnityEditor.Experimental.AssetImporters;
+using UnityEditor.Experimental.AssetImporters;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer
@@ -121,12 +121,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         [SerializeField] bool firstImport = true;
 
-        internal bool IsHDF5
-        {
-            get { return isHDF5;}
-        }
-        [SerializeField] bool isHDF5;
-
         void OnValidate()
         {
             if (!firstImport)
@@ -193,11 +187,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
-                isHDF5 = abcStream.IsHDF5();
-                if (IsHDF5)
-                {
-                    Debug.LogWarning(path + ": Deprecated HDF5 file format. Consider converting to Ogawa.");
-                }
             }
 
             firstImport = false;
