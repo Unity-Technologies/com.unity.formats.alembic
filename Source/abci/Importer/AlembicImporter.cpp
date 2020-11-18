@@ -45,10 +45,6 @@ abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
     return ctx ? ctx->load(path) : false;
 }
 
-abciAPI bool aiContextGetIsHDF5(aiContext* ctx)
-{
-    return ctx ? ctx->getIsHDF5() : false;
-}
 
 abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
 {

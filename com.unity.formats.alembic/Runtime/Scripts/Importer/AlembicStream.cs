@@ -34,11 +34,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return context.GetTimeSampling(i);
             }
 
-            public bool IsHDF5()
-            {
-                return context.IsHDF5();
-            }
-
             public void GetTimeRange(out double begin, out double end)
             {
                 context.GetTimeRange(out begin, out end);
@@ -130,11 +125,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal SafeContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context.isValid; } }
         internal aiConfig config { get { return m_config; } }
-
-        internal bool IsHDF5()
-        {
-            return m_context.IsHDF5();
-        }
 
         public void SetVertexMotionScale(float value) { m_config.vertexMotionScale = value; }
 

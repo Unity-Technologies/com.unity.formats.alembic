@@ -17,12 +17,6 @@ class aeCamera;   // : aeSchema
 class aeProperty;
 
 
-enum class aeArchiveType
-{
-    HDF5,
-    Ogawa,
-};
-
 enum class aeTimeSamplingType
 {
     Uniform,
@@ -77,7 +71,6 @@ enum class aePropertyType
 
 struct aeConfig
 {
-    aeArchiveType archive_type = aeArchiveType::Ogawa;
     aeTimeSamplingType time_sampling_type = aeTimeSamplingType::Uniform;
     float frame_rate = 30.0f;    // frame rate on Alembic. relevant only if time_sampling_type is uniform
     aeXFromType xform_type = aeXFromType::TRS;
