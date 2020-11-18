@@ -375,17 +375,8 @@ bool aiContext::load(const char *in_path)
             }
             m_streams.clear();
 
-            try
-            {
-                m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
-                DebugLog("Successfully opened HDF5 archive");
-                m_isHDF5 = true;
-            }
-            catch (Alembic::Util::Exception e2)
-            {
-                auto message = L(e2.what());
-                DebugLogW(L"Failed to open archive: %s", message.c_str());
-            }
+            auto message = L(e.what());
+            DebugLogW(L"Failed to open archive: %s", message.c_str());
         }
     }
     else

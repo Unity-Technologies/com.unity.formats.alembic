@@ -69,11 +69,7 @@ bool aeContext::openArchive(const char *path)
     DebugLog("aeContext::openArchive() %s", path);
     try
     {
-        if (m_config.archive_type == aeArchiveType::HDF5)
-        {
-            m_archive = Abc::OArchive(Alembic::AbcCoreHDF5::WriteArchive(), path);
-        }
-        else if (m_config.archive_type == aeArchiveType::Ogawa)
+        if (m_config.archive_type == aeArchiveType::Ogawa)
         {
             m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
         }
