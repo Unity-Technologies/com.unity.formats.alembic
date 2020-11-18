@@ -13,10 +13,15 @@ platforms:
     type: Unity::VM::osx
     image: package-ci/mac:latest
     flavor: m1.mac
-  - name: centOS
-    type: Unity::VM::GPU
-    image: package-ci/centos:latest
+  - name: ubuntu
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
     flavor: b1.large
+
+      # - name: centOS
+      # type: Unity::VM::GPU
+      #image: package-ci/centos:latest
+      #flavor: b1.large
 
 ---
 build_win:
