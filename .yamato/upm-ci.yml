@@ -29,9 +29,9 @@ standalone_platforms:
     image: package-ci/mac:stable
     flavor: m1.mac
     runtime: standalone
-  - name: ubuntu
-    type: Unity::VM
-    image: package-ci/ubuntu:stable
+  - name: centOS
+    type: Unity::VM::GPU
+    image: package-ci/centos:latest
     flavor: b1.large
     runtime: standalone
 
@@ -111,11 +111,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     {% if platform.name == 'centOS' %}   
-     - DISPLAY=:0 upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
-     {% else %}
-     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'  
-     {% endif %}
+     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
   artifacts:
     logs.zip:
       paths:
@@ -140,11 +136,8 @@ testProject_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     {% if platform.name == 'centOS' %}   
-     - DISPLAY=:0 upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
-     {% else %}
-     - upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
-     {% endif %} 
+     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci project test  --project-path TestProjects/AlembicRecorder --type project-tests --unity-version {{ editor.version }} --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
+
   artifacts:
     logs.zip:
       paths:
@@ -169,7 +162,7 @@ testStandalone_{{ platform.name }}_{{ editor.version }}:
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path TestProjects/AlembicStandaloneBuild --type project-tests --unity-version {{ editor.version }} --platform {{ platform.runtime }}
+     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %}  upm-ci project test  --project-path TestProjects/AlembicStandaloneBuild --type project-tests --unity-version {{ editor.version }} --platform {{ platform.runtime }}
   artifacts:
     logs.zip:
       paths:
