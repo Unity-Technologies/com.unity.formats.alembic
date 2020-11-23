@@ -17,7 +17,7 @@ namespace UnityEngine.Formats.Alembic.StandaloneTests
         [UnityTest]
         public IEnumerator AlembicUpdatesCorrectly()
         {
-            var abc = GameObject.Find("backflip").GetComponent<AlembicStreamPlayer>();
+            var abc = GameObject.Find("human").GetComponent<AlembicStreamPlayer>();
             Assert.IsNotNull(abc);
             var mesh = abc.GetComponentInChildren<MeshFilter>().sharedMesh;
             var position = new Vector3(0.0633399412f, 0.357630074f, 0.540497243f);
