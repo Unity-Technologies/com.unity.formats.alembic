@@ -4,6 +4,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    [DisallowMultipleComponent]
     public class AlembicCurves : MonoBehaviour
     {
         PinnedList<Vector3> m_positions = new PinnedList<Vector3>();
