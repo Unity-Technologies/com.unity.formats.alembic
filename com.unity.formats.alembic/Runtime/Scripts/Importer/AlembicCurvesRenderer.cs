@@ -8,61 +8,60 @@ using UnityEngine.Rendering;
 namespace Scripts.Importer
 {
     [RequireComponent(typeof(AlembicCurves))]
+    [RequireComponent(typeof(MeshRenderer))]
+    [RequireComponent(typeof(MeshFilter))]
     [ExecuteInEditMode]
     public class AlembicCurvesRenderer : MonoBehaviour
     {
         AlembicCurves curves;
         Mesh mesh;
 
-        [SerializeField] Material material;
-
         void OnEnable()
         {
             curves = GetComponent<AlembicCurves>();
-            mesh = new Mesh();
+            mesh = new Mesh {hideFlags = HideFlags.DontSave};
+            GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
         void Update()
         {
-            /* for (var i = 1; i < curves.PositionsOffsetBuffer.Count; ++i)
-             {
-                 var idx = curves.PositionsOffsetBuffer[i - 1];
-                 var p0 = curves.Positions[idx];
-                 do
-                 {
-                     idx++;
-                     var p1 = curves.Positions[idx];
-                     Debug.DrawLine(p0, p1);
-                 }
-                 while (idx < curves.positionOffsetBuffer[i]);
-             }*/
-            var curvePointCount = 16;// FIXME
+            GenerateLineMesh(mesh);
+        }
+
+        void OnDisable()
+        {
+            DestroyImmediate(mesh);
+        }
+
+        void GenerateLineMesh(Mesh theMesh)
+        {
+            var curvePointCount = curves.PositionsOffsetBuffer[1];// FIXME
             var curveCount = curves.PositionsOffsetBuffer.Count;
             var wireStrandLineCount = curvePointCount - 1;
             var wireStrandPointCount = wireStrandLineCount * 2;
             using (var particleTangent = new NativeArray<Vector3>(curveCount * curvePointCount, Allocator.Temp))
+            using (var particleUV = new NativeArray<Vector2>(curveCount * curvePointCount, Allocator.Temp))
             using (var indices = new NativeArray<int>(curveCount * wireStrandPointCount, Allocator.Temp))
             {
                 unsafe
                 {
                     var indicesPtr = (int*)indices.GetUnsafePtr();
                     var particleTangentPtr = (Vector3*)particleTangent.GetUnsafePtr();
+                    var particleUVPtr = (Vector2*)particleUV.GetUnsafePtr();
+
                     for (var i = 0; i < curveCount; i++)
                     {
-                        DeclareStrandIterator(i, curveCount, curvePointCount, out var strandParticleBegin,
-                            out var strandParticleStride, out _);
+                        DeclareStrandIterator(i, curvePointCount, out var strandParticleBegin,
+                            out var strandParticleStride, out var strandParticleEnd);
 
+                        // IndexArray
                         for (var j = 0; j < wireStrandLineCount; j++)
                         {
                             *(indicesPtr++) = strandParticleBegin + strandParticleStride * j;
                             *(indicesPtr++) = strandParticleBegin + strandParticleStride * (j + 1);
                         }
-                    }
 
-                    for (var i = 0; i < curveCount; i++)
-                    {
-                        DeclareStrandIterator(i, curveCount, curvePointCount, out var strandParticleBegin,
-                            out var strandParticleStride, out var strandParticleEnd);
+                        // Normals
                         for (var j = strandParticleBegin; j < strandParticleEnd - strandParticleStride; j += strandParticleStride)
                         {
                             var p0 = curves.Positions[j];
@@ -72,24 +71,30 @@ namespace Scripts.Importer
                         }
 
                         particleTangentPtr[strandParticleEnd - strandParticleStride] = particleTangentPtr[strandParticleEnd - 2 * strandParticleStride];
+
+                        for (var j = strandParticleBegin; j < strandParticleEnd; j += strandParticleStride)
+                        {
+                            particleUVPtr[j] = new Vector2(j, i);// particle index + strand index
+                        }
                     }
                 }
 
-                mesh.indexFormat = (curveCount * curvePointCount > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16;
-                mesh.SetVertices(curves.Positions);
-                mesh.SetIndices(indices, MeshTopology.Lines, 0);
-                mesh.SetNormals(particleTangent);
-                mesh.RecalculateBounds();
+                theMesh.indexFormat = (curveCount * curvePointCount > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16;
+                theMesh.SetVertices(curves.Positions);
+                theMesh.SetIndices(indices, MeshTopology.Lines, 0);
+                theMesh.SetNormals(particleTangent);
+                theMesh.SetUVs(0, particleUV);
+
+                if (curves.Velocities.Count > 0)
+                {
+                    theMesh.SetUVs(5, curves.Velocities);
+                }
+
+                theMesh.RecalculateBounds();
             }
-            Graphics.DrawMesh(mesh, transform.position, transform.rotation, material, 0);
         }
 
-        void OnDisable()
-        {
-            DestroyImmediate(mesh);
-        }
-
-        public static void DeclareStrandIterator(int strandIndex, int strandCount, int strandParticleCount,
+        static void DeclareStrandIterator(int strandIndex, int strandParticleCount,
             out int strandParticleBegin,
             out int strandParticleStride,
             out int strandParticleEnd)
