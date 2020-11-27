@@ -11,9 +11,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal PinnedList<Vector3> positionsList { get { return m_positions; } }
         public List<Vector3> Positions => positionsList.List;
 
-        PinnedList<int> m_positionsOffsetBuffer = new PinnedList<int>();
-        internal PinnedList<int> positionOffsetBuffer { get { return m_positionsOffsetBuffer; } }
-        public List<int> PositionsOffsetBuffer => positionOffsetBuffer.List;
+        PinnedList<int> m_curvePointCount = new PinnedList<int>();
+        internal PinnedList<int> curvePointCount { get { return m_curvePointCount; } }
+        public List<int> CurvePointCount => curvePointCount.List;
 
         PinnedList<Vector2> m_uvs = new PinnedList<Vector2>();
         internal PinnedList<Vector2> uvs { get { return m_uvs; } }

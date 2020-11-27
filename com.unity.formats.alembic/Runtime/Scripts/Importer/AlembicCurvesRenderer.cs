@@ -23,7 +23,7 @@ namespace Scripts.Importer
             GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
-        void Update()
+        void LateUpdate()
         {
             GenerateLineMesh(mesh);
         }
@@ -35,13 +35,28 @@ namespace Scripts.Importer
 
         void GenerateLineMesh(Mesh theMesh)
         {
-            var curvePointCount = curves.PositionsOffsetBuffer[1];// FIXME
-            var curveCount = curves.PositionsOffsetBuffer.Count;
-            var wireStrandLineCount = curvePointCount - 1;
-            var wireStrandPointCount = wireStrandLineCount * 2;
-            using (var particleTangent = new NativeArray<Vector3>(curveCount * curvePointCount, Allocator.Temp))
-            using (var particleUV = new NativeArray<Vector2>(curveCount * curvePointCount, Allocator.Temp))
-            using (var indices = new NativeArray<int>(curveCount * wireStrandPointCount, Allocator.Temp))
+            /* for (var i = 1; i < curves.PositionsOffsetBuffer.Count; ++i)
+      {
+          var idx = curves.PositionsOffsetBuffer[i - 1];
+          var p0 = curves.Positions[idx];
+          do
+          {
+              idx++;
+              var p1 = curves.Positions[idx];
+              Debug.DrawLine(p0, p1);
+          }
+          while (idx < curves.positionOffsetBuffer[i]);
+      }*/
+
+
+            var positions = curves.Positions;
+
+            var curveCount = curves.CurvePointCount.Count;
+
+            var indexArraySize = (positions.Count - curves.CurvePointCount.Count) * 2;
+            using (var particleTangent = new NativeArray<Vector3>(positions.Count, Allocator.Temp))
+            using (var particleUV = new NativeArray<Vector2>(positions.Count, Allocator.Temp))
+            using (var indices = new NativeArray<int>(indexArraySize, Allocator.Temp))
             {
                 unsafe
                 {
@@ -49,11 +64,18 @@ namespace Scripts.Importer
                     var particleTangentPtr = (Vector3*)particleTangent.GetUnsafePtr();
                     var particleUVPtr = (Vector2*)particleUV.GetUnsafePtr();
 
+                    var strandParticleBegin = 0;
+                    const int strandParticleStride = 1;
                     for (var i = 0; i < curveCount; i++)
                     {
-                        DeclareStrandIterator(i, curvePointCount, out var strandParticleBegin,
-                            out var strandParticleStride, out var strandParticleEnd);
+                        var nativeArray = indices;
+                        var index = nativeArray[i];
+                        nativeArray[i] = index;
 
+                        var curvePointCount = curves.CurvePointCount[i];
+                        var strandParticleEnd = strandParticleBegin + curvePointCount;
+
+                        var wireStrandLineCount = (curvePointCount - 1);
                         // IndexArray
                         for (var j = 0; j < wireStrandLineCount; j++)
                         {
@@ -64,8 +86,8 @@ namespace Scripts.Importer
                         // Normals
                         for (var j = strandParticleBegin; j < strandParticleEnd - strandParticleStride; j += strandParticleStride)
                         {
-                            var p0 = curves.Positions[j];
-                            var p1 = curves.Positions[j + strandParticleStride];
+                            var p0 = positions[j];
+                            var p1 = positions[j + strandParticleStride];
 
                             particleTangentPtr[j] = Vector3.Normalize(p1 - p0);
                         }
@@ -76,11 +98,13 @@ namespace Scripts.Importer
                         {
                             particleUVPtr[j] = new Vector2(j, i);// particle index + strand index
                         }
+
+                        strandParticleBegin += curvePointCount;
                     }
                 }
 
-                theMesh.indexFormat = (curveCount * curvePointCount > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16;
-                theMesh.SetVertices(curves.Positions);
+                theMesh.indexFormat = (indexArraySize > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16;
+                theMesh.SetVertices(positions);
                 theMesh.SetIndices(indices, MeshTopology.Lines, 0);
                 theMesh.SetNormals(particleTangent);
                 theMesh.SetUVs(0, particleUV);
@@ -92,16 +116,6 @@ namespace Scripts.Importer
 
                 theMesh.RecalculateBounds();
             }
-        }
-
-        static void DeclareStrandIterator(int strandIndex, int strandParticleCount,
-            out int strandParticleBegin,
-            out int strandParticleStride,
-            out int strandParticleEnd)
-        {
-            strandParticleBegin = strandIndex * strandParticleCount;
-            strandParticleStride = 1;
-            strandParticleEnd = strandParticleBegin + strandParticleStride * strandParticleCount;
         }
     }
 }
