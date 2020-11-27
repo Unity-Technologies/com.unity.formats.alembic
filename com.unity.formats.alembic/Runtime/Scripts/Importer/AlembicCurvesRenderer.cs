@@ -21,6 +21,11 @@ namespace Scripts.Importer
             curves = GetComponent<AlembicCurves>();
             mesh = new Mesh {hideFlags = HideFlags.DontSave};
             GetComponent<MeshFilter>().sharedMesh = mesh;
+            var meshRenderer = GetComponent<MeshRenderer>();
+            if (meshRenderer.sharedMaterial == null)
+            {
+                meshRenderer.sharedMaterial = GetDefaultMaterial();
+            }
         }
 
         void LateUpdate()
@@ -116,6 +121,11 @@ namespace Scripts.Importer
 
                 theMesh.RecalculateBounds();
             }
+        }
+
+        static Material GetDefaultMaterial()
+        {
+            return GraphicsSettings.renderPipelineAsset != null ? GraphicsSettings.renderPipelineAsset.defaultMaterial : new Material(Shader.Find("Diffuse"));
         }
     }
 }
