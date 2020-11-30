@@ -17,6 +17,7 @@ namespace Scripts.Importer
         AlembicCurves curves;
         Mesh mesh;
         [SerializeField] RenderMethod renderMethod;
+        [NonSerialized] RenderMethod prevRenderMethod;
 
         enum RenderMethod
         {
@@ -38,6 +39,13 @@ namespace Scripts.Importer
 
         void LateUpdate()
         {
+            if (prevRenderMethod != renderMethod)
+            {
+                mesh.Clear();
+            }
+
+            prevRenderMethod = renderMethod;
+
             switch (renderMethod)
             {
                 case RenderMethod.Line:
