@@ -1,14 +1,14 @@
-#if UNITY_2017_1_OR_NEWER
-
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using UnityEditor.Experimental.AssetImporters;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using Object = UnityEngine.Object;
+#if UNITY_2020_2_OR_NEWER
+    using UnityEditor.AssetImporters;
+#else
+    using UnityEditor.Experimental.AssetImporters;
+#endif
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -383,5 +383,3 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 }
-
-#endif

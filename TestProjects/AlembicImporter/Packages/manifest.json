@@ -1,8 +1,18 @@
 {
+  "scopedRegistries": [
+    {
+      "name": "Candidates",
+      "url": "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates",
+      "scopes": [
+        "com.unity.package-manager-doctools"
+      ]
+    }
+  ],
   "dependencies": {
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.coding": "0.1.0-preview.17",
+    "com.unity.package-manager-doctools":"1.6.1-preview",
     "com.unity.formats.alembic": "file:../../../com.unity.formats.alembic",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.ide.vscode": "1.2.0",

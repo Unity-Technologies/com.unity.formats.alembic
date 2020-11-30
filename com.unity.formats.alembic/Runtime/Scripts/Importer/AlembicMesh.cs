@@ -292,8 +292,9 @@ namespace UnityEngine.Formats.Alembic.Importer
                 sample.FillVertexBuffer(splitData, submeshData);
             }
         }
-
+#if BURST_AVAILABLE
         [BurstCompile]
+#endif
         struct MultiplyByConstant : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction]

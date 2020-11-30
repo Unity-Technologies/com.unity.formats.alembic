@@ -9,8 +9,16 @@ namespace UnityEditor.Formats.Alembic.Recorder
     [CustomEditor(typeof(AlembicRecorderSettings))]
     class AlembicRecorderSettingsEditor : RecorderEditor
     {
-        bool m_foldCaptureComponents;
-        bool m_foldMeshComponents;
+        SavedBool m_foldCaptureComponents;
+        SavedBool m_foldMeshComponents;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            m_foldCaptureComponents = new SavedBool($"{target.GetType()}.m_foldCaptureComponents", false);
+            m_foldMeshComponents = new SavedBool($"{target.GetType()}.m_foldMeshComponents", false);
+        }
+
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();

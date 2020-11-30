@@ -5,6 +5,7 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.RecorderTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")]
 
