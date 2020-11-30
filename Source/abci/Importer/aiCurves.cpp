@@ -62,8 +62,6 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
     auto& summary = getSummary();
     bool interpolate = getConfig().interpolate_samples;
 
-    readVisibility(sample, ss);
-
     // points
     if (summary.has_position)
     {
