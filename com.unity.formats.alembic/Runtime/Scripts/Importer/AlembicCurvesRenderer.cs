@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -15,6 +16,13 @@ namespace Scripts.Importer
     {
         AlembicCurves curves;
         Mesh mesh;
+        [SerializeField] RenderMethod renderMethod;
+
+        enum RenderMethod
+        {
+            Line,
+            Strip
+        }
 
         void OnEnable()
         {
@@ -30,7 +38,18 @@ namespace Scripts.Importer
 
         void LateUpdate()
         {
-            GenerateLineMesh(mesh);
+            switch (renderMethod)
+            {
+                case RenderMethod.Line:
+                    GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
+                    break;
+                case RenderMethod.Strip:
+                    //GeneratePlaneMesh(mesh, new[] {new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 2, 0)}, new[] {3}, new[] {0.1f, 0.75f, 0.1f});
+                    GeneratePlaneMesh(mesh, curves.Positions, curves.CurvePointCount, curves.Widths);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         void OnDisable()
@@ -38,25 +57,70 @@ namespace Scripts.Importer
             DestroyImmediate(mesh);
         }
 
-        void GenerateLineMesh(Mesh theMesh)
+        static void  GeneratePlaneMesh(Mesh theMesh, List<Vector3> positions, List<int> curveCounts, List<float> widths)
         {
-            /* for (var i = 1; i < curves.PositionsOffsetBuffer.Count; ++i)
-      {
-          var idx = curves.PositionsOffsetBuffer[i - 1];
-          var p0 = curves.Positions[idx];
-          do
-          {
-              idx++;
-              var p1 = curves.Positions[idx];
-              Debug.DrawLine(p0, p1);
-          }
-          while (idx < curves.positionOffsetBuffer[i]);
-      }*/
+            var curveCount = curveCounts.Count;
+
+            var indexArraySize = (positions.Count - curveCount) * 4;
+
+            using (var vertices = new NativeArray<Vector3>(positions.Count * 2 , Allocator.Temp))
+            using (var indices = new NativeArray<int>(indexArraySize, Allocator.Temp))
+            {
+                unsafe
+                {
+                    var vertexPtr = (Vector3*)vertices.GetUnsafePtr();
+                    var indicesPtr = (int*)indices.GetUnsafePtr();
+
+                    var strandParticleBegin = 0;
+
+                    var dir = new Vector3(1, 0, 0);
+
+                    var curveStartOffset = 0;
+                    for (var i = 0; i < curveCount; i++)
+                    {
+                        var curvePointCount = curveCounts[i];
+                        for (var j = 0; j < curvePointCount; ++j)
+                        {
+                            var width = widths[curveStartOffset + j] / 2;
+                            var p0 = positions[curveStartOffset + j] + width * dir;
+                            var p1 = positions[curveStartOffset + j] - width * dir;
+
+                            *(vertexPtr++) = p0;
+                            *(vertexPtr++) = p1;
+                        }
+
+                        curveStartOffset += curvePointCount;
 
 
-            var positions = curves.Positions;
+                        var wireStrandLineCount = (curvePointCount - 1);
+                        var firstIdx = 0;
+                        // IndexArray
+                        for (var j = 0; j < wireStrandLineCount; j++)
+                        {
+                            *(indicesPtr++) = firstIdx + strandParticleBegin + j;
+                            *(indicesPtr++) = firstIdx + strandParticleBegin + (j + 1);
+                            *(indicesPtr++) = firstIdx + strandParticleBegin + (j + 3);
+                            *(indicesPtr++) = firstIdx + strandParticleBegin + (j + 2);
+                            firstIdx += 1;
+                        }
 
-            var curveCount = curves.CurvePointCount.Count;
+                        strandParticleBegin += curvePointCount;
+                    }
+                }
+
+                theMesh.indexFormat = (indexArraySize > 65535) ? IndexFormat.UInt32 : IndexFormat.UInt16;
+                theMesh.SetVertices(vertices);
+                theMesh.SetIndices(indices, MeshTopology.Quads, 0);
+
+
+                theMesh.RecalculateBounds();
+                theMesh.RecalculateNormals();
+            }
+        }
+
+        void GenerateLineMesh(Mesh theMesh, List<Vector3> positions, List<int> curveCounts)
+        {
+            var curveCount = curveCounts.Count;
 
             var indexArraySize = (positions.Count - curves.CurvePointCount.Count) * 2;
             using (var particleTangent = new NativeArray<Vector3>(positions.Count, Allocator.Temp))
@@ -73,10 +137,6 @@ namespace Scripts.Importer
                     const int strandParticleStride = 1;
                     for (var i = 0; i < curveCount; i++)
                     {
-                        var nativeArray = indices;
-                        var index = nativeArray[i];
-                        nativeArray[i] = index;
-
                         var curvePointCount = curves.CurvePointCount[i];
                         var strandParticleEnd = strandParticleBegin + curvePointCount;
 
