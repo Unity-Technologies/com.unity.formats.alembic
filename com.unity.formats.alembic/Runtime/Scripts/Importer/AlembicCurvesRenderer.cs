@@ -33,7 +33,7 @@ namespace Scripts.Importer
         void OnEnable()
         {
             curves = GetComponent<AlembicCurves>();
-            curves.OnUpdate += UpdateMesh;
+            //curves.OnUpdate += UpdateMesh;
 
             mesh = new Mesh {hideFlags = HideFlags.DontSave};
             GetComponent<MeshFilter>().sharedMesh = mesh;
@@ -68,14 +68,14 @@ namespace Scripts.Importer
             }
         }
 
-        void OnPreRender()
+        void LateUpdate()
         {
-            
+            UpdateMesh(curves);
         }
 
         void OnDisable()
         {
-            curves.OnUpdate -= UpdateMesh;
+            //curves.OnUpdate -= UpdateMesh;
             DestroyImmediate(mesh);
         }
 

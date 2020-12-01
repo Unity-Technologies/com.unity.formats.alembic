@@ -266,7 +266,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
                 {
-                    meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                    if (meshFilter.sharedMesh != null)
+                    {
+                        meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                    }
                 }
             }
 
