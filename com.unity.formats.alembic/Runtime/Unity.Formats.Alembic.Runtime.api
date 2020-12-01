@@ -1,6 +1,14 @@
 // This file is generated. Do not modify by hand.
 // XML documentation file not found. To check if public methods have XML comments,
 // make sure the XML doc file is present and located next to the scraped dll
+namespace Scripts.Importer
+{
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.RequireComponent(typeof(UnityEngine.Formats.Alembic.Importer.AlembicCurves))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshFilter))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshRenderer))] public class AlembicCurvesRenderer : UnityEngine.MonoBehaviour
+    {
+        public AlembicCurvesRenderer() {}
+    }
+}
+
 namespace UnityEngine.Formats.Alembic.Exporter
 {
     [UnityEngine.ExecuteInEditMode] public class AlembicExporter : UnityEngine.MonoBehaviour
@@ -18,14 +26,16 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    public class AlembicCurves : UnityEngine.MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] public class AlembicCurves : UnityEngine.MonoBehaviour
     {
-        public System.Collections.Generic.List<UnityEngine.Vector3> Positions { get; }
-        public System.Collections.Generic.List<int> PositionsOffsetBuffer { get; }
-        public System.Collections.Generic.List<UnityEngine.Vector2> UVs { get; }
-        public System.Collections.Generic.List<UnityEngine.Vector3> Velocities { get; }
-        public System.Collections.Generic.List<float> Widths { get; }
+        public event UnityEngine.Formats.Alembic.Importer.AlembicCurves.OnUpdateDataHandler OnUpdate;
+        public int[] CurvePointCount { get; }
+        public UnityEngine.Vector3[] Positions { get; }
+        public UnityEngine.Vector2[] UVs { get; }
+        public UnityEngine.Vector3[] Velocities { get; }
+        public float[] Widths { get; }
         public AlembicCurves() {}
+        public delegate void OnUpdateDataHandler(UnityEngine.Formats.Alembic.Importer.AlembicCurves curves);
     }
 
     [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour

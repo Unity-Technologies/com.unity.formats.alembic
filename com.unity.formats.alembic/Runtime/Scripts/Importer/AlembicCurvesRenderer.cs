@@ -33,6 +33,8 @@ namespace Scripts.Importer
         void OnEnable()
         {
             curves = GetComponent<AlembicCurves>();
+            curves.OnUpdate += UpdateMesh;
+
             mesh = new Mesh {hideFlags = HideFlags.DontSave};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             var meshRenderer = GetComponent<MeshRenderer>();
@@ -40,9 +42,10 @@ namespace Scripts.Importer
             {
                 meshRenderer.sharedMaterial = GetDefaultMaterial();
             }
+            UpdateMesh(curves);
         }
 
-        void LateUpdate()
+        void UpdateMesh(AlembicCurves curves)
         {
             if (prevRenderMethod != renderMethod)
             {
@@ -54,7 +57,7 @@ namespace Scripts.Importer
             switch (renderMethod)
             {
                 case RenderMethod.Line:
-                    GenerateLineMesh(mesh, curves.positionsList.GetArray(), curves.curvePointCount.GetArray());
+                    GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
                     break;
                 case RenderMethod.Strip:
                     //GeneratePlaneMesh(mesh, new[] {new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 2, 0)}, new[] {3}, new[] {0.1f, 0.75f, 0.1f});
@@ -65,8 +68,14 @@ namespace Scripts.Importer
             }
         }
 
+        void OnPreRender()
+        {
+            
+        }
+
         void OnDisable()
         {
+            curves.OnUpdate -= UpdateMesh;
             DestroyImmediate(mesh);
         }
 
@@ -174,7 +183,7 @@ namespace Scripts.Importer
                     theMesh.SetNormals(particleTangent);
                     theMesh.SetUVs(0, particleUV);
 
-                    if (curves.Velocities.Count > 0)
+                    if (curves.Velocities.Length > 0)
                     {
                         theMesh.SetUVs(5, curves.Velocities);
                     }
@@ -226,7 +235,7 @@ namespace Scripts.Importer
                     }
 
                     particleTangentPtr[strandParticleEnd - 1] = particleTangentPtr[strandParticleEnd - 2];
-                    
+
                     for (var j = strandParticleBegin; j < strandParticleEnd; j += 1)
                     {
                         particleUVPtr[j] = new Vector2(j, curveIdx); // particle index + strand index

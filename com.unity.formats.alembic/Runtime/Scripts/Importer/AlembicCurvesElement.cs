@@ -2,7 +2,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    internal class AlembicCurvesElement : AlembicElement
+    class AlembicCurvesElement : AlembicElement
     {
         // members
         aiCurves m_abcSchema;
@@ -69,8 +69,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             m_abcData[0] = data;
-
-            // kick async copy
             sample.FillData(m_abcData);
         }
 
@@ -84,6 +82,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
                 abcTreeNode.gameObject.SetActive(data.visibility);
 
+            var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
+            curves.InvokeOnUpdate(curves);
             /* var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
 
              var cnt = 0;

@@ -7,24 +7,29 @@ namespace UnityEngine.Formats.Alembic.Importer
     [DisallowMultipleComponent]
     public class AlembicCurves : MonoBehaviour
     {
-        PinnedList<Vector3> m_positions = new PinnedList<Vector3>();
-        internal PinnedList<Vector3> positionsList { get { return m_positions; } }
-        public List<Vector3> Positions => positionsList.List;
+        public delegate void OnUpdateDataHandler(AlembicCurves curves);
+        public Vector3[] Positions => positionsList.GetArray();
+        public int[] CurvePointCount => curvePointCount.GetArray();
+        public Vector2[] UVs => uvs.GetArray();
+        public float[] Widths => widths.GetArray();
+        public Vector3[] Velocities => velocitiesList.GetArray();
+        public event OnUpdateDataHandler OnUpdate
+        {
+            add => updateHandler += value;
+            remove => updateHandler -= value;
+        }
 
-        PinnedList<int> m_curvePointCount = new PinnedList<int>();
-        internal PinnedList<int> curvePointCount { get { return m_curvePointCount; } }
-        public List<int> CurvePointCount => curvePointCount.List;
+        internal void InvokeOnUpdate(AlembicCurves curves)
+        {
+            updateHandler?.Invoke(curves);
+        }
 
-        PinnedList<Vector2> m_uvs = new PinnedList<Vector2>();
-        internal PinnedList<Vector2> uvs { get { return m_uvs; } }
-        public List<Vector2> UVs => uvs.List;
+        OnUpdateDataHandler updateHandler;
 
-        PinnedList<float> m_widths = new PinnedList<float>();
-        internal PinnedList<float> widths { get { return m_widths; } }
-        public List<float> Widths => widths.List;
-
-        PinnedList<Vector3> m_velocities = new PinnedList<Vector3>();
-        internal PinnedList<Vector3> velocitiesList { get { return m_velocities; } }
-        public List<Vector3> Velocities => velocitiesList.List;
+        internal PinnedList<Vector3> positionsList { get; } = new PinnedList<Vector3>();
+        internal PinnedList<int> curvePointCount { get; } = new PinnedList<int>();
+        internal PinnedList<Vector2> uvs { get; } = new PinnedList<Vector2>();
+        internal PinnedList<float> widths { get; } = new PinnedList<float>();
+        internal PinnedList<Vector3> velocitiesList { get; } = new PinnedList<Vector3>();
     }
 }
