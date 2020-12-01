@@ -7,6 +7,7 @@ using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Rendering;
+using Unity.Burst;
 
 namespace Scripts.Importer
 {
@@ -69,7 +70,7 @@ namespace Scripts.Importer
             DestroyImmediate(mesh);
         }
 
-        void GeneratePlaneMesh(Mesh theMesh, List<Vector3> positions, List<int> curveCounts, List<float> widths)
+        void GeneratePlaneMesh(Mesh theMesh, IReadOnlyList<Vector3> positions, IReadOnlyList<int> curveCounts, IReadOnlyList<float> widths)
         {
             var curveCount = curveCounts.Count;
 
@@ -183,6 +184,9 @@ namespace Scripts.Importer
             }
         }
 
+#if BURST_AVAILABLE
+        [BurstCompile]
+#endif
         struct GenerateLinesJob : IJobParallelFor
         {
             [WriteOnly] public NativeArray<int> indices;
@@ -191,14 +195,13 @@ namespace Scripts.Importer
             [Unity.Collections.ReadOnly] public NativeArray<int> curveCounts, strideArray;
             [Unity.Collections.ReadOnly] public NativeArray<Vector3> vertices;
 
-
             public void Execute(int curveIdx)
             {
                 unsafe
                 {
-                    var indicesPtr = (int*) indices.GetUnsafePtr();
-                    var particleTangentPtr = (Vector3*) particleTangent.GetUnsafePtr();
-                    var particleUVPtr = (Vector2*) particleUV.GetUnsafePtr();
+                    var indicesPtr = (int*)indices.GetUnsafePtr();
+                    var particleTangentPtr = (Vector3*)particleTangent.GetUnsafePtr();
+                    var particleUVPtr = (Vector2*)particleUV.GetUnsafePtr();
 
                     var curvePointCount = curveCounts[curveIdx];
                     var strandParticleBegin = strideArray[curveIdx];
