@@ -34,12 +34,12 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(curves.Positions.Length, curves.CurvePointCount[0]);
             {
                 streamPlayer.UpdateImmediately(0);
-                var expect = new Vector3(0.0042689126f, 0.010365379f, -0.00339815859f);
+                var expect = new Vector3(0.0042689126f, 0.010365379f, -0.00339815859f) * 100f; // points with default scale, scalled 100x
                 Assert.LessOrEqual((curves.Positions[0] - expect).magnitude, eps);
             }
             {
                 streamPlayer.UpdateImmediately(1);
-                var expect = new Vector3(0.014939514f, 0.010365379f, -0.00339815859f);
+                var expect = new Vector3(0.014939514f, 0.010365379f, -0.00339815859f) * 100f;
                 Assert.LessOrEqual((curves.Positions[0] - expect).magnitude, eps);
             }
         }
@@ -61,7 +61,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             }
             {
                 streamPlayer.UpdateImmediately(1);
-                var expect = new Vector3(0.0106706014f, -0f, -0f);
+                var expect = new Vector3(0.0106706014f, -0f, -0f) * 100;
                 Assert.LessOrEqual((curves.Velocities[0] - expect).magnitude, eps);
             }
         }

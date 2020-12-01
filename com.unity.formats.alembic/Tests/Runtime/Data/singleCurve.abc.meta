@@ -15,7 +15,7 @@ ScriptedImporter:
     tangents: 1
     cameraAspectRatio: 2
     importVisibility: 1
-    scaleFactor: 0.01
+    scaleFactor: 1
     swapHandedness: 1
     flipFaces: 0
     interpolateSamples: 1

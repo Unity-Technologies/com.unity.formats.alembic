@@ -164,11 +164,11 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
 	{
 		Assign(sample.m_velocities, sample.m_velocities_sp, point_count);
 		if (config.swap_handedness)
-		{
-			SwapHandedness(sample.m_velocities.data(), (int)sample.m_velocities.size());
-			for (int i=0;i<sample.m_velocities.size();++i)
-				sample.m_velocities[i] -= sample.m_velocities[i];
-		}
+        {
+            SwapHandedness(sample.m_velocities.data(), (int)sample.m_velocities.size());
+        }
+
+        ApplyScale(sample.m_velocities.data(), (int)sample.m_velocities.size(), -config.scale_factor);
 	}
 	else
 	{
