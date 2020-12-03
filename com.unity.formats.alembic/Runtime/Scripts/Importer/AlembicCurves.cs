@@ -7,24 +7,47 @@ namespace UnityEngine.Formats.Alembic.Importer
     [DisallowMultipleComponent]
     public class AlembicCurves : MonoBehaviour
     {
+        /// <summary>
+        /// Defines the type for the update callback.
+        /// </summary>
+        /// <param name="curves">the component that was updated.</param>
         public delegate void OnUpdateDataHandler(AlembicCurves curves);
+        /// <summary>
+        /// Returns the positions for all the curves in the current Alembic node.
+        /// </summary>
         public Vector3[] Positions => positionsList.GetArray();
+        /// <summary>
+        /// Returns an array where: the i-th entry returns how many points are contained in the i-th curve.
+        /// </summary>
         public int[] CurvePointCount => curvePointCount.GetArray();
+        /// <summary>
+        /// Returns an array of UVs (optional), if the imported file contained UVs.
+        /// </summary>
         public Vector2[] UVs => uvs.GetArray();
+        /// <summary>
+        /// Returns an array of Widths (optional), if the imported file contained widths/
+        /// </summary>
         public float[] Widths => widths.GetArray();
+        /// <summary>
+        /// Returns an array of Velocities (optional), if the imported file contained UVs.
+        /// </summary>
         public Vector3[] Velocities => velocitiesList.GetArray();
-        public event OnUpdateDataHandler OnUpdate
+        /// <summary>
+        /// Is an event that is invoked every time the data in the component is updated by the AlembicStreamPlayer. This is caused by the evaluation time or import options changing.
+        /// This allows users to perform data post-processing only when needed.
+        /// </summary>
+        public event OnUpdateDataHandler OnUpdateData
         {
-            add => updateHandler += value;
-            remove => updateHandler -= value;
+            add => update += value;
+            remove => update -= value;
         }
 
         internal void InvokeOnUpdate(AlembicCurves curves)
         {
-            updateHandler?.Invoke(curves);
+            update?.Invoke(curves);
         }
 
-        OnUpdateDataHandler updateHandler;
+        OnUpdateDataHandler update;
 
         internal PinnedList<Vector3> positionsList { get; } = new PinnedList<Vector3>();
         internal PinnedList<int> curvePointCount { get; } = new PinnedList<int>();
