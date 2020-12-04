@@ -1,5 +1,9 @@
 # Changes in Alembic for Unity
 
+## [Unreleased] 
+###
+- Fixed a bug causing the Alembic binary libraries to be copied into unsupported platform build, eg: iOS.
+
 ## [2.1.1-pre.1] - 2020-10-21
 ### Feature
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
