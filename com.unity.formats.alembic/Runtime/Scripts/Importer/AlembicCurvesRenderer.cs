@@ -60,7 +60,6 @@ namespace Scripts.Importer
                     GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
                     break;
                 case RenderMethod.Strip:
-                    //GeneratePlaneMesh(mesh, new[] {new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 2, 0)}, new[] {3}, new[] {0.1f, 0.75f, 0.1f});
                     GeneratePlaneMesh(mesh, curves.Positions, curves.CurvePointCount, curves.Widths);
                     break;
                 default:
@@ -140,6 +139,8 @@ namespace Scripts.Importer
             }
         }
 
+        // Generates a procedural mesh composed of Lines (normals, uvs). Normals for lines are ill defined (1 free DOF ), so they are in fact tangents alone the line.
+        // If velocities are present, they are bound to TEXCOORD5
         void GenerateLineMesh(Mesh theMesh, Vector3[] positionsM, int[] curvesCountsM)
         {
             var curveCount = curvesCountsM.Length;

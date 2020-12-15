@@ -41,7 +41,6 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (curves == null)
             {
                 curves = abcTreeNode.gameObject.AddComponent<AlembicCurves>();
-                //  abcTreeNode.gameObject.AddComponent<AlembicPointsRenderer>(); // Need rendering
             }
             var data = default(aiCurvesData);
 
@@ -84,15 +83,6 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
             curves.InvokeOnUpdate(curves);
-            /* var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
-
-             var cnt = 0;
-             for (var i = 0; i < curves.PositionsOffsetBuffer.Count; ++i)
-             {
-                 var v = curves.PositionsOffsetBuffer[i];
-                 curves.PositionsOffsetBuffer[i] = cnt;
-                 cnt += v;
-             }*/
         }
     }
 }
