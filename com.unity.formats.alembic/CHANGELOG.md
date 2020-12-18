@@ -1,5 +1,8 @@
 # Changes in Alembic for Unity
 
+## [2.2.0-exp.1] - 2020-12-17
+### Feature
+
 ## [2.1.2] - 2020-12-14
 ### Changes
 - Fixed a bug causing the Alembic binary libraries to be copied into unsupported platform build, eg: iOS.
