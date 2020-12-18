@@ -1,4 +1,5 @@
 editors:
+  - version: 2019.3
   - version: 2019.4
   - version: 2020.1
   - version: 2020.2
@@ -13,10 +14,16 @@ platforms:
     type: Unity::VM::osx
     image: package-ci/mac:latest
     flavor: m1.mac
-  - name: centOS
-    type: Unity::VM::GPU
-    image: package-ci/centos:latest
+#  - name: centOS
+#    type: Unity::VM::GPU
+#    image: package-ci/centos:latest
+#    flavor: b1.large
+  - name: ubuntu
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
     flavor: b1.large
+
+
 
 standalone_platforms:
   - name: win
@@ -29,11 +36,11 @@ standalone_platforms:
     image: package-ci/mac:stable
     flavor: m1.mac
     runtime: standalone
-  - name: centOS
-    type: Unity::VM::GPU
-    image: package-ci/centos:latest
-    flavor: b1.large
-    runtime: standalone
+#  - name: centOS
+#    type: Unity::VM::GPU
+#    image: package-ci/centos:latest
+#    flavor: b1.large
+#    runtime: standalone
 
 ---
 build_win:
