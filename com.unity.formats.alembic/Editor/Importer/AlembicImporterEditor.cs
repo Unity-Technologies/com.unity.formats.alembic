@@ -47,6 +47,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     new GUIContent("Import Meshes", ""));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPoints"),
                     new GUIContent("Import Points", ""));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importCurves"),
+                    new GUIContent("Import Curves", ""));
                 EditorGUILayout.Separator();
 
                 // time range

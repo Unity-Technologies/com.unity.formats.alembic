@@ -404,6 +404,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Sdk.aiXform aiObjectAsXform(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiCamera aiObjectAsCamera(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPoints aiObjectAsPoints(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiCurves aiObjectAsCurves(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
 
         [DllImport(Abci.Lib)] public static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
@@ -421,6 +422,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
         [DllImport(Abci.Lib)] public static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
 
+        [DllImport(Abci.Lib)] public static extern void aiCurvesGetSummary(IntPtr schema, ref aiCurvesSummary dst);
+
         [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
 
         [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref CameraData dst);
@@ -432,6 +435,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiPointsFillData(IntPtr sample, IntPtr dst);
+
+        //
+        [DllImport(Abci.Lib)] public static extern void aiCurvesGetSampleSummary(IntPtr sample, ref aiCurvesSampleSummary dst);
+        [DllImport(Abci.Lib)] public static extern void aiCurvesFillData(IntPtr sample, IntPtr dst);
+        //
 
         [DllImport(Abci.Lib)] public static extern IntPtr aiPropertyGetName(IntPtr prop);
         [DllImport(Abci.Lib)] public static extern aiPropertyType aiPropertyGetType(IntPtr prop);
@@ -455,6 +463,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal struct aiPoints
         {
             [DllImport(Abci.Lib)] public static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
+        }
+
+        internal struct aiCurves
+        {
+            [DllImport(Abci.Lib)] public static extern aiCurvesSample aiSchemaGetSample(IntPtr schema);
         }
     }
 }

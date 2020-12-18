@@ -266,7 +266,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
                 {
-                    meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                    if (meshFilter.sharedMesh != null)
+                    {
+                        meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                    }
                 }
             }
 
@@ -283,6 +286,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!schema) schema = obj.AsPolyMesh();
             if (!schema) schema = obj.AsCamera();
             if (!schema) schema = obj.AsPoints();
+            if (!schema) schema = obj.AsCurves();
 
             if (schema)
             {
@@ -325,7 +329,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
                 else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
-
+                else if (obj.AsCurves() && m_streamDesc.Settings.ImportCurves)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicCurvesElement>();
                 if (elem != null)
                 {
                     elem.AbcSetup(obj, schema);

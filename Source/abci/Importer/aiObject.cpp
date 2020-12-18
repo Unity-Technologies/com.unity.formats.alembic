@@ -7,7 +7,7 @@
 #include "aiPolyMesh.h"
 #include "aiCamera.h"
 #include "aiPoints.h"
-
+#include "aiCurves.h"
 
 static std::string SanitizeNodeName(const std::string& src)
 {
@@ -94,6 +94,8 @@ aiObject* aiObject::newChild(const abcObject &abc)
             ret = new aiCamera(this, abc);
         else if (AbcGeom::IPointsSchema::matches(metadata))
             ret = new aiPoints(this, abc);
+        else if (AbcGeom::ICurvesSchema::matches(metadata))
+            ret = new aiCurves(this, abc);
         else
             ret = new aiObject(m_ctx, this, abc);
     }

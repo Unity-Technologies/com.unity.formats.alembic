@@ -1,6 +1,14 @@
 // This file is generated. Do not modify by hand.
 // XML documentation file not found. To check if public methods have XML comments,
 // make sure the XML doc file is present and located next to the scraped dll
+namespace Scripts.Importer
+{
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.RequireComponent(typeof(UnityEngine.Formats.Alembic.Importer.AlembicCurves))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshFilter))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshRenderer))] public class AlembicCurvesRenderer : UnityEngine.MonoBehaviour
+    {
+        public AlembicCurvesRenderer() {}
+    }
+}
+
 namespace UnityEngine.Formats.Alembic.Exporter
 {
     [UnityEngine.ExecuteInEditMode] public class AlembicExporter : UnityEngine.MonoBehaviour
@@ -18,6 +26,18 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    [UnityEngine.DisallowMultipleComponent] public class AlembicCurves : UnityEngine.MonoBehaviour
+    {
+        public event UnityEngine.Formats.Alembic.Importer.AlembicCurves.OnUpdateDataHandler OnUpdateData;
+        public int[] CurvePointCount { get; }
+        public UnityEngine.Vector3[] Positions { get; }
+        public UnityEngine.Vector2[] UVs { get; }
+        public UnityEngine.Vector3[] Velocities { get; }
+        public float[] Widths { get; }
+        public AlembicCurves() {}
+        public delegate void OnUpdateDataHandler(UnityEngine.Formats.Alembic.Importer.AlembicCurves curves);
+    }
+
     [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour
     {
         public UnityEngine.Vector3 BoundsCenter { get; }
@@ -56,6 +76,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     {
         public bool FlipFaces { get; set; }
         public bool ImportCameras { get; set; }
+        public bool ImportCurves { get; set; }
         public bool ImportMeshes { get; set; }
         public bool ImportPoints { get; set; }
         public bool ImportVisibility { get; set; }
