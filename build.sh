@@ -15,7 +15,7 @@ depsdir=${PWD}/External/install
 installdir=${PWD}
 mkdir -p build
 pushd build
-cmake .. -DCMAKE_BUILD_TYPE=Release \
+cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DALEMBIC_DIR=${depsdir} \
     -DHDF5_USE_STATIC_LIBRARIES=ON \
     -DHDF5_ROOT=${depsdir} \
@@ -23,5 +23,5 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
     -DENABLE_DEPLOY=OFF \
     -DCMAKE_PREFIX_PATH=${depsdir} \
     -DCMAKE_INSTALL_PREFIX=${installdir}
-cmake --build . --target install --config Release
+cmake --build . --target install --config RelWithDebInfo
 popd
