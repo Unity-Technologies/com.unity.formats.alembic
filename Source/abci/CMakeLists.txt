@@ -1,8 +1,4 @@
-if( CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." OFF)
-else()
-    option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
-endif()
+option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
 
 if(ENABLE_ISPC)
     find_package(ISPC REQUIRED)
