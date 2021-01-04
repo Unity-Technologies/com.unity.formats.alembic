@@ -1,5 +1,9 @@
 # Changes in Alembic for Unity
 
+## [2.2.0-exp.2] - 2021-01-04
+### Feature
+
+
 ## [2.2.0-exp.1] - 2020-12-17
 ### Feature
 - Added support for piecewise constant Curve importing
