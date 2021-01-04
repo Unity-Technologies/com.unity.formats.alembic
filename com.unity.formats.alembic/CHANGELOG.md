@@ -1,11 +1,11 @@
 # Changes in Alembic for Unity
 
 ## [2.2.0-exp.2] - 2021-01-04
-### Feature
-
+### Chnages
+- Updated to Alembic version 1.7.16.
 
 ## [2.2.0-exp.1] - 2020-12-17
-### Feature
+### Changes
 - Added support for piecewise constant Curve importing
 
 ## [2.1.2] - 2020-12-14
@@ -13,7 +13,7 @@
 - Fixed a bug causing the Alembic binary libraries to be copied into unsupported platform build, eg: iOS.
 
 ## [2.1.1-pre.1] - 2020-10-21
-### Feature
+### Changes
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 
 ### Changes
