@@ -163,5 +163,16 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return importPoints; }
             set { importPoints = value; }
         }
+
+        [SerializeField]
+        bool importCurves = true;
+        /// <summary>
+        /// Enable or disable the import of Curve data.
+        /// </summary>
+        public bool ImportCurves
+        {
+            get { return importCurves; }
+            set { importCurves = value; }
+        }
     }
 }
