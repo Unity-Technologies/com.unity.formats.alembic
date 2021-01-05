@@ -3,6 +3,7 @@
 ## [2.2.0-exp.2] - 2021-01-04
 ### Chnages
 - Updated to Alembic version 1.7.16.
+- Added support for Stadia standalone builds.
 
 ## [2.2.0-exp.1] - 2020-12-17
 ### Changes
