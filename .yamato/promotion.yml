@@ -85,7 +85,7 @@ promote:
   triggers:
     tags:
       only:
-        - /^\d+.\d+.\d+(-preview(.\d+)?)?$/
+        - /^\d+.\d+.\d+(-exp(.\d+)?)?$/  
   artifacts:
     artifacts:
       paths:
