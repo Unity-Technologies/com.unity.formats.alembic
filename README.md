@@ -121,3 +121,14 @@ Batching の設定を変えたい場合、設定項目は Edit -> Project Settin
 
 Alembic 側のノードには名前に "(0000283C)" のような ID が付与されます。これは名前の衝突を避けるための処置です。(Alembic は一つの階層に名前が同じノードが複数あってはいけないルールになっています)
 また、マテリアルは現在全くの未サポートです。
+
+#Building 
+The Unity Alembic package supports Windows, OSX, Linux as build targets.
+External dependecies: CMake >=3, C++ compiler (Windows VS2015 with C++ toolchain),
+Clang on OSX, GCC on Linux.
+The build result (package, C# and native plugin code) can be found at: com.unity.formats.alembic
+
+1) Checkout submodules: git submodule update --init --recursive
+2) Windows run build.cmd
+   OSX, Linux run build.sh
+
