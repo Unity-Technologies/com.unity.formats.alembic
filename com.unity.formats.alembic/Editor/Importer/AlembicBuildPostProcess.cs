@@ -26,7 +26,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (HaveAlembicInstances)
                 {
                     Debug.LogWarning(
-                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, or Linux 64-bit.");
+                        "Alembic only supports the following build targets: Windows 64-bit, MacOS X, Linux 64-bit or Stadia");
                 }
 
                 HaveAlembicInstances = false;
@@ -49,7 +49,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public static bool TargetIsSupported(BuildTarget target)
         {
-            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64;
+            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64 || target == BuildTarget.Stadia;
         }
     }
 
@@ -99,6 +99,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 case BuildTarget.StandaloneOSX:
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
+                case BuildTarget.Stadia:
+                    return Path.Combine(summary.outputPath, "layout/files/Data/StreamingAssets");
                 case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
