@@ -257,7 +257,7 @@ publish:
   triggers:
     tags:
       only:
-        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-preview(\.\d+)?)?$/
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-(exp|pre)(\.\d+)?)?$/  
   artifacts:
     logs.zip:
       paths:
