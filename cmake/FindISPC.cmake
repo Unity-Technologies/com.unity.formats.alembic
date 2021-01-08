@@ -52,6 +52,17 @@ function(add_ispc_targets)
             "${arg_OUTDIR}/${name}_avx${CMAKE_CXX_OUTPUT_EXTENSION}"
             "${arg_OUTDIR}/${name}_avx512skx${CMAKE_CXX_OUTPUT_EXTENSION}"
         )
+       
+        if( CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            set(object_arm64 "${arg_OUTDIR}/${name}_arm64${CMAKE_CXX_OUTPUT_EXTENSION}")
+            add_custom_target(ISPC-ARM64 ALL
+                COMMAND ${ISPC} ${source} -o ${object_arm64} ${ISPC_OPTS} --target-os=ios --target=neon-i32x8 --opt=fast-masked-vload --opt=fast-math
+                DEPENDS ${source} ${arg_HEADERS}
+            )
+
+            list(APPEND objects ${object_arm64})
+        endif()
+
         set(outputs ${header} ${objects})
         add_custom_command(
             OUTPUT ${outputs}
@@ -59,10 +70,6 @@ function(add_ispc_targets)
             ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
             DEPENDS ${source} ${arg_HEADERS}
             MAIN_DEPENDENCY ${source}
-            COMMENT "Building ISPC header ${header} and objects ${object} from ${source}"
-            # To reenable ISPC compile x86-64, compile aarch64 amd lipo...
-            #ispc aiSIMD.ispc -o blahiOS.o --target-os=ios --target=neon-i32x8 --opt=fast-masked-vload --opt=fast-math
-            # lipo blah* -create -output blahUniversal.o
         )
 
         list(APPEND _ispc_headers ${header})
