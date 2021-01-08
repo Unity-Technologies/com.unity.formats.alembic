@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 04cbadf80f70d4415baf1450862310b0
+guid: 4f03ab724b2494f38ae7c6c3d06e0825
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -8,8 +8,8 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: f53f5fc499d31e44b9deee84d28a9ee8, type: 3}
-  rootGameObjectId: BackSwing
-  rootGameObjectName: BackSwing
+  rootGameObjectId: 
+  rootGameObjectName: 
   streamSettings:
     normals: 1
     tangents: 1
@@ -27,10 +27,10 @@ ScriptedImporter:
     importMeshes: 1
     importPoints: 0
     importCurves: 1
-  abcStartTime: 0
-  abcEndTime: 0.8333333333333334
-  startTime: 0
-  endTime: 0.8333333333333334
+  abcStartTime: 0.041666666666666664
+  abcEndTime: 0.041666666666666664
+  startTime: 0.041666666666666664
+  endTime: 0.041666666666666664
   importWarning: 
-  firstImport: 0
+  firstImport: 1
   isHDF5: 0

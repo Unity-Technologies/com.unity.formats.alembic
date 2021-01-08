@@ -5,9 +5,9 @@ using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
-    using UnityEditor.AssetImporters;
+using UnityEditor.AssetImporters;
 #else
-    using UnityEditor.Experimental.AssetImporters;
+using UnityEditor.Experimental.AssetImporters;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer

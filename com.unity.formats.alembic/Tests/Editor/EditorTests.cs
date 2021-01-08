@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void BadGeometryDoesNotCreateNanNormals()
         {
-            const string dummyGUID = "04cbadf80f70d4415baf1450862310b0";
+            const string dummyGUID = "4f03ab724b2494f38ae7c6c3d06e0825";
             var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
             var abc = AssetDatabase.LoadMainAssetAtPath(path);
             var instance = PrefabUtility.InstantiatePrefab(abc) as GameObject;
