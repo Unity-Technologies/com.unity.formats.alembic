@@ -24,7 +24,7 @@ set(ISPC_VERSION 1.14.1)
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-windows")
         execute_process(
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND ${7ZA} x -aoa ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.zip
+            COMMAND ${7ZA} x -aoa -o* ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.zip
         )
     endif()
 
@@ -68,6 +68,7 @@ function(add_ispc_targets)
             OUTPUT ${outputs}
             COMMAND ${ISPC}
             ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
+            COMMENT "running:  ${ISPC} ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math"
             DEPENDS ${source} ${arg_HEADERS}
             MAIN_DEPENDENCY ${source}
         )
