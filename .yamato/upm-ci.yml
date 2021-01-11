@@ -48,11 +48,11 @@ bizarro_standalone_platforms:
     image: package-ci/centos:latest
     flavor: b1.large
     runtime: standalone
-  - name: stadia
-    type: Unity::VM
-    image: desktop/stadia-bka-katana:stable
-    flavor: b1.large
-    runtime: stadia
+  #- name: stadia
+  #  type: Unity::VM
+  #  image: desktop/stadia-bka-katana:stable
+  #  flavor: b1.large
+  #  runtime: stadia
 
 ---
 build_win:
