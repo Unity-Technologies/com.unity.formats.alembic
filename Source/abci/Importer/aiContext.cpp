@@ -213,7 +213,8 @@ aiContext::aiContext(int uid)
       m_top_node(),
       m_timesamplings(),
       m_uid(uid),
-      m_config()
+      m_config(),
+      m_isHDF5(false)
 {
 }
 
@@ -362,6 +363,7 @@ bool aiContext::load(const char *in_path)
             Alembic::AbcCoreOgawa::ReadArchive archive_reader(m_streams);
             m_archive = Abc::IArchive(archive_reader(m_path), Abc::kWrapExisting, Abc::ErrorHandler::kThrowPolicy);
             DebugLog("Successfully opened Ogawa archive");
+            m_isHDF5 = false;
         }
         catch (Alembic::Util::Exception e)
         {
@@ -375,6 +377,32 @@ bool aiContext::load(const char *in_path)
 
             auto message = L(e.what());
             DebugLogW(L"Failed to open archive: %s", message.c_str());
+            std::ifstream fp(path, std::ios::in | std::ios::binary);
+            if (!fp)
+            {
+                DebugLog("Unable to open " + filename );
+            }
+            else
+            {
+                char header[4]; /* funky char + "HDF" */
+                if (!fp.read(header, sizeof(header)))
+                {
+                    DebugLog("Unable to read from " + filename );
+                }
+                if (strncmp(header + 1, "HDF", 3) != 0)
+                {
+                    DebugLog(filename+ "has unknown file format");
+                }
+                else
+                {
+                    m_isHDF5 = true;
+                }
+
+                if (fp.is_open())
+                {
+                    fp.close();
+                }
+            }
         }
     }
     else

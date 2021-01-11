@@ -70,6 +70,8 @@ public:
     int getTimeSamplingCount();
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
+    bool getIsHDF5() const { return m_isHDF5; }
+
     template<class F>
     void eachNodes(const F &f);
 
@@ -85,6 +87,8 @@ private:
     std::vector<aiTimeSamplingPtr> m_timesamplings;
     int m_uid = 0;
     aiConfig m_config;
+
+    bool m_isHDF5;
 };
 
 #include "aiObject.h"
