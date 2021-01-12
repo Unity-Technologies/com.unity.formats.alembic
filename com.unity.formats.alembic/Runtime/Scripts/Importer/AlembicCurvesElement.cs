@@ -49,10 +49,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 curves.positionsList.ResizeDiscard(m_sampleSummary.positionCount);
                 curves.velocitiesList.ResizeDiscard(m_sampleSummary.positionCount);
 
-                curves.strideArray.ResizeDiscard(m_sampleSummary.numVerticesCount);
+                curves.curveOffsets.ResizeDiscard(m_sampleSummary.numVerticesCount);
                 data.positions = curves.positionsList;
                 data.velocities = curves.velocitiesList;
-                data.numVertices = curves.strideArray;
+                data.numVertices = curves.curveOffsets;
             }
 
             if (m_summary.hasWidths)
@@ -84,10 +84,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
 
             var cnt = 0;
-            for (var i = 0; i < curves.StrideArray.Length; ++i)
+            for (var i = 0; i < curves.CurveOffsets.Length; ++i)
             {
-                var v = curves.StrideArray[i];
-                curves.StrideArray[i] = cnt;
+                var v = curves.CurveOffsets[i];
+                curves.CurveOffsets[i] = cnt;
                 cnt += v;
             }
 

@@ -47,7 +47,7 @@ namespace Scripts.Importer
 
         void UpdateMesh(AlembicCurves curves)
         {
-            GenerateLineMesh(mesh, curves.Positions, curves.StrideArray);
+            GenerateLineMesh(mesh, curves.Positions, curves.CurveOffsets);
             /*    if (prevRenderMethod != renderMethod)
                 {
                     mesh.Clear();
@@ -158,8 +158,10 @@ namespace Scripts.Importer
                 vertices.CopyFrom(positionsM);
                 strideArray.CopyFrom(curveOffsetM);
 
+                // if there is only 1 curve, there is no meaningful curveOffset array, thus the length is the whole point array length
                 if (curveOffsetM.Length > 1)
                 {
+                    // Intermediate variable needs to be introduced because the a struct inside a "using" statement is assumed to immutable.
                     var nativeArray = curveCounts;
                     nativeArray[0] = curveOffsetM[1];
                 }
