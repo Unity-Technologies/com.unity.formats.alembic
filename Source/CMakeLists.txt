@@ -6,17 +6,8 @@ cmake_policy(SET CMP0074 NEW)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(OpenEXR REQUIRED)
-FIND_PACKAGE(HDF5 REQUIRED)
 FIND_PACKAGE(Alembic REQUIRED)
 include(AddPlugin)
-
-if(WIN32)
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};${HDF5_ROOT}/lib/szip.lib;${HDF5_ROOT}/lib/zlib.lib")
-elseif(APPLE)
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
-else()
-    set(HDF5_LIBRARIES "${HDF5_LIBRARIES};-ldl;-lpthread;${HDF5_ROOT}/lib/libz.a;${HDF5_ROOT}/lib/libszip.a")
-endif()
 
 if(APPLE OR UNIX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
