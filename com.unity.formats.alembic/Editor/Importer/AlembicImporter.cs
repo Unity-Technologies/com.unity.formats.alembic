@@ -5,9 +5,9 @@ using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
-    using UnityEditor.AssetImporters;
+using UnityEditor.AssetImporters;
 #else
-    using UnityEditor.Experimental.AssetImporters;
+using UnityEditor.Experimental.AssetImporters;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer
@@ -196,7 +196,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 isHDF5 = abcStream.IsHDF5();
                 if (IsHDF5)
                 {
-                    Debug.LogWarning(path + ": Deprecated HDF5 file format. Consider converting to Ogawa.");
+                    Debug.LogError(path + ": Unsupported HDF5 file format detected. Please convert to Ogawa.");
                 }
             }
 

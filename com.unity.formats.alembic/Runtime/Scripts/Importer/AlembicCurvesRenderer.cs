@@ -19,8 +19,8 @@ namespace Scripts.Importer
     {
         AlembicCurves curves;
         Mesh mesh;
-      //  [SerializeField] RenderMethod renderMethod;
-      //  [NonSerialized] RenderMethod prevRenderMethod;
+        //  [SerializeField] RenderMethod renderMethod;
+        //  [NonSerialized] RenderMethod prevRenderMethod;
         ProfilerMarker setMeshProperties = new ProfilerMarker("SetMeshProperties");
 
 
@@ -47,26 +47,25 @@ namespace Scripts.Importer
 
         void UpdateMesh(AlembicCurves curves)
         {
-
             GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
-        /*    if (prevRenderMethod != renderMethod)
-            {
-                mesh.Clear();
-            }
+            /*    if (prevRenderMethod != renderMethod)
+                {
+                    mesh.Clear();
+                }
 
-            prevRenderMethod = renderMethod;
-*/
-  /*          switch (renderMethod)
-            {
-                case RenderMethod.Line:
-                    GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
-                    break;
-                case RenderMethod.Strip:
-                    GeneratePlaneMesh(mesh, curves.Positions, curves.CurvePointCount, curves.Widths);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }*/
+                prevRenderMethod = renderMethod;
+    */
+            /*          switch (renderMethod)
+                      {
+                          case RenderMethod.Line:
+                              GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
+                              break;
+                          case RenderMethod.Strip:
+                              GeneratePlaneMesh(mesh, curves.Positions, curves.CurvePointCount, curves.Widths);
+                              break;
+                          default:
+                              throw new ArgumentOutOfRangeException();
+                      }*/
         }
 
         void LateUpdate()

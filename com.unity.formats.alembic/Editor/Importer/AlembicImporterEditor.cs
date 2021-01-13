@@ -24,7 +24,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (importer.IsHDF5)
             {
-                EditorGUILayout.HelpBox("Deprecated HDF5 file format. Consider converting to Ogawa.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.", MessageType.Error);
+                return;
             }
 
             EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
