@@ -194,9 +194,6 @@ test_trigger:
     - dir
   triggers:
     cancel_old_ci: true
-    branches:
-      only:
-        - "/.*/"
   artifacts:
     logs:
       paths:
