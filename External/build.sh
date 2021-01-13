@@ -10,22 +10,11 @@ export CXXFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export CFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export MAKEFLAGS="-j12"
 
-hdf5_version=1.10.1
-hdf5_arch=$(uname)
 
 if [[ -e ${installdir} ]]; then
     rm -rf ${installdir}
 fi
 mkdir -p ${installdir}
-
-if [[ -e hdf5-build ]]; then
-    rm -rf hdf5-build
-fi
-mkdir -p hdf5-build
-pushd hdf5-build
-tar xf ${tgzdir}/HDF5-${hdf5_version}-${hdf5_arch}.tar.gz
-cp -R HDF5-${hdf5_version}-${hdf5_arch}/HDF_Group/HDF5/${hdf5_version}/* ${installdir}
-popd
 
 if [[ -e ilmbase-build ]]; then
     rm -rf ilmbase-build
@@ -51,11 +40,7 @@ cmake ../alembic -DCMAKE_BUILD_TYPE=Release \
     -DUSE_BINARIES=OFF \
     -DUSE_TESTS=OFF \
     -DALEMBIC_SHARED_LIBS=OFF \
-    -DUSE_HDF5=ON \
-    -DHDF5_USE_STATIC_LIBRARIES=ON \
     -DALEMBIC_ILMBASE_LINK_STATIC=ON \
-    -DUSE_STATIC_HDF5=ON \
-    -DILMBASE_ROOT="${installdir}" \
-    -DHDF5_ROOT="${installdir}"
+    -DILMBASE_ROOT="${installdir}" 
 cmake --build . --target install --config Release
 popd
