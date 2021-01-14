@@ -1,6 +1,7 @@
 # Changes in Alembic for Unity
 ## [2.1.3] - 2020-12-14
-###
+### Changes
+- The package depends on the Cloth Unity Module.
 
 
 ## [2.1.2] - 2020-12-14
