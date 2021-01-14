@@ -4,6 +4,7 @@
 ### Chnages
 - Updated to Alembic version 1.7.16.
 - Added support for Stadia standalone builds.
+- The package depends on the Cloth Unity Module.
 - Fixed a bug, where degenerate triangles would create NaN normals.
 
 ## [2.2.0-exp.1] - 2020-12-17
