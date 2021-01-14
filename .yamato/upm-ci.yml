@@ -185,21 +185,8 @@ testStandalone_{{ platform.name }}_{{ editor.version }}:
 
 test_trigger:
   name: TestsTrigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     cancel_old_ci: true
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
@@ -215,12 +202,6 @@ test_trigger:
 
 nightly_test_trigger:
   name: Nightly tests Trigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     recurring:
       - branch: dev
@@ -229,13 +210,6 @@ nightly_test_trigger:
       - branch: master
         frequency: daily
         rerun: always  
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
