@@ -50,7 +50,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (uv1 != null) uv1.Dispose();
                 if (rgba != null) rgba.Dispose();
                 if (rgb != null) rgb.Dispose();
-                if ((mesh.hideFlags & HideFlags.DontSave) != 0)
+                if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
 #if UNITY_EDITOR
                     Object.DestroyImmediate(mesh);
@@ -89,10 +89,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 split.Dispose();
             }
 
-            m_splitSummaries.Dispose();
-            m_submeshSummaries.Dispose();;
-            m_splitData.Dispose();;
-            m_submeshData.Dispose();;
+            m_splitSummaries.DisposeIfPossible();
+            m_submeshSummaries.DisposeIfPossible();;
+            m_splitData.DisposeIfPossible();
+            m_submeshData.DisposeIfPossible();
         }
 
         void UpdateSplits(int numSplits)
@@ -149,45 +149,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             var sample = m_abcSchema.sample;
 
             sample.GetSummary(ref m_sampleSummary);
-            int splitCount = m_sampleSummary.splitCount;
-            int submeshCount = m_sampleSummary.submeshCount;
+            var splitCount = m_sampleSummary.splitCount;
+            var submeshCount = m_sampleSummary.submeshCount;
 
-            if (m_splitSummaries.Length != splitCount)
-            {
-                if (m_splitSummaries.IsCreated)
-                {
-                    m_splitSummaries.Dispose();
-                }
-                m_splitSummaries = new NativeArray<aiMeshSplitSummary>(splitCount, Allocator.Persistent);
-            }
-
-            if (m_splitData.Length != splitCount)
-            {
-                if (m_splitData.IsCreated)
-                {
-                    m_splitData.Dispose();
-                }
-                m_splitData = new NativeArray<aiPolyMeshData>(splitCount, Allocator.Persistent);
-            }
-
-            if (m_submeshSummaries.Length != submeshCount)
-            {
-                if (m_submeshSummaries.IsCreated)
-                {
-                    m_submeshSummaries.Dispose();
-                }
-                m_submeshSummaries = new NativeArray<aiSubmeshSummary>(submeshCount, Allocator.Persistent);
-            }
-
-            if (m_submeshData.Length != submeshCount)
-            {
-                if (m_submeshData.IsCreated)
-                {
-                    m_submeshData.Dispose();
-                }
-
-                m_submeshData = new NativeArray<aiSubmeshData>(submeshCount, Allocator.Persistent);
-            }
+            m_splitSummaries.ResizeIfNeeded(splitCount);
+            m_splitData.ResizeIfNeeded(splitCount);
+            m_submeshSummaries.ResizeIfNeeded(submeshCount);
+            m_submeshData.ResizeIfNeeded(submeshCount);
 
             sample.GetSplitSummaries(m_splitSummaries);
             sample.GetSubmeshSummaries(m_submeshSummaries);
