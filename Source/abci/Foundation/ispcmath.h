@@ -212,10 +212,7 @@ static inline float3 rcp_precise(float3 v) { return 1.0f / v; }
 static inline uniform float  rcp_precise(uniform float  v) { return 1.0f / v; }
 static inline uniform float2 rcp_precise(uniform float2 v) { return 1.0f / v; }
 static inline uniform float3 rcp_precise(uniform float3 v) { return 1.0f / v; }
-static inline float  rcp_estimate(float  v) { return rcp(v); }
-static inline float2 rcp_estimate(float2 v) { return rcp(v); }
-static inline float3 rcp_estimate(float3 v) { return rcp(v); }
-static inline uniform float  rcp_estimate(uniform float  v) { return rcp(v); }
+
 static inline uniform float2 rcp_estimate(uniform float2 v) { return rcp(v); }
 static inline uniform float3 rcp_estimate(uniform float3 v) { return rcp(v); }
 
@@ -229,40 +226,52 @@ static inline float length(float3 v) { return sqrt(length_sq(v)); }
 static inline uniform float length(uniform float2 v) { return sqrt(length_sq(v)); }
 static inline uniform float length(uniform float3 v) { return sqrt(length_sq(v)); }
 
-static inline float rlength_precise(float2 v) { return 1.0f / sqrt(length_sq(v)); }
-static inline float rlength_precise(float3 v) { return 1.0f / sqrt(length_sq(v)); }
-static inline uniform float rlength_precise(uniform float2 v) { return 1.0f / sqrt(length_sq(v)); }
-static inline uniform float rlength_precise(uniform float3 v) { return 1.0f / sqrt(length_sq(v)); }
-static inline float rlength_estimate(float2 v) { return rsqrt(length_sq(v)); }
-static inline float rlength_estimate(float3 v) { return rsqrt(length_sq(v)); }
-static inline uniform float rlength_estimate(uniform float2 v) { return rsqrt(length_sq(v)); }
-static inline uniform float rlength_estimate(uniform float3 v) { return rsqrt(length_sq(v)); }
+static inline float2 normalize_precise(float2 v)
+{
+    float len = length_sq(v);
+    return len == 0 ? v : v * 1.0f/sqrt(len);
+}
+static inline float3 normalize_precise(float3 v)
+{
+    float len = length_sq(v);
+    return len == 0 ? v : v * 1.0f/sqrt(len);
+}
+static inline uniform float2 normalize_precise(uniform float2 v)
+{
+    uniform float len = length_sq(v);
+    return len == 0 ? v : v * 1.0f/sqrt(len);
+}
+static inline uniform float3 normalize_precise(uniform float3 v)
+{
+    uniform float len = length_sq(v);
+    return len == 0 ? v : v * 1.0f/sqrt(len);
+}
 
-static inline float2 normalize_precise(float2 v) { return v * rlength_precise(v); }
-static inline float3 normalize_precise(float3 v) { return v * rlength_precise(v); }
-static inline uniform float2 normalize_precise(uniform float2 v) { return v * rlength_precise(v); }
-static inline uniform float3 normalize_precise(uniform float3 v) { return v * rlength_precise(v); }
-static inline float2 normalize_estimate(float2 v) { return v * rlength_estimate(v); }
-static inline float3 normalize_estimate(float3 v) { return v * rlength_estimate(v); }
-static inline uniform float2 normalize_estimate(uniform float2 v) { return v * rlength_estimate(v); }
-static inline uniform float3 normalize_estimate(uniform float3 v) { return v * rlength_estimate(v); }
+static inline float2 normalize_estimate(float2 v)
+{
+    float len = length_sq(v);
+    return len == 0 ? v : v * rsqrt(len);
+}
+
+static inline float3 normalize_estimate(float3 v)
+{
+    float len = length_sq(v);
+    return len == 0 ? v : v * rsqrt(len);
+}
+static inline uniform float2 normalize_estimate(uniform float2 v)
+{
+    uniform float len = length_sq(v);
+    return len == 0 ? v : v * rsqrt(len);
+}
+
+static inline uniform float3 normalize_estimate(uniform float3 v)
+{
+    uniform float len = length_sq(v);
+    return len == 0 ? v : v * rsqrt(len);
+}
 
 static inline float angle_between(float3 a, float3 b) { return acos(dot(a, b)); }
 static inline uniform float angle_between(uniform float3 a, uniform float3 b) { return acos(dot(a, b)); }
-
-static inline float angle_between2_precise(float3 pos1, float3 pos2, float3 center)
-{
-    return angle_between(
-        normalize_precise(pos1 - center),
-        normalize_precise(pos2 - center));
-}
-
-static inline uniform float angle_between2_precise(uniform float3 pos1, uniform float3 pos2, uniform float3 center)
-{
-    return angle_between(
-        normalize_precise(pos1 - center),
-        normalize_precise(pos2 - center));
-}
 
 static inline float angle_between2_estimate(float3 pos1, float3 pos2, float3 center)
 {
@@ -298,75 +307,9 @@ static inline uniform float3 lerp(uniform float3 a, uniform float3 b, uniform fl
     return (1.0f - t) * a + t * b;
 }
 
-#ifdef ispcmathEstimate
-    #define rcp rcp_estimate
-    #define rlength rlength_estimate
-    #define normalize normalize_estimate
-    #define angle_between2 angle_between2_estimate
-#else
-    #define rcp rcp_precise
-    #define rlength rlength_precise
-    #define normalize normalize_precise
-    #define angle_between2 angle_between2_precise
-#endif
+#define rcp rcp_precise
+#define normalize normalize_precise
 
-
-static inline bool ray_triangle_intersection(uniform float3 pos, uniform float3 dir, float3 p1, float3 p2, float3 p3, float& distance)
-{
-    const float epsdet = 1e-10f;
-    const float eps = 1e-4f;
-
-    float3 e1 = p2 - p1;
-    float3 e2 = p3 - p1;
-    float3 p = cross(dir, e2);
-    float det = dot(e1, p);
-    float inv_det = rcp(det);
-    float3 t = pos - p1;
-    float u = dot(t, p) * inv_det;
-    float3 q = cross(t, e1);
-    float v = dot(dir, q) * inv_det;
-
-    distance = dot(e2, q) * inv_det;
-    return
-        abs(det) > 1e-10f &&
-        u > -eps && u < 1 + eps &&
-        v > -eps && u + v < 1 + eps &&
-        distance >= 0.0f;
-}
-
-// uniform variant
-static inline uniform bool ray_triangle_intersection(uniform float3 pos, uniform float3 dir, uniform float3 p1, uniform float3 p2, uniform float3 p3, uniform float& distance)
-{
-    uniform const float epsdet = 1e-10f;
-    uniform const float eps = 1e-4f;
-
-    uniform float3 e1 = p2 - p1;
-    uniform float3 e2 = p3 - p1;
-    uniform float3 p = cross(dir, e2);
-    uniform float det = dot(e1, p);
-    uniform float inv_det = rcp(det);
-    uniform float3 t = pos - p1;
-    uniform float u = dot(t, p) * inv_det;
-    uniform float3 q = cross(t, e1);
-    uniform float v = dot(dir, q) * inv_det;
-
-    distance = dot(e2, q) * inv_det;
-    return
-        abs(det) > epsdet &&
-        u > -eps && u < 1 + eps &&
-        v > -eps && u + v < 1 + eps &&
-        distance >= 0.0f;
-}
-
-static inline float ray_point_distance(float3 pos, float3 dir, float3 p)
-{
-    return length(cross(dir, p - pos));
-}
-
-static inline uniform float ray_point_distance(uniform float3 pos, uniform float3 dir, uniform float3 p)
-{
-    return length(cross(dir, p - pos));
-}
 
 static inline void compute_triangle_tangents(
     const float3(&vertices)[3], const float2(&uv)[3],
