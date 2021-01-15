@@ -47,6 +47,11 @@ namespace Scripts.Importer
 
         void UpdateMesh(AlembicCurves curves)
         {
+            if (curves.Positions.Length == 0)
+            {
+                return;
+            }
+
             GenerateLineMesh(mesh, curves.Positions, curves.CurveOffsets);
             /*    if (prevRenderMethod != renderMethod)
                 {
