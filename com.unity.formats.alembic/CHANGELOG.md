@@ -7,6 +7,7 @@
 - Added support for arm64 macOS.
 - The package depends on the Cloth Unity Module.
 - Fixed a bug, where degenerate triangles would create NaN normals.
+- Fixed a crash caused by empty geometry samples.
 
 ## [2.2.0-exp.1] - 2020-12-17
 ### Changes
