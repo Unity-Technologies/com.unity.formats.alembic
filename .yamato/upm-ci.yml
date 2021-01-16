@@ -36,11 +36,23 @@ standalone_platforms:
     image: package-ci/mac:stable
     flavor: m1.mac
     runtime: standalone
-#  - name: centOS
-#    type: Unity::VM::GPU
-#    image: package-ci/centos:latest
-#    flavor: b1.large
-#    runtime: standalone
+
+bizarro_standalone_platforms:
+  - name: mac_m2
+    type: Unity::metal::devkit
+    image: package-ci/mac:stable
+    flavor: m1.mac
+    runtime: standalone
+  - name: centOS
+    type: Unity::VM::GPU
+    image: package-ci/centos:latest
+    flavor: b1.large
+    runtime: standalone
+  #- name: stadia
+  #  type: Unity::VM
+  #  image: desktop/stadia-bka-katana:stable
+  #  flavor: b1.large
+  #  runtime: stadia
 
 ---
 build_win:
@@ -216,6 +228,53 @@ test_trigger:
     - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
+
+
+{% for platform in bizarro_standalone_platforms %}
+testBizarroStandalone_{{ platform.name }}:
+  name : Test Standalone on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - {% if platform.name == 'centOS' platform.name == 'stadia' %} DISPLAY=:0 {% endif %}  upm-ci project test  --project-path TestProjects/AlembicStandaloneBuild --type project-tests --unity-version 2021.1 --platform {{ platform.runtime }}
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    artifacts.zip:
+      paths:
+        - "upm-ci~/packages/**/*"
+        - "upm-ci~/templates/**/*"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+{% endfor %}
+
+test_bizarro:
+  name: TestsTriggerBizarro
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    - dir
+  triggers:
+    cancel_old_ci: true
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+    packages:
+      paths:
+        - "upm-ci~/packages/**/*"
+  dependencies:    
+    {% for platform in bizarro_standalone_platforms %}  
+    - .yamato/upm-ci.yml#testBizarroStandalone_{{platform.name}}
+    {% endfor %}
+
 
 nightly_test_trigger:
   name: Nightly tests Trigger
