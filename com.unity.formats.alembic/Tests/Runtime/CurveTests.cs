@@ -31,7 +31,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public void TestPositions()
         {
             Assert.AreEqual(5, streamPlayer.EndTime);
-            Assert.AreEqual(curves.Positions.Length, curves.CurvePointCount[0]);
+            Assert.AreEqual(0, curves.CurveOffsets[0]);
             {
                 streamPlayer.UpdateImmediately(0);
                 var expect = new Vector3(0.0042689126f, 0.010365379f, -0.00339815859f) * 100f; // points with default scale, scalled 100x

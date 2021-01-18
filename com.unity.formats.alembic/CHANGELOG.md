@@ -8,6 +8,7 @@
 - The package depends on the Cloth Unity Module.
 - Fixed a bug, where degenerate triangles would create NaN normals.
 - Fixed a crash caused by empty geometry samples.
+- Renamed AlembicCurve CurvePointCount to CurveOffsets, and changed the semantic to a stride array.
 
 ## [2.2.0-exp.1] - 2020-12-17
 ### Changes
