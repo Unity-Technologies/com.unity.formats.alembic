@@ -17,9 +17,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public Vector3[] Positions => positionsList.GetArray();
         /// <summary>
-        /// Returns an array where: the i-th entry returns how many points are contained in the i-th curve.
+        /// Returns an array where: the i-th entry returns the starting index of the i-th curve ( the i-th curve is between [CurveOffsets[i]..CurveOffsets[i+1]-1) ).
         /// </summary>
-        public int[] CurvePointCount => curvePointCount.GetArray();
+        public int[] CurveOffsets => curveOffsets.GetArray();
         /// <summary>
         /// Returns an array of UVs (optional), if the imported file contained UVs.
         /// </summary>
@@ -50,7 +50,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         OnUpdateDataHandler update;
 
         internal PinnedList<Vector3> positionsList { get; } = new PinnedList<Vector3>();
-        internal PinnedList<int> curvePointCount { get; } = new PinnedList<int>();
+        internal PinnedList<int> curveOffsets { get; } = new PinnedList<int>();
         internal PinnedList<Vector2> uvs { get; } = new PinnedList<Vector2>();
         internal PinnedList<float> widths { get; } = new PinnedList<float>();
         internal PinnedList<Vector3> velocitiesList { get; } = new PinnedList<Vector3>();

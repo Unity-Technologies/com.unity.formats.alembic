@@ -29,7 +29,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     [UnityEngine.DisallowMultipleComponent] public class AlembicCurves : UnityEngine.MonoBehaviour
     {
         public event UnityEngine.Formats.Alembic.Importer.AlembicCurves.OnUpdateDataHandler OnUpdateData;
-        public int[] CurvePointCount { get; }
+        public int[] CurveOffsets { get; }
         public UnityEngine.Vector3[] Positions { get; }
         public UnityEngine.Vector2[] UVs { get; }
         public UnityEngine.Vector3[] Velocities { get; }

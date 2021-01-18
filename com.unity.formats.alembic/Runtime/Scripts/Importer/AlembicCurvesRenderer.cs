@@ -47,7 +47,12 @@ namespace Scripts.Importer
 
         void UpdateMesh(AlembicCurves curves)
         {
-            GenerateLineMesh(mesh, curves.Positions, curves.CurvePointCount);
+            if (curves.Positions.Length == 0)
+            {
+                return;
+            }
+
+            GenerateLineMesh(mesh, curves.Positions, curves.CurveOffsets);
             /*    if (prevRenderMethod != renderMethod)
                 {
                     mesh.Clear();
@@ -142,27 +147,39 @@ namespace Scripts.Importer
 
         // Generates a procedural mesh composed of Lines (normals, uvs). Normals for lines are ill defined (1 free DOF ), so they are in fact tangents alone the line.
         // If velocities are present, they are bound to TEXCOORD5
-        void GenerateLineMesh(Mesh theMesh, Vector3[] positionsM, int[] curvesCountsM)
+        void GenerateLineMesh(Mesh theMesh, Vector3[] positionsM, int[] curveOffsetM)
         {
-            var curveCount = curvesCountsM.Length;
-            var indexArraySize = (positionsM.Length - curvesCountsM.Length) * 2;
+            var curveCount = curveOffsetM.Length;
+            var indexArraySize = (positionsM.Length - curveOffsetM.Length) * 2;
 
 
-            using (var curveCounts = new NativeArray<int>(curvesCountsM.Length, Allocator.TempJob))
+            using (var curveCounts = new NativeArray<int>(curveOffsetM.Length, Allocator.TempJob))
             using (var vertices = new NativeArray<Vector3>(positionsM.Length, Allocator.TempJob))
-            using (var strideArray = new NativeArray<int>(curvesCountsM.Length, Allocator.TempJob))
+            using (var strideArray = new NativeArray<int>(curveOffsetM.Length, Allocator.TempJob))
             using (var particleTangent = new NativeArray<Vector3>(positionsM.Length, Allocator.TempJob))
             using (var particleUV = new NativeArray<Vector2>(positionsM.Length, Allocator.TempJob))
             using (var indices = new NativeArray<int>(indexArraySize, Allocator.TempJob))
             {
                 vertices.CopyFrom(positionsM);
-                curveCounts.CopyFrom(curvesCountsM);
-                var cnt = 0;
-                for (var i = 0; i < strideArray.Length; ++i)
+                strideArray.CopyFrom(curveOffsetM);
+
+                // if there is only 1 curve, there is no meaningful curveOffset array, thus the length is the whole point array length
+                if (curveOffsetM.Length > 1)
                 {
-                    var nativeArray = strideArray;
-                    nativeArray[i] = cnt;
-                    cnt += curveCounts[i];
+                    // Intermediate variable needs to be introduced because the a struct inside a "using" statement is assumed to immutable.
+                    var nativeArray = curveCounts;
+                    nativeArray[0] = curveOffsetM[1];
+                }
+                else
+                {
+                    var nativeArray = curveCounts;
+                    nativeArray[0] = positionsM.Length;
+                }
+
+                for (var i = 1; i < strideArray.Length; ++i)
+                {
+                    var nativeArray = curveCounts;
+                    nativeArray[i] = strideArray[i] - strideArray[i - 1];
                 }
 
                 var job = new GenerateLinesJob
