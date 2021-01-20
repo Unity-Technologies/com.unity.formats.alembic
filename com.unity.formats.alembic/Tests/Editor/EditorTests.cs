@@ -26,5 +26,15 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var naNs = mesh.normals.Where(x => double.IsNaN(x.x) || double.IsNaN(x.y) || double.IsNaN(x.z));
             Assert.IsEmpty(naNs);
         }
+
+        [Test]
+        public void EmptyMeshFileIsHandledGracefully()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("66b8b570b5eec42bd80704392a7001b5");
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
+            Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));
+        }
     }
 }
