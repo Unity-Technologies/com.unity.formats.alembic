@@ -199,6 +199,8 @@ test_trigger:
   name: TestsTrigger
   triggers:
     cancel_old_ci: true
+    expression: pull_request.target match "/.*/"
+
   dependencies:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
