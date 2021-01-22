@@ -1,6 +1,6 @@
 # Alembic for Unity
 
-Alembic for Unity is a Unity package developed and [distributed by Unity](https://docs.unity3d.com/Packages/com.unity.formats.alembic@latest), but also open to [user contribution](contributing.md).
+Alembic for Unity is a Unity package developed and [distributed by Unity](https://docs.unity3d.com/Packages/com.unity.formats.alembic@latest), but also open to [user contribution](CONTRIBUTIONS.md).
 
 Alembic is a data format mainly used in the VFX industry to store very large vertex cache data such as complex cloth and fluid simulation results, or complex animation rigs. For more information, see http://www.alembic.io/
 
@@ -41,7 +41,7 @@ To be able to build this package, you must install the following external depend
 
     `git submodule update --init --recursive`
 
-2. Execute the command to run the build, according to your platform:
+1. Execute the command to run the build, according to your platform:
     - On Windows: `build.cmd`
     - On macOS or Linux: `build.sh`
 
@@ -51,6 +51,10 @@ The build process stores the result (package, C# and native plugin code) at `com
 
 ## Contributing
 
-We appreciate all the help we can get to improve the Alembic for Unity package. Read the [instructions](Contributing.md) if you want to contribute.
+We appreciate all the help we can get to improve the Alembic for Unity package. Read the [instructions](CONTRIBUTIONS.md) if you want to contribute.
 
 ![example](Screenshots/alembic_example.gif)
+
+## Reporting an issue
+
+See the Alembic for Unity's team [recommendations](ISSUE_TEMPLATE.md) about the information you should ideally provide if you want to report an issue.
