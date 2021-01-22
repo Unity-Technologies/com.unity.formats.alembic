@@ -214,7 +214,6 @@ test_trigger:
     {% endfor %}
     {% endfor %}
 
-
 {% for platform in bizarro_standalone_platforms %}
 testBizarroStandalone_{{ platform.name }}:
   name : Test Standalone on {{ platform.name }}
