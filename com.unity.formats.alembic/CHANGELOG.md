@@ -1,6 +1,9 @@
 # Changes in Alembic for Unity
+## [2.2.0-exp.3] - 2021-01-22
+### Changes
 
-## [2.2.0-exp.2] - 2021-01-04
+
+## [2.2.0-exp.2] - 2021-01-21
 ### Changes
 - Updated to Alembic version 1.7.16.
 - Added support for Stadia standalone builds.
