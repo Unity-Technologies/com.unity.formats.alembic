@@ -1,23 +1,56 @@
 # Alembic for Unity
 
-**Download the latest release available for your Editor from the PackageManagerUI. Use this repository only if you are trying to build plugin from source.**
+Alembic for Unity is a Unity package developed and [distributed by Unity](https://docs.unity3d.com/Packages/com.unity.formats.alembic@latest), but also open to [user contribution](contributing.md).
 
-## Alembic?
-![example](Screenshots/alembic_example.gif)
-Alembic is a data format mainly used in the video industry and is used to store huge vertex cache data. In the video industry, simulation results such as skinning and dynamics are baked for all frames, converted to a vertex cache, stored in Alembic, and passed to renderer or composite software. Alembic Headquarters: http://www.alembic.io/
+Alembic is a data format mainly used in the VFX industry to store very large vertex cache data such as complex cloth and fluid simulation results, or complex animation rigs. For more information, see http://www.alembic.io/
 
-Many modern DCC tools support Alembic, and if you can import and export Alembic, you can use Unity as a rendering or compositing tool, or perform various simulations in Unity and pass the results to other DCC tools. You will be able to do such things. There are new ways to use it, such as 3D recording of games. This plugin enables import and export of Alembic in Unity.
+The main features of the package include Alembic file import and export, which allows you to use Unity as a rendering or compositing tool, or perform various simulations in Unity and pass the results to other DCC tools.
 
-It has been confirmed to work on Windows (64bit), Mac, Linux and Unity 2019.4 or later. To use it, first import this package into your project.
-## Building 
-The Unity Alembic package supports Windows, OSX, Linux as build targets.
-External dependencies: CMake >=3, C++ compiler (Windows VS2017 with C++ toolchain),
-Clang on OSX, GCC on Linux.
-The build result (package, C# and native plugin code) can be found at: com.unity.formats.alembic
+## Before you start
 
-1) Checkout submodules: git submodule update --init --recursive
-2) Windows run build.cmd
-   OSX, Linux run build.sh
+**IMPORTANT:** Use this repository only if you need to build the Alembic for Unity package from its source. Otherwise, to use Alembic for Unity, you should install its [latest available official version](https://docs.unity3d.com/Packages/com.unity.formats.alembic@latest) from your Unity Editor, through the Package Manager.
+
+## Building the package
+
+### Requirements
+
+The latest official version of Alembic for Unity built from this repository is compatible with the following versions of the Unity Editor:
+- 2019.4 and later (recommended)
+
+You can build and use the Alembic for Unity package on the following 64-bit desktop platforms:
+- Microsoft Windows (x86-64)
+- macOS (x86-64 and arm64)
+- Linux (x86-64)
+
+### Pre-requisites
+
+To be able to build this package, you must install the following external dependencies:
+
+- CMake 3 or later
+
+- C++ compiler, according to your platform:
+  - On Windows: Visual Studio 2017 or later, with C++ toolchain
+  - On macOS: Clang (Xcode 12.3 or later)
+  - On linux: GCC 7 or later
+
+### Build steps
+
+1. Clone this repository.
+
+1. Checkout the submodules (only required the first time):
+
+    `git submodule update --init --recursive`
+
+2. Execute the command to run the build, according to your platform:
+    - On Windows: `build.cmd`
+    - On macOS or Linux: `build.sh`
+
+### Build result
+
+The build process stores the result (package, C# and native plugin code) at `com.unity.formats.alembic`
 
 ## Contributing
-We appreciate all the help we can get. Please see [Contributing](Contributing.md) for more details.
+
+We appreciate all the help we can get to improve the Alembic for Unity package. Read the [instructions](Contributing.md) if you want to contribute.
+
+![example](Screenshots/alembic_example.gif)
