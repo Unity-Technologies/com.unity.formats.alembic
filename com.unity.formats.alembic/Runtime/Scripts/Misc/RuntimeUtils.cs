@@ -2,7 +2,7 @@ using Unity.Collections;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    static class Utils
+    static class RuntimeUtils
     {
         public static void DisposeIfPossible<T>(this NativeArray<T> array) where T : struct
         {
