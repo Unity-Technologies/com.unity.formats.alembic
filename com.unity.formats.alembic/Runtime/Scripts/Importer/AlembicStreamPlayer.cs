@@ -167,8 +167,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!ret)
                 return false;
             //abcStream.AbcLoad(true, true);
-            double start, end;
-            abcStream.GetTimeRange(out start, out end);
+            abcStream.GetTimeRange(out var start, out var end);
             startTime = (float)start;
             endTime = (float)end;
 
@@ -182,8 +181,16 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
             {
-                var mats = new Material[meshRenderer.sharedMaterials.Length];
-                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
+                var mats = meshRenderer.sharedMaterials;
+                for (var i = 0; i < mats.Length; ++i)
+                {
+                    if (mats[i] == null) // Add the default material if no material present
+                    {
+                        mats[i] = defaultMat;
+                    }
+                }
+
+                meshRenderer.sharedMaterials = mats;
             }
 
             return true;
