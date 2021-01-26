@@ -178,7 +178,6 @@ void aePolyMesh::writeSampleBody()
                 }
             };
         do_swap(m_buf_indices);
-        do_swap(m_buf_normal_indices);
         do_swap(m_buf_uv0_indices);
     }
 
@@ -198,10 +197,12 @@ void aePolyMesh::writeSampleBody()
     {
         AbcGeom::ON3fGeomParam::Sample sp;
         sp.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
-        if (!m_buf_normal_indices.empty())
-            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
-        else if (m_buf_normals.size() == m_buf_points.size())
+        if (m_buf_normals.size() == m_buf_points.size())
+        {
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        }
+
+        sp.setScope(Alembic::AbcGeom::GeometryScope::kVertexScope);
         sample.setNormals(sp);
     }
     if (!m_buf_uv0.empty())

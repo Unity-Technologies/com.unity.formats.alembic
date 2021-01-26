@@ -52,7 +52,6 @@ private:
     RawVector<abcV3> m_buf_velocities;
 
     RawVector<abcV3> m_buf_normals;
-    RawVector<int>   m_buf_normal_indices;
 
     RawVector<abcV2> m_buf_uv0;
     RawVector<int>   m_buf_uv0_indices;
