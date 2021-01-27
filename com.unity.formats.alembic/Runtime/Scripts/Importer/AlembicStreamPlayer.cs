@@ -124,8 +124,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
 
                 StreamDescriptor.Settings = value;
-                abcStream?.Dispose();
-                LoadStream(false);
+                ReloadStream();
             }
         }
 
@@ -159,6 +158,15 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             StreamDescriptor.PathToAbc = newPath;
             return InitializeAfterLoad();
+        }
+
+        /// <summary>
+        /// Close and reopen the Alembic stream. Use this to apply the new stream settings.
+        /// </summary>
+        public void ReloadStream()
+        {
+            abcStream?.Dispose();
+            LoadStream(false);
         }
 
         bool InitializeAfterLoad()
