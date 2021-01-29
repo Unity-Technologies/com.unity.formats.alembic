@@ -250,10 +250,21 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        m_defaultMaterial = GetMaterial("Standard.shader");
+                        if (GraphicsSettings.currentRenderPipeline == null)
+                        {
+                            m_defaultMaterial = GetMaterial("Standard.shader");
+#if HDRP_PRESENT
+
+#endif
+                        }
+                        else
+                        {
+                            m_defaultMaterial = Instantiate(GraphicsSettings.currentRenderPipeline.defaultMaterial);
+                        }
+
+                        Add("Default Material", m_defaultMaterial);
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
-                        Add("Default Material", m_defaultMaterial);
                     }
                     return m_defaultMaterial;
                 }
