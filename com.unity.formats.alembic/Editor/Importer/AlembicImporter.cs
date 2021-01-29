@@ -253,13 +253,15 @@ namespace UnityEditor.Formats.Alembic.Importer
                         if (GraphicsSettings.currentRenderPipeline == null)
                         {
                             m_defaultMaterial = GetMaterial("Standard.shader");
-#if HDRP_PRESENT
-
-#endif
                         }
                         else
                         {
                             m_defaultMaterial = Instantiate(GraphicsSettings.currentRenderPipeline.defaultMaterial);
+                            // Enable the HDRP Custom Motion Vector Pass
+                            if (m_defaultMaterial.HasProperty("_AddPrecomputedVelocity"))
+                            {
+                                m_defaultMaterial.EnableKeyword("_ADD_PRECOMPUTED_VELOCITY");
+                            }
                         }
 
                         Add("Default Material", m_defaultMaterial);
