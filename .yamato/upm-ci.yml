@@ -1,8 +1,7 @@
 editors:
-  - version: 2019.3
   - version: 2019.4
-  - version: 2020.1
   - version: 2020.2
+  - version: 2021.1
   - version: trunk
 
 platforms:
@@ -36,11 +35,23 @@ standalone_platforms:
     image: package-ci/mac:stable
     flavor: m1.mac
     runtime: standalone
-#  - name: centOS
-#    type: Unity::VM::GPU
-#    image: package-ci/centos:latest
-#    flavor: b1.large
-#    runtime: standalone
+
+bizarro_standalone_platforms:
+  - name: mac_m2
+    type: Unity::metal::devkit
+    image: package-ci/mac:stable
+    flavor: m1.mac
+    runtime: standalone
+  - name: centOS
+    type: Unity::VM::GPU
+    image: package-ci/centos:latest
+    flavor: b1.large
+    runtime: standalone
+  #- name: stadia
+  #  type: Unity::VM
+  #  image: desktop/stadia-bka-katana:stable
+  #  flavor: b1.large
+  #  runtime: stadia
 
 ---
 build_win:
@@ -89,9 +100,9 @@ build_centOS:
 pack:
   name: Pack
   agent:
-    type: Unity::VM::osx
-    image: package-ci/mac:latest
-    flavor: m1.mac
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package pack --package-path com.unity.formats.alembic
@@ -186,6 +197,48 @@ testStandalone_{{ platform.name }}_{{ editor.version }}:
 
 test_trigger:
   name: TestsTrigger
+  triggers:
+    cancel_old_ci: true
+    expression: pull_request.target match ".*"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+    {% for editor in editors %}
+    {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
+    {% endfor %}
+    
+    {% for platform in standalone_platforms %}  
+    - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
+    {% endfor %}
+    {% endfor %}
+
+
+{% for platform in bizarro_standalone_platforms %}
+testBizarroStandalone_{{ platform.name }}:
+  name : Test Standalone on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - {% if platform.name == 'centOS' platform.name == 'stadia' %} DISPLAY=:0 {% endif %}  upm-ci project test  --project-path TestProjects/AlembicStandaloneBuild --type project-tests --unity-version 2021.1 --platform {{ platform.runtime }}
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    artifacts.zip:
+      paths:
+        - "upm-ci~/packages/**/*"
+        - "upm-ci~/templates/**/*"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+{% endfor %}
+
+test_bizarro:
+  name: TestsTriggerBizarro
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
@@ -201,27 +254,14 @@ test_trigger:
     packages:
       paths:
         - "upm-ci~/packages/**/*"
-  dependencies:
-    - .yamato/upm-ci.yml#pack
-    {% for editor in editors %}
-    {% for platform in platforms %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
-    - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
+  dependencies:    
+    {% for platform in bizarro_standalone_platforms %}  
+    - .yamato/upm-ci.yml#testBizarroStandalone_{{platform.name}}
     {% endfor %}
-    
-    {% for platform in standalone_platforms %}  
-    - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
-    {% endfor %}
-    {% endfor %}
+
 
 nightly_test_trigger:
   name: Nightly tests Trigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     recurring:
       - branch: dev
@@ -230,16 +270,40 @@ nightly_test_trigger:
       - branch: master
         frequency: daily
         rerun: always  
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
+
+publish_dry_run:
+  name: PublishDryRun
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:latest
+    flavor: b1.large
+    name: Runner
+  commands:
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - upm-ci package publish --package-path com.unity.formats.alembic --dry-run
+  triggers:
+    tags:
+      only:
+        - /^(r|R)(c|C)-\d+\.\d+\.\d+(-(exp|pre)(\.\d+)?)?$/  
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    Package.zip:
+      paths:
+        - "upm-ci~/package/*.tgz"
+  dependencies:
+    - .yamato/upm-ci.yml#pack
+    {% for editor in editors %}
+    {% for platform in platforms %}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
+    {% endfor %}
+    {% endfor %}
 
 publish:
   name: Publish
