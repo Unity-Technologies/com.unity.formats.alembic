@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Experimental;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -9,13 +7,15 @@ using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
+using static UnityEditor.AssetDatabase;
 #else
 using UnityEditor.Experimental.AssetImporters;
+using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    internal class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
+    class AlembicAssetModificationProcessor : AssetModificationProcessor
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
         {
@@ -226,7 +226,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (pipelineName != newPipelineName)
             {
                 var hash =  Hash128.Compute(newPipelineName);
-                AssetDatabaseExperimental.RegisterCustomDependency(renderPipepineDependency,hash);
+                RegisterCustomDependency(renderPipepineDependency, hash);
                 AssetDatabase.Refresh();
                 pipelineName = newPipelineName;
             }
@@ -291,11 +291,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             public void Add(string identifier, Object asset)
             {
-#if UNITY_2017_3_OR_NEWER
                 m_ctx.AddObjectToAsset(identifier, asset);
-#else
-                m_ctx.AddSubAsset(identifier, asset);
-#endif
             }
 
             Material GetMaterial(string shaderFile)
