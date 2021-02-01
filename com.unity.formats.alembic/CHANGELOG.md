@@ -5,7 +5,7 @@
 ### Fixed
 - Fixed a bug that caused the Alembic exporter to fail if GameObjects were being deleted during the recording session.
 - Fixed a memory leak that occurred when using varying topology meshes.
-
+- Added a custom dependency on the "CurrentRenderPipeline" setting and assigning the correct SRP by default.
 ## [2.2.0-exp.2] - 2021-01-21
 ### Added
 - Added support for Stadia standalone builds.
