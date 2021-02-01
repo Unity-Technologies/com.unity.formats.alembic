@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -141,7 +142,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
-        internal const string renderPipepineDependency = "AlembicRenderPipelineDependency";
+        const string renderPipepineDependency = "AlembicRenderPipelineDependency";
 
         public override void OnImportAsset(AssetImportContext ctx)
         {
@@ -149,8 +150,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 return;
             }
-
-            ctx.DependsOnCustomDependency(renderPipepineDependency);
 
             var path = ctx.assetPath;
             AlembicStream.DisconnectStreamsWithPath(path);
@@ -215,20 +214,42 @@ namespace UnityEditor.Formats.Alembic.Importer
         static void InitializeEditorCallback()
         {
             EditorApplication.update += DirtyCustomDependencies; //
+            DirtyCustomDependencies();
         }
 
-        static string pipelineName = string.Empty;
+        static ulong pipelineHash;
+        static readonly TimeSpan checkDependencyFrequency = TimeSpan.FromSeconds(5);
+        static DateTime lastCheck;
+
         static void DirtyCustomDependencies()
         {
-            var newPipelineName = GraphicsSettings.currentRenderPipeline == null
-                ? ""
-                : GraphicsSettings.currentRenderPipeline.ToString();
-            if (pipelineName != newPipelineName)
+            var now = DateTime.Now;
+            if (now - lastCheck < checkDependencyFrequency)
             {
-                var hash =  Hash128.Compute(newPipelineName);
-                RegisterCustomDependency(renderPipepineDependency, hash);
+                return;
+            }
+
+            lastCheck = now;
+
+            var newPipelineHash = 0UL;
+            if (GraphicsSettings.currentRenderPipeline == null)
+            {
+                newPipelineHash = 0;
+            }
+            else
+            {
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline, out var guid,
+                    out long fileId))
+                {
+                    newPipelineHash =
+                        UnityEngine.Formats.Alembic.Importer.Utils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
+                }
+            }
+            if (pipelineHash != newPipelineHash)
+            {
+                pipelineHash = newPipelineHash;
+                RegisterCustomDependency(renderPipepineDependency, new Hash128(pipelineHash, 0));
                 AssetDatabase.Refresh();
-                pipelineName = newPipelineName;
             }
         }
 
@@ -267,6 +288,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         Add("Default Material", m_defaultMaterial);
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
+                        m_ctx.DependsOnCustomDependency(renderPipepineDependency);
                     }
                     return m_defaultMaterial;
                 }
