@@ -41,7 +41,6 @@ target_link_libraries(abci
         ${OPENEXR_Half_LIBRARY}
         ${OPENEXR_Iex_LIBRARY}
         ${OPENEXR_IexMath_LIBRARY}
-        ${HDF5_LIBRARIES}
 )
 
 install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)

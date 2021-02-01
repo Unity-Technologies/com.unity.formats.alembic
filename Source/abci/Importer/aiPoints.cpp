@@ -6,6 +6,7 @@
 #include "aiPoints.h"
 #include "aiMisc.h"
 #include "aiMath.h"
+#include "aiUtils.h"
 
 
 template<class T, class U>
@@ -16,16 +17,6 @@ inline void Remap(RawVector<T>& dst, const U& src, const RawVector<std::pair<flo
     auto src_data = src->get();
     for (size_t i = 0; i < count; ++i)
         dst[i] = (T)src_data[sort_data[i].second];
-}
-
-template<class T, class U>
-inline void Assign(RawVector<T>& dst, const U& src, int point_count)
-{
-    dst.resize_discard(point_count);
-    size_t count = std::min<size_t>(point_count, src->size());
-    auto src_data = src->get();
-    for (size_t i = 0; i < count; ++i)
-        dst[i] = (T)src_data[i];
 }
 
 aiPointsSample::aiPointsSample(aiPoints *schema)
@@ -122,8 +113,6 @@ void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
     auto& summary = getSummary();
-
-    readVisibility(sample, ss);
 
     // points
     if (m_summary.has_points)

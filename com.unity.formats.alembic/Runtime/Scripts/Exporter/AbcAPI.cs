@@ -5,27 +5,12 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.RecorderTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Tests")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.Editor")]
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
-    /// <summary>
-    /// The Alembic file format.
-    /// </summary>
-    internal enum ArchiveType
-    {
-        /// <summary>
-        /// HDF5 format (Deprecated).
-        /// </summary>
-        [Obsolete]
-        HDF5,
-        /// <summary>
-        /// Ogawa format.
-        /// </summary>
-        Ogawa,
-    };
-
     /// <summary>
     /// The time sampling mode for the Alembic file.
     /// </summary>
@@ -103,16 +88,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     public class AlembicExportOptions
     {
-        [SerializeField]
-        ArchiveType archiveType = ArchiveType.Ogawa;
-        /// <summary>
-        /// Get or set the Alembic output file format.
-        /// </summary>
-        internal ArchiveType ArchiveType
-        {
-            get { return archiveType; }
-            set { archiveType = value; }
-        }
         [SerializeField]
         TimeSamplingType timeSamplingType = TimeSamplingType.Uniform;
         /// <summary>
@@ -335,7 +310,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
-
+        [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, AlembicExportOptions conf);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
@@ -380,7 +355,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
-        [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
@@ -403,6 +377,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Sdk.aiXform aiObjectAsXform(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiCamera aiObjectAsCamera(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPoints aiObjectAsPoints(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiCurves aiObjectAsCurves(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
 
         [DllImport(Abci.Lib)] public static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
@@ -420,6 +395,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
         [DllImport(Abci.Lib)] public static extern void aiPointsGetSummary(IntPtr schema, ref aiPointsSummary dst);
 
+        [DllImport(Abci.Lib)] public static extern void aiCurvesGetSummary(IntPtr schema, ref aiCurvesSummary dst);
+
         [DllImport(Abci.Lib)] public static extern void aiXformGetData(IntPtr sample, ref aiXformData data);
 
         [DllImport(Abci.Lib)] public static extern void aiCameraGetData(IntPtr sample, ref CameraData dst);
@@ -431,6 +408,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiPointsGetSampleSummary(IntPtr sample, ref aiPointsSampleSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiPointsFillData(IntPtr sample, IntPtr dst);
+
+        //
+        [DllImport(Abci.Lib)] public static extern void aiCurvesGetSampleSummary(IntPtr sample, ref aiCurvesSampleSummary dst);
+        [DllImport(Abci.Lib)] public static extern void aiCurvesFillData(IntPtr sample, IntPtr dst);
+        //
 
         [DllImport(Abci.Lib)] public static extern IntPtr aiPropertyGetName(IntPtr prop);
         [DllImport(Abci.Lib)] public static extern aiPropertyType aiPropertyGetType(IntPtr prop);
@@ -454,6 +436,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal struct aiPoints
         {
             [DllImport(Abci.Lib)] public static extern aiPointsSample aiSchemaGetSample(IntPtr schema);
+        }
+
+        internal struct aiCurves
+        {
+            [DllImport(Abci.Lib)] public static extern aiCurvesSample aiSchemaGetSample(IntPtr schema);
         }
     }
 }

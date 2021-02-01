@@ -634,7 +634,14 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Setup(Component c)
             {
                 m_target = c as MeshRenderer;
-                var mesh = m_target.GetComponent<MeshFilter>().sharedMesh;
+                MeshFilter meshFilter = m_target.GetComponent<MeshFilter>();
+                if (meshFilter == null)
+                {
+                    m_target = null;
+                    return;
+                }
+
+                Mesh mesh = meshFilter.mesh;
                 if (mesh == null)
                     return;
 

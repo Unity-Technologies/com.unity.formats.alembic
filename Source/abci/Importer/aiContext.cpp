@@ -375,16 +375,33 @@ bool aiContext::load(const char *in_path)
             }
             m_streams.clear();
 
-            try
+            auto message = L(e.what());
+            DebugLogW(L"Failed to open archive: %s", message.c_str());
+            std::ifstream fp(path, std::ios::in | std::ios::binary);
+            if (!fp)
             {
-                m_archive = Abc::IArchive(AbcCoreHDF5::ReadArchive(), path);
-                DebugLog("Successfully opened HDF5 archive");
-                m_isHDF5 = true;
+                DebugLog("Unable to open " + filename );
             }
-            catch (Alembic::Util::Exception e2)
+            else
             {
-                auto message = L(e2.what());
-                DebugLogW(L"Failed to open archive: %s", message.c_str());
+                char header[4]; /* funky char + "HDF" */
+                if (!fp.read(header, sizeof(header)))
+                {
+                    DebugLog("Unable to read from " + filename );
+                }
+                if (strncmp(header + 1, "HDF", 3) != 0)
+                {
+                    DebugLog(filename+ "has unknown file format");
+                }
+                else
+                {
+                    m_isHDF5 = true;
+                }
+
+                if (fp.is_open())
+                {
+                    fp.close();
+                }
             }
         }
     }

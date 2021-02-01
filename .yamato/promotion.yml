@@ -1,5 +1,5 @@
 test_editors:
-  - version: 2019.2
+  - version: 2019.4
 
 test_platforms:
   - name: win
@@ -85,7 +85,7 @@ promote:
   triggers:
     tags:
       only:
-        - /^\d+.\d+.\d+(-preview(.\d+)?)?$/
+        - /^\d+.\d+.\d+(-exp(.\d+)?)?$/  
   artifacts:
     artifacts:
       paths:

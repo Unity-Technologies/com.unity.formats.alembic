@@ -344,12 +344,17 @@ void aiPolyMesh::updateSummary()
     // points
     {
         auto prop = m_schema.getPositionsProperty();
-        if (prop.valid() && prop.getNumSamples() > 0)
+        if (prop.valid() && prop.getNumSamples() > 0 )
         {
-            summary.has_points = true;
-            summary.constant_points = prop.isConstant();
-            if (!summary.constant_points)
-                m_constant = false;
+            Alembic::Util::Dimensions dim;
+            prop.getDimensions(dim);
+            if (dim.numPoints() > 0)
+            {
+                summary.has_points = true;
+                summary.constant_points = prop.isConstant();
+                if (!summary.constant_points)
+                    m_constant = false;
+            }
         }
     }
 
@@ -505,8 +510,6 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-
-    readVisibility(sample, ss);
 
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;

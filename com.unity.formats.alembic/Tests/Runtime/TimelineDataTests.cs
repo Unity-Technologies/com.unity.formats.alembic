@@ -1,14 +1,19 @@
+using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Timeline;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Assert = NUnit.Framework.Assert;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -26,8 +31,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.CurrentTime = 0;
             yield return new WaitForEndOfFrame();
             var t0 = cubeGO.transform.position;
-            player.CurrentTime = (float)player.Duration;
-            yield return new WaitForEndOfFrame();
+            player.UpdateImmediately(player.Duration - 1e-5f);
             var t1  = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }
@@ -88,17 +92,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             director.Play();
             exporter.Recorder.Settings.ExportOptions.TranformType = (TransformType)xFormType;
-            yield return RecordAlembic();
-            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
-            var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
-            yield return TestCubeContents(go);
-        }
-
-        [UnityTest, UnityPlatform(exclude = new[] {RuntimePlatform.LinuxEditor})]
-        public IEnumerator TestArchiveType([Values(ArchiveType.Ogawa, ArchiveType.HDF5)] int archiveType)
-        {
-            director.Play();
-            exporter.Recorder.Settings.ExportOptions.ArchiveType = (ArchiveType)archiveType;
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
@@ -194,6 +187,36 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreNotEqual(t0, t1);
         }
 
+        [UnityTest]
+        public IEnumerator TestTimelineTrack()
+        {
+            director.Play();
+            exporter.MaxCaptureFrame = 30;
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
+            var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
+            var player = root.GetComponent<AlembicStreamPlayer>();
+            var timeline = director.playableAsset as TimelineAsset;
+            var abcTrack = timeline.CreateTrack<AlembicTrack>(null, "");
+            var clip = abcTrack.CreateClip<AlembicShotAsset>();
+            var abcAsset = clip.asset as AlembicShotAsset;
+            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            abcAsset.StreamPlayer = refAbc;
+            director.SetReferenceValue(refAbc.exposedName, player);
+            director.RebuildGraph();
+            var cubeGO = root.GetComponentInChildren<MeshRenderer>().gameObject;
+            director.time = 0;
+            director.Evaluate();
+            yield return null;
+            var t0 = cubeGO.transform.position;
+            director.time = player.Duration;
+            director.Evaluate();
+            yield return null;
+            var t1  = cubeGO.transform.position;
+            Assert.AreNotEqual(t0, t1);
+        }
+
         [Test]
         public void TestImportlessAlembicInvalidFile()
         {
@@ -244,6 +267,21 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             exporter.OneShot();
             yield return null;
             TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
+        }
+
+        [UnityTest]
+        public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
+        {
+            var go = new GameObject("mrgo");
+            go.AddComponent<MeshRenderer>();
+            go.AddComponent<AlembicExporter>();
+
+            director.Play();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            exporter.OneShot();
+            yield return null;
+            TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
+            Assert.IsTrue(true);
         }
     }
 }

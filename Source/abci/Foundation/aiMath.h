@@ -1425,6 +1425,7 @@ void SwapHandedness(abcV3 *dst, int num);
 void SwapHandedness(abcV4 *dst, int num);
 void ApplyScale(abcV3 *dst, int num, float scale);
 void Normalize(abcV3 *dst, int num);
+void Lerp(float *dst, const float *v1, const float *v2, int num, float w);
 void Lerp(abcV2 *dst, const abcV2 *v1, const abcV2 *v2, int num, float w);
 void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w);
 void Lerp(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w);
