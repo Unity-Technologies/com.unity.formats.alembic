@@ -259,6 +259,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             Material m_defaultMaterial;
             Material m_defaultPointsMaterial;
             Material m_defaultPointsMotionVectorMaterial;
+            int addPrecomputedVelocityProperty = Shader.PropertyToID("_AddPrecomputedVelocity");
 
             public Subassets(AssetImportContext ctx)
             {
@@ -279,8 +280,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                         {
                             m_defaultMaterial = Instantiate(GraphicsSettings.currentRenderPipeline.defaultMaterial);
                             // Enable the HDRP Custom Motion Vector Pass
-                            if (m_defaultMaterial.HasProperty("_AddPrecomputedVelocity"))
+                            if (m_defaultMaterial.HasProperty(addPrecomputedVelocityProperty))
                             {
+                                m_defaultMaterial.SetFloat(addPrecomputedVelocityProperty, 1);
                                 m_defaultMaterial.EnableKeyword("_ADD_PRECOMPUTED_VELOCITY");
                             }
                         }
