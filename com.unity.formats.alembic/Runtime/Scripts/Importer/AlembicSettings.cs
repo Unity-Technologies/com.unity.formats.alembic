@@ -174,5 +174,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             get { return importCurves; }
             set { importCurves = value; }
         }
+
+        [SerializeField] bool createCurveRenderers;
+        /// <summary>
+        /// If importing of Alembic curves is enabled, also create automatically the AlembicCurveRendering component.
+        /// </summary>
+        public bool CreateCurveRenderers
+        {
+            get => createCurveRenderers;
+            set => createCurveRenderers = value;
+        }
     }
 }
