@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "com.unity.timeline": "1.0.0"
+    "com.unity.timeline": "1.0.0",
+    "com.unity.modules.cloth": "1.0.0"
   },
   "description": "Import and export Alembic files (.abc), record and stream animations in the Alembic format directly in Unity.\n\nThe Alembic format is commonly used in animation to transfer facial, cloth, and other simulation between applications.\n\nIMPORTANT: Alembic for Unity only supports Windows 64-bit, MacOS X and Linux 64-bit as build targets.",
   "displayName": "Alembic",
@@ -14,5 +15,5 @@
   ],
   "name": "com.unity.formats.alembic",
   "unity": "2019.3",
-  "version": "2.1.2"
+  "version": "2.1.3"
 }
