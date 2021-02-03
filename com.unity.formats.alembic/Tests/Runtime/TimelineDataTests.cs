@@ -74,7 +74,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
             exporter.OneShot();
             yield return null;
-            yield return new WaitForSeconds(2);
             TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
         }
 
@@ -284,9 +283,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return RecordAlembic();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
 
-            var sceneName = GUID.Generate().ToString();
-            var scene = SceneManager.CreateScene(sceneName);
-            SceneManager.SetActiveScene(scene);
             var go = new GameObject("abc");
             var player = go.AddComponent<AlembicStreamPlayer>();
             var ret = player.LoadFromFile(exporter.Recorder.Settings.OutputPath);
