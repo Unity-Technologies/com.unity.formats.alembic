@@ -1,8 +1,11 @@
+using System.Collections;
 using System.Linq;
 using NUnit.Framework;
+using Scripts.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -35,6 +38,24 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
             Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));
+        }
+
+        [UnityTest]
+        public IEnumerator AddCurveRenderingSettingIsObeyed([Values] bool addCurve)
+        {
+            var path = AssetDatabase.GUIDToAssetPath("253cca792b1714bd985e9752217590a8"); // curves asset
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = inst.GetComponent<AlembicStreamPlayer>();
+            Assert.IsNotNull(player);
+            player.StreamDescriptor.Settings.CreateCurveRenderers = addCurve;
+            yield return null;
+            yield return null;
+            yield return null;
+            yield return null;
+            Assert.IsNotNull(inst.GetComponentsInChildren<AlembicCurves>());
+            var renderer = inst.GetComponentInChildren<AlembicCurvesRenderer>();
+            Assert.IsTrue(inst.GetComponentInChildren<AlembicCurvesRenderer>() != null ^ addCurve);
         }
     }
 }
