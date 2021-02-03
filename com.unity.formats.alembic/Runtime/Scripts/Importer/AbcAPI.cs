@@ -278,6 +278,42 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 boundsExtents;
     }
 
+    /*
+     *
+     */
+    [StructLayout(LayoutKind.Sequential)]
+    struct aiCurvesSummary
+    {
+        public Bool hasPositions { get; set; }
+        public Bool hasUVs { get; set; }
+        public Bool hasWidths { get; set; }
+        // public Bool constantVelocities { get; set; }
+        // public Bool constantIDs { get; set; }
+    };
+
+    struct aiCurvesSampleSummary
+    {
+        public int positionCount { get; set; }
+        public int numVerticesCount { get; set; }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct aiCurvesData
+    {
+        public Bool visibility;
+
+        public IntPtr positions;
+        public IntPtr numVertices;
+        public IntPtr uvs;
+        public IntPtr widths;
+        public IntPtr velocities;
+        public int count;
+        /*
+         public Vector3 boundsCenter;
+         public Vector3 boundsExtents;*/
+    }
+    //
+
     [StructLayout(LayoutKind.Sequential)]
     struct aiPropertyData
     {
@@ -360,6 +396,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiXform AsXform() { return NativeMethods.aiObjectAsXform(self); }
         internal aiCamera AsCamera() { return NativeMethods.aiObjectAsCamera(self); }
         internal aiPoints AsPoints() { return NativeMethods.aiObjectAsPoints(self); }
+        internal aiCurves AsCurves() { return NativeMethods.aiObjectAsCurves(self); }
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
 
         public void EachChild(Action<aiObject> act)
@@ -383,6 +420,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiCamera(aiSchema v) { var tmp = default(aiCamera); tmp.self = v.self; return tmp; }
         public static explicit operator aiPolyMesh(aiSchema v) { var tmp = default(aiPolyMesh); tmp.self = v.self; return tmp; }
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
+        public static explicit operator aiCurves(aiSchema v) { var tmp = default(aiCurves); tmp.self = v.self; return tmp; }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
         public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
     }
@@ -434,6 +472,21 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 sortBasePosition { set { NativeMethods.aiPointsSetSortBasePosition(self, value); } }
 
         public void GetSummary(ref aiPointsSummary dst) { NativeMethods.aiPointsGetSummary(self, ref dst); }
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    struct aiCurves
+    {
+        [FieldOffset(0)] public IntPtr self;
+        [FieldOffset(0)] public aiSchema schema;
+        public static implicit operator bool(aiCurves v) { return v.self != IntPtr.Zero; }
+        public static implicit operator aiSchema(aiCurves v) { return v.schema; }
+
+        internal aiCurvesSample sample { get { return NativeMethods.aiCurves.aiSchemaGetSample(self); } }
+        public bool sort { set { NativeMethods.aiPointsSetSort(self, value); } }
+        public Vector3 sortBasePosition { set { NativeMethods.aiPointsSetSortBasePosition(self, value); } }
+
+        public void GetSummary(ref aiCurvesSummary dst) { NativeMethods.aiCurvesGetSummary(self, ref dst); }
     }
 
     struct aiSample
@@ -508,6 +561,15 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void FillData(PinnedList<aiPointsData> dst) { NativeMethods.aiPointsFillData(self, dst); }
     }
 
+    struct aiCurvesSample
+    {
+        public IntPtr self;
+        public static implicit operator bool(aiCurvesSample v) { return v.self != IntPtr.Zero; }
+        public static implicit operator aiSample(aiCurvesSample v) { aiSample tmp; tmp.self = v.self; return tmp; }
+
+        public void GetSummary(ref aiCurvesSampleSummary dst) { NativeMethods.aiCurvesGetSampleSummary(self, ref dst); }
+        public void FillData(PinnedList<aiCurvesData> dst) { NativeMethods.aiCurvesFillData(self, dst); }
+    }
 
     struct aiProperty
     {

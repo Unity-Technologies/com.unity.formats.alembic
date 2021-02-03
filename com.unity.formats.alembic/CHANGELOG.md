@@ -1,7 +1,29 @@
 # Changes in Alembic for Unity
+## [2.2.0-exp.3] - 2021-01-22
+### Changes
+- Minimum Unity version is 2019.4
 
-## [2.1.0-preview.3] - 2020-09-24
-### Feature
+## [2.2.0-exp.2] - 2021-01-21
+### Changes
+- Updated to Alembic version 1.7.16.
+- Added support for Stadia standalone builds.
+- Added support for arm64 macOS.
+- The package depends on the Cloth Unity Module.
+- Fixed a bug, where degenerate triangles would create NaN normals.
+- Fixed a bug in the importer to prevent the Editor from crashing when importing meshes with empty geometry samples.
+- Renamed AlembicCurve CurvePointCount to CurveOffsets, and changed the semantic to a stride array.
+
+
+## [2.2.0-exp.1] - 2020-12-17
+### Changes
+- Added support for piecewise constant Curve importing
+
+## [2.1.2] - 2020-12-14
+### Changes
+- Fixed a bug causing the Alembic binary libraries to be copied into unsupported platform build, eg: iOS.
+
+## [2.1.1-pre.1] - 2020-10-21
+### Changes
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
 
 ### Changes
@@ -9,7 +31,7 @@
 - Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
 - Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
 - When the timeline does discontinuous time updates (scrubbing), the alembic updates the scene synchronously.
-- Updated dependency to Burst 1.3.6 (Eliminate the need to have a C++ compiler for x86-64 Mono builds).
+- Updated optional dependency to Burst 1.1.1 or newer.
 
 ## [2.0.1-preview.1] - 2020-05-29
 ### Changes
@@ -47,7 +69,7 @@
 ### Changes
 - Fixed regression introduced in 1.0.4 where old Alembic scene instances would lose prefab connection. New scene instances made with 1.0.4 are unfortunately unrecoverable
 
-## [1.0.4] - 2019-05-2
+## [1.0.4] - 2019-05-02
 ### Changes
 - Fixed crash in the Exporter when using SwapFaces
 - Fixed Branch recording mode in the Exporter
@@ -57,7 +79,7 @@
 - Fixed regression, where absolute paths to alembic assets were stored
 - Alembic importer and Exporter correctly deals with physical Camera parameters
 
-## [1.0.3] - 2019-04-9
+## [1.0.3] - 2019-04-09
 ### Changes
 - Do not lock Alembic files when Windows
 - Fix InheritXform on files from Blender

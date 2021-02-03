@@ -7,6 +7,7 @@
 #include "aiPolyMesh.h"
 #include "aiCamera.h"
 #include "aiPoints.h"
+#include "aiCurves.h"
 #include "aiProperty.h"
 
 abciAPI abcSampleSelector aiTimeToSampleSelector(double time)
@@ -154,6 +155,11 @@ abciAPI aiPoints* aiObjectAsPoints(aiObject* obj)
     return obj ? dynamic_cast<aiPoints*>(obj) : nullptr;
 }
 
+abciAPI aiCurves* aiObjectAsCurves(aiObject* obj)
+{
+    return obj ? dynamic_cast<aiCurves*>(obj) : nullptr;
+}
+
 abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 {
     return schema ? schema->getSample() : nullptr;
@@ -254,6 +260,24 @@ abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
 {
     if (schema)
         schema->setSort(v);
+}
+
+abciAPI void aiCurvesGetSummary(aiCurves *schema, aiCurvesSummary *dst)
+{
+    if (schema)
+        *dst = schema->getSummary();
+}
+
+abciAPI void aiCurvesGetSampleSummary(aiCurvesSample * sample, aiCurvesSampleSummary * dst)
+{
+    if (sample)
+        sample->getSummary(*dst);
+}
+
+abciAPI void aiCurvesFillData(aiCurvesSample* sample, aiCurvesData *dst)
+{
+    if (sample)
+        sample->fillData(*dst);
 }
 
 abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)

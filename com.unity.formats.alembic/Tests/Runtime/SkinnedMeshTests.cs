@@ -38,8 +38,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var abc = PrefabUtility.InstantiatePrefab(AssetDatabase.LoadMainAssetAtPath(exporter.Recorder.Settings.OutputPath) as GameObject) as GameObject;
             yield return null;
 
-            var boneScaledImported = abc.transform.GetChild(0);
-            var rootScaledImported = abc.transform.GetChild(2);
+            var boneScaledImported = GetFirstChildStartWithName(abc, "BoneScaled");
+            var rootScaledImported = GetFirstChildStartWithName(abc, "RootScaled");
 
             Assert.That(boneScaledImported.name.StartsWith("BoneScaled"));
             Assert.That(rootScaledImported.name.StartsWith("RootScaled"));
@@ -47,6 +47,18 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                 boneScaledImported.GetComponentInChildren<MeshFilter>()));
             Assert.IsTrue(MeshWorldPosCompare(rootScaled.GetComponentInChildren<SkinnedMeshRenderer>(),
                 rootScaledImported.GetComponentInChildren<MeshFilter>()));
+        }
+
+        GameObject GetFirstChildStartWithName(GameObject parent, string name)
+        {
+            for (var i = 0; i < parent.transform.childCount; ++i)
+            {
+                var ch = parent.transform.GetChild(i);
+                if (ch.name.StartsWith(name))
+                    return ch.gameObject;
+            }
+
+            return null;
         }
 
         static bool MeshWorldPosCompare(SkinnedMeshRenderer skinnedMesh, MeshFilter mesh2)

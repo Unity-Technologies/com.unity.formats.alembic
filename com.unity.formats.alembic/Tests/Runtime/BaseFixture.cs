@@ -101,6 +101,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             foreach (var file in deleteFileList)
             {
                 File.Delete(file);
+                var meta = file + ".meta";
+                if (File.Exists(meta))
+                    File.Delete(meta);
             }
 
             deleteFileList.Clear();

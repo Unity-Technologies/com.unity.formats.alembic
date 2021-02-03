@@ -338,12 +338,17 @@ void aiPolyMesh::updateSummary()
     // points
     {
         auto prop = m_schema.getPositionsProperty();
-        if (prop.valid() && prop.getNumSamples() > 0)
+        if (prop.valid() && prop.getNumSamples() > 0 )
         {
-            summary.has_points = true;
-            summary.constant_points = prop.isConstant();
-            if (!summary.constant_points)
-                m_constant = false;
+            Alembic::Util::Dimensions dim;
+            prop.getDimensions(dim);
+            if (dim.numPoints() > 0)
+            {
+                summary.has_points = true;
+                summary.constant_points = prop.isConstant();
+                if (!summary.constant_points)
+                    m_constant = false;
+            }
         }
     }
 
