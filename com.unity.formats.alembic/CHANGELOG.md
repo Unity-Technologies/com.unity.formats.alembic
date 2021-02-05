@@ -3,6 +3,9 @@
 ### Changes
 - Minimum Unity version is 2019.4
 
+### Fixed
+- Fixed a bug that caused the Alembic exporter to fail if GameObjects were being deleted during the recording session.
+
 ## [2.2.0-exp.2] - 2021-01-21
 ### Changes
 - Updated to Alembic version 1.7.16.
