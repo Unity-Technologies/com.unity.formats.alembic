@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
@@ -269,6 +270,31 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             TestAbcImported(exporter.Recorder.Settings.OutputPath, 0);
         }
 
+        [UnityTest]
+        public IEnumerator TestObjectDeletionAndCreation()
+        {
+            var root = new GameObject();
+            root.AddComponent<Spawner>();
+            director.Play();
+            exporter.MaxCaptureFrame = 40;
+            exporter.Recorder.TargetBranch = root;
+            exporter.Recorder.Settings.Scope = ExportScope.TargetBranch;
+
+            yield return RecordAlembic();
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+
+            var go = new GameObject("abc");
+            var player = go.AddComponent<AlembicStreamPlayer>();
+            var ret = player.LoadFromFile(exporter.Recorder.Settings.OutputPath);
+            player.UpdateImmediately(0);
+            Assert.IsTrue(ret);
+            var cam = go.GetComponentInChildren<Camera>();   // Scope is respected
+            Assert.IsNull(cam);
+            var meshNames = go.GetComponentsInChildren<MeshRenderer>(true).Select(x => x.transform.parent.parent.name).ToArray();
+            Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("10")));
+            Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("30")));
+        }
+        
         [UnityTest]
         public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
         {
