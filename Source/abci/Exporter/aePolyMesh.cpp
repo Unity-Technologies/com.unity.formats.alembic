@@ -105,6 +105,9 @@ void aePolyMesh::writeSampleBody()
         ApplyScale(m_buf_velocities.data(), (int)m_buf_velocities.size(), scale);
     }
 
+    auto facecount = 0;
+    auto attribScope = Alembic::AbcGeom::GeometryScope::kFacevaryingScope;
+
     // process submesh data if present
     {
         m_buf_indices.resize(0);
@@ -138,6 +141,7 @@ void aePolyMesh::writeSampleBody()
                     break;
             }
             m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
+            facecount+= face_count * ngon;
 
             if (smi < m_facesets.size())
             {
@@ -152,6 +156,8 @@ void aePolyMesh::writeSampleBody()
 
             offset_faces += face_count;
         }
+
+        attribScope = facecount == m_buf_indices.size() ? Alembic::AbcGeom::GeometryScope::kFacevaryingScope : Alembic::AbcGeom::GeometryScope::kVertexScope;
     }
 
     // handle swap face option
@@ -178,8 +184,6 @@ void aePolyMesh::writeSampleBody()
                 }
             };
         do_swap(m_buf_indices);
-        do_swap(m_buf_normal_indices);
-        do_swap(m_buf_uv0_indices);
     }
 
 
@@ -198,19 +202,21 @@ void aePolyMesh::writeSampleBody()
     {
         AbcGeom::ON3fGeomParam::Sample sp;
         sp.setVals(Abc::V3fArraySample(m_buf_normals.data(), m_buf_normals.size()));
-        if (!m_buf_normal_indices.empty())
-            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_normal_indices.data(), m_buf_normal_indices.size()));
-        else if (m_buf_normals.size() == m_buf_points.size())
+        if (m_buf_normals.size() == m_buf_points.size())
+        {
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
+        }
+
+        sp.setScope(attribScope);
         sample.setNormals(sp);
     }
     if (!m_buf_uv0.empty())
     {
         AbcGeom::OV2fGeomParam::Sample sp;
         sp.setVals(Abc::V2fArraySample(m_buf_uv0.data(), m_buf_uv0.size()));
-        if (!m_buf_uv0_indices.empty())
-            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv0_indices.data(), m_buf_uv0_indices.size()));
-        else if (m_buf_uv0.size() == m_buf_points.size())
+        sp.setScope(attribScope);
+
+        if (m_buf_uv0.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         sample.setUVs(sp);
     }
@@ -220,16 +226,16 @@ void aePolyMesh::writeSampleBody()
     {
         if (!m_uv1_param.valid())
         {
-            bool indexed = !m_buf_uv1_indices.empty() || m_buf_uv1.size() == m_buf_points.size();
+            bool indexed = m_buf_uv1.size() == m_buf_points.size();
             m_uv1_param = AbcGeom::OV2fGeomParam(
                 m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OV2fGeomParam::Sample sp;
         sp.setVals(Abc::V2fArraySample(m_buf_uv1.data(), m_buf_uv1.size()));
-        if (!m_buf_uv1_indices.empty())
-            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_uv1_indices.data(), m_buf_uv1_indices.size()));
-        else if (m_buf_uv1.size() == m_buf_points.size())
+        sp.setScope(attribScope);
+
+        if (m_buf_uv1.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         m_uv1_param.set(sp);
     }
@@ -238,16 +244,16 @@ void aePolyMesh::writeSampleBody()
     {
         if (!m_colors_param.valid())
         {
-            bool indexed = !m_buf_colors_indices.empty() || m_buf_colors.size() == m_buf_points.size();
+            bool indexed = m_buf_colors.size() == m_buf_points.size();
             m_colors_param = AbcGeom::OC4fGeomParam(
                 m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
         }
 
         AbcGeom::OC4fGeomParam::Sample sp;
         sp.setVals(Abc::C4fArraySample((abcC4*)m_buf_colors.data(), m_buf_colors.size()));
-        if (!m_buf_colors_indices.empty())
-            sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_colors_indices.data(), m_buf_colors_indices.size()));
-        else if (m_buf_colors.size() == m_buf_points.size())
+        sp.setScope(attribScope);
+
+        if (m_buf_colors.size() == m_buf_points.size())
             sp.setIndices(Abc::UInt32ArraySample((const uint32_t*)m_buf_indices.data(), m_buf_indices.size()));
         m_colors_param.set(sp);
     }
