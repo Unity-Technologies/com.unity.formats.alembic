@@ -243,7 +243,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     out long fileId))
                 {
                     newPipelineHash =
-                        UnityEngine.Formats.Alembic.Importer.Utils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
+                        RuntimeUtils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
                 }
             }
             if (pipelineHash != newPipelineHash)
