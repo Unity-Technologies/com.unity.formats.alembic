@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 
@@ -9,6 +8,16 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
     class AlembicStreamPlayerEditor : Editor
     {
+        void OnEnable()
+        {
+            RegisterCallbacks();
+        }
+
+        void OnDisable()
+        {
+            UnregisterCallbacks();
+        }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -200,6 +209,27 @@ namespace UnityEditor.Formats.Alembic.Importer
                     player.Settings = player.StreamDescriptor.Settings;
                 }
             }
+        }
+
+        void RegisterCallbacks()
+        {
+            if ((target as AlembicStreamPlayer).ExternalReference)
+            {
+                Undo.undoRedoPerformed += UndoRedoPerformed;
+            }
+        }
+
+        void UnregisterCallbacks()
+        {
+            if ((target as AlembicStreamPlayer).ExternalReference)
+            {
+                Undo.undoRedoPerformed -= UndoRedoPerformed;
+            }
+        }
+
+        void UndoRedoPerformed()
+        {
+            (target as AlembicStreamPlayer).ReloadStream();
         }
     }
 }
