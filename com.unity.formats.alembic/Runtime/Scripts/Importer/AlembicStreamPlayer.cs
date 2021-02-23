@@ -18,7 +18,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
-        AlembicStream abcStream { get; set; }
+        internal AlembicStream abcStream { get; set; }
         [SerializeField]
         AlembicStreamDescriptor streamDescriptor;
         /// <summary>
@@ -209,7 +209,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
         }
 
-        internal bool  LoadStream(bool createMissingNodes, bool serializeMesh = false)
+        internal bool LoadStream(bool createMissingNodes, bool serializeMesh = false)
         {
             if (StreamDescriptor == null)
                 return false;

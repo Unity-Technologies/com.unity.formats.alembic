@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -8,6 +9,8 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
     class AlembicStreamPlayerEditor : Editor
     {
+        static GUIContent recreateContent = new GUIContent("Recreate Missing Nodes",
+            "Re-create the GameObject hierarchy to mirror the node structure in the Alembic file.");
         void OnEnable()
         {
             RegisterCallbacks();
@@ -39,7 +42,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                         filePath = EditorGUILayout.DelayedTextField(filePath);
                         if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
                         {
-                            var path = EditorUtility.OpenFilePanel("Load Alembic File", "", "abc");
+                            var dir = "";
+                            if (File.Exists(filePath))
+                            {
+                                dir = Path.GetDirectoryName(filePath);
+                            }
+                            var path = EditorUtility.OpenFilePanel("Load Alembic File", dir, "abc");
                             if (!string.IsNullOrWhiteSpace(path))
                                 filePath = path;
                         }
@@ -49,6 +57,20 @@ namespace UnityEditor.Formats.Alembic.Importer
                     {
                         Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
                         streamPlayer.LoadFromFile(filePath);
+                    }
+
+                    if (!File.Exists(filePath))
+                    {
+                        EditorGUILayout.HelpBox(
+                            "Alembic file path not found.",
+                            MessageType.Error);
+                        return;
+                    }
+
+                    if (streamPlayer.abcStream.IsHDF5())
+                    {
+                        EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.", MessageType.Error);
+                        return;
                     }
 
                     EditorGUILayout.HelpBox(
@@ -126,7 +148,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(16);
-                    if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                    if (GUILayout.Button(recreateContent, GUILayout.Width(180)))
                     {
                         streamPlayer.LoadStream(true);
                     }
@@ -147,9 +169,6 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             using (var check = new EditorGUI.ChangeCheckScope())
             {
-                // Draw the stream proeprties
-                var pathSettings = "streamSettings.";
-
                 var so = new SerializedObject(player.StreamDescriptor);
                 so.Update();
                 var settings = so.FindProperty("settings");

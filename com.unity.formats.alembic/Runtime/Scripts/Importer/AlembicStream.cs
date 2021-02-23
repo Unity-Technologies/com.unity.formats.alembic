@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Unity.Jobs;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -220,7 +221,18 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + m_streamDesc.PathToAbc);
+                if (!File.Exists(m_streamDesc.PathToAbc))
+                {
+                    Debug.LogError("File does not exist: " + m_streamDesc.PathToAbc);
+                }
+                else if (m_context.IsHDF5())
+                {
+                    Debug.LogError("Failed to load HDF5 alembic. Please convert to Ogawa: " + m_streamDesc.PathToAbc);
+                }
+                else
+                {
+                    Debug.LogError("File is in unknown format: " + m_streamDesc.PathToAbc);
+                }
             }
 
             return m_loaded;
