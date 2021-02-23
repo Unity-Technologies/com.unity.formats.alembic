@@ -58,14 +58,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUILayout.Separator();
 
                 // time range
-                SerializedProperty startTimeProp = serializedObject.FindProperty("startTime");
-                SerializedProperty endTimeProp = serializedObject.FindProperty("endTime");
+                var startTimeProp = serializedObject.FindProperty("startTime");
+                var endTimeProp = serializedObject.FindProperty("endTime");
 
                 EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
-                float startTime = (float)startTimeProp.doubleValue;
-                float endTime = (float)endTimeProp.doubleValue;
-                float abcStart = (float)importer.AbcStartTime;
-                float abcEnd = (float)importer.AbcEndTime;
+                var startTime = (float)startTimeProp.doubleValue;
+                var endTime = (float)endTimeProp.doubleValue;
+                var abcStart = (float)importer.AbcStartTime;
+                var abcEnd = (float)importer.AbcEndTime;
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, abcStart, abcEnd);
 
@@ -124,12 +124,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
             EditorGUILayout.Separator();
 
-            // revive this if needed
-            //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importPointPolygon"));
-            //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importLinePolygon"));
-            //EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "importTrianglePolygon"));
-            //EditorGUILayout.Separator();
-
             serializedObject.ApplyModifiedProperties();
             base.ApplyRevertGUI();
         }
@@ -144,7 +138,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUI.showMixedValue = prop.hasMultipleDifferentValues;
             EditorGUI.BeginChangeCheck();
 
-            GUIContent[] options = new GUIContent[displayNames.Length];
+            var options = new GUIContent[displayNames.Length];
             for (int i = 0; i < options.Length; ++i)
                 options[i] = new GUIContent(ObjectNames.NicifyVariableName(displayNames[i]), "");
 

@@ -7,122 +7,126 @@ using UnityEngine.Formats.Alembic.Sdk;
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
-    internal class AlembicStreamPlayerEditor : Editor
+    class AlembicStreamPlayerEditor : Editor
     {
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            EditorGUI.BeginDisabledGroup((target.hideFlags & HideFlags.NotEditable) != HideFlags.None);
-
-            SerializedProperty streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
-            SerializedProperty startTime = serializedObject.FindProperty("startTime");
-            SerializedProperty endTime = serializedObject.FindProperty("endTime");
-
             var streamPlayer = target as AlembicStreamPlayer;
-            var targetStreamDesc = streamPlayer.StreamDescriptor;
-
-            if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
+            using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
-                var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
-                var filePath = initialFilePath;
-                EditorGUILayout.LabelField(new GUIContent("Alembic File"));
-                using (new EditorGUILayout.HorizontalScope())
+                var streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
+                var startTime = serializedObject.FindProperty("startTime");
+                var endTime = serializedObject.FindProperty("endTime");
+
+                var targetStreamDesc = streamPlayer.StreamDescriptor;
+                if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
                 {
-                    filePath = EditorGUILayout.DelayedTextField(filePath);
-                    if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
+                    var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
+                    var filePath = initialFilePath;
+                    EditorGUILayout.LabelField(new GUIContent("Alembic File"));
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        var path = EditorUtility.OpenFilePanel("Load Alembic File", "", "abc");
-                        if (!string.IsNullOrWhiteSpace(path))
-                            filePath = path;
+                        filePath = EditorGUILayout.DelayedTextField(filePath);
+                        if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
+                        {
+                            var path = EditorUtility.OpenFilePanel("Load Alembic File", "", "abc");
+                            if (!string.IsNullOrWhiteSpace(path))
+                                filePath = path;
+                        }
+                    }
+
+                    if (filePath != initialFilePath)
+                    {
+                        Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
+                        streamPlayer.LoadFromFile(filePath);
+                    }
+
+                    EditorGUILayout.HelpBox(
+                        "Alembic File is streamed. Selecting a new file will rebuild the GameObject or Prefab hierarchy.",
+                        MessageType.Info);
+                    if (streamDescriptorObj.objectReferenceValue == null)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    using (new EditorGUI.DisabledGroupScope(true))
+                    {
+                        EditorGUILayout.ObjectField(streamDescriptorObj);
                     }
                 }
 
-                if (filePath != initialFilePath)
-                {
-                    Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
-                    streamPlayer.LoadFromFile(filePath);
-                }
-
-                EditorGUILayout.HelpBox(
-                    "Alembic File is streamed. Selecting a new file will rebuild the GameObject or Prefab hierarchy.",
-                    MessageType.Info);
                 if (streamDescriptorObj.objectReferenceValue == null)
                 {
+                    EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
                     return;
                 }
-            }
-            else
-            {
-                EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField(streamDescriptorObj);
-                EditorGUI.EndDisabledGroup();
-            }
 
-            if (streamDescriptorObj.objectReferenceValue == null)
-            {
-                EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
-                return;
-            }
+                EditorGUILayout.LabelField(new GUIContent("Time Range"));
 
-            EditorGUILayout.LabelField(new GUIContent("Time Range"));
-
-            var abcStart = targetStreamDesc.mediaStartTime;
-            var abcEnd = targetStreamDesc.mediaEndTime;
-            var start = streamPlayer.StartTime;
-            var end = streamPlayer.EndTime;
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
-            if (EditorGUI.EndChangeCheck())
-            {
-                startTime.doubleValue = start;
-                endTime.doubleValue = end;
-            }
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(new GUIContent("seconds"));
-            EditorGUI.BeginChangeCheck();
-            EditorGUIUtility.labelWidth = 35.0f;
-            EditorGUI.showMixedValue = startTime.hasMultipleDifferentValues;
-            var newStartTime = EditorGUILayout.FloatField(new GUIContent("from", "Start time"), start, GUILayout.MinWidth(80.0f));
-            GUILayout.FlexibleSpace();
-            EditorGUIUtility.labelWidth = 20.0f;
-            EditorGUI.showMixedValue = endTime.hasMultipleDifferentValues;
-            var newEndTime = EditorGUILayout.FloatField(new GUIContent("to", "End time"), end, GUILayout.MinWidth(80.0f));
-            EditorGUI.showMixedValue = false;
-            if (EditorGUI.EndChangeCheck())
-            {
-                startTime.doubleValue = newStartTime;
-                endTime.doubleValue = newEndTime;
-            }
-
-            EditorGUILayout.EndHorizontal();
-            EditorGUIUtility.labelWidth = 0.0f;
-
-            GUIStyle style = new GUIStyle();
-            style.alignment = TextAnchor.LowerRight;
-            if (!endTime.hasMultipleDifferentValues && !startTime.hasMultipleDifferentValues)
-            {
-                EditorGUILayout.LabelField(new GUIContent((end - start).ToString("0.000") + "s"), style);
-            }
-
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
-            EditorGUILayout.Space();
-
-            var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
-            if (prefabStatus == PrefabInstanceStatus.NotAPrefab || prefabStatus == PrefabInstanceStatus.Disconnected)
-            {
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Space(16);
-                if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                var abcStart = targetStreamDesc.mediaStartTime;
+                var abcEnd = targetStreamDesc.mediaEndTime;
+                var start = streamPlayer.StartTime;
+                var end = streamPlayer.EndTime;
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
+                if (EditorGUI.EndChangeCheck())
                 {
-                    streamPlayer.LoadStream(true);
+                    startTime.doubleValue = start;
+                    endTime.doubleValue = end;
                 }
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel(new GUIContent("seconds"));
+                EditorGUI.BeginChangeCheck();
+                EditorGUIUtility.labelWidth = 35.0f;
+                EditorGUI.showMixedValue = startTime.hasMultipleDifferentValues;
+                var newStartTime = EditorGUILayout.FloatField(new GUIContent("from", "Start time"), start,
+                    GUILayout.MinWidth(80.0f));
+                GUILayout.FlexibleSpace();
+                EditorGUIUtility.labelWidth = 20.0f;
+                EditorGUI.showMixedValue = endTime.hasMultipleDifferentValues;
+                var newEndTime =
+                    EditorGUILayout.FloatField(new GUIContent("to", "End time"), end, GUILayout.MinWidth(80.0f));
+                EditorGUI.showMixedValue = false;
+                if (EditorGUI.EndChangeCheck())
+                {
+                    startTime.doubleValue = newStartTime;
+                    endTime.doubleValue = newEndTime;
+                }
+
                 EditorGUILayout.EndHorizontal();
+                EditorGUIUtility.labelWidth = 0.0f;
+
+                GUIStyle style = new GUIStyle();
+                style.alignment = TextAnchor.LowerRight;
+                if (!endTime.hasMultipleDifferentValues && !startTime.hasMultipleDifferentValues)
+                {
+                    EditorGUILayout.LabelField(new GUIContent((end - start).ToString("0.000") + "s"), style);
+                }
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
+                EditorGUILayout.Space();
+
+                var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
+                if (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
+                    prefabStatus == PrefabInstanceStatus.Disconnected)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Space(16);
+                    if (GUILayout.Button("Recreate Missing Nodes", GUILayout.Width(180)))
+                    {
+                        streamPlayer.LoadStream(true);
+                    }
+
+                    EditorGUILayout.EndHorizontal();
+                }
             }
 
-            EditorGUI.EndDisabledGroup();
-            if (!serializedObject.isEditingMultipleObjects)
+            if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
             {
                 DrawStreamSettings(streamPlayer);
             }
