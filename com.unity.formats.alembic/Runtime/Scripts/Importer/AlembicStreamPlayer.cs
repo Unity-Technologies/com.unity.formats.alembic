@@ -161,7 +161,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         /// <summary>
-        /// Close and reopen the Alembic stream. Use this to apply the new stream settings.
+        /// Closes and reopens the Alembic stream. Use this method to apply the new stream settings.
         /// </summary>
         public void ReloadStream()
         {
@@ -174,7 +174,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var ret = LoadStream(true, true);
             if (!ret)
                 return false;
-            //abcStream.AbcLoad(true, true);
+
             abcStream.GetTimeRange(out var start, out var end);
             startTime = (float)start;
             endTime = (float)end;

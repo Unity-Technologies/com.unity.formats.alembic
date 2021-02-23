@@ -73,9 +73,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                         return;
                     }
 
-                    EditorGUILayout.HelpBox(
-                        "Alembic File is streamed. Selecting a new file will rebuild the GameObject or Prefab hierarchy.",
-                        MessageType.Info);
                     if (streamDescriptorObj.objectReferenceValue == null)
                     {
                         return;
@@ -178,9 +175,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(settings.FindPropertyRelative("scaleFactor"),
                         new GUIContent("Scale Factor",
-                            "How much to scale the models compared to what is in the source file."));
+                            "Use this property to resize models relative to their dimensions in the source file."));
                     EditorGUILayout.PropertyField(settings.FindPropertyRelative("swapHandedness"),
-                        new GUIContent("Swap Handedness", "Swap X coordinate"));
+                        new GUIContent("Swap Handedness", "Swaps the X coordinate direction."));
                     EditorGUILayout.PropertyField(settings.FindPropertyRelative("interpolateSamples"),
                         new GUIContent("Interpolate Samples",
                             "Interpolate transforms and vertices (if topology is constant)."));
