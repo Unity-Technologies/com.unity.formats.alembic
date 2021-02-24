@@ -59,7 +59,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         streamPlayer.LoadFromFile(filePath);
                     }
 
-                    if (!File.Exists(filePath))
+                    if (!string.IsNullOrEmpty(filePath) && !File.Exists(filePath))
                     {
                         EditorGUILayout.HelpBox(
                             "Alembic file path not found.",
@@ -67,7 +67,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         return;
                     }
 
-                    if (streamPlayer.abcStream.IsHDF5())
+                    if (streamPlayer.abcStream != null && streamPlayer.abcStream.IsHDF5())
                     {
                         EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.", MessageType.Error);
                         return;
