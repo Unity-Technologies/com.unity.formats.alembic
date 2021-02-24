@@ -53,7 +53,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (importCurvesProp.boolValue == true)
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "createCurveRenderers"),
-                        new GUIContent("Add Curve Renderers", ""));
+                        new GUIContent("Add Curve Renderers", "Automatically add 'AlembicCurvesRenderer' components on curve objects.\nThis allows you to get a basic preview of the Alembic curves in the Scene."));
                 }
                 EditorGUILayout.Separator();
 
