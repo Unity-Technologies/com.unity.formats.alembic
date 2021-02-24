@@ -59,7 +59,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                         streamPlayer.LoadFromFile(filePath);
                     }
 
-                    if (!string.IsNullOrEmpty(filePath) && !File.Exists(filePath))
+                    if (string.IsNullOrEmpty(filePath))
+                    {
+                        return;
+                    }
+
+                    if (!File.Exists(filePath))
                     {
                         EditorGUILayout.HelpBox(
                             "Alembic file path not found.",

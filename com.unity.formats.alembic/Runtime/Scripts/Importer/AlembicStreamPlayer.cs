@@ -211,7 +211,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal bool LoadStream(bool createMissingNodes, bool serializeMesh = false)
         {
-            if (StreamDescriptor == null)
+            if (StreamDescriptor == null || string.IsNullOrEmpty(streamDescriptor.PathToAbc))
                 return false;
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
             var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
