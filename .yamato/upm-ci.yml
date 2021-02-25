@@ -11,7 +11,7 @@ platforms:
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:latest
+    image: package-ci/mac:stable
     flavor: m1.mac
 #  - name: centOS
 #    type: Unity::VM::GPU
@@ -72,7 +72,7 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: package-ci/mac:latest
+    image: package-ci/mac:stable
     flavor: m1.mac
   commands:
     - git submodule update --init --recursive
