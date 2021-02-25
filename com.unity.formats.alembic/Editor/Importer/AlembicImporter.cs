@@ -1,18 +1,22 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
+using static UnityEditor.AssetDatabase;
 #else
 using UnityEditor.Experimental.AssetImporters;
+using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    internal class AlembicAssetModificationProcessor : UnityEditor.AssetModificationProcessor
+    class AlembicAssetModificationProcessor : AssetModificationProcessor
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
         {
@@ -69,7 +73,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(7, "abc")]
+    [ScriptedImporter(8, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -138,6 +142,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
+        const string renderPipepineDependency = "AlembicRenderPipelineDependency";
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
             if (ctx == null)
@@ -193,6 +199,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 ctx.AddObjectToAsset(prevIdName, go);
                 ctx.SetMainObject(go);
+
                 isHDF5 = abcStream.IsHDF5();
                 if (IsHDF5)
                 {
@@ -203,12 +210,56 @@ namespace UnityEditor.Formats.Alembic.Importer
             firstImport = false;
         }
 
+        [InitializeOnLoadMethod]
+        static void InitializeEditorCallback()
+        {
+            EditorApplication.update += DirtyCustomDependencies; //
+            DirtyCustomDependencies();
+        }
+
+        static ulong pipelineHash;
+        static readonly TimeSpan checkDependencyFrequency = TimeSpan.FromSeconds(5);
+        static DateTime lastCheck;
+
+        static void DirtyCustomDependencies()
+        {
+            var now = DateTime.Now;
+            if (now - lastCheck < checkDependencyFrequency)
+            {
+                return;
+            }
+
+            lastCheck = now;
+
+            var newPipelineHash = 0UL;
+            if (GraphicsSettings.currentRenderPipeline == null)
+            {
+                newPipelineHash = 0;
+            }
+            else
+            {
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline, out var guid,
+                    out long fileId))
+                {
+                    newPipelineHash =
+                        UnityEngine.Formats.Alembic.Importer.Utils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
+                }
+            }
+            if (pipelineHash != newPipelineHash)
+            {
+                pipelineHash = newPipelineHash;
+                RegisterCustomDependency(renderPipepineDependency, new Hash128(pipelineHash, 0));
+                AssetDatabase.Refresh();
+            }
+        }
+
         class Subassets
         {
             AssetImportContext m_ctx;
             Material m_defaultMaterial;
             Material m_defaultPointsMaterial;
             Material m_defaultPointsMotionVectorMaterial;
+            int addPrecomputedVelocityProperty = Shader.PropertyToID("_AddPrecomputedVelocity");
 
             public Subassets(AssetImportContext ctx)
             {
@@ -221,10 +272,25 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        m_defaultMaterial = GetMaterial("Standard.shader");
+                        if (GraphicsSettings.currentRenderPipeline == null)
+                        {
+                            m_defaultMaterial = GetMaterial("Standard.shader");
+                        }
+                        else
+                        {
+                            m_defaultMaterial = Instantiate(GraphicsSettings.currentRenderPipeline.defaultMaterial);
+                            // Enable the HDRP Custom Motion Vector Pass
+                            if (m_defaultMaterial.HasProperty(addPrecomputedVelocityProperty))
+                            {
+                                m_defaultMaterial.SetFloat(addPrecomputedVelocityProperty, 1);
+                                m_defaultMaterial.EnableKeyword("_ADD_PRECOMPUTED_VELOCITY");
+                            }
+                        }
+
+                        Add("Default Material", m_defaultMaterial);
                         m_defaultMaterial.hideFlags = HideFlags.NotEditable;
                         m_defaultMaterial.name = "Default Material";
-                        Add("Default Material", m_defaultMaterial);
+                        m_ctx.DependsOnCustomDependency(renderPipepineDependency);
                     }
                     return m_defaultMaterial;
                 }
@@ -262,11 +328,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             public void Add(string identifier, Object asset)
             {
-#if UNITY_2017_3_OR_NEWER
                 m_ctx.AddObjectToAsset(identifier, asset);
-#else
-                m_ctx.AddSubAsset(identifier, asset);
-#endif
             }
 
             Material GetMaterial(string shaderFile)

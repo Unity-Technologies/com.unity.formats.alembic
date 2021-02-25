@@ -52,16 +52,9 @@ private:
     RawVector<abcV3> m_buf_velocities;
 
     RawVector<abcV3> m_buf_normals;
-    RawVector<int>   m_buf_normal_indices;
-
     RawVector<abcV2> m_buf_uv0;
-    RawVector<int>   m_buf_uv0_indices;
-
     RawVector<abcV2> m_buf_uv1;
-    RawVector<int>   m_buf_uv1_indices;
-
     RawVector<abcV4> m_buf_colors;
-    RawVector<int>   m_buf_colors_indices;
 
     std::vector<SubmeshBuffer> m_buf_submeshes;
     RawVector<int> m_tmp_facecet;
