@@ -4,7 +4,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     static class RuntimeUtils
     {
-        public static void DisposeIfPossible<T>(this NativeArray<T> array) where T : struct
+        public static void DisposeIfPossible<T>(this ref NativeArray<T> array) where T : struct
         {
             if (array.IsCreated)
             {
