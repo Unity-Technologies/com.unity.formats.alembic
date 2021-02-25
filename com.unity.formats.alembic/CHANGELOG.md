@@ -1,7 +1,7 @@
 # Changes in Alembic for Unity
 ## [2.2.0-exp.3] - 2021-01-22
 ### Added
-- Added an option to automatically add the AlembicCurveRendering components.
+- New option to automatically add the AlembicCurveRendering components for basic preview of the curves in the Scene.
 ### Changed
 - Minimum Unity version is 2019.4
 ### Fixed

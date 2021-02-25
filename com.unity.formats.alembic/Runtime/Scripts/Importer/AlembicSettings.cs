@@ -177,7 +177,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         [SerializeField] bool createCurveRenderers;
         /// <summary>
-        /// If importing of Alembic curves is enabled, also create automatically the AlembicCurveRendering component.
+        /// If you enabled the importing of Alembic curves, this method automatically creates the AlembicCurveRendering component.
         /// </summary>
         public bool CreateCurveRenderers
         {
