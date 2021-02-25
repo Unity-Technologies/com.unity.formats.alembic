@@ -29,6 +29,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             return array;
         }
 
+        public static T GetOrAddComponent<T>(this GameObject go) where T : Component
+        {
+            var ret = go.GetComponent<T>();
+            return ret != null ? ret : go.AddComponent<T>();
+        }
+      
         public static ulong CombineHash(this ulong h1, ulong h2)
         {
             unchecked

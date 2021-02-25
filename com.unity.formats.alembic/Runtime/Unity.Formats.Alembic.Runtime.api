@@ -74,6 +74,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
     public class AlembicStreamSettings
     {
+        public bool CreateCurveRenderers { get; set; }
         public bool FlipFaces { get; set; }
         public bool ImportCameras { get; set; }
         public bool ImportCurves { get; set; }
