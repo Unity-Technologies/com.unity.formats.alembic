@@ -202,6 +202,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                         new GUIContent("Import Meshes", ""));
                     EditorGUILayout.PropertyField(settings.FindPropertyRelative("importPoints"),
                         new GUIContent("Import Points", ""));
+                    var importCurvesProp = settings.FindPropertyRelative("importCurves");
+                    EditorGUILayout.PropertyField(importCurvesProp, new GUIContent("Import Curves", ""));
+                    if (importCurvesProp.boolValue == true)
+                    {
+                        var curveRenderers = settings.FindPropertyRelative("createCurveRenderers");
+                        EditorGUILayout.PropertyField(curveRenderers,
+                            new GUIContent("Add Curve Renderers", "Automatically add 'AlembicCurvesRenderer' components on curve objects.\nThis allows you to get a basic preview of the Alembic curves in the Scene."));
+                    }
                     EditorGUILayout.Separator();
 
                     EditorGUI.indentLevel--;
