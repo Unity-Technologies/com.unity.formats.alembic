@@ -56,7 +56,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                     if (filePath != initialFilePath)
                     {
                         Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
-                        Undo.RecordObject(streamPlayer.StreamDescriptor, "Load Alembic File");
+                        if (streamPlayer.StreamDescriptor != null)
+                        {
+                            Undo.RecordObject(streamPlayer.StreamDescriptor, "Load Alembic File");
+                        }
+
                         streamPlayer.LoadFromFile(filePath);
                     }
 
