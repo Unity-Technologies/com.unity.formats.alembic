@@ -11,9 +11,13 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         static GUIContent recreateContent = new GUIContent("Recreate Missing Nodes",
             "Re-create the GameObject hierarchy to mirror the node structure in the Alembic file.");
+
+        bool loadSucceded = true;
         void OnEnable()
         {
             RegisterCallbacks();
+            var streamPlayer = target as AlembicStreamPlayer;
+            loadSucceded = streamPlayer.LoadStream(false);
         }
 
         void OnDisable()
@@ -61,7 +65,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                             Undo.RecordObject(streamPlayer.StreamDescriptor, "Load Alembic File");
                         }
 
-                        streamPlayer.LoadFromFile(filePath);
+                        loadSucceded = streamPlayer.LoadFromFile(filePath);
                     }
 
                     if (string.IsNullOrEmpty(filePath))
@@ -85,6 +89,12 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                     if (streamDescriptorObj.objectReferenceValue == null)
                     {
+                        return;
+                    }
+
+                    if (!loadSucceded)
+                    {
+                        EditorGUILayout.HelpBox("File is in an unknown format", MessageType.Error);
                         return;
                     }
                 }
@@ -263,7 +273,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void UndoRedoPerformed()
         {
-            (target as AlembicStreamPlayer).ReloadStream();
+            loadSucceded = (target as AlembicStreamPlayer).ReloadStream();
         }
     }
 }
