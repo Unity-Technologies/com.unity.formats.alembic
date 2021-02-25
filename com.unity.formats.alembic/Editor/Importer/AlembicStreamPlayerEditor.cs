@@ -257,22 +257,21 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void RegisterCallbacks()
         {
-            if ((target as AlembicStreamPlayer).ExternalReference)
-            {
-                Undo.undoRedoPerformed += UndoRedoPerformed;
-            }
+            Undo.undoRedoPerformed += UndoRedoPerformed;
         }
 
         void UnregisterCallbacks()
         {
-            if ((target as AlembicStreamPlayer).ExternalReference)
-            {
-                Undo.undoRedoPerformed -= UndoRedoPerformed;
-            }
+            Undo.undoRedoPerformed -= UndoRedoPerformed;
         }
 
         void UndoRedoPerformed()
         {
+            if (target == null || !(target as AlembicStreamPlayer).ExternalReference) // Out of project streaming needs to reload the stream to update the data on undo.
+            {
+                return;
+            }
+
             loadSucceded = (target as AlembicStreamPlayer).ReloadStream();
         }
     }
