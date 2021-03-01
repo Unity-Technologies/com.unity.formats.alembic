@@ -177,14 +177,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                     startTime = abcStartTime;
                     endTime = abcEndTime;
                 }
-                streamDescriptor.mediaStartTime = (float)abcStartTime;
-                streamDescriptor.mediaEndTime = (float)abcEndTime;
+                streamDescriptor.MediaStartTime = (float)abcStartTime;
+                streamDescriptor.MediaEndTime = (float)abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
+                streamPlayer.ExternalReference = false;
                 streamPlayer.StreamDescriptor = streamDescriptor;
                 streamPlayer.StartTime = (float)StartTime;
                 streamPlayer.EndTime = (float)EndTime;
-                streamPlayer.ExternalReference = false;
 
                 var subassets = new Subassets(ctx);
                 subassets.Add(streamDescriptor.name, streamDescriptor);
@@ -344,7 +344,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
-            if (streamDescr.mediaDuration > 0)
+            if (streamDescr.MediaDuration > 0)
             {
                 // AnimationClip for time
                 {
@@ -352,8 +352,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     frames[0].value = 0.0f;
                     frames[0].time = 0.0f;
                     frames[0].outTangent = 1.0f;
-                    frames[1].value = streamDescr.mediaDuration;
-                    frames[1].time = streamDescr.mediaDuration;
+                    frames[1].value = streamDescr.MediaDuration;
+                    frames[1].time = streamDescr.MediaDuration;
                     frames[1].inTangent = 1.0f;
 
                     var curve = new AnimationCurve(frames);

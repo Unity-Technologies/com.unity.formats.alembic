@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             RegisterCallbacks();
             var streamPlayer = target as AlembicStreamPlayer;
-            loadSucceded = streamPlayer.LoadStream(false);
+            loadSucceded = streamPlayer.LoadStream(false, true);
         }
 
         void OnDisable()
@@ -59,12 +59,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                     if (filePath != initialFilePath)
                     {
+                        Undo.RecordObject(streamPlayer, "Load Alembic File");
                         Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
-                        if (streamPlayer.StreamDescriptor != null)
-                        {
-                            Undo.RecordObject(streamPlayer.StreamDescriptor, "Load Alembic File");
-                        }
-
                         loadSucceded = streamPlayer.LoadFromFile(filePath);
                     }
 
@@ -87,11 +83,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                         return;
                     }
 
-                    if (streamDescriptorObj.objectReferenceValue == null)
-                    {
-                        return;
-                    }
-
                     if (!loadSucceded)
                     {
                         EditorGUILayout.HelpBox("File is in an unknown format", MessageType.Error);
@@ -106,7 +97,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
 
-                if (streamDescriptorObj.objectReferenceValue == null)
+                if (!streamPlayer.ExternalReference && streamDescriptorObj.objectReferenceValue == null)
                 {
                     EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
                     return;
@@ -114,8 +105,8 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 EditorGUILayout.LabelField(new GUIContent("Time Range"));
 
-                var abcStart = targetStreamDesc.mediaStartTime;
-                var abcEnd = targetStreamDesc.mediaEndTime;
+                var abcStart = targetStreamDesc.MediaStartTime;
+                var abcEnd = targetStreamDesc.MediaEndTime;
                 var start = streamPlayer.StartTime;
                 var end = streamPlayer.EndTime;
                 EditorGUI.BeginChangeCheck();
@@ -176,83 +167,79 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
             {
-                DrawStreamSettings(streamPlayer);
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    DrawStreamSettings(serializedObject.FindProperty("sceneStreamDescriptor.settings"));
+                    if (check.changed)
+                    {
+                        streamPlayer.Settings = streamPlayer.StreamDescriptor.Settings;
+                    }
+                }
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        static void DrawStreamSettings(AlembicStreamPlayer player)
+        static void DrawStreamSettings(SerializedProperty settings)
         {
-            using (var check = new EditorGUI.ChangeCheckScope())
+            EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
             {
-                var so = new SerializedObject(player.StreamDescriptor);
-                so.Update();
-                var settings = so.FindProperty("settings");
-
-                EditorGUILayout.LabelField("Scene", EditorStyles.boldLabel);
-                {
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("scaleFactor"),
-                        new GUIContent("Scale Factor",
-                            "Use this property to resize models relative to their dimensions in the source file."));
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("swapHandedness"),
-                        new GUIContent("Swap Handedness", "Swaps the X coordinate direction."));
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("interpolateSamples"),
-                        new GUIContent("Interpolate Samples",
-                            "Interpolate transforms and vertices (if topology is constant)."));
-                    EditorGUILayout.Separator();
-
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importVisibility"),
-                        new GUIContent("Import Visibility", "Import visibility animation."));
-
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importCameras"),
-                        new GUIContent("Import Cameras", ""));
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importMeshes"),
-                        new GUIContent("Import Meshes", ""));
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("importPoints"),
-                        new GUIContent("Import Points", ""));
-                    var importCurvesProp = settings.FindPropertyRelative("importCurves");
-                    EditorGUILayout.PropertyField(importCurvesProp, new GUIContent("Import Curves", ""));
-                    if (importCurvesProp.boolValue == true)
-                    {
-                        var curveRenderers = settings.FindPropertyRelative("createCurveRenderers");
-                        EditorGUILayout.PropertyField(curveRenderers,
-                            new GUIContent("Add Curve Renderers", "Automatically add 'AlembicCurvesRenderer' components on curve objects.\nThis allows you to get a basic preview of the Alembic curves in the Scene."));
-                    }
-                    EditorGUILayout.Separator();
-
-                    EditorGUI.indentLevel--;
-                }
-
-                EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
-                {
-                    EditorGUI.indentLevel++;
-                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("normals"),
-                        Enum.GetNames(typeof(NormalsMode)));
-                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("tangents"),
-                        Enum.GetNames(typeof(TangentsMode)));
-                    EditorGUILayout.PropertyField(settings.FindPropertyRelative("flipFaces"));
-                    EditorGUI.indentLevel--;
-                }
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("scaleFactor"),
+                    new GUIContent("Scale Factor",
+                        "Use this property to resize models relative to their dimensions in the source file."));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("swapHandedness"),
+                    new GUIContent("Swap Handedness", "Swaps the X coordinate direction."));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("interpolateSamples"),
+                    new GUIContent("Interpolate Samples",
+                        "Interpolate transforms and vertices (if topology is constant)."));
                 EditorGUILayout.Separator();
 
-                EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("importVisibility"),
+                    new GUIContent("Import Visibility", "Import visibility animation."));
+
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("importCameras"),
+                    new GUIContent("Import Cameras", ""));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("importMeshes"),
+                    new GUIContent("Import Meshes", ""));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("importPoints"),
+                    new GUIContent("Import Points", ""));
+                var importCurvesProp = settings.FindPropertyRelative("importCurves");
+                EditorGUILayout.PropertyField(importCurvesProp, new GUIContent("Import Curves", ""));
+                if (importCurvesProp.boolValue == true)
                 {
-                    EditorGUI.indentLevel++;
-                    AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("cameraAspectRatio"),
-                        Enum.GetNames(typeof(AspectRatioMode)),
-                        new GUIContent("Aspect Ratio", ""));
-                    EditorGUI.indentLevel--;
+                    var curveRenderers = settings.FindPropertyRelative("createCurveRenderers");
+                    EditorGUILayout.PropertyField(curveRenderers,
+                        new GUIContent("Add Curve Renderers",
+                            "Automatically add 'AlembicCurvesRenderer' components on curve objects.\nThis allows you to get a basic preview of the Alembic curves in the Scene."));
                 }
+
                 EditorGUILayout.Separator();
 
-                so.ApplyModifiedProperties();
-                if (check.changed)
-                {
-                    player.Settings = player.StreamDescriptor.Settings;
-                }
+                EditorGUI.indentLevel--;
             }
+
+            EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
+            {
+                EditorGUI.indentLevel++;
+                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("normals"),
+                    Enum.GetNames(typeof(NormalsMode)));
+                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("tangents"),
+                    Enum.GetNames(typeof(TangentsMode)));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("flipFaces"));
+                EditorGUI.indentLevel--;
+            }
+            EditorGUILayout.Separator();
+
+            EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
+            {
+                EditorGUI.indentLevel++;
+                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("cameraAspectRatio"),
+                    Enum.GetNames(typeof(AspectRatioMode)),
+                    new GUIContent("Aspect Ratio", ""));
+                EditorGUI.indentLevel--;
+            }
+            EditorGUILayout.Separator();
         }
 
         void RegisterCallbacks()

@@ -118,7 +118,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             });
         }
 
-        AlembicStreamDescriptor m_streamDesc;
+        IStreamDescriptor m_streamDesc;
         AlembicTreeNode m_abcTreeRoot;
         aiConfig m_config;
         SafeContext m_context;
@@ -126,7 +126,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         bool m_loaded;
         bool m_streamInterupted;
 
-        internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        internal IStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
         internal SafeContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context.isValid; } }
@@ -142,7 +142,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
 
-        internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
+        internal AlembicStream(GameObject rootGo, IStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
             m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
@@ -159,7 +159,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void AbcBeginSyncData(AlembicTreeNode node)
         {
-            if (node.abcObject != null && node.gameObject != null)
+            if (node != null && node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataBegin();
             foreach (var child in node.Children)
                 AbcBeginSyncData(child);

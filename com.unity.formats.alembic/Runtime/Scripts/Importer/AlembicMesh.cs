@@ -426,7 +426,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!hasMesh)
             {
-                mesh = new Mesh { name = "dyn: " + go.name };
+                mesh = new Mesh {name = "dyn: " + go.name};
                 mesh.indexFormat = IndexFormat.UInt32;
                 mesh.MarkDynamic();
 
@@ -438,15 +438,15 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (renderer == null)
                 {
                     renderer = go.AddComponent<MeshRenderer>();
-                    var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
-                    if (material == null)
-                    {
-                        var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-                        material = pipelineAsset != null
-                            ? pipelineAsset.defaultMaterial
-                            : new Material(Shader.Find("Standard"));
-                    }
+                }
 
+                var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                if (material == null)
+                {
+                    var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+                    material = pipelineAsset != null
+                        ? pipelineAsset.defaultMaterial
+                        : new Material(Shader.Find("Standard"));
                     renderer.sharedMaterial = material;
                 }
             }

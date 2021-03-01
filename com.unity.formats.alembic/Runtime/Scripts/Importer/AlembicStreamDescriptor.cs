@@ -1,6 +1,6 @@
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    class AlembicStreamDescriptor : ScriptableObject
+    class AlembicStreamDescriptor : ScriptableObject, IStreamDescriptor
     {
         [SerializeField]
         string pathToAbc;
@@ -15,7 +15,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return System.IO.Path.Combine(Application.streamingAssetsPath, pathToAbc);
 #endif
             }
-            internal set { pathToAbc = value; }
+            set { pathToAbc = value; }
         }
 
         [SerializeField]
@@ -27,19 +27,23 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         [SerializeField] float abcStartTime = float.MinValue;
-        public float mediaStartTime
+        public float MediaStartTime
         {
             get => abcStartTime;
-            internal set => abcStartTime = value;
+            set => abcStartTime = value;
         }
 
         [SerializeField]
         float abcEndTime = float.MaxValue;
-        public float mediaEndTime
+        public float MediaEndTime
         {
             get => abcEndTime;
-            internal set => abcEndTime = value;
+            set => abcEndTime = value;
         }
-        public float mediaDuration => abcEndTime - abcStartTime;
+        public float MediaDuration => abcEndTime - abcStartTime;
+        public IStreamDescriptor Clone()
+        {
+            return Instantiate(this);
+        }
     }
 }

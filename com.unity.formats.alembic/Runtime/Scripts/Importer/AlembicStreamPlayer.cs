@@ -17,17 +17,36 @@ namespace UnityEngine.Formats.Alembic.Importer
             set => externalReference = value;
         }
 
+        [SerializeField] string externalReferencePath;
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         internal AlembicStream abcStream { get; set; }
-        [SerializeField]
-        AlembicStreamDescriptor streamDescriptor;
+        [SerializeField] AlembicStreamDescriptor streamDescriptor;
+        [SerializeField] SceneStreamDescriptor sceneStreamDescriptor = new SceneStreamDescriptor();
         /// <summary>
         /// Gives access to the stream description.
         /// </summary>
-        internal AlembicStreamDescriptor StreamDescriptor
+        internal IStreamDescriptor StreamDescriptor
         {
-            get { return streamDescriptor; }
-            set { streamDescriptor = value; }
+            get
+            {
+                if (ExternalReference)
+                {
+                    return sceneStreamDescriptor;
+                }
+
+                return streamDescriptor;
+            }
+            set
+            {
+                if (ExternalReference)
+                {
+                    sceneStreamDescriptor = (SceneStreamDescriptor)value;
+                }
+                else
+                {
+                    streamDescriptor = (AlembicStreamDescriptor)value;
+                }
+            }
         }
 
         [SerializeField]
@@ -37,13 +56,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float StartTime
         {
-            get { return startTime; }
+            get => startTime;
             set
             {
                 startTime = value;
                 if (StreamDescriptor == null)
                     return;
-                startTime = Mathf.Clamp(startTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
+                startTime = Mathf.Clamp(startTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
             }
         }
 
@@ -54,13 +73,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float EndTime
         {
-            get { return endTime; }
+            get => endTime;
             set
             {
                 endTime = value;
                 if (StreamDescriptor == null)
                     return;
-                endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.mediaEndTime);
+                endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.MediaEndTime);
             }
         }
 
@@ -71,14 +90,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float CurrentTime
         {
-            get { return currentTime; }
-            set { currentTime = Mathf.Clamp(value, 0.0f, Duration); }
+            get => currentTime;
+            set => currentTime = Mathf.Clamp(value, 0.0f, Duration);
         }
 
         /// <summary>
         /// Get the duration of the Alembic file (in seconds).
         /// </summary>
-        public float Duration { get { return EndTime - StartTime; } }
+        public float Duration => EndTime - StartTime;
 
         [SerializeField]
         float vertexMotionScale = 1.0f;
@@ -87,18 +106,18 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float VertexMotionScale
         {
-            get { return vertexMotionScale; }
-            set { vertexMotionScale = value; }
+            get => vertexMotionScale;
+            set => vertexMotionScale = value;
         }
 
         /// <summary>
         /// The start timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
+        public float MediaStartTime => StreamDescriptor == null ? StreamDescriptor.MediaStartTime : 0;
         /// <summary>
         /// The end timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
+        public float MediaEndTime => StreamDescriptor == null ? StreamDescriptor.MediaEndTime : 0;
 
         /// <summary>
         /// The duration of the Alembic file (in seconds).
@@ -166,8 +185,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <returns>True if the stream was successfully reopened, false otherwise.</returns>>
         public bool ReloadStream()
         {
-            abcStream?.Dispose();
-            return LoadStream(false);
+            if (abcStream != null)
+            {
+                abcStream?.Dispose();
+                return LoadStream(false);
+            }
+
+            return true;
         }
 
         bool InitializeAfterLoad()
@@ -180,8 +204,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             startTime = (float)start;
             endTime = (float)end;
 
-            streamDescriptor.mediaStartTime = (float)start;
-            streamDescriptor.mediaEndTime = (float)end;
+            StreamDescriptor.MediaStartTime = (float)start;
+            StreamDescriptor.MediaEndTime = (float)end;
 
             var pipelineAsset = GraphicsSettings.renderPipelineAsset;
             var defaultMat = pipelineAsset != null
@@ -212,7 +236,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal bool LoadStream(bool createMissingNodes, bool serializeMesh = false)
         {
-            if (StreamDescriptor == null || string.IsNullOrEmpty(streamDescriptor.PathToAbc))
+            if (StreamDescriptor == null || string.IsNullOrEmpty(StreamDescriptor.PathToAbc))
                 return false;
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
             var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
@@ -229,16 +253,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (StreamDescriptor == null || abcStream == null)
                 return;
-            if (StreamDescriptor.mediaStartTime == double.MinValue || StreamDescriptor.mediaEndTime == double.MaxValue)
+            if (StreamDescriptor.MediaStartTime == double.MinValue || StreamDescriptor.MediaEndTime == double.MaxValue)
             {
                 double start, end;
                 abcStream.GetTimeRange(out start, out end);
-                StreamDescriptor.mediaStartTime = (float)start;
-                StreamDescriptor.mediaEndTime = (float)end;
+                StreamDescriptor.MediaStartTime = (float)start;
+                StreamDescriptor.MediaEndTime = (float)end;
             }
 
-            StartTime = Mathf.Clamp(StartTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
-            EndTime = Mathf.Clamp(EndTime, StartTime, StreamDescriptor.mediaEndTime);
+            StartTime = Mathf.Clamp(StartTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
+            EndTime = Mathf.Clamp(EndTime, StartTime, StreamDescriptor.MediaEndTime);
             ClampTime();
             forceUpdate = true;
         }
