@@ -26,26 +26,18 @@ namespace UnityEngine.Formats.Alembic.Importer
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         internal AlembicStream abcStream { get; set; }
         [SerializeField] AlembicStreamDescriptor streamDescriptor;
-        [SerializeField] EmbeddedAlembicStreamDescriptor embeddedAlembicStreamDescriptor = new EmbeddedAlembicStreamDescriptor();
+        [SerializeField] EmbeddedAlembicStreamDescriptor embeddedStreamDescriptor = new EmbeddedAlembicStreamDescriptor();
         /// <summary>
         /// Gives access to the stream description.
         /// </summary>
         internal IStreamDescriptor StreamDescriptor
         {
-            get
-            {
-                if (StreamSource == AlembicStreamSource.External)
-                {
-                    return embeddedAlembicStreamDescriptor;
-                }
-
-                return streamDescriptor;
-            }
+            get => StreamSource == AlembicStreamSource.External ? embeddedStreamDescriptor : (IStreamDescriptor)streamDescriptor;
             set
             {
                 if (StreamSource == AlembicStreamSource.External)
                 {
-                    embeddedAlembicStreamDescriptor = (EmbeddedAlembicStreamDescriptor)value;
+                    embeddedStreamDescriptor = (EmbeddedAlembicStreamDescriptor)value;
                 }
                 else
                 {
@@ -65,9 +57,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             set
             {
                 startTime = value;
-                if (StreamDescriptor == null)
-                    return;
-                startTime = Mathf.Clamp(startTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
+                if (StreamDescriptor != null)
+                {
+                    startTime = Mathf.Clamp(startTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
+                }
             }
         }
 
@@ -82,9 +75,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             set
             {
                 endTime = value;
-                if (StreamDescriptor == null)
-                    return;
-                endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.MediaEndTime);
+                if (StreamDescriptor != null)
+                {
+                    endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.MediaEndTime);
+                }
             }
         }
 
@@ -118,11 +112,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// The start timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaStartTime => StreamDescriptor == null ? StreamDescriptor.MediaStartTime : 0;
+        public float MediaStartTime => StreamDescriptor != null ? StreamDescriptor.MediaStartTime : 0;
         /// <summary>
         /// The end timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaEndTime => StreamDescriptor == null ? StreamDescriptor.MediaEndTime : 0;
+        public float MediaEndTime => StreamDescriptor != null ? StreamDescriptor.MediaEndTime : 0;
 
         /// <summary>
         /// The duration of the Alembic file (in seconds).
