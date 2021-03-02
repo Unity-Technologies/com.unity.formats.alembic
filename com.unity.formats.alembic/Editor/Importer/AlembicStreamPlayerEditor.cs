@@ -29,6 +29,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             serializedObject.Update();
             var streamPlayer = target as AlembicStreamPlayer;
+            var externalSource = streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External;
+
             using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
                 var streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
@@ -36,7 +38,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var endTime = serializedObject.FindProperty("endTime");
 
                 var targetStreamDesc = streamPlayer.StreamDescriptor;
-                if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
+                if (streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External && !serializedObject.isEditingMultipleObjects)
                 {
                     var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
                     var filePath = initialFilePath;
@@ -97,7 +99,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
 
-                if (!streamPlayer.ExternalReference && streamDescriptorObj.objectReferenceValue == null)
+                if (!externalSource && streamDescriptorObj.objectReferenceValue == null)
                 {
                     EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
                     return;
@@ -165,7 +167,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
             }
 
-            if (streamPlayer.ExternalReference && !serializedObject.isEditingMultipleObjects)
+            if (externalSource && !serializedObject.isEditingMultipleObjects)
             {
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
@@ -254,7 +256,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void UndoRedoPerformed()
         {
-            if (target == null || !(target as AlembicStreamPlayer).ExternalReference) // Out of project streaming needs to reload the stream to update the data on undo.
+            if (target == null || (target as AlembicStreamPlayer).StreamSource != AlembicStreamPlayer.AlembicStreamSource.External) // Out of project streaming needs to reload the stream to update the data on undo.
             {
                 return;
             }

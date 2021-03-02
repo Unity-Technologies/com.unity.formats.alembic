@@ -10,11 +10,17 @@ namespace UnityEngine.Formats.Alembic.Importer
     [ExecuteInEditMode]
     public class AlembicStreamPlayer : MonoBehaviour
     {
-        [SerializeField] bool externalReference = true;
-        internal bool ExternalReference
+        internal enum AlembicStreamSource
         {
-            get => externalReference;
-            set => externalReference = value;
+            Internal = 0,
+            External = 1
+        }
+
+        [SerializeField] AlembicStreamSource streamSource = AlembicStreamSource.External;
+        internal AlembicStreamSource StreamSource
+        {
+            get => streamSource;
+            set => streamSource = value;
         }
 
         [SerializeField] string externalReferencePath;
@@ -29,7 +35,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             get
             {
-                if (ExternalReference)
+                if (StreamSource == AlembicStreamSource.External)
                 {
                     return sceneStreamDescriptor;
                 }
@@ -38,7 +44,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             set
             {
-                if (ExternalReference)
+                if (StreamSource == AlembicStreamSource.External)
                 {
                     sceneStreamDescriptor = (SceneStreamDescriptor)value;
                 }

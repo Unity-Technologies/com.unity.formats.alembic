@@ -181,7 +181,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 streamDescriptor.MediaEndTime = (float)abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
-                streamPlayer.ExternalReference = false;
+                streamPlayer.StreamSource = AlembicStreamPlayer.AlembicStreamSource.Internal;
                 streamPlayer.StreamDescriptor = streamDescriptor;
                 streamPlayer.StartTime = (float)StartTime;
                 streamPlayer.EndTime = (float)EndTime;
