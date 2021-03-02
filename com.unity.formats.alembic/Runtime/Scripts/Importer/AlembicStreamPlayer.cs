@@ -22,8 +22,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             get => streamSource;
             set => streamSource = value;
         }
-
-        [SerializeField] string externalReferencePath;
+        
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         internal AlembicStream abcStream { get; set; }
         [SerializeField] AlembicStreamDescriptor streamDescriptor;
