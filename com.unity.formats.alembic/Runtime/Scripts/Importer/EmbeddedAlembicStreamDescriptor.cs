@@ -3,7 +3,7 @@ using System;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [Serializable]
-    class SceneStreamDescriptor : IStreamDescriptor
+    class EmbeddedAlembicStreamDescriptor : IStreamDescriptor
     {
         [SerializeField] string pathToAbc;
         [SerializeField] AlembicStreamSettings settings = new AlembicStreamSettings();
@@ -39,7 +39,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public IStreamDescriptor Clone()
         {
             var copier = new AlembicStreamSettings.AlembicStreamSettingsCopier {abcSettings = Settings};
-            return new SceneStreamDescriptor
+            return new EmbeddedAlembicStreamDescriptor
             {
                 pathToAbc = PathToAbc,
                 settings = Object.Instantiate(copier).abcSettings,

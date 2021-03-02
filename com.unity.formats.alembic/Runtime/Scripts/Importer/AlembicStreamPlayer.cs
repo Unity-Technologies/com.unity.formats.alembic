@@ -22,11 +22,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             get => streamSource;
             set => streamSource = value;
         }
-        
+
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
         internal AlembicStream abcStream { get; set; }
         [SerializeField] AlembicStreamDescriptor streamDescriptor;
-        [SerializeField] SceneStreamDescriptor sceneStreamDescriptor = new SceneStreamDescriptor();
+        [SerializeField] EmbeddedAlembicStreamDescriptor embeddedAlembicStreamDescriptor = new EmbeddedAlembicStreamDescriptor();
         /// <summary>
         /// Gives access to the stream description.
         /// </summary>
@@ -36,7 +36,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 if (StreamSource == AlembicStreamSource.External)
                 {
-                    return sceneStreamDescriptor;
+                    return embeddedAlembicStreamDescriptor;
                 }
 
                 return streamDescriptor;
@@ -45,7 +45,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 if (StreamSource == AlembicStreamSource.External)
                 {
-                    sceneStreamDescriptor = (SceneStreamDescriptor)value;
+                    embeddedAlembicStreamDescriptor = (EmbeddedAlembicStreamDescriptor)value;
                 }
                 else
                 {
