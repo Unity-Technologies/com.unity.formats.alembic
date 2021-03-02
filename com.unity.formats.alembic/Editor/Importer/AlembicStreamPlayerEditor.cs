@@ -171,7 +171,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 using (var check = new EditorGUI.ChangeCheckScope())
                 {
-                    DrawStreamSettings(serializedObject.FindProperty("sceneStreamDescriptor.settings"));
+                    DrawStreamSettings(serializedObject.FindProperty("embeddedStreamDescriptor.settings"));
                     if (check.changed)
                     {
                         streamPlayer.Settings = streamPlayer.StreamDescriptor.Settings;
