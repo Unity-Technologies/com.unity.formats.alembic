@@ -437,7 +437,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     renderer = go.AddComponent<MeshRenderer>();
                 }
 
-                var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
+                var material = renderer.sharedMaterial;
                 if (material == null)
                 {
                     var pipelineAsset = GraphicsSettings.renderPipelineAsset;
