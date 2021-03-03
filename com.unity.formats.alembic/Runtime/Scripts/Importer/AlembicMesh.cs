@@ -6,6 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
+using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -52,11 +53,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (rgb != null) rgb.Dispose();
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
-#if UNITY_EDITOR
-                    Object.DestroyImmediate(mesh);
-#else
-                    Object.Destroy(mesh);
-#endif
+                    DestroyUnityObject(mesh);
                     mesh = null;
                 }
             }

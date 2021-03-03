@@ -1,6 +1,7 @@
 using System;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
+using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -181,16 +182,40 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// Closes and reopens the Alembic stream. Use this method to apply the new stream settings.
         /// </summary>
+        /// <param name="createMissingNodes">If true, it also recreates the missing GameObjects for the Alembic nodes. </param>>
         /// <returns>True if the stream was successfully reopened, false otherwise.</returns>>
-        public bool ReloadStream()
+        public bool ReloadStream(bool createMissingNodes = false)
         {
             if (abcStream != null)
             {
                 abcStream?.Dispose();
-                return LoadStream(false);
+                return LoadStream(createMissingNodes);
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// This function removes all child game objects that don't have a corresponding alembic node. Note that is the object is a part of a prefab, this call will fail.
+        /// </summary>
+        public void RemoveObsoleteGameObjects()
+        {
+            ReloadStream(true);
+            RemoveObsoleteGameObject(gameObject);
+        }
+
+        void RemoveObsoleteGameObject(GameObject root)
+        {
+            var nChildren = root.transform.childCount;
+            for (var i = nChildren - 1; i >= 0; --i) // need to iterate backwards because deleting an object changes the child count
+            {
+                RemoveObsoleteGameObject(root.transform.GetChild(i).gameObject);
+            }
+
+            if (abcStream.abcTreeRoot.FindNode(root) == null) // no alembic node means not driven by ABC
+            {
+                DestroyUnityObject(root);
+            }
         }
 
         bool InitializeAfterLoad()

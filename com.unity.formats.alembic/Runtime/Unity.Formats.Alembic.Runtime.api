@@ -70,7 +70,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         public float VertexMotionScale { get; set; }
         public AlembicStreamPlayer() {}
         public bool LoadFromFile(string newPath);
-        public bool ReloadStream();
+        public bool ReloadStream(bool createMissingNodes = False);
+        public void RemoveObsoleteGameObjects();
         public void UpdateImmediately(float time);
     }
 

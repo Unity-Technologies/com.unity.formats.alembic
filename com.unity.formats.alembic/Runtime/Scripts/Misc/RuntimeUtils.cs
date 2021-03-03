@@ -34,13 +34,22 @@ namespace UnityEngine.Formats.Alembic.Importer
             var ret = go.GetComponent<T>();
             return ret != null ? ret : go.AddComponent<T>();
         }
-      
+
         public static ulong CombineHash(this ulong h1, ulong h2)
         {
             unchecked
             {
                 return h1 ^ h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2); // Similar to c++ boost::hash_combine
             }
+        }
+
+        public static void DestroyUnityObject(Object o)
+        {
+#if UNITY_EDITOR
+            Object.DestroyImmediate(o, true);
+#else
+            Object.Destroy(o);
+#endif
         }
     }
 }

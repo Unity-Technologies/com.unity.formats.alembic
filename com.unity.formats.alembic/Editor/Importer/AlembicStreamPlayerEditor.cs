@@ -30,6 +30,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             serializedObject.Update();
             var streamPlayer = target as AlembicStreamPlayer;
             var externalSource = streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External;
+            var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
 
             using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
@@ -152,18 +153,35 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
                 EditorGUILayout.Space();
 
-                var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
-                if (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
-                    prefabStatus == PrefabInstanceStatus.Disconnected || externalSource)
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Space(16);
-                    if (GUILayout.Button(recreateContent, GUILayout.Width(180)))
+                    if (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
+                        prefabStatus == PrefabInstanceStatus.Disconnected || externalSource)
                     {
-                        streamPlayer.LoadStream(true);
+                        GUILayout.Space(16);
+                        if (GUILayout.Button(recreateContent, GUILayout.Width(180)))
+                        {
+                            streamPlayer.LoadStream(true);
+                        }
                     }
 
-                    EditorGUILayout.EndHorizontal();
+                    if (externalSource && (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
+                                           prefabStatus == PrefabInstanceStatus.Disconnected))
+                    {
+                        if (GUILayout.Button("Cleanp"))
+                        {
+                            Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject,
+                                "CleanUp GameObject Hierarchy");
+                            streamPlayer.RemoveObsoleteGameObjects();
+                        }
+                    }
+                    else if (externalSource)
+                    {
+                        using (new EditorGUI.DisabledScope(true))
+                        {
+                            GUILayout.Button(new GUIContent("Cleanp", "Unavailable in PrefabMode"));
+                        }
+                    }
                 }
             }
 
