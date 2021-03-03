@@ -154,7 +154,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
                 if (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
-                    prefabStatus == PrefabInstanceStatus.Disconnected)
+                    prefabStatus == PrefabInstanceStatus.Disconnected || externalSource)
                 {
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(16);
