@@ -395,7 +395,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                     }
 
                     if (split.points.Count > 0)
+                    {
+                        var layout = GetVertexAttributeDescriptors(split);
+                        split.mesh.SetVertexBufferParams(split.points.Count, layout);
                         split.mesh.SetVertices(split.points.List);
+                    }
+
                     if (split.normals.Count > 0)
                         split.mesh.SetNormals(split.normals.List);
                     if (split.tangents.Count > 0)
@@ -407,11 +412,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     if (split.velocities.Count > 0)
                     {
                         m_PostProcessJobs[s].Complete();
-#if UNITY_2019_2_OR_NEWER
                         split.mesh.SetUVs(5, split.velocities.List);
-#else
-                        split.mesh.SetUVs(3, split.velocities.List);
-#endif
                     }
 
                     if (split.rgba.Count > 0)
@@ -448,6 +449,70 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
             }
+        }
+
+        VertexAttributeDescriptor[] GetVertexAttributeDescriptors(Split split)
+        {
+            var layout = new List<VertexAttributeDescriptor>();
+            var vbo = 0;
+            const int maxVBOs = 3;
+
+            // Sort attributes according to popularity. Once we hit maxVBOs, mesh updates become slower as unity has to copy with stride.
+            if (split.points.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+            if (split.normals.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.uv0.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.velocities.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.TexCoord5, VertexAttributeFormat.Float32, 3,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.tangents.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.uv1.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.rgba.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+            else if (split.rgb.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            return layout.ToArray();
         }
 
         Mesh AddMeshComponents(GameObject go)
