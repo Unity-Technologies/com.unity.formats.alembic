@@ -548,6 +548,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 mesh.name = "dyn: " + go.name;
             }
 
+            mesh.hideFlags |= HideFlags.DontSave;
+
             return mesh;
         }
     }
