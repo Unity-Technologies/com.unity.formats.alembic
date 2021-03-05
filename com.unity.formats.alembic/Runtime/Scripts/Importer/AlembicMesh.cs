@@ -471,6 +471,26 @@ namespace UnityEngine.Formats.Alembic.Importer
                 vbo++;
             }
 
+            if (split.tangents.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
+            if (split.rgba.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+            else if (split.rgb.Count > 0)
+            {
+                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3,
+                    Mathf.Min(vbo, maxVBOs)));
+                vbo++;
+            }
+
             if (split.uv0.Count > 0)
             {
                 layout.Add(new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2,
@@ -485,29 +505,9 @@ namespace UnityEngine.Formats.Alembic.Importer
                 vbo++;
             }
 
-            if (split.tangents.Count > 0)
-            {
-                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4,
-                    Mathf.Min(vbo, maxVBOs)));
-                vbo++;
-            }
-
             if (split.uv1.Count > 0)
             {
                 layout.Add(new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2,
-                    Mathf.Min(vbo, maxVBOs)));
-                vbo++;
-            }
-
-            if (split.rgba.Count > 0)
-            {
-                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4,
-                    Mathf.Min(vbo, maxVBOs)));
-                vbo++;
-            }
-            else if (split.rgb.Count > 0)
-            {
-                layout.Add(new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3,
                     Mathf.Min(vbo, maxVBOs)));
                 vbo++;
             }
