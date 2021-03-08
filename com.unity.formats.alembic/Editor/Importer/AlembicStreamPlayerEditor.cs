@@ -9,8 +9,10 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]
     class AlembicStreamPlayerEditor : Editor
     {
-        static GUIContent recreateContent = new GUIContent("Recreate Missing Nodes",
-            "Re-create the GameObject hierarchy to mirror the node structure in the Alembic file.");
+        static readonly GUIContent RecreateContent = new GUIContent("Create Missing GameObjects",
+            "Re-create the GameObject hierarchy to mirror the node structure in the current Alembic file.");
+        static readonly GUIContent DeleteExtraContent = new GUIContent("Remove Unused GameObjects",
+            "Deletes all GameObjects that are not in the current Alembic file.");
 
         bool loadSucceded = true;
         void OnEnable()
@@ -30,7 +32,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             serializedObject.Update();
             var streamPlayer = target as AlembicStreamPlayer;
             var externalSource = streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External;
-            var prefabStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
+            var prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
+            var prefabStatus = PrefabUtility.GetPrefabAssetType(streamPlayer.gameObject);
+            var canEditGOHierarchy = prefabStatus == PrefabAssetType.NotAPrefab &&
+                (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
+                    prefabInstanceStatus == PrefabInstanceStatus.Disconnected);
 
             using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
@@ -39,57 +45,85 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var endTime = serializedObject.FindProperty("endTime");
 
                 var targetStreamDesc = streamPlayer.StreamDescriptor;
-                if (streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External && !serializedObject.isEditingMultipleObjects)
+                if (externalSource && !serializedObject.isEditingMultipleObjects)
                 {
-                    var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
-                    var filePath = initialFilePath;
-                    EditorGUILayout.LabelField(new GUIContent("Alembic File"));
-                    using (new EditorGUILayout.HorizontalScope())
+                    using (new EditorGUI.DisabledGroupScope(!canEditGOHierarchy))
                     {
-                        filePath = EditorGUILayout.DelayedTextField(filePath);
-                        if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
+                        var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
+                        var filePath = initialFilePath;
+                        EditorGUILayout.LabelField(new GUIContent("Alembic File"));
+                        using (new EditorGUILayout.HorizontalScope())
                         {
-                            var dir = "";
-                            if (File.Exists(filePath))
+                            filePath = EditorGUILayout.DelayedTextField(filePath);
+                            if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
                             {
-                                dir = Path.GetDirectoryName(filePath);
+                                var dir = "";
+                                if (File.Exists(filePath))
+                                {
+                                    dir = Path.GetDirectoryName(filePath);
+                                }
+
+                                var path = EditorUtility.OpenFilePanel("Load Alembic File", dir, "abc");
+                                if (!string.IsNullOrWhiteSpace(path))
+                                    filePath = path;
                             }
-                            var path = EditorUtility.OpenFilePanel("Load Alembic File", dir, "abc");
-                            if (!string.IsNullOrWhiteSpace(path))
-                                filePath = path;
                         }
-                    }
 
-                    if (filePath != initialFilePath)
-                    {
-                        Undo.RecordObject(streamPlayer, "Load Alembic File");
-                        Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
-                        loadSucceded = streamPlayer.LoadFromFile(filePath);
-                    }
+                        if (filePath != initialFilePath)
+                        {
+                            Undo.RecordObject(streamPlayer, "Load Alembic File");
+                            Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject, "Load Alembic File");
+                            loadSucceded = streamPlayer.LoadFromFile(filePath);
+                        }
 
-                    if (string.IsNullOrEmpty(filePath))
-                    {
-                        return;
-                    }
+                        if (string.IsNullOrEmpty(filePath))
+                        {
+                            return;
+                        }
 
-                    if (!File.Exists(filePath))
-                    {
-                        EditorGUILayout.HelpBox(
-                            "Alembic file path not found.",
-                            MessageType.Error);
-                        return;
-                    }
+                        if (!File.Exists(filePath))
+                        {
+                            EditorGUILayout.HelpBox(
+                                "Alembic file path not found.",
+                                MessageType.Error);
+                            return;
+                        }
 
-                    if (streamPlayer.abcStream != null && streamPlayer.abcStream.IsHDF5())
-                    {
-                        EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.", MessageType.Error);
-                        return;
-                    }
+                        if (streamPlayer.abcStream != null && streamPlayer.abcStream.IsHDF5())
+                        {
+                            EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.",
+                                MessageType.Error);
+                            return;
+                        }
 
-                    if (!loadSucceded)
-                    {
-                        EditorGUILayout.HelpBox("File is in an unknown format", MessageType.Error);
-                        return;
+                        if (!loadSucceded)
+                        {
+                            EditorGUILayout.HelpBox("File is in an unknown format", MessageType.Error);
+                            return;
+                        }
+
+                        const int space = 200;
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("From File", GUILayout.Width(150));
+
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button(RecreateContent, GUILayout.Width(200)))
+                            {
+                                streamPlayer.LoadStream(true);
+                            }
+                        }
+
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button(DeleteExtraContent, GUILayout.Width(200)))
+                            {
+                                Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject,
+                                    "CleanUp GameObject Hierarchy");
+                                streamPlayer.RemoveObsoleteGameObjects();
+                            }
+                        }
                     }
                 }
                 else
@@ -105,6 +139,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                     EditorGUILayout.HelpBox("The stream descriptor could not be found.", MessageType.Error);
                     return;
                 }
+
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
+                EditorGUILayout.Space();
 
                 EditorGUILayout.LabelField(new GUIContent("Time Range"));
 
@@ -147,41 +186,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                 if (!endTime.hasMultipleDifferentValues && !startTime.hasMultipleDifferentValues)
                 {
                     EditorGUILayout.LabelField(new GUIContent((end - start).ToString("0.000") + "s"), style);
-                }
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("currentTime"), new GUIContent("Time"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("vertexMotionScale"));
-                EditorGUILayout.Space();
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    if (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
-                        prefabStatus == PrefabInstanceStatus.Disconnected || externalSource)
-                    {
-                        GUILayout.Space(16);
-                        if (GUILayout.Button(recreateContent, GUILayout.Width(180)))
-                        {
-                            streamPlayer.LoadStream(true);
-                        }
-                    }
-
-                    if (externalSource && (prefabStatus == PrefabInstanceStatus.NotAPrefab ||
-                                           prefabStatus == PrefabInstanceStatus.Disconnected))
-                    {
-                        if (GUILayout.Button("Cleanp"))
-                        {
-                            Undo.RegisterFullObjectHierarchyUndo(streamPlayer.gameObject,
-                                "CleanUp GameObject Hierarchy");
-                            streamPlayer.RemoveObsoleteGameObjects();
-                        }
-                    }
-                    else if (externalSource)
-                    {
-                        using (new EditorGUI.DisabledScope(true))
-                        {
-                            GUILayout.Button(new GUIContent("Cleanp", "Unavailable in PrefabMode"));
-                        }
-                    }
                 }
             }
 
