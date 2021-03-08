@@ -1,4 +1,4 @@
-option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." ON)
+option(ENABLE_ISPC "Use Intel ISPC to generate SIMDified code. It can significantly boost performance." OFF)
 
 if(ENABLE_ISPC)
     find_package(ISPC REQUIRED)
