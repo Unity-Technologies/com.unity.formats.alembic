@@ -34,9 +34,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             var externalSource = streamPlayer.StreamSource == AlembicStreamPlayer.AlembicStreamSource.External;
             var prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
             var prefabStatus = PrefabUtility.GetPrefabAssetType(streamPlayer.gameObject);
-            var canEditGOHierarchy = prefabStatus == PrefabAssetType.NotAPrefab &&
-                (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
-                    prefabInstanceStatus == PrefabInstanceStatus.Disconnected);
+
+            var canAddGos = (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
+                prefabInstanceStatus == PrefabInstanceStatus.Disconnected || prefabInstanceStatus == PrefabInstanceStatus.Connected) &&
+                (prefabStatus == PrefabAssetType.NotAPrefab || prefabStatus == PrefabAssetType.Regular);             // Instance in the scene
+            var canRemoveGOs = (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
+                prefabInstanceStatus == PrefabInstanceStatus.Disconnected) &&
+                prefabStatus == PrefabAssetType.NotAPrefab;
 
             using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
@@ -47,7 +51,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var targetStreamDesc = streamPlayer.StreamDescriptor;
                 if (externalSource && !serializedObject.isEditingMultipleObjects)
                 {
-                    using (new EditorGUI.DisabledGroupScope(!canEditGOHierarchy))
+                    using (new EditorGUI.DisabledGroupScope(!canAddGos))
                     {
                         var initialFilePath = targetStreamDesc != null ? targetStreamDesc.PathToAbc : "";
                         var filePath = initialFilePath;
@@ -113,7 +117,10 @@ namespace UnityEditor.Formats.Alembic.Importer
                                 streamPlayer.LoadStream(true);
                             }
                         }
+                    }
 
+                    using (new EditorGUI.DisabledGroupScope(!canRemoveGOs))
+                    {
                         using (new EditorGUILayout.HorizontalScope())
                         {
                             GUILayout.FlexibleSpace();
