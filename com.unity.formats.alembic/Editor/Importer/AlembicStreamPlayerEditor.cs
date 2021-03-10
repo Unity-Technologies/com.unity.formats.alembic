@@ -35,13 +35,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             var prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(streamPlayer.gameObject);
             var prefabStatus = PrefabUtility.GetPrefabAssetType(streamPlayer.gameObject);
 
-            var canAddGos = (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
-                prefabInstanceStatus == PrefabInstanceStatus.Disconnected || prefabInstanceStatus == PrefabInstanceStatus.Connected) &&
-                (prefabStatus == PrefabAssetType.NotAPrefab || prefabStatus == PrefabAssetType.Regular);             // Instance in the scene
-            var canRemoveGOs = (prefabInstanceStatus == PrefabInstanceStatus.NotAPrefab ||
-                prefabInstanceStatus == PrefabInstanceStatus.Disconnected) &&
-                prefabStatus == PrefabAssetType.NotAPrefab;
-
+            var canAddGos = prefabStatus == PrefabAssetType.NotAPrefab || prefabInstanceStatus != PrefabInstanceStatus.NotAPrefab;
             using (new EditorGUI.DisabledGroupScope((target.hideFlags & HideFlags.NotEditable) != HideFlags.None))
             {
                 var streamDescriptorObj = serializedObject.FindProperty("streamDescriptor");
@@ -119,7 +113,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         }
                     }
 
-                    using (new EditorGUI.DisabledGroupScope(!canRemoveGOs))
+                    using (new EditorGUI.DisabledGroupScope(!canAddGos))
                     {
                         using (new EditorGUILayout.HorizontalScope())
                         {

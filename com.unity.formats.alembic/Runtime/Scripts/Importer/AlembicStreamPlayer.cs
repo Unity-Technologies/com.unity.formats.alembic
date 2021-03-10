@@ -1,4 +1,6 @@
-using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
@@ -196,7 +198,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         /// <summary>
-        /// This function removes all child game objects that don't have a corresponding alembic node. Note that is the object is a part of a prefab, this call will fail.
+        /// This function removes all child game objects that don't have a corresponding alembic node. Note that is the object is a part of a prefab, this call will fail. Please note that GameObjects that are a part of a Prefab cannot be deleted.
         /// </summary>
         public void RemoveObsoleteGameObjects()
         {
@@ -214,6 +216,15 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (abcStream.abcTreeRoot.FindNode(root) == null) // no alembic node means not driven by ABC
             {
+#if UNITY_EDITOR
+                var prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(root);
+                if (prefabInstanceStatus == PrefabInstanceStatus.Connected)
+                {
+                    Debug.LogError($"Cannot Remove GameObject: {root.name} because it is a part of a Prefab. Please delete in Prefab Isolation Mode");
+                    return;
+                }
+#endif
+
                 DestroyUnityObject(root);
             }
         }
