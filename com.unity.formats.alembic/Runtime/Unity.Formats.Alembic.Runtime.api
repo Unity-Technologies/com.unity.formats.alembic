@@ -56,7 +56,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public AlembicPointsRenderer() {}
     }
 
-    [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
     {
         public float CurrentTime { get; set; }
         public float Duration { get; }

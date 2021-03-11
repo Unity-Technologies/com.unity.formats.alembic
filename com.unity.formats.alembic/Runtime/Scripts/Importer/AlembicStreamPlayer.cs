@@ -11,6 +11,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     /// This component allows data streaming from Alembic files. It updates children nodes (Meshes, Transforms, Cameras, etc.) to reflect the Alembic data at the given time.
     /// </summary>
     [ExecuteInEditMode]
+    [DisallowMultipleComponent]
     public class AlembicStreamPlayer : MonoBehaviour
     {
         internal enum AlembicStreamSource
