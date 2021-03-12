@@ -72,11 +72,25 @@ namespace UnityEngine.Formats.Alembic.Importer
         List<JobHandle> m_PostProcessJobs = new List<JobHandle>();
         List<Submesh> m_submeshes = new List<Submesh>();
 
-        internal override aiSchema abcSchema { get { return m_abcSchema; } }
-        public override bool visibility { get { return m_sampleSummary.visibility; } }
+        internal override aiSchema abcSchema
+        {
+            get { return m_abcSchema; }
+        }
 
-        public aiMeshSummary summary { get { return m_summary; } }
-        public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
+        public override bool visibility
+        {
+            get { return m_sampleSummary.visibility; }
+        }
+
+        public aiMeshSummary summary
+        {
+            get { return m_summary; }
+        }
+
+        public aiMeshSampleSummary sampleSummary
+        {
+            get { return m_sampleSummary; }
+        }
 
         protected override void Dispose(bool v)
         {
@@ -87,7 +101,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             m_splitSummaries.DisposeIfPossible();
-            m_submeshSummaries.DisposeIfPossible();;
+            m_submeshSummaries.DisposeIfPossible();
+
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
         }
@@ -220,6 +235,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 {
                     split.rgb.ResizeDiscard(0);
                 }
+
                 vertexData.rgb = split.rgb;
 
                 m_splitData[spi] = vertexData;
@@ -252,6 +268,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public aiPolyMeshSample sample;
             public NativeArray<aiPolyMeshData> splitData;
             public NativeArray<aiSubmeshData> submeshData;
+
             public void Execute()
             {
                 sample.FillVertexBuffer(splitData, submeshData);
@@ -262,8 +279,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 #endif
         struct MultiplyByConstant : IJobParallelFor
         {
-            [NativeDisableUnsafePtrRestriction]
-            public IntPtr data;
+            [NativeDisableUnsafePtrRestriction] public IntPtr data;
             public float scalar;
 
             public unsafe void Execute(int index)
@@ -291,7 +307,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
-                if (split.active &&  split.velocities.Count > 0)
+                if (split.active && split.velocities.Count > 0)
                 {
                     var job = new MultiplyByConstant
                     {
@@ -419,7 +435,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             Mesh mesh = null;
             var meshFilter = go.GetComponent<MeshFilter>();
-            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null &&
+                meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
             if (!hasMesh)
             {
@@ -437,14 +454,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                     renderer = go.AddComponent<MeshRenderer>();
                 }
 
-                var material = renderer.sharedMaterial;
-                if (material == null)
+                var mat = renderer.sharedMaterial;
+                if (mat == null)
                 {
-                    var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-                    material = pipelineAsset != null
-                        ? pipelineAsset.defaultMaterial
-                        : new Material(Shader.Find("Standard"));
-                    renderer.sharedMaterial = material;
+                    renderer.sharedMaterial = GetDefaultMaterial();
                 }
             }
             else
@@ -455,6 +468,23 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             return mesh;
+        }
+
+        internal static Material GetDefaultMaterial()
+        {
+            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+            if (pipelineAsset != null)
+            {
+                return pipelineAsset.defaultMaterial;
+            }
+
+            var shader = Shader.Find("Standard");
+            if (shader != null)
+            {
+                return new Material(shader);
+            }
+
+            return null;
         }
     }
 }

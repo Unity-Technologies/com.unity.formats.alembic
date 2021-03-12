@@ -243,10 +243,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             StreamDescriptor.MediaStartTime = (float)start;
             StreamDescriptor.MediaEndTime = (float)end;
 
-            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-            var defaultMat = pipelineAsset != null
-                ? pipelineAsset.defaultMaterial
-                : new Material(Shader.Find("Standard"));
+            var defaultMat = AlembicMesh.GetDefaultMaterial();
 
             foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
             {
