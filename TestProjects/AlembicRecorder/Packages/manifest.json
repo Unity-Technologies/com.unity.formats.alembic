@@ -33,8 +33,5 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "enableLockFile": true,
-  "resolutionStrategy": "highest",
-  "testabls": [
-    "com.unity.formats.alembic"
-  ]
+  "resolutionStrategy": "highest"
 }
