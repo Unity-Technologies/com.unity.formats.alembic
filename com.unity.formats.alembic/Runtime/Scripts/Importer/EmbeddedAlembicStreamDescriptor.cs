@@ -1,18 +1,30 @@
 using System;
+using System.IO;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
     [Serializable]
     class EmbeddedAlembicStreamDescriptor : IStreamDescriptor
     {
-        [SerializeField] string pathToAbc;
+        [SerializeField] string pathToAbc = string.Empty;
         [SerializeField] AlembicStreamSettings settings = new AlembicStreamSettings();
         [SerializeField] float mediaStartTime;
         [SerializeField] float mediaEndTime;
 
         public string PathToAbc
         {
-            get => pathToAbc;
+            get
+            {
+                {
+#if UNITY_EDITOR
+                    return pathToAbc;
+#else
+                    if (!System.IO.Path.IsPathRooted(pathToAbc) && !string.IsNullOrEmpty(pathToAbc))
+                        return System.IO.Path.Combine(Application.streamingAssetsPath, pathToAbc);
+                    return pathToAbc;
+#endif
+                }
+            }
             set => pathToAbc = value;
         }
 
@@ -38,7 +50,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public IStreamDescriptor Clone()
         {
-            var copier = new AlembicStreamSettings.AlembicStreamSettingsCopier {abcSettings = Settings};
+            var copier = ScriptableObject.CreateInstance<AlembicStreamSettings.AlembicStreamSettingsCopier>();
+            copier.abcSettings = Settings;
             return new EmbeddedAlembicStreamDescriptor
             {
                 pathToAbc = PathToAbc,

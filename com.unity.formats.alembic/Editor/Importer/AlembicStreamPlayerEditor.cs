@@ -100,7 +100,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                             return;
                         }
 
-                        const int space = 200;
                         using (new EditorGUILayout.HorizontalScope())
                         {
                             GUILayout.Label("From File", GUILayout.Width(150));

@@ -185,7 +185,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             set => createCurveRenderers = value;
         }
 
-        internal class AlembicStreamSettingsCopier : Object
+        internal class AlembicStreamSettingsCopier : ScriptableObject
         {
             public AlembicStreamSettings abcSettings;
         }
