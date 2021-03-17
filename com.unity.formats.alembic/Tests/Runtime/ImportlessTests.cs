@@ -43,5 +43,27 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var p1 = player.gameObject.GetComponentInChildren<MeshFilter>().transform.position;
             Assert.AreEqual(10 * p0, p1);
         }
+
+        [Test]
+        public void ReloadStream_CreatesMissingNodes_IfNeeded([Values] bool createMissing)
+        {
+            Assert.IsTrue(player.LoadFromFile(path));
+            Assert.AreEqual(2, player.transform.childCount);
+            Object.DestroyImmediate(player.transform.GetChild(0).gameObject);
+            player.ReloadStream(createMissing);
+            Assert.AreEqual(createMissing ? 2 : 1, player.transform.childCount);
+        }
+
+        [Test]
+        public void RemovedObsoleteGameObjects_Removes()
+        {
+            Assert.IsTrue(player.LoadFromFile(path));
+            Assert.AreEqual(2, player.transform.childCount);
+            var cube = new GameObject();
+            cube.transform.parent = player.transform;
+            Assert.AreEqual(3, player.transform.childCount);
+            player.RemoveObsoleteGameObjects();
+            Assert.AreEqual(2, player.transform.childCount);
+        }
     }
 }
