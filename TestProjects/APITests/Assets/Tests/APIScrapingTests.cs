@@ -10,9 +10,8 @@ namespace ValidationTests
     {
         static readonly string[] k_ApiFilesGUID =
         {
-            "8af856e55aba3a842bb65372ce3b86ce", //Unity.Recorder.Editor.api
-            "428b801a7dffc63478778d1e864cb2b1", // Unity.Recorder.api
-            "ad280bc61d5f41f44a0b91cb3364ca2e" // Unity.Recorder.Base.api
+            "e3305ff7d49e0425aac9b9cb6fac4e88", //Unity.Formats.Alembic.Runtime.api
+            "3b49e2e2daa394a349ba61947bd337f6" //Unity.Formats.Alembic.Editor.api
         };
 
         string[] m_ApiFileContents = new string[k_ApiFilesGUID.Length];
