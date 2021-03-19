@@ -34,7 +34,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var ret = go.GetComponent<T>();
             return ret != null ? ret : go.AddComponent<T>();
         }
-      
+
         public static ulong CombineHash(this ulong h1, ulong h2)
         {
             unchecked

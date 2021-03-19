@@ -294,7 +294,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("10")));
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("30")));
         }
-        
+
         [UnityTest]
         public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
         {
