@@ -224,7 +224,7 @@ format_check_osx:
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - unity-downloader-cli -u 2019.4 -c Editor
-    - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/AlembicImporter --artifacts_path=artifacts --reruncount=0
+    - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   artifacts:
     logs.zip:
       paths:
@@ -239,7 +239,7 @@ format_check_win:
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - unity-downloader-cli -u 2019.4 -c Editor
-    - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/AlembicImporter --artifacts_path=artifacts --reruncount=0
+    - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   artifacts:
     logs.zip:
       paths:
