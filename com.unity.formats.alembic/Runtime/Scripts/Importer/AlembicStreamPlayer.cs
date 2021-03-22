@@ -271,6 +271,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (StreamDescriptor == null || string.IsNullOrEmpty(StreamDescriptor.PathToAbc))
                 return false;
+            if (abcStream != null)
+            {
+                abcStream.Dispose();
+            }
+
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
             var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
             forceUpdate = true;
@@ -346,7 +351,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         void OnDisable()
         {
             if (abcStream != null)
+            {
                 abcStream.Dispose();
+            }
+
+            abcStream = null;
         }
 
         void OnApplicationQuit()
