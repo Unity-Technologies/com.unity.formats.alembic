@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using NUnit.Framework;
@@ -5,7 +6,10 @@ using Scripts.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Formats.Alembic.Timeline;
+using UnityEngine.Playables;
 using UnityEngine.TestTools;
+using UnityEngine.Timeline;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -54,8 +58,43 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return null;
             yield return null;
             Assert.IsNotNull(inst.GetComponentsInChildren<AlembicCurves>());
-            var renderer = inst.GetComponentInChildren<AlembicCurvesRenderer>();
+            inst.GetComponentInChildren<AlembicCurvesRenderer>();
             Assert.IsTrue(inst.GetComponentInChildren<AlembicCurvesRenderer>() != null ^ addCurve);
+        }
+
+        [UnityTest]
+        public IEnumerator MultipleActivationsTracksCanActOnTheSameStreamPlayer()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("253cca792b1714bd985e9752217590a8");  // curves asset
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = inst.GetComponent<AlembicStreamPlayer>();
+            Assert.IsNotNull(player);
+            var director = new GameObject().AddComponent<PlayableDirector>();
+            var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
+            director.playableAsset = timeline;
+
+            var abcTrack = timeline.CreateTrack<AlembicTrack>(null, "");
+            var clip = abcTrack.CreateClip<AlembicShotAsset>();
+            var abcAsset = clip.asset as AlembicShotAsset;
+            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            abcAsset.StreamPlayer = refAbc;
+            director.SetReferenceValue(refAbc.exposedName, player);
+            var a1 = timeline.CreateTrack<ActivationTrack>();
+
+            var a2 = timeline.CreateTrack<ActivationTrack>();
+            var c2 = a2.CreateDefaultClip();
+            c2.start = 2;
+            c2.duration = 1;
+
+            director.SetGenericBinding(a1, player.gameObject);
+            director.SetGenericBinding(a2, player.gameObject);
+            director.RebuildGraph();
+            director.time = 0;
+            yield return null;
+            director.time = 2.5;
+            director.Evaluate();
+            yield return null;
         }
     }
 }
