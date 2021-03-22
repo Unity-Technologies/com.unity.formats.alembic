@@ -1,14 +1,25 @@
 {
     "name": "Unity.Formats.Alembic.UnitTests.Editor",
+    "rootNamespace": "",
     "references": [
-        "Unity.Formats.Alembic.Runtime"
-    ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
+        "Unity.Formats.Alembic.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.Timeline"
     ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
