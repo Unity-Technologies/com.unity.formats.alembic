@@ -155,7 +155,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataBegin()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
@@ -290,6 +290,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataEnd()
         {
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
+                return;
+
             fillVertexBufferHandle.Complete();
 #if UNITY_EDITOR
             for (int s = 0; s < m_splits.Count; ++s)

@@ -189,6 +189,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         // returns false if the context needs to be recovered.
         public void AbcUpdateEnd()
         {
+            if (m_streamInterupted)
+                return;
+
+
             m_context.updateJobHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);

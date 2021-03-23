@@ -262,6 +262,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             return true;
         }
 
+        void CloseStream()
+        {
+            abcStream?.Dispose();
+            abcStream = null;
+        }
+
         void ClampTime()
         {
             CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
@@ -271,10 +277,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (StreamDescriptor == null || string.IsNullOrEmpty(StreamDescriptor.PathToAbc))
                 return false;
-            if (abcStream != null)
-            {
-                abcStream.Dispose();
-            }
+            CloseStream();
 
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
             var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
@@ -323,8 +326,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 else
                 {
-                    abcStream.Dispose();
-                    abcStream = null;
+                    CloseStream();
                     LoadStream(false);
                 }
             }
@@ -350,12 +352,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnDisable()
         {
-            if (abcStream != null)
-            {
-                abcStream.Dispose();
-            }
-
-            abcStream = null;
+            CloseStream();
         }
 
         void OnApplicationQuit()
