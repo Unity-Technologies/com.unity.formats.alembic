@@ -1,4 +1,6 @@
+using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -27,6 +29,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             return array;
+        }
+
+        public static unsafe void* GetPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return array.Length == 0 ? null : array.GetUnsafePtr();
         }
 
         public static T GetOrAddComponent<T>(this GameObject go) where T : Component

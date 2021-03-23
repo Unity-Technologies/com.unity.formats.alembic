@@ -25,14 +25,14 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal class Split : IDisposable
         {
-            public PinnedList<Vector3> points = new PinnedList<Vector3>();
-            public PinnedList<Vector3> velocities = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normals = new PinnedList<Vector3>();
-            public PinnedList<Vector4> tangents = new PinnedList<Vector4>();
-            public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
-            public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
-            public PinnedList<Color> rgba = new PinnedList<Color>();
-            public PinnedList<Color> rgb = new PinnedList<Color>();
+            public NativeArray<Vector3> velocities;
+            public NativeArray<Vector3> points;
+            public NativeArray<Vector3> normals;
+            public NativeArray<Vector4> tangents;
+            public NativeArray<Vector2> uv0;
+            public NativeArray<Vector2> uv1;
+            public NativeArray<Color> rgba;
+            public NativeArray<Color> rgb;
 
             public Mesh mesh;
             public GameObject host;
@@ -40,22 +40,29 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public Vector3 center = Vector3.zero;
             public Vector3 size = Vector3.zero;
+            bool disposed;
 
             public void Dispose()
             {
-                if (points != null) points.Dispose();
-                if (velocities != null) velocities.Dispose();
-                if (normals != null) normals.Dispose();
-                if (tangents != null) tangents.Dispose();
-                if (uv0 != null) uv0.Dispose();
-                if (uv1 != null) uv1.Dispose();
-                if (rgba != null) rgba.Dispose();
-                if (rgb != null) rgb.Dispose();
+                if (disposed)
+                    return;
+
+                velocities.DisposeIfPossible();
+                points.DisposeIfPossible();
+                velocities.DisposeIfPossible();
+                normals.DisposeIfPossible();
+                tangents.DisposeIfPossible();
+                uv0.DisposeIfPossible();
+                uv1.DisposeIfPossible();
+                rgba.DisposeIfPossible();
+                rgb.DisposeIfPossible();
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
                     DestroyUnityObject(mesh);
                     mesh = null;
                 }
+
+                disposed = true;
             }
         }
 
@@ -95,8 +102,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         protected override void Dispose(bool v)
         {
             base.Dispose(v);
-            foreach (var split in m_splits)
+            for (var i = 0; i < m_splits.Count; ++i)
             {
+                m_PostProcessJobs[i].Complete();
+                var split = m_splits[i];
                 split.Dispose();
             }
 
@@ -153,7 +162,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_abcSchema.GetSummary(ref m_summary);
         }
 
-        public override void AbcSyncDataBegin()
+        public override unsafe void AbcSyncDataBegin()
         {
             if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
@@ -186,57 +195,57 @@ namespace UnityEngine.Formats.Alembic.Importer
                 int vertexCount = m_splitSummaries[spi].vertexCount;
 
                 if (!m_summary.constantPoints || topologyChanged)
-                    split.points.ResizeDiscard(vertexCount);
+                    split.points.ResizeIfNeeded(vertexCount);
                 else
-                    split.points.ResizeDiscard(0);
-                vertexData.positions = split.points;
+                    split.points.ResizeIfNeeded(0);
+                vertexData.positions = split.points.GetPointer();
 
+                m_PostProcessJobs[spi].Complete();
                 if (m_summary.hasVelocities && (!m_summary.constantVelocities || topologyChanged))
-                    split.velocities.ResizeDiscard(vertexCount);
+                    split.velocities.ResizeIfNeeded(vertexCount);
                 else
-                    split.velocities.ResizeDiscard(0);
-                vertexData.velocities = split.velocities;
+                    split.velocities.ResizeIfNeeded(0);
+                vertexData.velocities = split.velocities.GetPointer();
 
                 if (m_summary.hasNormals && (!m_summary.constantNormals || topologyChanged))
-                    split.normals.ResizeDiscard(vertexCount);
+                    split.normals.ResizeIfNeeded(vertexCount);
                 else
-                    split.normals.ResizeDiscard(0);
-                vertexData.normals = split.normals;
+                    split.normals.ResizeIfNeeded(0);
+                vertexData.normals = split.normals.GetPointer();
 
                 if (m_summary.hasTangents && (!m_summary.constantTangents || topologyChanged))
-                    split.tangents.ResizeDiscard(vertexCount);
+                    split.tangents.ResizeIfNeeded(vertexCount);
                 else
-                    split.tangents.ResizeDiscard(0);
-                vertexData.tangents = split.tangents;
+                    split.tangents.ResizeIfNeeded(0);
+                vertexData.tangents = split.tangents.GetPointer();
 
                 if (m_summary.hasUV0 && (!m_summary.constantUV0 || topologyChanged))
-                    split.uv0.ResizeDiscard(vertexCount);
+                    split.uv0.ResizeIfNeeded(vertexCount);
                 else
-                    split.uv0.ResizeDiscard(0);
-                vertexData.uv0 = split.uv0;
+                    split.uv0.ResizeIfNeeded(0);
+                vertexData.uv0 = split.uv0.GetPointer();
 
                 if (m_summary.hasUV1 && (!m_summary.constantUV1 || topologyChanged))
-                    split.uv1.ResizeDiscard(vertexCount);
+                    split.uv1.ResizeIfNeeded(vertexCount);
                 else
-                    split.uv1.ResizeDiscard(0);
-                vertexData.uv1 = split.uv1;
+                    split.uv1.ResizeIfNeeded(0);
+                vertexData.uv1 = split.uv1.GetPointer();
 
                 if (m_summary.hasRgba && (!m_summary.constantRgba || topologyChanged))
-                    split.rgba.ResizeDiscard(vertexCount);
+                    split.rgba.ResizeIfNeeded(vertexCount);
                 else
-                    split.rgba.ResizeDiscard(0);
-                vertexData.rgba = split.rgba;
+                    split.rgba.ResizeIfNeeded(0);
+                vertexData.rgba = split.rgba.GetPointer();
 
                 if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged))
                 {
-                    split.rgb.ResizeDiscard(vertexCount);
+                    split.rgb.ResizeIfNeeded(vertexCount);
                 }
                 else
                 {
-                    split.rgb.ResizeDiscard(0);
+                    split.rgb.ResizeIfNeeded(0);
                 }
-
-                vertexData.rgb = split.rgb;
+                vertexData.rgb = split.rgb.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -279,12 +288,12 @@ namespace UnityEngine.Formats.Alembic.Importer
 #endif
         struct MultiplyByConstant : IJobParallelFor
         {
-            [NativeDisableUnsafePtrRestriction] public IntPtr data;
+            public NativeArray<Vector3> data;
             public float scalar;
 
-            public unsafe void Execute(int index)
+            public void Execute(int index)
             {
-                ((Vector3*)data)[index] = scalar * ((Vector3*)data)[index];
+                data[index] = scalar * data[index];
             }
         }
 
@@ -310,14 +319,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
-                if (split.active && split.velocities.Count > 0)
+                if (split.active &&  split.velocities.Length > 0)
                 {
                     var job = new MultiplyByConstant
                     {
-                        data = split.velocities.Pointer,
+                        data = split.velocities,
                         scalar = -1
                     };
-                    m_PostProcessJobs[i] = job.Schedule(split.velocities.Count, 2048);
+                    m_PostProcessJobs[i].Complete();
+                    m_PostProcessJobs[i] = job.Schedule(split.velocities.Length, 2048);
                 }
             }
 
@@ -378,30 +388,27 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.subMeshCount = m_splitSummaries[s].submeshCount;
                     }
 
-                    if (split.points.Count > 0)
-                        split.mesh.SetVertices(split.points.List);
-                    if (split.normals.Count > 0)
-                        split.mesh.SetNormals(split.normals.List);
-                    if (split.tangents.Count > 0)
-                        split.mesh.SetTangents(split.tangents.List);
-                    if (split.uv0.Count > 0)
-                        split.mesh.SetUVs(0, split.uv0.List);
-                    if (split.uv1.Count > 0)
-                        split.mesh.SetUVs(1, split.uv1.List);
-                    if (split.velocities.Count > 0)
+                    if (split.points.Length > 0)
+                        split.mesh.SetVertices(split.points);
+
+                    if (split.normals.Length > 0)
+                        split.mesh.SetNormals(split.normals);
+                    if (split.tangents.Length > 0)
+                        split.mesh.SetTangents(split.tangents);
+                    if (split.uv0.Length > 0)
+                        split.mesh.SetUVs(0, split.uv0);
+                    if (split.uv1.Length > 0)
+                        split.mesh.SetUVs(1, split.uv1);
+                    if (split.velocities.Length > 0)
                     {
                         m_PostProcessJobs[s].Complete();
-#if UNITY_2019_2_OR_NEWER
-                        split.mesh.SetUVs(5, split.velocities.List);
-#else
-                        split.mesh.SetUVs(3, split.velocities.List);
-#endif
+                        split.mesh.SetUVs(5, split.velocities);
                     }
 
-                    if (split.rgba.Count > 0)
-                        split.mesh.SetColors(split.rgba.List);
-                    else if (split.rgb.Count > 0)
-                        split.mesh.SetColors(split.rgb.List);
+                    if (split.rgba.Length > 0)
+                        split.mesh.SetColors(split.rgba);
+                    else if (split.rgb.Length > 0)
+                        split.mesh.SetColors(split.rgb);
 
                     // update the bounds
                     var data = m_splitData[s];
