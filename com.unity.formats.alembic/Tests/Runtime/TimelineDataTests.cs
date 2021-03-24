@@ -156,11 +156,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
             var player = go.GetComponentInChildren<AlembicStreamPlayer>();
 
-            player.StartTime = player.StreamDescriptor.mediaStartTime - 1;
-            Assert.AreEqual(player.StartTime, player.StreamDescriptor.mediaStartTime);
+            player.StartTime = player.StreamDescriptor.MediaStartTime - 1;
+            Assert.AreEqual(player.StartTime, player.StreamDescriptor.MediaStartTime);
 
-            player.EndTime = (float)player.StreamDescriptor.mediaEndTime + 1;
-            Assert.AreEqual(player.EndTime, (float)player.StreamDescriptor.mediaEndTime);
+            player.EndTime = (float)player.StreamDescriptor.MediaEndTime + 1;
+            Assert.AreEqual(player.EndTime, (float)player.StreamDescriptor.MediaEndTime);
 
             player.CurrentTime = (player.StartTime + player.EndTime) / 2;
             Assert.AreEqual(player.CurrentTime, (player.StartTime + player.EndTime) / 2);
@@ -223,7 +223,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             var go = new GameObject("abc");
             var player = go.AddComponent<AlembicStreamPlayer>();
-            LogAssert.Expect(LogType.Error, new Regex("failed to load alembic at"));
+            LogAssert.Expect(LogType.Error, new Regex("File does not exist"));
             var ret = player.LoadFromFile("DoesNotExist");
 
             Assert.IsFalse(ret);
@@ -294,7 +294,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("10")));
             Assert.IsNotEmpty(meshNames.Where(x => x.StartsWith("30")));
         }
-        
+
         [UnityTest]
         public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Unity.Jobs;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -117,7 +118,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             });
         }
 
-        AlembicStreamDescriptor m_streamDesc;
+        IStreamDescriptor m_streamDesc;
         AlembicTreeNode m_abcTreeRoot;
         aiConfig m_config;
         SafeContext m_context;
@@ -125,7 +126,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         bool m_loaded;
         bool m_streamInterupted;
 
-        internal AlembicStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
+        internal IStreamDescriptor streamDescriptor { get { return m_streamDesc; } }
         public AlembicTreeNode abcTreeRoot { get { return m_abcTreeRoot; } }
         internal SafeContext abcContext { get { return m_context; } }
         public bool abcIsValid { get { return m_context.isValid; } }
@@ -141,7 +142,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public void GetTimeRange(out double begin, out double end) { m_context.GetTimeRange(out begin, out end); }
 
 
-        internal AlembicStream(GameObject rootGo, AlembicStreamDescriptor streamDesc)
+        internal AlembicStream(GameObject rootGo, IStreamDescriptor streamDesc)
         {
             m_config.SetDefaults();
             m_abcTreeRoot = new AlembicTreeNode() { stream = this, gameObject = rootGo };
@@ -158,7 +159,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void AbcBeginSyncData(AlembicTreeNode node)
         {
-            if (node.abcObject != null && node.gameObject != null)
+            if (node != null && node.abcObject != null && node.gameObject != null)
                 node.abcObject.AbcSyncDataBegin();
             foreach (var child in node.Children)
                 AbcBeginSyncData(child);
@@ -188,12 +189,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         // returns false if the context needs to be recovered.
         public void AbcUpdateEnd()
         {
+            if (m_streamInterupted)
+                return;
+
+
             m_context.updateJobHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);
         }
 
-        public bool AbcLoad(bool createMissingNodes, bool initialImport)
+        public bool AbcLoad(bool createMissingNodes, bool serializeMesh)
         {
             m_time = 0.0f;
             m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
@@ -215,12 +220,23 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (m_loaded)
             {
-                UpdateAbcTree(m_context.root, m_abcTreeRoot, m_time, createMissingNodes, initialImport);
+                UpdateAbcTree(m_context.root, m_abcTreeRoot, m_time, createMissingNodes, serializeMesh);
                 s_streams.Add(this);
             }
             else
             {
-                Debug.LogError("failed to load alembic at " + m_streamDesc.PathToAbc);
+                if (!File.Exists(m_streamDesc.PathToAbc))
+                {
+                    Debug.LogError("File does not exist: " + m_streamDesc.PathToAbc);
+                }
+                else if (m_context.IsHDF5())
+                {
+                    Debug.LogError("Failed to load HDF5 alembic. Please convert to Ogawa: " + m_streamDesc.PathToAbc);
+                }
+                else
+                {
+                    Debug.LogError("File is in unknown format: " + m_streamDesc.PathToAbc);
+                }
             }
 
             return m_loaded;
@@ -249,7 +265,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         ImportContext m_importContext;
-        void UpdateAbcTree(aiObject top, AlembicTreeNode node, double time, bool createMissingNodes, bool initialImport)
+        void UpdateAbcTree(aiObject top, AlembicTreeNode node, double time, bool createMissingNodes, bool serializeMesh)
         {
             if (!top)
                 return;
@@ -262,7 +278,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             };
             top.EachChild(ImportCallback);
 
-            if (!initialImport)
+            if (!serializeMesh)
             {
                 foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
                 {
@@ -309,7 +325,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         obj.SetEnabled(true);
                     }
 
-                    childGO = new GameObject { name = childName };
+                    childGO = Utils.CreateGameObjectWithUndo("Create AlembicObject");
+                    childGO.name = childName;
                     childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
                 }
                 else
