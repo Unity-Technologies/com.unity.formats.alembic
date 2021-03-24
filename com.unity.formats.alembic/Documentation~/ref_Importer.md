@@ -34,8 +34,8 @@ Use these options to customize the scale factor, handedness, interpolation, and 
 | __Import Camera__ | Enable to import Camera data. |
 | __Import Meshes__ | Enable to import Mesh data. |
 | __Import Points__ | Enable to import Point (particle cloud) data. |
-| __Import Curves__ | Enable to import Curve (hair or fur) data.<br /><br />Unity imports the curves as piecewise linear segments. The imported data includes the following attributes: Visibility, vertexPositions, nVertices, width, UV, and Velocities. However, it does **not** include the spline information from the original Alembic Curve schema. |
-| __Add Curve Renderers__ | Enable to get a basic preview of the Alembic curves in the Scene.<br /><br />Use this option only as a temporary solution to make the curves visible while you are working on your project. Keep it disabled if you need to produce a final quality render. |
+| __Import Curves__ | Enable to import Curve (hair or fur) data. See [Working with Curves](curves.md) for more details. |
+| __Add Curve Renderers__ | Enable to get a [basic preview](curves.md#rendering-alembic-curves) of the Alembic curves in your Scene and Game views if you don't have a curve renderer.<br />This option is only available when you select __Import Curves__. |
 
 <a name="importRef_B"></a>
 

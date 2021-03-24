@@ -11,6 +11,7 @@
 * [Exporting Unity GameObjects to Alembic](export.md)
 * [Working with Particles](particles.md)
 * [Working with Materials](matshad.md)
+* [Working with Curves](curves.md)
 * [Window reference](reference.md)
     * [Alembic Exporter component](ref_Exporter.md)
     * [Alembic Point Cloud component](ref_PointCloud.md)
