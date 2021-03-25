@@ -42,20 +42,17 @@ namespace ValidationTests
             var files = new List<string>();
             var allScraped = ApiScraping.ValidateAllFilesScraped(files);
             var filenames = "";
-            var shouldBe = "";
             if (files.Count > 0)
             {
                 foreach (var file in files)
                 {
                     filenames += $"{file}\n";
-                    shouldBe += "<<<<<<<<<<<<<<<<\n" + File.ReadAllText(file) + "\n<<<<<<<<<<<<<<<<<<<<<<";
                 }
             }
 
 
             Assert.IsTrue(allScraped,
-                "Some .api files have not been generated. Please make sure to run ApiScraping.Scrape() or configure the com.unity.coding package to your project in order to regenerate api files. Here are the api files that need to be generated\n" +
-                filenames + "ShouldBe:" + shouldBe);
+                "Some .api files have not been generated. Please make sure to run ApiScraping.Scrape() or configure the com.unity.coding package to your project in order to regenerate api files. Here are the api files that need to be generated\n" + filenames);
         }
     }
 }
