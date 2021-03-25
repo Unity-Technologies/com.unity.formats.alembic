@@ -6,6 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
+using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -24,14 +25,14 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal class Split : IDisposable
         {
-            public PinnedList<Vector3> points = new PinnedList<Vector3>();
-            public PinnedList<Vector3> velocities = new PinnedList<Vector3>();
-            public PinnedList<Vector3> normals = new PinnedList<Vector3>();
-            public PinnedList<Vector4> tangents = new PinnedList<Vector4>();
-            public PinnedList<Vector2> uv0 = new PinnedList<Vector2>();
-            public PinnedList<Vector2> uv1 = new PinnedList<Vector2>();
-            public PinnedList<Color> rgba = new PinnedList<Color>();
-            public PinnedList<Color> rgb = new PinnedList<Color>();
+            public NativeArray<Vector3> velocities;
+            public NativeArray<Vector3> points;
+            public NativeArray<Vector3> normals;
+            public NativeArray<Vector4> tangents;
+            public NativeArray<Vector2> uv0;
+            public NativeArray<Vector2> uv1;
+            public NativeArray<Color> rgba;
+            public NativeArray<Color> rgb;
 
             public Mesh mesh;
             public GameObject host;
@@ -39,26 +40,29 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public Vector3 center = Vector3.zero;
             public Vector3 size = Vector3.zero;
+            bool disposed;
 
             public void Dispose()
             {
-                if (points != null) points.Dispose();
-                if (velocities != null) velocities.Dispose();
-                if (normals != null) normals.Dispose();
-                if (tangents != null) tangents.Dispose();
-                if (uv0 != null) uv0.Dispose();
-                if (uv1 != null) uv1.Dispose();
-                if (rgba != null) rgba.Dispose();
-                if (rgb != null) rgb.Dispose();
+                if (disposed)
+                    return;
+
+                velocities.DisposeIfPossible();
+                points.DisposeIfPossible();
+                velocities.DisposeIfPossible();
+                normals.DisposeIfPossible();
+                tangents.DisposeIfPossible();
+                uv0.DisposeIfPossible();
+                uv1.DisposeIfPossible();
+                rgba.DisposeIfPossible();
+                rgb.DisposeIfPossible();
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
-#if UNITY_EDITOR
-                    Object.DestroyImmediate(mesh);
-#else
-                    Object.Destroy(mesh);
-#endif
+                    DestroyUnityObject(mesh);
                     mesh = null;
                 }
+
+                disposed = true;
             }
         }
 
@@ -75,22 +79,39 @@ namespace UnityEngine.Formats.Alembic.Importer
         List<JobHandle> m_PostProcessJobs = new List<JobHandle>();
         List<Submesh> m_submeshes = new List<Submesh>();
 
-        internal override aiSchema abcSchema { get { return m_abcSchema; } }
-        public override bool visibility { get { return m_sampleSummary.visibility; } }
+        internal override aiSchema abcSchema
+        {
+            get { return m_abcSchema; }
+        }
 
-        public aiMeshSummary summary { get { return m_summary; } }
-        public aiMeshSampleSummary sampleSummary { get { return m_sampleSummary; } }
+        public override bool visibility
+        {
+            get { return m_sampleSummary.visibility; }
+        }
+
+        public aiMeshSummary summary
+        {
+            get { return m_summary; }
+        }
+
+        public aiMeshSampleSummary sampleSummary
+        {
+            get { return m_sampleSummary; }
+        }
 
         protected override void Dispose(bool v)
         {
             base.Dispose(v);
-            foreach (var split in m_splits)
+            for (var i = 0; i < m_splits.Count; ++i)
             {
+                m_PostProcessJobs[i].Complete();
+                var split = m_splits[i];
                 split.Dispose();
             }
 
             m_splitSummaries.DisposeIfPossible();
-            m_submeshSummaries.DisposeIfPossible();;
+            m_submeshSummaries.DisposeIfPossible();
+
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
         }
@@ -141,9 +162,9 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_abcSchema.GetSummary(ref m_summary);
         }
 
-        public override void AbcSyncDataBegin()
+        public override unsafe void AbcSyncDataBegin()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
@@ -174,56 +195,57 @@ namespace UnityEngine.Formats.Alembic.Importer
                 int vertexCount = m_splitSummaries[spi].vertexCount;
 
                 if (!m_summary.constantPoints || topologyChanged)
-                    split.points.ResizeDiscard(vertexCount);
+                    split.points.ResizeIfNeeded(vertexCount);
                 else
-                    split.points.ResizeDiscard(0);
-                vertexData.positions = split.points;
+                    split.points.ResizeIfNeeded(0);
+                vertexData.positions = split.points.GetPointer();
 
+                m_PostProcessJobs[spi].Complete();
                 if (m_summary.hasVelocities && (!m_summary.constantVelocities || topologyChanged))
-                    split.velocities.ResizeDiscard(vertexCount);
+                    split.velocities.ResizeIfNeeded(vertexCount);
                 else
-                    split.velocities.ResizeDiscard(0);
-                vertexData.velocities = split.velocities;
+                    split.velocities.ResizeIfNeeded(0);
+                vertexData.velocities = split.velocities.GetPointer();
 
                 if (m_summary.hasNormals && (!m_summary.constantNormals || topologyChanged))
-                    split.normals.ResizeDiscard(vertexCount);
+                    split.normals.ResizeIfNeeded(vertexCount);
                 else
-                    split.normals.ResizeDiscard(0);
-                vertexData.normals = split.normals;
+                    split.normals.ResizeIfNeeded(0);
+                vertexData.normals = split.normals.GetPointer();
 
                 if (m_summary.hasTangents && (!m_summary.constantTangents || topologyChanged))
-                    split.tangents.ResizeDiscard(vertexCount);
+                    split.tangents.ResizeIfNeeded(vertexCount);
                 else
-                    split.tangents.ResizeDiscard(0);
-                vertexData.tangents = split.tangents;
+                    split.tangents.ResizeIfNeeded(0);
+                vertexData.tangents = split.tangents.GetPointer();
 
                 if (m_summary.hasUV0 && (!m_summary.constantUV0 || topologyChanged))
-                    split.uv0.ResizeDiscard(vertexCount);
+                    split.uv0.ResizeIfNeeded(vertexCount);
                 else
-                    split.uv0.ResizeDiscard(0);
-                vertexData.uv0 = split.uv0;
+                    split.uv0.ResizeIfNeeded(0);
+                vertexData.uv0 = split.uv0.GetPointer();
 
                 if (m_summary.hasUV1 && (!m_summary.constantUV1 || topologyChanged))
-                    split.uv1.ResizeDiscard(vertexCount);
+                    split.uv1.ResizeIfNeeded(vertexCount);
                 else
-                    split.uv1.ResizeDiscard(0);
-                vertexData.uv1 = split.uv1;
+                    split.uv1.ResizeIfNeeded(0);
+                vertexData.uv1 = split.uv1.GetPointer();
 
                 if (m_summary.hasRgba && (!m_summary.constantRgba || topologyChanged))
-                    split.rgba.ResizeDiscard(vertexCount);
+                    split.rgba.ResizeIfNeeded(vertexCount);
                 else
-                    split.rgba.ResizeDiscard(0);
-                vertexData.rgba = split.rgba;
+                    split.rgba.ResizeIfNeeded(0);
+                vertexData.rgba = split.rgba.GetPointer();
 
                 if (m_summary.hasRgb && (!m_summary.constantRgb || topologyChanged))
                 {
-                    split.rgb.ResizeDiscard(vertexCount);
+                    split.rgb.ResizeIfNeeded(vertexCount);
                 }
                 else
                 {
-                    split.rgb.ResizeDiscard(0);
+                    split.rgb.ResizeIfNeeded(0);
                 }
-                vertexData.rgb = split.rgb;
+                vertexData.rgb = split.rgb.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -255,6 +277,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public aiPolyMeshSample sample;
             public NativeArray<aiPolyMeshData> splitData;
             public NativeArray<aiSubmeshData> submeshData;
+
             public void Execute()
             {
                 sample.FillVertexBuffer(splitData, submeshData);
@@ -265,18 +288,20 @@ namespace UnityEngine.Formats.Alembic.Importer
 #endif
         struct MultiplyByConstant : IJobParallelFor
         {
-            [NativeDisableUnsafePtrRestriction]
-            public IntPtr data;
+            public NativeArray<Vector3> data;
             public float scalar;
 
-            public unsafe void Execute(int index)
+            public void Execute(int index)
             {
-                ((Vector3*)data)[index] = scalar * ((Vector3*)data)[index];
+                data[index] = scalar * data[index];
             }
         }
 
         public override void AbcSyncDataEnd()
         {
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
+                return;
+
             fillVertexBufferHandle.Complete();
 #if UNITY_EDITOR
             for (int s = 0; s < m_splits.Count; ++s)
@@ -294,14 +319,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
-                if (split.active &&  split.velocities.Count > 0)
+                if (split.active &&  split.velocities.Length > 0)
                 {
                     var job = new MultiplyByConstant
                     {
-                        data = split.velocities.Pointer,
+                        data = split.velocities,
                         scalar = -1
                     };
-                    m_PostProcessJobs[i] = job.Schedule(split.velocities.Count, 2048);
+                    m_PostProcessJobs[i].Complete();
+                    m_PostProcessJobs[i] = job.Schedule(split.velocities.Length, 2048);
                 }
             }
 
@@ -335,7 +361,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                             if (trans == null)
                             {
-                                GameObject go = new GameObject();
+                                GameObject go = Utils.CreateGameObjectWithUndo("Create AlembicObject");
                                 go.name = name;
 
                                 trans = go.GetComponent<Transform>();
@@ -362,30 +388,27 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.subMeshCount = m_splitSummaries[s].submeshCount;
                     }
 
-                    if (split.points.Count > 0)
-                        split.mesh.SetVertices(split.points.List);
-                    if (split.normals.Count > 0)
-                        split.mesh.SetNormals(split.normals.List);
-                    if (split.tangents.Count > 0)
-                        split.mesh.SetTangents(split.tangents.List);
-                    if (split.uv0.Count > 0)
-                        split.mesh.SetUVs(0, split.uv0.List);
-                    if (split.uv1.Count > 0)
-                        split.mesh.SetUVs(1, split.uv1.List);
-                    if (split.velocities.Count > 0)
+                    if (split.points.Length > 0)
+                        split.mesh.SetVertices(split.points);
+
+                    if (split.normals.Length > 0)
+                        split.mesh.SetNormals(split.normals);
+                    if (split.tangents.Length > 0)
+                        split.mesh.SetTangents(split.tangents);
+                    if (split.uv0.Length > 0)
+                        split.mesh.SetUVs(0, split.uv0);
+                    if (split.uv1.Length > 0)
+                        split.mesh.SetUVs(1, split.uv1);
+                    if (split.velocities.Length > 0)
                     {
                         m_PostProcessJobs[s].Complete();
-#if UNITY_2019_2_OR_NEWER
-                        split.mesh.SetUVs(5, split.velocities.List);
-#else
-                        split.mesh.SetUVs(3, split.velocities.List);
-#endif
+                        split.mesh.SetUVs(5, split.velocities);
                     }
 
-                    if (split.rgba.Count > 0)
-                        split.mesh.SetColors(split.rgba.List);
-                    else if (split.rgb.Count > 0)
-                        split.mesh.SetColors(split.rgb.List);
+                    if (split.rgba.Length > 0)
+                        split.mesh.SetColors(split.rgba);
+                    else if (split.rgb.Length > 0)
+                        split.mesh.SetColors(split.rgb);
 
                     // update the bounds
                     var data = m_splitData[s];
@@ -422,14 +445,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             Mesh mesh = null;
             var meshFilter = go.GetComponent<MeshFilter>();
-            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
+            bool hasMesh = meshFilter != null && meshFilter.sharedMesh != null &&
+                meshFilter.sharedMesh.name.IndexOf("dyn: ") == 0;
 
             if (!hasMesh)
             {
-                mesh = new Mesh { name = "dyn: " + go.name };
-#if UNITY_2017_3_OR_NEWER
+                mesh = new Mesh {name = "dyn: " + go.name};
                 mesh.indexFormat = IndexFormat.UInt32;
-#endif
                 mesh.MarkDynamic();
 
                 if (meshFilter == null)
@@ -440,8 +462,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (renderer == null)
                 {
                     renderer = go.AddComponent<MeshRenderer>();
-                    var material = go.transform.parent.GetComponentInChildren<MeshRenderer>(true).sharedMaterial;
-                    renderer.sharedMaterial = material;
+                }
+
+                var mat = renderer.sharedMaterial;
+                if (mat == null)
+                {
+                    renderer.sharedMaterial = GetDefaultMaterial();
                 }
             }
             else
@@ -452,6 +478,23 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             return mesh;
+        }
+
+        internal static Material GetDefaultMaterial()
+        {
+            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+            if (pipelineAsset != null)
+            {
+                return pipelineAsset.defaultMaterial;
+            }
+
+            var shader = Shader.Find("Standard");
+            if (shader != null)
+            {
+                return new Material(shader);
+            }
+
+            return null;
         }
     }
 }

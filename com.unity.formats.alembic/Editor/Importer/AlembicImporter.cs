@@ -177,10 +177,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                     startTime = abcStartTime;
                     endTime = abcEndTime;
                 }
-                streamDescriptor.mediaStartTime = (float)abcStartTime;
-                streamDescriptor.mediaEndTime = (float)abcEndTime;
+                streamDescriptor.MediaStartTime = (float)abcStartTime;
+                streamDescriptor.MediaEndTime = (float)abcEndTime;
 
                 var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
+                streamPlayer.StreamSource = AlembicStreamPlayer.AlembicStreamSource.Internal;
                 streamPlayer.StreamDescriptor = streamDescriptor;
                 streamPlayer.StartTime = (float)StartTime;
                 streamPlayer.EndTime = (float)EndTime;
@@ -242,7 +243,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     out long fileId))
                 {
                     newPipelineHash =
-                        UnityEngine.Formats.Alembic.Importer.Utils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
+                        RuntimeUtils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
                 }
             }
             if (pipelineHash != newPipelineHash)
@@ -343,7 +344,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void GenerateSubAssets(Subassets subassets, AlembicTreeNode root, AlembicStreamDescriptor streamDescr)
         {
-            if (streamDescr.mediaDuration > 0)
+            if (streamDescr.MediaDuration > 0)
             {
                 // AnimationClip for time
                 {
@@ -351,8 +352,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     frames[0].value = 0.0f;
                     frames[0].time = 0.0f;
                     frames[0].outTangent = 1.0f;
-                    frames[1].value = streamDescr.mediaDuration;
-                    frames[1].time = streamDescr.mediaDuration;
+                    frames[1].value = streamDescr.MediaDuration;
+                    frames[1].time = streamDescr.MediaDuration;
                     frames[1].inTangent = 1.0f;
 
                     var curve = new AnimationCurve(frames);

@@ -26,7 +26,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             m_abcSchema.sample.GetData(ref m_abcData);

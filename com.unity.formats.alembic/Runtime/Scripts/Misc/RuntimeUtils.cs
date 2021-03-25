@@ -1,10 +1,12 @@
+using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    static class Utils
+    static class RuntimeUtils
     {
-        public static void DisposeIfPossible<T>(this NativeArray<T> array) where T : struct
+        public static void DisposeIfPossible<T>(this ref NativeArray<T> array) where T : struct
         {
             if (array.IsCreated)
             {
@@ -29,6 +31,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             return array;
         }
 
+        public static unsafe void* GetPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return array.Length == 0 ? null : array.GetUnsafePtr();
+        }
+
         public static T GetOrAddComponent<T>(this GameObject go) where T : Component
         {
             var ret = go.GetComponent<T>();
@@ -41,6 +48,15 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 return h1 ^ h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2); // Similar to c++ boost::hash_combine
             }
+        }
+
+        public static void DestroyUnityObject(Object o)
+        {
+#if UNITY_EDITOR
+            Object.DestroyImmediate(o, true);
+#else
+            Object.Destroy(o);
+#endif
         }
     }
 }
