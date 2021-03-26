@@ -1,6 +1,9 @@
-using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
+using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -8,19 +11,43 @@ namespace UnityEngine.Formats.Alembic.Importer
     /// This component allows data streaming from Alembic files. It updates children nodes (Meshes, Transforms, Cameras, etc.) to reflect the Alembic data at the given time.
     /// </summary>
     [ExecuteInEditMode]
+    [DisallowMultipleComponent]
     public class AlembicStreamPlayer : MonoBehaviour
     {
+        internal enum AlembicStreamSource
+        {
+            Internal = 0,
+            External = 1
+        }
+
+        [SerializeField] AlembicStreamSource streamSource = AlembicStreamSource.External;
+        internal AlembicStreamSource StreamSource
+        {
+            get => streamSource;
+            set => streamSource = value;
+        }
+
         // "m_" prefix is intentionally missing and expose fields as public just to keep asset compatibility...
-        AlembicStream abcStream { get; set; }
-        [SerializeField]
-        AlembicStreamDescriptor streamDescriptor;
+        internal AlembicStream abcStream { get; set; }
+        [SerializeField] AlembicStreamDescriptor streamDescriptor;
+        [SerializeField] EmbeddedAlembicStreamDescriptor embeddedStreamDescriptor = new EmbeddedAlembicStreamDescriptor();
         /// <summary>
         /// Gives access to the stream description.
         /// </summary>
-        internal AlembicStreamDescriptor StreamDescriptor
+        internal IStreamDescriptor StreamDescriptor
         {
-            get { return streamDescriptor; }
-            set { streamDescriptor = value; }
+            get => StreamSource == AlembicStreamSource.External ? embeddedStreamDescriptor : (IStreamDescriptor)streamDescriptor;
+            set
+            {
+                if (StreamSource == AlembicStreamSource.External)
+                {
+                    embeddedStreamDescriptor = (EmbeddedAlembicStreamDescriptor)value;
+                }
+                else
+                {
+                    streamDescriptor = (AlembicStreamDescriptor)value;
+                }
+            }
         }
 
         [SerializeField]
@@ -30,13 +57,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float StartTime
         {
-            get { return startTime; }
+            get => startTime;
             set
             {
                 startTime = value;
-                if (StreamDescriptor == null)
-                    return;
-                startTime = Mathf.Clamp(startTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
+                if (StreamDescriptor != null)
+                {
+                    startTime = Mathf.Clamp(startTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
+                }
             }
         }
 
@@ -47,13 +75,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float EndTime
         {
-            get { return endTime; }
+            get => endTime;
             set
             {
                 endTime = value;
-                if (StreamDescriptor == null)
-                    return;
-                endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.mediaEndTime);
+                if (StreamDescriptor != null)
+                {
+                    endTime = Mathf.Clamp(endTime, StartTime, StreamDescriptor.MediaEndTime);
+                }
             }
         }
 
@@ -64,14 +93,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float CurrentTime
         {
-            get { return currentTime; }
-            set { currentTime = Mathf.Clamp(value, 0.0f, Duration); }
+            get => currentTime;
+            set => currentTime = Mathf.Clamp(value, 0.0f, Duration);
         }
 
         /// <summary>
         /// Get the duration of the Alembic file (in seconds).
         /// </summary>
-        public float Duration { get { return EndTime - StartTime; } }
+        public float Duration => EndTime - StartTime;
 
         [SerializeField]
         float vertexMotionScale = 1.0f;
@@ -80,18 +109,18 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         public float VertexMotionScale
         {
-            get { return vertexMotionScale; }
-            set { vertexMotionScale = value; }
+            get => vertexMotionScale;
+            set => vertexMotionScale = value;
         }
 
         /// <summary>
         /// The start timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaStartTime => StreamDescriptor ? StreamDescriptor.mediaStartTime : 0;
+        public float MediaStartTime => StreamDescriptor != null ? StreamDescriptor.MediaStartTime : 0;
         /// <summary>
         /// The end timestamp of the Alembic file (scale in seconds).
         /// </summary>
-        public float MediaEndTime => StreamDescriptor ? StreamDescriptor.mediaEndTime : 0;
+        public float MediaEndTime => StreamDescriptor != null ? StreamDescriptor.MediaEndTime : 0;
 
         /// <summary>
         /// The duration of the Alembic file (in seconds).
@@ -106,7 +135,20 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// The stream import options. NOTE: these options are shared between all instances of this asset.
         /// </summary>
-        public AlembicStreamSettings Settings => StreamDescriptor != null ? StreamDescriptor.Settings : null;
+        public AlembicStreamSettings Settings
+        {
+            get { return StreamDescriptor != null ? StreamDescriptor.Settings : null; }
+            set
+            {
+                if (StreamDescriptor == null)
+                {
+                    StreamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
+                }
+
+                StreamDescriptor.Settings = value;
+                ReloadStream();
+            }
+        }
 
         float lastUpdateTime;
         bool forceUpdate = false;
@@ -129,7 +171,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         /// <param name="newPath">Path to the new file.</param>
         /// <returns>True if the load succeeded, false otherwise.</returns>
-        internal bool LoadFromFile(string newPath)
+        public bool LoadFromFile(string newPath)
         {
             if (StreamDescriptor == null)
             {
@@ -140,37 +182,90 @@ namespace UnityEngine.Formats.Alembic.Importer
             return InitializeAfterLoad();
         }
 
-        bool InitializeAfterLoad()
+        /// <summary>
+        /// Closes and reopens the Alembic stream. Use this method to apply the new stream settings.
+        /// </summary>
+        /// <param name="createMissingNodes">If true, it also recreates the missing GameObjects for the Alembic nodes. </param>>
+        /// <returns>True if the stream was successfully reopened, false otherwise.</returns>>
+        public bool ReloadStream(bool createMissingNodes = false)
         {
-            var ret = LoadStream(true);
-            if (!ret)
-                return false;
-            //abcStream.AbcLoad(true, true);
-            double start, end;
-            abcStream.GetTimeRange(out start, out end);
-            startTime = (float)start;
-            endTime = (float)end;
-
-            streamDescriptor.mediaStartTime = (float)start;
-            streamDescriptor.mediaEndTime = (float)end;
-
-            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
-            var defaultMat = pipelineAsset != null
-                ? pipelineAsset.defaultMaterial
-                : new Material(Shader.Find("Standard"));
-
-            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            if (abcStream != null)
             {
-                var mats = new Material[meshRenderer.sharedMaterials.Length];
-                meshRenderer.sharedMaterials = Array.ConvertAll(mats, x => defaultMat);
-            }
-
-            foreach (var meshFilter in gameObject.GetComponentsInChildren<MeshFilter>())
-            {
-                meshFilter.sharedMesh.hideFlags |= HideFlags.DontSave;
+                abcStream?.Dispose();
+                return LoadStream(createMissingNodes);
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// This function removes all child game objects that don't have a corresponding alembic node. Note that is the object is a part of a prefab, this call will fail. Please note that GameObjects that are a part of a Prefab cannot be deleted.
+        /// </summary>
+        public void RemoveObsoleteGameObjects()
+        {
+            ReloadStream(true);
+            RemoveObsoleteGameObject(gameObject);
+        }
+
+        void RemoveObsoleteGameObject(GameObject root)
+        {
+            var nChildren = root.transform.childCount;
+            for (var i = nChildren - 1; i >= 0; --i) // need to iterate backwards because deleting an object changes the child count
+            {
+                RemoveObsoleteGameObject(root.transform.GetChild(i).gameObject);
+            }
+
+            if (abcStream.abcTreeRoot.FindNode(root) == null) // no alembic node means not driven by ABC
+            {
+#if UNITY_EDITOR
+                var prefabInstanceStatus = PrefabUtility.GetPrefabInstanceStatus(root);
+                if (prefabInstanceStatus == PrefabInstanceStatus.Connected)
+                {
+                    Debug.LogError($"Cannot Remove GameObject: {root.name} because it is a part of a Prefab. Please delete in Prefab Isolation Mode");
+                    return;
+                }
+#endif
+
+                DestroyUnityObject(root);
+            }
+        }
+
+        bool InitializeAfterLoad()
+        {
+            var ret = LoadStream(true, true);
+            if (!ret)
+                return false;
+
+            abcStream.GetTimeRange(out var start, out var end);
+            startTime = (float)start;
+            endTime = (float)end;
+
+            StreamDescriptor.MediaStartTime = (float)start;
+            StreamDescriptor.MediaEndTime = (float)end;
+
+            var defaultMat = AlembicMesh.GetDefaultMaterial();
+
+            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var mats = meshRenderer.sharedMaterials;
+                for (var i = 0; i < mats.Length; ++i)
+                {
+                    if (mats[i] == null) // Add the default material if no material present
+                    {
+                        mats[i] = defaultMat;
+                    }
+                }
+
+                meshRenderer.sharedMaterials = mats;
+            }
+
+            return true;
+        }
+
+        void CloseStream()
+        {
+            abcStream?.Dispose();
+            abcStream = null;
         }
 
         void ClampTime()
@@ -178,17 +273,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             CurrentTime = Mathf.Clamp(CurrentTime, 0.0f, Duration);
         }
 
-        internal bool  LoadStream(bool createMissingNodes)
+        internal bool LoadStream(bool createMissingNodes, bool serializeMesh = false)
         {
-            if (StreamDescriptor == null)
+            if (StreamDescriptor == null || string.IsNullOrEmpty(StreamDescriptor.PathToAbc))
                 return false;
-            if (abcStream != null)
-            {
-                abcStream.Dispose();
-            }
+            CloseStream();
 
             abcStream = new AlembicStream(gameObject, StreamDescriptor);
-            var ret = abcStream.AbcLoad(createMissingNodes, false);
+            var ret = abcStream.AbcLoad(createMissingNodes, serializeMesh);
             forceUpdate = true;
             return ret;
         }
@@ -202,16 +294,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             if (StreamDescriptor == null || abcStream == null)
                 return;
-            if (StreamDescriptor.mediaStartTime == double.MinValue || StreamDescriptor.mediaEndTime == double.MaxValue)
+            if (StreamDescriptor.MediaStartTime == double.MinValue || StreamDescriptor.MediaEndTime == double.MaxValue)
             {
                 double start, end;
                 abcStream.GetTimeRange(out start, out end);
-                StreamDescriptor.mediaStartTime = (float)start;
-                StreamDescriptor.mediaEndTime = (float)end;
+                StreamDescriptor.MediaStartTime = (float)start;
+                StreamDescriptor.MediaEndTime = (float)end;
             }
 
-            StartTime = Mathf.Clamp(StartTime, StreamDescriptor.mediaStartTime, StreamDescriptor.mediaEndTime);
-            EndTime = Mathf.Clamp(EndTime, StartTime, StreamDescriptor.mediaEndTime);
+            StartTime = Mathf.Clamp(StartTime, StreamDescriptor.MediaStartTime, StreamDescriptor.MediaEndTime);
+            EndTime = Mathf.Clamp(EndTime, StartTime, StreamDescriptor.MediaEndTime);
             ClampTime();
             forceUpdate = true;
         }
@@ -234,8 +326,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 else
                 {
-                    abcStream.Dispose();
-                    abcStream = null;
+                    CloseStream();
                     LoadStream(false);
                 }
             }
@@ -261,12 +352,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         void OnDisable()
         {
-            if (abcStream != null)
-            {
-                abcStream.Dispose();
-            }
-
-            abcStream = null;
+            CloseStream();
         }
 
         void OnApplicationQuit()

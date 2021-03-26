@@ -24,6 +24,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcPrepareSample()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
             if (cloud != null)
             {
@@ -37,7 +42,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataBegin()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
@@ -73,7 +78,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataEnd()
         {
-            if (!m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             var data = m_abcData[0];

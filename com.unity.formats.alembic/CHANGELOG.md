@@ -2,6 +2,7 @@
 ## [2.2.0-exp.3] - 2021-01-22
 ### Added
 - New option to automatically add the AlembicCurveRendering components for basic preview of the curves in the Scene.
+- New option to stream Alembic files from outside a Unity project.
 ### Changed
 - Minimum Unity version is 2019.4
 - Added a custom dependency on the "CurrentRenderPipeline" setting and assigning the correct SRP material by default.

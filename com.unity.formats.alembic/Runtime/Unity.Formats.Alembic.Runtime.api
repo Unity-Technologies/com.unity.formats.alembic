@@ -56,7 +56,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public AlembicPointsRenderer() {}
     }
 
-    [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
     {
         public float CurrentTime { get; set; }
         public float Duration { get; }
@@ -65,10 +65,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         public float MediaEndTime { get; }
         public float MediaStartTime { get; }
         public string PathToAbc { get; }
-        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; }
+        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; set; }
         public float StartTime { get; set; }
         public float VertexMotionScale { get; set; }
         public AlembicStreamPlayer() {}
+        public bool LoadFromFile(string newPath);
+        public bool ReloadStream(bool createMissingNodes = False);
+        public void RemoveObsoleteGameObjects();
         public void UpdateImmediately(float time);
     }
 

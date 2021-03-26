@@ -82,7 +82,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         static void ProcessAlembicStreamPlayerAssets(AlembicStreamPlayer streamPlayer, string streamingAssetsPath)
         {
-            streamPlayer.StreamDescriptor = Object.Instantiate(streamPlayer.StreamDescriptor);// make a copy
+            streamPlayer.StreamDescriptor = streamPlayer.StreamDescriptor.Clone();// make a copy
             var srcPath = streamPlayer.StreamDescriptor.PathToAbc;
 
             // Avoid name collisions by hashing the full path
