@@ -212,6 +212,38 @@ test_trigger:
     - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
+    - .yamato/upm-ci.yml#format_check_win
+    - .yamato/upm-ci.yml#format_check_osx 
+
+format_check_osx:
+  name : FormatCheck on OSX
+  agent:
+    type: Unity::VM::osx
+    image: package-ci/mac:latest
+    flavor: m1.mac
+  commands:
+    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
+    - unity-downloader-cli -u 2019.4 -c Editor
+    - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
+  artifacts:
+    logs.zip:
+      paths:
+      - "upm-ci~/test-results/**/*"
+
+format_check_win:
+  name : FormatCheck on Win
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
+    - unity-downloader-cli -u 2019.4 -c Editor
+    - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
+  artifacts:
+    logs.zip:
+      paths:
+      - "upm-ci~/test-results/**/*"
 
 
 {% for platform in bizarro_standalone_platforms %}
