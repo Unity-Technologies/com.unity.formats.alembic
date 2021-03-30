@@ -1,5 +1,7 @@
 * [Alembic](index.md)
 * [Importing Alembic files](import.md)
+  * [Importing a local Alembic file](import-file-local.md)
+  * [Importing an external Alembic file](import-file-external.md)
 * [Creating Alembic files in Autodesk® DCC applications](dccs.md)
 * [Controlling Alembic playback](playback.md)
 * [Using Alembic with Timeline](timeline.md)

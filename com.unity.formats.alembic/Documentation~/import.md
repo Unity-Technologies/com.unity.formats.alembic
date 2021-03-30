@@ -1,12 +1,11 @@
 # Importing Alembic files
 
-You can import Alembic files like [any other Asset](https://docs.unity3d.com/Manual/ImportingAssets.html):
+There are two ways to import Alembic files in Unity, depending on the way you can or want to handle their source:
 
-1. Drag your .abc file into your Project view.
-2. Select the file in the Project view and open the Inspector view.
-3. Customize how you want Unity to import the file. To do this, adjust the [options on the Alembic Import Settings window](ref_Importer.md).
-4. Drag your file from your Project into your Scene.
+* [Through your Unity project folder](import-file-local.md)
 
-Once imported, you might also want to [reassign the Default Material](matshad.md#materials) to a custom Material, because the Alembic format does not support any Material data.
+  Use this method when you can have a copy of the Alembic source file in a folder within your Unity project. For example, To import smaller assets or any assets that you are using in a context of individual work that does not involve team collaboration.
 
-In addition, the Alembic package provides a number of [Shaders](matshad.md#shaders) that are customized for Alembic data.
+* [From outside your Unity project folder](import-file-external.md)
+
+  Use this method when you cannot or do not want to manage the Alembic source file through a copy of a folder of your Unity project. For example, to import very large assets, or any assets that you are using in a context of collaborative work that involves shared storage locations.
