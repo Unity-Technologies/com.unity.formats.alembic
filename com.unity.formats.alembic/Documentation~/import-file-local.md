@@ -1,6 +1,6 @@
 # Importing a local Alembic file through your project folder
 
-Use this method when you can have a copy of the Alembic source file in a folder within your Unity project, for example:
+This is the default recommended import method. Use it when you can have a copy of the Alembic source file in a folder within your Unity project, for example:
 * To import smaller assets.
 * To import assets in a context of individual work that does not involve team collaboration.
 

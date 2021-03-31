@@ -2,7 +2,9 @@
 
 Use this method when you cannot or do not want to manage the Alembic source file through a copy of a folder of your Unity project, for example:
 * To import very large assets.
-* To import assets in a context of collaborative work that involves shared storage locations.
+* To import assets in a context of collaborative work that involves multiple teams and shared storage locations.
+
+>**Note:** If you can afford managing a copy of the Alembic inside your project folder, you should preferably use the [default recommended import method](import-file-local.md).
 
 ## Importing the file
 
