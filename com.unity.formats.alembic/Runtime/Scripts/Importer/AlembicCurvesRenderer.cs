@@ -12,7 +12,7 @@ using Unity.Burst;
 namespace Scripts.Importer
 {
     /// <summary>
-    /// Allows previewing the data inside an AlembicCurves component and requires it to function correctly. Adding this component will automatically add a MeshRenderer and  MeshFilter component.
+    /// The AlembicCurvesRenderer component allows you to preview the data inside an AlembicCurves component. It requires the AlembicCurves component to function correctly. When you add an AlembicCurvesRenderer component, it also automatically adds two other required components: a MeshRenderer and a MeshFilter.
     /// </summary>
     [RequireComponent(typeof(AlembicCurves))]
     [RequireComponent(typeof(MeshRenderer))]
