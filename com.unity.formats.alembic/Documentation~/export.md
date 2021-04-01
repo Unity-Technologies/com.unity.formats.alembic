@@ -11,6 +11,7 @@ Both options support exporting single frame and multi-frame Alembic files, and c
 - Particles ([**ParticleSystem**](https://docs.unity3d.com/Manual/class-ParticleSystem.html) component)
 - Cameras ([**Camera**](https://docs.unity3d.com/Manual/class-Camera.html) component)
 
+>**Note:** The Alembic Exporter uses the Ogawa archive type to encode the exported file data.
 
 <a name="alembic-exporter-component"></a>
 ## Using the Alembic Exporter component
