@@ -1,11 +1,17 @@
-# Changes in Alembic for Unity
+# Changelog
+All notable changes to this package will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [2.2.0-exp.3] - 2021-01-22
 ### Added
 - New option to automatically add the AlembicCurveRendering components for basic preview of the curves in the Scene.
 - New option to stream Alembic files from outside a Unity project.
+
 ### Changed
-- Minimum Unity version is 2019.4
-- Added a custom dependency on the "CurrentRenderPipeline" setting and assigning the correct SRP material by default.
+- Minimum Unity version is 2019.4.
+- Added a custom dependency on the "CurrentRenderPipeline" setting and ensure assigning the correct SRP material by default.
 
 ### Fixed
 - Fixed a bug that caused the Alembic exporter to fail if GameObjects were being deleted during the recording session.
@@ -15,48 +21,50 @@
 
 ## [2.2.0-exp.2] - 2021-01-21
 ### Added
-- Added support for Stadia standalone builds.
+- Added support for Google Stadia standalone builds.
 - Added support for arm64 macOS.
+
 ### Changed
 - Updated to Alembic version 1.7.16.
 - The package depends on the Cloth Unity Module.
 - Renamed AlembicCurve CurvePointCount to CurveOffsets, and changed the semantic to a stride array.
+
 ### Fixed
-- Fixed a bug, where degenerate triangles would create NaN normals.
+- Fixed a bug where degenerate triangles would create NaN normals.
 - Fixed a bug in the importer to prevent the Editor from crashing when importing meshes with empty geometry samples.
 
 ## [2.2.0-exp.1] - 2020-12-17
 ### Added
-- Added support for piecewise constant Curve importing
+- Added support for piecewise constant Curve importing.
 
 ## [2.1.2] - 2020-12-14
-### Changes
+### Changed
 - Fixed a bug causing the Alembic binary libraries to be copied into unsupported platform build, eg: iOS.
 
 ## [2.1.1-pre.1] - 2020-10-21
-### Changes
+### Changed
 - Added Unity recorder integration (compatible with Unity Recorder >= 2.2.0).
-
-### Changes
-- Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
-- Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
-- Fixed a bug where the visibility was not properly read if it was the only animated property of the object. 
 - When the timeline does discontinuous time updates (scrubbing), the alembic updates the scene synchronously.
 - Updated optional dependency to Burst 1.1.1 or newer.
 
+### Fixed
+- Fixed a bug on Windows where file pointers would leak, and after some time all alembic loads would fail.
+- Fixed a bug that caused a crash when exporting a GameObject with a MeshRender but without a MeshFilter Component.
+- Fixed a bug where the visibility was not properly read if it was the only animated property of the object.
+
 ## [2.0.1-preview.1] - 2020-05-29
-### Changes
+### Fixed
 - Fixed a crash in the Alembic Exporter  when GameObject names contained / in the name.
 - Fixed a bug where the Alembic motion vector direction was inverted.
 - Fixed a bug where the time range slider in the importer inspector breaks when going beyond the upper bound.
 - Fixed a crash in the Alembic Streamer when the object was being enabled and disabled very quickly.
 - Fixed a bug where the exported SkinnedMesh scale was wrong if the transform contained a scale change.
-- Fixed a bug where the exporter was writing the incorrect Camera rotation parameters. 
+- Fixed a bug where the exporter was writing the incorrect Camera rotation parameters.
 
 ## [2.0.0-preview.1] - 2019-12-20
 ### Changes
 - Minimum Unity version is 2019.3.
-- Introduced public API for Alembic playback and recording. 
+- Introduced public API for Alembic playback and recording.
 - Loading of Alembic files is now multi-threaded.
 - Removed the LitAlembic HDRP shader that has been obsoleted by HDRP native shaders that now offers the once missing velocity option.
 - HDF5 format is Obsolete.
@@ -73,7 +81,7 @@
 -Fixed Vertex colour import from Houdini.
 
 ### Known Issues
-- HDF5 is not supported under Linux for import or export. 
+- HDF5 is not supported under Linux for import or export.
 
 
 ## [1.0.5] - 2019-05-10
