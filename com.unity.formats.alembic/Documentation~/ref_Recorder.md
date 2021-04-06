@@ -27,9 +27,6 @@ Use this section to define the properties of the Alembic output.
 
 | Property || Description |
 | :--- | :--- | :--- |
-| __Archive Type__ || Choose the Alembic format specification. |
-|| HDF5 | Common (now deprecated) hierarchical data format for Alembic. |
-|| Ogawa | This format produces smaller files and better performance than HDF5. This is the default format. |
 | __Xform Type__ || Choose the transform type. |
 || Matrix | Record the full transformation matrix. |
 || TRS | Record the TRS channels for position, rotation, scale of an object. This is the default transform type. |

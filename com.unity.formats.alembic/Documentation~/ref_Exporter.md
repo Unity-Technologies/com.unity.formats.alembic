@@ -39,9 +39,6 @@ Use these settings to define the properties of the Alembic output.
 
 | ***Property***      |             | ***Description***                                            |
 | :------------------ | :---------- | :----------------------------------------------------------- |
-| __Archive Type__    |             | Choose the Alembic format specification.                     |
-|                     | __HDF5__    | Common (now deprecated) hierarchical data format for Alembic. |
-|                     | __Ogawa__   | This format produces smaller files and better performance than HDF5. This is the default format. |
 | __Xform Type__      |             | Choose the transform type.                                   |
 |                     | __Matrix__  | Record the full transformation matrix.                       |
 |                     | __TRS__     | Record the TRS channels for position, rotation, scale of an object. This is the default transform type. |
@@ -152,6 +149,8 @@ Enable the __Detailed Log__ option to provide Debug logging for each captured fr
 The buttons in this section allow you to define how much of the animation to capture.
 
 ![Capture Control section](images/abc_export_options_H.png)
+
+>**Note:** The buttons of this section are usable only once you enter the Play mode.
 
 In Play mode, click __Begin Recording__ to start capturing the entire Scene. Use this option if **Capture On Start** is disabled.
 
