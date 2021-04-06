@@ -1,6 +1,9 @@
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -36,18 +39,36 @@ namespace UnityEngine.Formats.Alembic.Importer
             return array.Length == 0 ? null : array.GetUnsafePtr();
         }
 
-        public static T GetOrAddComponent<T>(this GameObject go) where T : Component
-        {
-            var ret = go.GetComponent<T>();
-            return ret != null ? ret : go.AddComponent<T>();
-        }
-
         public static ulong CombineHash(this ulong h1, ulong h2)
         {
             unchecked
             {
                 return h1 ^ h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2); // Similar to c++ boost::hash_combine
             }
+        }
+
+        public static GameObject CreateGameObjectWithUndo(string message)
+        {
+            var ret = new GameObject();
+#if UNITY_EDITOR
+            Undo.RegisterCreatedObjectUndo(ret, message);
+#endif
+            return ret;
+        }
+
+        public static T GetOrAddComponent<T>(this GameObject go) where T : Component
+        {
+            var ret = go.GetComponent<T>();
+            if (ret != null)
+            {
+                return ret;
+            }
+
+            ret = go.AddComponent<T>();
+#if UNITY_EDITOR
+            Undo.RegisterCreatedObjectUndo(ret, "Add Component");
+#endif
+            return ret;
         }
 
         public static void DestroyUnityObject(Object o)
