@@ -196,6 +196,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     DrawStreamSettings(serializedObject.FindProperty("embeddedStreamDescriptor.settings"));
                     if (check.changed)
                     {
+                        serializedObject.ApplyModifiedProperties();
                         streamPlayer.Settings = streamPlayer.StreamDescriptor.Settings;
                     }
                 }
