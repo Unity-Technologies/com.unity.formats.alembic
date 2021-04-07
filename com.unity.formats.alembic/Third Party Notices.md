@@ -1,10 +1,10 @@
-This package contains third-party software components governed by the license(s) indicated below:
+This package contains third-party software components governed by the license(s) indicated below:  
 ---------
 
-Component Name: OpenEXR
-License Type: Modified BSD License
-Copyright © 2006-2019 Series of LF Projects, LLC
-https://www.openexr.com
+Component Name: OpenEXR  
+License Type: Modified BSD License  
+Copyright © 2006-2019 Series of LF Projects, LLC  
+https://www.openexr.com  
 
 Copyright (c) 2006-2019 OpenEXR a Series of LF Projects, LLC. All rights reserved. 
 
@@ -15,10 +15,10 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Component Name: Alembic
-License Type: MIT
-Copyright © 2009-2015 Sony Pictures Imageworks Inc
-https://www.alembic.io
+Component Name: Alembic  
+License Type: MIT  
+Copyright © 2009-2015 Sony Pictures Imageworks Inc  
+https://www.alembic.io  
 
 TM & © 2009-2015 Lucasfilm Entertainment Company Ltd. or Lucasfilm Ltd.
 All rights reserved.
