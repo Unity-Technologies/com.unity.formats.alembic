@@ -4,10 +4,10 @@
 #include "aiObject.h"
 #include <istream>
 #ifdef WIN32
-    #include <windows.h>
-    #include <io.h>
-    #include <fcntl.h>
-    #include <errno.h>
+#include <windows.h>
+#include <io.h>
+#include <fcntl.h>
+#include <errno.h>
 #endif
 
 static std::wstring L(const std::string& s)
@@ -20,7 +20,7 @@ static std::string S(const std::wstring& w)
     return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t> >().to_bytes(w);
 }
 
-static std::string NormalizePath(const char *in_path)
+static std::string NormalizePath(const char* in_path)
 {
     std::wstring path;
 
@@ -238,7 +238,7 @@ int aiContext::getTimeSamplingCount() const
     return (int)m_timesamplings.size();
 }
 
-aiTimeSampling * aiContext::getTimeSampling(int i)
+aiTimeSampling* aiContext::getTimeSampling(int i)
 {
     return m_timesamplings[i].get();
 }
@@ -292,19 +292,19 @@ const aiConfig& aiContext::getConfig() const
     return m_config;
 }
 
-void aiContext::setConfig(const aiConfig &config)
+void aiContext::setConfig(const aiConfig& config)
 {
     m_config = config;
 }
 
-void aiContext::gatherNodesRecursive(aiObject *n)
+void aiContext::gatherNodesRecursive(aiObject* n)
 {
     auto& abc = n->getAbcObject();
     size_t num_children = abc.getNumChildren();
 
     for (size_t i = 0; i < num_children; ++i)
     {
-        auto *child = n->newChild(abc.getChild(i));
+        auto* child = n->newChild(abc.getChild(i));
         gatherNodesRecursive(child);
     }
 }
@@ -325,7 +325,7 @@ void aiContext::reset()
     // m_config is not reset intentionally
 }
 
-bool aiContext::load(const char *in_path)
+bool aiContext::load(const char* in_path)
 {
     auto path = NormalizePath(in_path);
     auto wpath = L(in_path);
@@ -380,18 +380,18 @@ bool aiContext::load(const char *in_path)
             std::ifstream fp(path, std::ios::in | std::ios::binary);
             if (!fp)
             {
-                DebugLog("Unable to open " + filename );
+                DebugLog("Unable to open " + filename);
             }
             else
             {
                 char header[4]; /* funky char + "HDF" */
                 if (!fp.read(header, sizeof(header)))
                 {
-                    DebugLog("Unable to read from " + filename );
+                    DebugLog("Unable to read from " + filename);
                 }
                 if (strncmp(header + 1, "HDF", 3) != 0)
                 {
-                    DebugLog(filename+ "has unknown file format");
+                    DebugLog(filename + "has unknown file format");
                 }
                 else
                 {
@@ -439,8 +439,9 @@ aiObject* aiContext::getTopObject() const
 void aiContext::updateSamples(double time)
 {
     auto ss = aiTimeToSampleSelector(time);
-    eachNodes([ss](aiObject& o) {
-        o.updateSample(ss);
+    eachNodes([ss](aiObject& o)
+    {
+      o.updateSample(ss);
     });
 }
 

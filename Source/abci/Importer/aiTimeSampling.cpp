@@ -2,16 +2,15 @@
 #include "aiInternal.h"
 #include "aiTimeSampling.h"
 
-
 class aiTimeSamplingUniform : public aiTimeSampling
 {
-public:
+ public:
     aiTimeSamplingUniform(double start, double interval, size_t sample_count);
     void getTimeRange(double& begin, double& end) const override;
     size_t getSampleCount() const override;
     double getTime(uint64_t sample_index) const override;
 
-private:
+ private:
     double m_start = 0.0;
     double m_interval = 1.0;
     size_t m_sample_count = 0;
@@ -19,32 +18,31 @@ private:
 
 class aiTimeSamplingAcyclic : public aiTimeSampling
 {
-public:
+ public:
     aiTimeSamplingAcyclic(Abc::TimeSamplingPtr tsp);
     void getTimeRange(double& begin, double& end) const override;
     size_t getSampleCount() const override;
     double getTime(uint64_t sample_index) const override;
 
-private:
+ private:
     Abc::TimeSamplingPtr m_tsp;
 };
 
 class aiTimeSamplingCyclic : public aiTimeSampling
 {
-public:
+ public:
     aiTimeSamplingCyclic(double start, double interval, size_t m_cycle_count, Abc::TimeSamplingPtr tsp);
     void getTimeRange(double& begin, double& end) const override;
     size_t getSampleCount() const override;
     double getTime(uint64_t sample_index) const override;
 
-private:
+ private:
     double m_start = 0.0;
     double m_interval = 1.0;
     size_t m_cycle_count = 0;
     size_t m_samples_per_cycle = 0;
     Abc::TimeSamplingPtr m_tsp;
 };
-
 
 aiTimeSampling* aiCreateTimeSampling(Abc::IArchive& archive, int index)
 {
@@ -81,7 +79,7 @@ aiTimeSamplingUniform::aiTimeSamplingUniform(double start, double interval, size
     m_sample_count = sample_count;
 }
 
-void aiTimeSamplingUniform::getTimeRange(double & begin, double & end) const
+void aiTimeSamplingUniform::getTimeRange(double& begin, double& end) const
 {
     begin = m_start;
     end = m_sample_count > 0 ? m_start + m_interval * (m_sample_count - 1) : begin;
@@ -102,7 +100,7 @@ aiTimeSamplingAcyclic::aiTimeSamplingAcyclic(Abc::TimeSamplingPtr tsp)
     m_tsp = tsp;
 }
 
-void aiTimeSamplingAcyclic::getTimeRange(double & begin, double & end) const
+void aiTimeSamplingAcyclic::getTimeRange(double& begin, double& end) const
 {
     auto& st = m_tsp->getStoredTimes();
     begin = st.front();
@@ -130,7 +128,7 @@ aiTimeSamplingCyclic::aiTimeSamplingCyclic(double start, double interval, size_t
     m_tsp = tsp;
 }
 
-void aiTimeSamplingCyclic::getTimeRange(double & begin, double & end) const
+void aiTimeSamplingCyclic::getTimeRange(double& begin, double& end) const
 {
     auto& st = m_tsp->getStoredTimes();
     begin = m_start + (st.front() - m_interval);

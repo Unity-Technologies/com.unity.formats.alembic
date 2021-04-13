@@ -6,23 +6,21 @@
 #include "aiMisc.h"
 #include "aiMath.h"
 
-
-aeFaceSet::aeFaceSet(aeObject * parent, const char * name, uint32_t tsi)
-    : m_abc(new abcFaceSet(parent->getAbcObject(), name, tsi))
-    , m_schema(dynamic_cast<abcFaceSet&>(*m_abc).getSchema())
+aeFaceSet::aeFaceSet(aeObject* parent, const char* name, uint32_t tsi)
+    : m_abc(new abcFaceSet(parent->getAbcObject(), name, tsi)), m_schema(dynamic_cast<abcFaceSet&>(*m_abc).getSchema())
 {
 }
 
-void aeFaceSet::writeSample(const aeFaceSetData & data)
+void aeFaceSet::writeSample(const aeFaceSetData& data)
 {
     AbcGeom::OFaceSetSchema::Sample sample;
     sample.setFaces(Abc::Int32ArraySample(data.faces, data.face_count));
     m_schema.set(sample);
 }
 
-aePolyMesh::aePolyMesh(aeObject *parent, const char *name, uint32_t tsi)
-    : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi)
-    , m_schema(getAbcObject().getSchema())
+aePolyMesh::aePolyMesh(aeObject* parent, const char* name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcPolyMesh(parent->getAbcObject(), name, tsi), tsi),
+      m_schema(getAbcObject().getSchema())
 {
 }
 
@@ -46,14 +44,14 @@ void aePolyMesh::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aePolyMesh::writeSample(const aePolyMeshData &data)
+void aePolyMesh::writeSample(const aePolyMeshData& data)
 {
     m_buf_visibility = data.visibility;
     m_buf_points.assign(data.points, data.points + data.point_count);
-    m_buf_normals.assign(data.normals, data.normals +  data.point_count);
+    m_buf_normals.assign(data.normals, data.normals + data.point_count);
     m_buf_uv0.assign(data.uv0, data.uv0 + data.point_count);
-    m_buf_uv1.assign(data.uv1, data.uv1 +  data.point_count);
-    m_buf_colors.assign(data.colors, data.colors +  data.point_count);
+    m_buf_uv1.assign(data.uv1, data.uv1 + data.point_count);
+    m_buf_colors.assign(data.colors, data.colors + data.point_count);
 
     m_buf_submeshes.resize(data.submesh_count);
     for (int smi = 0; smi < data.submesh_count; ++smi)
@@ -64,10 +62,11 @@ void aePolyMesh::writeSample(const aePolyMeshData &data)
         dst.topology = src.topology;
     }
 
-    m_ctx->addAsync([this]() { writeSampleBody(); });
+    m_ctx->addAsync([this]()
+    { writeSampleBody(); });
 }
 
-int aePolyMesh::addFaceSet(const char *name)
+int aePolyMesh::addFaceSet(const char* name)
 {
     auto fs = new aeFaceSet(this, name, m_tsi);
     int ret = (int)m_facesets.size();
@@ -87,7 +86,7 @@ void aePolyMesh::writeFaceSetSample(int faceset_index, const aeFaceSetData& data
 
 void aePolyMesh::writeSampleBody()
 {
-    const auto &conf = getConfig();
+    const auto& conf = getConfig();
 
     // handle swap handedness
     if (conf.swap_handedness)
@@ -123,25 +122,25 @@ void aePolyMesh::writeSampleBody()
             int face_count = 0;
             switch (sm.topology)
             {
-                case aeTopology::Lines:
-                    ngon = 2;
-                    face_count = (int)sm.indices.size() / 2;
-                    break;
-                case aeTopology::Triangles:
-                    ngon = 3;
-                    face_count = (int)sm.indices.size() / 3;
-                    break;
-                case aeTopology::Quads:
-                    ngon = 4;
-                    face_count = (int)sm.indices.size() / 4;
-                    break;
-                default: // points
-                    ngon = 1;
-                    face_count = (int)sm.indices.size();
-                    break;
+            case aeTopology::Lines:
+                ngon = 2;
+                face_count = (int)sm.indices.size() / 2;
+                break;
+            case aeTopology::Triangles:
+                ngon = 3;
+                face_count = (int)sm.indices.size() / 3;
+                break;
+            case aeTopology::Quads:
+                ngon = 4;
+                face_count = (int)sm.indices.size() / 4;
+                break;
+            default: // points
+                ngon = 1;
+                face_count = (int)sm.indices.size();
+                break;
             }
             m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
-            facecount+= face_count * ngon;
+            facecount += face_count * ngon;
 
             if (smi < m_facesets.size())
             {
@@ -157,32 +156,34 @@ void aePolyMesh::writeSampleBody()
             offset_faces += face_count;
         }
 
-        attribScope = facecount == m_buf_indices.size() ? Alembic::AbcGeom::GeometryScope::kFacevaryingScope : Alembic::AbcGeom::GeometryScope::kVertexScope;
+        attribScope = facecount == m_buf_indices.size() ? Alembic::AbcGeom::GeometryScope::kFacevaryingScope
+                                                        : Alembic::AbcGeom::GeometryScope::kVertexScope;
     }
 
     // handle swap face option
     if (conf.swap_faces)
     {
         RawVector<int> face_indices;
-        auto do_swap = [&](RawVector<int>& dst) {
-                if (dst.empty())
-                {
-                    return;
-                }
-                int i = 0;
-                int num_faces = (int)m_buf_faces.size();
-                for (int fi = 0; fi < num_faces; ++fi)
-                {
-                    int ngon = m_buf_faces[fi];
-                    face_indices.assign(&dst[i], &dst[i + ngon]);
-                    for (int ni = 0; ni < ngon; ++ni)
-                    {
-                        int ini = ngon - ni - 1;
-                        dst[i + ni] = face_indices[ini];
-                    }
-                    i += ngon;
-                }
-            };
+        auto do_swap = [&](RawVector<int>& dst)
+        {
+          if (dst.empty())
+          {
+              return;
+          }
+          int i = 0;
+          int num_faces = (int)m_buf_faces.size();
+          for (int fi = 0; fi < num_faces; ++fi)
+          {
+              int ngon = m_buf_faces[fi];
+              face_indices.assign(&dst[i], &dst[i + ngon]);
+              for (int ni = 0; ni < ngon; ++ni)
+              {
+                  int ini = ngon - ni - 1;
+                  dst[i + ni] = face_indices[ini];
+              }
+              i += ngon;
+          }
+        };
         do_swap(m_buf_indices);
     }
 
@@ -228,7 +229,12 @@ void aePolyMesh::writeSampleBody()
         {
             bool indexed = m_buf_uv1.size() == m_buf_points.size();
             m_uv1_param = AbcGeom::OV2fGeomParam(
-                m_schema.getArbGeomParams(), "uv1", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
+                m_schema.getArbGeomParams(),
+                "uv1",
+                indexed,
+                AbcGeom::GeometryScope::kConstantScope,
+                m_buf_uv1.size(),
+                getTimeSamplingIndex());
         }
 
         AbcGeom::OV2fGeomParam::Sample sp;
@@ -246,7 +252,12 @@ void aePolyMesh::writeSampleBody()
         {
             bool indexed = m_buf_colors.size() == m_buf_points.size();
             m_colors_param = AbcGeom::OC4fGeomParam(
-                m_schema.getArbGeomParams(), "rgba", indexed, AbcGeom::GeometryScope::kConstantScope, m_buf_uv1.size(), getTimeSamplingIndex());
+                m_schema.getArbGeomParams(),
+                "rgba",
+                indexed,
+                AbcGeom::GeometryScope::kConstantScope,
+                m_buf_uv1.size(),
+                getTimeSamplingIndex());
         }
 
         AbcGeom::OC4fGeomParam::Sample sp;

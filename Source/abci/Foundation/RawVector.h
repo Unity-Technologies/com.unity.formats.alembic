@@ -7,17 +7,19 @@
 template<class T, int Align = 0x20>
 class RawVector
 {
-public:
+ public:
     using value_type = T;
-    using reference = T &;
+    using reference = T&;
     using const_reference = const T&;
-    using pointer = T *;
-    using const_pointer = const T *;
+    using pointer = T*;
+    using const_pointer = const T*;
     using iterator = pointer;
     using const_iterator = const_pointer;
     static const int alignment = Align;
 
-    RawVector() {}
+    RawVector()
+    {
+    }
     RawVector(const RawVector& v)
     {
         operator=(v);
@@ -33,7 +35,10 @@ public:
         operator=(v);
     }
 
-    explicit RawVector(size_t initial_size) { resize(initial_size); }
+    explicit RawVector(size_t initial_size)
+    {
+        resize(initial_size);
+    }
     RawVector& operator=(const RawVector& v)
     {
         assign(v.begin(), v.end());
@@ -58,31 +63,91 @@ public:
         shrink_to_fit();
     }
 
-    bool empty() const { return m_size == 0; }
-    size_t size() const { return m_size; }
-    size_t capacity() const { return m_capacity; }
+    bool empty() const
+    {
+        return m_size == 0;
+    }
+    size_t size() const
+    {
+        return m_size;
+    }
+    size_t capacity() const
+    {
+        return m_capacity;
+    }
 
-    T* data() { return m_data; }
-    const T* data() const { return m_data; }
-    const T* cdata() const { return m_data; }
+    T* data()
+    {
+        return m_data;
+    }
+    const T* data() const
+    {
+        return m_data;
+    }
+    const T* cdata() const
+    {
+        return m_data;
+    }
 
-    T& at(size_t i) { return m_data[i]; }
-    const T& at(size_t i) const { return m_data[i]; }
-    T& operator[](size_t i) { return at(i); }
-    const T& operator[](size_t i) const { return at(i); }
+    T& at(size_t i)
+    {
+        return m_data[i];
+    }
+    const T& at(size_t i) const
+    {
+        return m_data[i];
+    }
+    T& operator[](size_t i)
+    {
+        return at(i);
+    }
+    const T& operator[](size_t i) const
+    {
+        return at(i);
+    }
 
-    T& front() { return m_data[0]; }
-    const T& front() const { return m_data[0]; }
-    T& back() { return m_data[m_size - 1]; }
-    const T& back() const { return m_data[m_size - 1]; }
+    T& front()
+    {
+        return m_data[0];
+    }
+    const T& front() const
+    {
+        return m_data[0];
+    }
+    T& back()
+    {
+        return m_data[m_size - 1];
+    }
+    const T& back() const
+    {
+        return m_data[m_size - 1];
+    }
 
-    iterator begin() { return m_data; }
-    const_iterator begin() const { return m_data; }
-    iterator end() { return m_data + m_size; }
-    const_iterator end() const { return m_data + m_size; }
+    iterator begin()
+    {
+        return m_data;
+    }
+    const_iterator begin() const
+    {
+        return m_data;
+    }
+    iterator end()
+    {
+        return m_data + m_size;
+    }
+    const_iterator end() const
+    {
+        return m_data + m_size;
+    }
 
-    static void* allocate(size_t size) { return AlignedMalloc(size, alignment); }
-    static void deallocate(void *addr, size_t /*size*/) { AlignedFree(addr); }
+    static void* allocate(size_t size)
+    {
+        return AlignedMalloc(size, alignment);
+    }
+    static void deallocate(void* addr, size_t /*size*/)
+    {
+        AlignedFree(addr);
+    }
 
     void reserve(size_t s)
     {
@@ -92,7 +157,7 @@ public:
             size_t newsize = sizeof(T) * s;
             size_t oldsize = sizeof(T) * m_size;
 
-            T *newdata = (T*)allocate(newsize);
+            T* newdata = (T*)allocate(newsize);
             memcpy(newdata, m_data, oldsize);
             deallocate(m_data, oldsize);
             m_data = newdata;
@@ -130,7 +195,7 @@ public:
         {
             size_t newsize = sizeof(T) * m_size;
             size_t oldsize = sizeof(T) * m_capacity;
-            T *newdata = (T*)allocate(newsize);
+            T* newdata = (T*)allocate(newsize);
             memcpy(newdata, m_data, newsize);
             deallocate(m_data, oldsize);
             m_data = newdata;
@@ -172,7 +237,7 @@ public:
         m_size = 0;
     }
 
-    void swap(RawVector &other)
+    void swap(RawVector& other)
     {
         std::swap(m_data, other.m_data);
         std::swap(m_size, other.m_size);
@@ -277,8 +342,8 @@ public:
         memcpy(dst, m_data + offset, sizeof(value_type) * length);
     }
 
-private:
-    T * m_data = nullptr;
+ private:
+    T* m_data = nullptr;
     size_t m_size = 0;
     size_t m_capacity = 0;
 };

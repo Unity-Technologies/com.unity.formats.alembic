@@ -15,21 +15,66 @@ struct stride_iterator
     Boilerplate(stride_iterator, T);
     static const int stride = Stride;
 
-    uint8_t *data;
+    uint8_t* data;
 
-    reference operator[](int v)  { return *(T*)(data + stride * v); }
-    reference operator*()        { return *(T*)data; }
-    pointer   operator->()       { return &(T*)data; }
-    this_t  operator+(size_t v)  { return data + stride * v; }
-    this_t  operator-(size_t v)  { return data + stride * v; }
-    this_t& operator+=(size_t v) { data += stride * v; return *this; }
-    this_t& operator-=(size_t v) { data -= stride * v; return *this; }
-    this_t& operator++()         { data += stride; return *this; }
-    this_t& operator++(int)      { data += stride; return *this; }
-    this_t& operator--()         { data -= stride; return *this; }
-    this_t& operator--(int)      { data -= stride; return *this; }
-    bool operator==(const this_t& v) const { return data == data; }
-    bool operator!=(const this_t& v) const { return data != data; }
+    reference operator[](int v)
+    {
+        return *(T*)(data + stride * v);
+    }
+    reference operator*()
+    {
+        return *(T*)data;
+    }
+    pointer operator->()
+    {
+        return &(T*)data;
+    }
+    this_t operator+(size_t v)
+    {
+        return data + stride * v;
+    }
+    this_t operator-(size_t v)
+    {
+        return data + stride * v;
+    }
+    this_t& operator+=(size_t v)
+    {
+        data += stride * v;
+        return *this;
+    }
+    this_t& operator-=(size_t v)
+    {
+        data -= stride * v;
+        return *this;
+    }
+    this_t& operator++()
+    {
+        data += stride;
+        return *this;
+    }
+    this_t& operator++(int)
+    {
+        data += stride;
+        return *this;
+    }
+    this_t& operator--()
+    {
+        data -= stride;
+        return *this;
+    }
+    this_t& operator--(int)
+    {
+        data -= stride;
+        return *this;
+    }
+    bool operator==(const this_t& v) const
+    {
+        return data == data;
+    }
+    bool operator!=(const this_t& v) const
+    {
+        return data != data;
+    }
 };
 
 template<class T>
@@ -37,24 +82,68 @@ struct stride_iterator<T, 0>
 {
     Boilerplate(stride_iterator, T)
 
-    uint8_t *data;
+    uint8_t* data;
     size_t stride;
 
-    reference operator[](int v)  { return *(T*)(data + stride * v); }
-    reference operator*()        { return *(T*)data; }
-    pointer   operator->()       { return &(T*)data; }
-    this_t  operator+(size_t v)  { return data + stride * v; }
-    this_t  operator-(size_t v)  { return data + stride * v; }
-    this_t& operator+=(size_t v) { data += stride * v; return *this; }
-    this_t& operator-=(size_t v) { data -= stride * v; return *this; }
-    this_t& operator++()         { data += stride; return *this; }
-    this_t& operator++(int)      { data += stride; return *this; }
-    this_t& operator--()         { data -= stride; return *this; }
-    this_t& operator--(int)      { data -= stride; return *this; }
-    bool operator==(const this_t& v) const { return data == data; }
-    bool operator!=(const this_t& v) const { return data != data; }
+    reference operator[](int v)
+    {
+        return *(T*)(data + stride * v);
+    }
+    reference operator*()
+    {
+        return *(T*)data;
+    }
+    pointer operator->()
+    {
+        return &(T*)data;
+    }
+    this_t operator+(size_t v)
+    {
+        return data + stride * v;
+    }
+    this_t operator-(size_t v)
+    {
+        return data + stride * v;
+    }
+    this_t& operator+=(size_t v)
+    {
+        data += stride * v;
+        return *this;
+    }
+    this_t& operator-=(size_t v)
+    {
+        data -= stride * v;
+        return *this;
+    }
+    this_t& operator++()
+    {
+        data += stride;
+        return *this;
+    }
+    this_t& operator++(int)
+    {
+        data += stride;
+        return *this;
+    }
+    this_t& operator--()
+    {
+        data -= stride;
+        return *this;
+    }
+    this_t& operator--(int)
+    {
+        data -= stride;
+        return *this;
+    }
+    bool operator==(const this_t& v) const
+    {
+        return data == data;
+    }
+    bool operator!=(const this_t& v) const
+    {
+        return data != data;
+    }
 };
-
 
 template<class VIter, class IIter>
 struct indexed_iterator
@@ -64,19 +153,64 @@ struct indexed_iterator
     VIter data;
     IIter index;
 
-    reference operator[](int v) { return data[index[v]]; }
-    reference operator*()       { return data[*index]; }
-    pointer   operator->()      { return &data[*index]; }
-    this_t  operator+(size_t v) { return { data, index + v }; }
-    this_t  operator-(size_t v) { return { data, index - v }; }
-    this_t& operator+=(size_t v) { index += v; return *this; }
-    this_t& operator-=(size_t v) { index -= v; return *this; }
-    this_t& operator++()        { ++index; return *this; }
-    this_t& operator++(int)     { ++index; return *this; }
-    this_t& operator--()        { --index; return *this; }
-    this_t& operator--(int)     { --index; return *this; }
-    bool operator==(const this_t& v) const { return v.data == data && v.index == index; }
-    bool operator!=(const this_t& v) const { return v.data != data || v.index != index; }
+    reference operator[](int v)
+    {
+        return data[index[v]];
+    }
+    reference operator*()
+    {
+        return data[*index];
+    }
+    pointer operator->()
+    {
+        return &data[*index];
+    }
+    this_t operator+(size_t v)
+    {
+        return { data, index + v };
+    }
+    this_t operator-(size_t v)
+    {
+        return { data, index - v };
+    }
+    this_t& operator+=(size_t v)
+    {
+        index += v;
+        return *this;
+    }
+    this_t& operator-=(size_t v)
+    {
+        index -= v;
+        return *this;
+    }
+    this_t& operator++()
+    {
+        ++index;
+        return *this;
+    }
+    this_t& operator++(int)
+    {
+        ++index;
+        return *this;
+    }
+    this_t& operator--()
+    {
+        --index;
+        return *this;
+    }
+    this_t& operator--(int)
+    {
+        --index;
+        return *this;
+    }
+    bool operator==(const this_t& v) const
+    {
+        return v.data == data && v.index == index;
+    }
+    bool operator!=(const this_t& v) const
+    {
+        return v.data != data || v.index != index;
+    }
 };
 
 template<class VIter, class IIter>
@@ -87,19 +221,64 @@ struct indexed_iterator_s
     VIter data;
     IIter index;
 
-    reference operator[](int v) { return index ? data[index[v]] : data[v]; }
-    reference operator*()       { return index ? data[*index] : *data; }
-    pointer   operator->()      { return index ? &data[*index] : data; }
-    this_t  operator+(size_t v) { return index ? this_t{ data, index + v } : this_t{ data + v, nullptr }; }
-    this_t  operator-(size_t v) { return index ? this_t{ data, index - v } : this_t{ data - v, nullptr }; }
-    this_t& operator+=(size_t v) { if (index) index += v; else data += v; return *this; }
-    this_t& operator-=(size_t v) { if (index) index -= v; else data -= v; return *this; }
-    this_t& operator++()        { if (index) ++index; else ++data; return *this; }
-    this_t& operator++(int)     { if (index) ++index; else ++data; return *this; }
-    this_t& operator--()        { if (index) --index; else --data; return *this; }
-    this_t& operator--(int)     { if (index) --index; else --data; return *this; }
-    bool operator==(const this_t& v) const { return v.data == data && v.index == index; }
-    bool operator!=(const this_t& v) const { return v.data != data || v.index != index; }
+    reference operator[](int v)
+    {
+        return index ? data[index[v]] : data[v];
+    }
+    reference operator*()
+    {
+        return index ? data[*index] : *data;
+    }
+    pointer operator->()
+    {
+        return index ? &data[*index] : data;
+    }
+    this_t operator+(size_t v)
+    {
+        return index ? this_t{ data, index + v } : this_t{ data + v, nullptr };
+    }
+    this_t operator-(size_t v)
+    {
+        return index ? this_t{ data, index - v } : this_t{ data - v, nullptr };
+    }
+    this_t& operator+=(size_t v)
+    {
+        if (index) index += v; else data += v;
+        return *this;
+    }
+    this_t& operator-=(size_t v)
+    {
+        if (index) index -= v; else data -= v;
+        return *this;
+    }
+    this_t& operator++()
+    {
+        if (index) ++index; else ++data;
+        return *this;
+    }
+    this_t& operator++(int)
+    {
+        if (index) ++index; else ++data;
+        return *this;
+    }
+    this_t& operator--()
+    {
+        if (index) --index; else --data;
+        return *this;
+    }
+    this_t& operator--(int)
+    {
+        if (index) --index; else --data;
+        return *this;
+    }
+    bool operator==(const this_t& v) const
+    {
+        return v.data == data && v.index == index;
+    }
+    bool operator!=(const this_t& v) const
+    {
+        return v.data != data || v.index != index;
+    }
 };
 
 #undef Boilerplate

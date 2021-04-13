@@ -28,15 +28,14 @@ class aiObject;
 
 #include "aiTimeSampling.h"
 
-
 class aiContextManager
 {
-public:
+ public:
     static aiContext* getContext(int uid);
     static void destroyContext(int uid);
     static void destroyContextsWithPath(const char* assetPath);
 
-private:
+ private:
     ~aiContextManager();
 
     using ContextPtr = std::unique_ptr<aiContext>;
@@ -44,17 +43,16 @@ private:
     static aiContextManager s_instance;
 };
 
-
 class aiContext
 {
-public:
+ public:
     explicit aiContext(int uid = -1);
     ~aiContext();
 
-    bool load(const char *path);
+    bool load(const char* path);
 
     const aiConfig& getConfig() const;
-    void setConfig(const aiConfig &config);
+    void setConfig(const aiConfig& config);
 
     aiObject* getTopObject() const;
     void updateSamples(double time);
@@ -70,13 +68,16 @@ public:
     int getTimeSamplingCount();
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
-    bool getIsHDF5() const { return m_isHDF5; }
+    bool getIsHDF5() const
+    {
+        return m_isHDF5;
+    }
 
     template<class F>
-    void eachNodes(const F &f);
+    void eachNodes(const F& f);
 
-private:
-    static void gatherNodesRecursive(aiObject *n);
+ private:
+    static void gatherNodesRecursive(aiObject* n);
     void reset();
 
     std::string m_path;
@@ -94,7 +95,7 @@ private:
 #include "aiObject.h"
 
 template<class F>
-inline void aiContext::eachNodes(const F &f)
+inline void aiContext::eachNodes(const F& f)
 {
     if (m_top_node)
         m_top_node->eachChildRecursive(f);

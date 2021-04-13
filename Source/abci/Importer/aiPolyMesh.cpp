@@ -7,7 +7,6 @@
 #include "../Foundation/aiMisc.h"
 #include "../Foundation/aiMath.h"
 
-
 template<class Container>
 static inline int CalculateTriangulatedIndexCount(const Container& counts)
 {
@@ -22,9 +21,10 @@ static inline int CalculateTriangulatedIndexCount(const Container& counts)
 }
 
 template<class T, class IndexArray>
-inline void CopyWithIndices(T *dst, const T *src, const IndexArray& indices)
+inline void CopyWithIndices(T* dst, const T* src, const IndexArray& indices)
 {
-    if (!dst || !src) { return; }
+    if (!dst || !src)
+    { return; }
     size_t size = indices.size();
     for (size_t i = 0; i < (int)size; ++i)
     {
@@ -110,9 +110,8 @@ int aiMeshTopology::getSubmeshCount(int split_index) const
     return (int)m_refiner.splits[split_index].submesh_count;
 }
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
-    : super(schema)
-    , m_topology(topo)
+aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh* schema, TopologyPtr topo)
+    : super(schema), m_topology(topo)
 {
 }
 
@@ -122,10 +121,13 @@ aiPolyMeshSample::~aiPolyMeshSample()
 
 void aiPolyMeshSample::reset()
 {
-    m_points_sp.reset(); m_points_sp2.reset();
+    m_points_sp.reset();
+    m_points_sp2.reset();
     m_velocities_sp.reset();
-    m_normals_sp.reset(); m_normals_sp2.reset();
-    m_uv0_sp.reset(); m_uv1_sp.reset();
+    m_normals_sp.reset();
+    m_normals_sp2.reset();
+    m_uv0_sp.reset();
+    m_uv1_sp.reset();
     m_rgba_sp.reset();
     m_rgb_sp.reset();
 
@@ -139,41 +141,41 @@ void aiPolyMeshSample::reset()
     m_rgb_ref.reset();
 }
 
-void aiPolyMeshSample::getSummary(aiMeshSampleSummary &dst) const
+void aiPolyMeshSample::getSummary(aiMeshSampleSummary& dst) const
 {
     dst.visibility = visibility;
-    dst.split_count   = m_topology->getSplitCount();
+    dst.split_count = m_topology->getSplitCount();
     dst.submesh_count = m_topology->getSubmeshCount();
-    dst.vertex_count  = m_topology->getVertexCount();
-    dst.index_count   = m_topology->getIndexCount();
+    dst.vertex_count = m_topology->getVertexCount();
+    dst.index_count = m_topology->getIndexCount();
     dst.topology_changed = m_topology_changed;
 }
 
-void aiPolyMeshSample::getSplitSummaries(aiMeshSplitSummary  *dst) const
+void aiPolyMeshSample::getSplitSummaries(aiMeshSplitSummary* dst) const
 {
     auto& refiner = m_topology->m_refiner;
     for (int i = 0; i < (int)refiner.splits.size(); ++i)
     {
         auto& src = refiner.splits[i];
-        dst[i].submesh_count  = src.submesh_count;
+        dst[i].submesh_count = src.submesh_count;
         dst[i].submesh_offset = src.submesh_offset;
-        dst[i].vertex_count   = src.vertex_count;
-        dst[i].vertex_offset  = src.vertex_offset;
-        dst[i].index_count    = src.index_count;
-        dst[i].index_offset   = src.index_offset;
+        dst[i].vertex_count = src.vertex_count;
+        dst[i].vertex_offset = src.vertex_offset;
+        dst[i].index_count = src.index_count;
+        dst[i].index_offset = src.index_offset;
     }
 }
 
-void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary *dst) const
+void aiPolyMeshSample::getSubmeshSummaries(aiSubmeshSummary* dst) const
 {
     auto& refiner = m_topology->m_refiner;
     for (int i = 0; i < (int)refiner.submeshes.size(); ++i)
     {
         auto& src = refiner.submeshes[i];
-        dst[i].split_index   = src.split_index;
+        dst[i].split_index = src.split_index;
         dst[i].submesh_index = src.submesh_index;
-        dst[i].index_count   = src.index_count;
-        dst[i].topology      = (aiTopology)src.topology;
+        dst[i].index_count = src.index_count;
+        dst[i].topology = (aiTopology)src.topology;
     }
 }
 
@@ -194,17 +196,21 @@ static inline void copy_or_clear_3_to_4(T1* dst, const IArray<T2>& src, const Me
 {
     if (dst)
     {
-        if (!src.empty()) {
+        if (!src.empty())
+        {
             std::vector<T1> abc4(split.vertex_count);
-            std::transform(src.begin(), src.end(), abc4.begin(), [](const T2& c){ return T1{c.x, c.y, c.z, 1.f}; });
+            std::transform(src.begin(), src.end(), abc4.begin(), [](const T2& c)
+            { return T1{ c.x, c.y, c.z, 1.f }; });
             memcpy(dst, abc4.data() + split.vertex_offset, sizeof(T1) * split.vertex_count);
-        } else {
+        }
+        else
+        {
             memset(dst, 0, split.vertex_count * sizeof(T1));
         }
     }
 }
 
-void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) const
+void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData& data) const
 {
     auto& schema = *dynamic_cast<schema_t*>(getSchema());
     auto& summary = schema.getSummary();
@@ -236,7 +242,7 @@ void aiPolyMeshSample::fillSplitVertices(int split_index, aiPolyMeshData &data) 
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
 }
 
-void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const
+void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData& data) const
 {
     if (!data.indices)
         return;
@@ -246,16 +252,16 @@ void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData &data
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
 }
 
-void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
+void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs)
 {
-    auto &refiner = m_topology->m_refiner;
-    for (int spi = 0; spi < (int) refiner.splits.size(); ++spi)
+    auto& refiner = m_topology->m_refiner;
+    for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
         fillSplitVertices(spi, vbs[spi]);
-    for (int smi = 0; smi < (int) refiner.submeshes.size(); ++smi)
+    for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
         fillSubmeshIndices(smi, ibs[smi]);
 }
 
-aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
+aiPolyMesh::aiPolyMesh(aiObject* parent, const abcObject& abc)
     : super(parent, abc)
 {
     // find vertex color and additional uv params
@@ -272,7 +278,8 @@ aiPolyMesh::aiPolyMesh(aiObject *parent, const abcObject &abc)
             {
                 m_rgba_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
             }
-            if (AbcGeom::IC3fGeomParam::matches(header)) {
+            if (AbcGeom::IC3fGeomParam::matches(header))
+            {
 
                 m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
             }
@@ -344,7 +351,7 @@ void aiPolyMesh::updateSummary()
     // points
     {
         auto prop = m_schema.getPositionsProperty();
-        if (prop.valid() && prop.getNumSamples() > 0 )
+        if (prop.valid() && prop.getNumSamples() > 0)
         {
             Alembic::Util::Dimensions dim;
             prop.getDimensions(dim);
@@ -453,7 +460,7 @@ void aiPolyMesh::updateSummary()
         else
         {
             summary.compute_normals =
-                    config.normals_mode == NormalsMode::AlwaysCompute ||
+                config.normals_mode == NormalsMode::AlwaysCompute ||
                     (!summary.has_normals && config.normals_mode == NormalsMode::ComputeIfMissing);
             if (summary.compute_normals)
             {
@@ -818,11 +825,11 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         }
         else
         {
-            const auto &indices = topology.m_refiner.new_indices_tri;
+            const auto& indices = topology.m_refiner.new_indices_tri;
             sample.m_normals.resize_discard(sample.m_points_ref.size());
             GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
-                    sample.m_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
-                    topology.m_remap_points.size(), sample.m_points_sp->size());
+                sample.m_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
+                topology.m_remap_points.size(), sample.m_points_sp->size());
             sample.m_normals_ref = sample.m_normals;
         }
     }
@@ -832,7 +839,8 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     {
         // do nothing
     }
-    else if (summary.compute_tangents && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals))
+    else if (summary.compute_tangents
+        && (m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals))
     {
         if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty())
         {
@@ -841,10 +849,15 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
         }
         else
         {
-            const auto &indices = topology.m_refiner.new_indices_tri;
+            const auto& indices = topology.m_refiner.new_indices_tri;
             sample.m_tangents.resize_discard(sample.m_points_ref.size());
-            GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
-                indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+            GenerateTangents(sample.m_tangents.data(),
+                sample.m_points_ref.data(),
+                sample.m_uv0_ref.data(),
+                sample.m_normals_ref.data(),
+                indices.data(),
+                (int)sample.m_points_ref.size(),
+                (int)indices.size() / 3);
             sample.m_tangents_ref = sample.m_tangents;
         }
     }
@@ -878,7 +891,7 @@ void aiPolyMesh::cookSampleBody(Sample& sample)
     }
 }
 
-void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
+void aiPolyMesh::onTopologyChange(aiPolyMeshSample& sample)
 {
     auto& summary = m_summary;
     auto& topology = *sample.m_topology;
@@ -912,7 +925,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         has_valid_normals = true;
         if (sample.m_normals_sp.isIndexed() && sample.m_normals_sp.getIndices()->size() == refiner.indices.size())
         {
-            IArray<int> indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
+            IArray<int>
+                indices{ (int*)sample.m_normals_sp.getIndices()->get(), sample.m_normals_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcV3>(src, indices, dst, topology.m_remap_normals);
         }
         else if (src.size() == refiner.indices.size())
@@ -990,7 +1004,8 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
         has_valid_rgba = true;
         if (sample.m_rgba_sp.isIndexed() && sample.m_rgba_sp.getIndices()->size() == refiner.indices.size())
         {
-            IArray<int> colors_indices{ (int*)sample.m_rgba_sp.getIndices()->get(), sample.m_rgba_sp.getIndices()->size() };
+            IArray<int>
+                colors_indices{ (int*)sample.m_rgba_sp.getIndices()->get(), sample.m_rgba_sp.getIndices()->size() };
             refiner.addIndexedAttribute<abcC4>(src, colors_indices, dst, topology.m_remap_rgba);
         }
         else if (src.size() == refiner.indices.size())
@@ -1033,7 +1048,6 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
             has_valid_rgb = false;
         }
     }
-
 
     refiner.refine();
     refiner.retopology(config.swap_face_winding);
@@ -1112,19 +1126,24 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
 
     if (summary.constant_normals && summary.compute_normals)
     {
-        const auto &indices = topology.m_refiner.new_indices_tri;
+        const auto& indices = topology.m_refiner.new_indices_tri;
         m_constant_normals.resize_discard(m_constant_points.size());
         GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
-                m_constant_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
-                topology.m_remap_points.size(), sample.m_points_sp->size());
+            m_constant_normals.data(), topology.m_remap_points.data(), topology.m_counts_sp->size(),
+            topology.m_remap_points.size(), sample.m_points_sp->size());
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents)
     {
-        const auto &indices = topology.m_refiner.new_indices_tri;
+        const auto& indices = topology.m_refiner.new_indices_tri;
         m_constant_tangents.resize_discard(m_constant_points.size());
-        GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
-            indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
+        GenerateTangents(m_constant_tangents.data(),
+            m_constant_points.data(),
+            m_constant_uv0.data(),
+            m_constant_normals.data(),
+            indices.data(),
+            (int)m_constant_points.size(),
+            (int)indices.size() / 3);
         sample.m_tangents_ref = m_constant_tangents;
     }
 

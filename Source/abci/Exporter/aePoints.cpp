@@ -4,10 +4,9 @@
 #include "aeObject.h"
 #include "aePoints.h"
 
-
-aePoints::aePoints(aeObject *parent, const char *name, uint32_t tsi)
-    : super(parent->getContext(), parent, new abcPoints(parent->getAbcObject(), name, tsi), tsi)
-    , m_schema(getAbcObject().getSchema())
+aePoints::aePoints(aeObject* parent, const char* name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcPoints(parent->getAbcObject(), name, tsi), tsi),
+      m_schema(getAbcObject().getSchema())
 {
 }
 
@@ -31,19 +30,20 @@ void aePoints::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aePoints::writeSample(const aePointsData &data)
+void aePoints::writeSample(const aePointsData& data)
 {
     m_buf_visibility = data.visibility;
     m_buf_positions.assign(data.positions, data.positions + data.count);
     m_buf_velocities.assign(data.velocities, data.velocities + data.count);
     m_buf_ids.assign(data.ids, data.ids + data.count);
 
-    m_ctx->addAsync([this]() { doWriteSample(); });
+    m_ctx->addAsync([this]()
+    { doWriteSample(); });
 }
 
 void aePoints::doWriteSample()
 {
-    const auto &conf = getConfig();
+    const auto& conf = getConfig();
 
     // generate ids if needed
     if (m_buf_ids.size() != m_buf_positions.size())
@@ -55,11 +55,11 @@ void aePoints::doWriteSample()
     // handle swap handedness
     if (conf.swap_handedness)
     {
-        for (auto &v : m_buf_positions)
+        for (auto& v : m_buf_positions)
         {
             v.x *= -1.0f;
         }
-        for (auto &v : m_buf_velocities)
+        for (auto& v : m_buf_velocities)
         {
             v.x *= -1.0f;
         }
@@ -69,11 +69,11 @@ void aePoints::doWriteSample()
     float scale = conf.scale_factor;
     if (scale != 1.0f)
     {
-        for (auto &v : m_buf_positions)
+        for (auto& v : m_buf_positions)
         {
             v *= scale;
         }
-        for (auto &v : m_buf_velocities)
+        for (auto& v : m_buf_velocities)
         {
             v *= scale;
         }

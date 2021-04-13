@@ -35,18 +35,17 @@ struct aeTimeSamplingData
 };
 using aeTimeSamplingPtr = std::shared_ptr<aeTimeSamplingData>;
 
-
 class aeContext
 {
-public:
+ public:
     using NodeCont = std::vector<aeObject*>;
     using NodeIter = NodeCont::iterator;
 
     aeContext();
     ~aeContext();
     void reset();
-    void setConfig(const aeConfig &conf);
-    bool openArchive(const char *path);
+    void setConfig(const aeConfig& conf);
+    bool openArchive(const char* path);
 
     const aeConfig& getConfig() const;
     aeObject* getTopObject();
@@ -63,7 +62,7 @@ public:
     void addAsync(const std::function<void()>& task);
     void waitAsync();
 
-private:
+ private:
     aeConfig m_config;
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;

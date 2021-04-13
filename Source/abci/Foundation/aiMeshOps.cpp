@@ -2,7 +2,6 @@
 #include "aiMeshOps.h"
 #include <unordered_set>
 
-
 namespace impl
 {
     template<class Indices, class Counts>
@@ -132,7 +131,7 @@ static inline int next_power_of_two(uint32_t v)
     return v + (v == 0);
 }
 
-void MeshWelder::prepare(abcV3 * points, int count)
+void MeshWelder::prepare(abcV3* points, int count)
 {
     m_points = points;
     m_count = count;
@@ -227,17 +226,16 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     submeshes.clear();
 
     new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
-    const int *src_tri = new_indices_tri.data();
-    const int *src_lines = new_indices_lines.data();
-    const int *src_points = new_indices_points.data();
-    int *dst_indices = new_indices_submeshes.data();
+    const int* src_tri = new_indices_tri.data();
+    const int* src_lines = new_indices_lines.data();
+    const int* src_points = new_indices_points.data();
+    int* dst_indices = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
     RawVector<Submesh> tmp_submeshes;
     RawVector<int> materialOrder;
     std::unordered_set<int> materialSet;
-
 
     for (int spi = 0; spi < num_splits; ++spi)
     {
@@ -260,7 +258,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                         tmp_submeshes.push_back({});
                     }
                     tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
-                    if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end() )
+                    if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end())
                     {
                         materialSet.insert(mid);
                         materialOrder.push_back(mid);
@@ -289,7 +287,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
                 }
             }
 
-            for(int i=0; i < materialOrder.size(); ++i)
+            for (int i = 0; i < materialOrder.size(); ++i)
             {
                 auto mi = materialOrder[i];
                 auto& sm = tmp_submeshes[mi];
@@ -340,10 +338,10 @@ void MeshRefiner::genSubmeshes()
     submeshes.clear();
 
     new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
-    const int *src_tri = new_indices_tri.data();
-    const int *src_lines = new_indices_lines.data();
-    const int *src_points = new_indices_points.data();
-    int *dst_indices = new_indices_submeshes.data();
+    const int* src_tri = new_indices_tri.data();
+    const int* src_lines = new_indices_lines.data();
+    const int* src_points = new_indices_points.data();
+    int* dst_indices = new_indices_submeshes.data();
 
     int num_splits = (int)splits.size();
     for (int spi = 0; spi < num_splits; ++spi)
@@ -465,59 +463,63 @@ void MeshRefiner::refine()
     int num_indices_lines = 0;
     int num_indices_points = 0;
 
-    auto add_new_split = [&]() {
-            auto split = Split{};
-            split.face_offset = offset_faces;
-            split.index_offset = offset_indices;
-            split.vertex_offset = offset_vertices;
-            split.face_count = num_faces;
-            split.index_count_tri = num_indices_tri;
-            split.index_count_lines = num_indices_lines;
-            split.index_count_points = num_indices_points;
-            split.vertex_count = (int)new_points.size() - offset_vertices;
-            split.index_count = (int)new_indices.size() - offset_indices;
-            splits.push_back(split);
+    auto add_new_split = [&]()
+    {
+      auto split = Split{};
+      split.face_offset = offset_faces;
+      split.index_offset = offset_indices;
+      split.vertex_offset = offset_vertices;
+      split.face_count = num_faces;
+      split.index_count_tri = num_indices_tri;
+      split.index_count_lines = num_indices_lines;
+      split.index_count_points = num_indices_points;
+      split.vertex_count = (int)new_points.size() - offset_vertices;
+      split.index_count = (int)new_indices.size() - offset_indices;
+      splits.push_back(split);
 
-            offset_faces += split.face_count;
-            offset_indices += split.index_count;
-            offset_vertices += split.vertex_count;
+      offset_faces += split.face_count;
+      offset_indices += split.index_count;
+      offset_vertices += split.vertex_count;
 
-            num_faces = 0;
-            num_indices_tri = 0;
-            num_indices_lines = 0;
-            num_indices_points = 0;
-        };
+      num_faces = 0;
+      num_indices_tri = 0;
+      num_indices_lines = 0;
+      num_indices_points = 0;
+    };
 
-    auto compare_all_attributes = [&](int ni, int ii) -> bool {
-            for (auto& attr : attributes)
-                if (!attr->compare(ni, ii)) { return false; }
-            return true;
-        };
+    auto compare_all_attributes = [&](int ni, int ii) -> bool
+    {
+      for (auto& attr : attributes)
+          if (!attr->compare(ni, ii))
+          { return false; }
+      return true;
+    };
 
-    auto find_or_emit_vertex = [&](int vi, int ii) -> int {
-            int offset = connection.v2f_offsets[vi];
-            int connection_count = connection.v2f_counts[vi];
-            for (int ci = 0; ci < connection_count; ++ci)
-            {
-                int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
-                if (ni != -1 && compare_all_attributes(ni, ii))
-                {
-                    return ni;
-                }
-                else
-                {
-                    ni = (int)new_points.size();
-                    new_points.push_back(points[vi]);
-                    new2old_points.push_back(vi);
-                    for (auto& attr : attributes)
-                    {
-                        attr->emit(ii);
-                    }
-                    return ni;
-                }
-            }
-            return 0;
-        };
+    auto find_or_emit_vertex = [&](int vi, int ii) -> int
+    {
+      int offset = connection.v2f_offsets[vi];
+      int connection_count = connection.v2f_counts[vi];
+      for (int ci = 0; ci < connection_count; ++ci)
+      {
+          int& ni = old2new_indices[connection.v2f_indices[offset + ci]];
+          if (ni != -1 && compare_all_attributes(ni, ii))
+          {
+              return ni;
+          }
+          else
+          {
+              ni = (int)new_points.size();
+              new_points.push_back(points[vi]);
+              new2old_points.push_back(vi);
+              for (auto& attr : attributes)
+              {
+                  attr->emit(ii);
+              }
+              return ni;
+          }
+      }
+      return 0;
+    };
 
     int offset = 0;
     for (int fi = 0; fi < num_faces_total; ++fi)
