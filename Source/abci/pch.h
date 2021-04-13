@@ -27,27 +27,27 @@
 #if defined(aiDebug)
 void aiLogPrint(const char* fmt, ...);
 void aiLogPrint(const wchar_t* fmt, ...);
-    #define DebugLog(...)       aiLogPrint("abci Log: " __VA_ARGS__)
-    #define DebugWarning(...)   aiLogPrint("abci Warning: " __VA_ARGS__)
-    #define DebugError(...)     aiLogPrint("abci Error: "  __VA_ARGS__)
-    #define DebugLogW(...)      aiLogPrint(L"abci Log: " __VA_ARGS__)
-    #define DebugWarningW(...)  aiLogPrint(L"abci Warning: " __VA_ARGS__)
-    #define DebugErrorW(...)    aiLogPrint(L"abci Error: "  __VA_ARGS__)
+#define DebugLog(...)       aiLogPrint("abci Log: " __VA_ARGS__)
+#define DebugWarning(...)   aiLogPrint("abci Warning: " __VA_ARGS__)
+#define DebugError(...)     aiLogPrint("abci Error: "  __VA_ARGS__)
+#define DebugLogW(...)      aiLogPrint(L"abci Log: " __VA_ARGS__)
+#define DebugWarningW(...)  aiLogPrint(L"abci Warning: " __VA_ARGS__)
+#define DebugErrorW(...)    aiLogPrint(L"abci Error: "  __VA_ARGS__)
 #else
-    #define DebugLog(...)
-    #define DebugWarning(...)
-    #define DebugError(...)
-    #define DebugLogW(...)
-    #define DebugWarningW(...)
-    #define DebugErrorW(...)
+#define DebugLog(...)
+#define DebugWarning(...)
+#define DebugError(...)
+#define DebugLogW(...)
+#define DebugWarningW(...)
+#define DebugErrorW(...)
 #endif
 
 #ifdef _WIN32
-    #define NOMINMAX
-    #include <windows.h>
-    #include <ppl.h>
-    #pragma warning(disable: 4996)
-    #pragma warning(disable: 4190)
+#define NOMINMAX
+#include <windows.h>
+#include <ppl.h>
+#pragma warning(disable: 4996)
+#pragma warning(disable: 4190)
 #endif // _WIN32
 
 using namespace Alembic;

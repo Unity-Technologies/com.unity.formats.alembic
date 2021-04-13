@@ -5,18 +5,17 @@
 #include "aiSchema.h"
 #include "aiCamera.h"
 
-
-aiCameraSample::aiCameraSample(aiCamera *schema)
+aiCameraSample::aiCameraSample(aiCamera* schema)
     : super(schema)
 {
 }
 
-void aiCameraSample::getData(CameraData &dst) const
+void aiCameraSample::getData(CameraData& dst) const
 {
     dst = data;
 }
 
-aiCamera::aiCamera(aiObject *parent, const abcObject &abc)
+aiCamera::aiCamera(aiObject* parent, const abcObject& abc)
     : super(parent, abc)
 {
 }
@@ -41,7 +40,7 @@ void aiCamera::cookSampleBody(Sample& sample)
     auto& sp = sample.cam_sp;
     auto& dst = sample.data;
 
-    const double lensSizeFactor =  10; // Lens size is in cm
+    const double lensSizeFactor = 10; // Lens size is in cm
 
     dst.visibility = sample.visibility;
     dst.focal_length = (float)sp.getFocalLength();
@@ -51,7 +50,6 @@ void aiCamera::cookSampleBody(Sample& sample)
     dst.lens_shift[1] = (float)sp.getVerticalFilmOffset();
     dst.near_clip_plane = (float)sp.getNearClippingPlane() * config.scale_factor;
     dst.far_clip_plane = (float)sp.getFarClippingPlane() * config.scale_factor;
-
 
     if (config.interpolate_samples && m_current_time_offset != 0)
     {
@@ -63,8 +61,10 @@ void aiCamera::cookSampleBody(Sample& sample)
         dst.sensor_size[1] += time_offset * (float)(sp2.getVerticalAperture() * lensSizeFactor - dst.sensor_size[1]);
         dst.lens_shift[0] += time_offset * (float)(sp2.getHorizontalFilmOffset() - dst.lens_shift[0]);
         dst.lens_shift[1] += time_offset * (float)(sp2.getVerticalFilmOffset() - dst.lens_shift[1]);
-        dst.near_clip_plane += time_offset * (float)(sp2.getNearClippingPlane() * config.scale_factor - dst.near_clip_plane);
-        dst.far_clip_plane += time_offset * (float)(sp2.getFarClippingPlane() * config.scale_factor - dst.far_clip_plane);
+        dst.near_clip_plane +=
+            time_offset * (float)(sp2.getNearClippingPlane() * config.scale_factor - dst.near_clip_plane);
+        dst.far_clip_plane +=
+            time_offset * (float)(sp2.getFarClippingPlane() * config.scale_factor - dst.far_clip_plane);
     }
 
     if (dst.near_clip_plane == 0.0f)

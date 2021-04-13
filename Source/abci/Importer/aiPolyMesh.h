@@ -27,7 +27,7 @@ struct aiMeshSummaryInternal : public aiMeshSummary
 
 class aiMeshTopology
 {
-public:
+ public:
     aiMeshTopology();
     void clear();
 
@@ -39,7 +39,7 @@ public:
     int getSubmeshCount() const;
     int getSubmeshCount(int split_index) const;
 
-public:
+ public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
     abcFaceSetSamples m_faceset_sps;
@@ -57,25 +57,24 @@ public:
 };
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
-
 class aiPolyMeshSample : public aiSample
 {
     using super = aiSample;
     using schema_t = aiPolyMesh;
-public:
-    aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo);
+ public:
+    aiPolyMeshSample(aiPolyMesh* schema, TopologyPtr topo);
     ~aiPolyMeshSample();
     void reset();
 
-    void getSummary(aiMeshSampleSummary &dst) const;
-    void getSplitSummaries(aiMeshSplitSummary  *dst) const;
-    void getSubmeshSummaries(aiSubmeshSummary *dst) const;
+    void getSummary(aiMeshSampleSummary& dst) const;
+    void getSplitSummaries(aiMeshSplitSummary* dst) const;
+    void getSubmeshSummaries(aiSubmeshSummary* dst) const;
 
-    void fillSplitVertices(int split_index, aiPolyMeshData &data) const;
-    void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
+    void fillSplitVertices(int split_index, aiPolyMeshData& data) const;
+    void fillSubmeshIndices(int submesh_index, aiSubmeshData& data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-public:
+ public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
     AbcGeom::IN3fGeomParam::Sample m_normals_sp, m_normals_sp2;
@@ -108,7 +107,6 @@ public:
     std::future<void> m_async_copy;
 };
 
-
 struct aiPolyMeshTraits
 {
     using SampleT = aiPolyMeshSample;
@@ -118,8 +116,8 @@ struct aiPolyMeshTraits
 class aiPolyMesh : public aiTSchema<aiPolyMeshTraits>
 {
     using super = aiTSchema<aiPolyMeshTraits>;
-public:
-    aiPolyMesh(aiObject *parent, const abcObject &abc);
+ public:
+    aiPolyMesh(aiObject* parent, const abcObject& abc);
     ~aiPolyMesh() override;
     void updateSummary();
     const aiMeshSummaryInternal& getSummary() const;
@@ -131,7 +129,7 @@ public:
     void onTopologyChange(aiPolyMeshSample& sample);
     void onTopologyDetermined();
 
-public:
+ public:
     RawVector<abcV3> m_constant_points;
     RawVector<abcV3> m_constant_velocities;
     RawVector<abcV3> m_constant_normals;
@@ -141,7 +139,7 @@ public:
     RawVector<abcC4> m_constant_rgba;
     RawVector<abcC3> m_constant_rgb;
 
-private:
+ private:
     aiMeshSummaryInternal m_summary;
     AbcGeom::IV2fGeomParam m_uv1_param;
     AbcGeom::IC4fGeomParam m_rgba_param;

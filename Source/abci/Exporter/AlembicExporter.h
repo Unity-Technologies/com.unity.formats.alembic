@@ -16,7 +16,6 @@ class aePolyMesh; // : aeSchema
 class aeCamera;   // : aeSchema
 class aeProperty;
 
-
 enum class aeTimeSamplingType
 {
     Uniform,
@@ -79,7 +78,6 @@ struct aeConfig
     float scale_factor = 1.0f;
 };
 
-
 struct aeXformData
 {
     bool visibility = true;
@@ -92,28 +90,28 @@ struct aeXformData
 
 struct aeSubmeshData
 {
-    const int   *indices = nullptr;
-    int         index_count = 0;
-    aeTopology  topology = aeTopology::Triangles;
+    const int* indices = nullptr;
+    int index_count = 0;
+    aeTopology topology = aeTopology::Triangles;
 };
 
 struct aePolyMeshData
 {
     bool visibility = true;
 
-    const abcV3 *points = nullptr;
-    int         point_count = 0;
-    const abcV3 *normals = nullptr;         // can be null
-    const abcV2 *uv0 = nullptr;             // can be null
-    const abcV2 *uv1 = nullptr;             // can be null
-    const abcV4 *colors = nullptr;          // can be null
-    const aeSubmeshData *submeshes = nullptr;
+    const abcV3* points = nullptr;
+    int point_count = 0;
+    const abcV3* normals = nullptr;         // can be null
+    const abcV2* uv0 = nullptr;             // can be null
+    const abcV2* uv1 = nullptr;             // can be null
+    const abcV4* colors = nullptr;          // can be null
+    const aeSubmeshData* submeshes = nullptr;
     int submesh_count = 0;
 };
 
 struct aeFaceSetData
 {
-    const int *faces = nullptr;
+    const int* faces = nullptr;
     int face_count = 0;
 };
 
@@ -121,61 +119,63 @@ struct aePointsData
 {
     bool visibility = true;
 
-    const abcV3 *positions = nullptr;
-    const abcV3 *velocities = nullptr;  // can be null
-    const uint64_t *ids = nullptr;      // can be null
+    const abcV3* positions = nullptr;
+    const abcV3* velocities = nullptr;  // can be null
+    const uint64_t* ids = nullptr;      // can be null
     int count = 0;
 };
 
 struct aeWeights4
 {
     float weight[4];
-    int   boneIndex[4];
+    int boneIndex[4];
 
-    bool operator==(const aeWeights4& v) { return memcmp(this, &v, sizeof(*this)) == 0; }
+    bool operator==(const aeWeights4& v)
+    {
+        return memcmp(this, &v, sizeof(*this)) == 0;
+    }
 };
 
+abciAPI aeContext* aeCreateContext();
+abciAPI void aeDestroyContext(aeContext* ctx);
 
-abciAPI aeContext*  aeCreateContext();
-abciAPI void        aeDestroyContext(aeContext* ctx);
-
-abciAPI void        aeSetConfig(aeContext* ctx, const aeConfig *conf);
-abciAPI bool        aeOpenArchive(aeContext* ctx, const char *path);
-abciAPI aeObject*   aeGetTopObject(aeContext* ctx);
-abciAPI int         aeAddTimeSampling(aeContext* ctx, float start_time);
+abciAPI void aeSetConfig(aeContext* ctx, const aeConfig* conf);
+abciAPI bool aeOpenArchive(aeContext* ctx, const char* path);
+abciAPI aeObject* aeGetTopObject(aeContext* ctx);
+abciAPI int aeAddTimeSampling(aeContext* ctx, float start_time);
 // relevant only if timeSamplingType is acyclic. if tsi==-1, add time to all time samplings.
-abciAPI void        aeAddTime(aeContext* ctx, float time, int tsi = -1);
-abciAPI void        aeMarkFrameBegin(aeContext* ctx);
-abciAPI void        aeMarkFrameEnd(aeContext* ctx);
+abciAPI void aeAddTime(aeContext* ctx, float time, int tsi = -1);
+abciAPI void aeMarkFrameBegin(aeContext* ctx);
+abciAPI void aeMarkFrameEnd(aeContext* ctx);
 
-abciAPI void        aeDeleteObject(aeObject *obj);
-abciAPI aeXform*    aeNewXform(aeObject *parent, const char *name, int tsi = 1);
-abciAPI aePoints*   aeNewPoints(aeObject *parent, const char *name, int tsi = 1);
-abciAPI aePolyMesh* aeNewPolyMesh(aeObject *parent, const char *name, int tsi = 1);
-abciAPI aeCamera*   aeNewCamera(aeObject *obj, const char *name, int tsi = 1);
+abciAPI void aeDeleteObject(aeObject* obj);
+abciAPI aeXform* aeNewXform(aeObject* parent, const char* name, int tsi = 1);
+abciAPI aePoints* aeNewPoints(aeObject* parent, const char* name, int tsi = 1);
+abciAPI aePolyMesh* aeNewPolyMesh(aeObject* parent, const char* name, int tsi = 1);
+abciAPI aeCamera* aeNewCamera(aeObject* obj, const char* name, int tsi = 1);
 
-abciAPI int         aeGetNumChildren(aeObject *obj);
-abciAPI aeObject*   aeGetChild(aeObject *obj, int i);
-abciAPI aeObject*   aeGetParent(aeObject *obj);
-abciAPI aeXform*    aeAsXform(aeObject *obj);
-abciAPI aePoints*   aeAsPoints(aeObject *obj);
-abciAPI aePolyMesh* aeAsPolyMesh(aeObject *obj);
-abciAPI aeCamera*   aeAsCamera(aeObject *obj);
+abciAPI int aeGetNumChildren(aeObject* obj);
+abciAPI aeObject* aeGetChild(aeObject* obj, int i);
+abciAPI aeObject* aeGetParent(aeObject* obj);
+abciAPI aeXform* aeAsXform(aeObject* obj);
+abciAPI aePoints* aeAsPoints(aeObject* obj);
+abciAPI aePolyMesh* aeAsPolyMesh(aeObject* obj);
+abciAPI aeCamera* aeAsCamera(aeObject* obj);
 
-abciAPI int         aeGetNumSamples(aeSchema *obj);
-abciAPI void        aeSetFromPrevious(aeSchema *obj);
-abciAPI void        aeMarkForceInvisible(aeSchema *obj);
+abciAPI int aeGetNumSamples(aeSchema* obj);
+abciAPI void aeSetFromPrevious(aeSchema* obj);
+abciAPI void aeMarkForceInvisible(aeSchema* obj);
 
-abciAPI void        aeXformWriteSample(aeXform *obj, const aeXformData *data);
-abciAPI void        aeCameraWriteSample(aeCamera *obj, const CameraData *data);
-abciAPI void        aePointsWriteSample(aePoints *obj, const aePointsData *data);
+abciAPI void aeXformWriteSample(aeXform* obj, const aeXformData* data);
+abciAPI void aeCameraWriteSample(aeCamera* obj, const CameraData* data);
+abciAPI void aePointsWriteSample(aePoints* obj, const aePointsData* data);
 
-abciAPI int         aePolyMeshAddFaceSet(aePolyMesh *obj, const char *name);
-abciAPI void        aePolyMeshWriteSample(aePolyMesh *obj, const aePolyMeshData *data);
-abciAPI void        aePolyMeshWriteFaceSetSample(aePolyMesh *obj, int fsi, const aeFaceSetData *data);
+abciAPI int aePolyMeshAddFaceSet(aePolyMesh* obj, const char* name);
+abciAPI void aePolyMeshWriteSample(aePolyMesh* obj, const aePolyMeshData* data);
+abciAPI void aePolyMeshWriteFaceSetSample(aePolyMesh* obj, int fsi, const aeFaceSetData* data);
 
-abciAPI aeProperty* aeNewProperty(aeSchema *parent, const char *name, aePropertyType type);
-abciAPI void        aePropertyWriteArraySample(aeProperty *prop, const void *data, int num_data);
-abciAPI void        aePropertyWriteScalarSample(aeProperty *prop, const void *data);
+abciAPI aeProperty* aeNewProperty(aeSchema* parent, const char* name, aePropertyType type);
+abciAPI void aePropertyWriteArraySample(aeProperty* prop, const void* data, int num_data);
+abciAPI void aePropertyWriteScalarSample(aeProperty* prop, const void* data);
 
-abciAPI int         aeGenerateRemapIndices(int *dst, abcV3 *points, aeWeights4 *weights, int vertex_count);
+abciAPI int aeGenerateRemapIndices(int* dst, abcV3* points, aeWeights4* weights, int vertex_count);

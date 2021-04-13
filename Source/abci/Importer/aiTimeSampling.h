@@ -2,7 +2,7 @@
 
 class aiTimeSampling
 {
-public:
+ public:
     virtual ~aiTimeSampling();
     virtual void getTimeRange(double& begin, double& end) const = 0;
     virtual size_t getSampleCount() const = 0;

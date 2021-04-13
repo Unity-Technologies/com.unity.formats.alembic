@@ -4,10 +4,9 @@
 #include "aeObject.h"
 #include "aeXForm.h"
 
-
-aeXform::aeXform(aeObject *parent, const char *name, uint32_t tsi)
-    : super(parent->getContext(), parent, new abcXform(parent->getAbcObject(), name, tsi), tsi)
-    , m_schema(getAbcObject().getSchema())
+aeXform::aeXform(aeObject* parent, const char* name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcXform(parent->getAbcObject(), name, tsi), tsi),
+      m_schema(getAbcObject().getSchema())
 {
 }
 
@@ -31,10 +30,11 @@ void aeXform::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeXform::writeSample(const aeXformData &data)
+void aeXform::writeSample(const aeXformData& data)
 {
     m_data_local = data;
-    m_ctx->addAsync([this]() { writeSampleBody(); });
+    m_ctx->addAsync([this]()
+    { writeSampleBody(); });
 }
 
 void aeXform::writeSampleBody()
@@ -44,7 +44,7 @@ void aeXform::writeSampleBody()
     writeVisibility(data.visibility);
 
     // quaternion to angle axis
-    auto &quat = data.rotation;
+    auto& quat = data.rotation;
 
     float angle = 0.0f;
     abcV3 axis = abcV3(0.0f, 1.0f, 0.0f);

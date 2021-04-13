@@ -2,28 +2,30 @@
 
 class aiSample
 {
-public:
-    aiSample(aiSchema *schema);
+ public:
+    aiSample(aiSchema* schema);
     virtual ~aiSample();
 
-    virtual aiSchema* getSchema() const { return m_schema; }
+    virtual aiSchema* getSchema() const
+    {
+        return m_schema;
+    }
     const aiConfig& getConfig() const;
 
-public:
+ public:
     bool visibility = true;
 
-protected:
-    aiSchema *m_schema = nullptr;
+ protected:
+    aiSchema* m_schema = nullptr;
 };
-
 
 class aiSchema : public aiObject
 {
     using super = aiObject;
-public:
+ public:
     using aiPropertyPtr = std::unique_ptr<aiProperty>;
 
-    aiSchema(aiObject *parent, const abcObject &abc);
+    aiSchema(aiObject* parent, const abcObject& abc);
     virtual ~aiSchema();
 
     bool isConstant() const;
@@ -34,32 +36,30 @@ public:
     aiProperty* getPropertyByIndex(int i);
     aiProperty* getPropertyByName(const std::string& name);
 
-protected:
+ protected:
     virtual abcProperties getAbcProperties() = 0;
     void setupProperties();
     void updateProperties(const abcSampleSelector& ss);
 
-protected:
+ protected:
     bool m_constant = false;
     bool m_data_updated = false;
     bool m_force_update = false;
     std::vector<aiPropertyPtr> m_properties; // sorted vector
 };
 
-
 template<class Traits>
 class aiTSchema : public aiSchema
 {
     using super = aiSchema;
-public:
+ public:
     using Sample = typename Traits::SampleT;
     using SamplePtr = std::shared_ptr<Sample>;
     using SampleCont = std::map<int64_t, SamplePtr>;
     using AbcSchema = typename Traits::AbcSchemaT;
     using AbcSchemaObject = Abc::ISchemaObject<AbcSchema>;
 
-
-    aiTSchema(aiObject *parent, const abcObject &abc)
+    aiTSchema(aiObject* parent, const abcObject& abc)
         : super(parent, abc)
     {
         AbcSchemaObject abcObj(abc, Abc::kWrapExisting);
@@ -116,8 +116,7 @@ public:
         cookSampleBody(sample);
     }
 
-
-protected:
+ protected:
     virtual void updateSampleBody(const abcSampleSelector& ss)
     {
         if (!m_enabled)
@@ -130,7 +129,7 @@ protected:
         auto visible = readVisibility(ss) != 0;
         auto updateVisibility = m_sample && m_sample->visibility != visible;
         if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update ||
-                updateVisibility)
+            updateVisibility)
         {
             m_sample_index_changed = true;
             if (!m_sample)
@@ -165,15 +164,17 @@ protected:
 
             float prev_offset = m_current_time_offset;
             m_current_time_offset = interval == 0.0 ? 0.0f :
-                (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
+                                    (float)std::max(0.0, std::min((requested_time - index_time) / interval, 1.0));
             m_current_time_interval = (float)interval;
 
             // skip if time offset is not changed
-            if (sample_index == m_last_sample_index && prev_offset == m_current_time_offset && !m_force_update && !updateVisibility)
+            if (sample_index == m_last_sample_index && prev_offset == m_current_time_offset && !m_force_update
+                && !updateVisibility)
                 sample = nullptr;
         }
 
-        if (sample) {
+        if (sample)
+        {
 
             cookSample(*sample);
             m_data_updated = true;
@@ -190,7 +191,6 @@ protected:
 
     virtual void readSampleBody(Sample& sample, uint64_t idx) = 0;
     virtual void cookSampleBody(Sample& sample) = 0;
-
 
     AbcGeom::ICompoundProperty getAbcProperties() override
     {
@@ -209,7 +209,7 @@ protected:
         return 1; // -1 deffered, 0 invisible, 1 visible
     }
 
-protected:
+ protected:
     AbcSchema m_schema;
     Abc::TimeSamplingPtr m_time_sampling;
     AbcGeom::IVisibilityProperty m_visibility_prop;

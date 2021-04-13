@@ -4,10 +4,9 @@
 #include "aeObject.h"
 #include "aeCamera.h"
 
-
-aeCamera::aeCamera(aeObject *parent, const char *name, uint32_t tsi)
-    : super(parent->getContext(), parent, new abcCamera(parent->getAbcObject(), name, tsi), tsi)
-    , m_schema(getAbcObject().getSchema())
+aeCamera::aeCamera(aeObject* parent, const char* name, uint32_t tsi)
+    : super(parent->getContext(), parent, new abcCamera(parent->getAbcObject(), name, tsi), tsi),
+      m_schema(getAbcObject().getSchema())
 {
 }
 
@@ -31,10 +30,11 @@ void aeCamera::setFromPrevious()
     m_schema.setFromPrevious();
 }
 
-void aeCamera::writeSample(const CameraData &data)
+void aeCamera::writeSample(const CameraData& data)
 {
     m_data_local = data;
-    m_ctx->addAsync([this]() { writeSampleBody(); });
+    m_ctx->addAsync([this]()
+    { writeSampleBody(); });
 }
 
 void aeCamera::writeSampleBody()

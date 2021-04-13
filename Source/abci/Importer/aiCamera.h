@@ -3,16 +3,15 @@
 class aiCameraSample : public aiSample
 {
     using super = aiSample;
-public:
-    aiCameraSample(aiCamera *schema);
+ public:
+    aiCameraSample(aiCamera* schema);
 
-    void getData(CameraData &dst) const;
+    void getData(CameraData& dst) const;
 
-public:
+ public:
     AbcGeom::CameraSample cam_sp, cam_sp2;
     CameraData data;
 };
-
 
 struct aiCameraTraits
 {
@@ -20,12 +19,11 @@ struct aiCameraTraits
     using AbcSchemaT = AbcGeom::ICameraSchema;
 };
 
-
 class aiCamera : public aiTSchema<aiCameraTraits>
 {
     using super = aiTSchema<aiCameraTraits>;
-public:
-    aiCamera(aiObject *parent, const abcObject &abc);
+ public:
+    aiCamera(aiObject* parent, const abcObject& abc);
 
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;

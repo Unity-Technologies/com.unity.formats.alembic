@@ -1,27 +1,27 @@
 #pragma once
 
 #ifdef abciImpl
-    #ifndef abciStaticLink
-        #ifdef _WIN32
-            #define abciAPI extern "C" __declspec(dllexport)
-        #else
-            #define abciAPI extern "C"
-        #endif
-    #else
-        #define abciAPI
-    #endif
+#ifndef abciStaticLink
+#ifdef _WIN32
+#define abciAPI extern "C" __declspec(dllexport)
 #else
-    #ifdef _MSC_VER
-        #ifndef abciStaticLink
-            #define abciAPI extern "C" __declspec(dllimport)
-            #pragma comment(lib, "abci.lib")
-        #else
-            #define abciAPI extern "C"
-            #pragma comment(lib, "abci_s.lib")
-        #endif
-    #else
-        #define abciAPI extern "C"
-    #endif
+#define abciAPI extern "C"
+#endif
+#else
+#define abciAPI
+#endif
+#else
+#ifdef _MSC_VER
+#ifndef abciStaticLink
+#define abciAPI extern "C" __declspec(dllimport)
+#pragma comment(lib, "abci.lib")
+#else
+#define abciAPI extern "C"
+#pragma comment(lib, "abci_s.lib")
+#endif
+#else
+#define abciAPI extern "C"
+#endif
 
 struct abcV2 { float x, y; };
 struct abcV3 { float x, y, z; };

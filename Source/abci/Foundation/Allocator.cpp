@@ -8,13 +8,13 @@ void* AlignedMalloc(size_t size, size_t alignment)
 #ifdef _WIN32
     return _mm_malloc(size, alignment);
 #else
-    void *ret = nullptr;
+    void* ret = nullptr;
     posix_memalign(&ret, alignment, size);
     return ret;
 #endif
 }
 
-void AlignedFree(void *addr)
+void AlignedFree(void* addr)
 {
 #ifdef _WIN32
     _mm_free(addr);

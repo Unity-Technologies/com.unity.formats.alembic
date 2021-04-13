@@ -5,18 +5,17 @@
 #include "aiSchema.h"
 #include "aiXForm.h"
 
-
-aiXformSample::aiXformSample(aiXform *schema)
+aiXformSample::aiXformSample(aiXform* schema)
     : super(schema)
 {
 }
 
-void aiXformSample::getData(aiXformData &dst) const
+void aiXformSample::getData(aiXformData& dst) const
 {
     dst = data;
 }
 
-aiXform::aiXform(aiObject *parent, const abcObject &abc)
+aiXform::aiXform(aiObject* parent, const abcObject& abc)
     : super(parent, abc)
 {
 }
@@ -30,7 +29,7 @@ void aiXform::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-    
+
     m_schema.get(sample.xf_sp, ss);
     m_schema.get(sample.xf_sp2, ss2);
 }
@@ -77,7 +76,11 @@ void aiXform::cookSampleBody(Sample& sample)
     dst.scale = scale;
 }
 
-void aiXform::decompose(const Imath::M44d &mat, Imath::V3d &scale, Imath::V3d &shear, Imath::Quatd &rotation, Imath::V3d &translation) const
+void aiXform::decompose(const Imath::M44d& mat,
+    Imath::V3d& scale,
+    Imath::V3d& shear,
+    Imath::Quatd& rotation,
+    Imath::V3d& translation) const
 {
     Imath::M44d mat_remainder(mat);
 

@@ -1,24 +1,41 @@
 #pragma once
 
-template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a % b == 0 ? 0 : 1); }
-template<class IntType> inline IntType ceilup(IntType a, IntType b) { return ceildiv(a, b) * b; }
+template<class IntType>
+inline IntType ceildiv(IntType a, IntType b)
+{
+    return a / b + (a % b == 0 ? 0 : 1);
+}
+template<class IntType>
+inline IntType ceilup(IntType a, IntType b)
+{
+    return ceildiv(a, b) * b;
+}
 
+template<class T>
+inline T abcMin(const T& a, const T& b)
+{
+    return std::min(a, b);
+}
+template<class T>
+inline T abcMax(const T& a, const T& b)
+{
+    return std::max(a, b);
+}
 
-template<class T> inline T abcMin(const T& a, const T& b) { return std::min(a, b); }
-template<class T> inline T abcMax(const T& a, const T& b) { return std::max(a, b); }
-
-template<> inline abcV3 abcMin<abcV3>(const abcV3& a, const abcV3& b)
+template<>
+inline abcV3 abcMin<abcV3>(const abcV3& a, const abcV3& b)
 {
     return abcV3(std::min<float>(a.x, b.x), std::min<float>(a.y, b.y), std::min<float>(a.z, b.z));
 }
 
-template<> inline abcV3 abcMax<abcV3>(const abcV3& a, const abcV3& b)
+template<>
+inline abcV3 abcMax<abcV3>(const abcV3& a, const abcV3& b)
 {
     return abcV3(std::max<float>(a.x, b.x), std::max<float>(a.y, b.y), std::max<float>(a.z, b.z));
 }
 
 template<class AbcPropertyType, class Body>
-inline void abcEachSamples(AbcPropertyType& prop, const Body &body);
+inline void abcEachSamples(AbcPropertyType& prop, const Body& body);
 
 template<class AbcArrayPropertyType>
 inline size_t abcArrayPropertyGetPeakSize(AbcArrayPropertyType& prop);
@@ -30,9 +47,8 @@ inline std::pair<
 
 inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop);
 
-
 template<class AbcPropertyType, class Body>
-inline void abcEachSamples(AbcPropertyType& prop, const Body &body)
+inline void abcEachSamples(AbcPropertyType& prop, const Body& body)
 {
     size_t num_samples = prop.getNumSamples();
     for (size_t i = 0; i < num_samples; ++i)
@@ -78,19 +94,21 @@ inline std::pair<
 
     auto ret = std::make_pair(value_type(), value_type());
 
-    if (!prop.valid()) { return ret; }
+    if (!prop.valid())
+    { return ret; }
 
     size_t num_samples = prop.getNumSamples();
-    if (num_samples == 0) { return ret; }
+    if (num_samples == 0)
+    { return ret; }
 
-
-    auto scan_minmax = [&](const value_type *value, size_t size) {
-            for (size_t i = 0; i < size; ++i)
-            {
-                ret.first = abcMin<value_type>(ret.first, value[i]);
-                ret.second = abcMax<value_type>(ret.second, value[i]);
-            }
-        };
+    auto scan_minmax = [&](const value_type* value, size_t size)
+    {
+      for (size_t i = 0; i < size; ++i)
+      {
+          ret.first = abcMin<value_type>(ret.first, value[i]);
+          ret.second = abcMax<value_type>(ret.second, value[i]);
+      }
+    };
 
     sample_ptr_type sample = prop.getValue(aiIndexToSampleSelector(0));
 
@@ -125,7 +143,8 @@ inline abcBoxd abcGetMaxBounds(const Abc::IBox3dProperty& prop)
     abcBoxd bounds;
 
     size_t n = prop.getNumSamples();
-    if (n == 0) { return bounds; }
+    if (n == 0)
+    { return bounds; }
 
     prop.get(bounds, aiIndexToSampleSelector(0));
     bmin = (abcV3)bounds.min;

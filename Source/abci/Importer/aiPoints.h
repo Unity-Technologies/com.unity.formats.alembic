@@ -6,17 +6,16 @@ struct aiPointsSummaryInternal : public aiPointsSummary
     bool compute_velocities = false;
 };
 
-
 class aiPointsSample : public aiSample
 {
     using super = aiSample;
-public:
-    aiPointsSample(aiPoints *schema);
+ public:
+    aiPointsSample(aiPoints* schema);
     ~aiPointsSample();
-    void fillData(aiPointsData &dst);
-    void getSummary(aiPointsSampleSummary &dst);
+    void fillData(aiPointsData& dst);
+    void getSummary(aiPointsSampleSummary& dst);
 
-public:
+ public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
     Abc::UInt64ArraySamplePtr m_ids_sp;
@@ -39,8 +38,8 @@ struct aiPointsTraits
 class aiPoints : public aiTSchema<aiPointsTraits>
 {
     using super = aiTSchema<aiPointsTraits>;
-public:
-    aiPoints(aiObject *parent, const abcObject &abc);
+ public:
+    aiPoints(aiObject* parent, const abcObject& abc);
     ~aiPoints();
 
     void updateSummary();
@@ -55,8 +54,8 @@ public:
     void setSortPosition(const abcV3& v);
     const abcV3& getSortPosition() const;
 
-private:
+ private:
     aiPointsSummaryInternal m_summary;
     bool m_sort = false;
-    abcV3 m_sort_position = {0.0f, 0.0f, 0.0f};
+    abcV3 m_sort_position = { 0.0f, 0.0f, 0.0f };
 };

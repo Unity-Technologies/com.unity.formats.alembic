@@ -33,10 +33,11 @@ void aeContext::reset()
         {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i)
             {
-                auto &t = *m_timesamplings[i];
+                auto& t = *m_timesamplings[i];
                 if (!t.times.empty())
                 {
-                    auto ts = Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.times.size(), t.times.back()), t.times);
+                    auto ts =
+                        Abc::TimeSampling(Abc::TimeSamplingType((uint32_t)t.times.size(), t.times.back()), t.times);
                     *m_archive.getTimeSampling(i) = ts;
                 }
             }
@@ -45,7 +46,7 @@ void aeContext::reset()
         {
             for (int i = 1; i < (int)m_timesamplings.size(); ++i)
             {
-                auto &t = *m_timesamplings[i];
+                auto& t = *m_timesamplings[i];
                 auto ts = Abc::TimeSampling(Abc::TimeSamplingType(Abc::TimeSamplingType::kAcyclic), t.times);
                 *m_archive.getTimeSampling(i) = ts;
             }
@@ -57,12 +58,12 @@ void aeContext::reset()
     m_archive.reset(); // flush archive
 }
 
-void aeContext::setConfig(const aeConfig &conf)
+void aeContext::setConfig(const aeConfig& conf)
 {
     m_config = conf;
 }
 
-bool aeContext::openArchive(const char *path)
+bool aeContext::openArchive(const char* path)
 {
     reset();
 
@@ -80,7 +81,7 @@ bool aeContext::openArchive(const char *path)
     // reserve 'default' time sampling. update it later in reset()
     auto tsi = addTimeSampling(0.0);
 
-    auto *top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
+    auto* top = new AbcGeom::OObject(m_archive, AbcGeom::kTop, tsi);
     m_node_top.reset(new aeObject(this, nullptr, top, tsi));
     return true;
 }
@@ -130,7 +131,7 @@ void aeContext::addTime(double time, uint32_t tsi)
     {
         for (size_t i = 1; i < m_timesamplings.size(); ++i)
         {
-            auto &ts = *m_timesamplings[i];
+            auto& ts = *m_timesamplings[i];
             if (ts.times.empty() || ts.times.back() != time)
             {
                 ts.times.push_back(time);
@@ -139,7 +140,7 @@ void aeContext::addTime(double time, uint32_t tsi)
     }
     else
     {
-        auto &ts = *m_timesamplings[tsi];
+        auto& ts = *m_timesamplings[tsi];
         if (ts.times.empty() || ts.times.back() != time)
         {
             ts.times.push_back(time);
@@ -155,10 +156,11 @@ void aeContext::markFrameBegin()
 void aeContext::markFrameEnd()
 {
     // kick async tasks
-    m_async_task_future = std::async(std::launch::async, [this]() {
-        for (auto& task : m_async_tasks)
-            task();
-        m_async_tasks.clear();
+    m_async_task_future = std::async(std::launch::async, [this]()
+    {
+      for (auto& task : m_async_tasks)
+          task();
+      m_async_tasks.clear();
     });
 }
 

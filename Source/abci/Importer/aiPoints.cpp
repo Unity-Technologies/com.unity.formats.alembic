@@ -8,7 +8,6 @@
 #include "aiMath.h"
 #include "aiUtils.h"
 
-
 template<class T, class U>
 inline void Remap(RawVector<T>& dst, const U& src, const RawVector<std::pair<float, int> >& sort_data)
 {
@@ -19,7 +18,7 @@ inline void Remap(RawVector<T>& dst, const U& src, const RawVector<std::pair<flo
         dst[i] = (T)src_data[sort_data[i].second];
 }
 
-aiPointsSample::aiPointsSample(aiPoints *schema)
+aiPointsSample::aiPointsSample(aiPoints* schema)
     : super(schema)
 {
 }
@@ -28,7 +27,7 @@ aiPointsSample::~aiPointsSample()
 {
 }
 
-void aiPointsSample::fillData(aiPointsData &data)
+void aiPointsSample::fillData(aiPointsData& data)
 {
     data.visibility = visibility;
     if (data.points)
@@ -55,12 +54,12 @@ void aiPointsSample::fillData(aiPointsData &data)
     data.size = m_bb_size;
 }
 
-void aiPointsSample::getSummary(aiPointsSampleSummary & dst)
+void aiPointsSample::getSummary(aiPointsSampleSummary& dst)
 {
     dst.count = (int)m_points.size();
 }
 
-aiPoints::aiPoints(aiObject *parent, const abcObject &abc)
+aiPoints::aiPoints(aiObject* parent, const abcObject& abc)
     : super(parent, abc)
 {
     updateSummary();
@@ -108,7 +107,7 @@ aiPoints::Sample* aiPoints::newSample()
     return new Sample(this);
 }
 
-void aiPoints::readSampleBody(Sample & sample, uint64_t idx)
+void aiPoints::readSampleBody(Sample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
@@ -167,7 +166,8 @@ void aiPoints::cookSampleBody(Sample& sample)
             std::sort
 #endif
                 (sample.m_sort_data.begin(), sample.m_sort_data.end(),
-                [](const std::pair<float, int>& a, const std::pair<float, int>& b) { return a.first > b.first; });
+                    [](const std::pair<float, int>& a, const std::pair<float, int>& b)
+                    { return a.first > b.first; });
 
             Remap(sample.m_points, sample.m_points_sp, sample.m_sort_data);
             if (summary.interpolate_points)
@@ -240,7 +240,19 @@ void aiPoints::cookSampleBody(Sample& sample)
     }
 }
 
-void aiPoints::setSort(bool v) { m_sort = v; }
-bool aiPoints::getSort() const { return m_sort; }
-void aiPoints::setSortPosition(const abcV3& v) { m_sort_position = v; }
-const abcV3& aiPoints::getSortPosition() const { return m_sort_position; }
+void aiPoints::setSort(bool v)
+{
+    m_sort = v;
+}
+bool aiPoints::getSort() const
+{
+    return m_sort;
+}
+void aiPoints::setSortPosition(const abcV3& v)
+{
+    m_sort_position = v;
+}
+const abcV3& aiPoints::getSortPosition() const
+{
+    return m_sort_position;
+}

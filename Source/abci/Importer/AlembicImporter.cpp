@@ -24,7 +24,7 @@ abciAPI void aiCleanup()
 {
 }
 
-abciAPI void aiClearContextsWithPath(const char *path)
+abciAPI void aiClearContextsWithPath(const char* path)
 {
     aiContextManager::destroyContextsWithPath(path);
 }
@@ -40,7 +40,7 @@ abciAPI void aiContextDestroy(aiContext* ctx)
         aiContextManager::destroyContext(ctx->getUid());
 }
 
-abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
+abciAPI bool aiContextLoad(aiContext* ctx, const char* path)
 {
     return ctx ? ctx->load(path) : false;
 }
@@ -61,12 +61,12 @@ abciAPI int aiContextGetTimeSamplingCount(aiContext* ctx)
     return ctx ? ctx->getTimeSamplingCount() : 0;
 }
 
-abciAPI aiTimeSampling * aiContextGetTimeSampling(aiContext * ctx, int i)
+abciAPI aiTimeSampling* aiContextGetTimeSampling(aiContext* ctx, int i)
 {
     return ctx ? ctx->getTimeSampling(i) : nullptr;
 }
 
-abciAPI void aiContextGetTimeRange(aiContext* ctx, double *begin, double *end)
+abciAPI void aiContextGetTimeRange(aiContext* ctx, double* begin, double* end)
 {
     if (ctx && begin && end)
         ctx->getTimeRange(*begin, *end);
@@ -83,23 +83,23 @@ abciAPI void aiContextUpdateSamples(aiContext* ctx, double time)
         ctx->updateSamples(time);
 }
 
-abciAPI int aiTimeSamplingGetSampleCount(aiTimeSampling *self)
+abciAPI int aiTimeSamplingGetSampleCount(aiTimeSampling* self)
 {
     return self ? (int)self->getSampleCount() : 0;
 }
 
-abciAPI double aiTimeSamplingGetTime(aiTimeSampling *self, int index)
+abciAPI double aiTimeSamplingGetTime(aiTimeSampling* self, int index)
 {
     return self ? self->getTime(index) : 0.0;
 }
 
-abciAPI void aiTimeSamplingGetRange(aiTimeSampling *self, double *start, double *end)
+abciAPI void aiTimeSamplingGetRange(aiTimeSampling* self, double* start, double* end)
 {
     if (self)
         self->getTimeRange(*start, *end);
 }
 
-abciAPI aiContext * aiObjectGetContext(aiObject * obj)
+abciAPI aiContext* aiObjectGetContext(aiObject* obj)
 {
     return obj ? obj->getContext() : nullptr;
 }
@@ -129,7 +129,7 @@ abciAPI aiObject* aiObjectGetParent(aiObject* obj)
     return obj ? obj->getParent() : nullptr;
 }
 
-abciAPI void aiObjectSetEnabled(aiObject * obj, bool v)
+abciAPI void aiObjectSetEnabled(aiObject* obj, bool v)
 {
     if (obj)
         obj->setEnabled(v);
@@ -160,14 +160,15 @@ abciAPI aiCurves* aiObjectAsCurves(aiObject* obj)
     return obj ? dynamic_cast<aiCurves*>(obj) : nullptr;
 }
 
-abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
+abciAPI aiSample* aiSchemaGetSample(aiSchema* schema)
 {
     return schema ? schema->getSample() : nullptr;
 }
 
-abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss)
+abciAPI void aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector* ss)
 {
-    if (schema) {
+    if (schema)
+    {
         schema->markForceUpdate();
         schema->updateSample(*ss);
     }
@@ -179,7 +180,7 @@ abciAPI void aiSchemaSync(aiSchema* schema)
         schema->waitAsync();
 }
 
-abciAPI bool aiSchemaIsConstant(aiSchema * schema)
+abciAPI bool aiSchemaIsConstant(aiSchema* schema)
 {
     return schema ? schema->isConstant() : false;
 }
@@ -199,12 +200,12 @@ abciAPI aiProperty* aiSchemaGetPropertyByIndex(aiSchema* schema, int i)
     return schema->getPropertyByIndex(i);
 }
 
-abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char *name)
+abciAPI aiProperty* aiSchemaGetPropertyByName(aiSchema* schema, const char* name)
 {
     return schema->getPropertyByName(name);
 }
 
-abciAPI void aiXformGetData(aiXformSample* sample, aiXformData *dst)
+abciAPI void aiXformGetData(aiXformSample* sample, aiXformData* dst)
 {
     if (sample)
     {
@@ -224,7 +225,7 @@ abciAPI void aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiMeshSampleSu
         sample->getSummary(*dst);
 }
 
-abciAPI void aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst)
+abciAPI void aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary* dst)
 {
     if (sample)
         sample->getSplitSummaries(dst);
@@ -242,7 +243,7 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
         sample->fillVertexBuffer(vbs, ibs);
 }
 
-abciAPI void aiCameraGetData(aiCameraSample* sample, CameraData *dst)
+abciAPI void aiCameraGetData(aiCameraSample* sample, CameraData* dst)
 {
     if (sample)
     {
@@ -250,7 +251,7 @@ abciAPI void aiCameraGetData(aiCameraSample* sample, CameraData *dst)
     }
 }
 
-abciAPI void aiPointsGetSummary(aiPoints *schema, aiPointsSummary *dst)
+abciAPI void aiPointsGetSummary(aiPoints* schema, aiPointsSummary* dst)
 {
     if (schema)
         *dst = schema->getSummary();
@@ -262,19 +263,19 @@ abciAPI void aiPointsSetSort(aiPoints* schema, bool v)
         schema->setSort(v);
 }
 
-abciAPI void aiCurvesGetSummary(aiCurves *schema, aiCurvesSummary *dst)
+abciAPI void aiCurvesGetSummary(aiCurves* schema, aiCurvesSummary* dst)
 {
     if (schema)
         *dst = schema->getSummary();
 }
 
-abciAPI void aiCurvesGetSampleSummary(aiCurvesSample * sample, aiCurvesSampleSummary * dst)
+abciAPI void aiCurvesGetSampleSummary(aiCurvesSample* sample, aiCurvesSampleSummary* dst)
 {
     if (sample)
         sample->getSummary(*dst);
 }
 
-abciAPI void aiCurvesFillData(aiCurvesSample* sample, aiCurvesData *dst)
+abciAPI void aiCurvesFillData(aiCurvesSample* sample, aiCurvesData* dst)
 {
     if (sample)
         sample->fillData(*dst);
@@ -286,13 +287,13 @@ abciAPI void aiPointsSetSortBasePosition(aiPoints* schema, abcV3 v)
         schema->setSortPosition(v);
 }
 
-abciAPI void aiPointsGetSampleSummary(aiPointsSample * sample, aiPointsSampleSummary * dst)
+abciAPI void aiPointsGetSampleSummary(aiPointsSample* sample, aiPointsSampleSummary* dst)
 {
     if (sample)
         sample->getSummary(*dst);
 }
 
-abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData *dst)
+abciAPI void aiPointsFillData(aiPointsSample* sample, aiPointsData* dst)
 {
     if (sample)
         sample->fillData(*dst);
@@ -313,12 +314,12 @@ abciAPI const char* aiPropertyGetName(aiProperty* prop)
     return prop->getName().c_str();
 }
 
-abciAPI void aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *data)
+abciAPI void aiPropertyGetDataPointer(aiProperty* prop, const abcSampleSelector* ss, aiPropertyData* data)
 {
     prop->getDataPointer(*ss, *data);
 }
 
-abciAPI void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst)
+abciAPI void aiPropertyCopyData(aiProperty* prop, const abcSampleSelector* ss, aiPropertyData* dst)
 {
     prop->copyData(*ss, *dst);
 }

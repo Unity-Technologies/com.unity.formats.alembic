@@ -2,7 +2,7 @@
 
 class aiProperty
 {
-public:
+ public:
     aiProperty();
     virtual ~aiProperty();
     virtual const std::string& getName() const = 0;
@@ -23,8 +23,8 @@ public:
 
     void setActive(bool v);
 
-protected:
+ protected:
     bool m_active = false;
 };
 
-aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyHeader header);
+aiProperty* aiMakeProperty(aiSchema* schema, abcProperties cprop, Abc::PropertyHeader header);

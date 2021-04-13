@@ -3,7 +3,6 @@
 #include "aiIntrusiveArray.h"
 #include "aiMath.h"
 
-
 struct MeshConnectionInfo
 {
     RawVector<int> v2f_counts;
@@ -45,30 +44,28 @@ struct MeshConnectionInfo
     }
 };
 
-
 class MeshWelder
 {
-public:
+ public:
 
     // compare_op: [](int vertex_index, int another_vertex_index) -> bool
     // weld_op: [](int vertex_index, int new_vertex_index) -> void
     template<class Compare, class Welder>
-    int weld(abcV3 *points, int count, const Compare& compare_op, const Welder& weld_op);
+    int weld(abcV3* points, int count, const Compare& compare_op, const Welder& weld_op);
 
     const RawVector<int>& getRemapTable() const;
 
-private:
+ private:
     RawVector<int> m_hash_table;
     RawVector<int> m_remap;
-    abcV3 *m_points = nullptr;
+    abcV3* m_points = nullptr;
     int m_count = 0;
     int m_hash_size = 0;
 
     static const int NIL = -1;
-    void prepare(abcV3 *points, int count);
+    void prepare(abcV3* points, int count);
     static uint32_t hash(const abcV3& v);
 };
-
 
 struct MeshRefiner
 {
@@ -131,9 +128,12 @@ struct MeshRefiner
 
     // attributes
     template<class T>
-    void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, RawVector<T>& new_values, RawVector<int>& new2old)
+    void addIndexedAttribute(const IArray<T>& values,
+        const IArray<int>& indices,
+        RawVector<T>& new_values,
+        RawVector<int>& new2old)
     {
-        auto attr = newAttribute<IndexedAttribute<T> >();
+        auto attr = newAttribute < IndexedAttribute < T > > ();
         attr->values = values;
         attr->indices = indices;
         attr->new_values = &new_values;
@@ -143,7 +143,7 @@ struct MeshRefiner
     template<class T>
     void addExpandedAttribute(const IArray<T>& values, RawVector<T>& new_values, RawVector<int>& new2old)
     {
-        auto attr = newAttribute<ExpandedAttribute<T> >();
+        auto attr = newAttribute < ExpandedAttribute < T > > ();
         attr->values = values;
         attr->new_values = &new_values;
         attr->new2old = &new2old;
@@ -159,13 +159,15 @@ struct MeshRefiner
     int getLinesIndexCountTotal() const;
     int getPointsIndexCountTotal() const;
 
-private:
+ private:
     void setupSubmeshes();
 
     class IAttribute
     {
-    public:
-        virtual ~IAttribute() {}
+     public:
+        virtual ~IAttribute()
+        {
+        }
         virtual void prepare(int vertex_count, int index_count) = 0;
         virtual bool compare(int vertex_index, int index_index) = 0;
         virtual void emit(int index_index) = 0;
@@ -175,7 +177,7 @@ private:
     template<class T>
     class IndexedAttribute : public IAttribute
     {
-    public:
+     public:
         void prepare(int vertex_count, int index_count) override
         {
             clear();
@@ -201,14 +203,14 @@ private:
 
         IArray<T> values;
         IArray<int> indices;
-        RawVector<T> *new_values = nullptr;
-        RawVector<int> *new2old = nullptr;
+        RawVector<T>* new_values = nullptr;
+        RawVector<int>* new2old = nullptr;
     };
 
     template<class T>
     class ExpandedAttribute : public IAttribute
     {
-    public:
+     public:
         void prepare(int vertex_count, int index_count) override
         {
             clear();
@@ -231,8 +233,8 @@ private:
         }
 
         IArray<T> values;
-        RawVector<T> *new_values = nullptr;
-        RawVector<int> *new2old = nullptr;
+        RawVector<T>* new_values = nullptr;
+        RawVector<int>* new2old = nullptr;
     };
 
     template<class AttrType>
@@ -245,7 +247,7 @@ private:
         size_t i = attributes.size();
         if (i >= max_attributes)
             return nullptr;
-        auto *ret = new(&buf_attributes[size_attr * i]) AttrType();
+        auto* ret = new(&buf_attributes[size_attr * i]) AttrType();
         attributes.push_back(ret);
         return ret;
     }
@@ -255,7 +257,6 @@ private:
     static const int max_attributes = 8; // you can increase this if needed
 };
 
-
 inline uint32_t MeshWelder::hash(const abcV3& value)
 {
     auto* h = (const uint32_t*)(&value);
@@ -264,12 +265,12 @@ inline uint32_t MeshWelder::hash(const abcV3& value)
 }
 
 template<class Compare, class Welder>
-inline int MeshWelder::weld(abcV3 *points, int count, const Compare & compare_op, const Welder & weld_op)
+inline int MeshWelder::weld(abcV3* points, int count, const Compare& compare_op, const Welder& weld_op)
 {
     prepare(points, count);
 
     int new_index = 0;
-    int *next = &m_hash_table[m_hash_size];
+    int* next = &m_hash_table[m_hash_size];
     for (int vi = 0; vi < m_count; vi++)
     {
         auto& v = m_points[vi];

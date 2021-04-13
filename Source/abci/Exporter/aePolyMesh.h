@@ -2,34 +2,33 @@
 
 class aeFaceSet
 {
-public:
-    aeFaceSet(aeObject *parent, const char *name, uint32_t tsi);
-    void writeSample(const aeFaceSetData &data);
+ public:
+    aeFaceSet(aeObject* parent, const char* name, uint32_t tsi);
+    void writeSample(const aeFaceSetData& data);
 
-private:
+ private:
     std::unique_ptr<abcObject> m_abc;
     AbcGeom::OFaceSetSchema m_schema;
     RawVector<int> m_buf_faces;
 };
 using aeFaceSetPtr = std::shared_ptr<aeFaceSet>;
 
-
 class aePolyMesh : public aeSchema
 {
     using super = aeSchema;
-public:
-    aePolyMesh(aeObject *parent, const char *name, uint32_t tsi);
+ public:
+    aePolyMesh(aeObject* parent, const char* name, uint32_t tsi);
     abcPolyMesh& getAbcObject() override;
     abcProperties getAbcProperties() override;
 
-    size_t  getNumSamples() override;
-    void    setFromPrevious() override;
-    void    writeSample(const aePolyMeshData &data);
+    size_t getNumSamples() override;
+    void setFromPrevious() override;
+    void writeSample(const aePolyMeshData& data);
 
-    int addFaceSet(const char *name);
-    void writeFaceSetSample(int faceset_index, const aeFaceSetData &data);
+    int addFaceSet(const char* name);
+    void writeFaceSetSample(int faceset_index, const aeFaceSetData& data);
 
-private:
+ private:
     void writeSampleBody();
 
     struct SubmeshBuffer
@@ -45,8 +44,8 @@ private:
 
     bool m_buf_visibility = true;
 
-    RawVector<int>   m_buf_faces;
-    RawVector<int>   m_buf_indices;
+    RawVector<int> m_buf_faces;
+    RawVector<int> m_buf_indices;
 
     RawVector<abcV3> m_buf_points;
     RawVector<abcV3> m_buf_velocities;
