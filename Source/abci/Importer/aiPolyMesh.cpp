@@ -68,6 +68,7 @@ void aiMeshTopology::clear()
     m_counts_sp.reset();
     m_faceset_sps.clear();
     m_material_ids.clear();
+    m_faceset_names.clear();
     m_refiner.clear();
     m_remap_points.clear();
     m_remap_normals.clear();
@@ -250,6 +251,7 @@ void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData& data
     auto& refiner = m_topology->m_refiner;
     auto& submesh = refiner.submeshes[submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
+    strncpy(data.faceset_names, submesh.facesetName.c_str(), 255 );
 }
 
 void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs)
@@ -543,9 +545,11 @@ void aiPolyMesh::readSampleBody(Sample& sample, uint64_t idx)
     if (!m_facesets.empty() && topology_changed)
     {
         topology.m_faceset_sps.resize(m_facesets.size());
+        topology.m_faceset_names.resize(m_facesets.size());
         for (size_t fi = 0; fi < m_facesets.size(); ++fi)
         {
-            m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
+          m_facesets[fi].get(topology.m_faceset_sps[fi], ss);
+          topology.m_faceset_names[fi] = m_facesets[fi].getObject().getName();
         }
     }
 
@@ -1070,7 +1074,7 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample& sample)
                 }
             }
         }
-        refiner.genSubmeshes(topology.m_material_ids);
+        refiner.genSubmeshes(topology.m_material_ids, topology.m_faceset_names);
     }
     else
     {

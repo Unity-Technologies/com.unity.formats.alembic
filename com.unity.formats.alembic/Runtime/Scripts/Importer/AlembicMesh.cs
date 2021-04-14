@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -15,6 +16,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal class Submesh : IDisposable
         {
             public PinnedList<int> indexes = new PinnedList<int>();
+            public readonly string facesetName = new string('\0', 255);
             public bool update = true;
 
             public void Dispose()
@@ -263,6 +265,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                     m_submeshes[smi].update = true;
                     submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
                     submeshData.indexes = submesh.indexes;
+                    fixed(char* s = submesh.facesetName)
+                    {
+                        submeshData.facesetNames = s;
+                    }
                     m_submeshData[smi] = submeshData;
                 }
             }
@@ -319,7 +325,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 var split = m_splits[i];
-                if (split.active &&  split.velocities.Length > 0)
+                if (split.active && split.velocities.Length > 0)
                 {
                     var job = new MultiplyByConstant
                     {
@@ -427,6 +433,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 var submesh = m_submeshes[smi];
                 if (submesh.update)
                 {
+                    unsafe
+                    {
+                        var facesetName = Marshal.PtrToStringAnsi(new IntPtr(m_submeshData[smi].facesetNames));
+                    }
+
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
                     if (sum.topology == aiTopology.Triangles)

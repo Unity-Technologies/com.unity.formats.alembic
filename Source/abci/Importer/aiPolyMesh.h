@@ -44,6 +44,7 @@ class aiMeshTopology
     Abc::Int32ArraySamplePtr m_counts_sp;
     abcFaceSetSamples m_faceset_sps;
     RawVector<int> m_material_ids;
+    std::vector<std::string> m_faceset_names;
 
     MeshRefiner m_refiner;
     RawVector<int> m_remap_points;
