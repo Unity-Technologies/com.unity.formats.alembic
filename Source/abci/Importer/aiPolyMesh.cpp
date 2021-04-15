@@ -58,6 +58,16 @@ inline void Lerp(RawVector<T>& dst, const RawVector<T>& src1, const RawVector<T>
     Lerp(dst.data(), src1.data(), src2.data(), (int)src1.size(), w);
 }
 
+void copyCharsWithStride(void * target, const std::string &source, unsigned long maxLength )
+{
+    auto span = std::min(maxLength, source.size())
+    for (int i=0;i<span;++i)
+    {
+        *((char*)target+2*i) = source[i];
+        *((char*)target+2*i+1) = '\0';
+    }
+}
+
 aiMeshTopology::aiMeshTopology()
 {
 }
@@ -251,7 +261,7 @@ void aiPolyMeshSample::fillSubmeshIndices(int submesh_index, aiSubmeshData& data
     auto& refiner = m_topology->m_refiner;
     auto& submesh = refiner.submeshes[submesh_index];
     refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
-    strncpy(data.faceset_names, submesh.facesetName.c_str(), 255 );
+    copyCharsWithStride(data.faceset_names, submesh.facesetName, 255); // c# strings are 2 bytes. This function sets the low byte to the char and the high byte to \0
 }
 
 void aiPolyMeshSample::fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs)

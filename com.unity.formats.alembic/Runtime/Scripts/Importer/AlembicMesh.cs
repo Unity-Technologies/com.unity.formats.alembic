@@ -433,11 +433,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 var submesh = m_submeshes[smi];
                 if (submesh.update)
                 {
-                    unsafe
-                    {
-                        var facesetName = Marshal.PtrToStringAnsi(new IntPtr(m_submeshData[smi].facesetNames));
-                    }
-
                     var sum = m_submeshSummaries[smi];
                     var split = m_splits[sum.splitIndex];
                     if (sum.topology == aiTopology.Triangles)
