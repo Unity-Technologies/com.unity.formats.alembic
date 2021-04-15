@@ -1,4 +1,3 @@
-using Scripts.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer

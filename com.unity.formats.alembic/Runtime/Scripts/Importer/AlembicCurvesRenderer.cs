@@ -9,7 +9,7 @@ using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Rendering;
 using Unity.Burst;
 
-namespace Scripts.Importer
+namespace UnityEngine.Formats.Alembic.Importer
 {
     /// <summary>
     /// The AlembicCurvesRenderer component allows you to preview the data inside an AlembicCurves component. It requires the AlembicCurves component to function correctly. When you add an AlembicCurvesRenderer component, it also automatically adds two other required components: a MeshRenderer and a MeshFilter.

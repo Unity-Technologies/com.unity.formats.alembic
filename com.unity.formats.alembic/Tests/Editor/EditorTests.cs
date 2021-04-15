@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Linq;
 using NUnit.Framework;
-using Scripts.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
