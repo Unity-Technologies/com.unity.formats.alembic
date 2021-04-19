@@ -95,5 +95,17 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             director.Evaluate();
             yield return null;
         }
+
+        [UnityTest]
+        public IEnumerator SelectingAnAlembicPlayer_ShouldNotLeakResources()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811"); // GUID of DummyAlembic.abc
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var player = asset.GetComponent<AlembicStreamPlayer>();
+            Assert.IsNull(player.abcStream);
+            Selection.activeObject = asset;
+            yield return null;
+            Assert.IsNull(player.abcStream);
+        }
     }
 }

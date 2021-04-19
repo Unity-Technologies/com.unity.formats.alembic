@@ -19,7 +19,16 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             RegisterCallbacks();
             var streamPlayer = target as AlembicStreamPlayer;
-            loadSucceded = streamPlayer.LoadStream(false, true);
+            if (streamPlayer.abcStream != null)
+            {
+                loadSucceded = streamPlayer.abcStream.abcIsValid;
+            }
+            else
+            {
+                // We have no stream, open and close just to update the UI status.
+                loadSucceded = streamPlayer.LoadStream(false, true);
+                streamPlayer.CloseStream();
+            }
         }
 
         void OnDisable()
