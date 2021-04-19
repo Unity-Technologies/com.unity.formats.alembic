@@ -224,6 +224,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         static void DirtyCustomDependencies()
         {
+            if (Application.isPlaying)
+            {
+                return;
+            }
+
             var now = DateTime.Now;
             if (now - lastCheck < checkDependencyFrequency)
             {
