@@ -262,7 +262,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             return true;
         }
 
-        void CloseStream()
+        internal void CloseStream()
         {
             abcStream?.Dispose();
             abcStream = null;
