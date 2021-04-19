@@ -171,7 +171,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// </summary>
         /// <param name="newPath">Path to the new file.</param>
         /// <returns>True if the load succeeded, false otherwise.</returns>
-        public bool LoadFromFile(string newPath)
+        public bool LoadFromFile(string newPath, bool reloadMaterials = true)
         {
             if (StreamDescriptor == null)
             {
@@ -179,7 +179,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             StreamDescriptor.PathToAbc = newPath;
-            return InitializeAfterLoad();
+            return InitializeAfterLoad(reloadMaterials);
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
         }
 
-        bool InitializeAfterLoad()
+        bool InitializeAfterLoad(bool reloadMaterials = true)
         {
             var ret = LoadStream(true, true);
             if (!ret)
@@ -243,20 +243,22 @@ namespace UnityEngine.Formats.Alembic.Importer
             StreamDescriptor.MediaStartTime = (float)start;
             StreamDescriptor.MediaEndTime = (float)end;
 
-            var defaultMat = AlembicMesh.GetDefaultMaterial();
-
-            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            if (reloadMaterials)
             {
-                var mats = meshRenderer.sharedMaterials;
-                for (var i = 0; i < mats.Length; ++i)
+                var defaultMat = AlembicMesh.GetDefaultMaterial();
+                foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
                 {
-                    if (mats[i] == null) // Add the default material if no material present
+                    var mats = meshRenderer.sharedMaterials;
+                    for (var i = 0; i < mats.Length; ++i)
                     {
-                        mats[i] = defaultMat;
+                        if (mats[i] == null) // Add the default material if no material present
+                        {
+                            mats[i] = defaultMat;
+                        }
                     }
-                }
 
-                meshRenderer.sharedMaterials = mats;
+                    meshRenderer.sharedMaterials = mats;
+                }
             }
 
             return true;
