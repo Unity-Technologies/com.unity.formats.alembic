@@ -215,7 +215,6 @@ namespace UnityEditor.Formats.Alembic.Importer
         static void InitializeEditorCallback()
         {
             EditorApplication.update += DirtyCustomDependencies; //
-            DirtyCustomDependencies();
         }
 
         static ulong pipelineHash;
@@ -225,7 +224,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         static void DirtyCustomDependencies()
         {
             var now = DateTime.Now;
-            if (now - lastCheck < checkDependencyFrequency)
+            if (Application.isPlaying || now - lastCheck < checkDependencyFrequency)
             {
                 return;
             }
