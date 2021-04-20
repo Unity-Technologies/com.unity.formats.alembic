@@ -60,7 +60,7 @@ inline void Lerp(RawVector<T>& dst, const RawVector<T>& src1, const RawVector<T>
 
 void copyCharsWithStride(void * target, const std::string &source, unsigned long maxLength )
 {
-    auto span = std::min(maxLength, source.size())
+    auto span = std::min(maxLength, source.size());
     for (int i=0;i<span;++i)
     {
         *((char*)target+2*i) = source[i];
