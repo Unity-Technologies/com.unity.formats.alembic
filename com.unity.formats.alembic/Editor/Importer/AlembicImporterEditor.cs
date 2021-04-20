@@ -124,8 +124,25 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
             EditorGUILayout.Separator();
 
+            DisplayMaterialUI(serializedObject.FindProperty("materialAssignments"));
+
             serializedObject.ApplyModifiedProperties();
             base.ApplyRevertGUI();
+        }
+
+        static void DisplayMaterialUI(SerializedProperty materialAssignment)
+        {
+            var keysProp = materialAssignment.FindPropertyRelative("keys");
+            var valsProp = materialAssignment.FindPropertyRelative("values");
+            for (var i = 0; i < keysProp.arraySize; ++i)
+            {
+                var matSlotProp = keysProp.GetArrayElementAtIndex(i);
+                var matProp = valsProp.GetArrayElementAtIndex(i);
+                var key = matSlotProp.FindPropertyRelative("key").stringValue;
+                var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
+
+                EditorGUILayout.ObjectField(matProp, typeof(Material), new GUIContent(facesetName));
+            }
         }
 
         internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)

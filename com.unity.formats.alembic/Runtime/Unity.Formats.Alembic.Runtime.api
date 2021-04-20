@@ -37,6 +37,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
     public class AlembicCustomData : UnityEngine.MonoBehaviour
     {
+        public System.Collections.Generic.List<string> FacesetNames { get; }
         public AlembicCustomData() {}
     }
 

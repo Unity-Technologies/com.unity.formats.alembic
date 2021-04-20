@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -131,6 +133,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
         [SerializeField] bool isHDF5;
 
+        [SerializeField]
+        SerializableDictionary<MaterialSlot, Material> materialAssignments = new();
+
         void OnValidate()
         {
             if (!firstImport)
@@ -210,9 +215,53 @@ namespace UnityEditor.Formats.Alembic.Importer
                         Debug.LogError(path + ": Unsupported HDF5 file format detected. Please convert to Ogawa.");
                     }
                 }
+
+                ApplyMaterialAssignments(go);
             }
 
             firstImport = false;
+        }
+
+        void ApplyMaterialAssignments(GameObject go)
+        {
+            foreach (var materialSlot in GenMaterialSlots(go))
+            {
+                materialAssignments.ChangeOrAddKey(materialSlot, materialSlot);
+            }
+
+            foreach (var kvs in materialAssignments)
+            {
+                var meshRenderer = kvs.Key.GameObject.GetComponent<MeshRenderer>();
+                if (kvs.Value != null && meshRenderer != null)
+                {
+                    var mats = meshRenderer.sharedMaterials;
+                    mats[kvs.Key.SubmeshIdx] = kvs.Value;
+                    meshRenderer.sharedMaterials = mats;
+                }
+            }
+        }
+
+        static IEnumerable<MaterialSlot> GenMaterialSlots(GameObject go)
+        {
+            foreach (var customData in go.GetComponentsInChildren<AlembicCustomData>())
+            {
+                var path = string.Empty;
+                var parent = customData.transform;
+                while (parent != null)
+                {
+                    path = parent.name + "/" + path;
+                    parent = parent.parent;
+                }
+
+                for (var i = 0; i < customData.FacesetNames.Count; ++i)
+                {
+                    if (!string.IsNullOrEmpty(customData.FacesetNames[i]))
+                    {
+                        var key = path + "-" + customData.FacesetNames[i];
+                        yield return new MaterialSlot(key, customData.FacesetNames[i], customData.gameObject, i);
+                    }
+                }
+            }
         }
 
         [InitializeOnLoadMethod]
@@ -262,6 +311,52 @@ namespace UnityEditor.Formats.Alembic.Importer
                 pipelineHash = newPipelineHash;
                 RegisterCustomDependency(renderPipepineDependency, new Hash128(pipelineHash, 0));
                 AssetDatabase.Refresh();
+            }
+        }
+
+        [Serializable]
+        class MaterialSlot : IEquatable<MaterialSlot>
+        {
+            [SerializeField] string key;
+            [SerializeField] string facesetName;
+            [SerializeField] GameObject gameObject;
+            [SerializeField] int submeshIdx;
+
+            public MaterialSlot(string key, string facesetName, GameObject gameObject, int submeshIdx)
+            {
+                this.key = key;
+                this.facesetName = facesetName;
+                this.gameObject = gameObject;
+                this.submeshIdx = submeshIdx;
+            }
+
+            public int SubmeshIdx => submeshIdx;
+
+            public GameObject GameObject => gameObject;
+
+            public string Key => key;
+            public string FacesetName => facesetName;
+
+            public bool Equals(MaterialSlot other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                return ReferenceEquals(this, other) || string.Equals(key, other.key);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((MaterialSlot)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((key != null ? key.GetHashCode() : 0) * 397) ^ (facesetName != null ? facesetName.GetHashCode() : 0);
+                }
             }
         }
 
