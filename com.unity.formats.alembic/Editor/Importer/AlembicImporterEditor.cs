@@ -138,10 +138,27 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 var matSlotProp = keysProp.GetArrayElementAtIndex(i);
                 var matProp = valsProp.GetArrayElementAtIndex(i);
-                var key = matSlotProp.FindPropertyRelative("key").stringValue;
                 var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
 
                 EditorGUILayout.ObjectField(matProp, typeof(Material), new GUIContent(facesetName));
+            }
+
+            if (GUILayout.Button("Auto-Assign"))
+            {
+                const string searchString = "t:Material ";
+                for (var i = 0; i < keysProp.arraySize; ++i)
+                {
+                    var matSlotProp = keysProp.GetArrayElementAtIndex(i);
+                    var matProp = valsProp.GetArrayElementAtIndex(i);
+                    var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
+                    var guid = AssetDatabase.FindAssets(searchString + facesetName);
+                    if (guid.Length > 0)
+                    {
+                        var path = AssetDatabase.GUIDToAssetPath(guid[0]);
+                        var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                        matProp.objectReferenceValue = mat;
+                    }
+                }
             }
         }
 
