@@ -40,7 +40,7 @@ This version of Alembic for Unity is compatible with the following versions of t
 
 ### Known issues and limitations
 
-* Alembic for Unity **only supports** the following build targets: **Windows 64-bit**, **MacOS X**, **Linux 64-bit**, and **Google Stadia**.
+* Alembic for Unity **only supports** the following build targets: **Windows 64-bit**, **MacOS X**, **Linux 64-bit**, and **Stadia**.
 
 * The Alembic format does not support Material import and export.
 
