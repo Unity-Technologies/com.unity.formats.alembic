@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0-pre.4] - 2021-04-27
+### Added
+### Changed
+### Fixed
+
 ## [2.2.0-pre.3] - 2021-04-07
 ### Added
 - New option to automatically add the AlembicCurveRendering components for basic preview of the curves in the Scene.
