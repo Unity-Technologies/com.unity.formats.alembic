@@ -898,6 +898,9 @@ void aiPolyMesh::onTopologyChange(aiPolyMeshSample & sample)
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
 
+    if (refiner.points.empty())
+        return;
+
     bool has_valid_normals = false;
     bool has_valid_uv0 = false;
     bool has_valid_uv1 = false;
