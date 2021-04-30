@@ -79,5 +79,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             Object.Destroy(o);
 #endif
         }
+
+        public static void DepthFirstVisitor(this GameObject root, Action<GameObject> lambda)
+        {
+            for (var i = 0; i < root.transform.childCount; i++)
+            {
+                DepthFirstVisitor(root.transform.GetChild(i).gameObject, lambda);
+            }
+            lambda.Invoke(root);
+        }
     }
 }

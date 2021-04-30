@@ -107,5 +107,20 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return null;
             Assert.IsNull(player.abcStream);
         }
+
+        [Test]
+        public void Importerless_ShouldGenerateTheCorrectNumberOfMaterialSlots()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("f30dca527f4e947248046d6d12750c2d"); // GUID of twoTris_twoFaceSets...
+            var player = new GameObject().AddComponent<AlembicStreamPlayer>();
+
+            var ret = player.LoadFromFile(path);
+            Assert.IsTrue(ret);
+
+            var materials = player.GetComponentInChildren<MeshRenderer>().sharedMaterials;
+            var subMeshes = player.GetComponentInChildren<MeshFilter>().sharedMesh.subMeshCount;
+            Assert.AreEqual(2, subMeshes);
+            Assert.AreEqual(subMeshes, materials.Length);
+        }
     }
 }

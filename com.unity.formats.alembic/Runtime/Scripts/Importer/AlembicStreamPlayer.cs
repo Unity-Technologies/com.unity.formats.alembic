@@ -245,19 +245,30 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var defaultMat = AlembicMesh.GetDefaultMaterial();
 
-            foreach (var meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>(true))
+            gameObject.DepthFirstVisitor(go =>
             {
-                var mats = meshRenderer.sharedMaterials;
-                for (var i = 0; i < mats.Length; ++i)
+                var filter = go.GetComponent<MeshFilter>();
+                var meshRenderer = go.GetComponent<MeshRenderer>();
+                if (filter == null || meshRenderer == null)
                 {
-                    if (mats[i] == null) // Add the default material if no material present
-                    {
-                        mats[i] = defaultMat;
-                    }
+                    return;
+                }
+
+                var mesh = filter.sharedMesh;
+                if (mesh == null)
+                {
+                    return;
+                }
+
+                var subMesh = mesh.subMeshCount;
+                var mats = new Material[subMesh];
+                for (var i = 0; i < subMesh; ++i)
+                {
+                    mats[i] = defaultMat;
                 }
 
                 meshRenderer.sharedMaterials = mats;
-            }
+            });
 
             return true;
         }
