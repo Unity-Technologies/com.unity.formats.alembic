@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed a bug that cased data loss when the AlembicStreamPlayer was reset.
 
 ## [2.2.0-pre.3] - 2021-04-07
 ### Added
