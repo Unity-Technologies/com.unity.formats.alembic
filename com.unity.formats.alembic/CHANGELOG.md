@@ -8,12 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- Fixed a bug that caused out of project stream files to have the wrong number of material slots.
 - Fixed a bug that was causing data loss when resetting the AlembicStreamPlayer.
 - Fixed a bug that was converting previous Alembic instance in prefabs into out-of-project references.
 - Fixed a bug that was adding unnecessary Undo events during the Alembic asset import process.
 - Fixed a bug that was re-importing Alembic files on every SRP project start.
 - Fixed a bug that caused standalone builds to fail when the Alembic assets are read-only.
+- Fixed a bug that caused crashed when the file was of variable topology and there were empty vertex samples. 
 
 ## [2.2.0-pre.3] - 2021-04-07
 ### Added
