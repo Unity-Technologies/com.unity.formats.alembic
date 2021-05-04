@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- Fixed bug that caused previous Alembic instance in prefabs to get converted to out of project references.
+- Fixed a bug that was converting previous Alembic instance in prefabs into out-of-project references.
 
 ## [2.2.0-pre.3] - 2021-04-07
 ### Added
