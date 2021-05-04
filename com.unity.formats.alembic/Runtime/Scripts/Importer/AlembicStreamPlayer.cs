@@ -362,7 +362,6 @@ namespace UnityEngine.Formats.Alembic.Importer
                 LoadStream(false);
         }
 
-
         void OnDisable()
         {
             CloseStream();
