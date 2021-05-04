@@ -53,7 +53,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         public AlembicPointsRenderer() {}
     }
 
-    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour, UnityEngine.ISerializationCallbackReceiver
     {
         public float CurrentTime { get; set; }
         public float Duration { get; }
