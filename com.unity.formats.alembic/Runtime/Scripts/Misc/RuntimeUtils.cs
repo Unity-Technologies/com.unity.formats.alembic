@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 #if UNITY_EDITOR
@@ -51,7 +52,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             var ret = new GameObject();
 #if UNITY_EDITOR
-            Undo.RegisterCreatedObjectUndo(ret, message);
+            if (DisableUndoGuard.enableUndo)
+            {
+                Undo.RegisterCreatedObjectUndo(ret, message);
+            }
 #endif
             return ret;
         }
@@ -66,7 +70,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             ret = go.AddComponent<T>();
 #if UNITY_EDITOR
-            Undo.RegisterCreatedObjectUndo(ret, "Add Component");
+            if (DisableUndoGuard.enableUndo)
+            {
+                Undo.RegisterCreatedObjectUndo(ret, "Add Component");
+            }
 #endif
             return ret;
         }
@@ -79,6 +86,36 @@ namespace UnityEngine.Formats.Alembic.Importer
             Object.Destroy(o);
 #endif
         }
+
+#if UNITY_EDITOR
+        internal class DisableUndoGuard : IDisposable
+        {
+            internal static bool enableUndo = true;
+            static readonly Stack<bool> m_UndoStateStack = new Stack<bool>();
+            bool m_Disposed;
+            public DisableUndoGuard(bool disable)
+            {
+                m_Disposed = false;
+                m_UndoStateStack.Push(enableUndo);
+                enableUndo = !disable;
+            }
+
+            public void Dispose()
+            {
+                if (!m_Disposed)
+                {
+                    if (m_UndoStateStack.Count == 0)
+                    {
+                        Debug.LogError("UnMatched DisableUndoGuard calls");
+                        enableUndo = true;
+                        return;
+                    }
+                    enableUndo = m_UndoStateStack.Pop();
+                    m_Disposed = true;
+                }
+            }
+        }
+#endif
 
         public static void DepthFirstVisitor(this GameObject root, Action<GameObject> lambda)
         {
