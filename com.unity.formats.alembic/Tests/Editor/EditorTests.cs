@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -121,6 +122,20 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var subMeshes = player.GetComponentInChildren<MeshFilter>().sharedMesh.subMeshCount;
             Assert.AreEqual(2, subMeshes);
             Assert.AreEqual(subMeshes, materials.Length);
+        }
+
+        [Test]
+        public void UpgradingOldPrefabs_DoNotGetSwitchedToImporterless()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("c01136857b8dc481bb9babb33803ed4a"); // GUID of DummyAlembic.prefab
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = go.GetComponent<AlembicStreamPlayer>();
+            Assert.AreEqual(AlembicStreamPlayer.AlembicStreamSource.Internal, player.StreamSource);
+            Assert.AreEqual(typeof(AlembicStreamDescriptor), player.StreamDescriptor.GetType());
+            var asd = player.StreamDescriptor as AlembicStreamDescriptor;
+            Assert.IsTrue(!string.IsNullOrEmpty(asd.PathToAbc));
+            Assert.IsTrue(File.Exists(asd.PathToAbc));
         }
     }
 }
