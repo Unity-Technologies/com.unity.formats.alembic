@@ -134,7 +134,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         [SerializeField] bool isHDF5;
 
         [SerializeField]
-        SerializableDictionary<MaterialSlot, Material> materialAssignments = new();
+        SerializableDictionary<MaterialSlot, Material> materialAssignments = new SerializableDictionary<MaterialSlot, Material>();
 
         void OnValidate()
         {

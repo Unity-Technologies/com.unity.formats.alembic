@@ -9,11 +9,11 @@ namespace UnityEngine.Formats.Alembic.Importer
     class SerializableDictionary<TK, TV> : ISerializationCallbackReceiver, IEnumerable<KeyValuePair<TK, TV>>
     {
         [SerializeField]
-        List<TK> keys = new();
+        List<TK> keys = new List<TK>();
         [SerializeField]
-        List<TV> values = new();
+        List<TV> values = new List<TV>();
 
-        Dictionary<TK, TV> dict = new();
+        Dictionary<TK, TV> dict = new Dictionary<TK, TV>();
 
 
         public void ChangeOrAddKey(TK k1, TK k2)
