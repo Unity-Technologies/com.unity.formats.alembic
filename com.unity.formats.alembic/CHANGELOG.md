@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed a bug that was converting previous Alembic instance in prefabs into out-of-project references.
 - Fixed a bug that was adding unnecessary Undo events during the Alembic asset import process.
+- Fixed a bug that was re-importing Alembic files on every SRP project start.
+- Fixed a bug that caused standalone builds to fail when the Alembic assets are read-only.
 
 ## [2.2.0-pre.3] - 2021-04-07
 ### Added
