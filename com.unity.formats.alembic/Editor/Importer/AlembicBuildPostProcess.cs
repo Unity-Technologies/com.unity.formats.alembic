@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 {
     static class AlembicBuildPostProcess
     {
-        internal static readonly List<KeyValuePair<string, string>> FilesToCopy = new List<KeyValuePair<string, string>>();
+        internal static readonly HashSet<KeyValuePair<string, string>> FilesToCopy = new HashSet<KeyValuePair<string, string>>();
         internal static bool HaveAlembicInstances = false;
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
@@ -42,6 +42,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                     Directory.CreateDirectory(dir);
                 }
 
+                if (File.Exists(files.Value))
+                {
+                    var attrs = File.GetAttributes(files.Value);
+                    attrs &= ~FileAttributes.ReadOnly;
+                    File.SetAttributes(files.Value, attrs);
+                }
                 File.Copy(files.Key, files.Value, true);
             }
             FilesToCopy.Clear();
