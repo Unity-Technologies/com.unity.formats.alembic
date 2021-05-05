@@ -168,43 +168,47 @@ namespace UnityEditor.Formats.Alembic.Importer
             streamDescriptor.PathToAbc = path;
             streamDescriptor.Settings = StreamSettings;
 
-            using (var abcStream = new AlembicStream(go, streamDescriptor))
+            using (new RuntimeUtils.DisableUndoGuard(true))
             {
-                abcStream.AbcLoad(true, true);
-                abcStream.GetTimeRange(out abcStartTime, out abcEndTime);
-                if (firstImport)
+                using (var abcStream = new AlembicStream(go, streamDescriptor))
                 {
-                    startTime = abcStartTime;
-                    endTime = abcEndTime;
-                }
-                streamDescriptor.MediaStartTime = (float)abcStartTime;
-                streamDescriptor.MediaEndTime = (float)abcEndTime;
+                    abcStream.AbcLoad(true, true);
+                    abcStream.GetTimeRange(out abcStartTime, out abcEndTime);
+                    if (firstImport)
+                    {
+                        startTime = abcStartTime;
+                        endTime = abcEndTime;
+                    }
 
-                var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
-                streamPlayer.StreamSource = AlembicStreamPlayer.AlembicStreamSource.Internal;
-                streamPlayer.StreamDescriptor = streamDescriptor;
-                streamPlayer.StartTime = (float)StartTime;
-                streamPlayer.EndTime = (float)EndTime;
+                    streamDescriptor.MediaStartTime = (float)abcStartTime;
+                    streamDescriptor.MediaEndTime = (float)abcEndTime;
 
-                var subassets = new Subassets(ctx);
-                subassets.Add(streamDescriptor.name, streamDescriptor);
-                GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
+                    var streamPlayer = go.AddComponent<AlembicStreamPlayer>();
+                    streamPlayer.StreamSource = AlembicStreamPlayer.AlembicStreamSource.Internal;
+                    streamPlayer.StreamDescriptor = streamDescriptor;
+                    streamPlayer.StartTime = (float)StartTime;
+                    streamPlayer.EndTime = (float)EndTime;
 
-                AlembicStream.ReconnectStreamsWithPath(path);
+                    var subassets = new Subassets(ctx);
+                    subassets.Add(streamDescriptor.name, streamDescriptor);
+                    GenerateSubAssets(subassets, abcStream.abcTreeRoot, streamDescriptor);
 
-                var prevIdName = fileName;
-                if (!string.IsNullOrEmpty(rootGameObjectId))
-                {
-                    prevIdName = rootGameObjectId;
-                }
+                    AlembicStream.ReconnectStreamsWithPath(path);
 
-                ctx.AddObjectToAsset(prevIdName, go);
-                ctx.SetMainObject(go);
+                    var prevIdName = fileName;
+                    if (!string.IsNullOrEmpty(rootGameObjectId))
+                    {
+                        prevIdName = rootGameObjectId;
+                    }
 
-                isHDF5 = abcStream.IsHDF5();
-                if (IsHDF5)
-                {
-                    Debug.LogError(path + ": Unsupported HDF5 file format detected. Please convert to Ogawa.");
+                    ctx.AddObjectToAsset(prevIdName, go);
+                    ctx.SetMainObject(go);
+
+                    isHDF5 = abcStream.IsHDF5();
+                    if (IsHDF5)
+                    {
+                        Debug.LogError(path + ": Unsupported HDF5 file format detected. Please convert to Ogawa.");
+                    }
                 }
             }
 
