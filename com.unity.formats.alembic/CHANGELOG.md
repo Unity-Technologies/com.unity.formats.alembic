@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed a bug that was causing data loss when resetting the AlembicStreamPlayer.
 - Fixed a bug that was converting previous Alembic instance in prefabs into out-of-project references.
 - Fixed a bug that was adding unnecessary Undo events during the Alembic asset import process.
 - Fixed a bug that was re-importing Alembic files on every SRP project start.
