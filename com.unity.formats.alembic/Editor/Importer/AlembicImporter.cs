@@ -215,22 +215,15 @@ namespace UnityEditor.Formats.Alembic.Importer
         static void InitializeEditorCallback()
         {
             EditorApplication.update += DirtyCustomDependencies; //
+            pipelineHash = ComputeHash();
         }
 
         static ulong pipelineHash;
         static readonly TimeSpan checkDependencyFrequency = TimeSpan.FromSeconds(5);
         static DateTime lastCheck;
 
-        static void DirtyCustomDependencies()
+        static ulong ComputeHash()
         {
-            var now = DateTime.Now;
-            if (Application.isPlaying || now - lastCheck < checkDependencyFrequency)
-            {
-                return;
-            }
-
-            lastCheck = now;
-
             var newPipelineHash = 0UL;
             if (GraphicsSettings.currentRenderPipeline == null)
             {
@@ -245,6 +238,21 @@ namespace UnityEditor.Formats.Alembic.Importer
                         RuntimeUtils.CombineHash((ulong)guid.GetHashCode(), (ulong)fileId);
                 }
             }
+
+            return newPipelineHash;
+        }
+
+        static void DirtyCustomDependencies()
+        {
+            var now = DateTime.Now;
+            if (Application.isPlaying || now - lastCheck < checkDependencyFrequency)
+            {
+                return;
+            }
+
+            lastCheck = now;
+
+            var newPipelineHash = ComputeHash();
             if (pipelineHash != newPipelineHash)
             {
                 pipelineHash = newPipelineHash;
