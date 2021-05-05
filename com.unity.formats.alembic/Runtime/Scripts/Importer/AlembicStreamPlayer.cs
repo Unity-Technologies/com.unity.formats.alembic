@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using System;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
@@ -12,7 +13,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     /// </summary>
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class AlembicStreamPlayer : MonoBehaviour
+    public class AlembicStreamPlayer : MonoBehaviour, ISerializationCallbackReceiver
     {
         internal enum AlembicStreamSource
         {
@@ -369,6 +370,18 @@ namespace UnityEngine.Formats.Alembic.Importer
         void OnApplicationQuit()
         {
             NativeMethods.aiCleanup();
+        }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+        }
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            if (streamDescriptor != null && streamDescriptor.GetType() == typeof(AlembicStreamDescriptor))
+            {
+                streamSource = AlembicStreamSource.Internal;
+            }
         }
     }
 }

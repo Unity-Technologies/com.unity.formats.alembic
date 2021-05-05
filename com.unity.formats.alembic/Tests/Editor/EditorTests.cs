@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,6 +16,24 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
     class EditorTests
     {
+        readonly List<string> deleteFileList = new List<string>();
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (var file in deleteFileList)
+            {
+                AssetDatabase.DeleteAsset(file);
+                var meta = file + ".meta";
+                if (File.Exists(meta))
+                {
+                    File.Delete(meta);
+                }
+            }
+
+            deleteFileList.Clear();
+        }
+
         [Test]
         public void MarshalTests()
         {
@@ -121,6 +141,50 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var subMeshes = player.GetComponentInChildren<MeshFilter>().sharedMesh.subMeshCount;
             Assert.AreEqual(2, subMeshes);
             Assert.AreEqual(subMeshes, materials.Length);
+        }
+
+        [Test]
+        public void UpgradingOldPrefabs_DoNotGetSwitchedToImporterless()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("c01136857b8dc481bb9babb33803ed4a"); // GUID of DummyAlembic.prefab
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = go.GetComponent<AlembicStreamPlayer>();
+            Assert.AreEqual(AlembicStreamPlayer.AlembicStreamSource.Internal, player.StreamSource);
+            Assert.AreEqual(typeof(AlembicStreamDescriptor), player.StreamDescriptor.GetType());
+            var asd = player.StreamDescriptor as AlembicStreamDescriptor;
+            Assert.IsTrue(!string.IsNullOrEmpty(asd.PathToAbc));
+            Assert.IsTrue(File.Exists(asd.PathToAbc));
+        }
+
+        [UnityTest]
+        public IEnumerator ImportingFilesShouldNotGenerateUndoEvents()
+        {
+            Undo.IncrementCurrentGroup();
+            var go = new GameObject();
+            Undo.RegisterCreatedObjectUndo(go, "Create Object");
+            Undo.IncrementCurrentGroup();
+
+            yield return null;
+            yield return null;
+
+            const string dummyGUID = "1a066d124049a413fb12b82470b82811"; // GUID of DummyAlembic.abc
+            const string copiedAbcFile = "Assets/abc.abc";
+            var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
+            var srcDummyFile = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AlembicStreamPlayer>().First()
+                .StreamDescriptor.PathToAbc;
+            File.Copy(srcDummyFile, copiedAbcFile, true);
+            deleteFileList.Add(copiedAbcFile);
+
+            AssetDatabase.Refresh();
+            yield return null;
+            yield return null;
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(copiedAbcFile);
+            Assert.IsNotNull(asset);
+
+            Undo.PerformUndo();
+
+            Assert.IsTrue(go == null); // If the alembic importer pushed undo events, i will not undo the creation of the gameobject. If this is dead, it means there were no extra undo events between.
         }
     }
 }
