@@ -1,12 +1,15 @@
 #if UNITY_2017_1_OR_NEWER
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
+using UnityEngine.Formats.Alembic.Importer;
+
 #else
 using UnityEditor.Experimental.AssetImporters;
 #endif
@@ -16,12 +19,49 @@ namespace UnityEditor.Formats.Alembic.Importer
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     internal class AlembicImporterEditor : ScriptedImporterEditor
     {
+        enum UITab
+        {
+            Model,
+            Material
+        };
+
+        enum MaterialSearchLocation
+        {
+            ProjectWide,
+            CurrentFolder
+        }
+
+        UITab uiTab;
+        MaterialSearchLocation materialSearchLocation;
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             var importer = serializedObject.targetObject as AlembicImporter;
-            var pathSettings = "streamSettings.";
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                uiTab = (UITab)GUILayout.Toolbar((int)uiTab, new[] {"Model", "Material"});
+                GUILayout.FlexibleSpace();
+            }
 
+            if (uiTab == UITab.Model)
+            {
+                DrawModelUI(importer);
+            }
+            else
+            {
+                DrawMaterialUI(importer);
+            }
+
+
+            serializedObject.ApplyModifiedProperties();
+            ApplyRevertGUI();
+        }
+
+        void DrawModelUI(AlembicImporter importer)
+        {
+            const string pathSettings = "streamSettings.";
             if (importer.IsHDF5)
             {
                 EditorGUILayout.HelpBox("Unsupported HDF5 file format detected. Please convert to Ogawa.", MessageType.Error);
@@ -123,44 +163,90 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
-
-            DisplayMaterialUI(serializedObject.FindProperty("materialAssignments"));
-
-            serializedObject.ApplyModifiedProperties();
-            base.ApplyRevertGUI();
         }
 
-        static void DisplayMaterialUI(SerializedProperty materialAssignment)
+        void DrawMaterialUI(AlembicImporter importer)
         {
-            var keysProp = materialAssignment.FindPropertyRelative("keys");
-            var valsProp = materialAssignment.FindPropertyRelative("values");
-            for (var i = 0; i < keysProp.arraySize; ++i)
-            {
-                var matSlotProp = keysProp.GetArrayElementAtIndex(i);
-                var matProp = valsProp.GetArrayElementAtIndex(i);
-                var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
+            var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
+            EditorGUILayout.LabelField("Material");
 
-                EditorGUILayout.ObjectField(matProp, typeof(Material), new GUIContent(facesetName));
+            using (new EditorGUI.IndentLevelScope())
+            {
+                materialSearchLocation = (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
+                if (GUILayout.Button("Existing Material"))
+                {}
             }
 
-            if (GUILayout.Button("Auto-Assign"))
+            using (new EditorGUI.IndentLevelScope())
             {
-                const string searchString = "t:Material ";
-                for (var i = 0; i < keysProp.arraySize; ++i)
+                EditorGUILayout.LabelField("Meshes");
+                var remaps = importer.GetExternalObjectMap();
+                var drawnMeshes = new HashSet<string>();
+                foreach (var o in remaps)
                 {
-                    var matSlotProp = keysProp.GetArrayElementAtIndex(i);
-                    var matProp = valsProp.GetArrayElementAtIndex(i);
-                    var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
-                    var guid = AssetDatabase.FindAssets(searchString + facesetName);
-                    if (guid.Length > 0)
+                    var goPath = o.Key.name.Split(':')[0];
+                    if (drawnMeshes.Contains(goPath))
+                        continue;
+                    drawnMeshes.Add(goPath);
+
+                    var go = AlembicImporter.GetGameObjectFromPath(mainGO, goPath);
+                    using (new EditorGUI.IndentLevelScope())
                     {
-                        var path = AssetDatabase.GUIDToAssetPath(guid[0]);
-                        var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
-                        matProp.objectReferenceValue = mat;
+                        EditorGUILayout.LabelField(go.name);
+                        var custom = go.GetComponent<AlembicCustomData>();
+                        for (var i = 0; i < custom.FacesetNames.Count; ++i)
+                        {
+                            var key = new AssetImporter.SourceAssetIdentifier(typeof(Material), goPath + $":{i}");
+                            var assignedMaterial = remaps[key] as Material;
+                            using (new EditorGUI.IndentLevelScope())
+                            {
+                                using (var c = new EditorGUI.ChangeCheckScope())
+                                {
+                                    var assign = EditorGUILayout.ObjectField(custom.FacesetNames[i], assignedMaterial,
+                                        typeof(Material), false);
+                                    if (c.changed)
+                                    {
+                                        importer.AddRemap(key, assign);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
+        /*  static void DisplayMaterialUI(SerializedProperty materialAssignment)
+          {
+              var keysProp = materialAssignment.FindPropertyRelative("keys");
+              var valsProp = materialAssignment.FindPropertyRelative("values");
+              for (var i = 0; i < keysProp.arraySize; ++i)
+              {
+                  var matSlotProp = keysProp.GetArrayElementAtIndex(i);
+                  var matProp = valsProp.GetArrayElementAtIndex(i);
+                  var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
+
+                  EditorGUILayout.ObjectField(matProp, typeof(Material), new GUIContent(facesetName));
+              }
+
+              if (GUILayout.Button("Auto-Assign"))
+              {
+                  const string searchString = "t:Material ";
+                  for (var i = 0; i < keysProp.arraySize; ++i)
+                  {
+                      var matSlotProp = keysProp.GetArrayElementAtIndex(i);
+                      var matProp = valsProp.GetArrayElementAtIndex(i);
+                      var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
+                      var guid = AssetDatabase.FindAssets(searchString + facesetName);
+                      if (guid.Length > 0)
+                      {
+                          var path = AssetDatabase.GUIDToAssetPath(guid[0]);
+                          var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                          matProp.objectReferenceValue = mat;
+                      }
+                  }
+              }
+          }*/
 
         internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
         {

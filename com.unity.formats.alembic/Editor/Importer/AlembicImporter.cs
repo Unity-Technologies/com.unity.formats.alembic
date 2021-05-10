@@ -133,9 +133,6 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
         [SerializeField] bool isHDF5;
 
-        [SerializeField]
-        SerializableDictionary<MaterialSlot, Material> materialAssignments = new SerializableDictionary<MaterialSlot, Material>();
-
         void OnValidate()
         {
             if (!firstImport)
@@ -214,54 +211,113 @@ namespace UnityEditor.Formats.Alembic.Importer
                     {
                         Debug.LogError(path + ": Unsupported HDF5 file format detected. Please convert to Ogawa.");
                     }
-                }
 
-                ApplyMaterialAssignments(go);
+                    ApplyMaterialAssignments(go, subassets);
+                }
             }
 
             firstImport = false;
         }
 
-        void ApplyMaterialAssignments(GameObject go)
+        void ApplyMaterialAssignments(GameObject go, Subassets subs)
         {
-            foreach (var materialSlot in GenMaterialSlots(go))
+            var remap = GetExternalObjectMap();
+            var newSlots = GenMaterialSlots(go);
+
+            // remove slots that don't exist anymore
+            var keys = remap.Keys.ToArray();
+            foreach (var r in keys)
             {
-                materialAssignments.ChangeOrAddKey(materialSlot, materialSlot);
+                if (!newSlots.Contains(r))
+                {
+                    RemoveRemap(r);
+                }
             }
 
-            foreach (var kvs in materialAssignments)
+            // Add new Slots
+            foreach (var slot in newSlots)
             {
-                var meshRenderer = kvs.Key.GameObject.GetComponent<MeshRenderer>();
-                if (kvs.Value != null && meshRenderer != null)
+                if (!remap.ContainsKey(slot))
                 {
-                    var mats = meshRenderer.sharedMaterials;
-                    mats[kvs.Key.SubmeshIdx] = kvs.Value;
-                    meshRenderer.sharedMaterials = mats;
+                    AddRemap(slot, subs.defaultMaterial);
                 }
+            }
+
+            remap = GetExternalObjectMap(); // maybe not needed?
+
+            foreach (var r in remap)
+            {
+                var pathFaceId = r.Key.name.Split(':');
+                var path = pathFaceId[0];
+                var materialId = Int32.Parse(pathFaceId[1]);
+
+                var meshGO = GetGameObjectFromPath(go, path);
+                var renderer = meshGO.GetComponent<MeshRenderer>();
+                var mats = renderer.sharedMaterials;
+                mats[materialId] = r.Value as Material;
+                renderer.sharedMaterials = mats;
             }
         }
 
-        static IEnumerable<MaterialSlot> GenMaterialSlots(GameObject go)
+        static HashSet<SourceAssetIdentifier> GenMaterialSlots(GameObject go)
         {
+            var ret = new HashSet<SourceAssetIdentifier>();
             foreach (var customData in go.GetComponentsInChildren<AlembicCustomData>())
             {
-                var path = string.Empty;
-                var parent = customData.transform;
-                while (parent != null)
-                {
-                    path = parent.name + "/" + path;
-                    parent = parent.parent;
-                }
-
+                var path = GetGameObjectPath(customData.gameObject);
                 for (var i = 0; i < customData.FacesetNames.Count; ++i)
                 {
-                    if (!string.IsNullOrEmpty(customData.FacesetNames[i]))
-                    {
-                        var key = path + "-" + customData.FacesetNames[i];
-                        yield return new MaterialSlot(key, customData.FacesetNames[i], customData.gameObject, i);
-                    }
+                    var key = path + ":" + i;
+                    ret.Add(new SourceAssetIdentifier(typeof(Material), key));
                 }
             }
+
+            return ret;
+        }
+
+        static string GetGameObjectPath(GameObject go)
+        {
+            var reversePath = new List<string>();
+            var parent = go.transform;
+            while (parent != null)
+            {
+                reversePath.Add(parent.name);
+                parent = parent.parent;
+            }
+
+            var sb = new StringBuilder();
+            for (var i = reversePath.Count - 2; i >= 0; --i) // We don't want the root
+            {
+                sb.Append(reversePath[i]);
+                sb.Append('/');
+            }
+            return sb.ToString().TrimEnd('/');
+        }
+
+        internal static GameObject GetGameObjectFromPath(GameObject root, string path)
+        {
+            var go = root;
+            foreach (var name in path.Split('/'))
+            {
+                var found = false;
+                for (var i = 0; i < go.transform.childCount; ++i)
+                {
+                    var ch = go.transform.GetChild(i);
+                    if (ch.name == name)
+                    {
+                        go = ch.gameObject;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    throw new Exception($"Cannot find path:{path} from GameObject: {root.name}");
+                }
+            }
+
+            return go;
         }
 
         [InitializeOnLoadMethod]
@@ -311,52 +367,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                 pipelineHash = newPipelineHash;
                 RegisterCustomDependency(renderPipepineDependency, new Hash128(pipelineHash, 0));
                 AssetDatabase.Refresh();
-            }
-        }
-
-        [Serializable]
-        class MaterialSlot : IEquatable<MaterialSlot>
-        {
-            [SerializeField] string key;
-            [SerializeField] string facesetName;
-            [SerializeField] GameObject gameObject;
-            [SerializeField] int submeshIdx;
-
-            public MaterialSlot(string key, string facesetName, GameObject gameObject, int submeshIdx)
-            {
-                this.key = key;
-                this.facesetName = facesetName;
-                this.gameObject = gameObject;
-                this.submeshIdx = submeshIdx;
-            }
-
-            public int SubmeshIdx => submeshIdx;
-
-            public GameObject GameObject => gameObject;
-
-            public string Key => key;
-            public string FacesetName => facesetName;
-
-            public bool Equals(MaterialSlot other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                return ReferenceEquals(this, other) || string.Equals(key, other.key);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((MaterialSlot)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return ((key != null ? key.GetHashCode() : 0) * 397) ^ (facesetName != null ? facesetName.GetHashCode() : 0);
-                }
             }
         }
 
