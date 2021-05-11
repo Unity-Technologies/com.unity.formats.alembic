@@ -351,7 +351,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                 Update();
 
             if (!updateStarted)
+            {
+                // If the model did not move this frame, we need to clear the motion vectors to avoid post processing artefacts.
+                abcStream.ClearMotionVectors();
                 return;
+            }
+
             updateStarted = false;
             abcStream.AbcUpdateEnd();
         }
