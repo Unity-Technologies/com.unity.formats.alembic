@@ -2,10 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
+using Object = System.Object;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
 using UnityEngine.Formats.Alembic.Importer;
@@ -29,6 +32,31 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             ProjectWide,
             CurrentFolder
+        }
+
+        struct MaterialEntry
+        {
+            public AlembicCustomData component;
+            public string path;
+            public int index;
+            public Material material;
+
+            public AssetImporter.SourceAssetIdentifier ToSourceAssetIdentifier()
+            {
+                return new AssetImporter.SourceAssetIdentifier(typeof(Material), path + $":{index}");
+            }
+
+            public static MaterialEntry FromSourceAssetIdentifier(AssetImporter.SourceAssetIdentifier identifier, GameObject rootGO)
+            {
+                var toks = identifier.name.Split(':');
+                var go = AlembicImporter.GetGameObjectFromPath(rootGO, toks[0]);
+                return new MaterialEntry
+                {
+                    component = go.GetComponent<AlembicCustomData>(),
+                    path = toks[0],
+                    index = int.Parse(toks[1])
+                };
+            }
         }
 
         UITab uiTab;
@@ -168,45 +196,52 @@ namespace UnityEditor.Formats.Alembic.Importer
         void DrawMaterialUI(AlembicImporter importer)
         {
             var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
+            var materials = ConvertToMaterialEntry(importer.GetExternalObjectMap(), mainGO);
+
             EditorGUILayout.LabelField("Material");
 
             using (new EditorGUI.IndentLevelScope())
             {
                 materialSearchLocation = (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
                 if (GUILayout.Button("Existing Material"))
-                {}
+                {
+                    SearchForMaterials(materials, importer);
+                }
             }
 
             using (new EditorGUI.IndentLevelScope())
             {
                 EditorGUILayout.LabelField("Meshes");
-                var remaps = importer.GetExternalObjectMap();
-                var drawnMeshes = new HashSet<string>();
-                foreach (var o in remaps)
-                {
-                    var goPath = o.Key.name.Split(':')[0];
-                    if (drawnMeshes.Contains(goPath))
-                        continue;
-                    drawnMeshes.Add(goPath);
 
-                    var go = AlembicImporter.GetGameObjectFromPath(mainGO, goPath);
+                var drawnMeshes = new HashSet<AlembicCustomData>();
+                foreach (var o in materials)
+                {
+                    if (drawnMeshes.Contains(o.component))
+                        continue;
+                    drawnMeshes.Add(o.component);
+
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        EditorGUILayout.LabelField(go.name);
-                        var custom = go.GetComponent<AlembicCustomData>();
-                        for (var i = 0; i < custom.FacesetNames.Count; ++i)
+                        EditorGUILayout.LabelField(o.component.name);
+                        for (var i = 0; i < o.component.FacesetNames.Count; ++i)
                         {
-                            var key = new AssetImporter.SourceAssetIdentifier(typeof(Material), goPath + $":{i}");
-                            var assignedMaterial = remaps[key] as Material;
                             using (new EditorGUI.IndentLevelScope())
                             {
                                 using (var c = new EditorGUI.ChangeCheckScope())
                                 {
-                                    var assign = EditorGUILayout.ObjectField(custom.FacesetNames[i], assignedMaterial,
+                                    var assign = EditorGUILayout.ObjectField(o.component.FacesetNames[i], o.material,
                                         typeof(Material), false);
                                     if (c.changed)
                                     {
-                                        importer.AddRemap(key, assign);
+                                        if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                        {
+                                            Debug.LogError(
+                                                $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                        }
+                                        else
+                                        {
+                                            importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                        }
                                     }
                                 }
                             }
@@ -214,6 +249,54 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
+        }
+
+        List<MaterialEntry> ConvertToMaterialEntry(
+            Dictionary<AssetImporter.SourceAssetIdentifier, UnityEngine.Object> remap, GameObject rootGameObject)
+        {
+            var ret = new List<MaterialEntry>();
+            foreach (var o in remap)
+            {
+                var entry = MaterialEntry.FromSourceAssetIdentifier(o.Key, rootGameObject);
+                entry.material = o.Value as Material;
+                ret.Add(entry);
+            }
+
+            return ret;
+        }
+
+        void SearchForMaterials(List<MaterialEntry> materials, AlembicImporter importer)
+        {
+            const string searchString = "t:Material ";
+            var searchPath = new string[1];
+            switch (materialSearchLocation)
+            {
+                case MaterialSearchLocation.ProjectWide:
+                    searchPath[0] = "Assets";
+                    break;
+                case MaterialSearchLocation.CurrentFolder:
+                    searchPath[0] = Path.GetDirectoryName(importer.assetPath);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+
+            foreach (var entry in materials)
+            {
+                var facesetName = entry.component.FacesetNames[entry.index];
+                var guids = AssetDatabase.FindAssets(searchString + facesetName, searchPath);
+                if (guids.Length > 0)
+                {
+                    importer.AddRemap(entry.ToSourceAssetIdentifier(), LoadAssetFromGuid<Material>(guids[0]));
+                }
+            }
+        }
+
+        T LoadAssetFromGuid<T>(string guid) where T : UnityEngine.Object
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
         /*  static void DisplayMaterialUI(SerializedProperty materialAssignment)
