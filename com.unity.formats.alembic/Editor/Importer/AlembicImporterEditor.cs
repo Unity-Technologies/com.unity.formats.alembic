@@ -202,10 +202,20 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             using (new EditorGUI.IndentLevelScope())
             {
-                materialSearchLocation = (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
-                if (GUILayout.Button("Existing Material"))
+                //        using (new EditorGUILayout.HorizontalScope(GUILayout.Width(300)))
                 {
-                    SearchForMaterials(materials, importer);
+                    materialSearchLocation =
+                        (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
+                }
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    //EditorGUILayout.LabelField("Existing Material");
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("Search and Remap"))
+                    {
+                        SearchForMaterials(materials, importer);
+                    }
                 }
             }
 
