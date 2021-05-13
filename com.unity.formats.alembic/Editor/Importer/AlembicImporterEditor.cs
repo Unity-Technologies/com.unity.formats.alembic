@@ -228,7 +228,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             EditorGUILayout.LabelField("Meshes / Facesets");
-            materialRootFold = EditorGUILayout.Foldout(materialRootFold, mainGO.name);
+            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, mainGO.name);
+            if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
+            {
+                materialFold = Enumerable.Repeat(newRootFoldout, materialFold.Count).ToList();
+            }
+
+            materialRootFold = newRootFoldout;
             if (materialRootFold)
             {
                 var drawnMeshes = new HashSet<AlembicCustomData>();
@@ -241,7 +247,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        //EditorGUILayout.LabelField(o.component.name);
                         materialFold[m] = EditorGUILayout.Foldout(materialFold[m], o.component.name);
                         if (materialFold[m])
                         {
