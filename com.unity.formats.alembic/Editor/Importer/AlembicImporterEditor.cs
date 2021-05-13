@@ -59,8 +59,16 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
-        UITab uiTab;
+        bool materialRootFold = true;
+        List<bool> materialFold = new List<bool>();
+        SavedInt uiTab;
         MaterialSearchLocation materialSearchLocation;
+
+        public override void OnEnable()
+        {
+            base.OnEnable();
+            uiTab = new SavedInt("AlembicImporterUITab", (int)UITab.Model);
+        }
 
         public override void OnInspectorGUI()
         {
@@ -69,11 +77,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab = (UITab)GUILayout.Toolbar((int)uiTab, new[] {"Model", "Material"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Material"});
                 GUILayout.FlexibleSpace();
             }
 
-            if (uiTab == UITab.Model)
+            if (uiTab == (int)UITab.Model)
             {
                 DrawModelUI(importer);
             }
@@ -197,20 +205,20 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
             var materials = ConvertToMaterialEntry(importer.GetExternalObjectMap(), mainGO);
+            if (materialFold.Count != materials.Count)
+            {
+                materialFold = Enumerable.Repeat(true, materials.Count).ToList();
+            }
 
             EditorGUILayout.LabelField("Material");
 
             using (new EditorGUI.IndentLevelScope())
             {
-                //        using (new EditorGUILayout.HorizontalScope(GUILayout.Width(300)))
-                {
-                    materialSearchLocation =
-                        (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
-                }
+                materialSearchLocation =
+                    (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    //EditorGUILayout.LabelField("Existing Material");
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("Search and Remap"))
                     {
@@ -219,38 +227,44 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
             }
 
-            using (new EditorGUI.IndentLevelScope())
+            EditorGUILayout.LabelField("Meshes / Facesets");
+            materialRootFold = EditorGUILayout.Foldout(materialRootFold, mainGO.name);
+            if (materialRootFold)
             {
-                EditorGUILayout.LabelField("Meshes");
-
                 var drawnMeshes = new HashSet<AlembicCustomData>();
-                foreach (var o in materials)
+                for (var m = 0; m < materials.Count; ++m)
                 {
+                    var o = materials[m];
                     if (drawnMeshes.Contains(o.component))
                         continue;
                     drawnMeshes.Add(o.component);
 
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        EditorGUILayout.LabelField(o.component.name);
-                        for (var i = 0; i < o.component.FacesetNames.Count; ++i)
+                        //EditorGUILayout.LabelField(o.component.name);
+                        materialFold[m] = EditorGUILayout.Foldout(materialFold[m], o.component.name);
+                        if (materialFold[m])
                         {
-                            using (new EditorGUI.IndentLevelScope())
+                            foreach (var t in o.component.FacesetNames)
                             {
-                                using (var c = new EditorGUI.ChangeCheckScope())
+                                using (new EditorGUI.IndentLevelScope())
                                 {
-                                    var assign = EditorGUILayout.ObjectField(o.component.FacesetNames[i], o.material,
-                                        typeof(Material), false);
-                                    if (c.changed)
+                                    using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                        var assign = EditorGUILayout.ObjectField(t,
+                                            o.material,
+                                            typeof(Material), false);
+                                        if (c.changed)
                                         {
-                                            Debug.LogError(
-                                                $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
-                                        }
-                                        else
-                                        {
-                                            importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                            if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                            {
+                                                Debug.LogError(
+                                                    $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                            }
+                                            else
+                                            {
+                                                importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                            }
                                         }
                                     }
                                 }
@@ -309,38 +323,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
-        /*  static void DisplayMaterialUI(SerializedProperty materialAssignment)
-          {
-              var keysProp = materialAssignment.FindPropertyRelative("keys");
-              var valsProp = materialAssignment.FindPropertyRelative("values");
-              for (var i = 0; i < keysProp.arraySize; ++i)
-              {
-                  var matSlotProp = keysProp.GetArrayElementAtIndex(i);
-                  var matProp = valsProp.GetArrayElementAtIndex(i);
-                  var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
-
-                  EditorGUILayout.ObjectField(matProp, typeof(Material), new GUIContent(facesetName));
-              }
-
-              if (GUILayout.Button("Auto-Assign"))
-              {
-                  const string searchString = "t:Material ";
-                  for (var i = 0; i < keysProp.arraySize; ++i)
-                  {
-                      var matSlotProp = keysProp.GetArrayElementAtIndex(i);
-                      var matProp = valsProp.GetArrayElementAtIndex(i);
-                      var facesetName = matSlotProp.FindPropertyRelative("facesetName").stringValue;
-                      var guid = AssetDatabase.FindAssets(searchString + facesetName);
-                      if (guid.Length > 0)
-                      {
-                          var path = AssetDatabase.GUIDToAssetPath(guid[0]);
-                          var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
-                          matProp.objectReferenceValue = mat;
-                      }
-                  }
-              }
-          }*/
-
         internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
         {
             if (guicontent == null)
@@ -361,6 +343,44 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             EditorGUI.showMixedValue = false;
             EditorGUI.EndProperty();
+        }
+    }
+
+    class SavedInt
+    {
+        int m_Value;
+        string m_Name;
+        bool m_Loaded;
+        public SavedInt(string name, int value)
+        {
+            m_Name = name;
+            m_Loaded = false;
+            m_Value = value;
+        }
+
+        void Load()
+        {
+            if (m_Loaded)
+                return;
+            m_Loaded = true;
+            m_Value = EditorPrefs.GetInt(m_Name, m_Value);
+        }
+
+        public int value
+        {
+            get { Load(); return m_Value; }
+            set
+            {
+                Load();
+                if (m_Value == value)
+                    return;
+                m_Value = value;
+                EditorPrefs.SetInt(m_Name, value);
+            }
+        }
+        public static implicit operator int(SavedInt s)
+        {
+            return s.value;
         }
     }
 }
