@@ -223,6 +223,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     if (GUILayout.Button("Search and Remap"))
                     {
                         SearchForMaterials(materials, importer);
+                        materials = ConvertToMaterialEntry(importer.GetExternalObjectMap(), mainGO);
                     }
                 }
             }
@@ -237,26 +238,30 @@ namespace UnityEditor.Formats.Alembic.Importer
             materialRootFold = newRootFoldout;
             if (materialRootFold)
             {
-                var drawnMeshes = new HashSet<AlembicCustomData>();
                 for (var m = 0; m < materials.Count; ++m)
                 {
-                    var o = materials[m];
-                    if (drawnMeshes.Contains(o.component))
-                        continue;
-                    drawnMeshes.Add(o.component);
+                    var currentGO = materials[m].component;
 
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        materialFold[m] = EditorGUILayout.Foldout(materialFold[m], o.component.name);
+                        materialFold[m] = EditorGUILayout.Foldout(materialFold[m], materials[m].component.name);
                         if (materialFold[m])
                         {
-                            foreach (var t in o.component.FacesetNames)
+                            for (var i = m; i < materials.Count; ++i)
                             {
+                                var o = materials[i];
+                                if (o.component != currentGO)
+                                {
+                                    m = i - 1;
+                                    break;
+                                }
+
+                                var fsName = currentGO.FacesetNames[o.index];
                                 using (new EditorGUI.IndentLevelScope())
                                 {
                                     using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        var assign = EditorGUILayout.ObjectField(t,
+                                        var assign = EditorGUILayout.ObjectField(fsName,
                                             o.material,
                                             typeof(Material), false);
                                         if (c.changed)
@@ -273,6 +278,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                                         }
                                     }
                                 }
+
+                                m = i;
                             }
                         }
                     }
@@ -322,9 +329,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
-        T LoadAssetFromGuid<T>(string guid) where T : UnityEngine.Object
+        static T LoadAssetFromGuid<T>(string guid, bool filterOutAbc = true) where T : UnityEngine.Object
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
+            if (filterOutAbc && path.ToLower().EndsWith("abc"))
+            {
+                return null;
+            }
+
             return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
