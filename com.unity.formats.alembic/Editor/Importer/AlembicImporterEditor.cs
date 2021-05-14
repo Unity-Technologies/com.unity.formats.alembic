@@ -7,6 +7,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using Object = System.Object;
 #if UNITY_2020_2_OR_NEWER
@@ -20,7 +21,7 @@ using UnityEditor.Experimental.AssetImporters;
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
-    internal class AlembicImporterEditor : ScriptedImporterEditor
+    class AlembicImporterEditor : ScriptedImporterEditor
     {
         enum UITab
         {
@@ -93,6 +94,13 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
+        }
+
+        protected override void Apply()
+        {
+            var importer = serializedObject.targetObject as AlembicImporter;
+            importer.ClearDefaultMaterialAssignments();
+            base.Apply();
         }
 
         void DrawModelUI(AlembicImporter importer)

@@ -219,6 +219,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             firstImport = false;
         }
 
+        public override bool SupportsRemappedAssetType(Type type)
+        {
+            return type == typeof(Material);
+        }
+
         void ApplyMaterialAssignments(GameObject go, Subassets subs)
         {
             var remap = GetExternalObjectMap();
@@ -256,6 +261,19 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var mats = renderer.sharedMaterials;
                 mats[materialId] = r.Value as Material;
                 renderer.sharedMaterials = mats;
+            }
+        }
+
+        internal void ClearDefaultMaterialAssignments()
+        {
+            var remaps = GetExternalObjectMap();
+            foreach (var remap in remaps)
+            {
+                var path = AssetDatabase.GetAssetPath(remap.Value);
+                if (path == assetPath)
+                {
+                    RemoveRemap(remap.Key);
+                }
             }
         }
 
