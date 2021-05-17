@@ -412,7 +412,15 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                     // update the bounds
                     var data = m_splitData[s];
-                    split.mesh.bounds = new Bounds(data.center, data.extents);
+                    if (float.IsInfinity(data.center.sqrMagnitude) || float.IsInfinity(data.extents.sqrMagnitude)) // Garbage data causes unity to complain.
+                    {
+                        split.mesh.bounds = new Bounds();
+                        Debug.LogError($"Invalid bounds on Mesh: {split.mesh.name}");
+                    }
+                    else
+                    {
+                        split.mesh.bounds = new Bounds(data.center, data.extents);
+                    }
 
                     split.host.SetActive(true);
                 }
