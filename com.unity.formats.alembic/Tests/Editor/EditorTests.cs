@@ -216,7 +216,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [Test]
-        public void Velocities_AreScaled()
+        public void Computed_Velocities_AreScaled()
         {
             var path = AssetDatabase.GUIDToAssetPath("a6d019a425afe49d7a8fd029c82c0455"); // GUID of triangleRigged_asymetricalVertexTransform_24fps_2f.abc
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
@@ -240,6 +240,33 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var expected = expectedVelocity.Select(x => 0.5f * x).ToArray();
             var error = expected.Zip(velocity0, (x, y) => (x - y).magnitude);
             Assert.IsTrue(error.All(x => x < 1e-5));
+        }
+
+        [Test]
+        public void Read_Velocities_AreNotScaled() // This is very strange. Need to decide if this is a bug
+        {
+            var path = AssetDatabase.GUIDToAssetPath("d0f12062215204c6991895f6a51dd627"); // GUID of varTopo_bakedVelocity_0-1_30fps.abc
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = go.GetComponent<AlembicStreamPlayer>();
+            var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
+            player.UpdateImmediately(1 / 60f);
+
+            var velocity0 = new List<Vector3>();
+            mesh.GetUVs(5, velocity0);
+
+            var v0 = new Vector3(0.00163127552f, 3.62623905E-05f, 0.0247734953f);
+            var v100 = new Vector3(0.00122647523f, 5.96942518E-05f, 0.0172897689f);
+            Assert.That(v0, Is.EqualTo(velocity0[0]).Within(1e-5));
+            Assert.That(v100, Is.EqualTo(velocity0[100]).Within(1e-5));
+
+            player.VertexMotionScale = 0.5f;
+            player.UpdateImmediately(0);
+            player.UpdateImmediately(1 / 60f); // Bug that needs to change time to update velocity
+            mesh.GetUVs(5, velocity0);
+
+            Assert.That(player.VertexMotionScale * v0, Is.Not.EqualTo(velocity0[0]).Within(1e-5));
+            Assert.That(player.VertexMotionScale * v100, Is.Not.EqualTo(velocity0[100]).Within(1e-5));
         }
     }
 }
