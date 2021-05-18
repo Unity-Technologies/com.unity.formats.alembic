@@ -231,15 +231,19 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             mesh.GetUVs(5, velocity0);
 
             var expectedVelocity = new[] {new Vector3(0, 8, 0), new Vector3(-4, 0, 0), new Vector3(0, 0, 0)};
-            CollectionAssert.AreEqual(expectedVelocity, velocity0);
-
+            {
+                var error = expectedVelocity.Zip(velocity0, (x, y) => (x - y).magnitude);
+                Assert.IsTrue(error.All(x => x < 1e-5));
+            }
             player.VertexMotionScale = 0.5f;
             player.UpdateImmediately(0);
             player.UpdateImmediately(1 / 60f); // Bug that needs to change time to update velocity
             mesh.GetUVs(5, velocity0);
-            var expected = expectedVelocity.Select(x => 0.5f * x).ToArray();
-            var error = expected.Zip(velocity0, (x, y) => (x - y).magnitude);
-            Assert.IsTrue(error.All(x => x < 1e-5));
+            {
+                var expected = expectedVelocity.Select(x => 0.5f * x).ToArray();
+                var error = expected.Zip(velocity0, (x, y) => (x - y).magnitude);
+                Assert.IsTrue(error.All(x => x < 1e-5));
+            }
         }
 
         [Test]
