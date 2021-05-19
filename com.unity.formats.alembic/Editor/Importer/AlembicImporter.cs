@@ -146,6 +146,31 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         const string renderPipepineDependency = "AlembicRenderPipelineDependency";
 
+        internal struct MaterialEntry
+        {
+            public AlembicCustomData component;
+            public string path;
+            public int index;
+            public Material material;
+
+            public SourceAssetIdentifier ToSourceAssetIdentifier()
+            {
+                return new SourceAssetIdentifier(typeof(Material), path + $":{index}");
+            }
+
+            public static MaterialEntry FromSourceAssetIdentifier(SourceAssetIdentifier identifier, GameObject rootGO)
+            {
+                var toks = identifier.name.Split(':');
+                var go = AlembicImporter.GetGameObjectFromPath(rootGO, toks[0]);
+                return new MaterialEntry
+                {
+                    component = go.GetComponent<AlembicCustomData>(),
+                    path = toks[0],
+                    index = int.Parse(toks[1])
+                };
+            }
+        }
+
         public override void OnImportAsset(AssetImportContext ctx)
         {
             if (ctx == null)
@@ -227,28 +252,6 @@ namespace UnityEditor.Formats.Alembic.Importer
         void ApplyMaterialAssignments(GameObject go, Subassets subs)
         {
             var remap = GetExternalObjectMap();
-            var newSlots = GenMaterialSlots(go);
-
-            // remove slots that don't exist anymore
-            var keys = remap.Keys.ToArray();
-            foreach (var r in keys)
-            {
-                if (!newSlots.Contains(r))
-                {
-                    RemoveRemap(r);
-                }
-            }
-
-            // Add new Slots
-            foreach (var slot in newSlots)
-            {
-                if (!remap.ContainsKey(slot))
-                {
-                    AddRemap(slot, subs.defaultMaterial);
-                }
-            }
-
-            remap = GetExternalObjectMap(); // maybe not needed?
 
             foreach (var r in remap)
             {
@@ -264,29 +267,34 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
-        internal void ClearDefaultMaterialAssignments()
+        internal static List<MaterialEntry> GenMaterialSlots(AlembicImporter importer, GameObject go)
         {
-            var remaps = GetExternalObjectMap();
-            foreach (var remap in remaps)
-            {
-                var path = AssetDatabase.GetAssetPath(remap.Value);
-                if (path == assetPath)
-                {
-                    RemoveRemap(remap.Key);
-                }
-            }
-        }
-
-        static HashSet<SourceAssetIdentifier> GenMaterialSlots(GameObject go)
-        {
-            var ret = new HashSet<SourceAssetIdentifier>();
+            var ret = new List<MaterialEntry>();
+            var remap = importer.GetExternalObjectMap();
             foreach (var customData in go.GetComponentsInChildren<AlembicCustomData>())
             {
+                var renderer = customData.GetComponent<MeshRenderer>();
                 var path = GetGameObjectPath(customData.gameObject);
                 for (var i = 0; i < customData.FacesetNames.Count; ++i)
                 {
-                    var key = path + ":" + i;
-                    ret.Add(new SourceAssetIdentifier(typeof(Material), key));
+                    var entry = new MaterialEntry {component = customData, index = i, path = path};
+                    if (remap.TryGetValue(entry.ToSourceAssetIdentifier(), out var material))
+                    {
+                        entry.material = (Material)material;
+                    }
+                    else
+                    {
+                        if (renderer != null)
+                        {
+                            var mats = renderer.sharedMaterials;
+                            if (mats.Length > i)
+                            {
+                                entry.material = mats[i];
+                            }
+                        }
+                    }
+
+                    ret.Add(entry);
                 }
             }
 

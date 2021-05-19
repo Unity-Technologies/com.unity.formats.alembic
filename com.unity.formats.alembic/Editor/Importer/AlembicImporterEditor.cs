@@ -35,30 +35,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             CurrentFolder
         }
 
-        struct MaterialEntry
-        {
-            public AlembicCustomData component;
-            public string path;
-            public int index;
-            public Material material;
-
-            public AssetImporter.SourceAssetIdentifier ToSourceAssetIdentifier()
-            {
-                return new AssetImporter.SourceAssetIdentifier(typeof(Material), path + $":{index}");
-            }
-
-            public static MaterialEntry FromSourceAssetIdentifier(AssetImporter.SourceAssetIdentifier identifier, GameObject rootGO)
-            {
-                var toks = identifier.name.Split(':');
-                var go = AlembicImporter.GetGameObjectFromPath(rootGO, toks[0]);
-                return new MaterialEntry
-                {
-                    component = go.GetComponent<AlembicCustomData>(),
-                    path = toks[0],
-                    index = int.Parse(toks[1])
-                };
-            }
-        }
 
         bool materialRootFold = true;
         List<bool> materialFold = new List<bool>();
@@ -94,13 +70,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
-        }
-
-        protected override void Apply()
-        {
-            var importer = serializedObject.targetObject as AlembicImporter;
-            importer.ClearDefaultMaterialAssignments();
-            base.Apply();
         }
 
         void DrawModelUI(AlembicImporter importer)
@@ -212,7 +181,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         void DrawMaterialUI(AlembicImporter importer)
         {
             var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
-            var materials = ConvertToMaterialEntry(importer.GetExternalObjectMap(), mainGO);
+            var materials = AlembicImporter.GenMaterialSlots(importer, mainGO);
             if (materialFold.Count != materials.Count)
             {
                 materialFold = Enumerable.Repeat(true, materials.Count).ToList();
@@ -231,7 +200,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                     if (GUILayout.Button("Search and Remap"))
                     {
                         SearchForMaterials(materials, importer);
-                        materials = ConvertToMaterialEntry(importer.GetExternalObjectMap(), mainGO);
                     }
                 }
             }
@@ -252,7 +220,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        materialFold[m] = EditorGUILayout.Foldout(materialFold[m], materials[m].component.name);
+                        materialFold[m] = EditorGUILayout.Foldout(materialFold[m], (string)materials[m].component.name);
                         if (materialFold[m])
                         {
                             for (var i = m; i < materials.Count; ++i)
@@ -269,7 +237,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                                 {
                                     using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        var assign = EditorGUILayout.ObjectField(fsName,
+                                        var assign = EditorGUILayout.ObjectField((string)fsName,
                                             o.material,
                                             typeof(Material), false);
                                         if (c.changed)
@@ -295,21 +263,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
 
-        List<MaterialEntry> ConvertToMaterialEntry(
-            Dictionary<AssetImporter.SourceAssetIdentifier, UnityEngine.Object> remap, GameObject rootGameObject)
-        {
-            var ret = new List<MaterialEntry>();
-            foreach (var o in remap)
-            {
-                var entry = MaterialEntry.FromSourceAssetIdentifier(o.Key, rootGameObject);
-                entry.material = o.Value as Material;
-                ret.Add(entry);
-            }
-
-            return ret;
-        }
-
-        void SearchForMaterials(List<MaterialEntry> materials, AlembicImporter importer)
+        void SearchForMaterials(List<AlembicImporter.MaterialEntry> materials, AlembicImporter importer)
         {
             const string searchString = "t:Material ";
             var searchPath = new string[1];
