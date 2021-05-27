@@ -13,6 +13,7 @@ class aiSample;
 class aiXformSample;        // : aiSample
 class aiCameraSample;       // : aiSample
 class aiPolyMeshSample;     // : aiSample
+class aiSubDSample;         // : aiSample
 class aiPointsSample;       // : aiSample
 class aiCurves;
 #else
@@ -28,6 +29,7 @@ using aiPointsSample   = void;
 class aiXform;    // : aiSchema
 class aiCamera;   // : aiSchema
 class aiPolyMesh; // : aiSchema
+class aiSubD;     // : aiSchema
 class aiPoints;   // : aiSchema
 class aiProperty;
 
@@ -297,6 +299,7 @@ abciAPI aiObject*       aiObjectGetParent(aiObject* obj);
 abciAPI void            aiObjectSetEnabled(aiObject* obj, bool v);
 abciAPI aiXform*        aiObjectAsXform(aiObject* obj);
 abciAPI aiPolyMesh*     aiObjectAsPolyMesh(aiObject* obj);
+abciAPI aiSubD*         aiObjectAsSubD(aiObject* obj);
 abciAPI aiCamera*       aiObjectAsCamera(aiObject* obj);
 abciAPI aiPoints*       aiObjectAsPoints(aiObject* obj);
 abciAPI aiCurves*       aiObjectAsCurves(aiObject* obj);
@@ -317,6 +320,12 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
+
+abciAPI void            aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst);
+abciAPI void            aiSubDGetSampleSummary(aiSubDSample* sample, aiMeshSampleSummary* dst);
+abciAPI void            aiSubDGetSplitSummaries(aiSubDSample* sample, aiMeshSplitSummary *dst);
+abciAPI void            aiSubDGetSubmeshSummaries(aiSubDSample* sample, aiSubmeshSummary* dst);
+abciAPI void            aiSubDFillVertexBuffer(aiSubDSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
 abciAPI void            aiCameraGetData(aiCameraSample* sample, CameraData *dst);
 

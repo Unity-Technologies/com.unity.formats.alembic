@@ -5,6 +5,7 @@
 #include "aiSchema.h"
 #include "aiXForm.h"
 #include "aiPolyMesh.h"
+#include "aiSubD.h"
 #include "aiCamera.h"
 #include "aiPoints.h"
 #include "aiCurves.h"
@@ -145,6 +146,11 @@ abciAPI aiPolyMesh* aiObjectAsPolyMesh(aiObject* obj)
     return obj ? dynamic_cast<aiPolyMesh*>(obj) : nullptr;
 }
 
+abciAPI aiSubD* aiObjectAsSubD(aiObject* obj)
+{
+    return obj ? dynamic_cast<aiSubD*>(obj) : nullptr;
+}
+
 abciAPI aiCamera* aiObjectAsCamera(aiObject* obj)
 {
     return obj ? dynamic_cast<aiCamera*>(obj) : nullptr;
@@ -240,6 +246,12 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
 {
     if (sample)
         sample->fillVertexBuffer(vbs, ibs);
+}
+
+abciAPI void aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst)
+{
+    if (schema)
+        *dst = schema->getSummary();
 }
 
 abciAPI void aiCameraGetData(aiCameraSample* sample, CameraData *dst)
