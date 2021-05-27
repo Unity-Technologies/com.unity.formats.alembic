@@ -378,6 +378,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiPoints AsPoints() { return NativeMethods.aiObjectAsPoints(self); }
         internal aiCurves AsCurves() { return NativeMethods.aiObjectAsCurves(self); }
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
+        internal aiSubD AsSubD() { return NativeMethods.aiObjectAsSubD(self); }
 
         public void EachChild(Action<aiObject> act)
         {
@@ -399,6 +400,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiXform(aiSchema v) { var tmp = default(aiXform); tmp.self = v.self; return tmp; }
         public static explicit operator aiCamera(aiSchema v) { var tmp = default(aiCamera); tmp.self = v.self; return tmp; }
         public static explicit operator aiPolyMesh(aiSchema v) { var tmp = default(aiPolyMesh); tmp.self = v.self; return tmp; }
+        public static explicit operator aiSubD(aiSchema v) { var tmp = default(aiSubD); tmp.self = v.self; return tmp; }
         public static explicit operator aiPoints(aiSchema v) { var tmp = default(aiPoints); tmp.self = v.self; return tmp; }
         public static explicit operator aiCurves(aiSchema v) { var tmp = default(aiCurves); tmp.self = v.self; return tmp; }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
@@ -438,6 +440,20 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiPolyMeshSample sample { get { return NativeMethods.aiPolyMesh.aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiPolyMeshGetSummary(self, ref dst); }
     }
+
+    [StructLayout(LayoutKind.Explicit)]
+    struct aiSubD
+    {
+        [FieldOffset(0)] public IntPtr self;
+        [FieldOffset(0)] public aiSchema schema;
+        public static implicit operator bool(aiSubD v) { return v.self != IntPtr.Zero; }
+        public static implicit operator aiSchema(aiSubD v) { return v.schema; }
+
+        public aiPolyMeshSample sample { get { return NativeMethods.aiSubD.aiSchemaGetSample(self); } }
+        public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiSubDGetSummary(self, ref dst); }
+    }
+
+
 
     [StructLayout(LayoutKind.Explicit)]
     struct aiPoints

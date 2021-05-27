@@ -5,6 +5,7 @@
 #include "aiSchema.h"
 #include "aiXForm.h"
 #include "aiPolyMesh.h"
+#include "aiSubD.h"
 #include "aiCamera.h"
 #include "aiPoints.h"
 #include "aiCurves.h"
@@ -90,6 +91,8 @@ aiObject* aiObject::newChild(const abcObject &abc)
             ret = new aiXform(this, abc);
         else if (AbcGeom::IPolyMeshSchema::matches(metadata))
             ret = new aiPolyMesh(this, abc);
+        else if (AbcGeom::ISubDSchema::matches(metadata))
+            ret = new aiSubD(this, abc);
         else if (AbcGeom::ICameraSchema::matches(metadata))
             ret = new aiCamera(this, abc);
         else if (AbcGeom::IPointsSchema::matches(metadata))

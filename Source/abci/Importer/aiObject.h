@@ -3,6 +3,7 @@ class aiContext;
 class aiSchema;
 class aiXform;
 class aiPolyMesh;
+class aiSubD;
 class aiCamera;
 
 class aiObject

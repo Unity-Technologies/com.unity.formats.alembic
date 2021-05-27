@@ -379,6 +379,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Sdk.aiPoints aiObjectAsPoints(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiCurves aiObjectAsCurves(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiSubD aiObjectAsSubD(IntPtr obj);
 
         [DllImport(Abci.Lib)] public static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
         [DllImport(Abci.Lib)] public static extern void aiSchemaSync(IntPtr schema);
@@ -390,6 +391,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
+        [DllImport(Abci.Lib)] public static extern void aiSubDGetSummary(IntPtr schema, ref aiMeshSummary dst);
 
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSort(IntPtr schema, Bool v);
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);
@@ -430,6 +432,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
             [DllImport(Abci.Lib)] public static extern aiCameraSample aiSchemaGetSample(IntPtr schema);
         }
         internal struct aiPolyMesh
+        {
+            [DllImport(Abci.Lib)] public static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
+        }
+
+        internal struct aiSubD
         {
             [DllImport(Abci.Lib)] public static extern aiPolyMeshSample aiSchemaGetSample(IntPtr schema);
         }

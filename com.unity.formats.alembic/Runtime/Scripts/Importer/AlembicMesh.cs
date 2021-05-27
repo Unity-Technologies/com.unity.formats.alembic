@@ -67,7 +67,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         aiPolyMesh m_abcSchema;
-        aiMeshSummary m_summary;
+        protected aiMeshSummary m_summary;
         aiMeshSampleSummary m_sampleSummary;
         NativeArray<aiMeshSplitSummary> m_splitSummaries;
         NativeArray<aiSubmeshSummary> m_submeshSummaries;
