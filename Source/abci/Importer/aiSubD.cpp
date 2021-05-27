@@ -4,29 +4,31 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
+#include "aiMeshSchema.h"
+#include "aiSubD.h"
 #include "../Foundation/aiMisc.h"
 #include "../Foundation/aiMath.h"
 
 
-aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
+aiSubDSample::aiSubDSample(aiSubD *schema, TopologyPtr topo)
     : aiMeshSample(schema, topo)
 {
 }
 
-aiPolyMeshSample::~aiPolyMeshSample()
+aiSubDSample::~aiSubDSample()
 {
 }
 
-aiPolyMesh::aiPolyMesh(aiObject* parent, const abcObject& abc)
-    :aiMeshSchema(parent, abc)
+aiSubD::aiSubD(aiObject *parent, const abcObject &abc)
+    : aiMeshSchema(parent, abc)
 {
 }
 
-aiPolyMesh::~aiPolyMesh()
+aiSubD::~aiSubD()
 {
 }
 
-aiPolyMeshSample* aiPolyMesh::newSample()
+aiSubDSample* aiSubD::newSample()
 {
     if (!m_varying_topology)
     {
