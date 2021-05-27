@@ -43,7 +43,7 @@ bizarro_standalone_platforms:
     flavor: m1.mac
     runtime: standalone
   - name: centOS
-    type: Unity::VM
+    type: Unity::VM::GPU
     image: package-ci/centos:latest
     flavor: b1.large
     runtime: standalone
