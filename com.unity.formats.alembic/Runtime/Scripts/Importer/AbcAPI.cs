@@ -454,7 +454,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
 
-
     [StructLayout(LayoutKind.Explicit)]
     struct aiPoints
     {
