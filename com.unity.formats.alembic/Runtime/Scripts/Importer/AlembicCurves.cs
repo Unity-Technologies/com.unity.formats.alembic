@@ -4,6 +4,9 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    /// <summary>
+    /// The AlembicCurves component stores the curve information for the associated Alembic tree Node.
+    /// </summary>
     [DisallowMultipleComponent]
     public class AlembicCurves : MonoBehaviour
     {
