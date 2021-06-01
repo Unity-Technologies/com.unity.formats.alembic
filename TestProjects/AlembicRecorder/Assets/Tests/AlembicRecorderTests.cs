@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
@@ -72,7 +72,7 @@ namespace Tests
             abcSettings.Settings.TargetBranch = cube;
 
             director.Play();
-            deleteFileList.Add(outputFile+".abc");
+            deleteFileList.Add(outputFile + ".abc");
             while (Time.time < 10)
             {
                 yield return null;
@@ -80,11 +80,11 @@ namespace Tests
 
             var go = new GameObject("abc");
             var player = go.AddComponent<AlembicStreamPlayer>();
-            var ret = player.LoadFromFile(outputFile+".abc");
+            var ret = player.LoadFromFile(outputFile + ".abc");
             Assert.IsTrue(ret);
             player.UpdateImmediately(5);
             var pos = go.GetComponentInChildren<MeshFilter>().transform.position;
-            Assert.IsTrue(Vector3.Distance(pos, new Vector3(4.96666f,0,0)) < 1e-3);
+            Assert.IsTrue(Vector3.Distance(pos, new Vector3(4.96666f, 0, 0)) < 1e-3);
         }
     }
 }

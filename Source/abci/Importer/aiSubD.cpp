@@ -3,11 +3,8 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
-#include "aiPolyMesh.h"
 #include "aiMeshSchema.h"
 #include "aiSubD.h"
-#include "../Foundation/aiMisc.h"
-#include "../Foundation/aiMath.h"
 
 
 aiSubDSample::aiSubDSample(aiSubD *schema, TopologyPtr topo)
@@ -41,4 +38,3 @@ aiSubDSample* aiSubD::newSample()
         return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
 }
-

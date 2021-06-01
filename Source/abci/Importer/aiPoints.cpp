@@ -4,20 +4,8 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPoints.h"
-#include "aiMisc.h"
 #include "aiMath.h"
-#include "aiUtils.h"
 
-
-template<class T, class U>
-inline void Remap(RawVector<T>& dst, const U& src, const RawVector<std::pair<float, int> >& sort_data)
-{
-    dst.resize_discard(sort_data.size());
-    size_t count = std::min<size_t>(sort_data.size(), src->size());
-    auto src_data = src->get();
-    for (size_t i = 0; i < count; ++i)
-        dst[i] = (T)src_data[sort_data[i].second];
-}
 
 aiPointsSample::aiPointsSample(aiPoints *schema)
     : super(schema)
@@ -39,17 +27,25 @@ void aiPointsSample::fillData(aiPointsData &data)
     if (data.velocities)
     {
         if (!m_velocities.empty())
-            m_velocities.copy_to(data.velocities);
+        {
+            CopyTo(m_velocities, data.velocities);
+        }
         else
+        {
             memset(data.velocities, 0, m_points_ref.size() * sizeof(abcV3));
+        }
     }
 
     if (data.ids)
     {
         if (!m_ids.empty())
-            m_ids.copy_to(data.ids);
+        {
+            CopyTo(m_ids, data.ids);
+        }
         else
+        {
             memset(data.ids, 0, m_points_ref.size() * sizeof(uint32_t));
+        }
     }
     data.center = m_bb_center;
     data.size = m_bb_size;
@@ -219,14 +215,14 @@ void aiPoints::cookSampleBody(Sample& sample)
         if (summary.compute_velocities)
             sample.m_points_int.swap(sample.m_points_prev);
 
-        sample.m_points_int.resize_discard(sample.m_points.size());
+        sample.m_points_int.resize(sample.m_points.size());
         Lerp(sample.m_points_int.data(), sample.m_points.data(), sample.m_points2.data(),
             (int)sample.m_points.size(), m_current_time_offset);
         sample.m_points_ref = sample.m_points_int;
 
         if (summary.compute_velocities)
         {
-            sample.m_velocities.resize_discard(sample.m_points.size());
+            sample.m_velocities.resize(sample.m_points.size());
             if (sample.m_points_int.size() == sample.m_points_prev.size())
             {
                 GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
@@ -234,7 +230,7 @@ void aiPoints::cookSampleBody(Sample& sample)
             }
             else
             {
-                sample.m_velocities.zeroclear();
+                ResizeZeroClear(sample.m_velocities, sample.m_velocities.size());
             }
         }
     }

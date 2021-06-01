@@ -4,8 +4,6 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
-#include "../Foundation/aiMisc.h"
-#include "../Foundation/aiMath.h"
 
 
 aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)
@@ -18,7 +16,7 @@ aiPolyMeshSample::~aiPolyMeshSample()
 }
 
 aiPolyMesh::aiPolyMesh(aiObject* parent, const abcObject& abc)
-    :aiMeshSchema(parent, abc)
+    : aiMeshSchema(parent, abc)
 {
 }
 
@@ -39,4 +37,3 @@ aiPolyMeshSample* aiPolyMesh::newSample()
         return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
 }
-

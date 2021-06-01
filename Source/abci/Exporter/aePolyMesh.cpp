@@ -3,7 +3,6 @@
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aePolyMesh.h"
-#include "aiMisc.h"
 #include "aiMath.h"
 
 
@@ -49,18 +48,18 @@ void aePolyMesh::setFromPrevious()
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
     m_buf_visibility = data.visibility;
-    m_buf_points.assign(data.points, data.points + data.point_count);
-    m_buf_normals.assign(data.normals, data.normals +  data.point_count);
-    m_buf_uv0.assign(data.uv0, data.uv0 + data.point_count);
-    m_buf_uv1.assign(data.uv1, data.uv1 +  data.point_count);
-    m_buf_colors.assign(data.colors, data.colors +  data.point_count);
+    Assign(m_buf_points, data.points,  data.point_count);
+    Assign(m_buf_normals, data.normals,  data.point_count);
+    Assign(m_buf_uv0, data.uv0,  data.point_count);
+    Assign(m_buf_uv1, data.uv1,  data.point_count);
+    Assign(m_buf_colors, data.colors, data.point_count);
 
     m_buf_submeshes.resize(data.submesh_count);
     for (int smi = 0; smi < data.submesh_count; ++smi)
     {
         auto& src = data.submeshes[smi];
         auto& dst = m_buf_submeshes[smi];
-        dst.indices.assign(src.indices, src.indices + src.index_count);
+        Assign(dst.indices, src.indices,  src.index_count);
         dst.topology = src.topology;
     }
 
@@ -141,11 +140,11 @@ void aePolyMesh::writeSampleBody()
                     break;
             }
             m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
-            facecount+= face_count * ngon;
+            facecount += face_count * ngon;
 
             if (smi < m_facesets.size())
             {
-                m_tmp_facecet.resize_discard(face_count);
+                m_tmp_facecet.resize(face_count);
                 std::iota(m_tmp_facecet.begin(), m_tmp_facecet.end(), offset_faces);
 
                 aeFaceSetData fsd;
@@ -163,8 +162,8 @@ void aePolyMesh::writeSampleBody()
     // handle swap face option
     if (conf.swap_faces)
     {
-        RawVector<int> face_indices;
-        auto do_swap = [&](RawVector<int>& dst) {
+        Vector<int> face_indices;
+        auto do_swap = [&](Vector<int>& dst) {
                 if (dst.empty())
                 {
                     return;

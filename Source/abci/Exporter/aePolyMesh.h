@@ -1,4 +1,5 @@
 #pragma once
+#include <Foundation/Vector.h>
 
 class aeFaceSet
 {
@@ -9,7 +10,7 @@ public:
 private:
     std::unique_ptr<abcObject> m_abc;
     AbcGeom::OFaceSetSchema m_schema;
-    RawVector<int> m_buf_faces;
+    Vector<int> m_buf_faces;
 };
 using aeFaceSetPtr = std::shared_ptr<aeFaceSet>;
 
@@ -34,7 +35,7 @@ private:
 
     struct SubmeshBuffer
     {
-        RawVector<int> indices;
+        Vector<int> indices;
         aeTopology topology = aeTopology::Triangles;
     };
 
@@ -45,17 +46,17 @@ private:
 
     bool m_buf_visibility = true;
 
-    RawVector<int>   m_buf_faces;
-    RawVector<int>   m_buf_indices;
+    Vector<int>   m_buf_faces;
+    Vector<int>   m_buf_indices;
 
-    RawVector<abcV3> m_buf_points;
-    RawVector<abcV3> m_buf_velocities;
+    Vector<abcV3> m_buf_points;
+    Vector<abcV3> m_buf_velocities;
 
-    RawVector<abcV3> m_buf_normals;
-    RawVector<abcV2> m_buf_uv0;
-    RawVector<abcV2> m_buf_uv1;
-    RawVector<abcV4> m_buf_colors;
+    Vector<abcV3> m_buf_normals;
+    Vector<abcV2> m_buf_uv0;
+    Vector<abcV2> m_buf_uv1;
+    Vector<abcV4> m_buf_colors;
 
     std::vector<SubmeshBuffer> m_buf_submeshes;
-    RawVector<int> m_tmp_facecet;
+    Vector<int> m_tmp_facecet;
 };

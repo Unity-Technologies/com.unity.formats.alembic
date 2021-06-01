@@ -1,20 +1,19 @@
 #pragma once
-#include "RawVector.h"
 #include "aiIntrusiveArray.h"
 #include "aiMath.h"
-
+#include <Foundation/Vector.h>
 
 struct MeshConnectionInfo
 {
-    RawVector<int> v2f_counts;
-    RawVector<int> v2f_offsets;
-    RawVector<int> v2f_faces;
-    RawVector<int> v2f_indices;
+    Vector<int> v2f_counts;
+    Vector<int> v2f_offsets;
+    Vector<int> v2f_faces;
+    Vector<int> v2f_indices;
 
-    RawVector<int> weld_map;
-    RawVector<int> weld_counts;
-    RawVector<int> weld_offsets;
-    RawVector<int> weld_indices;
+    Vector<int> weld_map;
+    Vector<int> weld_counts;
+    Vector<int> weld_offsets;
+    Vector<int> weld_indices;
 
     void clear();
     void buildConnection(
@@ -55,11 +54,11 @@ public:
     template<class Compare, class Welder>
     int weld(abcV3 *points, int count, const Compare& compare_op, const Welder& weld_op);
 
-    const RawVector<int>& getRemapTable() const;
+    const Vector<int>& getRemapTable() const;
 
 private:
-    RawVector<int> m_hash_table;
-    RawVector<int> m_remap;
+    Vector<int> m_hash_table;
+    Vector<int> m_remap;
     abcV3 *m_points = nullptr;
     int m_count = 0;
     int m_hash_size = 0;
@@ -117,21 +116,21 @@ struct MeshRefiner
     IArray<float3> points;
 
     // outputs
-    RawVector<int> old2new_indices; // old index to new index
-    RawVector<int> new2old_points;  // new index to old vertex
-    RawVector<int> new_indices;     // non-triangulated new indices
-    RawVector<int> new_indices_tri;
-    RawVector<int> new_indices_lines;
-    RawVector<int> new_indices_points;
-    RawVector<int> new_indices_submeshes;
-    RawVector<float3> new_points;
-    RawVector<Split> splits;
-    RawVector<Submesh> submeshes;
+    Vector<int> old2new_indices; // old index to new index
+    Vector<int> new2old_points;  // new index to old vertex
+    Vector<int> new_indices;     // non-triangulated new indices
+    Vector<int> new_indices_tri;
+    Vector<int> new_indices_lines;
+    Vector<int> new_indices_points;
+    Vector<int> new_indices_submeshes;
+    Vector<float3> new_points;
+    Vector<Split> splits;
+    Vector<Submesh> submeshes;
     MeshConnectionInfo connection;
 
     // attributes
     template<class T>
-    void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, RawVector<T>& new_values, RawVector<int>& new2old)
+    void addIndexedAttribute(const IArray<T>& values, const IArray<int>& indices, Vector<T>& new_values, Vector<int>& new2old)
     {
         auto attr = newAttribute<IndexedAttribute<T> >();
         attr->values = values;
@@ -141,7 +140,7 @@ struct MeshRefiner
     }
 
     template<class T>
-    void addExpandedAttribute(const IArray<T>& values, RawVector<T>& new_values, RawVector<int>& new2old)
+    void addExpandedAttribute(const IArray<T>& values, Vector<T>& new_values, Vector<int>& new2old)
     {
         auto attr = newAttribute<ExpandedAttribute<T> >();
         attr->values = values;
@@ -201,8 +200,8 @@ private:
 
         IArray<T> values;
         IArray<int> indices;
-        RawVector<T> *new_values = nullptr;
-        RawVector<int> *new2old = nullptr;
+        Vector<T> *new_values = nullptr;
+        Vector<int> *new2old = nullptr;
     };
 
     template<class T>
@@ -231,8 +230,8 @@ private:
         }
 
         IArray<T> values;
-        RawVector<T> *new_values = nullptr;
-        RawVector<int> *new2old = nullptr;
+        Vector<T> *new_values = nullptr;
+        Vector<int> *new2old = nullptr;
     };
 
     template<class AttrType>
@@ -250,8 +249,8 @@ private:
         return ret;
     }
 
-    RawVector<IAttribute*> attributes;
-    RawVector<char> buf_attributes;
+    Vector<IAttribute*> attributes;
+    Vector<char> buf_attributes;
     static const int max_attributes = 8; // you can increase this if needed
 };
 

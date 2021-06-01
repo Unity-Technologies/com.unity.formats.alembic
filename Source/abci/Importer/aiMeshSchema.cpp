@@ -58,4 +58,3 @@ int aiMeshTopology::getSubmeshCount(int split_index) const
 {
     return (int)m_refiner.splits[split_index].submesh_count;
 }
-

@@ -53,7 +53,7 @@ class lockFreeIStream : public std::ifstream
 {
 private:
     static bool updatedIOLimit;
-    FILE* _osFH ;
+    FILE* _osFH;
 
     FILE *Init(const wchar_t *name)
     {
@@ -84,7 +84,7 @@ private:
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
             NULL);
-        if ( handle == INVALID_HANDLE_VALUE)
+        if (handle == INVALID_HANDLE_VALUE)
         {
             auto errorMsg = GetLastErrorAsString();
             std::cerr << "Alembic cannot open:" << name << ":" << errorMsg << std::endl;
@@ -95,7 +95,7 @@ private:
 
         if (osFD == -1)
         {
-             std::cerr << "Alembic cannot open:" << name << ":" << "_open_osfhandle failed" << std::endl;
+            std::cerr << "Alembic cannot open:" << name << ":" << "_open_osfhandle failed" << std::endl;
             ::CloseHandle(handle);
             return nullptr;
         }
@@ -118,8 +118,8 @@ public:
     {}
     ~lockFreeIStream()
     {
-       // The FILE owns all the handles associated with it and closing this should
-       // free the HANDLE and the OS file handle.
+        // The FILE owns all the handles associated with it and closing this should
+        // free the HANDLE and the OS file handle.
         if (_osFH != nullptr)
         {
             fclose(_osFH);
@@ -208,13 +208,13 @@ aiContextManager::~aiContextManager()
 
 aiContext::aiContext(int uid)
     : m_path(),
-      m_streams(),
-      m_archive(),
-      m_top_node(),
-      m_timesamplings(),
-      m_uid(uid),
-      m_config(),
-      m_isHDF5(false)
+    m_streams(),
+    m_archive(),
+    m_top_node(),
+    m_timesamplings(),
+    m_uid(uid),
+    m_config(),
+    m_isHDF5(false)
 {
 }
 
@@ -380,18 +380,18 @@ bool aiContext::load(const char *in_path)
             std::ifstream fp(path, std::ios::in | std::ios::binary);
             if (!fp)
             {
-                DebugLog("Unable to open " + filename );
+                DebugLog("Unable to open " + filename);
             }
             else
             {
                 char header[4]; /* funky char + "HDF" */
                 if (!fp.read(header, sizeof(header)))
                 {
-                    DebugLog("Unable to read from " + filename );
+                    DebugLog("Unable to read from " + filename);
                 }
                 if (strncmp(header + 1, "HDF", 3) != 0)
                 {
-                    DebugLog(filename+ "has unknown file format");
+                    DebugLog(filename + "has unknown file format");
                 }
                 else
                 {
@@ -443,7 +443,3 @@ void aiContext::updateSamples(double time)
         o.updateSample(ss);
     });
 }
-
-
-
-

@@ -34,9 +34,9 @@ void aePoints::setFromPrevious()
 void aePoints::writeSample(const aePointsData &data)
 {
     m_buf_visibility = data.visibility;
-    m_buf_positions.assign(data.positions, data.positions + data.count);
-    m_buf_velocities.assign(data.velocities, data.velocities + data.count);
-    m_buf_ids.assign(data.ids, data.ids + data.count);
+    Assign(m_buf_positions, data.positions, data.count);
+    Assign(m_buf_velocities, data.velocities, data.count);
+    Assign(m_buf_ids, data.ids, data.count);
 
     m_ctx->addAsync([this]() { doWriteSample(); });
 }
@@ -48,7 +48,7 @@ void aePoints::doWriteSample()
     // generate ids if needed
     if (m_buf_ids.size() != m_buf_positions.size())
     {
-        m_buf_ids.resize_discard(m_buf_positions.size());
+        m_buf_ids.resize(m_buf_positions.size());
         std::iota(m_buf_ids.begin(), m_buf_ids.end(), 0);
     }
 
