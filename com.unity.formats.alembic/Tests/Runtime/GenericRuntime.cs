@@ -29,6 +29,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             mesh.GetUVs(5, velocity);
             Assert.IsTrue(velocity.All(x => x == Vector3.zero));
         }
+
 #endif
     }
 }
