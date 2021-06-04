@@ -372,10 +372,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             NativeMethods.aiCleanup();
         }
 
+        /// <inheritdoc/>
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
         }
 
+        /// <inheritdoc/>
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             if (streamDescriptor != null && streamDescriptor.GetType() == typeof(AlembicStreamDescriptor))
