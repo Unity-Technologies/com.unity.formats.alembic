@@ -26,6 +26,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal class Split : IDisposable
         {
             public NativeArray<Vector3> velocities;
+            public NativeArray<Vector3> zeroVelocities;
             public NativeArray<Vector3> points;
             public NativeArray<Vector3> normals;
             public NativeArray<Vector4> tangents;
@@ -40,6 +41,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public Vector3 center = Vector3.zero;
             public Vector3 size = Vector3.zero;
+
+            public bool velocitiesSet;
             bool disposed;
 
             public void Dispose()
@@ -48,8 +51,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                     return;
 
                 velocities.DisposeIfPossible();
+                zeroVelocities.DisposeIfPossible();
                 points.DisposeIfPossible();
-                velocities.DisposeIfPossible();
                 normals.DisposeIfPossible();
                 tangents.DisposeIfPossible();
                 uv0.DisposeIfPossible();
@@ -202,7 +205,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                 m_PostProcessJobs[spi].Complete();
                 if (m_summary.hasVelocities && (!m_summary.constantVelocities || topologyChanged))
+                {
                     split.velocities.ResizeIfNeeded(vertexCount);
+                    split.zeroVelocities.ResizeIfNeeded(vertexCount);
+                }
                 else
                     split.velocities.ResizeIfNeeded(0);
                 vertexData.velocities = split.velocities.GetPointer();
@@ -403,6 +409,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     {
                         m_PostProcessJobs[s].Complete();
                         split.mesh.SetUVs(5, split.velocities);
+                        split.velocitiesSet = true;
                     }
 
                     if (split.rgba.Length > 0)
@@ -437,6 +444,18 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Points, sum.submeshIndex, false);
                     else if (sum.topology == aiTopology.Quads)
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
+                }
+            }
+        }
+
+        internal void ClearMotionVectors()
+        {
+            foreach (var split in m_splits)
+            {
+                if (split.active && split.velocitiesSet && split.velocities.Length > 0)
+                {
+                    split.mesh.SetUVs(5, split.zeroVelocities);
+                    split.velocitiesSet = false;
                 }
             }
         }

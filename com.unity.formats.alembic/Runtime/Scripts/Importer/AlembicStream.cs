@@ -192,10 +192,25 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (m_streamInterupted)
                 return;
 
-
             m_context.updateJobHandle.Complete();
             AbcBeginSyncData(m_abcTreeRoot);
             AbcEndSyncData(m_abcTreeRoot);
+        }
+
+        public void ClearMotionVectors()
+        {
+            ClearMotionVectors(m_abcTreeRoot);
+        }
+
+        void ClearMotionVectors(AlembicTreeNode node)
+        {
+            if (node.abcObject is AlembicMesh mesh)
+            {
+                mesh.ClearMotionVectors();
+            }
+
+            foreach (var child in node.Children)
+                ClearMotionVectors(child);
         }
 
         public bool AbcLoad(bool createMissingNodes, bool serializeMesh)
