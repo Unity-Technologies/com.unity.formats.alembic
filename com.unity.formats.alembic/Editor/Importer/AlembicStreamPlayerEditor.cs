@@ -164,8 +164,15 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUILayout.MinMaxSlider(" ", ref start, ref end, abcStart, abcEnd);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    startTime.doubleValue = start;
-                    endTime.doubleValue = end;
+                    if (Math.Abs(startTime.doubleValue - start) > 1e-5) // The Mix max slider is "jiggly": changes slightly all numbers even though they were not changed.
+                    {
+                        startTime.doubleValue = start;
+                    }
+
+                    if (Math.Abs(endTime.doubleValue - end) > 1e-5)
+                    {
+                        endTime.doubleValue = end;
+                    }
                 }
 
                 EditorGUILayout.BeginHorizontal();
