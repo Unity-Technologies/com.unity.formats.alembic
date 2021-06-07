@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed a bug that was causing visual artefacts due to motion vector persistence when pausing Alembic playback.
 
 ## [2.2.0-pre.4] - 2021-04-27
 ### Added
