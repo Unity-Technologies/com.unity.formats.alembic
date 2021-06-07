@@ -336,12 +336,9 @@ nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: dev
+      - branch: trunk
         frequency: daily
         rerun: always    
-      - branch: master
-        frequency: daily
-        rerun: always  
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
