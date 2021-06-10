@@ -4,7 +4,7 @@ Use the Alembic package to import and export [Alembic](http://www.alembic.io/) f
 
 The Alembic package brings in vertex cache data from a 3D modeling software, such as facial animation (skinning) and cloth simulation (dynamics). When you play it back inside Unity, it looks exactly the same as it did in the 3D modeling software.
 
->**Important:** before you start using this package, you must be aware of its [known issues and limitations](#known-issues-and-limitations).
+>**Important:** before you start using this package, you must be aware of its [limitations and known issues](known-issues.md).
 
 
 ## Features
@@ -38,15 +38,11 @@ This version of Alembic for Unity is compatible with the following versions of t
 
 * 2019.3 and later (recommended)
 
-### Known issues and limitations
+### Limitations and known issues
 
 * Alembic for Unity **only supports** the following build targets: **Windows 64-bit**, **MacOS X**, **Linux 64-bit**, and **Stadia**.
 
-* The Alembic format does not support Material import and export.
-
-* Importing meshes with non-convex polygons results in malformed geometry (for example, triangles with flipped normals).
-
-* Adding an FBX GameObject as a child of an Alembic Prefab prevents you from building your project. Instead, Create a new Prefab with both the FBX GameObject and the Alembic Prefab as children.
+See the full list of [limitations and known issues](known-issues.md), which also provides workarounds in some cases.
 
 
 ## Feedback
