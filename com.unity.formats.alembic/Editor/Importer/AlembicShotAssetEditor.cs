@@ -1,6 +1,5 @@
 using System;
 using UnityEditor.Timeline;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Timeline;
 using UnityEngine.Timeline;
@@ -25,8 +24,13 @@ namespace UnityEditor.Formats.Alembic.Importer
                 return;
             }
 
-            var duration =
-                Math.Max(asp.Duration, 1 / TimelineEditor.inspectedAsset.editorSettings.frameRate); // at least 1 frame
+#if TIMELINE_1_6_0
+            var fps = TimelineEditor.inspectedAsset.editorSettings.frameRate;
+#else
+            var fps = TimelineEditor.inspectedAsset.editorSettings.fps;
+#endif
+            double duration =
+                Math.Max(asp.Duration, 1 / fps); // at least 1 frame
             clip.duration = duration;
         }
     }
