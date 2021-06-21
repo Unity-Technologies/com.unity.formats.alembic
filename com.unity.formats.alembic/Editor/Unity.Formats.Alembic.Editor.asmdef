@@ -1,9 +1,11 @@
 {
     "name": "Unity.Formats.Alembic.Editor",
+    "rootNamespace": "",
     "references": [
         "Unity.Formats.Alembic.Runtime",
         "Unity.Timeline",
-        "Unity.Recorder.Editor"
+        "Unity.Recorder.Editor",
+        "Unity.Timeline.Editor"
     ],
     "includePlatforms": [
         "Editor"
