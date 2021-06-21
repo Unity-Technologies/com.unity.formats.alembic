@@ -219,6 +219,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [Test]
+        [Ignore("Unstable AssetDatabase Assertion")] //Assertion failed on expression: 'sadbTxn.Exists(artifactKey.GetGUID())'
         public void TestImportlessAlembicInvalidFile()
         {
             var go = new GameObject("abc");
