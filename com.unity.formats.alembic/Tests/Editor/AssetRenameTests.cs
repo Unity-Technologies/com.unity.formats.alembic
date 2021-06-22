@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [SetUp]
         public void SetUp()
         {
-            const string dummyGUID = "1a066d124049a413fb12b82470b82811"; // GUID of DummyAlembic.abc
+            const string dummyGUID = "a6d019a425afe49d7a8fd029c82c0455";
             var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
             var srcDummyFile = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AlembicStreamPlayer>().First().StreamDescriptor.PathToAbc;
             File.Copy(srcDummyFile, copiedAbcFile, true);
@@ -42,10 +42,27 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             Assert.AreEqual("abc", go.name);
             var ret = AssetDatabase.RenameAsset(copiedAbcFile, "new.abc");
+            deleteFileList.Add("Assets/new.abc");
             AssetDatabase.Refresh();
             Assert.AreEqual("abc", go.name);
             Assert.IsEmpty(ret);
+        }
+
+        [Test]
+        public void StreamUpdatesAfterRenamingAsset()
+        {
             deleteFileList.Add("Assets/new.abc");
+            var asp = go.GetComponent<AlembicStreamPlayer>();
+            AssetDatabase.RenameAsset(copiedAbcFile, "new.abc");
+            AssetDatabase.Refresh();
+
+            asp.UpdateImmediately(0);
+            var mesh = go.GetComponentInChildren<MeshFilter>().sharedMesh;
+            var v0 = mesh.vertices;
+            asp.UpdateImmediately(asp.Duration / 2);
+            var v1 = mesh.vertices;
+
+            CollectionAssert.AreNotEqual(v0, v1);
         }
     }
 }
