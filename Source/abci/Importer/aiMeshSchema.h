@@ -1,6 +1,6 @@
 #pragma once
 #include "aiMeshOps.h"
-#include <Foundation/AlignedVector.h>
+#include <Foundation/Vector.h>
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
@@ -42,14 +42,14 @@ public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
     abcFaceSetSamples m_faceset_sps;
-    AlignedVector<int> m_material_ids;
+    Vector<int> m_material_ids;
 
     MeshRefiner m_refiner;
-    AlignedVector<int> m_remap_points;
-    AlignedVector<int> m_remap_normals;
-    AlignedVector<int> m_remap_uv0, m_remap_uv1;
-    AlignedVector<int> m_remap_rgba;
-    AlignedVector<int> m_remap_rgb;
+    Vector<int> m_remap_points;
+    Vector<int> m_remap_normals;
+    Vector<int> m_remap_uv0, m_remap_uv1;
+    Vector<int> m_remap_rgba;
+    Vector<int> m_remap_rgb;
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -90,14 +90,14 @@ public:
     IArray<abcC4> m_rgba_ref;
     IArray<abcC3> m_rgb_ref;
 
-    AlignedVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
-    AlignedVector<abcV3> m_velocities;
-    AlignedVector<abcV2> m_uv0, m_uv02, m_uv0_int;
-    AlignedVector<abcV2> m_uv1, m_uv12, m_uv1_int;
-    AlignedVector<abcV3> m_normals, m_normals2, m_normals_int;
-    AlignedVector<abcV4> m_tangents;
-    AlignedVector<abcC4> m_rgba, m_rgba2, m_rgba_int;
-    AlignedVector<abcC3> m_rgb, m_rgb2, m_rgb_int;
+    Vector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
+    Vector<abcV3> m_velocities;
+    Vector<abcV2> m_uv0, m_uv02, m_uv0_int;
+    Vector<abcV2> m_uv1, m_uv12, m_uv1_int;
+    Vector<abcV3> m_normals, m_normals2, m_normals_int;
+    Vector<abcV4> m_tangents;
+    Vector<abcC4> m_rgba, m_rgba2, m_rgba_int;
+    Vector<abcC3> m_rgb, m_rgb2, m_rgb_int;
 
     TopologyPtr m_topology;
     bool m_topology_changed = false;
@@ -122,14 +122,14 @@ public:
 
 public:
 
-    AlignedVector<abcV3> m_constant_points;
-    AlignedVector<abcV3> m_constant_velocities;
-    AlignedVector<abcV3> m_constant_normals;
-    AlignedVector<abcV4> m_constant_tangents;
-    AlignedVector<abcV2> m_constant_uv0;
-    AlignedVector<abcV2> m_constant_uv1;
-    AlignedVector<abcC4> m_constant_rgba;
-    AlignedVector<abcC3> m_constant_rgb;
+    Vector<abcV3> m_constant_points;
+    Vector<abcV3> m_constant_velocities;
+    Vector<abcV3> m_constant_normals;
+    Vector<abcV4> m_constant_tangents;
+    Vector<abcV2> m_constant_uv0;
+    Vector<abcV2> m_constant_uv1;
+    Vector<abcC4> m_constant_rgba;
+    Vector<abcC3> m_constant_rgb;
 
 protected:
     virtual AbcGeom::IN3fGeomParam readNormalsParam();
@@ -984,7 +984,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     topology.m_remap_points.swap(refiner.new2old_points);
     {
         auto& points = summary.constant_points ? m_constant_points : sample.m_points;
-        points.swap((AlignedVector<abcV3>&)refiner.new_points);
+        points.swap((Vector<abcV3>&)refiner.new_points);
         if (config.swap_handedness)
             SwapHandedness(points.data(), (int)points.size());
         if (config.scale_factor != 1.0f)

@@ -1,5 +1,5 @@
 #pragma once
-#include <Foundation/AlignedVector.h>
+#include <Foundation/Vector.h>
 
 struct aiPointsSummaryInternal : public aiPointsSummary
 {
@@ -24,10 +24,10 @@ public:
 
     IArray<abcV3> m_points_ref;
 
-    AlignedVector<std::pair<float, int> > m_sort_data;
-    AlignedVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
-    AlignedVector<abcV3> m_velocities;
-    AlignedVector<uint32_t> m_ids;
+    Vector<std::pair<float, int> > m_sort_data;
+    Vector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
+    Vector<abcV3> m_velocities;
+    Vector<uint32_t> m_ids;
     abcV3 m_bb_center, m_bb_size;
 };
 

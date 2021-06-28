@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "aiMath.h"
-#include "AlignedVector.h"
+#include "Vector.h"
 #include <numeric>
 
 // ispc implementation
@@ -156,7 +156,7 @@ void GenerateTangentsGeneric(abcV4 *dst_,
     auto *uv = (const float2*)uv_;
     auto *normals = (const float3*)normals_;
 
-    AlignedVector<float3> tangents, binormals;
+    Vector<float3> tangents, binormals;
     ResizeZeroClear(tangents,num_points);
     ResizeZeroClear(binormals,num_points);
 

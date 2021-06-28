@@ -34,9 +34,9 @@ void aePoints::setFromPrevious()
 void aePoints::writeSample(const aePointsData &data)
 {
     m_buf_visibility = data.visibility;
-    m_buf_positions.assign(data.positions, data.positions + data.count);
-    m_buf_velocities.assign(data.velocities, data.velocities + data.count);
-    m_buf_ids.assign(data.ids, data.ids + data.count);
+    Assign(m_buf_positions, data.positions, data.count);
+    Assign(m_buf_velocities, data.velocities, data.count);
+    Assign(m_buf_ids, data.ids, data.count);
 
     m_ctx->addAsync([this]() { doWriteSample(); });
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include<Foundation/AlignedVector.h>
+#include<Foundation/Vector.h>
 class aePoints : public aeSchema
 {
     using super = aeSchema;
@@ -17,7 +17,7 @@ private:
 
     AbcGeom::OPointsSchema m_schema;
     bool m_buf_visibility = true;
-    AlignedVector<uint64_t> m_buf_ids;
-    AlignedVector<abcV3> m_buf_positions;
-    AlignedVector<abcV3> m_buf_velocities;
+    Vector<uint64_t> m_buf_ids;
+    Vector<abcV3> m_buf_positions;
+    Vector<abcV3> m_buf_velocities;
 };

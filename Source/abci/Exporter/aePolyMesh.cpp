@@ -48,18 +48,18 @@ void aePolyMesh::setFromPrevious()
 void aePolyMesh::writeSample(const aePolyMeshData &data)
 {
     m_buf_visibility = data.visibility;
-    m_buf_points.assign(data.points, data.points + data.point_count);
-    m_buf_normals.assign(data.normals, data.normals +  data.point_count);
-    m_buf_uv0.assign(data.uv0, data.uv0 + data.point_count);
-    m_buf_uv1.assign(data.uv1, data.uv1 +  data.point_count);
-    m_buf_colors.assign(data.colors, data.colors +  data.point_count);
+    Assign(m_buf_points, data.points,  data.point_count);
+    Assign(m_buf_normals, data.normals,  data.point_count);
+    Assign(m_buf_uv0, data.uv0,  data.point_count);
+    Assign(m_buf_uv1, data.uv1,  data.point_count);
+    Assign(m_buf_colors,data.colors, data.point_count);
 
     m_buf_submeshes.resize(data.submesh_count);
     for (int smi = 0; smi < data.submesh_count; ++smi)
     {
         auto& src = data.submeshes[smi];
         auto& dst = m_buf_submeshes[smi];
-        dst.indices.assign(src.indices, src.indices + src.index_count);
+        Assign(dst.indices, src.indices,  src.index_count);
         dst.topology = src.topology;
     }
 
@@ -162,8 +162,8 @@ void aePolyMesh::writeSampleBody()
     // handle swap face option
     if (conf.swap_faces)
     {
-        AlignedVector<int> face_indices;
-        auto do_swap = [&](AlignedVector<int>& dst) {
+        Vector<int> face_indices;
+        auto do_swap = [&](Vector<int>& dst) {
                 if (dst.empty())
                 {
                     return;

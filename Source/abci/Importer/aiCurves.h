@@ -4,7 +4,7 @@
 #include "aiContext.h"
 #include "aiObject.h"
 #include "aiSchema.h"
-#include <Foundation/AlignedVector.h>
+#include <Foundation/Vector.h>
 
 class aiCurves;
 
@@ -22,20 +22,20 @@ public:
 
     ~aiCurvesSample(){}
     Abc::P3fArraySamplePtr m_position_sp,m_position_sp2;
-    AlignedVector<abcV3> m_positions, m_positions2, m_positions_prev;
+    Vector<abcV3> m_positions, m_positions2, m_positions_prev;
 
     Abc::Int32ArraySamplePtr m_numVertices_sp;
-    AlignedVector<int32_t> m_numVertices;
+    Vector<int32_t> m_numVertices;
 
     AbcGeom::ITypedGeomParam<Abc::V2fTPTraits>::sample_type m_uvs_sp, m_uvs_sp2;
-    AlignedVector<abcV2> m_uvs, m_uvs2;
+    Vector<abcV2> m_uvs, m_uvs2;
 
     AbcGeom::ITypedGeomParam<Abc::Float32TPTraits>::sample_type m_widths_sp, m_widths_sp2;
 
-    AlignedVector<float> m_widths, m_widths2;
+    Vector<float> m_widths, m_widths2;
 
 	Abc::V3fArraySamplePtr m_velocities_sp;
-    AlignedVector<abcV3> m_velocities;
+    Vector<abcV3> m_velocities;
 
     void fillData(aiCurvesData& data);
 };

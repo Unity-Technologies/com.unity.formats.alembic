@@ -144,7 +144,7 @@ void MeshWelder::prepare(abcV3 * points, int count)
     m_remap.resize(m_count);
 }
 
-const AlignedVector<int>& MeshWelder::getRemapTable() const
+const Vector<int>& MeshWelder::getRemapTable() const
 {
     return m_remap;
 }
@@ -234,8 +234,8 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
-    AlignedVector<Submesh> tmp_submeshes;
-    AlignedVector<int> materialOrder;
+    Vector<Submesh> tmp_submeshes;
+    Vector<int> materialOrder;
     std::unordered_set<int> materialSet;
 
 
