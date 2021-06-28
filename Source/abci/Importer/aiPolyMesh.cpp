@@ -4,8 +4,6 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiPolyMesh.h"
-#include "../Foundation/aiMisc.h"
-#include "../Foundation/aiMath.h"
 
 
 aiPolyMeshSample::aiPolyMeshSample(aiPolyMesh *schema, TopologyPtr topo)

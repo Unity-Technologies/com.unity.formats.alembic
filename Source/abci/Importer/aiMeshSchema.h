@@ -1,6 +1,6 @@
 #pragma once
 #include "aiMeshOps.h"
-
+#include <Foundation/AlignedVector.h>
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
@@ -42,14 +42,14 @@ public:
     Abc::Int32ArraySamplePtr m_indices_sp;
     Abc::Int32ArraySamplePtr m_counts_sp;
     abcFaceSetSamples m_faceset_sps;
-    RawVector<int> m_material_ids;
+    AlignedVector<int> m_material_ids;
 
     MeshRefiner m_refiner;
-    RawVector<int> m_remap_points;
-    RawVector<int> m_remap_normals;
-    RawVector<int> m_remap_uv0, m_remap_uv1;
-    RawVector<int> m_remap_rgba;
-    RawVector<int> m_remap_rgb;
+    AlignedVector<int> m_remap_points;
+    AlignedVector<int> m_remap_normals;
+    AlignedVector<int> m_remap_uv0, m_remap_uv1;
+    AlignedVector<int> m_remap_rgba;
+    AlignedVector<int> m_remap_rgb;
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -90,14 +90,14 @@ public:
     IArray<abcC4> m_rgba_ref;
     IArray<abcC3> m_rgb_ref;
 
-    RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
-    RawVector<abcV3> m_velocities;
-    RawVector<abcV2> m_uv0, m_uv02, m_uv0_int;
-    RawVector<abcV2> m_uv1, m_uv12, m_uv1_int;
-    RawVector<abcV3> m_normals, m_normals2, m_normals_int;
-    RawVector<abcV4> m_tangents;
-    RawVector<abcC4> m_rgba, m_rgba2, m_rgba_int;
-    RawVector<abcC3> m_rgb, m_rgb2, m_rgb_int;
+    AlignedVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
+    AlignedVector<abcV3> m_velocities;
+    AlignedVector<abcV2> m_uv0, m_uv02, m_uv0_int;
+    AlignedVector<abcV2> m_uv1, m_uv12, m_uv1_int;
+    AlignedVector<abcV3> m_normals, m_normals2, m_normals_int;
+    AlignedVector<abcV4> m_tangents;
+    AlignedVector<abcC4> m_rgba, m_rgba2, m_rgba_int;
+    AlignedVector<abcC3> m_rgb, m_rgb2, m_rgb_int;
 
     TopologyPtr m_topology;
     bool m_topology_changed = false;
@@ -122,14 +122,14 @@ public:
 
 public:
 
-    RawVector<abcV3> m_constant_points;
-    RawVector<abcV3> m_constant_velocities;
-    RawVector<abcV3> m_constant_normals;
-    RawVector<abcV4> m_constant_tangents;
-    RawVector<abcV2> m_constant_uv0;
-    RawVector<abcV2> m_constant_uv1;
-    RawVector<abcC4> m_constant_rgba;
-    RawVector<abcC3> m_constant_rgb;
+    AlignedVector<abcV3> m_constant_points;
+    AlignedVector<abcV3> m_constant_velocities;
+    AlignedVector<abcV3> m_constant_normals;
+    AlignedVector<abcV4> m_constant_tangents;
+    AlignedVector<abcV2> m_constant_uv0;
+    AlignedVector<abcV2> m_constant_uv1;
+    AlignedVector<abcC4> m_constant_rgba;
+    AlignedVector<abcC3> m_constant_rgb;
 
 protected:
     virtual AbcGeom::IN3fGeomParam readNormalsParam();
@@ -694,7 +694,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
 
         if (summary.compute_velocities)
         {
-            sample.m_velocities.resize_discard(sample.m_points.size());
+            sample.m_velocities.resize(sample.m_points.size());
             if (sample.m_points_int.size() == sample.m_points_prev.size())
             {
                 GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
@@ -702,7 +702,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             }
             else
             {
-                sample.m_velocities.zeroclear();
+                ResizeZeroClear(sample.m_velocities, sample.m_velocities.size());
             }
             sample.m_velocities_ref = sample.m_velocities;
         }
@@ -729,7 +729,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         else
         {
             const auto &indices = topology.m_refiner.new_indices_tri;
-            sample.m_normals.resize_discard(sample.m_points_ref.size());
+            sample.m_normals.resize(sample.m_points_ref.size());
             GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
                     sample.m_normals.data(), topology.m_remap_points.data(),
                     static_cast<int>(topology.m_counts_sp->size()),
@@ -754,7 +754,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         else
         {
             const auto &indices = topology.m_refiner.new_indices_tri;
-            sample.m_tangents.resize_discard(sample.m_points_ref.size());
+            sample.m_tangents.resize(sample.m_points_ref.size());
             GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
                 indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
             sample.m_tangents_ref = sample.m_tangents;
@@ -984,7 +984,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     topology.m_remap_points.swap(refiner.new2old_points);
     {
         auto& points = summary.constant_points ? m_constant_points : sample.m_points;
-        points.swap((RawVector<abcV3>&)refiner.new_points);
+        points.swap((AlignedVector<abcV3>&)refiner.new_points);
         if (config.swap_handedness)
             SwapHandedness(points.data(), (int)points.size());
         if (config.scale_factor != 1.0f)
@@ -1026,7 +1026,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     if (summary.constant_normals && summary.compute_normals)
     {
         const auto &indices = topology.m_refiner.new_indices_tri;
-        m_constant_normals.resize_discard(m_constant_points.size());
+        m_constant_normals.resize(m_constant_points.size());
         GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
                 m_constant_normals.data(), topology.m_remap_points.data(),
                 static_cast<int>(topology.m_counts_sp->size()),
@@ -1037,7 +1037,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     if (summary.constant_tangents && summary.compute_tangents)
     {
         const auto &indices = topology.m_refiner.new_indices_tri;
-        m_constant_tangents.resize_discard(m_constant_points.size());
+        m_constant_tangents.resize(m_constant_points.size());
         GenerateTangents(m_constant_tangents.data(), m_constant_points.data(), m_constant_uv0.data(), m_constant_normals.data(),
             indices.data(), (int)m_constant_points.size(), (int)indices.size() / 3);
         sample.m_tangents_ref = m_constant_tangents;
@@ -1172,7 +1172,7 @@ void aiMeshSample<T>::fillSubmeshIndices(int submesh_index, aiSubmeshData &data)
 
     auto& refiner = m_topology->m_refiner;
     auto& submesh = refiner.submeshes[submesh_index];
-    refiner.new_indices_submeshes.copy_to(data.indices, submesh.index_count, submesh.index_offset);
+    CopyTo(refiner.new_indices_submeshes,data.indices, submesh.index_count, submesh.index_offset);
 }
 
 template<typename T>

@@ -13,11 +13,11 @@ namespace impl
         size_t num_faces = counts.size();
         size_t num_indices = indices.size();
 
-        connection.v2f_offsets.resize_discard(num_points);
-        connection.v2f_faces.resize_discard(num_indices);
-        connection.v2f_indices.resize_discard(num_indices);
+        connection.v2f_offsets.resize(num_points);
+        connection.v2f_faces.resize(num_indices);
+        connection.v2f_indices.resize(num_indices);
 
-        connection.v2f_counts.resize_zeroclear(num_points);
+        ResizeZeroClear(connection.v2f_counts,num_points);
         {
             int ii = 0;
             for (size_t fi = 0; fi < num_faces; ++fi)
@@ -38,7 +38,7 @@ namespace impl
             }
         }
 
-        connection.v2f_counts.zeroclear();
+        ResizeZeroClear(connection.v2f_counts,num_points);
         {
             int i = 0;
             for (int fi = 0; fi < (int)num_faces; ++fi)
@@ -77,11 +77,11 @@ void MeshConnectionInfo::buildConnection(
     size_t num_faces = counts.size();
     size_t num_indices = indices.size();
 
-    v2f_offsets.resize_discard(num_points);
-    v2f_faces.resize_discard(num_indices);
-    v2f_indices.resize_discard(num_indices);
+    v2f_offsets.resize(num_points);
+    v2f_faces.resize(num_indices);
+    v2f_indices.resize(num_indices);
 
-    v2f_counts.resize_zeroclear(num_points);
+    ResizeZeroClear(v2f_counts,num_points);
     {
         int ii = 0;
         for (size_t fi = 0; fi < num_faces; ++fi)
@@ -102,7 +102,7 @@ void MeshConnectionInfo::buildConnection(
         }
     }
 
-    v2f_counts.zeroclear();
+    ResizeZeroClear(v2f_counts,num_points);
     {
         int i = 0;
         for (int fi = 0; fi < (int)num_faces; ++fi)
@@ -138,13 +138,13 @@ void MeshWelder::prepare(abcV3 * points, int count)
     m_count = count;
 
     m_hash_size = next_power_of_two(m_count);
-    m_hash_table.resize_discard(m_hash_size + m_count);
+    m_hash_table.resize(m_hash_size + m_count);
     memset(m_hash_table.data(), NIL, m_hash_size * sizeof(int));
 
-    m_remap.resize_discard(m_count);
+    m_remap.resize(m_count);
 }
 
-const RawVector<int>& MeshWelder::getRemapTable() const
+const AlignedVector<int>& MeshWelder::getRemapTable() const
 {
     return m_remap;
 }
@@ -175,9 +175,9 @@ int MeshRefiner::getPointsIndexCountTotal() const
 
 void MeshRefiner::retopology(bool swap_faces)
 {
-    new_indices_tri.resize_discard(getTrianglesIndexCountTotal());
-    new_indices_lines.resize_discard(getLinesIndexCountTotal());
-    new_indices_points.resize_discard(getPointsIndexCountTotal());
+    new_indices_tri.resize(getTrianglesIndexCountTotal());
+    new_indices_lines.resize(getLinesIndexCountTotal());
+    new_indices_points.resize(getPointsIndexCountTotal());
 
     auto& src = new_indices;
     auto dst_tri = new_indices_tri.data();
@@ -226,7 +226,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
     }
     submeshes.clear();
 
-    new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
+    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
     const int *src_tri = new_indices_tri.data();
     const int *src_lines = new_indices_lines.data();
     const int *src_points = new_indices_points.data();
@@ -234,8 +234,8 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids)
 
     int num_splits = (int)splits.size();
     int offset_faces = 0;
-    RawVector<Submesh> tmp_submeshes;
-    RawVector<int> materialOrder;
+    AlignedVector<Submesh> tmp_submeshes;
+    AlignedVector<int> materialOrder;
     std::unordered_set<int> materialSet;
 
 
@@ -339,7 +339,7 @@ void MeshRefiner::genSubmeshes()
 {
     submeshes.clear();
 
-    new_indices_submeshes.resize_discard(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
+    new_indices_submeshes.resize(new_indices_tri.size() + new_indices_lines.size() + new_indices_points.size());
     const int *src_tri = new_indices_tri.data();
     const int *src_lines = new_indices_lines.data();
     const int *src_points = new_indices_points.data();

@@ -48,7 +48,7 @@ void aePoints::doWriteSample()
     // generate ids if needed
     if (m_buf_ids.size() != m_buf_positions.size())
     {
-        m_buf_ids.resize_discard(m_buf_positions.size());
+        m_buf_ids.resize(m_buf_positions.size());
         std::iota(m_buf_ids.begin(), m_buf_ids.end(), 0);
     }
 

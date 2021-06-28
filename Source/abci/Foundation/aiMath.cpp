@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "aiMath.h"
-#include "RawVector.h"
+#include "AlignedVector.h"
 #include <numeric>
 
 // ispc implementation
@@ -156,9 +156,9 @@ void GenerateTangentsGeneric(abcV4 *dst_,
     auto *uv = (const float2*)uv_;
     auto *normals = (const float3*)normals_;
 
-    RawVector<float3> tangents, binormals;
-    tangents.resize_zeroclear(num_points);
-    binormals.resize_zeroclear(num_points);
+    AlignedVector<float3> tangents, binormals;
+    ResizeZeroClear(tangents,num_points);
+    ResizeZeroClear(binormals,num_points);
 
     for (int ti = 0; ti < num_triangles; ++ti)
     {

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include <Foundation/aiMath.h>
 #include "aiCurves.h"
-#include "aiUtils.h"
 
 aiCurvesSample::aiCurvesSample(aiCurves *schema) : super(schema)
 {
@@ -19,8 +18,8 @@ void aiCurvesSample::fillData(aiCurvesData& data)
     if (data.positions)
     {
         if (!m_positions.empty()) {
-            m_positions.copy_to(data.positions);
-            m_numVertices.copy_to(data.numVertices);
+            CopyTo(m_positions,data.positions);
+            CopyTo(m_numVertices, data.numVertices);
             data.count = m_positions.size();
         }
     }
@@ -28,19 +27,25 @@ void aiCurvesSample::fillData(aiCurvesData& data)
     if (data.uvs)
     {
         if (!m_uvs.empty())
-            m_uvs.copy_to(data.uvs);
+        {
+            CopyTo(m_uvs,data.uvs);
+        }
     }
 
     if (data.widths)
     {
         if (!m_widths.empty())
-            m_widths.copy_to(data.widths);
+        {
+            CopyTo(m_widths,data.widths);
+        }
     }
 
 	if (data.velocities)
 	{
 		if (!m_velocities.empty())
-			m_velocities.copy_to(data.velocities);
+        {
+            CopyTo(m_velocities,data.velocities);
+        }
 	}
 }
 
@@ -173,10 +178,14 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
 	else
 	{
 		if (sample.m_positions_prev.empty())
-			sample.m_velocities.resize_zeroclear(sample.m_positions.size());
+        {
+            ResizeZeroClear(sample.m_velocities,sample.m_positions.size());
+        }
 		else
-			GenerateVelocities(sample.m_velocities.data(), sample.m_positions.data(), sample.m_positions_prev.data(),
-				(int)sample.m_positions.size(), -1 * config.vertex_motion_scale);
+        {
+            GenerateVelocities(sample.m_velocities.data(), sample.m_positions.data(), sample.m_positions_prev.data(),
+                               (int) sample.m_positions.size(), -1 * config.vertex_motion_scale);
+        }
 	}
 
 }

@@ -3,7 +3,6 @@
 #include "aeContext.h"
 #include "aeObject.h"
 #include "aePolyMesh.h"
-#include "aiMisc.h"
 #include "aiMath.h"
 
 
@@ -145,7 +144,7 @@ void aePolyMesh::writeSampleBody()
 
             if (smi < m_facesets.size())
             {
-                m_tmp_facecet.resize_discard(face_count);
+                m_tmp_facecet.resize(face_count);
                 std::iota(m_tmp_facecet.begin(), m_tmp_facecet.end(), offset_faces);
 
                 aeFaceSetData fsd;
@@ -163,8 +162,8 @@ void aePolyMesh::writeSampleBody()
     // handle swap face option
     if (conf.swap_faces)
     {
-        RawVector<int> face_indices;
-        auto do_swap = [&](RawVector<int>& dst) {
+        AlignedVector<int> face_indices;
+        auto do_swap = [&](AlignedVector<int>& dst) {
                 if (dst.empty())
                 {
                     return;

@@ -245,7 +245,7 @@ abciAPI int aeGenerateRemapIndices(int *remap, abcV3 *points, aeWeights4 *weight
         auto weld_op = [&](int vi, int ni) {};
         ret = welder.weld(points, vertex_count, compare_op, weld_op);
     }
-    welder.getRemapTable().copy_to(remap);
+    CopyTo(welder.getRemapTable(), remap);
     return ret;
 }
 
