@@ -19,6 +19,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug ^
     -DENABLE_DEPLOY=OFF ^
     -DCMAKE_PREFIX_PATH=%depsdir% ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
-    -G "Visual Studio 15 2017 Win64"
+    -DCMAKE_CXX_FLAGS="/MP" 
 cmake --build . --target INSTALL --config Debug
 cd ..

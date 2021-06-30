@@ -20,8 +20,8 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
-    -G "Visual Studio 15 2017 Win64"
-cmake --build . --target install --config Debug
+    -DCMAKE_CXX_FLAGS="/MP"
+cmake --build . --target install --config Debug 
 cd ..
 
 if exist alembic-build (
@@ -37,6 +37,6 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Debug ^
     -DALEMBIC_SHARED_LIBS=OFF ^
     -DALEMBIC_ILMBASE_LINK_STATIC=ON ^
     -DILMBASE_ROOT=%installdir% ^
-    -G "Visual Studio 15 2017 Win64"
+    -DCMAKE_CXX_FLAGS="/MP"
 cmake --build . --target install --config Debug
 cd ..
