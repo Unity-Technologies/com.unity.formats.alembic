@@ -40,6 +40,12 @@ public:
             c->eachChildRecursive(f);
         }
     }
+public:
+    enum ErrorCode
+    {
+        NoError = 0,
+        MeshIndexOutOfBounds = 1
+    };
 
 public:
     // for internal use
@@ -48,6 +54,7 @@ public:
     abcObject&  getAbcObject();
     aiObject*   newChild(const abcObject &abc);
     void        removeChild(aiObject *c);
+    ErrorCode   getErrorCode() { return m_errorCode;}
 
 protected:
     using ObjectPtr = std::unique_ptr<aiObject>;
@@ -62,4 +69,5 @@ protected:
     std::string m_name;     //
     std::string m_fullname; // sanitized
     bool m_enabled = true;
+    ErrorCode m_errorCode = ErrorCode::NoError;
 };

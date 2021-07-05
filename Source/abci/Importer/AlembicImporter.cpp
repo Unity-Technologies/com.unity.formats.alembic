@@ -115,6 +115,11 @@ abciAPI const char* aiObjectGetFullName(aiObject* obj)
     return obj ? obj->getFullName() : "";
 }
 
+abciAPI int aiObjectGetErrorCode(aiObject* obj)
+{
+    return obj ? obj->getErrorCode() : 0;
+}
+
 abciAPI int aiObjectGetNumChildren(aiObject* obj)
 {
     return obj ? obj->getNumChildren() : 0;

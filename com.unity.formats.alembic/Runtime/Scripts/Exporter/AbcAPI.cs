@@ -374,6 +374,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aiObjectSetEnabled(IntPtr obj, Bool v);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetName(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern IntPtr aiObjectGetFullName(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern int aiObjectGetErrorCode(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiXform aiObjectAsXform(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiCamera aiObjectAsCamera(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPoints aiObjectAsPoints(IntPtr obj);

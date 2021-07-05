@@ -305,9 +305,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public override void AbcSyncDataEnd()
         {
-            if (disposed || !m_abcSchema.schema.isDataUpdated)
+            if (disposed || !m_abcSchema.schema.isDataUpdated || !CanContinue())
                 return;
-
             fillVertexBufferHandle.Complete();
 #if UNITY_EDITOR
             for (int s = 0; s < m_splits.Count; ++s)
@@ -446,6 +445,23 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetIndices(submesh.indexes.GetArray(), MeshTopology.Quads, sum.submeshIndex, false);
                 }
             }
+        }
+
+        bool CanContinue()
+        {
+            var error = abcObject.GetErrorCode();
+            switch (error)
+            {
+                case ErrorCode.MeshIndexOutOfBounds:
+                    Debug.LogError($"{abcTreeNode.gameObject.name}: IndexArray out of bounds");
+                    break;
+                case ErrorCode.NoError:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return error == ErrorCode.NoError;
         }
 
         internal void ClearMotionVectors()

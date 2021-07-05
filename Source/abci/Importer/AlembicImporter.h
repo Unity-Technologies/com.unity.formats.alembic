@@ -293,6 +293,7 @@ abciAPI void            aiTimeSamplingGetRange(aiTimeSampling *self, double *sta
 abciAPI aiContext*      aiObjectGetContext(aiObject* obj);
 abciAPI const char*     aiObjectGetName(aiObject* obj);
 abciAPI const char*     aiObjectGetFullName(aiObject* obj);
+abciAPI int             aiObjectGetErrorCode(aiObject* obj);
 abciAPI int             aiObjectGetNumChildren(aiObject* obj);
 abciAPI aiObject*       aiObjectGetChild(aiObject* obj, int i);
 abciAPI aiObject*       aiObjectGetParent(aiObject* obj);

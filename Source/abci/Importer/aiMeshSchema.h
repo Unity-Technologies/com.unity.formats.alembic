@@ -798,7 +798,8 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     auto& refiner = topology.m_refiner;
     auto& config = this->getConfig();
 
-    if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp)
+    if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp ||
+        topology.m_counts_sp->size() == 0 || topology.m_indices_sp->size() == 0 | sample.m_points_sp->size() == 0)
         return;
 
     refiner.clear();
@@ -810,6 +811,15 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     refiner.counts = { topology.m_counts_sp->get(), topology.m_counts_sp->size() };
     refiner.indices = { topology.m_indices_sp->get(), topology.m_indices_sp->size() };
     refiner.points = { (float3*)sample.m_points_sp->get(), sample.m_points_sp->size() };
+
+    for (int i = 0; i< refiner.indices.size();++i)
+    {
+        if (refiner.indices[i] > refiner.points.size())
+        {
+            m_errorCode = ErrorCode::MeshIndexOutOfBounds;
+            return;
+        }
+    }
 
     bool has_valid_normals = false;
     bool has_valid_uv0 = false;

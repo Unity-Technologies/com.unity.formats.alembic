@@ -102,6 +102,7 @@ public:
 
     void updateSample(const abcSampleSelector& ss) override
     {
+        m_errorCode = ErrorCode::NoError;
         updateSampleBody(ss);
     }
 

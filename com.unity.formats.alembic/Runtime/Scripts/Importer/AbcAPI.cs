@@ -7,6 +7,12 @@ using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
+    enum ErrorCode
+    {
+        NoError = 0,
+        MeshIndexOutOfBounds = 1
+    }
+
     enum AspectRatioMode
     {
         CurrentResolution,
@@ -379,6 +385,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiCurves AsCurves() { return NativeMethods.aiObjectAsCurves(self); }
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
         internal aiSubD AsSubD() { return NativeMethods.aiObjectAsSubD(self); }
+
+        internal ErrorCode GetErrorCode()
+        {
+            return (ErrorCode)NativeMethods.aiObjectGetErrorCode(self);
+        }
 
         public void EachChild(Action<aiObject> act)
         {
