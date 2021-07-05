@@ -22,7 +22,7 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Release ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
     -DCMAKE_CXX_FLAGS="/MP" ^
-    -G "Visual Studio 15 2017 Win64"
+    -G "Visual Studio 16 2019" -A x64
 cmake --build . --target install --config Release
 cd ..
 
@@ -40,6 +40,6 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Release ^
     -DALEMBIC_ILMBASE_LINK_STATIC=ON ^
     -DILMBASE_ROOT=%installdir% ^
     -DCMAKE_CXX_FLAGS="/MP" ^
-    -G "Visual Studio 15 2017 Win64"
+    -G "Visual Studio 16 2019" -A x64
 cmake --build . --target install --config Release
 cd ..
