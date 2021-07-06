@@ -44,7 +44,8 @@ public:
     enum ErrorCode
     {
         NoError = 0,
-        MeshIndexOutOfBounds = 1
+        MeshIndexOutOfBounds = 1,
+        MeshEmptySample = 2
     };
 
 public:

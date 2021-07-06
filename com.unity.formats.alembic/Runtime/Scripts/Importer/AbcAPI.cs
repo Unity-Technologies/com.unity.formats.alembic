@@ -10,7 +10,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
     enum ErrorCode
     {
         NoError = 0,
-        MeshIndexOutOfBounds = 1
+        MeshIndexOutOfBounds = 1,
+        MeshEmptySample = 2
     }
 
     enum AspectRatioMode

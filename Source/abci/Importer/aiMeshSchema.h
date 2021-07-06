@@ -800,7 +800,10 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
 
     if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp ||
         topology.m_counts_sp->size() == 0 || topology.m_indices_sp->size() == 0 | sample.m_points_sp->size() == 0)
+    {
+        m_errorCode = ErrorCode::MeshEmptySample;
         return;
+    }
 
     refiner.clear();
     refiner.split_unit = config.split_unit;

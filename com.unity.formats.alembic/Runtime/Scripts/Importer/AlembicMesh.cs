@@ -275,7 +275,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var job = new FillVertexBufferJob {sample = sample, splitData = m_splitData, submeshData = m_submeshData};
 
-            fillVertexBufferHandle = job.Schedule();
+            fillVertexBufferHandle = job.Schedule(fillVertexBufferHandle);
         }
 
         struct FillVertexBufferJob : IJob
@@ -456,6 +456,9 @@ namespace UnityEngine.Formats.Alembic.Importer
                     Debug.LogError($"{abcTreeNode.gameObject.name}: IndexArray out of bounds");
                     break;
                 case ErrorCode.NoError:
+                    break;
+                case ErrorCode.MeshEmptySample:
+                    Debug.LogError($"{abcTreeNode.gameObject.name}: Empty mesh sample");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
