@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
@@ -59,6 +60,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             var path = AssetDatabase.GUIDToAssetPath("66b8b570b5eec42bd80704392a7001b5");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            LogAssert.Expect(LogType.Error, new Regex("polymshShape: Empty Mesh sample"));
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
             Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));

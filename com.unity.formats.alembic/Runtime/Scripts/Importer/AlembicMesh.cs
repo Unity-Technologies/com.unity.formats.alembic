@@ -459,7 +459,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 case ErrorCode.NoError:
                     break;
                 case ErrorCode.MeshEmptySample:
-                    Debug.LogError($"{abcTreeNode.gameObject.name}: Empty mesh sample");
+                    Debug.LogError($"{abcTreeNode.gameObject.name}: Empty Mesh sample");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
