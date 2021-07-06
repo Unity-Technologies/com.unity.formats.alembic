@@ -171,6 +171,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
+            fillVertexBufferHandle.Complete();
             var sample = m_abcSchema.sample;
 
             sample.GetSummary(ref m_sampleSummary);
@@ -276,7 +277,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var job = new FillVertexBufferJob {sample = sample, splitData = m_splitData, submeshData = m_submeshData};
 
-            fillVertexBufferHandle = job.Schedule(fillVertexBufferHandle);
+            fillVertexBufferHandle = job.Schedule();
         }
 
         struct FillVertexBufferJob : IJob
