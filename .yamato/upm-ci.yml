@@ -7,7 +7,7 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:latest
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
@@ -26,7 +26,7 @@ platforms:
 
 standalone_platforms:
   - name: win
-    image: package-ci/win10:stable
+    image: package-ci/win10:latest
     flavor: b1.large
     runtime: standalone
     type: Unity::VM
@@ -58,7 +58,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:latest
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
