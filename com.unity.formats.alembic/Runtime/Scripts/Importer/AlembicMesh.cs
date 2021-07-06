@@ -105,6 +105,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         protected override void Dispose(bool v)
         {
             base.Dispose(v);
+            fillVertexBufferHandle.Complete();
             for (var i = 0; i < m_splits.Count; ++i)
             {
                 m_PostProcessJobs[i].Complete();
