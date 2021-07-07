@@ -379,6 +379,20 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             CollectionAssert.AreNotEqual(v0, mesh.vertices);
         }
 
+        [Test]
+        public void SubDVariableTopologyMeshes_Animate()
+        {
+            var player = LoadAndInstantiate("942e560acda81ab47b439395d265a587");
+            var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
+            player.UpdateImmediately(player.StreamDescriptor.MediaStartTime);
+            var v0 = mesh.vertices;
+
+            Assert.IsTrue(v0.Any(x => x != Vector3.zero)); // some data
+            player.UpdateImmediately(player.StreamDescriptor.MediaEndTime);
+            CollectionAssert.AreNotEqual(v0, mesh.vertices);
+            Assert.AreNotEqual(v0.Length, mesh.vertices.Length);
+        }
+
         static AlembicStreamPlayer LoadAndInstantiate(string guid)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
