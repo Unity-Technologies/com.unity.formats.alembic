@@ -315,6 +315,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             aiSchema schema = obj.AsXform();
             if (!schema) schema = obj.AsPolyMesh();
+            if (!schema) schema = obj.AsSubD();
             if (!schema) schema = obj.AsCamera();
             if (!schema) schema = obj.AsPoints();
             if (!schema) schema = obj.AsCurves();
@@ -359,6 +360,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicCamera>();
                 else if (obj.AsPolyMesh() && m_streamDesc.Settings.ImportMeshes)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicMesh>();
+                else if (obj.AsSubD() && m_streamDesc.Settings.ImportMeshes)
+                    elem = childTreeNode.GetOrAddAlembicObj<AlembicSubD>();
                 else if (obj.AsPoints() && m_streamDesc.Settings.ImportPoints)
                     elem = childTreeNode.GetOrAddAlembicObj<AlembicPoints>();
                 else if (obj.AsCurves() && m_streamDesc.Settings.ImportCurves)

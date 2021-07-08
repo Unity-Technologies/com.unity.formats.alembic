@@ -147,10 +147,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void UpgradingOldPrefabs_DoNotGetSwitchedToImporterless()
         {
-            var path = AssetDatabase.GUIDToAssetPath("c01136857b8dc481bb9babb33803ed4a"); // GUID of DummyAlembic.prefab
-            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
-            var player = go.GetComponent<AlembicStreamPlayer>();
+            var player = LoadAndInstantiate("c01136857b8dc481bb9babb33803ed4a");
             Assert.AreEqual(AlembicStreamPlayer.AlembicStreamSource.Internal, player.StreamSource);
             Assert.AreEqual(typeof(AlembicStreamDescriptor), player.StreamDescriptor.GetType());
             var asd = player.StreamDescriptor as AlembicStreamDescriptor;
@@ -191,10 +188,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void Velocities_AreConsistentWithMotion()
         {
-            var path = AssetDatabase.GUIDToAssetPath("a6d019a425afe49d7a8fd029c82c0455"); // GUID of triangleRigged_asymetricalVertexTransform_24fps_2f.abc
-            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
-            var player = go.GetComponent<AlembicStreamPlayer>();
+            var player = LoadAndInstantiate("a6d019a425afe49d7a8fd029c82c0455");
             var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
             player.UpdateImmediately(0);
 
@@ -218,10 +212,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void Computed_Velocities_AreScaled()
         {
-            var path = AssetDatabase.GUIDToAssetPath("a6d019a425afe49d7a8fd029c82c0455"); // GUID of triangleRigged_asymetricalVertexTransform_24fps_2f.abc
-            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
-            var player = go.GetComponent<AlembicStreamPlayer>();
+            var player = LoadAndInstantiate("a6d019a425afe49d7a8fd029c82c0455");
             var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
             player.UpdateImmediately(1 / 60f);
 
@@ -249,10 +240,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void Read_Velocities_AreNotScaled() // This is very strange. Need to decide if this is a bug
         {
-            var path = AssetDatabase.GUIDToAssetPath("d0f12062215204c6991895f6a51dd627"); // GUID of varTopo_bakedVelocity_0-1_30fps.abc
-            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
-            var player = go.GetComponent<AlembicStreamPlayer>();
+            var player = LoadAndInstantiate("d0f12062215204c6991895f6a51dd627");
             var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
             player.UpdateImmediately(1 / 60f);
 
@@ -356,6 +344,63 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             Assert.AreEqual(expectedColours.Count, mesh.colors32.Length);
             Assert.IsTrue(diff.All(x => x < 1e-5));
+        }
+
+        [Test]
+        public void SubDAndPolyMeshes_ReadTheSameWay()
+        {
+            Vector3[] vertexPoly, vertexSubd;
+            {
+                var playerPoly = LoadAndInstantiate("d3dedb3122bcd4d3787b29d185751353");
+                var meshPoly = playerPoly.GetComponentInChildren<MeshFilter>().sharedMesh;
+                playerPoly.UpdateImmediately(0);
+                vertexPoly = meshPoly.vertices;
+            }
+            {
+                var playerSubd = LoadAndInstantiate("42c8ff3c70d6b46d09da4146d0a44754");
+                var meshSubd = playerSubd.GetComponentInChildren<MeshFilter>().sharedMesh;
+                playerSubd.UpdateImmediately(0);
+                vertexSubd = meshSubd.vertices;
+            }
+
+            CollectionAssert.AreEqual(vertexSubd, vertexPoly);
+        }
+
+        [Test]
+        public void SubDMeshes_Animate()
+        {
+            var player = LoadAndInstantiate("d844f566b42f54aa4a4f8a1bc3a121af");
+            var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
+            player.UpdateImmediately(player.StreamDescriptor.MediaStartTime);
+            var v0 = mesh.vertices;
+
+            Assert.IsTrue(v0.Any(x => x != Vector3.zero)); // some data
+            player.UpdateImmediately((player.StreamDescriptor.MediaStartTime + player.StreamDescriptor.MediaEndTime) / 2);
+            CollectionAssert.AreNotEqual(v0, mesh.vertices);
+        }
+
+        [Test]
+        public void SubDVariableTopologyMeshes_Animate()
+        {
+            var player = LoadAndInstantiate("942e560acda81ab47b439395d265a587");
+            var mesh = player.GetComponentInChildren<MeshFilter>().sharedMesh;
+            player.UpdateImmediately(player.StreamDescriptor.MediaStartTime);
+            var v0 = mesh.vertices;
+
+            Assert.IsTrue(v0.Any(x => x != Vector3.zero)); // some data
+            player.UpdateImmediately(player.StreamDescriptor.MediaEndTime);
+            CollectionAssert.AreNotEqual(v0, mesh.vertices);
+            Assert.AreNotEqual(v0.Length, mesh.vertices.Length);
+        }
+
+        static AlembicStreamPlayer LoadAndInstantiate(string guid)
+        {
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = go.GetComponent<AlembicStreamPlayer>();
+
+            return player;
         }
     }
 }
