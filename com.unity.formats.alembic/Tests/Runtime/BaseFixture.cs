@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected GameObject camera;
         const string sceneName = "Scene";
 
-        protected GameObject TestAbcImported(string abcPath, double minDuration = 0.1)
+        protected GameObject TestAbcImported(string abcPath, double minDuration = 0)
         {
             AssetDatabase.Refresh();
             Assert.That(File.Exists(abcPath));
@@ -29,7 +29,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.That(go, Is.Not.Null);
 
             var player = go.GetComponent<AlembicStreamPlayer>();
-            Assert.GreaterOrEqual(player.Duration, minDuration); // More than empty
+            Assert.Greater(player.Duration, minDuration); // More than empty
 
             return go;
         }
