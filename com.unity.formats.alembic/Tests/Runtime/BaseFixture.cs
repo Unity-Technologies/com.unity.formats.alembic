@@ -17,7 +17,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected GameObject camera;
         const string sceneName = "Scene";
 
-        protected GameObject TestAbcImported(string abcPath, double minDuration = 0.1)
+        protected GameObject TestAbcImported(string abcPath, double minDuration = 0)
         {
             AssetDatabase.Refresh();
             Assert.That(File.Exists(abcPath));
@@ -46,6 +46,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             {
                 yield return null;
             }
+            exporter.EndRecording();
         }
 
         protected static bool NearlyEqual(float f1, float f2, float eps = 1e-5f)
