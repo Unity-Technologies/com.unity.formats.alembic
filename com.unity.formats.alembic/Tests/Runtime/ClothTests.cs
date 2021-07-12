@@ -56,25 +56,5 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var go = TestAbcImported(exporter.Recorder.Settings.OutputPath);
             yield return TestPlaneContents(go);
         }
-
-        [UnityTest]
-        public IEnumerator TestClothWorldScaling()
-        {
-            var clothRoot = new GameObject("Root");
-            cloth.transform.parent = clothRoot.transform;
-            clothRoot.transform.localScale = new Vector3(0.5f, 1, 1);
-            clothRoot.transform.localEulerAngles = new Vector3(0, 33, 0);
-
-            yield return RecordAlembic();
-
-            var prefab = TestAbcImported(exporter.Recorder.Settings.OutputPath);
-            var go  = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            var player = go.GetComponent<AlembicStreamPlayer>();
-
-            player.UpdateImmediately(0);
-            var meshFilter = go.GetComponentsInChildren<MeshFilter>().First(x => x.name == "Plane");
-
-            Assert.That(new Vector3(-8.17750168f, -0.0186390355f, 5.110888f), Is.EqualTo(meshFilter.sharedMesh.vertices[0]).Within(1e-5));
-        }
     }
 }
