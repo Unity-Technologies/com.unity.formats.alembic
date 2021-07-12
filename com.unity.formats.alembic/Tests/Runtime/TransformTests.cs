@@ -2,6 +2,7 @@ using System.Collections;
 using System.IO;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
@@ -45,6 +46,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var c = abc.GetComponentInChildren<MeshFilter>();
             Assert.That(NearlyEqual(c.transform.position, position));
             Assert.That(NearlyEqual(c.transform.rotation, rotation));
+        }
+
+        [UnityTest]
+        public IEnumerator EmptyGameObjects_AreExported()
+        {
+            var root = new GameObject("Root");
+            exporter.Recorder.Settings.Scope = ExportScope.TargetBranch;
+            exporter.Recorder.Settings.TargetBranch = root;
+            deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
+            exporter.OneShot();
+            yield return null;
+
+            AssetDatabase.Refresh();
+            Assert.That(File.Exists(exporter.Recorder.Settings.OutputPath));
+            var abc = AssetDatabase.LoadMainAssetAtPath(exporter.Recorder.Settings.OutputPath) as GameObject;
+            Assert.AreEqual(1, abc.transform.childCount);
+            Assert.AreEqual(1, abc.transform.GetChild(0).childCount);
         }
     }
 }

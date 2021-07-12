@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for importing the cage mesh of SubD Alembic nodes.
 
 ### Changed
+- Alembic now exported GameObjects now inclue also GameObjects that change only their transform.
+
 ### Fixed
 
 ## [2.2.0] - 2021-06-10

@@ -507,6 +507,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Capture() {}
         }
 
+        [CaptureTarget(typeof(Transform))]
         class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
