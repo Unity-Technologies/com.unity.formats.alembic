@@ -29,9 +29,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 #else
             var fps = TimelineEditor.inspectedAsset.editorSettings.fps;
 #endif
-            double duration =
-                Math.Max(asp.Duration, 1 / fps); // at least 1 frame
-            clip.duration = duration;
+            clip.duration = asp.Duration > 1 / fps ? asp.Duration : 1; // Clips that are under 1 frame are 1s long (tiny clips are hard to select in the UI)
         }
     }
 }
