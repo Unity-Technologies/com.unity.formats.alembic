@@ -340,7 +340,7 @@ nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: trunk
+      - branch: main
         frequency: daily
         rerun: always    
   dependencies:
