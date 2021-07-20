@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 -  Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
 ### Fixed
+- Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
+- Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
 
 ## [2.2.0] - 2021-06-10
 ### Added

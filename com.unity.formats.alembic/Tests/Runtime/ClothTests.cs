@@ -9,6 +9,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
     class ClothTests : BaseFixture
     {
+        private Cloth cloth;
         static IEnumerator TestPlaneContents(GameObject go)
         {
             var root = PrefabUtility.InstantiatePrefab(go) as GameObject;
@@ -42,7 +43,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.transform.localPosition = new Vector3(0, -1, 0);
             var plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            var cloth = plane.AddComponent<Cloth>();
+            cloth = plane.AddComponent<Cloth>();
             cloth.sphereColliders = new[] {new ClothSphereColliderPair(sphere.GetComponent<SphereCollider>())};
             cloth.clothSolverFrequency = 300;
         }
