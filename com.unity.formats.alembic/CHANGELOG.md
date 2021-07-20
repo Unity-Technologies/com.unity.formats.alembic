@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for importing the cage mesh of SubD Alembic nodes.
 
 ### Changed
+-  Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
 ### Fixed
 - Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
 - Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
