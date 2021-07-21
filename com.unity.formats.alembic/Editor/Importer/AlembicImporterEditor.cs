@@ -216,7 +216,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             strideArray.Add(materials.Count);
 
 
-            if (materialFold.Count != materials.Count)
+            if (materialFold.Count != strideArray.Count)
             {
                 materialFold = Enumerable.Repeat(true, strideArray.Count).ToList();
             }
@@ -239,7 +239,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             EditorGUILayout.LabelField("Meshes / Facesets");
-            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, mainGO.name);
+            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, mainGO.name, true);
             if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
             {
                 materialFold = Enumerable.Repeat(newRootFoldout, materialFold.Count).ToList();
@@ -250,7 +250,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 for (var s = 0; s < strideArray.Count - 1; ++s)
                 {
-                    materialFold[s] = EditorGUILayout.Foldout(materialFold[s], materials[strideArray[s]].component.name);
+                    materialFold[s] = EditorGUILayout.Foldout(materialFold[s], materials[strideArray[s]].component.name, true);
                     if (materialFold[s])
                     {
                         for (var i = strideArray[s]; i < strideArray[s + 1]; ++i)
