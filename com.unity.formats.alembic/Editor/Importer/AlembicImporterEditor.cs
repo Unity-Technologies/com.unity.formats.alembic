@@ -221,12 +221,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                 materialFold = Enumerable.Repeat(true, strideArray.Count).ToList();
             }
 
-            EditorGUILayout.LabelField("Material Overrides");
+            EditorGUILayout.LabelField("Material Search");
 
             using (new EditorGUI.IndentLevelScope())
             {
                 materialSearchLocation =
-                    (MaterialSearchLocation)EditorGUILayout.EnumPopup("Search Location", materialSearchLocation);
+                    (MaterialSearchLocation)EditorGUILayout.EnumPopup("Location", materialSearchLocation);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -237,45 +237,47 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
-
-            EditorGUILayout.LabelField("Meshes / Facesets");
-            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, mainGO.name, true);
+            
+            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, "Meshes / Facesets", true);
             if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
             {
                 materialFold = Enumerable.Repeat(newRootFoldout, materialFold.Count).ToList();
             }
-
-            materialRootFold = newRootFoldout;
-            if (materialRootFold)
+            using (new EditorGUI.IndentLevelScope())
             {
-                for (var s = 0; s < strideArray.Count - 1; ++s)
+                materialRootFold = newRootFoldout;
+                if (materialRootFold)
                 {
-                    materialFold[s] = EditorGUILayout.Foldout(materialFold[s], materials[strideArray[s]].component.name, true);
-                    if (materialFold[s])
+                    for (var s = 0; s < strideArray.Count - 1; ++s)
                     {
-                        for (var i = strideArray[s]; i < strideArray[s + 1]; ++i)
+                        materialFold[s] =
+                            EditorGUILayout.Foldout(materialFold[s], materials[strideArray[s]].component.name, true);
+                        if (materialFold[s])
                         {
-                            var currentGO = materials[i].component;
-                            var o = materials[i];
-                            var fsName = currentGO.FacesetNames[o.index];
-                            using (new EditorGUI.IndentLevelScope())
+                            for (var i = strideArray[s]; i < strideArray[s + 1]; ++i)
                             {
-                                using (var c = new EditorGUI.ChangeCheckScope())
+                                var currentGO = materials[i].component;
+                                var o = materials[i];
+                                var fsName = currentGO.FacesetNames[o.index];
+                                using (new EditorGUI.IndentLevelScope())
                                 {
-                                    var assign = EditorGUILayout.ObjectField((string)fsName,
-                                        o.material,
-                                        typeof(Material), false);
-                                    if (c.changed)
+                                    using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                        var assign = EditorGUILayout.ObjectField((string)fsName,
+                                            o.material,
+                                            typeof(Material), false);
+                                        if (c.changed)
                                         {
-                                            Debug.LogError(
-                                                $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
-                                        }
-                                        else
-                                        {
-                                            Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
-                                            importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                            if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                            {
+                                                Debug.LogError(
+                                                    $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                            }
+                                            else
+                                            {
+                                                Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
+                                                importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                            }
                                         }
                                     }
                                 }
