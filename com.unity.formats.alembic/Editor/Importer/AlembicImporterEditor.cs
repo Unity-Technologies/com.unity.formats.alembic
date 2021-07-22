@@ -287,9 +287,18 @@ namespace UnityEditor.Formats.Alembic.Importer
                                 {
                                     using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        var assign = EditorGUILayout.ObjectField(fsName,
+                                        var bakStyle = EditorStyles.objectField.fontStyle;
+                                        var emptyName = string.IsNullOrEmpty(fsName);
+                                        if (emptyName)
+                                        {
+                                            EditorStyles.label.fontStyle = FontStyle.BoldAndItalic;
+                                        }
+
+                                        var assign = EditorGUILayout.ObjectField(!emptyName ? fsName : "Empty",
                                             o.material,
                                             typeof(Material), false);
+
+                                        EditorStyles.label.fontStyle = bakStyle;
                                         if (c.changed)
                                         {
                                             if (assign == null)
