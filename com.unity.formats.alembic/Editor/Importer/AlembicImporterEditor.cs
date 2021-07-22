@@ -174,23 +174,47 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.Separator();
         }
 
+        internal static List<AlembicImporter.MaterialEntry> GenMaterialSlotsPresetUI(AlembicImporter importer)
+        {
+            var ret = new List<AlembicImporter.MaterialEntry>();
+            foreach (var r in importer.GetExternalObjectMap())
+            {
+                var toks = r.Key.name.Split(':');
+                var entry = new AlembicImporter.MaterialEntry
+                {
+                    path = toks[0], index = int.Parse(toks[1]), facesetName = toks[2], material = r.Value as Material
+                };
+                ret.Add(entry);
+            }
+
+            return ret;
+        }
+
         void DrawMaterialUI(AlembicImporter importer)
         {
             var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
-            var materials = AlembicImporter.GenMaterialSlots(importer, mainGO);
-
-            var facesetName = mainGO.GetComponentsInChildren<AlembicCustomData>().SelectMany(x => x.FacesetNames);
-            if (!facesetName.Any())
+            List<AlembicImporter.MaterialEntry> materials = new List<AlembicImporter.MaterialEntry>();
+            if (mainGO != null) // Null in case of a Preset for the importer
             {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField("No facesets present in file.");
-                    GUILayout.FlexibleSpace();
-                }
+                materials = AlembicImporter.GenMaterialSlots(importer, mainGO);
 
-                return;
+                if (!materials.Any())
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        EditorGUILayout.LabelField("No facesets present in file.");
+                        GUILayout.FlexibleSpace();
+                    }
+
+                    return;
+                }
             }
+            else
+            {
+                materials = GenMaterialSlotsPresetUI(importer);
+            }
+
 
             var strideArray = new List<int>(); // list that "breaks" the materials when the gameObject changes.
             if (materials.Count > 0)
@@ -200,11 +224,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             for (var m = 0; m < materials.Count; ++m)
             {
-                var currentGO = materials[m].component;
+                var currentGO = materials[m].path;
                 for (var i = m; i < materials.Count; ++i)
                 {
                     var o = materials[i];
-                    if (o.component != currentGO)
+                    if (o.path != currentGO)
                     {
                         m = i;
                         strideArray.Add(m);
@@ -237,7 +261,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
                 }
             }
-            
+
             var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, "Meshes / Facesets", true);
             if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
             {
@@ -250,33 +274,40 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     for (var s = 0; s < strideArray.Count - 1; ++s)
                     {
+                        var path = materials[strideArray[s]].path.Split('/');
                         materialFold[s] =
-                            EditorGUILayout.Foldout(materialFold[s], materials[strideArray[s]].component.name, true);
+                            EditorGUILayout.Foldout(materialFold[s], path[path.Length - 1], true);
                         if (materialFold[s])
                         {
                             for (var i = strideArray[s]; i < strideArray[s + 1]; ++i)
                             {
-                                var currentGO = materials[i].component;
                                 var o = materials[i];
-                                var fsName = currentGO.FacesetNames[o.index];
+                                var fsName = materials[i].facesetName;
                                 using (new EditorGUI.IndentLevelScope())
                                 {
                                     using (var c = new EditorGUI.ChangeCheckScope())
                                     {
-                                        var assign = EditorGUILayout.ObjectField((string)fsName,
+                                        var assign = EditorGUILayout.ObjectField(fsName,
                                             o.material,
                                             typeof(Material), false);
                                         if (c.changed)
                                         {
-                                            if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                            if (assign == null)
                                             {
-                                                Debug.LogError(
-                                                    $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                                importer.RemoveRemap(o.ToSourceAssetIdentifier());
                                             }
                                             else
                                             {
-                                                Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
-                                                importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                                if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                                {
+                                                    Debug.LogError(
+                                                        $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                                }
+                                                else
+                                                {
+                                                    Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
+                                                    importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
+                                                }
                                             }
                                         }
                                     }
@@ -306,7 +337,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             foreach (var entry in materials)
             {
-                var facesetName = entry.component.FacesetNames[entry.index];
+                var facesetName = entry.facesetName;
                 var guids = AssetDatabase.FindAssets(searchString + facesetName, searchPath);
                 if (guids.Length > 0)
                 {

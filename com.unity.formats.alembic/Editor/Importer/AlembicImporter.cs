@@ -148,26 +148,15 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal struct MaterialEntry
         {
-            public AlembicCustomData component;
+            //public AlembicCustomData component;
             public string path;
+            public string facesetName;
             public int index;
             public Material material;
 
             public SourceAssetIdentifier ToSourceAssetIdentifier()
             {
-                return new SourceAssetIdentifier(typeof(Material), path + $":{index}");
-            }
-
-            public static MaterialEntry FromSourceAssetIdentifier(SourceAssetIdentifier identifier, GameObject rootGO)
-            {
-                var toks = identifier.name.Split(':');
-                var go = AlembicImporter.GetGameObjectFromPath(rootGO, toks[0]);
-                return new MaterialEntry
-                {
-                    component = go.GetComponent<AlembicCustomData>(),
-                    path = toks[0],
-                    index = int.Parse(toks[1])
-                };
+                return new SourceAssetIdentifier(typeof(Material), path + $":{index}:{facesetName}");
             }
         }
 
@@ -281,7 +270,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var path = GetGameObjectPath(customData.gameObject);
                 for (var i = 0; i < customData.FacesetNames.Count; ++i)
                 {
-                    var entry = new MaterialEntry {component = customData, index = i, path = path};
+                    var entry = new MaterialEntry {facesetName = customData.FacesetNames[i], index = i, path = path};
                     if (remap.TryGetValue(entry.ToSourceAssetIdentifier(), out var material))
                     {
                         entry.material = (Material)material;
