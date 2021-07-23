@@ -274,8 +274,16 @@ namespace UnityEditor.Formats.Alembic.Importer
                     for (var s = 0; s < strideArray.Count - 1; ++s)
                     {
                         var path = materials[strideArray[s]].path.Split('/');
+                        var label = new GUIContent(path[path.Length - 1]);
+                        if (mainGO != null)
+                        {
+                            string tooltip = "";
+                            tooltip += path.Aggregate(tooltip, (current, p) => current + p + " > ");
+                            label.tooltip = mainGO.name + " > " + tooltip.Remove(tooltip.Length - 3, 3);
+                        }
+
                         materialFold[s] =
-                            EditorGUILayout.Foldout(materialFold[s], path[path.Length - 1], true);
+                            EditorGUILayout.Foldout(materialFold[s], label, true);
                         if (materialFold[s])
                         {
                             for (var i = strideArray[s]; i < strideArray[s + 1]; ++i)
