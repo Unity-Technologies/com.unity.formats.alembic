@@ -215,23 +215,22 @@ namespace UnityEditor.Formats.Alembic.Importer
                 materials = GenMaterialSlotsPresetUI(importer);
             }
 
-
             var strideArray = new List<int>(); // list that "breaks" the materials when the gameObject changes.
             if (materials.Count > 0)
             {
                 strideArray.Add(0);
             }
 
-            for (var m = 0; m < materials.Count; ++m)
+            for (var m = 0; m < materials.Count - 1; ++m)
             {
                 var currentGO = materials[m].path;
-                for (var i = m; i < materials.Count; ++i)
+                for (var i = m + 1; i < materials.Count; ++i)
                 {
                     var o = materials[i];
                     if (o.path != currentGO)
                     {
-                        m = i;
-                        strideArray.Add(m);
+                        m = i - 1;
+                        strideArray.Add(i);
                         break;
                     }
                 }
