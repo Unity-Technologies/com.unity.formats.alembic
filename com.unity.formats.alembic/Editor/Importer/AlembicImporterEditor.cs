@@ -308,21 +308,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                                         EditorStyles.label.fontStyle = bakStyle;
                                         if (c.changed)
                                         {
-                                            if (assign == null)
+                                            if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
                                             {
-                                                importer.RemoveRemap(o.ToSourceAssetIdentifier());
+                                                Debug.LogError("Materials cannot be remapped to materials bundled with Alembic files.");
                                             }
                                             else
                                             {
-                                                if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
-                                                {
-                                                    Debug.LogError("Materials cannot be remapped to materials bundled with Alembic files.");
-                                                }
-                                                else
-                                                {
-                                                    Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
-                                                    importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
-                                                }
+                                                Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
+                                                importer.AddRemap(o.ToSourceAssetIdentifier(), assign);
                                             }
                                         }
                                     }
