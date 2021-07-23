@@ -307,10 +307,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                                             }
                                             else
                                             {
-                                                if (AssetDatabase.GetAssetPath(assign) == importer.assetPath)
+                                                if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
                                                 {
-                                                    Debug.LogError(
-                                                        $"{assign.name} is a sub-asset of {Path.GetFileName(importer.assetPath)} and cannot be used as an external material.");
+                                                    Debug.LogError("Materials cannot be remapped to materials bundled with Alembic files.");
                                                 }
                                                 else
                                                 {
@@ -330,7 +329,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void SearchForMaterials(List<AlembicImporter.MaterialEntry> materials, AlembicImporter importer)
         {
-            const string searchString = "t:Material ";
             var searchPath = new string[1];
             switch (materialSearchLocation)
             {
@@ -346,25 +344,30 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             foreach (var entry in materials)
             {
-                var facesetName = entry.facesetName;
-                var guids = AssetDatabase.FindAssets(searchString + facesetName, searchPath);
-                if (guids.Length > 0)
+                var mat = LoadMaterial(entry.facesetName, searchPath);
+                if (mat != null)
                 {
                     Undo.RegisterCompleteObjectUndo(importer, "Alembic Material");
-                    importer.AddRemap(entry.ToSourceAssetIdentifier(), LoadAssetFromGuid<Material>(guids[0]));
+                    importer.AddRemap(entry.ToSourceAssetIdentifier(), mat);
                 }
             }
         }
 
-        static T LoadAssetFromGuid<T>(string guid, bool filterOutAbc = true) where T : UnityEngine.Object
+        static Material LoadMaterial(string assetName, string[] searchPath)
         {
-            var path = AssetDatabase.GUIDToAssetPath(guid);
-            if (filterOutAbc && path.ToLower().EndsWith("abc"))
+            const string searchString = "t:Material ";
+            var path = AssetDatabase.FindAssets(searchString + assetName, searchPath)
+                .Select(AssetDatabase.GUIDToAssetPath).FirstOrDefault(str =>
+                    string.Equals(Path.GetFileNameWithoutExtension(str), assetName,
+                        StringComparison.CurrentCultureIgnoreCase));
+
+            if (path == null || path.ToLower().EndsWith("abc")) // we don't want to assign materials from other alembics since these gets recreated on every re-import.
             {
                 return null;
             }
 
-            return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
+
+            return AssetDatabase.LoadAssetAtPath<Material>(path);
         }
 
         internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
