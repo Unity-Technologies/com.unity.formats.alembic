@@ -156,7 +156,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             public SourceAssetIdentifier ToSourceAssetIdentifier()
             {
-                return new SourceAssetIdentifier(typeof(Material), path + $":{index}:{facesetName}");
+                return new SourceAssetIdentifier(typeof(Material), path + $":{index:D3}:{facesetName}");
             }
         }
 
