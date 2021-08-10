@@ -1035,7 +1035,7 @@ namespace UnityEngine.Formats.Alembic.Util
             node.transformCapturer.inherits = true;
             node.transformCapturer.Setup(node.transform);
 
-            if (node.componentType != null)
+            if (node.componentType != null && node.componentType != typeof(Transform)) // previous chunk already sets up transforms
             {
                 var component = node.transform.GetComponent(node.componentType);
                 if (component != null)

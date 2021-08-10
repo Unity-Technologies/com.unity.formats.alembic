@@ -52,6 +52,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public IEnumerator EmptyGameObjects_AreExported()
         {
             var root = new GameObject("Root");
+            root.transform.localPosition = new Vector3(1, 2, 3);
             exporter.Recorder.Settings.Scope = ExportScope.TargetBranch;
             exporter.Recorder.Settings.TargetBranch = root;
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
@@ -62,7 +63,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.That(File.Exists(exporter.Recorder.Settings.OutputPath));
             var abc = AssetDatabase.LoadMainAssetAtPath(exporter.Recorder.Settings.OutputPath) as GameObject;
             Assert.AreEqual(1, abc.transform.childCount);
-            Assert.AreEqual(1, abc.transform.GetChild(0).childCount);
+            Assert.AreEqual(0, abc.transform.GetChild(0).childCount);
+
+            Assert.AreEqual(new Vector3(1, 2, 3), abc.transform.GetChild(0).transform.position);
         }
     }
 }
