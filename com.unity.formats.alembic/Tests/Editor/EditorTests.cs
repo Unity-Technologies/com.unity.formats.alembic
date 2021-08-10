@@ -357,5 +357,16 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(expectedColours.Count, mesh.colors32.Length);
             Assert.IsTrue(diff.All(x => x < 1e-5));
         }
+
+        [UnityTest]
+        public IEnumerator EmptyStreamPlayer_DoesNotAssert()
+        {
+            var go = new GameObject();
+            go.AddComponent<AlembicStreamPlayer>();
+
+            yield return null;
+
+            Assert.IsTrue(true); // should not have Thrown exceptions
+        }
     }
 }
