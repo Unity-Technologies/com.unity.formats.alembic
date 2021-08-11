@@ -68,6 +68,17 @@ namespace UnityEditor.Formats.Alembic.Importer
             ApplyRevertGUI();
         }
 
+        protected override void Apply()
+        {
+            var importer = serializedObject.targetObject as AlembicImporter;
+            var remaps = importer.GetExternalObjectMap();
+            foreach (var remap in remaps.Where(remap => remap.Value == null))
+            {
+                importer.RemoveRemap(remap.Key);
+            }
+            base.Apply();
+        }
+
         void DrawModelUI(AlembicImporter importer)
         {
             const string pathSettings = "streamSettings.";
@@ -308,7 +319,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                                         EditorStyles.label.fontStyle = bakStyle;
                                         if (c.changed)
                                         {
-                                            if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
+                                            if (mainGO != null && assign == null)
+                                            {
+                                                importer.RemoveRemap(o.ToSourceAssetIdentifier());
+                                            }
+                                            else if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
                                             {
                                                 Debug.LogError("Materials cannot be remapped to materials bundled with Alembic files.");
                                             }
