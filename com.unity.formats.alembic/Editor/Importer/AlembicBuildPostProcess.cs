@@ -21,6 +21,11 @@ namespace UnityEditor.Formats.Alembic.Importer
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
+            if (HaveAlembicInstances)
+            {
+                AlembicBuildAnalytics.SendAnalytics(target);
+            }
+
             if (!TargetIsSupported(target))
             {
                 if (HaveAlembicInstances)

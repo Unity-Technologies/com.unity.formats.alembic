@@ -944,17 +944,6 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #endif
 
-        T[] GetTargets<T>() where T : Component
-        {
-            if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
-            {
-                return TargetBranch.GetComponentsInChildren<T>();
-            }
-            else
-            {
-                return GameObject.FindObjectsOfType<T>();
-            }
-        }
 
         Component[] GetTargets(Type type)
         {
