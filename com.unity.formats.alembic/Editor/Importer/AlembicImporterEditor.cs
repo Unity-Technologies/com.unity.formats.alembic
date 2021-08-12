@@ -272,7 +272,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
             }
 
-            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, "Meshes / Facesets", true);
+            var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, "Meshes / Face Sets", true);
             if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
             {
                 materialFold = Enumerable.Repeat(newRootFoldout, materialFold.Count).ToList();

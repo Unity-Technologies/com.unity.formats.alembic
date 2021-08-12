@@ -353,11 +353,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
             var facesetNames = new[] { "phong2SG", "phong1SG" };
-            CollectionAssert.AreEqual(facesetNames, asset.GetComponentInChildren<AlembicCustomData>().FacesetNames);
+            CollectionAssert.AreEqual(facesetNames, asset.GetComponentInChildren<AlembicCustomData>().FaceSetNames);
 
             var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             go.GetComponent<AlembicStreamPlayer>().UpdateImmediately(0);
-            CollectionAssert.AreEqual(facesetNames, go.GetComponentInChildren<AlembicCustomData>().FacesetNames);
+            CollectionAssert.AreEqual(facesetNames, go.GetComponentInChildren<AlembicCustomData>().FaceSetNames);
         }
 
         [Test]

@@ -2,19 +2,25 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+    /// <summary>
+    /// Class that stores ancillary data for the current Alembic Node.
+    /// </summary>
     public class AlembicCustomData : MonoBehaviour
     {
         [SerializeField]
-        List<string> facesetNames;
+        List<string> faceSetNames;
 
-        public List<string> FacesetNames => facesetNames;
+        /// <summary>
+        /// Retrieves the set of Face Set names stored in the current Alembic node.
+        /// </summary>
+        public List<string> FaceSetNames => faceSetNames;
 
         internal void SetFacesetNames(List<string> names)
         {
-            facesetNames = names;
-            for (var i = 0; i < facesetNames.Count; i++)
+            faceSetNames = names;
+            for (var i = 0; i < faceSetNames.Count; i++)
             {
-                facesetNames[i] = facesetNames[i].TrimEnd('\0');
+                faceSetNames[i] = faceSetNames[i].TrimEnd('\0');
             }
         }
     }

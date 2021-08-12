@@ -268,9 +268,9 @@ namespace UnityEditor.Formats.Alembic.Importer
             foreach (var customData in go.GetComponentsInChildren<AlembicCustomData>())
             {
                 var path = GetGameObjectPath(customData.gameObject);
-                for (var i = 0; i < customData.FacesetNames.Count; ++i)
+                for (var i = 0; i < customData.FaceSetNames.Count; ++i)
                 {
-                    var entry = new MaterialEntry {facesetName = customData.FacesetNames[i], index = i, path = path};
+                    var entry = new MaterialEntry {facesetName = customData.FaceSetNames[i], index = i, path = path};
                     if (remap.TryGetValue(entry.ToSourceAssetIdentifier(), out var material))
                     {
                         entry.material = (Material)material;
