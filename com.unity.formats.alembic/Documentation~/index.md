@@ -13,7 +13,7 @@ The Alembic package supports these features:
 
 * [Importing](import.md) data from Meshes, Particle Cloud Points, Cameras, and Curves.
 
-* Applying [Alembic Shaders](matshad.md#shaders) and [Motion Blur](matshad.md#blur) effects.
+* Applying [Alembic Shaders](motion-vectors.md#shaders) and [Motion Blur](motion-vectors.md#blur) effects.
 
 * Customizing [particle and point cloud effects](particles.md).
 
