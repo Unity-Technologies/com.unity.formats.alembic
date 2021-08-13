@@ -45,13 +45,13 @@ To change the time range, either drag the handles or directly enter the start an
 
 ## Materials
 
-The Materials tab helps you assign existing materials of your project to any submesh of the imported Alembic file. You can assign these materials manually, or map them automatically based on the Faceset names of the original Alembic file.
+The Materials tab helps you assign existing materials of your project to any submesh of the imported Alembic file. You can assign these materials manually, or map them automatically based on the Face Set names of the original Alembic file.
 
 ![The Import Settings window (Materials tab)](images/abc_import_options_materials.png)
 
 ### Material Search
 
-This section of the Materials tab allows you to automatically assign materials to submeshes of the imported Alembic asset. For this, your project must already include materials named after the Facesets of the original Alembic file.
+This section of the Materials tab allows you to automatically assign materials to submeshes of the imported Alembic asset. For this, your project must already include materials named after the Face Sets of the original Alembic file.
 
 ![Material Search tool](images/abc_import_options_materials_search.png)
 
@@ -62,17 +62,17 @@ This section of the Materials tab allows you to automatically assign materials t
 |  | Current Folder | Sets the search scope to the folder where the imported Alembic asset is located. This includes subfolders. |
 | **Search and Remap** |  | Searches for existing materials in the specified **Location**, and automatically maps the submeshes of the imported Alembic asset with materials having the same name, if they exist.<br /><br />**Note:** This process is case insensitive. |
 
-### Meshes / Facesets
+### Meshes / Face Sets
 
 This section of the Materials tab lists all meshes and submeshes of the imported Alembic asset, with their current material assignation status.
 
-![List of meshes and submeshes with faceset names](images/abc_import_options_materials_meshes_facesets.png)
+![List of meshes and submeshes with face Set names](images/abc_import_options_materials_meshes_facesets.png)
 
 | Label | Description |
 |:---|:---|
-| (1) | A mesh of the imported Alembic asset.<br /><br />**Note:** The Meshes / Facesets treeview does not represent the actual GameObject hierarchy of the imported Alembic asset. To get hierarchy context for a specific mesh, place your mouse cursor over the mesh name. |
-| (2) | Submeshes of mesh (1), identified by the names of their corresponding Facesets in the original Alembic file.<br /><br />**Note:** "Empty" means the corresponding Faceset has no name in the original Alembic file. In that case, you can only assign a material manually. |
-| (3) | The current material assignation of the submesh.<br /><br />Use the target fields to manually assign materials to the listed submeshes. For automatic name-based material assignation, use [Material Search](#material-search).<br /><br />**Note:** "None (Material)" means the Alembic Importer doesn't override the default behavior, which assigns the Default Material to the submesh. |
+| (1) | A mesh of the imported Alembic asset.<br /><br />**Note:** The Meshes / Face Sets treeview does not represent the actual GameObject hierarchy of the imported Alembic asset. To get hierarchy context for a specific mesh, place your mouse cursor over the mesh name. |
+| (2) | Submeshes of mesh (1), identified by the names of their corresponding Face Sets in the original Alembic file.<br /><br />**Note:** "Empty" means the corresponding Face Set has no name in the original Alembic file. In that case, you can only assign a material manually. |
+| (3) | The current material override status of the submesh.<br /><br />Use the target fields to manually assign materials to the listed submeshes. For automatic name-based material assignation, use [Material Search](#material-search).<br /><br />**Note:** "None (Material)" means the Alembic Importer still assigns the Default Material to the submesh. |
 
 ## Apply and Revert buttons
 
