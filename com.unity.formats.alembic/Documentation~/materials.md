@@ -2,21 +2,20 @@
 
 The Alembic format doesn't support any material data. Thus, when you import an Alembic file in Unity, the resulting imported asset can't have specific materials assigned by default to its submeshes.
 
-To guarantee an acceptable basic display of the imported Alembic asset, Unity first assigns the whole asset a [default material](#default). Then, you can re-map all its submeshes with specific materials of your project, according to your rendering needs.
+To guarantee an acceptable basic display of the imported Alembic asset, Unity first assigns the whole asset a [default material](#default-material-assignation-and-re-mapping). Then, you can re-map all its submeshes with specific materials of your project, according to your rendering needs.
 
 **Note:** The instructions on this page only apply to Alembic files imported [via your project folder](import-file-local.md). They don't apply to Alembic files you would have added to a Scene [via an external link](import-file-external.md).
 
-<a name="default"></a>
+
 ## Default material assignation and re-mapping
 
 By default, when you import an Alembic file, Unity automatically assigns all of its submeshes the **Default Material** corresponding to your project's render pipeline.
 
 If you need to re-map the imported submeshes with custom materials, you can do it directly from the Importer Settings window:
-* [Automatically](#automatically) with materials of your project you would have named after the Face Sets of the original Alembic file.
-* [Manually](#manually) with any materials of your project.
+* [Automatically](#automatic-re-mapping-based-on-face-set-names) with materials of your project you would have named after the Face Sets of the original Alembic file.
+* [Manually](#manual-assignation) with any materials of your project.
 
 
-<a name="automatically"></a>
 ## Automatic re-mapping based on Face Set names
 
 To automatically search and assign materials based on Alembic Face Set names:
@@ -37,10 +36,9 @@ To automatically search and assign materials based on Alembic Face Set names:
 
 6. In the **Meshes / Face Sets** list, review the material override field changes, and click on **Apply**.
 
-**Note:** If a material override field remains set to "None (Material)", you can still [assign it a material manually](#manually). Otherwise, the Default Material assignation continues to apply to the submesh.
+**Note:** If a material override field remains set to "None (Material)", you can still [assign it a material manually](#manual-assignation). Otherwise, the Default Material assignation continues to apply to the submesh.
 
 
-<a name="manually"></a>
 ## Manual assignation
 
 To manually assign materials of your project to the imported Alembic asset submeshes:

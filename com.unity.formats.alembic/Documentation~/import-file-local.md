@@ -23,7 +23,7 @@ The Alembic format doesn't support any Material data.
 
 By default, to guarantee an acceptable basic display of the imported Alembic asset, Unity automatically assigns all of its submeshes the **Default Material** corresponding to your project's render pipeline.
 
-However, once you imported the file, you can [override the material assignation](materials.md) for all submeshes, either manually or automatically based on the original Face Set names, directly from the Alembic Importer window.
+However, once you imported the file, you can [override the default material assignation](materials.md) for all submeshes, either manually or automatically based on the original Face Set names, directly from the Alembic Importer window.
 
 ## Editing the import options
 
