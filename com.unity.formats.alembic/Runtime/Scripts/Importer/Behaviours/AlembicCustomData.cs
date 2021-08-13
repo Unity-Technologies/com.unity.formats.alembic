@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     /// <summary>
-    /// Class that stores ancillary data for the current Alembic Node.
+    /// Class that stores additional data for the current Alembic Node.
     /// </summary>
     public class AlembicCustomData : MonoBehaviour
     {
@@ -11,7 +11,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         List<string> faceSetNames;
 
         /// <summary>
-        /// Retrieves the set of Face Set names stored in the current Alembic node.
+        /// Retrieves the set of Face Set names.
         /// </summary>
         public List<string> FaceSetNames => faceSetNames;
 
