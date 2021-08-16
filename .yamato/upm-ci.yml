@@ -315,21 +315,8 @@ testBizarroStandalone_{{ platform.name }}:
 
 test_bizarro:
   name: TestsTriggerBizarro
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:v1.15.0
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     cancel_old_ci: true
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:    
     {% for platform in bizarro_standalone_platforms %}  
     - .yamato/upm-ci.yml#testBizarroStandalone_{{platform.name}}
@@ -347,6 +334,7 @@ nightly_test_trigger:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
     - .yamato/upm-ci.yml#test_trigger_hdrp
+    - .yamato/upm-ci.yml#test_bizarro 
 
 publish_dry_run:
   name: PublishDryRun
