@@ -42,10 +42,10 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             switch (e)
             {
-                case AlembicXform:
+                case AlembicXform _:
                     evt.xform_node_count++;
                     break;
-                case AlembicCamera:
+                case AlembicCamera _:
                     evt.camera_node_count++;
                     break;
                 case AlembicSubD m:
@@ -56,12 +56,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                     evt.mesh_node_count++;
                     UpdateMeshStats(ref evt, s);
                     break;
-                case AlembicPoints x:
+                case AlembicPoints _:
                     evt.point_cloud_node_count++;
                     var points = e.abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>().Positions;
                     evt.max_points_count = Math.Max(evt.max_points_count, points.Count);
                     break;
-                case AlembicCurvesElement x:
+                case AlembicCurvesElement _:
                     evt.curve_node_count++;
                     var curves = e.abcTreeNode.gameObject.GetComponent<AlembicCurves>().Positions;
                     evt.max_curve_count = Math.Max(evt.max_curve_count, curves.Length);
