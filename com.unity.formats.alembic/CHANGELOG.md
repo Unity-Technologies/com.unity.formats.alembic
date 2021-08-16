@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0-pre.1] - 2021-07-11
 ### Added
 - Added support for importing the cage mesh of SubD Alembic nodes.
+- The Alembic Importer window now has a Material tab to assign materials to the imported Alembic asset submeshes.
+- The Material tab includes a tool to automatically assign materials based on the Face Set names of the original Alembic file.
 
 ### Changed
 - Alembic now exported GameObjects now inclue also GameObjects that change only their transform.

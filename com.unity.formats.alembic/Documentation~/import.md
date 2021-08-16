@@ -4,8 +4,9 @@ There are two ways to import Alembic files in Unity, depending on the way you ca
 
 * [Through your Unity project folder](import-file-local.md)
 
-  This is the default recommended import method.
+  This is the default **recommended import method**.
   <br />Use it when you can have a copy of the Alembic source file in a folder within your Unity project. For example, To import smaller assets or any assets that you are using in a context of individual work that does not involve team collaboration.
+  <br />**Note:** This method supports material automatic remapping based on Face Set names.
 
 * [From outside your Unity project folder](import-file-external.md)
 
