@@ -10,6 +10,8 @@ This page lists some known issues and limitations that you might experience with
 
 **Limitation:** The Alembic format does not support Material import and export.
 
+**Workaround:** The Alembic Importer includes a tool to [automatically remap materials](materials.md) on imported Alembic assets based on Face Set names.
+
 #### Non-convex polygon import issues
 
 **Known issue:** Importing meshes with non-convex polygons results in malformed geometry (for example, triangles with flipped normals).

@@ -1,17 +1,6 @@
-# Working with Materials
+# Applying motion blur and shaders
 
-This section contains information about [how to handle Materials](#materials) when importing, and how to set up [Motion Blur](#blur). It also [lists the set of Shaders provided](#shaders) with the package that are specifically customized to work with Alembic.
-
-
-
-<a name="materials"></a>
-
-## Assigning Materials on Import
-
-By default, Unity assigns the **Default Material** to imported Alembic Meshes. You need to manually reassign your Materials for each GameObject.
-
-The Alembic package does not support remapping Face Set names to Materials, or creating Materials from Face Set names.
-
+This section contains information about how to set up [Motion Blur](#blur). It also lists the [Shaders](#shaders) included in this package and specifically customized to work with Alembic.
 
 
 <a name="shaders"></a>
@@ -29,7 +18,6 @@ The Alembic package includes the following Shaders:
 |__Standard__                   |Standard Physically Based Renderer (PBR) Material with Motion Blur support added. |
 |__Standard (Roughness setup)__ |Standard PBR Roughness Material with Motion Blur support added. |
 |__Standard (Specular setup)__   |Standard Specular Material with Motion Blur support added. |
-
 
 
 <a name="blur"></a>
