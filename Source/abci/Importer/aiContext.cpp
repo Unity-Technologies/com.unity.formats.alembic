@@ -10,6 +10,7 @@
     #include <errno.h>
 #endif
 
+
 static std::wstring L(const std::string& s)
 {
     return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t> >().from_bytes(s);
@@ -285,6 +286,16 @@ int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
 int aiContext::getUid() const
 {
     return m_uid;
+}
+
+const char* aiContext::getApplication() // Attention, not reentrant
+{
+    uint32_t api;
+    static std::string app;
+    std::string version, date, description;
+    GetArchiveInfo(m_archive, app, version, api, date, description);
+
+    return app.c_str();
 }
 
 const aiConfig& aiContext::getConfig() const

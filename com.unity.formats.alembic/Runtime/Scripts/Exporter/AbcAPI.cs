@@ -311,6 +311,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
+        [DllImport(Abci.Lib)] public static extern string aiContextGetApplication(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, AlembicExportOptions conf);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);

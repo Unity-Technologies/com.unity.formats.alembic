@@ -345,6 +345,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
             return NativeMethods.aiContextGetIsHDF5(self);
         }
 
+        public string GetApplication()
+        {
+            return NativeMethods.aiContextGetApplication(self);
+        }
+
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
         public void UpdateSamples(double time) { NativeMethods.aiContextUpdateSamples(self, time); }
 

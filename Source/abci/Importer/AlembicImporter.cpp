@@ -51,6 +51,11 @@ abciAPI bool aiContextGetIsHDF5(aiContext* ctx)
     return ctx ? ctx->getIsHDF5() : false;
 }
 
+abciAPI const char* aiContextGetApplication(aiContext* ctx)
+{
+    return ctx ? ctx->getApplication() : "";
+}
+
 abciAPI void aiContextSetConfig(aiContext* ctx, const aiConfig* conf)
 {
     if (ctx)

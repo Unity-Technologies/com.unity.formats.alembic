@@ -71,6 +71,7 @@ public:
     int getTimeSamplingIndex(Abc::TimeSamplingPtr ts);
 
     bool getIsHDF5() const { return m_isHDF5; }
+    const char* getApplication();
 
     template<class F>
     void eachNodes(const F &f);
