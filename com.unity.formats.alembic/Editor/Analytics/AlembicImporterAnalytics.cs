@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
+using UnityEngine.Rendering;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -23,13 +24,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorAnalytics.SendEventWithLimit(EventName, data);
         }
 
-        static AlembicImporterAnalyticsEvent CreateEvent(AlembicTreeNode root, AlembicImporter importer)
+        static AlembicImporterAnalyticsEvent CreateEvent(AlembicTreeNode root, AssetImporter importer)
         {
             var evt = new AlembicImporterAnalyticsEvent
             {
                 material_override_count = importer.GetExternalObjectMap().Count,
                 guid = AssetDatabase.AssetPathToGUID(importer.assetPath),
-                app = root.stream.abcContext.GetApplication()
+                app = root.stream.abcContext.GetApplication(),
+                render_pipeline = GetCurrentRenderPipeline()
             };
             root.VisitRecursively(e => UpdateStats(ref evt, e));
 
@@ -97,8 +99,14 @@ namespace UnityEditor.Formats.Alembic.Importer
                        max_curve_count,
                        material_override_count;
 
-            public string app, guid;
+            public string app, guid, render_pipeline;
             public bool mesh_variable_topology;
+        }
+
+
+        static string GetCurrentRenderPipeline()
+        {
+            return GraphicsSettings.currentRenderPipeline == null ? "legacy" : GraphicsSettings.currentRenderPipeline.GetType().FullName;
         }
     }
 }
