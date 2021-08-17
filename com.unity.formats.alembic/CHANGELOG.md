@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Material tab includes a tool to automatically assign materials based on the Face Set names of the original Alembic file.
 
 ### Changed
--  Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
+- Alembic now exported GameObjects now inclue also GameObjects that change only their transform.
+- Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
 ### Fixed
 - Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
 - Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
