@@ -1,3 +1,4 @@
+#define DEBUG_ANALYTICS
 using System;
 using UnityEditor;
 
@@ -17,7 +18,12 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return;
 
             EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
-            EditorAnalytics.SendEventWithLimit(EventName, new AlembicChangeStreamEvent());
+            var data = new AlembicChangeStreamEvent();
+            EditorAnalytics.SendEventWithLimit(EventName, data);
+#if DEBUG_ANALYTICS
+            var json = JsonUtility.ToJson(data, prettyPrint: true);
+            Debug.Log(json);
+#endif
 #endif
         }
 

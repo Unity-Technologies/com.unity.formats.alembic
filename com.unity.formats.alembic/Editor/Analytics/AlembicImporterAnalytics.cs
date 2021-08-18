@@ -1,3 +1,4 @@
+#define DEBUG_ANALYTICS
 using System;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
@@ -22,9 +23,13 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var data = CreateEvent(root, importer);
             EditorAnalytics.SendEventWithLimit(EventName, data);
+#if DEBUG_ANALYTICS
+            var json = JsonUtility.ToJson(data, prettyPrint: true);
+            Debug.Log(json);
+#endif
         }
 
-        static AlembicImporterAnalyticsEvent CreateEvent(AlembicTreeNode root, AssetImporter importer)
+        internal static AlembicImporterAnalyticsEvent CreateEvent(AlembicTreeNode root, AssetImporter importer)
         {
             var evt = new AlembicImporterAnalyticsEvent
             {
@@ -79,13 +84,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             evt.max_mesh_index_count = Math.Max(evt.max_mesh_index_count, indices);
-            evt.max_mesh_vertex_count = Math.Max(evt.max_mesh_vertex_count, indices);
+            evt.max_mesh_vertex_count = Math.Max(evt.max_mesh_vertex_count, mesh.vertexCount);
 
             evt.mesh_variable_topology |= m.summary.topologyVariance == aiTopologyVariance.Heterogeneous;
         }
 
         [Serializable]
-        struct AlembicImporterAnalyticsEvent
+        internal struct AlembicImporterAnalyticsEvent
         {
             public int mesh_node_count,
                        sub_d_node_count,

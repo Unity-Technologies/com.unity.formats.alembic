@@ -2,7 +2,12 @@ fileFormatVersion: 2
 guid: 1a066d124049a413fb12b82470b82811
 ScriptedImporter:
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: backflip (FFFFFB70)/Man_Sample (FFFFFB6C)/Man_Sample (FFFFFB6A)/Man_Sample:000:submesh[0]
+    second: {fileID: 2100000, guid: beb932cce33ea412a9847bf05b941dc8, type: 2}
   serializedVersion: 2
   userData: 
   assetBundleName: 

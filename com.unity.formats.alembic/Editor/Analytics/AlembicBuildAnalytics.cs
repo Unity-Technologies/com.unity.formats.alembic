@@ -1,4 +1,8 @@
+#define DEBUG_ANALYTICS
 using System;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -18,9 +22,13 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             var data = CreateEvent(target);
             EditorAnalytics.SendEventWithLimit(EventName, data);
+#if DEBUG_ANALYTICS
+            var json = JsonUtility.ToJson(data, prettyPrint: true);
+            Debug.Log(json);
+#endif
         }
 
-        static AlembicBuildAnalyticsEvent CreateEvent(BuildTarget target)
+        internal static AlembicBuildAnalyticsEvent CreateEvent(BuildTarget target)
         {
             var evt = new AlembicBuildAnalyticsEvent
             {
@@ -32,7 +40,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
 
         [Serializable]
-        struct AlembicBuildAnalyticsEvent
+        internal struct AlembicBuildAnalyticsEvent
         {
             public string target_platform;
         }

@@ -1,3 +1,4 @@
+#define DEBUG_ANALYTICS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,10 +26,14 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
             var data = CreateEvent(settings);
             EditorAnalytics.SendEventWithLimit(EventName, data);
+#if DEBUG_ANALYTICS
+            var json = JsonUtility.ToJson(data, prettyPrint: true);
+            Debug.Log(json);
+#endif
 #endif
         }
 
-        static AlembicExporterAnalyticsEvent CreateEvent(AlembicRecorderSettings settings)
+        internal static AlembicExporterAnalyticsEvent CreateEvent(AlembicRecorderSettings settings)
         {
             var evt = new AlembicExporterAnalyticsEvent
             {
@@ -53,7 +58,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
         }
 
         [Serializable]
-        struct AlembicExporterAnalyticsEvent
+        internal struct AlembicExporterAnalyticsEvent
         {
             public bool capture_mesh, skinned_mesh, camera, static_mesh_renderers;
         }
