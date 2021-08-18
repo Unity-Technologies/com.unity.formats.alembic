@@ -347,7 +347,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public string GetApplication()
         {
-            return NativeMethods.aiContextGetApplication(self);
+            return Marshal.PtrToStringAnsi(NativeMethods.aiContextGetApplication(self));
         }
 
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }

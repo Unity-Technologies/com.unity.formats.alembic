@@ -90,6 +90,7 @@ private:
     aiConfig m_config;
 
     bool m_isHDF5;
+    std::string m_app; // Lazy initialized by getApplication
 };
 
 #include "aiObject.h"

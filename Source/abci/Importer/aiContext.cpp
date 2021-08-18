@@ -215,7 +215,8 @@ aiContext::aiContext(int uid)
       m_timesamplings(),
       m_uid(uid),
       m_config(),
-      m_isHDF5(false)
+      m_isHDF5(false),
+      m_app()
 {
 }
 
@@ -291,11 +292,9 @@ int aiContext::getUid() const
 const char* aiContext::getApplication() // Attention, not reentrant
 {
     uint32_t api;
-    static std::string app;
     std::string version, date, description;
-    GetArchiveInfo(m_archive, app, version, api, date, description);
-
-    return app.c_str();
+    GetArchiveInfo(m_archive, m_app, version, api, date, description);
+    return m_app.c_str();
 }
 
 const aiConfig& aiContext::getConfig() const
@@ -332,6 +331,7 @@ void aiContext::reset()
         delete s;
     }
     m_streams.clear();
+    m_app.clear();
 
     // m_config is not reset intentionally
 }
