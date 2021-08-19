@@ -149,7 +149,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal struct MaterialEntry
         {
-            //public AlembicCustomData component;
             public string path;
             public string facesetName;
             public int index;
