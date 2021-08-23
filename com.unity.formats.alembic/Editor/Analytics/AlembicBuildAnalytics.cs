@@ -24,7 +24,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorAnalytics.SendEventWithLimit(EventName, data);
 #if DEBUG_ANALYTICS
             var json = JsonUtility.ToJson(data, prettyPrint: true);
-            Debug.Log(json);
+            Debug.Log($"{EventName}->{json}");
 #endif
         }
 
