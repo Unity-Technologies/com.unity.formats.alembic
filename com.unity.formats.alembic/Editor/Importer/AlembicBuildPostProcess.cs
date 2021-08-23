@@ -73,10 +73,10 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
             if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
-                AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
-                    .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
                 return;
             }
 
