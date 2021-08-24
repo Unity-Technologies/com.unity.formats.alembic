@@ -380,6 +380,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Sdk.aiCurves aiObjectAsCurves(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiPolyMesh aiObjectAsPolyMesh(IntPtr obj);
         [DllImport(Abci.Lib)] public static extern Sdk.aiSubD aiObjectAsSubD(IntPtr obj);
+        [DllImport(Abci.Lib)] public static extern Sdk.aiSubD aiObjectReadContents(IntPtr obj);
 
         [DllImport(Abci.Lib)] public static extern void aiSchemaUpdateSample(IntPtr schema, ref aiSampleSelector ss);
         [DllImport(Abci.Lib)] public static extern void aiSchemaSync(IntPtr schema);

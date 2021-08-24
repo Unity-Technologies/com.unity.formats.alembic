@@ -166,6 +166,21 @@ abciAPI aiCurves* aiObjectAsCurves(aiObject* obj)
     return obj ? dynamic_cast<aiCurves*>(obj) : nullptr;
 }
 
+abciAPI bool aiObjectReadContents(aiObject* obj)
+{
+    if (obj == nullptr)
+    {
+        return false;
+    }
+
+    if (AbcGeom::IFaceSetSchema::matches(obj->GetAbcObject().getMetaData())) // FaceSet Names are not read directly in a GameObject but as a part of the Mesh
+    {
+        return false;
+    }
+
+    return true;
+}
+
 abciAPI aiSample* aiSchemaGetSample(aiSchema * schema)
 {
     return schema ? schema->getSample() : nullptr;

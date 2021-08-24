@@ -417,7 +417,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             Assert.IsTrue(true); // should not have Thrown exceptions
         }
-      
+
         [Test]
         public void UnsupportedSchemas_LoadAsNOOPGameObjects()
         {
@@ -429,6 +429,28 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(1, points.Length);
             Assert.AreEqual(12719, points.First().Positions.Count);
             Assert.IsTrue(cams.Union<Component>(points).All(x => x.transform.parent != player.transform)); // children down the hierarchy
+        }
+
+        [Test]
+        public void FacesetAlembicNodesDoNotCreateGOs()
+        {
+            var player = LoadAndInstantiate("1a066d124049a413fb12b82470b82811");
+            Assert.AreEqual(2, player.transform.childCount);
+            var backflip = player.transform.GetChild(0);
+            Assert.IsTrue(backflip.name.StartsWith("backflip"));
+            Assert.AreEqual(1, backflip.transform.childCount);
+            var sample = backflip.transform.GetChild(0);
+            Assert.IsTrue(sample.name.StartsWith("Man_Sample"));
+            Assert.AreEqual(1, sample.transform.childCount);
+
+            sample = sample.transform.GetChild(0);
+            Assert.IsTrue(sample.name.StartsWith("Man_Sample"));
+            Assert.AreEqual(1, sample.transform.childCount);
+
+            sample = sample.transform.GetChild(0);
+            Assert.IsTrue(sample.name.StartsWith("Man_Sample"));
+            Assert.AreEqual(0, sample.transform.childCount);
+            Assert.IsNotNull(sample.GetComponent<MeshFilter>());
         }
 
         static AlembicStreamPlayer LoadAndInstantiate(string guid)

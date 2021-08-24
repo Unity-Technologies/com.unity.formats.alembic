@@ -304,6 +304,7 @@ abciAPI aiSubD*         aiObjectAsSubD(aiObject* obj);
 abciAPI aiCamera*       aiObjectAsCamera(aiObject* obj);
 abciAPI aiPoints*       aiObjectAsPoints(aiObject* obj);
 abciAPI aiCurves*       aiObjectAsCurves(aiObject* obj);
+abciAPI bool            aiObjectReadContents(aiObject* obj);
 
 abciAPI aiSample*       aiSchemaGetSample(aiSchema* schema);
 abciAPI void            aiSchemaUpdateSample(aiSchema* schema, const abcSampleSelector *ss);

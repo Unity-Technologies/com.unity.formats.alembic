@@ -382,6 +382,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
         internal aiSubD AsSubD() { return NativeMethods.aiObjectAsSubD(self); }
 
+        internal bool ShouldReadContents()
+        {
+            return NativeMethods.aiObjectReadContents(self);
+        }
+
         public void EachChild(Action<aiObject> act)
         {
             if (act == null)

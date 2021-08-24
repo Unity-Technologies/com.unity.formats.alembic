@@ -19,6 +19,7 @@ public:
     aiObject*   getChild(int i);
     aiObject*   getParent() const;
     void        setEnabled(bool v);
+    const abcObject&   GetAbcObject() {return m_abc;}
 
     virtual aiSample* getSample();
     virtual void updateSample(const abcSampleSelector& ss);

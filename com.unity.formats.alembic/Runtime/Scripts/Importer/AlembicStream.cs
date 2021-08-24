@@ -312,6 +312,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             var ic = m_importContext;
             AlembicTreeNode treeNode = ic.alembicTreeNode;
             AlembicTreeNode childTreeNode = null;
+            if (!obj.ShouldReadContents())
+            {
+                return;
+            }
 
             aiSchema schema = obj.AsXform();
             if (!schema) schema = obj.AsPolyMesh();
@@ -321,7 +325,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!schema) schema = obj.AsCurves();
 
             // Get child. create if needed and allowed.
-            string childName = obj.name;
+            var childName = obj.name;
             // Find targetted child GameObj
             GameObject childGO = null;
 
@@ -333,17 +337,17 @@ namespace UnityEngine.Formats.Alembic.Importer
                     obj.SetEnabled(false);
                     return;
                 }
-                else
-                {
-                    obj.SetEnabled(true);
-                }
+
+                obj.SetEnabled(true);
 
                 childGO = RuntimeUtils.CreateGameObjectWithUndo("Create AlembicObject");
                 childGO.name = childName;
                 childGO.GetComponent<Transform>().SetParent(treeNode.gameObject.transform, false);
             }
             else
+            {
                 childGO = childTransf.gameObject;
+            }
 
             childTreeNode = new AlembicTreeNode() { stream = this, gameObject = childGO };
             treeNode.Children.Add(childTreeNode);
@@ -384,7 +388,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 obj.SetEnabled(false);
                 if (ic.createMissingNodes)
                 {
-                    Debug.LogWarning($"{childName} has an unsupported schema.");
+                    Debug.LogWarning($"Alembic Node:{childName} has an unsupported schema.");
                 }
             }
 
