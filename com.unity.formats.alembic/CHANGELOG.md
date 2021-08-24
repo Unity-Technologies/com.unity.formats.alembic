@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0-pre.1] - 2021-07-11
 ### Added
 - Added support for importing the cage mesh of SubD Alembic nodes.
+- The Alembic Importer window now has a Material tab to assign materials to the imported Alembic asset submeshes.
+- The Material tab includes a tool to automatically assign materials based on the Face Set names of the original Alembic file.
 
 ### Changed
-- Unsupported schema nodes are imported as NOOP GameObjects.
-
+- Alembic now exported GameObjects now inclue also GameObjects that change only their transform.
+- Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
+- Unsupported schema nodes are imported as NO-OP GameObjects.
 ### Fixed
+- Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
+- Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
 
 ## [2.2.0] - 2021-06-10
 ### Added

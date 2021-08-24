@@ -455,7 +455,14 @@ namespace UnityEngine.Formats.Alembic.Util
                 // apply root bone transform
                 if (rootBone != null)
                 {
-                    var mat = Matrix4x4.TRS(rootBone.localPosition, rootBone.localRotation, Vector3.one);
+                    var mat = Matrix4x4.TRS(rootBone.position, rootBone.rotation, Vector3.one);
+                    // The Cloth disregards the world scale (Similar to the SkinnedMesh).
+                    if (rootBone.parent != null)
+                    {
+                        mat = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, rootBone.parent.lossyScale).inverse *
+                            mat;
+                    }
+
                     NativeMethods.aeApplyMatrixP(vertices, vertices.Count, ref mat);
                     NativeMethods.aeApplyMatrixV(normals, normals.Count, ref mat);
                 }
@@ -507,6 +514,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Capture() {}
         }
 
+        [CaptureTarget(typeof(Transform))]
         class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
@@ -1034,7 +1042,7 @@ namespace UnityEngine.Formats.Alembic.Util
             node.transformCapturer.inherits = true;
             node.transformCapturer.Setup(node.transform);
 
-            if (node.componentType != null)
+            if (node.componentType != null && node.componentType != typeof(Transform)) // previous chunk already sets up transforms
             {
                 var component = node.transform.GetComponent(node.componentType);
                 if (component != null)

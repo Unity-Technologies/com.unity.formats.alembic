@@ -265,6 +265,8 @@ format_check_osx:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - unity-downloader-cli -u 2019.4 -c Editor
     - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
+  dependencies:
+    - .yamato/upm-ci.yml#pack       
   artifacts:
     logs.zip:
       paths:
@@ -280,6 +282,8 @@ format_check_win:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - unity-downloader-cli -u 2019.4 -c Editor
     - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
+  dependencies:
+    - .yamato/upm-ci.yml#pack         
   artifacts:
     logs.zip:
       paths:
@@ -311,21 +315,8 @@ testBizarroStandalone_{{ platform.name }}:
 
 test_bizarro:
   name: TestsTriggerBizarro
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:v1.15.0
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     cancel_old_ci: true
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:    
     {% for platform in bizarro_standalone_platforms %}  
     - .yamato/upm-ci.yml#testBizarroStandalone_{{platform.name}}
@@ -336,13 +327,14 @@ nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: trunk
+      - branch: main
         frequency: daily
         rerun: always    
   dependencies:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
     - .yamato/upm-ci.yml#test_trigger_hdrp
+    - .yamato/upm-ci.yml#test_bizarro 
 
 publish_dry_run:
   name: PublishDryRun
