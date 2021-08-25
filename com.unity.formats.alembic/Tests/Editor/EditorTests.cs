@@ -418,6 +418,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsTrue(true); // should not have Thrown exceptions
         }
 
+        [Test]
+        public void StreamedAlembicFilesKeepMaterialAssignmentsWhenChangingStream()
+        {
+            const string dst = "Assets/dst.abc";
+            var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
+            File.Copy(src, dst);
+            deleteFileList.Add(dst);
+            var player = new GameObject().AddComponent<AlembicStreamPlayer>();
+            player.LoadFromFile(src);
+            var mat = AlembicMesh.GetDefaultMaterial();
+            var renderer = player.GetComponentInChildren<MeshRenderer>();
+            renderer.material = mat;
+
+            Assert.AreEqual(mat, renderer.sharedMaterial);
+
+            player.LoadFromFile(dst);
+            Assert.AreEqual(mat, renderer.sharedMaterial);
+        }
+
         static AlembicStreamPlayer LoadAndInstantiate(string guid)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
