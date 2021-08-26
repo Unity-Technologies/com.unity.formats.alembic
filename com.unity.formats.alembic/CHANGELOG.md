@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Prevented material assignments from being lost for a streamed external Alembic file when changing the Alembic source file link.
 
 ## [2.2.1] - 2021-07-10
 ### Added
