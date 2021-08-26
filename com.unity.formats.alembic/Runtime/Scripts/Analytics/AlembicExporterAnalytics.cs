@@ -12,7 +12,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
     static class AlembicExporterAnalytics
     {
         const string VendorKey = "unity.alembic";
-        const string EventName = "alembic_exporter_start";
+        const string EventName = "alembic_exporter";
         const int MAXEventsPerHour = 1000;
         const int MAXNumberOfElements = 1000;
 
