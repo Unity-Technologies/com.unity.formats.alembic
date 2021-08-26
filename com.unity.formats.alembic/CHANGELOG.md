@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
 - Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
+- Prevented material assignments from being lost for a streamed external Alembic file when changing the Alembic source file link.
 
 ## [2.2.0] - 2021-06-10
 ### Added
