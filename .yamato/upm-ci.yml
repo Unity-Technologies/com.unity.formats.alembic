@@ -336,7 +336,7 @@ nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
     recurring:
-      - branch: trunk
+      - branch: release/2.2
         frequency: daily
         rerun: always    
   dependencies:
