@@ -262,13 +262,14 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
 
                 var subMesh = mesh.subMeshCount;
-                var mats = new Material[subMesh];
+                var newMats = new Material[subMesh];
+                var oldMats = meshRenderer.sharedMaterials;
                 for (var i = 0; i < subMesh; ++i)
                 {
-                    mats[i] = defaultMat;
+                    newMats[i] = i < oldMats.Length && oldMats[i] != null ? oldMats[i] : defaultMat;
                 }
 
-                meshRenderer.sharedMaterials = mats;
+                meshRenderer.sharedMaterials = newMats;
             });
 
             return true;
