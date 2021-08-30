@@ -9,7 +9,7 @@ class aiCurves;
 
 struct aiCurvesSummaryInternal : aiCurvesSummary
 {
-	bool has_velocity;
+    bool has_velocity;
 };
 
 class aiCurvesSample : public aiSample
@@ -19,8 +19,8 @@ public:
     aiCurvesSample(aiCurves *schema);
     void getSummary(aiCurvesSampleSummary &dst);
 
-    ~aiCurvesSample(){}
-    Abc::P3fArraySamplePtr m_position_sp,m_position_sp2;
+    ~aiCurvesSample() {}
+    Abc::P3fArraySamplePtr m_position_sp, m_position_sp2;
     RawVector<abcV3> m_positions, m_positions2, m_positions_prev;
 
     Abc::Int32ArraySamplePtr m_numVertices_sp;
@@ -33,8 +33,8 @@ public:
 
     RawVector<float> m_widths, m_widths2;
 
-	Abc::V3fArraySamplePtr m_velocities_sp;
-	RawVector<abcV3> m_velocities;
+    Abc::V3fArraySamplePtr m_velocities_sp;
+    RawVector<abcV3> m_velocities;
 
     void fillData(aiCurvesData& data);
 };
@@ -50,7 +50,7 @@ class aiCurves : public aiTSchema<aiCurvesTraits>
     using super = aiTSchema<aiCurvesTraits>;
 public:
     aiCurves(aiObject *parent, const abcObject &abc);
-    ~aiCurves() override {};
+    ~aiCurves() override {}
 
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
@@ -58,5 +58,5 @@ public:
     const aiCurvesSummaryInternal& getSummary() const {return m_summary;}
 private:
     void updateSummary();
-	aiCurvesSummaryInternal m_summary;
+    aiCurvesSummaryInternal m_summary;
 };

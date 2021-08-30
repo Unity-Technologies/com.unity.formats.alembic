@@ -260,7 +260,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                         tmp_submeshes.push_back({});
                     }
                     tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
-                    if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end() )
+                    if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end())
                     {
                         materialSet.insert(mid);
                         materialOrder.push_back(mid);

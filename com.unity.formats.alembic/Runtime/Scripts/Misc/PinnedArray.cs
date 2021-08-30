@@ -231,7 +231,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         {
             if (size > m_data.Length)
             {
-                LockList(l => {
+                LockList(l =>
+                {
                     l.Capacity = size;
                 });
             }

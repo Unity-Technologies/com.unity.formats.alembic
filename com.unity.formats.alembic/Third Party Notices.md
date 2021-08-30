@@ -1,10 +1,10 @@
 This package contains third-party software components governed by the license(s) indicated below:
 ---------
 
-Component Name: OpenEXR  
-License Type: Modified BSD License  
-Copyright © 2006-2019 Series of LF Projects, LLC  
-https://www.openexr.com  
+Component Name: OpenEXR
+License Type: Modified BSD License
+Copyright © 2006-2019 Series of LF Projects, LLC
+https://www.openexr.com
 
 ```text
 Copyright (c) 2006-2019 OpenEXR a Series of LF Projects, LLC. All rights reserved.
@@ -34,10 +34,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------
 
-Component Name: Alembic  
-License Type: MIT  
-Copyright © 2009-2015 Sony Pictures Imageworks Inc  
-https://www.alembic.io  
+Component Name: Alembic
+License Type: MIT
+Copyright © 2009-2015 Sony Pictures Imageworks Inc
+https://www.alembic.io
 
 ```text
 TM & © 2009-2015 Lucasfilm Entertainment Company Ltd. or Lucasfilm Ltd.

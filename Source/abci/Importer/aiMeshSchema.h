@@ -12,8 +12,6 @@ namespace
             *(static_cast<char*>(target) + 2 * i + 1) = '\0';
         }
     }
-
-
 }
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
@@ -71,7 +69,7 @@ public:
 };
 using TopologyPtr = std::shared_ptr<aiMeshTopology>;
 
-template <typename T>
+template<typename T>
 class aiMeshSample : public aiSample
 {
 public:
@@ -120,7 +118,7 @@ public:
     std::future<void> m_async_copy;
 };
 
-template <typename T, typename U>
+template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
 public:
@@ -158,7 +156,7 @@ protected:
     bool m_varying_topology = false;
 };
 
-template <typename T, typename U>
+template<typename T, typename U>
 AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
 {
     auto& summary = m_summary;
@@ -184,8 +182,8 @@ inline aiMeshSchema<T, U>::aiMeshSchema(aiObject * parent, const abcObject & abc
             {
                 m_rgba_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
             }
-            if (AbcGeom::IC3fGeomParam::matches(header)) {
-
+            if (AbcGeom::IC3fGeomParam::matches(header))
+            {
                 m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
             }
 
@@ -231,17 +229,20 @@ static inline void copy_or_clear_3_to_4(T1* dst, const IArray<T2>& src, const Me
 {
     if (dst)
     {
-        if (!src.empty()) {
+        if (!src.empty())
+        {
             std::vector<T1> abc4(split.vertex_count);
-            std::transform(src.begin(), src.end(), abc4.begin(), [](const T2& c){ return T1{c.x, c.y, c.z, 1.f}; });
+            std::transform(src.begin(), src.end(), abc4.begin(), [](const T2& c) { return T1{c.x, c.y, c.z, 1.f}; });
             memcpy(dst, abc4.data() + split.vertex_offset, sizeof(T1) * split.vertex_count);
-        } else {
+        }
+        else
+        {
             memset(dst, 0, split.vertex_count * sizeof(T1));
         }
     }
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 void aiMeshSchema<T, U>::updateSummary()
 {
     m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
@@ -280,7 +281,7 @@ void aiMeshSchema<T, U>::updateSummary()
     // points
     {
         auto prop = this->m_schema.getPositionsProperty();
-        if (prop.valid() && prop.getNumSamples() > 0 )
+        if (prop.valid() && prop.getNumSamples() > 0)
         {
             Alembic::Util::Dimensions dim;
             prop.getDimensions(dim);
@@ -423,13 +424,13 @@ void aiMeshSchema<T, U>::updateSummary()
     }
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 const aiMeshSummaryInternal& aiMeshSchema<T, U>::getSummary() const
 {
     return m_summary;
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
@@ -545,7 +546,7 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
     sample.m_topology_changed = topology_changed;
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 void aiMeshSchema<T, U>::cookSampleBody(U& sample)
 {
     auto& topology = *sample.m_topology;
@@ -748,10 +749,10 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             const auto &indices = topology.m_refiner.new_indices_tri;
             sample.m_normals.resize_discard(sample.m_points_ref.size());
             GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
-                    sample.m_normals.data(), topology.m_remap_points.data(),
-                    static_cast<int>(topology.m_counts_sp->size()),
-                    static_cast<int>(topology.m_remap_points.size()),
-                    static_cast<int>(sample.m_points_sp->size()));
+                sample.m_normals.data(), topology.m_remap_points.data(),
+                static_cast<int>(topology.m_counts_sp->size()),
+                static_cast<int>(topology.m_remap_points.size()),
+                static_cast<int>(sample.m_points_sp->size()));
             sample.m_normals_ref = sample.m_normals;
         }
     }
@@ -807,7 +808,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
     }
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 void aiMeshSchema<T, U>::onTopologyChange(U& sample)
 {
     auto& summary = m_summary;
@@ -1045,10 +1046,10 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         const auto &indices = topology.m_refiner.new_indices_tri;
         m_constant_normals.resize_discard(m_constant_points.size());
         GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
-                m_constant_normals.data(), topology.m_remap_points.data(),
-                static_cast<int>(topology.m_counts_sp->size()),
-                static_cast<int>(topology.m_remap_points.size()),
-                static_cast<int>(sample.m_points_sp->size()));
+            m_constant_normals.data(), topology.m_remap_points.data(),
+            static_cast<int>(topology.m_counts_sp->size()),
+            static_cast<int>(topology.m_remap_points.size()),
+            static_cast<int>(sample.m_points_sp->size()));
         sample.m_normals_ref = m_constant_normals;
     }
     if (summary.constant_tangents && summary.compute_tangents)
@@ -1063,7 +1064,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     // velocities are done in later part of cookSampleBody()
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 void aiMeshSchema<T, U>::onTopologyDetermined()
 {
     // nothing to do for now
@@ -1197,8 +1198,8 @@ template<typename T>
 void aiMeshSample<T>::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs)
 {
     auto &refiner = m_topology->m_refiner;
-    for (int spi = 0; spi < (int) refiner.splits.size(); ++spi)
+    for (int spi = 0; spi < (int)refiner.splits.size(); ++spi)
         fillSplitVertices(spi, vbs[spi]);
-    for (int smi = 0; smi < (int) refiner.submeshes.size(); ++smi)
+    for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
         fillSubmeshIndices(smi, ibs[smi]);
 }

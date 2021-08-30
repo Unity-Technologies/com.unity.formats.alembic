@@ -97,7 +97,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var abcTrack = timeline.CreateTrack<AlembicTrack>(null, "");
             var clip = abcTrack.CreateClip<AlembicShotAsset>();
             var abcAsset = clip.asset as AlembicShotAsset;
-            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            var refAbc = new ExposedReference<AlembicStreamPlayer> { exposedName = Guid.NewGuid().ToString() };
             abcAsset.StreamPlayer = refAbc;
             director.SetReferenceValue(refAbc.exposedName, player);
             var a1 = timeline.CreateTrack<ActivationTrack>();
@@ -221,7 +221,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             mesh.GetVertices(vert0);
             mesh.GetUVs(5, velocity0);
 
-            var expectedVelocity = new[] {new Vector3(0, 8, 0), new Vector3(-4, 0, 0), new Vector3(0, 0, 0)};
+            var expectedVelocity = new[] { new Vector3(0, 8, 0), new Vector3(-4, 0, 0), new Vector3(0, 0, 0) };
             {
                 var error = expectedVelocity.Zip(velocity0, (x, y) => (x - y).magnitude);
                 Assert.IsTrue(error.All(x => x < 1e-5));

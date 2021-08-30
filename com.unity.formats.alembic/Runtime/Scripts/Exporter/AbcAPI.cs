@@ -184,12 +184,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool visibility { get; set; }
         public IntPtr points { get; set; }  // Vector3*
         public int pointCount { get; set; }
-        public IntPtr   normals;          // Vector3*. can be null
-        public IntPtr   uv0;              // Vector2*. can be null
-        public IntPtr   uv1;              // Vector2*. can be null
-        public IntPtr   colors;           // Vector2*. can be null
-        public IntPtr   submeshes;        // aeSubmeshData*. can be null
-        public int      submeshCount;
+        public IntPtr normals;          // Vector3*. can be null
+        public IntPtr uv0;              // Vector2*. can be null
+        public IntPtr uv1;              // Vector2*. can be null
+        public IntPtr colors;           // Vector2*. can be null
+        public IntPtr submeshes;        // aeSubmeshData*. can be null
+        public int submeshCount;
     }
 
     struct aeCameraData
@@ -269,7 +269,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         {
             if (!name.Contains("/")) return name;
 
-            var ret =  name.Replace('/', '_');
+            var ret = name.Replace('/', '_');
             Debug.LogWarning($"AlembicExporter: Illegal character '/' in Alembic object name '{name}'. Replaced with {ret}");
             return ret;
         }
