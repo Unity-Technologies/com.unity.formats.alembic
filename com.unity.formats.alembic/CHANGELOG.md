@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed a bug that caused a mesh import to fail when changing options after having mapped materials.
 
 ## [2.3.0-pre.1] - 2021-07-11
 ### Added

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
@@ -15,6 +16,7 @@ using static UnityEditor.AssetDatabase;
 using UnityEditor.Experimental.AssetImporters;
 using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -254,7 +256,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var materialId = Int32.Parse(pathFaceId[1]);
 
                 var meshGO = GetGameObjectFromPath(go, path);
-                var renderer = meshGO.GetComponent<MeshRenderer>();
+                var haveRenderer = meshGO.TryGetComponent<MeshRenderer>(out var renderer);
+                if (!haveRenderer)
+                {
+                    continue;
+                }
+
                 var mats = renderer.sharedMaterials;
                 mats[materialId] = r.Value as Material;
                 renderer.sharedMaterials = mats;
