@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- Fixed a UI bug that affected the multi-editing for Importer options.
+- Fixed a UI issue affecting the use of Importer options in multi-editing context.
 
 ## [2.3.0-pre.1] - 2021-07-11
 ### Added
