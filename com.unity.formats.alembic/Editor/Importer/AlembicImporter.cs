@@ -17,7 +17,6 @@ using UnityEditor.Experimental.AssetImporters;
 using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
-
 namespace UnityEditor.Formats.Alembic.Importer
 {
     class AlembicAssetModificationProcessor : AssetModificationProcessor
@@ -256,6 +255,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var materialId = Int32.Parse(pathFaceId[1]);
 
                 var meshGO = GetGameObjectFromPath(go, path);
+                if (meshGO == null)
+                {
+                    continue;
+                }
+
                 var haveRenderer = meshGO.TryGetComponent<MeshRenderer>(out var renderer);
                 if (!haveRenderer)
                 {
@@ -263,6 +267,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
 
                 var mats = renderer.sharedMaterials;
+                if (materialId > mats.Length - 1)
+                {
+                    continue;
+                }
+
                 mats[materialId] = r.Value as Material;
                 renderer.sharedMaterials = mats;
             }
@@ -328,7 +337,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 if (!found)
                 {
-                    throw new Exception($"Cannot find path:{path} from GameObject: {root.name}");
+                    return null;
                 }
             }
 
