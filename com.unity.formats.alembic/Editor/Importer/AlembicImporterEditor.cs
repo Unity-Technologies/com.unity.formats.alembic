@@ -56,11 +56,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             if (uiTab == (int)UITab.Model)
             {
-                DrawModelUI(importer);
+                DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
             }
             else
             {
-                DrawMaterialUI(importer);
+                DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
             }
 
 
@@ -79,7 +79,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             base.Apply();
         }
 
-        void DrawModelUI(AlembicImporter importer)
+        void DrawModelUI(AlembicImporter importer, bool isMultiEdit)
         {
             const string pathSettings = "streamSettings.";
             if (importer.IsHDF5)
@@ -117,51 +117,59 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
                 EditorGUILayout.Separator();
 
-                // time range
-                var startTimeProp = serializedObject.FindProperty("startTime");
-                var endTimeProp = serializedObject.FindProperty("endTime");
-
-                EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues || endTimeProp.hasMultipleDifferentValues);
-                var startTime = (float)startTimeProp.doubleValue;
-                var endTime = (float)endTimeProp.doubleValue;
-                var abcStart = (float)importer.AbcStartTime;
-                var abcEnd = (float)importer.AbcEndTime;
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, abcStart, abcEnd);
-
-                if (EditorGUI.EndChangeCheck())
+                if (!isMultiEdit)
                 {
-                    startTimeProp.doubleValue = startTime;
-                    endTime = (float)Math.Round(endTime, 5);
-                    endTimeProp.doubleValue = endTime;
+                    // time range
+                    var startTimeProp = serializedObject.FindProperty("startTime");
+                    var endTimeProp = serializedObject.FindProperty("endTime");
+
+                    EditorGUI.BeginDisabledGroup(startTimeProp.hasMultipleDifferentValues ||
+                        endTimeProp.hasMultipleDifferentValues);
+                    var startTime = (float)startTimeProp.doubleValue;
+                    var endTime = (float)endTimeProp.doubleValue;
+                    var abcStart = (float)importer.AbcStartTime;
+                    var abcEnd = (float)importer.AbcEndTime;
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.MinMaxSlider("Time Range", ref startTime, ref endTime, abcStart, abcEnd);
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        startTimeProp.doubleValue = startTime;
+                        endTime = (float)Math.Round(endTime, 5);
+                        endTimeProp.doubleValue = endTime;
+                    }
+
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUI.showMixedValue = startTimeProp.hasMultipleDifferentValues;
+                    var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ", "Start time"), startTime,
+                        GUILayout.MinWidth(90.0f));
+                    EditorGUI.showMixedValue = endTimeProp.hasMultipleDifferentValues;
+                    var newEndTime = EditorGUILayout.FloatField(new GUIContent(" ", "End time"), endTime,
+                        GUILayout.MinWidth(90.0f));
+                    EditorGUI.showMixedValue = false;
+
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        startTimeProp.doubleValue = newStartTime;
+                        endTimeProp.doubleValue = newEndTime;
+                    }
+
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUI.EndDisabledGroup();
+
+
+                    GUIStyle style = new GUIStyle();
+                    style.alignment = TextAnchor.LowerRight;
+                    style.normal.textColor = Color.gray;
+                    if (!startTimeProp.hasMultipleDifferentValues && !endTimeProp.hasMultipleDifferentValues)
+                    {
+                        EditorGUILayout.LabelField(new GUIContent((endTime - startTime).ToString("0.000") + "s"),
+                            style);
+                    }
                 }
 
-                EditorGUILayout.BeginHorizontal();
-                EditorGUI.BeginChangeCheck();
-                EditorGUI.showMixedValue = startTimeProp.hasMultipleDifferentValues;
-                var newStartTime = EditorGUILayout.FloatField(new GUIContent(" ", "Start time"), startTime, GUILayout.MinWidth(90.0f));
-                EditorGUI.showMixedValue = endTimeProp.hasMultipleDifferentValues;
-                var newEndTime = EditorGUILayout.FloatField(new GUIContent(" ", "End time"), endTime, GUILayout.MinWidth(90.0f));
-                EditorGUI.showMixedValue = false;
-
-                if (EditorGUI.EndChangeCheck())
-                {
-                    startTimeProp.doubleValue = newStartTime;
-                    endTimeProp.doubleValue = newEndTime;
-                }
-
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUI.EndDisabledGroup();
-
-
-                GUIStyle style = new GUIStyle();
-                style.alignment = TextAnchor.LowerRight;
-                style.normal.textColor = Color.gray;
-                if (!startTimeProp.hasMultipleDifferentValues && !endTimeProp.hasMultipleDifferentValues)
-                {
-                    EditorGUILayout.LabelField(new GUIContent((endTime - startTime).ToString("0.000") + "s"), style);
-                }
                 EditorGUI.indentLevel--;
             }
 
@@ -185,7 +193,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.Separator();
         }
 
-        internal static List<AlembicImporter.MaterialEntry> GenMaterialSlotsPresetUI(AlembicImporter importer)
+        static List<AlembicImporter.MaterialEntry> GenMaterialSlotsPresetUI(AlembicImporter importer)
         {
             var ret = new List<AlembicImporter.MaterialEntry>();
             foreach (var r in importer.GetExternalObjectMap())
@@ -201,8 +209,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             return ret;
         }
 
-        void DrawMaterialUI(AlembicImporter importer)
+        void DrawMaterialUI(AlembicImporter importer, bool multiEdit)
         {
+            if (multiEdit)
+            {
+                EditorGUILayout.HelpBox("Material Editing is not supported on multiple selection.", MessageType.Info);
+                return;
+            }
+
             var mainGO = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
             List<AlembicImporter.MaterialEntry> materials = new List<AlembicImporter.MaterialEntry>();
             if (mainGO != null) // Null in case of a Preset for the importer
