@@ -260,7 +260,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                     continue;
                 }
 
-                var renderer = meshGO.GetComponent<MeshRenderer>();
+                var haveRenderer = meshGO.TryGetComponent<MeshRenderer>(out var renderer);
+                if (!haveRenderer)
+                {
+                    continue;
+                }
+
                 var mats = renderer.sharedMaterials;
                 if (materialId > mats.Length - 1)
                 {

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Prevent mesh import failure when changing import options after having set up material assignment overrides.
 - Fixed a UI issue affecting the use of Importer options in multi-editing context.
 - Prevent import failure when material mapping data is inconsistent with Alembic node hierarchy.
 
