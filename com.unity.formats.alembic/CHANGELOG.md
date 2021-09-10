@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0-pre.2] - 2021-09-02
+### Added
+### Changed
+### Fixed
+- Prevent mesh import failure when changing import options after having set up material assignment overrides.
+- Fixed a UI issue affecting the use of Importer options in multi-editing context.
+- Prevent import failure when material mapping data is inconsistent with Alembic node hierarchy.
+
 ## [2.3.0-pre.1] - 2021-07-11
 ### Added
 - Added support for importing the cage mesh of SubD Alembic nodes.

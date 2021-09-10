@@ -7,7 +7,7 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
@@ -26,7 +26,7 @@ platforms:
 
 standalone_platforms:
   - name: win
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     runtime: standalone
     type: Unity::VM
@@ -58,7 +58,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
@@ -101,7 +101,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
@@ -277,7 +277,7 @@ api_scrape_check_win:
   name : Check API Scrape on Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
@@ -341,7 +341,7 @@ publish_dry_run:
   name: PublishDryRun
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     name: Runner
   commands:
@@ -368,7 +368,7 @@ publish:
   name: Publish
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     name: Runner
   commands:
