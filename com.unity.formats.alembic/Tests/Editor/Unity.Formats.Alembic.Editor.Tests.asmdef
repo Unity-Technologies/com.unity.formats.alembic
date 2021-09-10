@@ -6,8 +6,7 @@
         "Unity.Formats.Alembic.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.Timeline",
-        "Unity.Formats.Alembic.Editor"
+        "Unity.Timeline"
     ],
     "includePlatforms": [
         "Editor"
