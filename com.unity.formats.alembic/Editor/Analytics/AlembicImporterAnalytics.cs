@@ -1,4 +1,4 @@
-#define DEBUG_ANALYTICS
+//#define DEBUG_ANALYTICS
 using System;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
