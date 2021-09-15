@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal static void SendAnalytics(AlembicTreeNode root, AlembicImporter importer)
         {
-            if (!EditorAnalytics.enabled)
+            if (!EditorAnalytics.enabled || importer.IsHDF5) // Ignore HDF5 failed files.
                 return;
 
             EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
