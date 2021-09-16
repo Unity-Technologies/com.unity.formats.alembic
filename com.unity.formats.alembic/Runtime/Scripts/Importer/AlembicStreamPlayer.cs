@@ -1,9 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using System;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
@@ -174,6 +172,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <returns>True if the load succeeded, false otherwise.</returns>
         public bool LoadFromFile(string newPath)
         {
+            AlembicStreamAnalytics.SendAnalytics();
             if (StreamDescriptor == null)
             {
                 StreamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
