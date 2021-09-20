@@ -451,7 +451,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(matPath);
 
             AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
-            var importer =  AssetImporter.GetAtPath(dst) as AlembicImporter;
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
             importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "backflip (FFFFFB70)/Man_Sample (FFFFFB6C)/Man_Sample (FFFFFB6A)/Man_Sample:000:submesh[0]"), mat);
             importer.StreamSettings.ImportMeshes = false;
             EditorUtility.SetDirty(importer);
@@ -475,7 +475,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(dst);
             deleteFileList.Add(matPath);
             AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
-            var importer =  AssetImporter.GetAtPath(dst) as AlembicImporter;
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
             importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "some/random/path:999:SomeName"), mat);
             AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
 
@@ -496,7 +496,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             deleteFileList.Add(dst);
             deleteFileList.Add(matPath);
             AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
-            var importer =  AssetImporter.GetAtPath(dst) as AlembicImporter;
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
             importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "backflip (FFFFFB70)/Man_Sample (FFFFFB6C)/Man_Sample (FFFFFB6A)/Man_Sample:099:submesh[0]"), mat);
             AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
 

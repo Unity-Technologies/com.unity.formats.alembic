@@ -209,14 +209,14 @@ aiContextManager::~aiContextManager()
 
 aiContext::aiContext(int uid)
     : m_path(),
-      m_streams(),
-      m_archive(),
-      m_top_node(),
-      m_timesamplings(),
-      m_uid(uid),
-      m_config(),
-      m_isHDF5(false),
-      m_app()
+    m_streams(),
+    m_archive(),
+    m_top_node(),
+    m_timesamplings(),
+    m_uid(uid),
+    m_config(),
+    m_isHDF5(false),
+    m_app()
 {
 }
 
