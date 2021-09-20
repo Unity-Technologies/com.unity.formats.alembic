@@ -84,6 +84,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
             m_firstFrame = true;
             m_prevFrame = -1;
             m_recorder.BeginRecording();
+            AlembicExporterAnalytics.SendAnalytics(m_recorder.Settings);
         }
 
         /// <summary>

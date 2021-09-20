@@ -29,9 +29,9 @@ ScriptedImporter:
     importCurves: 1
     createCurveRenderers: 0
   abcStartTime: 0.041666666666666664
-  abcEndTime: 0.4166666666666667
-  startTime: 0.041666666666666664
-  endTime: 0.4166666666666667
+  abcEndTime: 1.0000000000000002
+  startTime: 0.0416666679084301
+  endTime: 1
   importWarning: 
   firstImport: 0
   isHDF5: 0

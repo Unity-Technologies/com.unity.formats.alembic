@@ -76,7 +76,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(9, "abc")]
+    [ScriptedImporter(10, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
         [SerializeField]
@@ -149,7 +149,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal struct MaterialEntry
         {
-            //public AlembicCustomData component;
             public string path;
             public string facesetName;
             public int index;
@@ -228,6 +227,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
 
                     ApplyMaterialAssignments(go, subassets);
+
+                    AlembicImporterAnalytics.SendAnalytics(abcStream.abcTreeRoot, this);
                 }
             }
 

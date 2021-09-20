@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor.Formats.Alembic.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 
@@ -63,6 +63,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var v1 = mesh.vertices;
 
             CollectionAssert.AreNotEqual(v0, v1);
+        }
+
+        [Test]
+        public void ChangingOptionsOnExistingImportedAssetsWorks()
+        {
+            deleteFileList.Add(copiedAbcFile);
+            var path = AssetDatabase.GUIDToAssetPath("369d852cb291c4c6aa11efc087bf3d2b");
+            File.Copy(path, copiedAbcFile, true);
+
+            AssetDatabase.ImportAsset(copiedAbcFile, ImportAssetOptions.ForceSynchronousImport);
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(copiedAbcFile);
+            Assert.IsNull(asset.GetComponentInChildren<AlembicPointsCloud>());
+
+            var importer = AssetImporter.GetAtPath(copiedAbcFile) as AlembicImporter;
+            importer.StreamSettings.ImportPoints = true;
+            EditorUtility.SetDirty(importer);
+            AssetDatabase.ImportAsset(copiedAbcFile, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh();
+            Assert.IsNotNull(asset.GetComponentInChildren<AlembicPointsCloud>());
         }
     }
 }

@@ -40,6 +40,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return context.IsHDF5();
             }
 
+            public string GetApplication()
+            {
+                return context.GetApplication();
+            }
+
             public void GetTimeRange(out double begin, out double end)
             {
                 context.GetTimeRange(out begin, out end);
