@@ -68,7 +68,7 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public int callbackOrder
         {
-            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
+            get { return 9999; } // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)

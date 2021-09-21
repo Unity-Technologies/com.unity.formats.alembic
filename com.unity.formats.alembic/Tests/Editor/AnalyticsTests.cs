@@ -123,7 +123,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         static void GetImporter(string guid, out AlembicImporter importer, out AlembicStreamPlayer player)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
-            importer =  AssetImporter.GetAtPath(path) as AlembicImporter;
+            importer = AssetImporter.GetAtPath(path) as AlembicImporter;
             player = AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponent<AlembicStreamPlayer>();
         }
     }

@@ -19,8 +19,9 @@ void NormalizeISPC(abcV3 *dst, int num)
 
 void LerpISPC(float *dst, const float * v1, const float * v2, int num, float w)
 {
-	ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num, w);
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num, w);
 }
+
 void LerpISPC(abcV2 *dst, const abcV2 * v1, const abcV2 * v2, int num, float w)
 {
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 2, w);
@@ -46,7 +47,6 @@ void MinMaxISPC(abcV3 & min, abcV3 & max, const abcV3 * points, int num)
 {
     ispc::MinMax3((ispc::float3&)min, (ispc::float3&)max, (const ispc::float3*)points, num);
 }
-
 
 void GenerateTangentsISPC(abcV4 *dst,
     const abcV3 *points, const abcV2 *uv, const abcV3 *normals, const int *indices,
@@ -79,11 +79,11 @@ void ApplyScaleGeneric(abcV3 *dst, int num, float scale)
 
 void LerpGeneric(float *dst, const float *v1, const float *v2, int num, float w)
 {
-	float iw = 1.0f - w;
-	for (int i = 0; i < num; ++i)
-	{
-		dst[i] = (v1[i] * iw) + (v2[i] * w);
-	}
+    float iw = 1.0f - w;
+    for (int i = 0; i < num; ++i)
+    {
+        dst[i] = (v1[i] * iw) + (v2[i] * w);
+    }
 }
 
 void LerpGeneric(abcV2 *dst, const abcV2 *v1, const abcV2 *v2, int num, float w)
@@ -183,20 +183,21 @@ void GenerateTangentsGeneric(abcV4 *dst_,
     }
 }
 
-
 void GeneratePointNormalsGeneric(const int *face_start_offsets, const int *face_vertex_counts, const int *face_indices,
     const float *positions, float *normals, const int *remapped_indices, const int face_count, const int remapped_count,
     const int orig_point_count)
 {
-
     std::vector<abcV3> tmp_normals(orig_point_count, {0.f, 0.f, 0.f});
-    for (size_t i = 0; i < face_count; ++i) {
+    for (size_t i = 0; i < face_count; ++i)
+    {
         int face_vert_count = face_vertex_counts[i];
         int face_start_index = face_start_offsets[i];
-        if (face_vert_count < 3) {
+        if (face_vert_count < 3)
+        {
             continue;
         }
-        for (int tri = 0; tri < face_vert_count - 2; ++tri) {
+        for (int tri = 0; tri < face_vert_count - 2; ++tri)
+        {
             int i1 = face_indices[face_start_index + tri];
             int i2 = face_indices[face_start_index + tri + 1];
             int i3 = face_indices[face_start_index + tri + 2];
@@ -209,7 +210,8 @@ void GeneratePointNormalsGeneric(const int *face_start_offsets, const int *face_
             tmp_normals[i3] += tri_normal;
         }
     }
-    for (size_t i = 0; i < remapped_count; ++i) {
+    for (size_t i = 0; i < remapped_count; ++i)
+    {
         int remap = remapped_indices[i];
         abcV3 n = tmp_normals[remap].normalize();
         reinterpret_cast<abcV3*>(normals)[i] = abcV3{ -n.x, n.y, n.z};
@@ -254,7 +256,7 @@ void Normalize(abcV3 *dst, int num)
 
 void Lerp(float *dst, const float *v1, const float *v2, int num, float w)
 {
-	Impl(Lerp, dst, v1, v2, num, w);
+    Impl(Lerp, dst, v1, v2, num, w);
 }
 
 void Lerp(abcV2 *dst, const abcV2 *v1, const abcV2 *v2, int num, float w)
@@ -290,14 +292,14 @@ void GenerateTangents(abcV4 *dst,
 }
 
 void GeneratePointNormals(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
-        const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count)
+    const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count)
 {
     std::vector<int> face_start_indices(face_count);
     std::partial_sum(face_vertex_counts, face_vertex_counts + face_count - 1, face_start_indices.begin() + 1);
     memset(normals, 0, remapped_count * 3 * sizeof(float));
     Impl(GeneratePointNormals, face_start_indices.data(), face_vertex_counts, face_indices,
-            reinterpret_cast<const float*>(points), reinterpret_cast<float*>(normals),
-            remapped_point_indices, face_count, remapped_count, orig_point_count);
+        reinterpret_cast<const float*>(points), reinterpret_cast<float*>(normals),
+        remapped_point_indices, face_count, remapped_count, orig_point_count);
 }
 
 #undef Impl

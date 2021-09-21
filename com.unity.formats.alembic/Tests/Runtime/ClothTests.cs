@@ -44,7 +44,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             sphere.transform.localPosition = new Vector3(0, -1, 0);
             var plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             cloth = plane.AddComponent<Cloth>();
-            cloth.sphereColliders = new[] {new ClothSphereColliderPair(sphere.GetComponent<SphereCollider>())};
+            cloth.sphereColliders = new[] { new ClothSphereColliderPair(sphere.GetComponent<SphereCollider>()) };
             cloth.clothSolverFrequency = 300;
         }
 

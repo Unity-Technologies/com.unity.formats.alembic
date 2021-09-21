@@ -130,7 +130,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal bool IsHDF5
         {
-            get { return isHDF5;}
+            get { return isHDF5; }
         }
         [SerializeField] bool isHDF5;
 
@@ -287,7 +287,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var path = GetGameObjectPath(customData.gameObject);
                 for (var i = 0; i < customData.FaceSetNames.Count; ++i)
                 {
-                    var entry = new MaterialEntry {facesetName = customData.FaceSetNames[i], index = i, path = path};
+                    var entry = new MaterialEntry { facesetName = customData.FaceSetNames[i], index = i, path = path };
                     if (remap.TryGetValue(entry.ToSourceAssetIdentifier(), out var material))
                     {
                         entry.material = (Material)material;

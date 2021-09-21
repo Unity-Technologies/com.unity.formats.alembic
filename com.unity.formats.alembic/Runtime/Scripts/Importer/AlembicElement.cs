@@ -9,7 +9,7 @@ namespace UnityEngine.Formats.Alembic.Importer
     internal abstract class AlembicElement : IDisposable
     {
         private aiObject m_abcObj;
-        public bool disposed {  protected set;  get; }
+        public bool disposed { protected set; get; }
         public AlembicTreeNode abcTreeNode { get; set; }
         public aiObject abcObject { get { return m_abcObj; } }
         internal abstract aiSchema abcSchema { get; }
@@ -50,14 +50,14 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         // called before update samples
-        public virtual void AbcPrepareSample() {}
+        public virtual void AbcPrepareSample() { }
 
         // called after update samples kicked
         // (possibly not finished yet. call aiPolyMesh.Sync() etc. to sync)
-        public virtual void AbcSyncDataBegin() {}
+        public virtual void AbcSyncDataBegin() { }
 
         // called after AbcSyncDataBegin()
         // intended to wait vertex buffer copy task (kicked in AbcSyncDataBegin()) and update meshes in this
-        public virtual void AbcSyncDataEnd() {}
+        public virtual void AbcSyncDataEnd() { }
     }
 }

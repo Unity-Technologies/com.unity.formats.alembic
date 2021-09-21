@@ -271,7 +271,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     m_submeshes[smi].update = true;
                     submesh.indexes.ResizeDiscard(m_submeshSummaries[smi].indexCount);
                     submeshData.indexes = submesh.indexes;
-                    fixed(char* s = submesh.facesetName)
+                    fixed (char* s = submesh.facesetName)
                     {
                         submeshData.facesetNames = s;
                     }
@@ -279,7 +279,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
             }
 
-            var job = new FillVertexBufferJob {sample = sample, splitData = m_splitData, submeshData = m_submeshData};
+            var job = new FillVertexBufferJob { sample = sample, splitData = m_splitData, submeshData = m_submeshData };
 
             fillVertexBufferHandle = job.Schedule();
         }
@@ -502,7 +502,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!hasMesh)
             {
-                mesh = new Mesh {name = "dyn: " + go.name};
+                mesh = new Mesh { name = "dyn: " + go.name };
                 mesh.indexFormat = IndexFormat.UInt32;
                 mesh.MarkDynamic();
 

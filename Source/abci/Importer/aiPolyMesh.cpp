@@ -18,7 +18,7 @@ aiPolyMeshSample::~aiPolyMeshSample()
 }
 
 aiPolyMesh::aiPolyMesh(aiObject* parent, const abcObject& abc)
-    :aiMeshSchema(parent, abc)
+    : aiMeshSchema(parent, abc)
 {
 }
 
@@ -39,4 +39,3 @@ aiPolyMeshSample* aiPolyMesh::newSample()
         return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
 }
-

@@ -303,12 +303,12 @@ namespace UnityEditor.Formats.Alembic.Importer
             loadSucceded = (target as AlembicStreamPlayer).ReloadStream();
         }
 
-        [MenuItem("CONTEXT/AlembicStreamPlayer/Reset"), ]
+        [MenuItem("CONTEXT/AlembicStreamPlayer/Reset"),]
         static void ResetPreventer()
         {
         }
 
-        [MenuItem("CONTEXT/AlembicStreamPlayer/Reset", validate = true), ]
+        [MenuItem("CONTEXT/AlembicStreamPlayer/Reset", validate = true),]
         static bool ResetPreventerValidate()
         {
             return false;

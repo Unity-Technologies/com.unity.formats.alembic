@@ -41,4 +41,3 @@ aiSubDSample* aiSubD::newSample()
         return new Sample(this, TopologyPtr(new aiMeshTopology()));
     }
 }
-
