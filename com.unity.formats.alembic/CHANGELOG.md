@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Prevent build error when the scene contains empty AlembicStreamPlayer components.
 
 ## [2.3.0-pre.2] - 2021-09-02
 ### Added
