@@ -21,6 +21,11 @@ namespace UnityEditor.Formats.Alembic.Importer
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
+            if (HaveAlembicInstances)
+            {
+                AlembicBuildAnalytics.SendAnalytics(target);
+            }
+
             if (!TargetIsSupported(target))
             {
                 if (HaveAlembicInstances)
@@ -63,15 +68,15 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public int callbackOrder
         {
-            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
+            get { return 9999; } // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
             if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
-                AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
-                    .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
                 return;
             }
 

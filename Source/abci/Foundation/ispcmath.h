@@ -229,22 +229,25 @@ static inline uniform float length(uniform float3 v) { return sqrt(length_sq(v))
 static inline float2 normalize_precise(float2 v)
 {
     float len = length_sq(v);
-    return len == 0 ? v : v * 1.0f/sqrt(len);
+    return len == 0 ? v : v * 1.0f / sqrt(len);
 }
+
 static inline float3 normalize_precise(float3 v)
 {
     float len = length_sq(v);
-    return len == 0 ? v : v * 1.0f/sqrt(len);
+    return len == 0 ? v : v * 1.0f / sqrt(len);
 }
+
 static inline uniform float2 normalize_precise(uniform float2 v)
 {
     uniform float len = length_sq(v);
-    return len == 0 ? v : v * 1.0f/sqrt(len);
+    return len == 0 ? v : v * 1.0f / sqrt(len);
 }
+
 static inline uniform float3 normalize_precise(uniform float3 v)
 {
     uniform float len = length_sq(v);
-    return len == 0 ? v : v * 1.0f/sqrt(len);
+    return len == 0 ? v : v * 1.0f / sqrt(len);
 }
 
 static inline float2 normalize_estimate(float2 v)
@@ -258,6 +261,7 @@ static inline float3 normalize_estimate(float3 v)
     float len = length_sq(v);
     return len == 0 ? v : v * rsqrt(len);
 }
+
 static inline uniform float2 normalize_estimate(uniform float2 v)
 {
     uniform float len = length_sq(v);

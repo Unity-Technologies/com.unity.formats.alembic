@@ -33,7 +33,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return new WaitForEndOfFrame();
             var t0 = cubeGO.transform.position;
             player.UpdateImmediately(player.Duration - 1e-5f);
-            var t1  = cubeGO.transform.position;
+            var t1 = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }
 
@@ -41,7 +41,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public new void SetUp()
         {
             var curve = AnimationCurve.Linear(0, 0, 10, 10);
-            var clip = new AnimationClip {hideFlags = HideFlags.DontSave};
+            var clip = new AnimationClip { hideFlags = HideFlags.DontSave };
             clip.SetCurve("", typeof(Transform), "localPosition.x", curve);
             var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
             timeline.hideFlags = HideFlags.DontSave;
@@ -56,7 +56,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
-        public IEnumerator  TestTargetBranchExport()
+        public IEnumerator TestTargetBranchExport()
         {
             director.Play();
             exporter.Recorder.Settings.Scope = ExportScope.TargetBranch;
@@ -68,7 +68,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
-        public IEnumerator  TestOneShotExport()
+        public IEnumerator TestOneShotExport()
         {
             director.Play();
             deleteFileList.Add(exporter.Recorder.Settings.OutputPath);
@@ -184,7 +184,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.UpdateImmediately(0);
             var t0 = cubeGO.transform.position;
             player.UpdateImmediately(player.Duration);
-            var t1  = cubeGO.transform.position;
+            var t1 = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }
 
@@ -202,7 +202,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var abcTrack = timeline.CreateTrack<AlembicTrack>(null, "");
             var clip = abcTrack.CreateClip<AlembicShotAsset>();
             var abcAsset = clip.asset as AlembicShotAsset;
-            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            var refAbc = new ExposedReference<AlembicStreamPlayer> { exposedName = Guid.NewGuid().ToString() };
             abcAsset.StreamPlayer = refAbc;
             director.SetReferenceValue(refAbc.exposedName, player);
             director.RebuildGraph();
@@ -214,7 +214,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             director.time = player.Duration;
             director.Evaluate();
             yield return null;
-            var t1  = cubeGO.transform.position;
+            var t1 = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
         }
 
@@ -250,7 +250,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             player.UpdateImmediately(0);
             var t0 = cubeGO.transform.position;
             player.UpdateImmediately(player.Duration);
-            var t1  = cubeGO.transform.position;
+            var t1 = cubeGO.transform.position;
             Assert.AreNotEqual(t0, t1);
 
             var asyncOperation = SceneManager.UnloadSceneAsync(sceneName);
@@ -261,7 +261,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
-        public IEnumerator  TestInvalidName()
+        public IEnumerator TestInvalidName()
         {
             cube.name = "a/b";
             director.Play();
@@ -297,7 +297,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
-        public IEnumerator  TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
+        public IEnumerator TestAlembicExportMeshRendererNoMesh_DoesNotCrash()
         {
             var go = new GameObject("mrgo");
             go.AddComponent<MeshRenderer>();

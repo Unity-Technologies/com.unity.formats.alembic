@@ -73,5 +73,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             return null;
         }
+
+        public void VisitRecursively(Action<AlembicElement> cb)
+        {
+            cb.Invoke(abcObject);
+            foreach (var child in Children)
+            {
+                child.VisitRecursively(cb);
+            }
+        }
     }
 }

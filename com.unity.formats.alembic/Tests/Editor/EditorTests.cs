@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor.Formats.Alembic.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -97,7 +98,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var abcTrack = timeline.CreateTrack<AlembicTrack>(null, "");
             var clip = abcTrack.CreateClip<AlembicShotAsset>();
             var abcAsset = clip.asset as AlembicShotAsset;
-            var refAbc = new ExposedReference<AlembicStreamPlayer> {exposedName = Guid.NewGuid().ToString()};
+            var refAbc = new ExposedReference<AlembicStreamPlayer> { exposedName = Guid.NewGuid().ToString() };
             abcAsset.StreamPlayer = refAbc;
             director.SetReferenceValue(refAbc.exposedName, player);
             var a1 = timeline.CreateTrack<ActivationTrack>();
@@ -221,7 +222,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             mesh.GetVertices(vert0);
             mesh.GetUVs(5, velocity0);
 
-            var expectedVelocity = new[] {new Vector3(0, 8, 0), new Vector3(-4, 0, 0), new Vector3(0, 0, 0)};
+            var expectedVelocity = new[] { new Vector3(0, 8, 0), new Vector3(-4, 0, 0), new Vector3(0, 0, 0) };
             {
                 var error = expectedVelocity.Zip(velocity0, (x, y) => (x - y).magnitude);
                 Assert.IsTrue(error.All(x => x < 1e-5));
@@ -451,6 +452,92 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsTrue(sample.name.StartsWith("Man_Sample"));
             Assert.AreEqual(0, sample.transform.childCount);
             Assert.IsNotNull(sample.GetComponent<MeshFilter>());
+        }
+      
+        [Test]
+        public void StreamedAlembicFilesKeepMaterialAssignmentsWhenChangingStream()
+        {
+            const string dst = "Assets/dst.abc";
+            var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
+            File.Copy(src, dst);
+            deleteFileList.Add(dst);
+            var player = new GameObject().AddComponent<AlembicStreamPlayer>();
+            player.LoadFromFile(src);
+            var mat = AlembicMesh.GetDefaultMaterial();
+            var renderer = player.GetComponentInChildren<MeshRenderer>();
+            renderer.material = mat;
+
+            Assert.AreEqual(mat, renderer.sharedMaterial);
+
+            player.LoadFromFile(dst);
+            Assert.AreEqual(mat, renderer.sharedMaterial);
+        }
+
+        [Test]
+        public void ImporterAllowsNotImportingMeshesAfterMappingMaterials()
+        {
+            const string dst = "Assets/src.abc";
+            const string matPath = "Assets/mat.mat";
+            var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
+            File.Copy(src, dst);
+            var mat = new Material(Shader.Find("Standard"));
+            AssetDatabase.CreateAsset(mat, matPath);
+            deleteFileList.Add(dst);
+            deleteFileList.Add(matPath);
+
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
+            importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "backflip (FFFFFB70)/Man_Sample (FFFFFB6C)/Man_Sample (FFFFFB6A)/Man_Sample:000:submesh[0]"), mat);
+            importer.StreamSettings.ImportMeshes = false;
+            EditorUtility.SetDirty(importer);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh();
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(dst).GetComponentInChildren<MeshFilter>();
+
+            Assert.IsNull(mesh);
+        }
+
+        [Test]
+        public void ImporterAcceptsMismatchedGameObjectPathPathMapping()
+        {
+            const string dst = "Assets/src.abc";
+            const string matPath = "Assets/mat.mat";
+            var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
+            File.Copy(src, dst);
+            var mat = new Material(Shader.Find("Standard"));
+            AssetDatabase.CreateAsset(mat, matPath);
+            deleteFileList.Add(dst);
+            deleteFileList.Add(matPath);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
+            importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "some/random/path:999:SomeName"), mat);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(dst).GetComponentInChildren<MeshFilter>();
+
+            Assert.IsNotNull(mesh);
+        }
+
+        [Test]
+        public void ImporterAcceptsMismatchedFacesetNames()
+        {
+            const string dst = "Assets/src.abc";
+            const string matPath = "Assets/mat.mat";
+            var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
+            File.Copy(src, dst);
+            var mat = new Material(Shader.Find("Standard"));
+            AssetDatabase.CreateAsset(mat, matPath);
+            deleteFileList.Add(dst);
+            deleteFileList.Add(matPath);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(dst) as AlembicImporter;
+            importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "backflip (FFFFFB70)/Man_Sample (FFFFFB6C)/Man_Sample (FFFFFB6A)/Man_Sample:099:submesh[0]"), mat);
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(dst).GetComponentInChildren<MeshFilter>();
+
+            Assert.IsNotNull(mesh);
         }
 
         static AlembicStreamPlayer LoadAndInstantiate(string guid)

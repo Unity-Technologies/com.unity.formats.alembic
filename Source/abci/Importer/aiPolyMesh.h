@@ -72,4 +72,3 @@ inline void Lerp(RawVector<T>& dst, const RawVector<T>& src1, const RawVector<T>
     dst.resize_discard(src1.size());
     Lerp(dst.data(), src1.data(), src2.data(), (int)src1.size(), w);
 }
-

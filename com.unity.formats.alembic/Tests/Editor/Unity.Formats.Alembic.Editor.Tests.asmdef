@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Unity.Formats.Alembic.Runtime",
+        "Unity.Formats.Alembic.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.Timeline"

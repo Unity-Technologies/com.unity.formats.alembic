@@ -38,7 +38,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             curves = GetComponent<AlembicCurves>();
             //curves.OnUpdate += UpdateMesh;
 
-            mesh = new Mesh {hideFlags = HideFlags.DontSave};
+            mesh = new Mesh { hideFlags = HideFlags.DontSave };
             GetComponent<MeshFilter>().sharedMesh = mesh;
             var meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer.sharedMaterial == null)

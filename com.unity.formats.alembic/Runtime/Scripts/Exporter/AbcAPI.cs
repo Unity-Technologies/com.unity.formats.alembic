@@ -184,12 +184,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool visibility { get; set; }
         public IntPtr points { get; set; }  // Vector3*
         public int pointCount { get; set; }
-        public IntPtr   normals;          // Vector3*. can be null
-        public IntPtr   uv0;              // Vector2*. can be null
-        public IntPtr   uv1;              // Vector2*. can be null
-        public IntPtr   colors;           // Vector2*. can be null
-        public IntPtr   submeshes;        // aeSubmeshData*. can be null
-        public int      submeshCount;
+        public IntPtr normals;          // Vector3*. can be null
+        public IntPtr uv0;              // Vector2*. can be null
+        public IntPtr uv1;              // Vector2*. can be null
+        public IntPtr colors;           // Vector2*. can be null
+        public IntPtr submeshes;        // aeSubmeshData*. can be null
+        public int submeshCount;
     }
 
     struct aeCameraData
@@ -269,7 +269,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         {
             if (!name.Contains("/")) return name;
 
-            var ret =  name.Replace('/', '_');
+            var ret = name.Replace('/', '_');
             Debug.LogWarning($"AlembicExporter: Illegal character '/' in Alembic object name '{name}'. Replaced with {ret}");
             return ret;
         }
@@ -311,6 +311,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aeContext aeCreateContext();
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
+
+        [DllImport(Abci.Lib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        public static extern IntPtr aiContextGetApplication(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, AlembicExportOptions conf);
         [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
@@ -15,7 +16,7 @@ using static UnityEditor.AssetDatabase;
 using UnityEditor.Experimental.AssetImporters;
 using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
-
+[assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 namespace UnityEditor.Formats.Alembic.Importer
 {
     class AlembicAssetModificationProcessor : AssetModificationProcessor
@@ -129,7 +130,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal bool IsHDF5
         {
-            get { return isHDF5;}
+            get { return isHDF5; }
         }
         [SerializeField] bool isHDF5;
 
@@ -148,7 +149,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         internal struct MaterialEntry
         {
-            //public AlembicCustomData component;
             public string path;
             public string facesetName;
             public int index;
@@ -227,6 +227,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     }
 
                     ApplyMaterialAssignments(go, subassets);
+
+                    AlembicImporterAnalytics.SendAnalytics(abcStream.abcTreeRoot, this);
                 }
             }
 
@@ -254,8 +256,23 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var materialId = Int32.Parse(pathFaceId[1]);
 
                 var meshGO = GetGameObjectFromPath(go, path);
-                var renderer = meshGO.GetComponent<MeshRenderer>();
+                if (meshGO == null)
+                {
+                    continue;
+                }
+
+                var haveRenderer = meshGO.TryGetComponent<MeshRenderer>(out var renderer);
+                if (!haveRenderer)
+                {
+                    continue;
+                }
+
                 var mats = renderer.sharedMaterials;
+                if (materialId > mats.Length - 1)
+                {
+                    continue;
+                }
+
                 mats[materialId] = r.Value as Material;
                 renderer.sharedMaterials = mats;
             }
@@ -270,7 +287,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var path = GetGameObjectPath(customData.gameObject);
                 for (var i = 0; i < customData.FaceSetNames.Count; ++i)
                 {
-                    var entry = new MaterialEntry {facesetName = customData.FaceSetNames[i], index = i, path = path};
+                    var entry = new MaterialEntry { facesetName = customData.FaceSetNames[i], index = i, path = path };
                     if (remap.TryGetValue(entry.ToSourceAssetIdentifier(), out var material))
                     {
                         entry.material = (Material)material;
@@ -321,7 +338,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 if (!found)
                 {
-                    throw new Exception($"Cannot find path:{path} from GameObject: {root.name}");
+                    return null;
                 }
             }
 

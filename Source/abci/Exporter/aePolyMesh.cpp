@@ -141,7 +141,7 @@ void aePolyMesh::writeSampleBody()
                     break;
             }
             m_buf_faces.resize(m_buf_faces.size() + face_count, ngon);
-            facecount+= face_count * ngon;
+            facecount += face_count * ngon;
 
             if (smi < m_facesets.size())
             {

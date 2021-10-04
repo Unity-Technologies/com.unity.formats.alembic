@@ -116,7 +116,6 @@ public:
         cookSampleBody(sample);
     }
 
-
 protected:
     virtual void updateSampleBody(const abcSampleSelector& ss)
     {
@@ -130,7 +129,7 @@ protected:
         auto visible = readVisibility(ss) != 0;
         auto updateVisibility = m_sample && m_sample->visibility != visible;
         if (!m_sample || (!m_constant && sample_index != m_last_sample_index) || m_force_update ||
-                updateVisibility)
+            updateVisibility)
         {
             m_sample_index_changed = true;
             if (!m_sample)
@@ -173,8 +172,8 @@ protected:
                 sample = nullptr;
         }
 
-        if (sample) {
-
+        if (sample)
+        {
             cookSample(*sample);
             m_data_updated = true;
         }
