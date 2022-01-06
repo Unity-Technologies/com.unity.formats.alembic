@@ -75,9 +75,11 @@ namespace UnityEditor.Formats.Alembic.Importer
         static readonly Type[] kStrippableBehaviourTypes =
         {
             typeof(AlembicStreamPlayer),
-            typeof(AlembicCurves), typeof(AlembicCurvesRenderer), typeof(AlembicCustomData), typeof(AlembicPointsCloud), typeof(AlembicPointsRenderer)
+            typeof(AlembicCustomData),
+            typeof(AlembicCurvesRenderer), typeof(AlembicCurves),
+            typeof(AlembicPointsRenderer), typeof(AlembicPointsCloud),
         };
-        
+
         public int callbackOrder => -9999; // Run early to strip behaviours before other callbacks try to interact with them.
 
         public void OnProcessScene(Scene scene, BuildReport report)
@@ -86,13 +88,13 @@ namespace UnityEditor.Formats.Alembic.Importer
                 return;
 
             var sceneRoots = scene.GetRootGameObjects();
-            
+
             var alembicBehaviours = new List<Component>();
             foreach (var type in kStrippableBehaviourTypes)
             {
                 alembicBehaviours.AddRange(sceneRoots.SelectMany(root => root.GetComponentsInChildren(type, true)));
             }
- 
+
             if (alembicBehaviours.Count > 0)
             {
                 Debug.Log($"{AlembicBuildPostProcess.kUnsupportedTarget} Stripping {alembicBehaviours.Count} alembic behaviour instances from scene '{scene.name}'.");
@@ -100,7 +102,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
         }
     }
-    
+
     class AlembicProcessScene : IProcessSceneWithReport
     {
         public int callbackOrder => 9999; // Run late to catch potential Alembics that were created during a Scene post process.
