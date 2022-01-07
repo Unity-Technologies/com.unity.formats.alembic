@@ -3,14 +3,6 @@
 installdir=$(pwd)/install
 tgzdir=$(pwd)
 
-# Produce fast and small code (but not debuggable), and produce it to be
-# relocatable since in the end we'll link it all together in a shared object.
-# Note that cmake seems to clobber the -O3 with a -O2, but we can dream.
-export CXXFLAGS="-O0 -fomit-frame-pointer -fPIC"
-export CFLAGS="-O0 -fomit-frame-pointer -fPIC"
-export MAKEFLAGS="-j12"
-
-
 if [[ -e ${installdir} ]]; then
     rm -rf ${installdir}
 fi
