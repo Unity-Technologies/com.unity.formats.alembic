@@ -296,7 +296,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                 auto& sm = tmp_submeshes[mi];
                 if (copyFacesetNames)
                 {
-                    sm.facesetName = faceset_names[mi-1];
+                    sm.facesetName = faceset_names[mi - 1];
                 }
                 if (sm.index_count > 0)
                 {
