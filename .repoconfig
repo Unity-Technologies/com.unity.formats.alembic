@@ -1,8 +1,8 @@
 # ** Note that all patterns below are case-insensitive
 
 [version]
-repoconfig=5
-minimum-unity-meta=33
+repoconfig=7
+minimum-unity-meta=47
 
 [processors]
 # best guess at c++/cli from path

@@ -19,6 +19,10 @@ set(ISPC_VERSION 1.14.1)
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND tar -xf ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.tar.gz
         )
+        execute_process(
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMAND xattr -d com.apple.quarantine  ${CMAKE_SOURCE_DIR}/build/ispc-v1.14.1-macOS/bin/ispc
+        )
 
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-windows")

@@ -1,9 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using System;
 using UnityEngine.Formats.Alembic.Sdk;
-using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
 namespace UnityEngine.Formats.Alembic.Importer
@@ -174,6 +172,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <returns>True if the load succeeded, false otherwise.</returns>
         public bool LoadFromFile(string newPath)
         {
+            AlembicStreamAnalytics.SendAnalytics();
             if (StreamDescriptor == null)
             {
                 StreamDescriptor = ScriptableObject.CreateInstance<AlembicStreamDescriptor>();
@@ -262,13 +261,14 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
 
                 var subMesh = mesh.subMeshCount;
-                var mats = new Material[subMesh];
+                var newMats = new Material[subMesh];
+                var oldMats = meshRenderer.sharedMaterials;
                 for (var i = 0; i < subMesh; ++i)
                 {
-                    mats[i] = defaultMat;
+                    newMats[i] = i < oldMats.Length && oldMats[i] != null ? oldMats[i] : defaultMat;
                 }
 
-                meshRenderer.sharedMaterials = mats;
+                meshRenderer.sharedMaterials = newMats;
             });
 
             return true;

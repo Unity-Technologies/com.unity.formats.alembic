@@ -21,9 +21,11 @@ To import an Alembic file from outside your Unity project:
 
 ## Applying Materials
 
-The Alembic format does not support any Material data. However, once you imported the file, you can [reassign the Default Material](matshad.md#materials) to a custom Material.
+The Alembic format doesn't support any Material data.
 
-The Alembic for Unity package also provides you with several [Shaders](matshad.md#shaders) specifically designed for Alembic data.
+By default, to guarantee an acceptable basic display of the used Alembic asset, Unity automatically assigns all of its submeshes the **Default Material** corresponding to your project's render pipeline.
+
+However, once you added the Alembic asset to the Scene Hierarchy, you can manually [re-assign materials for each GameObject](https://docs.unity3d.com/Manual/materials-introduction.html).
 
 ## Editing the import options
 

@@ -510,10 +510,11 @@ namespace UnityEngine.Formats.Alembic.Util
                 abcObject = abc;
             }
 
-            public override void Setup(Component c) {}
-            public override void Capture() {}
+            public override void Setup(Component c) { }
+            public override void Capture() { }
         }
 
+        [CaptureTarget(typeof(Transform))]
         class TransformCapturer : ComponentCapturer
         {
             Transform m_target;
@@ -634,7 +635,7 @@ namespace UnityEngine.Formats.Alembic.Util
                 }
                 else
                 {
-                    const float deg2rad =  Mathf.PI / 180;
+                    const float deg2rad = Mathf.PI / 180;
                     dst.focalLength = (float)(Screen.height / 2 / Math.Tan(deg2rad * src.fieldOfView / 2));
                     dst.sensorSize = new Vector2(Screen.width, Screen.height);
                 }
@@ -744,7 +745,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     {
                         if (m_meshBake == null)
                         {
-                            m_meshBake = new Mesh {name = m_target.name};
+                            m_meshBake = new Mesh { name = m_target.name };
                         }
 
                         m_meshBake.Clear();
@@ -943,17 +944,6 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #endif
 
-        T[] GetTargets<T>() where T : Component
-        {
-            if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
-            {
-                return TargetBranch.GetComponentsInChildren<T>();
-            }
-            else
-            {
-                return GameObject.FindObjectsOfType<T>();
-            }
-        }
 
         Component[] GetTargets(Type type)
         {
@@ -1041,7 +1031,7 @@ namespace UnityEngine.Formats.Alembic.Util
             node.transformCapturer.inherits = true;
             node.transformCapturer.Setup(node.transform);
 
-            if (node.componentType != null)
+            if (node.componentType != null && node.componentType != typeof(Transform)) // previous chunk already sets up transforms
             {
                 var component = node.transform.GetComponent(node.componentType);
                 if (component != null)
@@ -1049,7 +1039,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     var cr = m_capturerTable[node.componentType];
                     node.componentCapturer = Activator.CreateInstance(cr.type) as ComponentCapturer;
                     node.componentCapturer.recorder = this;
-                    node.componentCapturer.parent = node.transformCapturer;;
+                    node.componentCapturer.parent = node.transformCapturer; ;
                     node.componentCapturer.timeSamplingIndex = timeSamplingIndex;
                     node.componentCapturer.Setup(component);
                 }

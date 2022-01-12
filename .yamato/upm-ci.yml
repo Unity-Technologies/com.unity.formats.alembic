@@ -7,7 +7,7 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
@@ -26,7 +26,7 @@ platforms:
 
 standalone_platforms:
   - name: win
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     runtime: standalone
     type: Unity::VM
@@ -58,7 +58,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
@@ -101,7 +101,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
@@ -252,11 +252,12 @@ test_trigger:
     - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
-    - .yamato/upm-ci.yml#format_check_win
-    - .yamato/upm-ci.yml#format_check_osx 
+    - .yamato/upm-ci.yml#api_scrape_check_osx
+    - .yamato/upm-ci.yml#api_scrape_check_win
+    - .yamato/_formatting.yml#formatting
 
-format_check_osx:
-  name : FormatCheck on OSX
+api_scrape_check_osx:
+  name : Check API Scrape on OSX
   agent:
     type: Unity::VM::osx
     image: package-ci/mac:latest
@@ -272,11 +273,11 @@ format_check_osx:
       paths:
       - "upm-ci~/test-results/**/*"
 
-format_check_win:
-  name : FormatCheck on Win
+api_scrape_check_win:
+  name : Check API Scrape on Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
@@ -315,21 +316,8 @@ testBizarroStandalone_{{ platform.name }}:
 
 test_bizarro:
   name: TestsTriggerBizarro
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:v1.15.0
-    flavor: b1.large
-  commands:
-    - dir
   triggers:
     cancel_old_ci: true
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:    
     {% for platform in bizarro_standalone_platforms %}  
     - .yamato/upm-ci.yml#testBizarroStandalone_{{platform.name}}
@@ -347,14 +335,17 @@ nightly_test_trigger:
     - .yamato/upm-ci.yml#pack
     - .yamato/upm-ci.yml#test_trigger
     - .yamato/upm-ci.yml#test_trigger_hdrp
+    - .yamato/upm-ci.yml#test_bizarro 
 
 publish_dry_run:
   name: PublishDryRun
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     name: Runner
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package publish --package-path com.unity.formats.alembic --dry-run
@@ -379,9 +370,11 @@ publish:
   name: Publish
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:stable
     flavor: b1.large
     name: Runner
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package publish --package-path com.unity.formats.alembic

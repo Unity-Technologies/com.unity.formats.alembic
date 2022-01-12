@@ -212,9 +212,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Vector3 extents;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     struct aiSubmeshData
     {
         public IntPtr indexes;
+        public unsafe char* facesetNames;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -341,6 +343,11 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public bool IsHDF5()
         {
             return NativeMethods.aiContextGetIsHDF5(self);
+        }
+
+        public string GetApplication()
+        {
+            return Marshal.PtrToStringAnsi(NativeMethods.aiContextGetApplication(self));
         }
 
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }

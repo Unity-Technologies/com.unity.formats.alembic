@@ -48,7 +48,7 @@ namespace Tests
         public IEnumerator AlembicRecorderRecords()
         {
             var curve = AnimationCurve.Linear(0, 0, 10, 10);
-            var clip = new AnimationClip {hideFlags = HideFlags.DontSave};
+            var clip = new AnimationClip { hideFlags = HideFlags.DontSave };
             clip.SetCurve("", typeof(Transform), "localPosition.x", curve);
             var timeline = ScriptableObject.CreateInstance<TimelineAsset>();
             timeline.hideFlags = HideFlags.DontSave;

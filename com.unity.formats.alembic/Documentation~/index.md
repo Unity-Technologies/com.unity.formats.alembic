@@ -11,9 +11,11 @@ The Alembic package brings in vertex cache data from a 3D modeling software, suc
 
 The Alembic package supports these features:
 
-* [Importing](import.md) data from Meshes, Particle Cloud Points, Cameras, and Curves.
+* [Importing](import.md) data from Meshes, Particle Cloud Points, Curves, and Cameras.
 
-* Applying [Alembic Shaders](matshad.md#shaders) and [Motion Blur](matshad.md#blur) effects.
+* [Material automatic remapping](materials.md) on imported Alembic assets based on Face Set names.
+
+* Applying [Alembic Shaders](motion-vectors.md#shaders) and [Motion Blur](motion-vectors.md#blur) effects.
 
 * Customizing [particle and point cloud effects](particles.md).
 

@@ -59,7 +59,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             }
         }
 
-        CamParams camParams = new CamParams {focalLength = 300, filmBack = new Vector2(200, 300), nearFar = new Vector2(0.1f, 500)};
+        CamParams camParams = new CamParams { focalLength = 300, filmBack = new Vector2(200, 300), nearFar = new Vector2(0.1f, 500) };
 
 
         [SetUp]

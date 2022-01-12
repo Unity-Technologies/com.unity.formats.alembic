@@ -40,6 +40,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return context.IsHDF5();
             }
 
+            public string GetApplication()
+            {
+                return context.GetApplication();
+            }
+
             public void GetTimeRange(out double begin, out double end)
             {
                 context.GetTimeRange(out begin, out end);
@@ -65,7 +70,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void ScheduleUpdateSamples(double time)
             {
-                var updateJob = new UpdateSamplesJob {context = context, time = time};
+                var updateJob = new UpdateSamplesJob { context = context, time = time };
                 updateJobHandle = updateJob.Schedule();
             }
 
@@ -85,7 +90,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         public static void DisconnectStreamsWithPath(string path)
         {
             aiContext.DestroyByPath(path);
-            s_streams.ForEach(s => {
+            s_streams.ForEach(s =>
+            {
                 if (s.m_streamDesc.PathToAbc == path)
                 {
                     s.m_streamInterupted = true;

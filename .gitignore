@@ -75,3 +75,4 @@ InitTestScene*.unity.meta
 TestProjects/AlembicImporter/Assets/Plugins.meta
 TestProjects/AlembicImporter/Assets/Plugins/Editor/JetBrains.meta
 com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci
+com.unity.formats.alembic/TestRunnerOptions.json.meta

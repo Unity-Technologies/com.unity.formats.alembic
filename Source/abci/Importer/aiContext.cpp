@@ -10,6 +10,7 @@
     #include <errno.h>
 #endif
 
+
 static std::wstring L(const std::string& s)
 {
     return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t> >().from_bytes(s);
@@ -214,7 +215,8 @@ aiContext::aiContext(int uid)
     m_timesamplings(),
     m_uid(uid),
     m_config(),
-    m_isHDF5(false)
+    m_isHDF5(false),
+    m_app()
 {
 }
 
@@ -287,6 +289,14 @@ int aiContext::getUid() const
     return m_uid;
 }
 
+const char* aiContext::getApplication() // Attention, not reentrant
+{
+    uint32_t api;
+    std::string version, date, description;
+    GetArchiveInfo(m_archive, m_app, version, api, date, description);
+    return m_app.c_str();
+}
+
 const aiConfig& aiContext::getConfig() const
 {
     return m_config;
@@ -321,6 +331,7 @@ void aiContext::reset()
         delete s;
     }
     m_streams.clear();
+    m_app.clear();
 
     // m_config is not reset intentionally
 }

@@ -21,6 +21,7 @@
 #include <Alembic/Abc/ErrorHandler.h>
 #include <Alembic/AbcGeom/All.h>
 #include <Alembic/AbcMaterial/All.h>
+#include <Alembic/Abc/ArchiveInfo.h>
 
 #define abciImpl
 

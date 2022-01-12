@@ -21,6 +21,11 @@ namespace UnityEditor.Formats.Alembic.Importer
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
         {
+            if (HaveAlembicInstances)
+            {
+                AlembicBuildAnalytics.SendAnalytics(target);
+            }
+
             if (!TargetIsSupported(target))
             {
                 if (HaveAlembicInstances)
@@ -36,6 +41,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             foreach (var files in FilesToCopy)
             {
+                if (!File.Exists(files.Key))
+                {
+                    continue;
+                }
+
                 var dir = Path.GetDirectoryName(files.Value);
                 if (dir != null && !Directory.Exists(dir))
                 {
@@ -63,15 +73,15 @@ namespace UnityEditor.Formats.Alembic.Importer
     {
         public int callbackOrder
         {
-            get { return 9999;} // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
+            get { return 9999; } // Best if we are lest in the chain to catch potential Alembics that were created during a Scene post process.
         }
 
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
             if (report == null || !AlembicBuildPostProcess.TargetIsSupported(report.summary.platform))
             {
-                AlembicBuildPostProcess.HaveAlembicInstances |= scene.GetRootGameObjects()
-                    .SelectMany(root => root.GetComponentsInChildren<AlembicStreamPlayer>(true)).Any();
                 return;
             }
 
@@ -90,6 +100,10 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             streamPlayer.StreamDescriptor = streamPlayer.StreamDescriptor.Clone();// make a copy
             var srcPath = streamPlayer.StreamDescriptor.PathToAbc;
+            if (string.IsNullOrEmpty(srcPath))
+            {
+                return;
+            }
 
             // Avoid name collisions by hashing the full path
             var hashedFilename = HashSha1(srcPath) + ".abc";
