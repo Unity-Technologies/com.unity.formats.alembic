@@ -348,12 +348,26 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [Test]
-        public void FacesetNames_AreReadCorrectly() // Broken
+        public void FacesetNames_AreReadCorrectly()
         {
             var path = AssetDatabase.GUIDToAssetPath("f30dca527f4e947248046d6d12750c2d"); // GUID of cubes_coloured.abc
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
             var facesetNames = new[] { "phong2SG", "phong1SG" };
+            CollectionAssert.AreEqual(facesetNames, asset.GetComponentInChildren<AlembicCustomData>().FaceSetNames);
+
+            var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            go.GetComponent<AlembicStreamPlayer>().UpdateImmediately(0);
+            CollectionAssert.AreEqual(facesetNames, go.GetComponentInChildren<AlembicCustomData>().FaceSetNames);
+        }
+
+        [Test]
+        public void FacesetNamesWithStrangeOrdering_IsCorrect()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("ade5a7d01a0fd4cec986910e81ef1df3"); // GUID of cubes_coloured.abc
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+
+            var facesetNames = new[] { "fs_top", "fs_bottom" };
             CollectionAssert.AreEqual(facesetNames, asset.GetComponentInChildren<AlembicCustomData>().FaceSetNames);
 
             var go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
