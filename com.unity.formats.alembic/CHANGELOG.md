@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- The faceset names were being read in the incorect order in certain cases.
+- Make sure Unity always reads the Face Set names in the correct order.
 
 ## [2.3.0-pre.3] - 2021-10-02
 ### Added
