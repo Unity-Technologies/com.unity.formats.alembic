@@ -18,7 +18,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
         internal static void SendAnalytics(AlembicRecorderSettings settings)
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
             if (!EditorAnalytics.enabled)
                 return;
 
