@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Make sure Unity always reads the Face Set names in the correct order.
+- Fixed a compile error when a project does not have the analytics module.
 
 ## [2.3.0-pre.3] - 2021-10-02
 ### Added

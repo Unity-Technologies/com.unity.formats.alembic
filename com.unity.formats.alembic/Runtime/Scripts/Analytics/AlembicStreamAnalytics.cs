@@ -13,7 +13,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal static void SendAnalytics()
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
             if (!EditorAnalytics.enabled)
                 return;
 
