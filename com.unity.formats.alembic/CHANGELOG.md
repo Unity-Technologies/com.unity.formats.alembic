@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When building unsupported standalone targets, Unity excludes the Alembic components from the build.
 
 ### Fixed
+- Fixed a compile error when a project does not have the analytics module.
+
 
 ## [2.3.0-pre.3] - 2021-10-02
 ### Added
