@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -76,14 +77,22 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(10, "abc")]
+    [ScriptedImporter(11, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {
+        enum ImporterVersions
+        {
+            FacesetNames = 1,
+            Latest = FacesetNames
+        };
+
         [SerializeField]
 #pragma warning disable 0649
         private string rootGameObjectId;
         [SerializeField]
         private string rootGameObjectName;
+        [UsedImplicitly]
+        [SerializeField] int importerVersion = (int)ImporterVersions.FacesetNames;
 #pragma warning restore 0649
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
