@@ -8,7 +8,7 @@ findings_access:
 organization: 5d8b8596cadf01000a30db1f
 poc: marief@unity3d.com
 slack_channel: devs-alembic
-description: Import and export Alembic files (.abc), record and stream animations in the Alembic format directly in Unity.\n\nThe Alembic format is commonly used in animation to transfer facial, cloth, and other simulation between applications.\n\nIMPORTANT: Alembic for Unity ony supports Windows 64-bit, MacOS X and Linux 64-bit as build targets.
+description: "Import and export Alembic files (.abc), record and stream animations in the Alembic format directly in Unity.\n\nThe Alembic format is commonly used in animation to transfer facial, cloth, and other simulation between applications.\n\nIMPORTANT: Alembic for Unity ony supports Windows 64-bit, MacOS X and Linux 64-bit as build targets."
 risk_assessment:
   internet_facing: false
   personal_info: false
