@@ -19,7 +19,7 @@ platforms:
 #    flavor: b1.large
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-20:stable
     flavor: b1.large
 
 
@@ -45,6 +45,11 @@ bizarro_standalone_platforms:
   - name: centOS
     type: Unity::VM::GPU
     image: package-ci/centos:latest
+    flavor: b1.large
+    runtime: standalone
+  - name: ubuntu
+    type: Unity::VM::GPU
+    image: package-ci/ubuntu:stable
     flavor: b1.large
     runtime: standalone
   #- name: stadia
