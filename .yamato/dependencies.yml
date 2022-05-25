@@ -62,9 +62,9 @@ pack:
      paths:
        - "com.unity.formats.alembic/**/*"
   dependencies:
-    - .yamato/upm-ci.yml#build_win
-    - .yamato/upm-ci.yml#build_mac
-    - .yamato/upm-ci.yml#build_centOS
+    - .yamato/dependencies.yml#build_win
+    - .yamato/dependencies.yml#build_mac
+    - .yamato/dependencies.yml#build_centOS
 
 
 {% for package in packages -%}
