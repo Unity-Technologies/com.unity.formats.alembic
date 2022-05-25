@@ -1,3 +1,7 @@
+{% metadata_file .yamato/common/environments.metafile %}
+{% metadata_file .yamato/project.metafile %}
+---
+
 {% for package in packages -%}
 {% for editor in test_editors -%}
 {% for runtime_platform in package.runtime_platforms -%}
