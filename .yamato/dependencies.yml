@@ -64,7 +64,7 @@ pack:
   dependencies:
     - .yamato/dependencies.yml#build_win
     - .yamato/dependencies.yml#build_mac
-    - .yamato/dependencies.yml#build_centOS
+    - .yamato/dependencies.yml#build_linux
 
 
 {% for package in packages -%}
