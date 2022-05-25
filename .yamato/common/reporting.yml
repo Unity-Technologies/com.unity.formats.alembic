@@ -1,0 +1,102 @@
+{% metadata_file .yamato/common/environments.metafile %}
+{% metadata_file .yamato/project.metafile %}
+---
+
+{% if enable_codecov == true -%}
+{% for package in packages -%}
+codecov_{{ package.short_name }}_all_tests:
+{% if is_monorepo == true -%}
+  name: "{{ package.short_name }}: Codecov all tests"
+{% else -%}
+  name: "Codecov all tests"
+{% endif -%}
+  agent:
+    type: Unity::VM
+    image: slough-ops/ubuntu-20.04-base:stable
+    flavor: b1.small
+  commands:
+    - git clone -b latest --single-branch git@github.cds.internal.unity3d.com:unity/re.codecoverage.tools.git coverage-tools
+{% for editor in test_editors -%}
+{% for platform in test_platforms -%}
+    - >
+      coverage-tools/codecov
+      --reports "{{ log_path }}/{{ package.short_name }}/*/{{ platform.name }}/{{ editor.version }}/CoverageResults/*-opencov/*/*.xml"
+      --name {{ platform.name }}_{{ editor.version }}
+      --flags "{{ platform.name }},{{ editor.version }}"
+{% endfor -%}
+{% endfor -%}
+  dependencies:
+    - .yamato/common/package-test.yml#test_{{ package.short_name }}_all_editors_all_platforms
+
+{% endfor -%}
+{% if is_monorepo == true -%}
+codecov_all_packages_all_tests:
+  name: "All packages: Codecov all platforms"
+  dependencies:
+{% for package in packages -%}
+    - .yamato/common/reporting.yml#codecov_{{ package.short_name }}_all_tests
+{% endfor -%}
+{% endif -%}
+{% endif -%}
+
+{% if enable_sonarqube == true -%}
+{% for package in packages -%}
+{% if package.runtime_platforms["editor"].project_path -%}
+{% assign job_project_path = package.runtime_platforms["editor"].project_path -%}
+{% else %}
+{% assign job_project_path = generic_project_path -%}
+{% endif -%}
+sonarqube_{{ package.short_name }}_all_tests:
+{% if is_monorepo == true -%}
+  name: "{{ package.short_name }}: Sonar scan all tests"
+{% else -%}
+  name: "Sonar scan all tests"
+{% endif -%}
+  agent:
+    type: Unity::VM
+    flavor: b1.large
+    image: package-ci/win10-sonar:stable
+  commands:
+    - gsudo powershell.exe -file .yamato\common\scripts~\win_defender_exclusions.ps1
+    - unity-downloader-cli -u {{ test_editors[0].version }} -c Editor -p %YAMATO_WORK_DIR%/.Editor
+    - unity-config project add dependency {{ sonarqube_ci.dependency.name }}@{{ sonarqube_ci.dependency.version }} -p {{ job_project_path }}
+{% if using_submodule == true %}
+    - git submodule update --init --recursive
+{% endif %}
+    - >
+      "%YAMATO_WORK_DIR%/.Editor/Unity.exe"
+      -projectPath "{{ job_project_path }}"
+      -batchmode -quit -nographics
+      -api-profile NET_4_6
+      -logFile {{ log_path }}/{{ package.short_name }}/sonarqube_build/Editor.log
+      -executeMethod "Packages.Rider.Editor.RiderScriptEditor.SyncSolution"
+    - |
+      IF "%YAMATO_PR_ID%" == "" ( set SONAR_ANALYSIS_TYPE_PARAM=/d:sonar.branch.name=%GIT_BRANCH% ) ELSE ( set SONAR_ANALYSIS_TYPE_PARAM=/d:sonar.pullrequest.key=%YAMATO_PR_ID% /d:sonar.pullrequest.branch=%GIT_BRANCH% /d:sonar.pullrequest.base=%YAMATO_PR_TARGET_BRANCH% )
+      cmd /v /c "dotnet sonarscanner begin /k:{{ package.sonarqube.project_key }} /v:%GIT_BRANCH% /d:sonar.login={{ ci["win"].env_sonar_token }} /d:sonar.host.url={{ sonarqube_ci.url }} /d:sonar.buildString=%GIT_REVISION% /d:sonar.sourceEncoding="UTF-8" %SONAR_ANALYSIS_TYPE_PARAM% /d:sonar.projectBaseDir=%YAMATO_SOURCE_DIR%/{{ package.root_dir }} /d:sonar.scm.provider=git /d:sonar.links.scm={{ package.sonarqube.git_url }} /d:sonar.cs.nunit.reportsPaths={{ log_path }}/{{ package.short_name }}/*/win/{{ test_editors[0].version }}/*/*/TestResults.xml /d:sonar.cs.opencover.reportsPaths={{ log_path }}/**/*-opencov/*/*.xml /d:sonar.coverage.exclusions=Samples/**/*,Tests/**/*"
+    - for %%i in ({{ job_project_path }}/*.sln) do (dotnet build {{ job_project_path }}/%%i /t:Rebuild /p:SonarQubeTestProject=false )
+    - >
+      cmd /v /c "dotnet sonarscanner end
+      /d:sonar.login={{ ci["win"].env_sonar_token }}"
+  artifacts:
+    logs:
+      paths:
+        - "{{ log_path }}/{{ package.short_name }}/sonarqube_build/**/*"
+  dependencies:
+    - .yamato/common/package-test.yml#test_{{ package.short_name }}_all_editors_all_platforms
+
+{% endfor -%}
+{% if is_monorepo == true -%}
+sonarqube_all_packages_all_tests:
+  name: "All packages: Sonar scan"
+  dependencies:
+{% for package in packages -%}
+    - .yamato/common/reporting.yml#sonarqube_{{ package.short_name }}_all_tests
+{% endfor -%}
+
+{% endif -%}
+{% endif -%}
+
+{% if enable_codecov == false and enable_sonarqube == false -%}
+dummy:
+  name: "Dummy job"
+{% endif -%}

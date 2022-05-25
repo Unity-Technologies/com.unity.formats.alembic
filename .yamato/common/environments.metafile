@@ -1,0 +1,29 @@
+log_path: "test_results~"
+
+artifactory_url: "https://artifactory.prd.cds.internal.unity3d.com/artifactory"
+homebrew_url: "git@github.cds.internal.unity3d.com:unity/homebrew-unity.git"
+
+sonarqube_ci:
+  url: "https://sonarqube.internal.unity3d.com"
+  dependency:
+    name: "com.unity.ide.rider"
+    version: "3.0.13"
+  analysis:
+    - pr
+    - branch
+
+generic_project_path: [ .yamato/common/generic_project ]
+  
+npm_registry: "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates"
+
+ci:
+  win:
+    env_sonar_token: "!SONARQUBE_PROD_ACCESS_TOKEN!"
+    env_prefix: "%"
+    env_suffix: "%"
+    tool_utr: "utr.bat"
+  mac:
+    env_sonar_token: "$SONARQUBE_PROD_ACCESS_TOKEN"
+    env_prefix: "$"
+    env_suffix: ""
+    tool_utr: "./utr"

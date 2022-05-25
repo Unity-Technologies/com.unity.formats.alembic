@@ -1,0 +1,79 @@
+{% metadata_file .yamato/project.metafile %}
+
+---
+
+build_win:
+  name: Build Win
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    - git submodule update --init --recursive
+    - build.cmd
+  artifacts:
+    build:
+      paths:
+        - "com.unity.formats.alembic/**/*"
+
+build_mac:
+  name: Build Mac
+  agent:
+    type: Unity::VM::osx
+    image: package-ci/mac:stable
+    flavor: m1.mac
+  commands:
+    - git submodule update --init --recursive
+    - ./build.sh
+  artifacts:
+    build:
+      paths:
+        - "com.unity.formats.alembic/**/*"
+
+build_linux:
+  name: Build CentOS
+  agent:
+    type: Unity::VM
+    image: package-ci/centos:latest
+    flavor: b1.large
+  commands:
+    -  git submodule update --init --recursive 
+    -  scl enable devtoolset-7 ./build.sh
+      
+  artifacts:
+    build:
+      paths:
+        - "com.unity.formats.alembic/**/*"
+
+pack:
+  name: Pack
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - upm-ci package pack --package-path com.unity.formats.alembic
+  artifacts:
+   packages:
+     paths:
+       - "upm-ci~/packages/**/*"
+   build:
+     paths:
+       - "com.unity.formats.alembic/**/*"
+  dependencies:
+    - .yamato/upm-ci.yml#build_win
+    - .yamato/upm-ci.yml#build_mac
+    - .yamato/upm-ci.yml#build_centOS
+
+
+{% for package in packages -%}
+{% for editor in test_editors -%}
+{% for platform in tests_dependencies['editor'] -%}
+pre_test_{{ package.short_name }}_{{editor.name}}_{{platform}}:
+  name : Build alembic plugin before testing on {{platform}}
+  dependencies:
+    - .yamato/dependencies.yml#pack
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}

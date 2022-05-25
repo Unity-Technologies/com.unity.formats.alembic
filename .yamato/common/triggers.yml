@@ -1,0 +1,100 @@
+{% metadata_file .yamato/project.metafile %}
+---
+
+{% for package in packages -%}
+pr_{{ package.short_name }}_test_trigger:
+{% if is_monorepo == true -%}
+  name: "{{ package.short_name }}: PR test trigger"
+{% else -%}
+  name: "PR test trigger"
+{% endif -%}
+  triggers:
+    expression: |
+      pull_request.target eq "{{ git_main_branch }}" AND
+      NOT pull_request.draft
+{% if package.root_dir != "." -%}
+      AND (
+      pull_request.changes.any match ".yamato/**"
+      OR pull_request.changes.any match "{{ package.root_dir }}/**"
+{% if package.project_path -%}
+      OR pull_request.changes.any match "{{ package.project_path }}/**"
+{% endif -%}
+      )
+{% endif -%}
+  dependencies:
+{% if enable_codecov == true-%}  
+    - .yamato/common/reporting.yml#codecov_{{ package.short_name }}_all_tests
+{% endif -%}
+{% if enable_sonarqube == true-%}  
+    - .yamato/common/reporting.yml#sonarqube_{{ package.short_name }}_all_tests
+{% endif -%}
+{% if enable_codecov == false and enable_sonarqube == false -%}
+    - .yamato/common/package-test.yml#test_{{ package.short_name }}_PR_trigger
+{% endif -%}
+{% endfor %}
+
+{% if is_monorepo == true -%}
+{% assign job_package_id = "all_packages" -%}
+{% else %}
+{% assign job_package_id = packages[0].short_name -%}
+{% endif -%}
+{% if enable_nightly == true -%}
+
+
+nightly_all_test_trigger:
+{% if is_monorepo == true -%}
+  name: "All packages: Nightly test trigger"
+{% else %}
+  name: "Nightly test trigger"
+{% endif -%}
+  triggers:
+    recurring:
+    - branch: {{ git_main_branch }}
+      frequency: daily
+      rerun: always
+  dependencies:
+{% if enable_codecov == true -%}  
+    - .yamato/common/reporting.yml#codecov_{{ job_package_id }}_all_tests
+{% endif -%}
+{% if enable_sonarqube == true-%}  
+    - .yamato/common/reporting.yml#sonarqube_{{ job_package_id }}_all_tests
+{% endif -%}
+{% if enable_codecov == false and enable_sonarqube == false -%}
+    - .yamato/common/package-test.yml#test_{{ job_package_id }}_all_editors_all_platforms
+{% endif -%}
+{% elsif enable_weekly == true -%}
+
+
+weekly_all_test_trigger:
+{% if is_monorepo == true -%}
+  name: "All packages: Weekly test trigger"
+{% else %}
+  name: "Weekly test trigger"
+{% endif -%}
+  triggers:
+    recurring:
+      - branch: {{ git_main_branch }}
+        frequency: weekly
+        rerun: always
+  dependencies:
+{% if enable_codecov == true -%}  
+    - .yamato/common/reporting.yml#codecov_{{ job_package_id }}_all_tests
+{% endif -%}
+{% if enable_sonarqube == true-%}  
+    - .yamato/common/reporting.yml#sonarqube_{{ job_package_id }}_all_tests
+{% endif -%}
+{% if enable_codecov == false and enable_sonarqube == false -%}
+    - .yamato/common/package-test.yml#test_{{ job_package_id }}_all_editors_all_platforms
+{% endif -%}
+{% endif -%}
+
+
+{% if is_monorepo == true -%}
+# the only purpose of this trigger is to be a Required task on GitHub to force branch update in the branch protection rules
+require_branch_up_to_date_trigger:
+  name: "Require branch up-to-date trigger"
+  triggers:
+    expression: |
+      pull_request.target eq "{{ git_main_branch }}" AND
+      NOT pull_request.draft
+{% endif -%}
