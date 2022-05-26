@@ -11,6 +11,15 @@
 {% continue -%}
 {% endunless -%}
 {% endif %}
+
+{%- comment %}
+# Skip if there is no image for this Unity editor version on this platform 
+# which means no need to test this Unity editor version on this paftorm in this test mode
+{%- endcomment -%}
+{% unless platform[editor.name].image -%}
+{% continue -%}
+{% endunless -%}
+
 {% if runtime_platform['1'].project_path -%}
 {% assign project_path_list = runtime_platform['1'].project_path -%}
 {% endif -%}

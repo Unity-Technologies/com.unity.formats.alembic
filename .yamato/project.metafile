@@ -63,10 +63,17 @@ test_platforms:
         image: package-ci/mac:stable
       flavor: m1.mac
 
-#    - name: ubuntu
-#      type: Unity::VM
-#      image: package-ci/ubuntu-20:stable
-#      flavor: b1.large
+    - name: ubuntu20
+      type: Unity::VM
+      2019.4:
+        image: "package-ci/ubuntu-20:stable"
+      2020.2:
+        image: "package-ci/ubuntu-20:stable"
+      2021.1:
+        image: "package-ci/ubuntu-20:stable"
+      trunk:
+        image: "package-ci/ubuntu-20:stable"
+      flavor: b1.large
 
   standalone:
     - name: win
@@ -94,6 +101,25 @@ test_platforms:
         image: package-ci/mac:stable
       flavor: m1.mac
       platform: StandaloneOSX
+
+# Following VMs are using GPU for nightly standalone test and only test against Unity 2021.1
+    - name: mac_m2
+      type: Unity::metal::devkit
+      2021.1:
+        image: package-ci/mac:stable
+      flavor: m1.mac
+
+    - name: centOS_GPU
+      type: Unity::VM::GPU
+      2021.1:
+        image: package-ci/centos:latest
+      flavor: b1.large
+
+    - name: ubuntu18_GPU
+      type: Unity::VM::GPU
+      2021.1:
+        image: package-ci/ubuntu:stable
+      flavor: b1.large
 
 tests_dependencies:
   editor: [win, mac]
