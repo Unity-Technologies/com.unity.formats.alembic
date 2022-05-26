@@ -72,7 +72,7 @@ pack:
 {% for runtime_platform in tests_dependencies -%}
 {% for platform in tests_dependencies[runtime_platform['0']] -%}
 {{runtime_platform['0']}}_mode_pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform }}:
-  name : Pack {{ package.short_name }} before testing in {{ editor.name }} on {{platform}}
+  name : {{runtime_platform['0']}} mode: Pack {{ package.short_name }} before testing in {{ editor.name }} on {{platform}}
   dependencies:
     - .yamato/dependencies.yml#pack
 {% endfor -%}
