@@ -72,7 +72,7 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
 {% if tests_dependencies[runtime_platform['0']] -%}
 {% if tests_dependencies[runtime_platform['0']] contains platform.name -%}
   dependencies:
-    - .yamato/dependencies.yml#pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform.name }}
+    - .yamato/dependencies.yml#{{runtime_platform['0']}}_mode_pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform.name }}
 {% endif -%}
 {% endif -%}
 {% endfor -%}

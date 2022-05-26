@@ -69,11 +69,13 @@ pack:
 
 {% for package in packages -%}
 {% for editor in test_editors -%}
-{% for platform in tests_dependencies['editor'] -%}
-pre_test_{{ package.short_name }}_{{editor.name}}_{{platform}}:
+{% for runtime_platform in tests_dependencies -%}
+{% for platform in tests_dependencies[runtime_platform['0']] -%}
+{{runtime_platform['0']}}_mode_pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform }}:
   name : Pack before testing on {{platform}}
   dependencies:
     - .yamato/dependencies.yml#pack
+{% endfor -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}

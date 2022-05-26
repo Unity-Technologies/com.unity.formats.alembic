@@ -122,5 +122,5 @@ test_platforms:
       flavor: b1.large
 
 tests_dependencies:
-  editor: [win, mac]
-  standalone: [win, mac]
+  editor: [win, mac, ubuntu20]
+  standalone: [win, mac, mac_m2, centOS_GPU, ubuntu18_GPU]
