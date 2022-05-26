@@ -22,7 +22,7 @@
 {% if job_project_path == "package_test_dummy_project" -%}
 test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name }}_{{ platform.name }}:
 {% if is_monorepo == true -%}
-  name : "{{ package.short_name }}: Test {{ runtime_platform['0'] }}package{{ editor.version }} on {{ platform.name }}"
+  name : "{{ package.short_name }}: Test {{ runtime_platform['0'] }} package {{ editor.version }} on {{ platform.name }}"
 {% else -%}
   name : "Test {{ runtime_platform['0'] }}package{{ editor.version }} on {{ platform.name }}"
 {% endif -%}
