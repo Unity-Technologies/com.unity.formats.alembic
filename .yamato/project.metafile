@@ -5,15 +5,16 @@ packages:
     assembly: "Unity.Formats.Alembic"
     runtime_platforms:
       editor:
+        # If need to run package test, set to true
+        package_test: !!bool true
+        # Set test projects path, don't set project_path is no project to test
         project_path: 
           - TestProjects/AlembicRecorder
           - TestProjects/AlembicHDRP
           #- TestProjects/APITests
-        utr_arg_suite: "--suite=editor --suite=playmode"
       standalone:
         project_path:
           - TestProjects/AlembicStandaloneBuild
-        utr_arg_suite: "--suite=playmode --platform="        
     sonarqube:
       project_key: "formats-alembic"
       git_url: https://github.com/Unity-Technologies/com.unity.formats.alembic
