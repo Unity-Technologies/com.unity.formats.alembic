@@ -11,11 +11,12 @@
 {% continue -%}
 {% endunless -%}
 {% endif %}
-{% if runtime_platform['1'].package_test == true -%}
-{% assign project_path_list = "package_test_dummy_project" -%}
-{% endif -%}
 {% if runtime_platform['1'].project_path -%}
-{% assign project_path_list = project_path_list | concat: runtime_platform['1'].project_path -%}
+{% assign project_path_list = runtime_platform['1'].project_path -%}
+{% endif -%}
+{% if runtime_platform['1'].package_test == true -%}
+{% assign dummy_project = "package_test_dummy_project" | split: "," -%}
+{% assign project_path_list = project_path_list | concat: dummy_project -%}
 {% endif -%}
 {% for job_project_path in project_path_list %}
 {% if job_project_path == "package_test_dummy_project" -%}
