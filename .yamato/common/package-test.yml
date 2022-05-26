@@ -80,6 +80,8 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
+
+
 {% if is_monorepo == true -%}
 test_all_packages_all_editors_all_platforms:
   name: "All packages: Test all editors on all platforms"
@@ -104,21 +106,36 @@ test_{{ package.short_name }}_all_editors_all_platforms:
 {% continue -%}
 {% endunless -%}
 {% endif %}
+{%- comment %}
+# Skip if there is no image for this Unity editor version on this platform 
+# which means no need to test this Unity editor version on this paftorm in this test mode
+{%- endcomment -%}
+{% unless platform[editor.name].image -%}
+{% continue -%}
+{% endunless -%}
+
 {% if runtime_platform['1'].project_path -%}
 {% assign project_path_list = runtime_platform['1'].project_path -%}
-{% assign job_is_custom_projects = true -%}
-{% else %}
-{% assign project_path_list = generic_project_path -%}
-{% assign job_is_custom_projects = false -%}
 {% endif -%}
+{% if runtime_platform['1'].package_test == true -%}
+{% assign dummy_project = "package_test_dummy_project" | split: "," -%}
+{% assign project_path_list = project_path_list | concat: dummy_project -%}
+{% endif -%}
+
 {% for job_project_path in project_path_list -%}
+{% if job_project_path == "package_test_dummy_project" -%}
+    - .yamato/common/package-test.yml#test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name }}_{{ platform.name }}
+{% else %}
 {% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
     - .yamato/common/package-test.yml#test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ editor.name }}_{{ platform.name }}
+{% endif %}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
+
+
 {% if is_monorepo == true -%}
 test_all_packages_PR_trigger:
   name: "All packages: Test PR trigger"
