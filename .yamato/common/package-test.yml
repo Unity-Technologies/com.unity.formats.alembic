@@ -24,7 +24,7 @@ test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name
 {% if is_monorepo == true -%}
   name : "{{ package.short_name }}: Test {{ runtime_platform['0'] }} package {{ editor.version }} on {{ platform.name }}"
 {% else -%}
-  name : "Test {{ runtime_platform['0'] }} package {{ editor.version }} on {{ platform.name }}"
+  name : "{{ runtime_platform['0'] }} mode: Test package in {{ editor.version }} on {{ platform.name }}"
 {% endif -%}
 {% else -%}
 {% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
@@ -33,7 +33,7 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
 {% if is_monorepo == true -%}
   name : "{{ package.short_name }}: Test {{ runtime_platform['0'] }}{{ display_project_name }}{{ editor.version }} on {{ platform.name }}"
 {% else -%}
-  name : "Test {{ runtime_platform['0'] }}{{ display_project_name }}{{ editor.version }} on {{ platform.name }}"
+  name : "{{ runtime_platform['0'] }} mode: Test project {{ display_project_name }} in {{ editor.version }} on {{ platform.name }}"
 {% endif -%}
 {% endif -%}
   agent:
@@ -45,7 +45,11 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
 {% if job_project_path == "package_test_dummy_project" -%}
     - {% if platform.name == 'centOS' -%} DISPLAY=:0 {% endif -%} upm-ci package test --unity-version {{ editor.version }} --package-path {{ package.root_dir }}
 {% else -%}
+{% if runtime_platform['0'] == "editor" -%}
     - {% if platform.name == 'centOS' -%} DISPLAY=:0 {% endif -%} upm-ci project test  --project-path {{ job_project_path }} --type project-tests --unity-version {{ editor.version }}
+{% else -%}
+    - {% if platform.name == 'centOS' -%} DISPLAY=:0 {% endif -%} upm-ci project test  --project-path {{ job_project_path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+{% endif -%}
 {% endif -%}
   artifacts:
     logs.zip:
