@@ -24,6 +24,12 @@
 {% else %}
 {% assign job_is_custom_projects = false -%}
 {% endif -%}
+{% assign env_yamato_source_dir = "YAMATO_SOURCE_DIR" | prepend: ci[platform.name].env_prefix | append: ci[platform.name].env_suffix -%}
+{% if platform[editor.name].unity_path_var -%}
+{% assign env_unity_path = platform[editor.name].unity_path_var -%}
+{% else -%}
+{% assign env_unity_path = "YAMATO_WORK_DIR" | prepend: ci[platform.name].env_prefix | append: ci[platform.name].env_suffix | append: "/.Editor" -%}
+{% endif -%}
 {%- comment -%}
 # If package_test is set to true or no custom project is set in project_path, then package test will run.
 # If there are already custom projects set, then a dummy project will be appended to project_path_list for package test
