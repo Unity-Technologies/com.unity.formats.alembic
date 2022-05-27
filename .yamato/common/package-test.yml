@@ -63,8 +63,8 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
   commands:
 {%- comment -%}
 #Use upm-ci to run the test
-{% if using_upm-ci == true -%}
 {%- endcomment -%}
+{% if using_upm-ci == true -%}
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 {%- comment -%}
 # Run upm-ci package test if the job is a dummy generic job
