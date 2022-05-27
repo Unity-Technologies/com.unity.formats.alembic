@@ -7,7 +7,7 @@ packages:
       editor:
         # If need to run package test, set to true
         package_test: !!bool true
-        # Set test projects path, don't set project_path is no project to test
+        # Set test projects path. If project_path is not set, package test will run automatically.
         project_path: 
           - TestProjects/AlembicRecorder
           - TestProjects/AlembicHDRP
@@ -23,6 +23,8 @@ is_monorepo: !!bool false
 enable_nightly: !!bool true
 using_submodule: !!bool true
 git_main_branch: main
+# Set to true if tests need to be run by using_upm-ci, by default it should be false
+using_upm-ci: !!bool true
 
 enable_codecov: !!bool false
 enable_sonarqube: !!bool false
