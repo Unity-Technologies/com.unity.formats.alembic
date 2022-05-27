@@ -36,7 +36,7 @@
 {%- comment -%}
 # If the project is generic project, then it is package test, name the job accordingly
 {%- endcomment -%}
-{% if job_project_path == generic_project_path -%}
+{% if generic_project_path contains job_project_path -%}
 test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name }}_{{ platform.name }}:
 {% if is_monorepo == true -%}
   name : "{{ package.short_name }}: Test {{ runtime_platform['0'] }} package {{ editor.version }} on {{ platform.name }}"
@@ -61,13 +61,15 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
     image: {{ platform[editor.name].image }}
     flavor: {{ platform.flavor}}
   commands:
+{%- comment -%}
 #Use upm-ci to run the test
 {% if using_upm-ci == true -%}
+{%- endcomment -%}
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 {%- comment -%}
 # Run upm-ci package test if the job is a dummy generic job
 {%- endcomment -%}
-{% if job_project_path == generic_project_path -%}
+{% if generic_project_path contains job_project_path -%}
     - {% if platform.name == 'centOS' -%} DISPLAY=:0 {% endif -%} upm-ci package test --unity-version {{ editor.version }} --package-path {{ package.root_dir }}
 {%- comment -%}
 # Otherwise run upm-ci project test
@@ -86,7 +88,9 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
       paths:
         - "upm-ci~/packages/**/*"
         - "upm-ci~/templates/**/*"
+{%- comment -%}
 #Use utr to run the test
+{%- endcomment -%}
 {% else -%}
 {% if platform.name == "win" -%}
     - gsudo powershell.exe -file .yamato\common\scripts~\win_defender_exclusions.ps1
@@ -100,7 +104,7 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
     - curl -s {{ artifactory_url }}/unity-tools-local/utr-standalone/utr --output {{ ci["mac"].tool_utr }}
     - chmod +x {{ ci["mac"].tool_utr }}
 {% endif -%}
-{% if job_project_path == generic_project_path %}
+{% if generic_project_path contains job_project_path %}
     - unity-config project create {{ job_project_path }}
     - unity-config project add testable {{ package.name }}
     - unity-config project add dependency {{ package.name }}@file:./../../../../{{ package.root_dir }}
@@ -198,7 +202,7 @@ test_{{ package.short_name }}_all_editors_all_platforms:
 {% assign project_path_list = project_path_list | concat: generic_project_path -%}
 {% endif -%}
 {% for job_project_path in project_path_list -%}
-{% if job_project_path == generic_project_path -%}
+{% if generic_project_path contains job_project_path -%}
     - .yamato/common/package-test.yml#test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name }}_{{ platform.name }}
 {% else %}
 {% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
