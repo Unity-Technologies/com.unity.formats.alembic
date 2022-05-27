@@ -1,5 +1,5 @@
 {
-    "name": "Tests",
+    "name": "Unity.Formats.Alembic.APITests.Editor",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
