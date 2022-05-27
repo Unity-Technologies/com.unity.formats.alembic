@@ -1,19 +1,20 @@
 packages:
   - name: "com.unity.formats.alembic"
     short_name: "alembic"
-    root_dir: "./com.unity.formats.alembic"
+    root_dir: "com.unity.formats.alembic"
     assembly: "Unity.Formats.Alembic"
     runtime_platforms:
       editor:
+        # If need to run package test, set to true
+        package_test: !!bool true
+        # Set test projects path. If project_path is not set, package test will run automatically.
         project_path: 
           - TestProjects/AlembicRecorder
           - TestProjects/AlembicHDRP
-          - TestProjects/APITests
-        utr_arg_suite: "--suite=editor --suite=playmode"
+          #- TestProjects/APITests
       standalone:
         project_path:
           - TestProjects/AlembicStandaloneBuild
-        utr_arg_suite: "--suite=playmode --platform="        
     sonarqube:
       project_key: "formats-alembic"
       git_url: https://github.com/Unity-Technologies/com.unity.formats.alembic
@@ -22,6 +23,8 @@ is_monorepo: !!bool false
 enable_nightly: !!bool true
 using_submodule: !!bool true
 git_main_branch: main
+# Set to true if tests need to be run by using_upm-ci, by default it should be false
+using_upm-ci: !!bool true
 
 enable_codecov: !!bool false
 enable_sonarqube: !!bool false
@@ -62,6 +65,18 @@ test_platforms:
         image: package-ci/mac:stable
       flavor: m1.mac
 
+    - name: ubuntu20
+      type: Unity::VM
+      2019.4:
+        image: "package-ci/ubuntu-20:stable"
+      2020.2:
+        image: "package-ci/ubuntu-20:stable"
+      2021.1:
+        image: "package-ci/ubuntu-20:stable"
+      trunk:
+        image: "package-ci/ubuntu-20:stable"
+      flavor: b1.large
+
   standalone:
     - name: win
       type: Unity::VM
@@ -89,6 +104,25 @@ test_platforms:
       flavor: m1.mac
       platform: StandaloneOSX
 
+# Following VMs are using GPU for nightly standalone test and only test against Unity 2021.1
+    - name: mac_m2
+      type: Unity::metal::devkit
+      2021.1:
+        image: package-ci/mac:stable
+      flavor: m1.mac
+
+    - name: centOS_GPU
+      type: Unity::VM::GPU
+      2021.1:
+        image: package-ci/centos:latest
+      flavor: b1.large
+
+    - name: ubuntu18_GPU
+      type: Unity::VM::GPU
+      2021.1:
+        image: package-ci/ubuntu:stable
+      flavor: b1.large
+
 tests_dependencies:
-  editor: [win, mac]
-  standalone: [win, mac]
+  editor: [win, mac, ubuntu20]
+  standalone: [win, mac, mac_m2, centOS_GPU, ubuntu18_GPU]
