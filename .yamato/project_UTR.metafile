@@ -1,0 +1,94 @@
+packages:
+  - name: "com.unity.formats.alembic"
+    short_name: "alembic"
+    root_dir: "./com.unity.formats.alembic"
+    assembly: "Unity.Formats.Alembic"
+    runtime_platforms:
+      editor:
+        project_path: 
+          - TestProjects/AlembicRecorder
+          - TestProjects/AlembicHDRP
+          - TestProjects/APITests
+        utr_arg_suite: "--suite=editor --suite=playmode"
+      standalone:
+        project_path:
+          - TestProjects/AlembicStandaloneBuild
+        utr_arg_suite: "--suite=playmode --platform="        
+    sonarqube:
+      project_key: "formats-alembic"
+      git_url: https://github.com/Unity-Technologies/com.unity.formats.alembic
+
+is_monorepo: !!bool false
+enable_nightly: !!bool true
+using_submodule: !!bool true
+git_main_branch: main
+
+enable_codecov: !!bool false
+enable_sonarqube: !!bool false
+
+test_editors:
+  - name: 2019.4
+    version: 2019.4 
+  - name: 2020.2
+    version: 2020.2
+  - name: 2021.1
+    version: 2021.1
+  - name: trunk
+    version: trunk  
+
+test_platforms:
+  editor:
+    - name: win
+      type: Unity::VM
+      2019.4:
+        image: "package-ci/win10:stable"
+      2020.2:
+        image: "package-ci/win10:stable"
+      2021.1:
+        image: "package-ci/win10:stable"
+      trunk:
+        image: "package-ci/win10:stable"
+      flavor: b1.large
+
+    - name: mac
+      type: Unity::VM::osx
+      2019.4:
+        image: package-ci/mac:stable
+      2020.2:
+        image: package-ci/mac:stable
+      2021.1:
+        image: package-ci/mac:stable
+      trunk:
+        image: package-ci/mac:stable
+      flavor: m1.mac
+
+  standalone:
+    - name: win
+      type: Unity::VM
+      2019.4:
+        image: "package-ci/win10:stable"
+      2020.2:
+        image: "package-ci/win10:stable"
+      2021.1:
+        image: "package-ci/win10:stable"
+      trunk:
+        image: "package-ci/win10:stable"
+      flavor: b1.large
+      platform: StandaloneWindows64      
+
+    - name: mac
+      type: Unity::VM::osx
+      2019.4:
+        image: package-ci/mac:stable
+      2020.2:
+        image: package-ci/mac:stable
+      2021.1:
+        image: package-ci/mac:stable
+      trunk:
+        image: package-ci/mac:stable
+      flavor: m1.mac
+      platform: StandaloneOSX
+
+tests_dependencies:
+  editor: [win, mac]
+  standalone: [win, mac]
