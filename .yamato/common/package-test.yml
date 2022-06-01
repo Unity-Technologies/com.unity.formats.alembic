@@ -98,7 +98,7 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
 {%- comment -%}
 # For tests using upm-ci, package needs to be packed before testing.
 {%- endcomment -%}  
-    - .yamato/upm-ci.yml#pack
+    - .yamato/dependencies.yml#pack
 {%- comment -%}
 # Use utr to run the test
 {%- endcomment -%}
