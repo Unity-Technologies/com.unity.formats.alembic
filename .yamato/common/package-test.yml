@@ -53,7 +53,7 @@ test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name
 # Otherwise the project is a custom project, and it is project test, name the job accordingly
 {%- endcomment -%}
 {% else -%}
-{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
+{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last -%}
 {% assign display_project_name = job_project_path | replace: "\\", "/" | split: "/" | last | prepend: " " | append: " " -%}
 test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ editor.name }}_{{ platform.name }}:
 {% if is_monorepo == true -%}
@@ -96,12 +96,8 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
         - "upm-ci~/packages/**/*"
         - "upm-ci~/templates/**/*"
   dependencies:
-{%- comment -%}
-# For tests using upm-ci, package needs to be packed before testing except APIScrapingTests.
-{%- endcomment -%}
-{% unless project_name == "APITests" -%}  
     - .yamato/dependencies.yml#pack
-{% endunless -%}
+
 {%- comment -%}
 # Use utr to run the test
 {%- endcomment -%}
@@ -154,9 +150,10 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
         - "{{ log_path }}/**/*"
         - "{{ job_project_path }}/Packages/*.json"
 {%- comment -%}
-# Add a hook to each test job so that a pre-test job can be run before running the test job
+# Add a hook to each test job so that a pre-test job can be run before running the test job.
+# APIScrapingTests is exception, it has no dependency.
 {%- endcomment -%}
-{% if tests_dependencies[runtime_platform['0']] -%}
+{% if tests_dependencies[runtime_platform['0']] and project_name != "APITests" -%}
 {% if tests_dependencies[runtime_platform['0']] contains platform.name -%}
   dependencies:
     - .yamato/dependencies.yml#{{runtime_platform['0']}}_mode_pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform.name }}
@@ -218,7 +215,7 @@ test_{{ package.short_name }}_all_editors_all_platforms:
 {% if generic_project_path contains job_project_path -%}
     - .yamato/common/package-test.yml#test_{{ package.short_name }}_package_{{ runtime_platform['0'] }}_{{ editor.name }}_{{ platform.name }}
 {% else %}
-{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
+{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last -%}
     - .yamato/common/package-test.yml#test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ editor.name }}_{{ platform.name }}
 {% endif %}
 {% endfor -%}
@@ -265,7 +262,7 @@ test_{{ package.short_name }}_PR_trigger:
 {% assign job_is_custom_projects = false -%}
 {% endif -%}
 {% for job_project_path in project_path_list -%}
-{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last | downcase -%}
+{% assign project_name = job_project_path | replace: "\\", "/" | split: "/" | last -%}
     - .yamato/common/package-test.yml#test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ editor.name }}_{{ platform.name }}
 {% endfor -%}
 {% endfor -%}
