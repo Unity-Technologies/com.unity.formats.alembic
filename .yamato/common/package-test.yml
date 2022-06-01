@@ -68,9 +68,10 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
     flavor: {{ platform.flavor}}
   commands:
 {%- comment -%}
-#Use upm-ci to run the test
+# If using_upm-ci set to true, use upm-ci to run the test.
+# One exception is if the test project is API scraping test which use UTR to run the test.
 {%- endcomment -%}
-{% if using_upm-ci == true -%}
+{% if using_upm-ci == true and project_name != "APITests" -%}
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 {%- comment -%}
 # Run upm-ci package test if the job is a dummy generic job

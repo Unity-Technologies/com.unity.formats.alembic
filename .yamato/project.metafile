@@ -10,8 +10,8 @@ packages:
         # Set test projects path. If project_path is not set, package test will run automatically.
         project_path: 
           - TestProjects/AlembicRecorder
-          - TestProjects/AlembicHDRP
-          # - TestProjects/APITests
+          #- TestProjects/AlembicHDRP
+          - TestProjects/APITests
       standalone:
         project_path:
           - TestProjects/AlembicStandaloneBuild
