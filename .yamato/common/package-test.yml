@@ -97,9 +97,11 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
         - "upm-ci~/templates/**/*"
   dependencies:
 {%- comment -%}
-# For tests using upm-ci, package needs to be packed before testing.
-{%- endcomment -%}  
+# For tests using upm-ci, package needs to be packed before testing except APIScrapingTests.
+{%- endcomment -%}
+{% unless project_name == "APITests" -%}  
     - .yamato/dependencies.yml#pack
+{% endunless -%}
 {%- comment -%}
 # Use utr to run the test
 {%- endcomment -%}
