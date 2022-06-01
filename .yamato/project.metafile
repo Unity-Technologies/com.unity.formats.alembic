@@ -12,9 +12,11 @@ packages:
           - TestProjects/AlembicRecorder
           #- TestProjects/AlembicHDRP
           - TestProjects/APITests
+        utr_arg_suite: "--suite=editor --suite=playmode"
       standalone:
         project_path:
           - TestProjects/AlembicStandaloneBuild
+        utr_arg_suite: "--suite=playmode --platform="  
     sonarqube:
       project_key: "formats-alembic"
       git_url: https://github.com/Unity-Technologies/com.unity.formats.alembic
