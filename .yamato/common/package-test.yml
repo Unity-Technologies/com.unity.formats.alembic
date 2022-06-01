@@ -94,8 +94,13 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
       paths:
         - "upm-ci~/packages/**/*"
         - "upm-ci~/templates/**/*"
+  dependencies:
 {%- comment -%}
-#Use utr to run the test
+# For tests using upm-ci, package needs to be packed before testing.
+{%- endcomment -%}  
+    - .yamato/upm-ci.yml#pack
+{%- comment -%}
+# Use utr to run the test
 {%- endcomment -%}
 {% else -%}
 {% if platform.name == "win" -%}
@@ -145,7 +150,6 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
       paths:
         - "{{ log_path }}/**/*"
         - "{{ job_project_path }}/Packages/*.json"
-{% endif -%}
 {%- comment -%}
 # Add a hook to each test job so that a pre-test job can be run before running the test job
 {%- endcomment -%}
@@ -155,12 +159,12 @@ test_{{ package.short_name }}_{{ runtime_platform['0'] }}_{{ project_name }}_{{ 
     - .yamato/dependencies.yml#{{runtime_platform['0']}}_mode_pre_test_{{ package.short_name }}_{{ editor.name }}_{{ platform.name }}
 {% endif -%}
 {% endif -%}
+{% endif -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
 {% endfor -%}
-
 
 {% if is_monorepo == true -%}
 test_all_packages_all_editors_all_platforms:
