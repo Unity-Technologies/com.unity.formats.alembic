@@ -5,18 +5,29 @@ packages:
     assembly: "Unity.Formats.Alembic"
     runtime_platforms:
       editor:
-        # If need to run package test, set to true
-        package_test: !!bool true
-        # Set test projects path. If project_path is not set, package test will run automatically.
-        project_path: 
-          - TestProjects/AlembicRecorder
-          #- TestProjects/AlembicHDRP
-          - TestProjects/APITests
-        utr_arg_suite: "--suite=editor --suite=playmode"
+        # Set test path. If need package test, set "package_test" which will use a dummy test project.
+        test_path:
+          package_test:
+            test_tool: upm-ci
+            dependencies: [pack] 
+          TestProjects/AlembicRecorder:
+            test_tool: upm-ci
+            dependencies: [pack]
+          TestProjects/AlembicHDRP:
+            test_tool: upm-ci
+            dependencies: [pack]
+          TestProjects/APITests:
+            test_tool: utr
+            enabled_platforms: [win, mac]
+            enabled_editors: [2019.4]
+            utr_arg_suite: "--suite=editor"
+            dependencies: [pack]
       standalone:
-        project_path:
-          - TestProjects/AlembicStandaloneBuild
-        utr_arg_suite: "--suite=playmode --platform="  
+        # Set test path. If need package test, set "package_test" which will use a dummy test project.      
+        test_path:
+          TestProjects/AlembicStandaloneBuild:
+            test_tool: upm-ci
+            dependencies: [pack]
     sonarqube:
       project_key: "formats-alembic"
       git_url: https://github.com/Unity-Technologies/com.unity.formats.alembic
@@ -32,99 +43,62 @@ enable_codecov: !!bool false
 enable_sonarqube: !!bool false
 
 test_editors:
-  - name: 2019.4
-    version: 2019.4 
-  - name: 2020.2
-    version: 2020.2
-  - name: 2021.1
-    version: 2021.1
-  - name: trunk
-    version: trunk  
-
+  - version: 2019.4  
+  - version: 2020.2
+  - version: 2021.1
+  - version: trunk
+     
 test_platforms:
   editor:
     - name: win
       type: Unity::VM
-      2019.4:
-        image: "package-ci/win10:stable"
-      2020.2:
-        image: "package-ci/win10:stable"
-      2021.1:
-        image: "package-ci/win10:stable"
-      trunk:
-        image: "package-ci/win10:stable"
+      image: "package-ci/win10:stable"
+      test_editors: [2019.4, 2020.2, 2021.1, trunk]
       flavor: b1.large
 
     - name: mac
       type: Unity::VM::osx
-      2019.4:
-        image: package-ci/mac:stable
-      2020.2:
-        image: package-ci/mac:stable
-      2021.1:
-        image: package-ci/mac:stable
-      trunk:
-        image: package-ci/mac:stable
+      image: package-ci/mac:stable
+      test_editors: [2019.4, 2020.2, 2021.1, trunk]
       flavor: m1.mac
 
     - name: ubuntu20
       type: Unity::VM
-      2019.4:
-        image: "package-ci/ubuntu-20:stable"
-      2020.2:
-        image: "package-ci/ubuntu-20:stable"
-      2021.1:
-        image: "package-ci/ubuntu-20:stable"
-      trunk:
-        image: "package-ci/ubuntu-20:stable"
+      image: "package-ci/ubuntu-20:stable"
+      test_editors: [2019.4, 2020.2, 2021.1, trunk]
       flavor: b1.large
 
   standalone:
     - name: win
       type: Unity::VM
-      2019.4:
-        image: "package-ci/win10:stable"
-      2020.2:
-        image: "package-ci/win10:stable"
-      2021.1:
-        image: "package-ci/win10:stable"
-      trunk:
-        image: "package-ci/win10:stable"
+      image: "package-ci/win10:stable"
+      test_editors: [2019.4, 2020.2, 2021.1, trunk]
       flavor: b1.large
       platform: StandaloneWindows64      
 
     - name: mac
       type: Unity::VM::osx
-      2019.4:
-        image: package-ci/mac:stable
-      2020.2:
-        image: package-ci/mac:stable
-      2021.1:
-        image: package-ci/mac:stable
-      trunk:
-        image: package-ci/mac:stable
+      image: package-ci/mac:stable
+      test_editors: [2019.4, 2020.2, 2021.1, trunk]
       flavor: m1.mac
       platform: StandaloneOSX
 
-# Following VMs are using GPU for nightly standalone test and only test against Unity 2021.1
+    # Following VMs are using GPU for nightly standalone test and only test against Unity 2021.1
     - name: mac_m2
       type: Unity::metal::devkit
-      2021.1:
-        image: package-ci/mac:stable
+      image: package-ci/mac:stable
+      test_editors: [2021.1]
       flavor: m1.mac
+      platform: StandaloneOSX
 
     - name: centOS_GPU
       type: Unity::VM::GPU
-      2021.1:
-        image: package-ci/centos:latest
+      image: package-ci/centos:latest
+      test_editors: [2021.1]
       flavor: b1.large
 
     - name: ubuntu18_GPU
       type: Unity::VM::GPU
-      2021.1:
-        image: package-ci/ubuntu:stable
+      image: package-ci/ubuntu:stable
+      test_editors: [2021.1]
       flavor: b1.large
-
-tests_dependencies:
-  editor: [win, mac, ubuntu20]
-  standalone: [win, mac, mac_m2, centOS_GPU, ubuntu18_GPU]
