@@ -237,7 +237,8 @@ test_trigger_hdrp:
     {% for editor in editors %}
     {% for platform in platforms %}
     {%- comment -%}
-    # Disable hdrp test in trunk on Mac for now which fails nightly trigger: First the test doesn't test too much. Second, we belive the failure is caused by HDRP in trunk
+    # Disable hdrp test in trunk on Mac for now which fails nightly trigger because: 
+    # First the test doesn't test too much. Second, we belive the failure is caused by HDRP in trunk
     {%- endcomment -%}
     {%- if editor.version == 'trunk' and platform.name == 'mac' -%}
     {%- continue -%}
