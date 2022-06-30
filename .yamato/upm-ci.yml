@@ -10,9 +10,10 @@ platforms:
     image: package-ci/win10:stable
     flavor: b1.large
   - name: mac
-    type: Unity::VM::osx
-    image: package-ci/mac:stable
-    flavor: m1.mac
+    type: Unity::metal::macmini
+    model: M1
+    image: package-ci/macos-12:v0.0.1-1084810
+    flavor: b1.large
 #  - name: centOS
 #    type: Unity::VM::GPU
 #    image: package-ci/centos:latest
