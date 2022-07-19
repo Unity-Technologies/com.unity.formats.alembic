@@ -123,6 +123,33 @@ pack:
     - .yamato/upm-ci.yml#build_mac
     - .yamato/upm-ci.yml#build_centOS
 
+docs-validate:
+  name: API docs validation via upm-pvp
+  agent:
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
+    flavor: b1.large
+  variables:
+    UPMCI_PKG: upm-ci-utils@stable
+  commands:
+    # Needed for now, until we get a recent upm-pvp into the image.
+    - sudo apt-get update && sudo apt-get install -y upm-pvp
+    - npm install -g "$UPMCI_PKG" --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    # Download Unity.
+    - unity-downloader-cli --fast --wait -u 2020.2 -c editor
+    # Run PVS in PVP mode.
+    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
+    # Require that PVP-20-1 (API docs validation) passed.
+    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
+  artifacts:
+    pvp:
+      paths:
+        - upm-ci~/pvp/**
+    logs:
+      paths:
+        - upm-ci~/test-results/**
+  dependencies:
+    - .yamato/upm-ci.yml#pack
 
 {% for editor in editors %}
 {% for platform in platforms %}
