@@ -137,6 +137,7 @@ docs-validate:
     - npm install -g "$UPMCI_PKG" --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     # Download Unity.
     - unity-downloader-cli --fast --wait -u 2020.2 -c editor
+    - cd $YAMATO_WORK_DIR
     # Run PVS in PVP mode.
     - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
     # Require that PVP-20-1 (API docs validation) passed.
