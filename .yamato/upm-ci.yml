@@ -132,7 +132,7 @@ docs-validate:
   commands:
     # Needed for now, until we get a recent upm-pvp into the image.
     - choco install upm-pvp -y -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
-    - npm install upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path com.unity.formats.alembic
     # Download Unity.
     - unity-downloader-cli --fast --wait -u 2020.2 -c editor
