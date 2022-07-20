@@ -135,9 +135,9 @@ docs-validate:
     # Needed for now, until we get a recent upm-pvp into the image.
     - sudo apt-get update && sudo apt-get install -y upm-pvp
     - npm install -g "$UPMCI_PKG" --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - upm-ci package pack --package-path com.unity.formats.alembic
     # Download Unity.
     - unity-downloader-cli --fast --wait -u 2020.2 -c editor
-    - cd $YAMATO_WORK_DIR
     # Run PVS in PVP mode.
     - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
     # Require that PVP-20-1 (API docs validation) passed.
@@ -149,8 +149,6 @@ docs-validate:
     logs:
       paths:
         - upm-ci~/test-results/**
-  dependencies:
-    - .yamato/upm-ci.yml#pack
 
 {% for editor in editors %}
 {% for platform in platforms %}
