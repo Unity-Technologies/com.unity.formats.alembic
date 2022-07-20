@@ -127,13 +127,13 @@ docs-validate:
   name: API docs validation via upm-pvp
   agent:
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/win10:stable
     flavor: b1.large
   variables:
     UPMCI_PKG: upm-ci-utils@stable
   commands:
     # Needed for now, until we get a recent upm-pvp into the image.
-    - sudo apt-get update && sudo apt-get install -y upm-pvp
+    - choco install upm-pvp -y -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
     - npm install -g "$UPMCI_PKG" --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path com.unity.formats.alembic
     # Download Unity.
