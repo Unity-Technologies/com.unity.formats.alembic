@@ -24,17 +24,13 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 
         #region properties
-        /// <summary>
-        /// Reference to the Alembic recorder (lower level class that implements most of the functionality).
-        /// </summary>
+ 
         public AlembicRecorder Recorder { get { return m_recorder; } }
         /// <summary>
         /// Enable to start capturing immediately after entering the Play Mode.
         /// </summary>
         public bool CaptureOnStart { get { return m_captureOnStart; } set { m_captureOnStart = value; } }
-        /// <summary>
-        /// Enable to skip capturing the first frame (only available when CaptureOnStart is enabled).
-        /// </summary>
+
         public bool IgnoreFirstFrame { get { return m_ignoreFirstFrame; } set { m_ignoreFirstFrame = value; } }
         /// <summary>
         /// Get or set the number of frames to capture. If set to 0, the capture runs indefinitely.
