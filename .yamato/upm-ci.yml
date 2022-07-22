@@ -59,6 +59,32 @@ bizarro_standalone_platforms:
   #  runtime: stadia
 
 ---
+docs-validate:
+  name: API docs validation
+  agent:
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
+    flavor: b1.large
+  commands:
+    # Needed for now, until we get a recent upm-pvp into the image.
+    - sudo apt-get update && sudo apt-get install -y upm-pvp
+    - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - python -c "import json, sys; m = json.load(open(sys.argv[1])); m['dependencies']['com.unity.modules.imgui'] = '1.0.0';  json.dump(m, open(sys.argv[1], 'w'))" com.unity.formats.alembic/package.json
+    - upm-ci package pack --package-path com.unity.formats.alembic
+    # Download Unity.
+    - unity-downloader-cli --fast --wait -u 2020.2 -c editor
+    # Run PVS in PVP mode.
+    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
+    # Require that PVP-20-1 (API docs validation) passed.
+    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
+  artifacts:
+    pvp:
+      paths:
+        - upm-ci~/pvp/**
+    logs:
+      paths:
+        - upm-ci~/test-results/**
+
 build_win:
   name: Build Win
   agent:
@@ -123,6 +149,31 @@ pack:
     - .yamato/upm-ci.yml#build_mac
     - .yamato/upm-ci.yml#build_centOS
 
+docs-validate:
+  name: API docs validation via upm-pvp
+  agent:
+    type: Unity::VM
+    image: package-ci/win10:stable
+    flavor: b1.large
+  commands:
+    # Needed for now, until we get a recent upm-pvp into the image.
+    - choco install upm-pvp -y -s https://artifactory.prd.it.unity3d.com/artifactory/api/nuget/unity-choco-local
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - python -c "import json, sys; m = json.load(open(sys.argv[1])); m['dependencies']['com.unity.modules.imgui'] = '1.0.0';  json.dump(m, open(sys.argv[1], 'w'))" com.unity.formats.alembic/package.json
+    - upm-ci package pack --package-path com.unity.formats.alembic
+    # Download Unity.
+    - unity-downloader-cli --fast --wait -u 2020.2 -c editor
+    # Run PVS in PVP mode.
+    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
+    # Require that PVP-20-1 (API docs validation) passed.
+    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
+  artifacts:
+    pvp:
+      paths:
+        - upm-ci~/pvp/**
+    logs:
+      paths:
+        - upm-ci~/test-results/**
 
 {% for editor in editors %}
 {% for platform in platforms %}
@@ -135,7 +186,7 @@ test_{{ platform.name }}_{{ editor.version }}:
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      #- {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
-     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
+     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --extra-create-project-arg="-upmNoDefaultPackages"
   artifacts:
     logs.zip:
       paths:
