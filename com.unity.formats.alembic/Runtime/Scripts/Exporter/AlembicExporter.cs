@@ -24,6 +24,9 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 
         #region properties
+        /// <summary>
+        /// Reference to the Alembic recorder (lower level class that implements most of the functionality).
+        /// </summary>
         public AlembicRecorder Recorder { get { return m_recorder; } }
         /// <summary>
         /// Enable to start capturing immediately after entering the Play Mode.
