@@ -69,6 +69,8 @@ docs-validate:
     # Needed for now, until we get a recent upm-pvp into the image.
     - sudo apt-get update && sudo apt-get install -y upm-pvp
     - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    # Add 'com.unity.modules.imgui' dependency to alembic package because its upstream package 'com.unity.timeline' misses this dependency. 
+    # If not adding this dependency, upm-pvp will fail to run because of compilation errors.
     - python -c "import json, sys; m = json.load(open(sys.argv[1])); m['dependencies']['com.unity.modules.imgui'] = '1.0.0';  json.dump(m, open(sys.argv[1], 'w'))" com.unity.formats.alembic/package.json
     - upm-ci package pack --package-path com.unity.formats.alembic
     # Download Unity.
