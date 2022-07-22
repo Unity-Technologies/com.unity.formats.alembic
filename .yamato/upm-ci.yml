@@ -149,6 +149,7 @@ pack:
     - .yamato/upm-ci.yml#build_mac
     - .yamato/upm-ci.yml#build_centOS
 
+
 {% for editor in editors %}
 {% for platform in platforms %}
 test_{{ platform.name }}_{{ editor.version }}:
@@ -160,7 +161,7 @@ test_{{ platform.name }}_{{ editor.version }}:
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      #- {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
-     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --extra-create-project-arg="-upmNoDefaultPackages"
+     - {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
   artifacts:
     logs.zip:
       paths:
