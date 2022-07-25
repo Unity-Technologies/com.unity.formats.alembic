@@ -86,5 +86,11 @@ namespace Tests
             var pos = go.GetComponentInChildren<MeshFilter>().transform.position;
             Assert.IsTrue(Vector3.Distance(pos, new Vector3(4.96666f, 0, 0)) < 1e-3);
         }
+
+        public IEnumerator AnimationEvent_InvokeMethodWithIntArgument()
+        {
+            Assert.IsTrue(true);
+            yield return null;
+        }
     }
 }
