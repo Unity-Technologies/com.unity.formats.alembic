@@ -59,6 +59,34 @@ bizarro_standalone_platforms:
   #  runtime: stadia
 
 ---
+docs-validate:
+  name: API docs validation
+  agent:
+    type: Unity::VM
+    image: package-ci/ubuntu:stable
+    flavor: b1.large
+  commands:
+    # Needed for now, until we get a recent upm-pvp into the image.
+    - sudo apt-get update && sudo apt-get install -y upm-pvp
+    - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    # Add 'com.unity.modules.imgui' dependency to alembic package because its upstream package 'com.unity.timeline' misses this dependency. 
+    # If not adding this dependency, upm-pvp will fail to run because of compilation errors.
+    - python -c "import json, sys; m = json.load(open(sys.argv[1])); m['dependencies']['com.unity.modules.imgui'] = '1.0.0';  json.dump(m, open(sys.argv[1], 'w'))" com.unity.formats.alembic/package.json
+    - upm-ci package pack --package-path com.unity.formats.alembic
+    # Download Unity.
+    - unity-downloader-cli --fast --wait -u 2020.2 -c editor
+    # Run PVS in PVP mode.
+    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
+    # Require that PVP-20-1 (API docs validation) passed.
+    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
+  artifacts:
+    pvp:
+      paths:
+        - upm-ci~/pvp/**
+    logs:
+      paths:
+        - upm-ci~/test-results/**
+
 build_win:
   name: Build Win
   agent:
@@ -253,6 +281,7 @@ test_trigger:
     cancel_old_ci: true
     expression: pull_request.target match ".*"
   dependencies:
+    - .yamato/upm-ci.yml#docs-validate
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
