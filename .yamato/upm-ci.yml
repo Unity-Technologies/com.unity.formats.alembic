@@ -339,6 +339,8 @@ testBizarroStandalone_{{ platform.name }}:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
+  variables:
+     UPMCI_ACK_DEPRECATED_PYTHON_UNITY_DOWNLOADER: 1
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      - {% if platform.name == 'centOS' platform.name == 'stadia' %} DISPLAY=:0 {% endif %}  upm-ci project test  --project-path TestProjects/AlembicStandaloneBuild --type project-tests --unity-version 2021.1 --platform {{ platform.runtime }}
