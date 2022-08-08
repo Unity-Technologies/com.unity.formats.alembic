@@ -7,7 +7,9 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:stable
+    # win10:stable fails clean console test in trunk because of warning: Unity is running with Administrator privileges, which is not supported.
+    # Use win10:v2.0.1 which has UAC enabled to workaround that.
+    image: package-ci/win10:v2.0.1
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
