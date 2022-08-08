@@ -160,6 +160,8 @@ test_{{ platform.name }}_{{ editor.version }}:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
+  variables:
+    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      #- {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
