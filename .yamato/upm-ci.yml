@@ -233,13 +233,6 @@ test_trigger_hdrp:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
-    {%- comment -%}
-    # Disable hdrp test in trunk on Mac for now which fails nightly trigger because: 
-    # First the test doesn't test too much. Second, we believe the failure is caused by HDRP in trunk
-    {%- endcomment -%}
-    {%- if editor.version == 'trunk' and platform.name == 'mac' -%}
-    {%- continue -%}
-    {%- endif -%}
     - .yamato/upm-ci.yml#testProject_hdrp_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
