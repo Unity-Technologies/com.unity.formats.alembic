@@ -2,6 +2,7 @@ editors:
   - version: 2019.4
   - version: 2020.2
   - version: 2021.1
+  - version: 2022.2
   - version: trunk
 
 platforms:
