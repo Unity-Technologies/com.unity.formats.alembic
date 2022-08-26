@@ -2,6 +2,7 @@ editors:
   - version: 2019.4
   - version: 2020.2
   - version: 2021.1
+  - version: 2022.2
   - version: trunk
 
 platforms:
@@ -268,6 +269,13 @@ test_trigger_hdrp:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
+    {%- comment -%}
+    # Disable hdrp test for 2022.2 on Mac because of '[Assert] Assertion failed on expression: 'localPagePos <= page.allocatedSize''
+    # This is an HDRP issue and has been fixed in trunk, but apprantly not fixed in 2022.2
+    {%- endcomment -%}
+    {%- if editor.version == '2022.2' and platform.name == 'mac' -%}
+    {%- continue -%}
+    {%- endif -%}
     - .yamato/upm-ci.yml#testProject_hdrp_{{platform.name}}_{{editor.version}}
     {% endfor %}
     {% endfor %}
