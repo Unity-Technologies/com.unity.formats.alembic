@@ -17,8 +17,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         public Camera GetOrAddCamera()
         {
-            var c = abcTreeNode.gameObject.GetComponent<Camera>();
-            if (c == null)
+            if (!abcTreeNode.gameObject.TryGetComponent<Camera>(out var c))
             {
                 c = abcTreeNode.gameObject.AddComponent<Camera>();
                 c.usePhysicalProperties = true;

@@ -322,8 +322,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 if (split.host == null)
                     continue;
 
-                var mf = split.host.GetComponent<MeshFilter>();
-                if (mf != null)
+                if (split.host.TryGetComponent<MeshFilter>(out var mf))
                     mf.sharedMesh = split.mesh;
             }
 #endif

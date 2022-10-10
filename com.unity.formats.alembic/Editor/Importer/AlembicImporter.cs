@@ -543,8 +543,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         void CollectSubAssets(Subassets subassets, AlembicTreeNode node)
         {
             int submeshCount = 0;
-            var meshFilter = node.gameObject.GetComponent<MeshFilter>();
-            if (meshFilter != null)
+            if (node.gameObject.TryGetComponent<MeshFilter>(out var meshFilter))
             {
                 var m = meshFilter.sharedMesh;
                 submeshCount = m.subMeshCount;
@@ -552,8 +551,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 subassets.Add(node.abcObject.abcObject.fullname, m);
             }
 
-            var renderer = node.gameObject.GetComponent<MeshRenderer>();
-            if (renderer != null)
+            if (node.gameObject.TryGetComponent<MeshRenderer>(out var renderer))
             {
                 var mats = new Material[submeshCount];
                 for (int i = 0; i < submeshCount; ++i)
@@ -561,8 +559,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 renderer.sharedMaterials = mats;
             }
 
-            var apr = node.gameObject.GetComponent<AlembicPointsRenderer>();
-            if (apr != null)
+            if (node.gameObject.TryGetComponent<AlembicPointsRenderer>(out var apr))
             {
                 var cubeGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 apr.InstancedMesh = cubeGO.GetComponent<MeshFilter>().sharedMesh;
