@@ -158,6 +158,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool constantUV1 { get; set; }
         public Bool constantRgba { get; set; }
         public Bool constantRgb { get; set; }
+        public int numV2FVertexProperties { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -202,6 +203,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* uv1;
         public void* rgba;
         public void* rgb;
+        public void* v2fProps;
+
 
         public IntPtr indices;
 

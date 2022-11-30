@@ -148,6 +148,7 @@ struct aiMeshSummary
     bool constant_uv1 = false;
     bool constant_rgba = false;
     bool constant_rgb = false;
+    int numV2FVertexProperties = 0;
 };
 
 struct aiMeshSampleSummary
@@ -189,6 +190,7 @@ struct aiPolyMeshData
     abcV2 *uv1 = nullptr;
     abcV4 *rgba = nullptr;
     abcV4 *rgb = nullptr;
+    void **v2fParams = nullptr;
     int *indices = nullptr;
 
     int vertex_count = 0;
@@ -196,6 +198,8 @@ struct aiPolyMeshData
 
     abcV3 center = { 0.0f, 0.0f, 0.0f };
     abcV3 extents = { 0.0f, 0.0f, 0.0f };
+
+    // need the data for c#
 };
 
 struct aiSubmeshData
