@@ -36,6 +36,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public NativeArray<Vector2> uv1;
             public NativeArray<Color> rgba;
             public NativeArray<Color> rgb;
+            public UnsafeList<NativeArray<Vector2>> v2fParams;
 
             public Mesh mesh;
             public GameObject host;
@@ -61,6 +62,18 @@ namespace UnityEngine.Formats.Alembic.Importer
                 uv1.DisposeIfPossible();
                 rgba.DisposeIfPossible();
                 rgb.DisposeIfPossible();
+
+                if (v2fParams.IsCreated)
+                {
+                    foreach (var t in v2fParams)
+                    {
+                        var v2FParam = t;
+                        v2FParam.DisposeIfPossible();
+                    }
+
+                    v2fParams.Dispose();
+                }
+
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
                     DestroyUnityObject(mesh);
@@ -254,6 +267,38 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.rgb.ResizeIfNeeded(0);
                 }
                 vertexData.rgb = split.rgb.GetPointer();
+
+                if (m_summary.numV2FVertexProperties > 0 && topologyChanged)
+                {
+                    if (!split.v2fParams.IsCreated)
+                    {
+                        split.v2fParams =
+                            new UnsafeList<NativeArray<Vector2>>(m_summary.numV2FVertexProperties,
+                                Allocator.Persistent);
+                    }
+
+                    var prevSize = split.v2fParams.Length;
+                    split.v2fParams.Resize(m_summary.numV2FVertexProperties);
+                    for (var i = prevSize; i < split.v2fParams.Length; ++i)
+                    {
+                        split.v2fParams[i] = new NativeArray<Vector2>(0, Allocator.Persistent);
+                    }
+
+
+                    using (var v2fs = new NativeArray<IntPtr>(m_summary.numV2FVertexProperties, Allocator.Temp))
+                    {
+                        for (var i = 0; i < m_summary.numV2FVertexProperties; ++i)
+                        {
+                            var arr = split.v2fParams[i];
+                            arr.ResizeIfNeeded(vertexCount);
+                            var nativeArray = v2fs;
+                            nativeArray[i] = new IntPtr(arr.GetPointer());
+                            split.v2fParams[i] = arr;
+                        }
+
+                        vertexData.v2fProps = v2fs.GetUnsafePtr();
+                    }
+                }
 
                 m_splitData[spi] = vertexData;
             }
