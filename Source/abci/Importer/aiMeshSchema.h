@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include "aiMeshOps.h"
 
 namespace
@@ -13,6 +14,15 @@ namespace
         }
     }
 }
+
+struct FixedString128
+{
+    static constexpr size_t MaxLength = 126;
+    unsigned short Length;
+    char String[MaxLength];
+};
+
+
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
 
@@ -86,6 +96,7 @@ public:
     void fillSplitVertices(int split_index, aiPolyMeshData &data) const;
     void fillSubmeshIndices(int submesh_index, aiSubmeshData &data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
+    char* readPropertyName(int index);
 
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
@@ -98,7 +109,8 @@ public:
     Abc::Box3d m_bounds;
 
     std::vector<AbcGeom::IV2fGeomParam::Sample> m_IV2fGeomParam_sp;
-    std::vector<IArray<abcV2> > m_IV2fGeomParam_ref;
+    std::vector<FixedString128> m_IV2fGeomParamName;
+    std::vector<IArray<abcV2>> m_IV2fGeomParam_ref; // useless for now
     std::vector<RawVector<abcV2> >m_IV2fGeomParam;
 
     IArray<abcV3> m_points_ref;
@@ -566,9 +578,16 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
         sample.m_IV2fGeomParam_ref = std::vector<IArray<abcV2> >(m_IV2fGeomParam.size());
     }
 
+    if (sample.m_IV2fGeomParamName.size() !=m_IV2fGeomParam.size()  )
+    {
+        sample.m_IV2fGeomParamName = std::vector<FixedString128>(m_IV2fGeomParam.size());
+    }
+
     for (int i=0;i<m_IV2fGeomParam.size();++i)
     {
         auto param = m_IV2fGeomParam[i];
+       // sample.m_IV2fGeomParamName[i]. = param.getName();
+        strncpy(sample.m_IV2fGeomParamName[i].String, param.getName().c_str(), std::min(FixedString128::MaxLength, param.getName().size()));
         param.getIndexed(sample.m_IV2fGeomParam_sp[i], ss);
         /// deal with interpolation
 
@@ -1014,6 +1033,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
 
     for (int i=0;i<sample.m_IV2fGeomParam_sp.size(); ++i)
     {
+        sample.m_IV2fGeomParam_ref[i] = sample.m_IV2fGeomParam[i];
         auto sp = sample.m_IV2fGeomParam_sp[i];
         if (sp.valid())
         {
@@ -1251,6 +1271,18 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData &data) c
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
+
+    for (int i=0;i<m_IV2fGeomParam_ref.size();++i)
+    {
+        auto ref = m_IV2fGeomParam_ref[i];
+        auto target = m_IV2fGeomParam[i];
+        ref = target;
+        abcV2 *dst = data.v2fParams[i];
+        copy_or_clear(dst, ref, split);
+
+       // data.v2fParamNames[i] = m_IV2fGeomParamName[i];
+      //  strncpy(data.v2fParamNames[i].String, m_IV2fGeomParamName[i].String, FixedString128::MaxLength);
+    }
 }
 
 template<typename T>
@@ -1273,4 +1305,10 @@ void aiMeshSample<T>::fillVertexBuffer(aiPolyMeshData * vbs, aiSubmeshData * ibs
         fillSplitVertices(spi, vbs[spi]);
     for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
         fillSubmeshIndices(smi, ibs[smi]);
+}
+
+template<typename T>
+char* aiMeshSample<T>::readPropertyName(int idx)
+{
+    return &(m_IV2fGeomParamName[idx].String[0]);
 }

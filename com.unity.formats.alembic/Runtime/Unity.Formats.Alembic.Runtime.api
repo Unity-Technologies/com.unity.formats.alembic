@@ -37,8 +37,14 @@ namespace UnityEngine.Formats.Alembic.Importer
 
     public class AlembicCustomData : UnityEngine.MonoBehaviour
     {
+        public System.Collections.Generic.List<UnityEngine.Formats.Alembic.Importer.AlembicCustomData.V2FAttribute> VertexAttributes;
         public System.Collections.Generic.List<string> FaceSetNames { get; }
         public AlembicCustomData() {}
+        public struct V2FAttribute
+        {
+            public Unity.Collections.NativeArray<UnityEngine.Vector2> Data;
+            public Unity.Collections.FixedString128Bytes Name;
+        }
     }
 
     [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour

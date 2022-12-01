@@ -37,6 +37,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public NativeArray<Color> rgba;
             public NativeArray<Color> rgb;
             public UnsafeList<NativeArray<Vector2>> v2fParams;
+            public NativeArray<FixedString128Bytes> v2fParamsNames;
 
             public Mesh mesh;
             public GameObject host;
@@ -72,6 +73,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                     }
 
                     v2fParams.Dispose();
+                }
+
+                if (v2fParamsNames.IsCreated)
+                {
+                    v2fParamsNames.Dispose();
                 }
 
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
@@ -284,6 +290,13 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.v2fParams[i] = new NativeArray<Vector2>(0, Allocator.Persistent);
                     }
 
+                    if (!split.v2fParamsNames.IsCreated)
+                    {
+                        split.v2fParamsNames =
+                            new NativeArray<FixedString128Bytes>(m_summary.numV2FVertexProperties,
+                                Allocator.Persistent);
+                    }
+
 
                     using (var v2fs = new NativeArray<IntPtr>(m_summary.numV2FVertexProperties, Allocator.Temp))
                     {
@@ -298,6 +311,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                         vertexData.v2fProps = v2fs.GetUnsafePtr();
                     }
+                   // vertexData.v2fPropsNames = split.v2fParamsNames.GetUnsafePtr();
                 }
 
                 m_splitData[spi] = vertexData;
@@ -467,6 +481,17 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
                         split.mesh.SetColors(split.rgb);
+
+                    if (split.v2fParams.Length > 0)
+                    {
+                       // FixedString128Bytes name = new FixedString128Bytes();
+                        var customData = split.host.GetOrAddComponent<AlembicCustomData>();
+                       // foreach (var param in split.v2fParamsNames)
+                        {
+                            var name = m_abcSchema.sample.PolyMeshReadPropertyName(0);
+                            Debug.Log(name);
+                        }
+                    }
 
                     // update the bounds
                     var data = m_splitData[s];
