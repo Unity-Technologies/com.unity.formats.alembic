@@ -44,6 +44,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             public Unity.Collections.NativeArray<UnityEngine.Vector2> Data;
             public Unity.Collections.FixedString128Bytes Name;
+            public V2FAttribute(Unity.Collections.FixedString128Bytes name, Unity.Collections.NativeArray<UnityEngine.Vector2> data) {}
         }
     }
 
