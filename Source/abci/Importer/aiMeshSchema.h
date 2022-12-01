@@ -110,7 +110,6 @@ public:
 
     std::vector<AbcGeom::IV2fGeomParam::Sample> m_IV2fGeomParam_sp;
     std::vector<FixedString128> m_IV2fGeomParamName;
-    std::vector<IArray<abcV2>> m_IV2fGeomParam_ref; // useless for now
     std::vector<RawVector<abcV2> >m_IV2fGeomParam;
 
     IArray<abcV3> m_points_ref;
@@ -246,6 +245,18 @@ static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner
     {
         if (!src.empty())
             src.copy_to(dst, split.vertex_count, split.vertex_offset);
+        else
+            memset(dst, 0, split.vertex_count * sizeof(T));
+    }
+}
+
+template<class T>
+static inline void copy_or_clear(T* dst, const RawVector<T>& src, const MeshRefiner::Split& split)
+{
+    if (dst)
+    {
+        if (!src.empty())
+            memcpy(dst, src.data() + split.vertex_offset, sizeof(T) * split.vertex_count);
         else
             memset(dst, 0, split.vertex_count * sizeof(T));
     }
@@ -571,11 +582,6 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
     if (sample.m_IV2fGeomParam_sp.size() !=m_IV2fGeomParam.size()  )
     {
         sample.m_IV2fGeomParam_sp = std::vector<AbcGeom::IV2fGeomParam::Sample>(m_IV2fGeomParam.size());
-    }
-
-    if (sample.m_IV2fGeomParam_ref.size() !=m_IV2fGeomParam.size()  )
-    {
-        sample.m_IV2fGeomParam_ref = std::vector<IArray<abcV2> >(m_IV2fGeomParam.size());
     }
 
     if (sample.m_IV2fGeomParamName.size() !=m_IV2fGeomParam.size()  )
@@ -1033,7 +1039,6 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
 
     for (int i=0;i<sample.m_IV2fGeomParam_sp.size(); ++i)
     {
-        sample.m_IV2fGeomParam_ref[i] = sample.m_IV2fGeomParam[i];
         auto sp = sample.m_IV2fGeomParam_sp[i];
         if (sp.valid())
         {
@@ -1272,16 +1277,16 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData &data) c
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
 
-    for (int i=0;i<m_IV2fGeomParam_ref.size();++i)
+    if (data.v2fParams != nullptr)
     {
-        auto ref = m_IV2fGeomParam_ref[i];
-        auto target = m_IV2fGeomParam[i];
-        ref = target;
-        abcV2 *dst = data.v2fParams[i];
-        copy_or_clear(dst, ref, split);
+        for (int i = 0; i < m_IV2fGeomParam.size(); ++i)
+        {
+            abcV2 *dst = data.v2fParams[i];
+            copy_or_clear(dst, m_IV2fGeomParam[i], split);
 
-       // data.v2fParamNames[i] = m_IV2fGeomParamName[i];
-      //  strncpy(data.v2fParamNames[i].String, m_IV2fGeomParamName[i].String, FixedString128::MaxLength);
+            // data.v2fParamNames[i] = m_IV2fGeomParamName[i];
+            //  strncpy(data.v2fParamNames[i].String, m_IV2fGeomParamName[i].String, FixedString128::MaxLength);
+        }
     }
 }
 
