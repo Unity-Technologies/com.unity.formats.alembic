@@ -307,7 +307,7 @@ api_scrape_check_osx:
     flavor: m1.mac
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u editors.first.version -c Editor
+    - unity-downloader-cli -u {{ editors.first.version }} -c Editor
     - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/upm-ci.yml#pack       
@@ -324,7 +324,7 @@ api_scrape_check_win:
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u editors.first.version -c Editor
+    - unity-downloader-cli -u {{ editors.first.version }} -c Editor
     - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/upm-ci.yml#pack         
