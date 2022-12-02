@@ -1,6 +1,6 @@
 editors:
   - version: 2020.3
-  - version: 2021.1
+  - version: 2021.3
   - version: 2022.2
   - version: trunk
 
@@ -24,14 +24,12 @@ platforms:
     image: package-ci/ubuntu-20:stable
     flavor: b1.large
 
-
-
 standalone_platforms:
   - name: win
+    type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.large
     runtime: standalone
-    type: Unity::VM
   - name: mac
     type: Unity::VM::osx
     image: package-ci/mac:stable
