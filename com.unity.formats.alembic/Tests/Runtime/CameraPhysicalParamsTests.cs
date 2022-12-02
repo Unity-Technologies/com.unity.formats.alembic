@@ -65,7 +65,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [SetUp]
         public new void SetUp()
         {
-            var cam = Object.FindObjectOfType<Camera>();
+            var cam = Object.FindFirstObjectByType<Camera>();
             camParams.ToCamera(cam);
         }
 
