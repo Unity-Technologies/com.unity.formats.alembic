@@ -5,7 +5,8 @@
         "Unity.Formats.Alembic.Runtime",
         "Unity.Timeline",
         "Unity.Recorder.Editor",
-        "Unity.Timeline.Editor"
+        "Unity.Timeline.Editor",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Editor"
