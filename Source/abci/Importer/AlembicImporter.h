@@ -192,7 +192,7 @@ struct aiPolyMeshData
     abcV4 *rgba = nullptr;
     abcV4 *rgb = nullptr;
     abcV2 **v2fParams = nullptr;
-   // FixedString128* v2fParamNames = nullptr;
+    // FixedString128* v2fParamNames = nullptr;
     int *indices = nullptr;
 
     int vertex_count = 0;
@@ -350,5 +350,3 @@ abciAPI void            aiPointsFillData(aiPointsSample* sample, aiPointsData *d
 abciAPI const char*     aiPropertyGetName(aiProperty* prop);
 abciAPI aiPropertyType  aiPropertyGetType(aiProperty* prop);
 abciAPI void            aiPropertyCopyData(aiProperty* prop, const abcSampleSelector *ss, aiPropertyData *dst);
-
-
