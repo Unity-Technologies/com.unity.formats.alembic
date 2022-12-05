@@ -298,7 +298,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                         vertexData.v2fProps = v2fs.GetUnsafePtr();
                     }
-                   // vertexData.v2fPropsNames = split.v2fParamsNames.GetUnsafePtr();
+                    // vertexData.v2fPropsNames = split.v2fParamsNames.GetUnsafePtr();
                 }
 
                 m_splitData[spi] = vertexData;
@@ -455,8 +455,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.mesh.SetTangents(split.tangents);
                     if (split.uv0.Length > 0)
                         split.mesh.SetUVs(0, split.uv0);
-                   /* if (split.uv1.Length > 0)
-                        split.mesh.SetUVs(1, split.uv1);*/
+                    /* if (split.uv1.Length > 0)
+                         split.mesh.SetUVs(1, split.uv1);*/
                     if (split.velocities.Length > 0)
                     {
                         m_PostProcessJobs[s].Complete();
@@ -473,7 +473,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     {
                         var customData = split.host.GetOrAddComponent<AlembicCustomData>();
                         customData.ClearCustomAttributes();
-                        for (var i=0;i<split.v2fParams.Length;++i)
+                        for (var i = 0; i < split.v2fParams.Length; ++i)
                         {
                             var name = m_abcSchema.sample.PolyMeshReadPropertyName(i);
                             var d = split.v2fParams[i];
