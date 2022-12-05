@@ -204,7 +204,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* rgba;
         public void* rgb;
         public void* v2fProps;
-      //  public void* v2fPropsNames;
+        //  public void* v2fPropsNames;
 
         public IntPtr indices;
 

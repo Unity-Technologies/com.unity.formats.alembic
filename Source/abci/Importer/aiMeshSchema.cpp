@@ -7,7 +7,7 @@
 #include "aiMeshSchema.h"
 #include "aiSubD.h"
 
- constexpr size_t FixedString128::MaxLength;
+constexpr size_t FixedString128::MaxLength;
 
 aiMeshTopology::aiMeshTopology()
 {

@@ -74,7 +74,7 @@ public:
     RawVector<int> m_remap_rgba;
     RawVector<int> m_remap_rgb;
 
-    std::vector<RawVector<int>> m_remap_m_IV2fGeomParam;
+    std::vector<RawVector<int> > m_remap_m_IV2fGeomParam;
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -110,7 +110,7 @@ public:
 
     std::vector<AbcGeom::IV2fGeomParam::Sample> m_IV2fGeomParam_sp;
     std::vector<FixedString128> m_IV2fGeomParamName;
-    std::vector<RawVector<abcV2> >m_IV2fGeomParam;
+    std::vector<RawVector<abcV2> > m_IV2fGeomParam;
 
     IArray<abcV3> m_points_ref;
     IArray<abcV3> m_velocities_ref;
@@ -579,24 +579,23 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
         }
     }
 
-    if (sample.m_IV2fGeomParam_sp.size() !=m_IV2fGeomParam.size()  )
+    if (sample.m_IV2fGeomParam_sp.size() != m_IV2fGeomParam.size())
     {
         sample.m_IV2fGeomParam_sp = std::vector<AbcGeom::IV2fGeomParam::Sample>(m_IV2fGeomParam.size());
     }
 
-    if (sample.m_IV2fGeomParamName.size() !=m_IV2fGeomParam.size()  )
+    if (sample.m_IV2fGeomParamName.size() != m_IV2fGeomParam.size())
     {
         sample.m_IV2fGeomParamName = std::vector<FixedString128>(m_IV2fGeomParam.size());
     }
 
-    for (int i=0;i<m_IV2fGeomParam.size();++i)
+    for (int i = 0; i < m_IV2fGeomParam.size(); ++i)
     {
         auto param = m_IV2fGeomParam[i];
-       // sample.m_IV2fGeomParamName[i]. = param.getName();
+        // sample.m_IV2fGeomParamName[i]. = param.getName();
         strncpy(sample.m_IV2fGeomParamName[i].String, param.getName().c_str(), std::min(FixedString128::MaxLength, param.getName().size()));
         param.getIndexed(sample.m_IV2fGeomParam_sp[i], ss);
         /// deal with interpolation
-
     }
 
     auto bounds_param = this->m_schema.getSelfBoundsProperty();
@@ -1029,15 +1028,15 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     /// Arbitrary V2f attributes
     if (sample.m_IV2fGeomParam.size() != sample.m_IV2fGeomParam_sp.size())
     {
-        sample.m_IV2fGeomParam = std::vector<RawVector<abcV2>>(sample.m_IV2fGeomParam_sp.size());
+        sample.m_IV2fGeomParam = std::vector<RawVector<abcV2> >(sample.m_IV2fGeomParam_sp.size());
     }
 
     if (topology.m_remap_m_IV2fGeomParam.size() != sample.m_IV2fGeomParam_sp.size())
     {
-        topology.m_remap_m_IV2fGeomParam = std::vector<RawVector<int>>(sample.m_IV2fGeomParam_sp.size());
+        topology.m_remap_m_IV2fGeomParam = std::vector<RawVector<int> >(sample.m_IV2fGeomParam_sp.size());
     }
 
-    for (int i=0;i<sample.m_IV2fGeomParam_sp.size(); ++i)
+    for (int i = 0; i < sample.m_IV2fGeomParam_sp.size(); ++i)
     {
         auto sp = sample.m_IV2fGeomParam_sp[i];
         if (sp.valid())
@@ -1047,7 +1046,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
 
             if (sp.isIndexed() && sp.getIndices()->size() == refiner.indices.size())
             {
-                IArray<int> indices{(int *) sp.getIndices()->get(), sp.getIndices()->size()};
+                IArray<int> indices{(int *)sp.getIndices()->get(), sp.getIndices()->size()};
                 refiner.template addIndexedAttribute<abcV2>(src, indices, dst, topology.m_remap_m_IV2fGeomParam[i]);
             }
             else if (src.size() == refiner.indices.size())
