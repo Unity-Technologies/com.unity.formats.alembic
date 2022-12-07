@@ -526,7 +526,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var meshFlags = player.GetComponentsInChildren<MeshFilter>(includeInactive: true)
                 .Select(x => x.sharedMesh.hideFlags);
 
-            Assert.IsTrue(meshFlags.All(x=>(x & HideFlags.DontSave) != 0));
+            Assert.IsTrue(meshFlags.All(x => (x & HideFlags.DontSave) != 0));
         }
 
         static AlembicStreamPlayer LoadAndInstantiate(string guid)
