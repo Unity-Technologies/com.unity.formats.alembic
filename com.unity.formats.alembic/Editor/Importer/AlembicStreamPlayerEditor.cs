@@ -263,8 +263,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                AlembicImporterEditor.DisplayEnumProperty<NormalsMode>(settings.FindPropertyRelative("normals"));
-                AlembicImporterEditor.DisplayEnumProperty<TangentsMode>(settings.FindPropertyRelative("tangents"));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("normals"));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("tangents"));
                 EditorGUILayout.PropertyField(settings.FindPropertyRelative("flipFaces"));
                 EditorGUI.indentLevel--;
             }
