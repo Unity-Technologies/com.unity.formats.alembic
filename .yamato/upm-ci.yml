@@ -162,7 +162,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
 # Exclude 2019.4 from clean console test because of a known warning in console
-{% if editor.version == '2019.4' %}
+{% if editor.version != '2019.4' %}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
 {% endif %}
