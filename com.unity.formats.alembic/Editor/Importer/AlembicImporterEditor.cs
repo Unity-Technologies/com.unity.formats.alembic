@@ -186,7 +186,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty<AspectRatioMode>(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
@@ -396,30 +396,6 @@ namespace UnityEditor.Formats.Alembic.Importer
 
 
             return AssetDatabase.LoadAssetAtPath<Material>(path);
-        }
-
-        internal static void DisplayEnumProperty<T>(SerializedProperty prop, GUIContent guiContent = null) where T : Enum
-        {
-            if (guiContent == null)
-                guiContent = new GUIContent(prop.displayName);
-
-            var rect = EditorGUILayout.GetControlRect();
-
-            using(var scope = new EditorGUI.PropertyScope(rect, guiContent, prop)) {
-                EditorGUI.showMixedValue = prop.hasMultipleDifferentValues;
-                using (var check = new EditorGUI.ChangeCheckScope())
-                {
-                    var newValue = (T)EditorGUI.EnumPopup(rect,
-                        scope.content,
-                        (T)(object)prop.intValue);
-                    if (check.changed)
-                    {
-                        prop.intValue = (int)(object)newValue;
-                    }
-                }
-
-                EditorGUI.showMixedValue = false;
-            }
         }
     }
 

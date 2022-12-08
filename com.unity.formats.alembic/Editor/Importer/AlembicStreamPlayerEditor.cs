@@ -273,7 +273,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                AlembicImporterEditor.DisplayEnumProperty<AspectRatioMode>(settings.FindPropertyRelative("cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
