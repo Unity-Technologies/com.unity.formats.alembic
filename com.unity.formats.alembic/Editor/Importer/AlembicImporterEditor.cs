@@ -176,8 +176,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "normals"), Enum.GetNames(typeof(NormalsMode)));
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "tangents"), Enum.GetNames(typeof(TangentsMode)));
+                DisplayEnumProperty<NormalsMode>(serializedObject.FindProperty(pathSettings + "normals"));
+                DisplayEnumProperty<TangentsMode>(serializedObject.FindProperty(pathSettings + "tangents"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(pathSettings + "flipFaces"));
                 EditorGUI.indentLevel--;
             }
@@ -186,8 +186,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                DisplayEnumProperty(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), Enum.GetNames(typeof(AspectRatioMode)),
-                    new GUIContent("Aspect Ratio", ""));
+                DisplayEnumProperty<AspectRatioMode>(serializedObject.FindProperty(pathSettings + "cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
@@ -399,26 +398,28 @@ namespace UnityEditor.Formats.Alembic.Importer
             return AssetDatabase.LoadAssetAtPath<Material>(path);
         }
 
-        internal static void DisplayEnumProperty(SerializedProperty prop, string[] displayNames, GUIContent guicontent = null)
+        internal static void DisplayEnumProperty<T>(SerializedProperty prop, GUIContent guiContent = null) where T : Enum
         {
-            if (guicontent == null)
-                guicontent = new GUIContent(prop.displayName);
+            if (guiContent == null)
+                guiContent = new GUIContent(prop.displayName);
 
             var rect = EditorGUILayout.GetControlRect();
-            EditorGUI.BeginProperty(rect, guicontent, prop);
-            EditorGUI.showMixedValue = prop.hasMultipleDifferentValues;
-            EditorGUI.BeginChangeCheck();
 
-            var options = new GUIContent[displayNames.Length];
-            for (int i = 0; i < options.Length; ++i)
-                options[i] = new GUIContent(ObjectNames.NicifyVariableName(displayNames[i]), "");
+            using(var scope = new EditorGUI.PropertyScope(rect, guiContent, prop)) {
+                EditorGUI.showMixedValue = prop.hasMultipleDifferentValues;
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    var newValue = (T)EditorGUI.EnumPopup(rect,
+                        scope.content,
+                        (T)(object)prop.intValue);
+                    if (check.changed)
+                    {
+                        prop.intValue = (int)(object)newValue;
+                    }
+                }
 
-            var normalsModeNew = EditorGUI.Popup(rect, guicontent, prop.intValue, options);
-            if (EditorGUI.EndChangeCheck())
-                prop.intValue = normalsModeNew;
-
-            EditorGUI.showMixedValue = false;
-            EditorGUI.EndProperty();
+                EditorGUI.showMixedValue = false;
+            }
         }
     }
 
