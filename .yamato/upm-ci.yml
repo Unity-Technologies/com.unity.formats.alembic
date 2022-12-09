@@ -1,7 +1,7 @@
 editors:
   - version: 2019.4
-  - version: 2020.2
-  - version: 2021.1
+  - version: 2020.3
+  - version: 2021.3
   - version: 2022.2
   - version: trunk
 
@@ -25,14 +25,12 @@ platforms:
     image: package-ci/ubuntu-20:stable
     flavor: b1.large
 
-
-
 standalone_platforms:
   - name: win
+    type: Unity::VM
     image: package-ci/win10:stable
     flavor: b1.large
     runtime: standalone
-    type: Unity::VM
   - name: mac
     type: Unity::VM::osx
     image: package-ci/mac:stable
@@ -163,8 +161,11 @@ test_{{ platform.name }}_{{ editor.version }}:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
+# Exclude 2019.4 from clean console test because of a known warning in console
+{% if editor.version != '2019.4' %}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
+{% endif %}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      #- {% if platform.name == 'centOS' %} DISPLAY=:0 {% endif %} upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic --enable-code-coverage --code-coverage-options 'enableCyclomaticComplexity;generateHtmlReport'
@@ -310,7 +311,7 @@ api_scrape_check_osx:
     flavor: m1.mac
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u 2019.4 -c Editor
+    - unity-downloader-cli -u {{ editors.first.version }} -c Editor
     - utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/upm-ci.yml#pack       
@@ -327,7 +328,7 @@ api_scrape_check_win:
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u 2019.4 -c Editor
+    - unity-downloader-cli -u {{ editors.first.version }} -c Editor
     - utr/utr.bat --suite=editor --editor-location=.Editor --testproject=TestProjects/APITests --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/upm-ci.yml#pack         
