@@ -453,6 +453,34 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [Test]
+        public void NormalsAlwaysComputeImportOptionWorks() {
+            const string badTriangleGUID = "6ee46b60872584073a7db242b67ec63d";
+            const string copyTrianglePath = "Assets/src.abc";
+
+            // create copy of bad triangle
+            var src = AssetDatabase.GUIDToAssetPath(badTriangleGUID);
+            File.Copy(src, copyTrianglePath);
+            deleteFileList.Add(copyTrianglePath);
+
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(copyTrianglePath) as AlembicImporter;
+            importer.StreamSettings.Normals = NormalsMode.AlwaysCalculate;
+            EditorUtility.SetDirty(importer);
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh();
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(copyTrianglePath).GetComponentInChildren<MeshFilter>().sharedMesh;
+            var expectedNormals = new Vector3[] {
+                    new (0.0f, 1.0f, 0.0f),
+                    new (0.0f, 1.0f, 0.0f),
+                    new (0.0f, 1.0f, 0.0f),
+            };
+
+            Assert.IsNotNull(mesh);
+            CollectionAssert.AreEqual(expectedNormals,mesh.normals);
+        }
+
+        [Test]
         public void ImporterAllowsNotImportingMeshesAfterMappingMaterials()
         {
             const string dst = "Assets/src.abc";
