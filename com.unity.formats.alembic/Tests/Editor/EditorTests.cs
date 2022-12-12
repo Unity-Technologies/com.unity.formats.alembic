@@ -481,7 +481,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             CollectionAssert.AreEqual(expectedNormals, mesh.normals);
         }
 
-        [Test] public void CalculateNormalsIfMissingImportOption_DoesNotRecalculateNormals()
+        [Test]
+        public void CalculateNormalsIfMissingImportOption_DoesNotRecalculateNormals()
         {
             const string badTriangleGUID = "6ee46b60872584073a7db242b67ec63d";
             const string copyTrianglePath = "Assets/src.abc";
