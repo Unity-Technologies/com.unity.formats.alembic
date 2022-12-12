@@ -472,9 +472,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(copyTrianglePath).GetComponentInChildren<MeshFilter>().sharedMesh;
             var expectedNormals = new Vector3[] {
-                    new Vector3(0.0f, 1.0f, 0.0f),
-                    new Vector3(0.0f, 1.0f, 0.0f),
-                    new Vector3(0.0f, 1.0f, 0.0f),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
             };
 
             Assert.IsNotNull(mesh);
