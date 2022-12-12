@@ -478,7 +478,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             };
 
             Assert.IsNotNull(mesh);
-            CollectionAssert.AreEqual(expectedNormals, mesh.normals);
+
+            Assert.AreEqual(expectedNormals.Length, mesh.normals.Length);
+            var dists = mesh.normals.Zip(expectedNormals, Vector3.Distance);
+            Assert.IsTrue(dists.All(d => d < 1e-5));
         }
 
         [Test]
