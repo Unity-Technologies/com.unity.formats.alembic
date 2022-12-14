@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Util;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -65,7 +65,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [SetUp]
         public new void SetUp()
         {
-            var cam = Object.FindObjectOfType<Camera>();
+            var cam = Camera.allCameras.First();
             camParams.ToCamera(cam);
         }
 
