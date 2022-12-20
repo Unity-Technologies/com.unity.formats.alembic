@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.1] - 2022-12-06
 ### Added
 ### Changed
+- The Editor will stop re-importing Alembic assets when a user changes their project quality settings (HDRP).
 ### Fixed
 
 ## [2.3.0] - 2022-01-28
