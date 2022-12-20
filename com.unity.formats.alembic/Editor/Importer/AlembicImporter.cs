@@ -374,7 +374,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
             else
             {
-                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline, out var guid,
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline.defaultMaterial, out var guid,
                     out long fileId))
                 {
                     newPipelineHash =
