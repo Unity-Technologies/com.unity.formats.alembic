@@ -1,6 +1,6 @@
-# Alembic Shot Asset clip asset
+# Alembic Shot Asset clip settings
 
-The Alembic Shot Asset is a clip asset that allows you to customize where to stop playback of the Alembic Shot clip in a Timeline:
+The Alembic Shot Asset allows you to customize where to stop playback of the Alembic Shot clip in a Timeline:
 
 ![The Alembic Shot component](images/abc_shot_options.png)
 
