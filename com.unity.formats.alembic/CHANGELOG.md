@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- Fix the Normals import settings of the Importer.
+- Fixed the Normals import settings of the Importer.
 
 ## [2.3.0] - 2022-01-28
 ### Added
