@@ -1,6 +1,6 @@
 # Alembic Curves Renderer component
 
-The Alembic Curves Renderer component allows you to visualize an Alembic curve in a basic way. Adding a Curves Renderer component automatically adds a Mesh Renderer component and a Mesh Filter component.
+The Alembic Curves Renderer component provides a basic representation of Alembic curves. Adding a Curves Renderer component automatically adds a Mesh Renderer component and a Mesh Filter component.
 
 ![The Alembic Curves Renderer component](images/abc_curves_renderer_options.png)
 
