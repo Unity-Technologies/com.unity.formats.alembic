@@ -453,6 +453,67 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [Test]
+        public void NormalsAlwaysComputeImportOptionWorks()
+        {
+            const string badTriangleGUID = "6ee46b60872584073a7db242b67ec63d";
+            const string copyTrianglePath = "Assets/src.abc";
+
+            // create copy of bad triangle
+            var src = AssetDatabase.GUIDToAssetPath(badTriangleGUID);
+            File.Copy(src, copyTrianglePath);
+            deleteFileList.Add(copyTrianglePath);
+
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(copyTrianglePath) as AlembicImporter;
+            importer.StreamSettings.Normals = NormalsMode.AlwaysCalculate;
+            EditorUtility.SetDirty(importer);
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh();
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(copyTrianglePath).GetComponentInChildren<MeshFilter>().sharedMesh;
+            var expectedNormals = new Vector3[] {
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+            };
+
+            Assert.IsNotNull(mesh);
+
+            Assert.AreEqual(expectedNormals.Length, mesh.normals.Length);
+            var dists = mesh.normals.Zip(expectedNormals, Vector3.Distance);
+            Assert.IsTrue(dists.All(d => d < 1e-5));
+        }
+
+        [Test]
+        public void CalculateNormalsIfMissingImportOption_DoesNotRecalculateNormals()
+        {
+            const string badTriangleGUID = "6ee46b60872584073a7db242b67ec63d";
+            const string copyTrianglePath = "Assets/src.abc";
+
+            // create copy of bad triangle
+            var src = AssetDatabase.GUIDToAssetPath(badTriangleGUID);
+            File.Copy(src, copyTrianglePath);
+            deleteFileList.Add(copyTrianglePath);
+
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            var importer = AssetImporter.GetAtPath(copyTrianglePath) as AlembicImporter;
+            importer.StreamSettings.Normals = NormalsMode.CalculateIfMissing;
+            EditorUtility.SetDirty(importer);
+            AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.Refresh();
+
+            var mesh = AssetDatabase.LoadAssetAtPath<GameObject>(copyTrianglePath).GetComponentInChildren<MeshFilter>().sharedMesh;
+            var expectedNormals = new Vector3[] {
+                new Vector3(-0, -0.998879254f, -0.0473323129f),
+                new Vector3(0.554307222f, 0.402543187f, -0.728493333f),
+                new Vector3(0.293467999f, -0.0240235999f, 0.955667019f),
+            };
+
+            Assert.IsNotNull(mesh);
+            CollectionAssert.AreEqual(expectedNormals, mesh.normals);
+        }
+
+        [Test]
         public void ImporterAllowsNotImportingMeshesAfterMappingMaterials()
         {
             const string dst = "Assets/src.abc";
