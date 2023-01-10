@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed an issue where a mesh from an Alembic file with visibility samples gets wrongly serialized in scenes.
 
 ## [2.3.0] - 2022-01-28
 ### Added
