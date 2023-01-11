@@ -21,9 +21,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         internal static readonly HashSet<KeyValuePair<string, string>> FilesToCopy = new HashSet<KeyValuePair<string, string>>();
         internal static bool HaveAlembicInstances = false;
         [PostProcessBuild]
-        public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
-        {
-            if (HaveAlembicInstances)
+        public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject) {
+            if ( HaveAlembicInstances )
             {
                 AlembicBuildAnalytics.SendAnalytics(target);
             }
