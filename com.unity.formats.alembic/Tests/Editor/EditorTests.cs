@@ -580,6 +580,16 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsNotNull(mesh);
         }
 
+        [Test]
+        public void InactiveMeshesAreNotSerializedInTheScene()
+        {
+            var player = LoadAndInstantiate("a648a7ac564ae48ef80f302ee12eb71d");
+            var meshFlags = player.GetComponentsInChildren<MeshFilter>(includeInactive: true)
+                .Select(x => x.sharedMesh.hideFlags);
+
+            Assert.IsTrue(meshFlags.All(x => (x & HideFlags.DontSave) != 0));
+        }
+
         static AlembicStreamPlayer LoadAndInstantiate(string guid)
         {
             var path = AssetDatabase.GUIDToAssetPath(guid);
