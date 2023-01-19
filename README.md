@@ -55,6 +55,6 @@ We appreciate all the help we can get to improve the Alembic for Unity package. 
 
 ![example](Screenshots/alembic_example.gif)
 
-## Reporting an issue
+## Support
 
-See the Alembic for Unity's team [recommendations](ISSUE_TEMPLATE.md) about the information you should ideally provide if you want to report an issue.
+For all questions or issues, please post on the [official Unity Forum](https://forum.unity.com/forums/virtual-production.466/) or directly inside the Unity editor using the [Bug Reporter tool](https://unity.com/releases/editor/qa/bug-reporting).
