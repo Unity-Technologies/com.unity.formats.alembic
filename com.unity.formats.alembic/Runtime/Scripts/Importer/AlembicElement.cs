@@ -1,8 +1,5 @@
 using System;
-using System.Runtime.InteropServices;
-using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
-
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -22,6 +19,10 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 c = abcTreeNode.gameObject.AddComponent<Camera>();
                 c.usePhysicalProperties = true;
+
+#if HDRP_AVAILABLE
+                abcTreeNode.gameObject.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
+#endif
             }
 
             return c;
