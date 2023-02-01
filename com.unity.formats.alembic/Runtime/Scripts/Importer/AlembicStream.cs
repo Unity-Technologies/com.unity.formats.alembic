@@ -301,7 +301,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             if (!serializeMesh)
             {
-                foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>())
+                foreach (var meshFilter in node.gameObject.GetComponentsInChildren<MeshFilter>(includeInactive: true))
                 {
                     if (meshFilter.sharedMesh != null)
                     {

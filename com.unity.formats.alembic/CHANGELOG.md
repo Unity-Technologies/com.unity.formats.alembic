@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fixed an issue where a mesh from an Alembic file with visibility samples gets wrongly serialized in scenes.
 - Fixed the Normals import settings of the Importer.
 - When a user changes HDRP quality settings, the Editor no longer re-imports Alembic assets.
 
