@@ -21,8 +21,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 c.usePhysicalProperties = true;
 
 #if HDRP_AVAILABLE
-                if (!c.TryGetComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>(out _))
-                    abcTreeNode.gameObject.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
+                if (!c.TryGetComponent<Rendering.HighDefinition.HDAdditionalCameraData>(out _))
+                    abcTreeNode.gameObject.AddComponent<Rendering.HighDefinition.HDAdditionalCameraData>();
+#elif true
+                if (!c.TryGetComponent<Rendering.Universal.UniversalAdditionalCameraData>(out _))
+                    abcTreeNode.gameObject.AddComponent<Rendering.Universal.UniversalAdditionalCameraData>();
 #endif
             }
 
