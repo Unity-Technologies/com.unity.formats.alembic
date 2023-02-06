@@ -22,18 +22,16 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             var camera = instance.GetComponentInChildren<Camera>();
 
-            Assert.That(camera.GetComponent<Rendering.HighDefinition.HDAdditionalCameraData>(), Is.Not.Null,
+            Assert.That(camera.GetComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>(), Is.Not.Null,
                 "HDAdditionalCameraData not found on camera gameobject.");
         }
-#endif
-
-#if URP_AVAILABLE
+#elif URP_AVAILABLE
         [Test]
         public void UniversalCamera_HasExtraComponent()
         {
             var camera = instance.GetComponentInChildren<Camera>();
 
-            Assert.That(camera.GetComponent<Rendering.Universal.UniversalAdditionalCameraData>(), Is.Not.Null,
+            Assert.That(camera.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>(), Is.Not.Null,
                 "UniversalAdditionalCameraData not found on camera gameobject.");
         }
 #endif

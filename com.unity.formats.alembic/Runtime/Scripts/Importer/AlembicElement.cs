@@ -23,7 +23,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 #if HDRP_AVAILABLE
                 if (!c.TryGetComponent<Rendering.HighDefinition.HDAdditionalCameraData>(out _))
                     abcTreeNode.gameObject.AddComponent<Rendering.HighDefinition.HDAdditionalCameraData>();
-#elif true
+#elif URP_AVAILABLE
                 if (!c.TryGetComponent<Rendering.Universal.UniversalAdditionalCameraData>(out _))
                     abcTreeNode.gameObject.AddComponent<Rendering.Universal.UniversalAdditionalCameraData>();
 #endif

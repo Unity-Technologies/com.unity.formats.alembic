@@ -4,6 +4,7 @@
     "references": [
         "Unity.Timeline",
         "Unity.Burst",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
         "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
@@ -26,7 +27,7 @@
             "define": "BURST_AVAILABLE"
         },
         {
-            "name": "com.unity.burst",
+            "name": "com.unity.render-pipelines.high-definition",
             "expression": "10",
             "define": "HDRP_AVAILABLE"
         },
