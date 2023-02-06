@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Unity.Timeline",
-        "Unity.Burst"
+        "Unity.Burst",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Editor",

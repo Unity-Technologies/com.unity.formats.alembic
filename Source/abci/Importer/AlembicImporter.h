@@ -16,6 +16,7 @@ class aiPolyMeshSample;     // : aiSample
 class aiSubDSample;         // : aiSample
 class aiPointsSample;       // : aiSample
 class aiCurves;
+struct FixedString128;
 #else
 // force make castable
 using aiSchema         = void;
@@ -148,6 +149,7 @@ struct aiMeshSummary
     bool constant_uv1 = false;
     bool constant_rgba = false;
     bool constant_rgb = false;
+    int numV2FVertexProperties = 0;
 };
 
 struct aiMeshSampleSummary
@@ -189,6 +191,8 @@ struct aiPolyMeshData
     abcV2 *uv1 = nullptr;
     abcV4 *rgba = nullptr;
     abcV4 *rgb = nullptr;
+    abcV2 **v2fParams = nullptr;
+    // FixedString128* v2fParamNames = nullptr;
     int *indices = nullptr;
 
     int vertex_count = 0;
@@ -196,6 +200,8 @@ struct aiPolyMeshData
 
     abcV3 center = { 0.0f, 0.0f, 0.0f };
     abcV3 extents = { 0.0f, 0.0f, 0.0f };
+
+    // need the data for c#
 };
 
 struct aiSubmeshData
@@ -322,6 +328,7 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
+abciAPI char*           aiPolyMeshReadPropertyName(aiPolyMeshSample* sample, int idx);
 
 abciAPI void            aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst);
 abciAPI void            aiSubDGetSampleSummary(aiSubDSample* sample, aiMeshSampleSummary* dst);

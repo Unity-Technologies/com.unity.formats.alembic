@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Unity.Collections;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -14,6 +16,37 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// Retrieves the set of Face Set names.
         /// </summary>
         public List<string> FaceSetNames => faceSetNames;
+
+        public struct V2FAttribute
+        {
+            public FixedString128Bytes Name;
+            public NativeArray<Vector2> Data;
+
+            public V2FAttribute(FixedString128Bytes name, NativeArray<Vector2> data)
+            {
+                Name = name;
+                Data = new NativeArray<Vector2>(data.Length, Allocator.Persistent);
+                Data.CopyFrom(data);
+            }
+        }
+
+        public List<V2FAttribute> VertexAttributes = new();
+
+        void OnDisable()
+        {
+            ClearCustomAttributes();
+        }
+
+        internal void ClearCustomAttributes()
+        {
+            foreach (var attribute in VertexAttributes)
+            {
+                var v2FAttribute = attribute;
+                v2FAttribute.Data.DisposeIfPossible();
+            }
+
+            VertexAttributes.Clear();
+        }
 
         internal void SetFacesetNames(List<string> names)
         {
