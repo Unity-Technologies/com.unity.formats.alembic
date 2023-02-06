@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.unity.coding": "0.1.0-preview.17",
     "com.unity.formats.alembic": "file:../../../com.unity.formats.alembic",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.package-validation-suite": "0.4.0-preview.12",
