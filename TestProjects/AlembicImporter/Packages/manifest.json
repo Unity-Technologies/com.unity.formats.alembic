@@ -13,7 +13,6 @@
     "com.unity.package-manager-doctools":"1.6.1-preview",
     "com.unity.formats.alembic": "file:../../../com.unity.formats.alembic",
     "com.unity.ide.rider": "1.1.4",
-    "com.unity.package-validation-suite": "0.4.0-preview.12",
     "com.unity.test-framework": "1.1.13",
     "com.unity.timeline": "1.2.6",
     "com.unity.modules.ai": "1.0.0",
