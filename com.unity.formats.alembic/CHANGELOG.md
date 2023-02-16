@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.1] - 2022-12-06
 ### Added
+- Comform the GameObject cameras to these rendering pipelines with the additional data at import time.
 ### Changed
 ### Fixed
 
