@@ -8,6 +8,7 @@ The **Alembic Point Cloud** component allows you to define the shape and volume 
 
 | ***Property*** | ***Description*** |
 |:---|:---|
+| **Script**        | The script that defines this component. You cannot modify this property. |
 | **Bounds Center** | Set the position in **X**, **Y**, and **Z** for the center of the particle cloud. |
 | **Bounds Extents** | Set the bounding limit for the particle cloud. Each **X**, **Y**, and **Z** value defines the maximum distance between the **Bounds Center** value and the extents of the bounding box (AABB). For more information, see the [Bounds struct reference page in the Unity manual](https://docs.unity3d.com/ScriptReference/Bounds.html). |
 | **Sort** | Check to enable particle sorting. Particle sorting allows you to set realistic particle effects by defining the order in which Unity renders particles. For example, the particles that are drawn last overlay the particles that were drawn earlier. |
