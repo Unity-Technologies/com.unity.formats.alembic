@@ -107,6 +107,7 @@ build_mac:
     image: package-ci/macos-12:v4
     flavor: m1.mac
   commands:
+    - brew install cmake
     - git submodule update --init --recursive
     - ./build.sh
   artifacts:
