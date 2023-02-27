@@ -3,7 +3,9 @@
     "rootNamespace": "",
     "references": [
         "Unity.Timeline",
-        "Unity.Burst"
+        "Unity.Burst",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
         "Editor",
@@ -23,6 +25,16 @@
             "name": "com.unity.burst",
             "expression": "1.1.1",
             "define": "BURST_AVAILABLE"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "10",
+            "define": "HDRP_AVAILABLE"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "10",
+            "define": "URP_AVAILABLE"
         }
     ],
     "noEngineReferences": false

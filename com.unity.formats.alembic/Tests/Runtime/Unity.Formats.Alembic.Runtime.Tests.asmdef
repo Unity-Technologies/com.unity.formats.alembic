@@ -1,11 +1,13 @@
 {
     "name": "Unity.Formats.Alembic.UnitTests.Runtime",
+    "rootNamespace": "",
     "references": [
         "Unity.Formats.Alembic.Runtime",
-        "Unity.Timeline"
-    ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
+        "Unity.Timeline",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
         "Editor",
@@ -15,8 +17,25 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": []
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "10",
+            "define": "HDRP_AVAILABLE"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "10",
+            "define": "URP_AVAILABLE"
+        }
+    ],
+    "noEngineReferences": false
 }
