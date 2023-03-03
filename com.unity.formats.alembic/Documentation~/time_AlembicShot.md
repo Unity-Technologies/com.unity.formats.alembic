@@ -8,7 +8,7 @@ To create an Alembic Shot:
 
 1. Drag a GameObject with an [Alembic Stream Player](ref_StreamPlayer.md) component onto the Clips view in Timeline.
 
-   If Timeline is empty, create a temporary track so that you can see the Clips view.
+   If Timeline is empty, create an Alembic Track so that you can see the Clips view.
 
    ![Alembic Clip Editor](images/abc_clip_editor.png)
 
@@ -17,5 +17,3 @@ To create an Alembic Shot:
    A new Alembic clip appears in the Clips view.
 
 3. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline window.
-
-4. If you want to change when the Alembic Shot clip stops playing, you can modify the __End Offset__ property on the [Alembic Shot Asset component](ref_Shot.md).
