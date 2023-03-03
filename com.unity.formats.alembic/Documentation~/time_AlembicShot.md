@@ -8,7 +8,7 @@ To create an Alembic Shot:
 
 1. Drag a GameObject with an [Alembic Stream Player](ref_StreamPlayer.md) component onto the Clips view in Timeline.
 
-   If Timeline is empty, create an Alembic Track so that you can see the Clips view.
+   If Timeline is empty, create an Alembic track so that you can see the Clips view.
 
    ![Alembic Clip Editor](images/abc_clip_editor.png)
 
