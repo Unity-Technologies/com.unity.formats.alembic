@@ -9,13 +9,11 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    # win10:stable fails clean console test in trunk because of warning: Unity is running with Administrator privileges, which is not supported.
-    # Use win10:v2.0.1 which has UAC enabled to workaround that.
-    image: package-ci/win10:v2.0.1
+    image: package-ci/win10:v4
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
 #  - name: centOS
 #    type: Unity::VM::GPU
@@ -23,25 +21,25 @@ platforms:
 #    flavor: b1.large
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu-20:stable
+    image: package-ci/ubuntu-20.04:v4
     flavor: b1.large
 
 standalone_platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
     runtime: standalone
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
     runtime: standalone
 
 bizarro_standalone_platforms:
   - name: mac_m2
     type: Unity::metal::devkit
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
     runtime: standalone
   - name: centOS
@@ -51,7 +49,7 @@ bizarro_standalone_platforms:
     runtime: standalone
   - name: ubuntu
     type: Unity::VM::GPU
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.large
     runtime: standalone
   #- name: stadia
@@ -65,7 +63,7 @@ docs-validate:
   name: API docs validation
   agent:
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.large
   commands:
     # Needed for now, until we get a recent upm-pvp into the image.
@@ -93,7 +91,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
@@ -107,9 +105,10 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
   commands:
+    - brew install cmake
     - git submodule update --init --recursive
     - ./build.sh
   artifacts:
@@ -136,7 +135,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
@@ -325,7 +324,7 @@ api_scrape_check_win:
   name : Check API Scrape on Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
@@ -391,7 +390,7 @@ publish_dry_run:
   name: PublishDryRun
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   variables:
@@ -420,7 +419,7 @@ publish:
   name: Publish
   agent:
     type: Unity::VM
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   variables:
