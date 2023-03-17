@@ -274,8 +274,8 @@ static inline uniform float3 normalize_estimate(uniform float3 v)
     return len == 0 ? v : v * rsqrt(len);
 }
 
-static inline float angle_between(float3 a, float3 b) { return acos(dot(a, b)); }
-static inline uniform float angle_between(uniform float3 a, uniform float3 b) { return acos(dot(a, b)); }
+static inline float angle_between(float3 a, float3 b) { return acos(clamp(dot(a, b), 0.0f, 1.0f)); }
+static inline uniform float angle_between(uniform float3 a, uniform float3 b) { return acos(clamp(dot(a, b), 0.0f, 1.0f)); }
 
 static inline float angle_between2_estimate(float3 pos1, float3 pos2, float3 center)
 {
