@@ -105,7 +105,7 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: package-ci/macos-12:v4
+    image: package-ci/mac:stable
     flavor: m1.mac
   commands:
     - brew install cmake
