@@ -9,11 +9,11 @@ set -e
 export CXXFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export CFLAGS="-O3 -fomit-frame-pointer -fPIC"
 
-OSX_DEPLOYMENT_TARGET=
+OSX_DEPL_TARGET=
 if [ "$(uname)" == "Darwin" ]; then
    export CXXFLAGS="${CXXFLAGS} -arch x86_64 -arch arm64"
    export CFLAGS="${CFLAGS} -arch x86_64 -arch arm64"
-   OSX_DEPLOYMENT_TARGET=10.14
+   OSX_DEPL_TARGET=10.14
 
 fi
 
@@ -37,7 +37,7 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DENABLE_DEPLOY=OFF \
     -DCMAKE_PREFIX_PATH=${depsdir} \
     -DCMAKE_INSTALL_PREFIX=${installdir} \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_DEPLOYMENT_TARGET}
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_DEPL_TARGET}
 
 cmake --build . --target install --config RelWithDebInfo
 popd
