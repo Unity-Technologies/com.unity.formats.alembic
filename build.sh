@@ -9,11 +9,11 @@ set -e
 export CXXFLAGS="-O3 -fomit-frame-pointer -fPIC"
 export CFLAGS="-O3 -fomit-frame-pointer -fPIC"
 
-OSX_DEPLOYMENT_TARGET=""
+OSX_DEPLOYMENT_TARGET=
 if [ "$(uname)" == "Darwin" ]; then
    export CXXFLAGS="${CXXFLAGS} -arch x86_64 -arch arm64"
    export CFLAGS="${CFLAGS} -arch x86_64 -arch arm64"
-   OSX_DEPLOYMENT_TARGET="10.14"
+   OSX_DEPLOYMENT_TARGET=10.14
 
 fi
 
