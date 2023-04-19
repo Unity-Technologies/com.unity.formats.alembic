@@ -21,7 +21,7 @@ platforms:
 #    flavor: b1.large
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu-20.04:v4.12.0
+    image: package-ci/ubuntu-20.04:v4.13.0-1283632
     flavor: b1.large
 
 standalone_platforms:
