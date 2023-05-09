@@ -1,0 +1,23 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+pack:
+  name: Pack
+  agent:
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
+  commands:
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - upm-ci package pack --package-path com.unity.formats.alembic
+  artifacts:
+   packages:
+     paths:
+       - "upm-ci~/packages/**/*"
+   build:
+     paths:
+       - "com.unity.formats.alembic/**/*"
+  dependencies:
+    - .yamato/build-plugins.yml#build_win
+    - .yamato/build-plugins.yml#build_mac
+    - .yamato/build-plugins.yml#build_centOS
