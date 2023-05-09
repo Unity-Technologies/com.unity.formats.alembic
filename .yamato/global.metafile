@@ -33,16 +33,16 @@ mac_platform_gpu: &mac_gpu
   flavor: m1.mac
 
 centos_platform_gpu: &centos_gpu
-  - name: centos_gpu
-    type: Unity::VM::GPU
-    image: package-ci/centos:latest
-    flavor: b1.large
+  name: centos_gpu
+  type: Unity::VM::GPU
+  image: package-ci/centos:latest
+  flavor: b1.large
 
 ubuntu18_platform_gpu: &ubuntu18_gpu
-  - name: ubuntu18_gpu
-    type: Unity::VM::GPU
-    image: package-ci/ubuntu-18.04:v4
-    flavor: b1.large
+  name: ubuntu18_gpu
+  type: Unity::VM::GPU
+  image: package-ci/ubuntu-18.04:v4
+  flavor: b1.large
 
 test_platforms:
   - *win
