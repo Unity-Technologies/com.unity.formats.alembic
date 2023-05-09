@@ -13,7 +13,7 @@ build_win:
   artifacts:
     plugin:
       paths:
-        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/abci"
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abc*"
 
 build_mac:
   name: Build on Mac
@@ -28,7 +28,7 @@ build_mac:
   artifacts:
     plugin:
       paths:
-        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll"
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.dll"
 
 build_centOS:
   name: Build on CentOS
@@ -42,4 +42,4 @@ build_centOS:
   artifacts:
     plugin:
       paths:
-        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.so"
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.so"
