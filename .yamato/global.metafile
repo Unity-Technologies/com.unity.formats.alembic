@@ -1,0 +1,76 @@
+test_editors:
+  - version: 2019.4
+  - version: 2020.3
+  - version: 2021.3
+  - version: 2022.2
+  - version: 2023.1
+  - version: trunk
+
+# Platforms used in CI
+win_platform: &win
+  name: win
+  type: Unity::VM
+  image: package-ci/win10:v4
+  flavor: b1.large
+
+mac_platform: &mac
+  name: mac
+  type: Unity::VM::osx
+  image: package-ci/macos-12:v4
+  flavor: m1.mac
+
+ubuntu20_platform: &ubuntu20
+  name: ubuntu20
+  type: Unity::VM
+  image: package-ci/ubuntu-20.04:v4
+  flavor: b1.large
+
+# Platform definitions with GPU
+mac_platform_gpu: &mac_gpu
+  name: mac_gpu
+  type: Unity::metal::macmini
+  image: package-ci/macos-12:v4
+  flavor: m1.mac
+
+centos_platform_gpu: &centos_gpu
+  - name: centos_gpu
+    type: Unity::VM::GPU
+    image: package-ci/centos:latest
+    flavor: b1.large
+
+ubuntu18_platform_gpu: &ubuntu18_gpu
+  - name: ubuntu18_gpu
+    type: Unity::VM::GPU
+    image: package-ci/ubuntu-18.04:v4
+    flavor: b1.large
+
+test_platforms:
+  - *win
+  - *mac
+  - *ubuntu20
+
+# When running tests on standalone platforms, "--platform standalone" flag needs to be passed to upm-ci
+standalone_test_platforms:
+  - *win
+  - *mac
+
+standalone_test_platforms_gpu:
+  - *mac_gpu
+  - *centos_gpu
+  - *ubuntu18_gpu
+
+recorder_test_project:
+  name: AlembicRecorder
+  path: TestProjects/AlembicRecorder
+
+standalone_test_project:
+  name: AlembicStandaloneBuild
+  path: TestProjects/AlembicStandaloneBuild
+
+hdrp_test_project:
+  name: AlembicHDRP
+  path: TestProjects/AlembicHDRP
+
+api_test_project:
+  name: APITests
+  path: TestProjects/APITests

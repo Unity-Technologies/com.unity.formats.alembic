@@ -1,0 +1,87 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+# Recorder test project
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
+  name : Project test ({{ recorder_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endfor %}
+{% endfor %}
+
+# Standalone test project
+{% for editor in test_editors %}
+{% for platform in standalone_test_platforms %}
+test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
+  name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endfor %}
+{% endfor %}
+
+# Standalone test project on platforms with GPU
+{% for editor in test_editors %}
+{% for platform in standalone_test_platforms_gpu %}
+test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
+  name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endfor %}
+{% endfor %}
+
+
+# HDRP test project
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
+  name : Project test {{ hdrp_test_project.name }} in version {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - upm-ci project test  --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endfor %}
+{% endfor %}
