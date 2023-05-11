@@ -21,7 +21,7 @@ test_trigger_pr:
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
-    - .yamato/_formatting.yml#formatting
+    - .yamato/package-format.yml#formatting
 
 # Nightly test trigger
 nightly_test_trigger:

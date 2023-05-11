@@ -43,10 +43,6 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
 
 promotion_test_trigger:
   name: Promotion Tests Trigger
-  artifacts:
-    logs:
-      paths:
-        - "upm-ci~/test-results/**/*"
   dependencies:
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
