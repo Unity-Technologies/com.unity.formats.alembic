@@ -44,8 +44,8 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
 promotion_test_trigger:
   name: Promotion Tests Trigger
   dependencies:
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
+{% for editor in promotion_test_editors %}
+{% for platform in promotion_test_platforms %}
     - .yamato/package-promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
