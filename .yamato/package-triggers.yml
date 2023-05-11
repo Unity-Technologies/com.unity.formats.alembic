@@ -47,4 +47,3 @@ nightly_test_trigger:
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
-    - .yamato/upm-ci.yml#test_trigger_hdrp
