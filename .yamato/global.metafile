@@ -6,6 +6,9 @@ test_editors:
   - version: 2023.1
   - version: trunk
 
+promotion_test_editors:
+  - version: 2019.4
+
 # Platforms used in CI
 win_platform: &win
   name: win
@@ -58,6 +61,10 @@ standalone_test_platforms_gpu:
   - *mac_gpu
   - *centos_gpu
   - *ubuntu18_gpu
+
+promotion_test_platforms:
+  - *win
+  - *mac
 
 recorder_test_project:
   name: AlembicRecorder

@@ -1,34 +1,26 @@
-test_editors:
-  - version: 2019.4
 
-test_platforms:
-  - name: win
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
-  - name: mac
-    type: Unity::VM::osx
-    image: package-ci/mac:latest
-    flavor: m1.mac
+{% metadata_file .yamato/global.metafile %}
+
 ---
+
 promotion_fetch:
   name: Fetch Package From Internal Registry
   agent:
-    type: Unity::VM::osx
-    image: package-ci/mac:latest
-    flavor: m1.mac
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
   variables:
     UPMCI_PROMOTION: 1
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package pack --package-path com.unity.formats.alembic
   artifacts:
     packages:
       paths:
         - "upm-ci~/packages/**/*"
 
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
+{% for editor in promotion_test_editors %}
+{% for platform in promotion_test_platforms %}
 promotion_test_{{ platform.name }}_{{ editor.version }}:
   name : Promotion Test {{ editor.version }} on {{ platform.name }}
   agent:
@@ -38,36 +30,27 @@ promotion_test_{{ platform.name }}_{{ editor.version }}:
   variables:
     UPMCI_PROMOTION: 1
   commands:
-    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
   artifacts:
     logs:
       paths:
         - "upm-ci~/test-results/**/*"
   dependencies:
-    - .yamato/promotion.yml#promotion_fetch
+    - .yamato/package-promotion.yml#promotion_fetch
 {% endfor %}
 {% endfor %}
 
 promotion_test_trigger:
   name: Promotion Tests Trigger
-  agent:
-    type: Unity::VM
-    image: package-ci/win10:stable
-    flavor: b1.large
-  commands:
-    - dir
   artifacts:
     logs:
       paths:
         - "upm-ci~/test-results/**/*"
-    packages:
-      paths:
-        - "upm-ci~/packages/**/*"
   dependencies:
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
-    - .yamato/promotion.yml#promotion_test_{{platform.name}}_{{editor.version}}
+    - .yamato/package-promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endfor %}
 
@@ -87,13 +70,9 @@ promote:
       only:
         - /^\d+.\d+.\d+(-exp(.\d+)?)?$/  
   artifacts:
-    artifacts:
+    logs:
       paths:
-        - "upm-ci~/packages/*.tgz"
+        - "upm-ci~/test-results/**/*"
   dependencies:
-    - .yamato/promotion.yml#promotion_fetch
-{% for editor in test_editors %}
-{% for platform in test_platforms %}
-    - .yamato/promotion.yml#promotion_test_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
-{% endfor %}
+    - .yamato/package-promotion.yml#promotion_fetch
+    - .yamato/package-promotion.yml#promotion_test_trigger
