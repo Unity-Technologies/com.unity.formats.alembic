@@ -21,3 +21,4 @@ pack:
     - .yamato/build-plugins.yml#build_win
     - .yamato/build-plugins.yml#build_mac
     - .yamato/build-plugins.yml#build_centOS
+    

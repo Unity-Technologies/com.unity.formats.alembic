@@ -36,6 +36,7 @@ nightly_test_trigger:
     - .yamato/package-triggers.yml#test_trigger_pr
 {% for editor in test_editors %}
 {% for platform in standalone_test_platforms_gpu %}
+# Only run standalone tests in 2022.2 and trunk on platforms with GPU
 {% if editor.version == 2022.2 or editor.version == trunk %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}

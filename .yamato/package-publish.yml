@@ -1,6 +1,7 @@
 {% metadata_file .yamato/global.metafile %}
 ---
 
+# Publish dry run job
 publish_dry_run:
   name: Publish to Internal Registry (dry run)
   agent:
