@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 {
     static class AlembicBuildPostProcess
     {
-        internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, MacOS X, Linux 64-bit or Stadia.";
+        internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, MacOS X or Linux 64-bit.";
 
         internal static readonly HashSet<KeyValuePair<string, string>> FilesToCopy = new HashSet<KeyValuePair<string, string>>();
         internal static bool HaveAlembicInstances = false;
