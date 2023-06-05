@@ -8,10 +8,6 @@ To control the playback of Alembic, use an **Infinite clip** on a Timeline **Ani
 4. Begin recording, and save keys for the **Time** property on the **Alembic Stream Player** component (see Unity documentation on [Recording basic animations with an Infinite clip](https://docs.unity3d.com/2019.1/Documentation/Manual/TimelineWorkflowRecordingBasicAnimation.html)). For example, if the Alembic file lasts 16 seconds, set a key at the beginning of the clip where the **Time** property is set to 0, and another key at the end of the clip where the **Time** property is set to 16.
 5. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/2019.1/Documentation/Manual/TimelinePlaybackControls.html) in the Timeline window.
 
-
-
 ![Controlling Stream Player With Infinite Clip](images/abc_infinite_clip.png)
 
-
-
-If you want to use the animation in the GameObject's animation state machine, you can [convert the Infinite clip into an animation clip](https://docs.unity3d.com/2019.1/Documentation/Manual/TimelineWorkflowConvertingInfiniteClip.html) and add it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html).
+If you want to use the animation in the GameObject's animation state machine, you can [convert the Infinite clip into an animation clip](https://docs.unity3d.com/Packages/com.unity.timeline@latest/index.html?subfolder=/manual/wf-convert-infinite.html) and add it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html).

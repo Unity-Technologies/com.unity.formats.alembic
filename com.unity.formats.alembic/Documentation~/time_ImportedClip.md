@@ -20,6 +20,6 @@ To play back the clip in [Timeline](https://docs.unity3d.com/Manual/TimelineSect
 
 4. Set the Animator driving the Animation clip to the newly created Animator component.
 
-5. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/2019.1/Documentation/Manual/TimelinePlaybackControls.html) in the Timeline view.
+5. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Packages/com.unity.timeline@latest/index.html?subfolder=/manual/tl-play-ctrls.html) in the Timeline view.
 
 You can also use the Animator to play back the clip by adding it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other clip.
