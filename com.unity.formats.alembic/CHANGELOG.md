@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Removed
-- Removed support of Stadia.
+- Removed support of Stadia as a build target.
 
 ## [2.3.2] - 2022-05-08
 ### Added
