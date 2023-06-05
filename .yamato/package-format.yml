@@ -1,3 +1,6 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
 # Documentation: https://internaldocs.hq.unity3d.com/unity-meta/
 
  formatting:
@@ -39,3 +42,27 @@
      - git commit -m "Apply formatting changes"
      - git push --set-upstream origin $GIT_BRANCH
    timeout: 1
+
+check_formatting_use_brick:
+  name: Check formatting using brick
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
+  commands:
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_code_formatting.git@v1.2.8
+      variables:
+        ACTION: check
+        PACKAGE_SOURCE_PATH: ./com.unity.formats.alembic
+
+apply_formatting_use_brick:
+  name: Apply formatting using brick
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
+  commands:
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_code_formatting.git@v1.2.8
+      variables:
+        ACTION: apply
+        PACKAGE_SOURCE_PATH: ./com.unity.formats.alembic
