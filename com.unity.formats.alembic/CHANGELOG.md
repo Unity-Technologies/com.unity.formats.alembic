@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
-- Prevent warnings related to FindObjectOfType<> calls on package installation with Unity 23.1+.
+- Prevent warnings related to FindObjectOfType<> calls on package installation with Unity Editor 2023.1+.
 
 ## [2.3.2] - 2022-05-08
 ### Added
