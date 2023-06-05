@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
-- Prevent a warning in the Console when Alembic is installed along with Recorder due to `RecorderInputSetting.ValidityCheck()` that has been deprecated.
+- Prevent a warning in the Console due to deprecated `RecorderInputSetting.ValidityCheck()` when Alembic is installed along with Recorder.
 
 ## [2.3.2] - 2022-05-08
 ### Added
