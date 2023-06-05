@@ -16,7 +16,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 {
     static class AlembicBuildPostProcess
     {
-        internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, MacOS X, Linux 64-bit or Stadia.";
+        internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, macOS X, and Linux 64-bit.";
 
         internal static readonly HashSet<KeyValuePair<string, string>> FilesToCopy = new HashSet<KeyValuePair<string, string>>();
         internal static bool HaveAlembicInstances = false;
@@ -66,7 +66,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         public static bool TargetIsSupported(BuildTarget target)
         {
-            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64 || target == BuildTarget.Stadia;
+            return target == BuildTarget.StandaloneOSX || target == BuildTarget.StandaloneWindows64 || target == BuildTarget.StandaloneLinux64;
         }
     }
 
@@ -150,8 +150,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 case BuildTarget.StandaloneOSX:
                     return Path.Combine(summary.outputPath, "Contents/Resources/Data/StreamingAssets");
-                case BuildTarget.Stadia:
-                    return Path.Combine(summary.outputPath, "layout/files/Data/StreamingAssets");
                 case BuildTarget.StandaloneLinux64:
                 case BuildTarget.StandaloneWindows64:
                     var name = Path.ChangeExtension(summary.outputPath, null);
