@@ -9,6 +9,7 @@ export CFLAGS="-O0 -fomit-frame-pointer -fPIC"
 if [ "$(uname)" == "Darwin" ]; then
    export CXXFLAGS="${CXXFLAGS} -arch x86_64 -arch arm64"
    export CFLAGS="${CFLAGS} -arch x86_64 -arch arm64"
+   export MACOSX_DEPLOYMENT_TARGET=10.14
 
 fi
 
@@ -32,5 +33,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
     -DENABLE_DEPLOY=OFF \
     -DCMAKE_PREFIX_PATH=${depsdir} \
     -DCMAKE_INSTALL_PREFIX=${installdir}
+
 cmake --build . --target install --config Debug
 popd

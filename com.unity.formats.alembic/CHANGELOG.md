@@ -4,17 +4,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.1] - 2022-12-06
+## [2.3.2] - 2022-05-08
 ### Added
 - At import, additional data is added to GameObject cameras to conform with URP or HDRP rendering pipelines.
-### Changed
+
 ### Fixed
 - Fixed an issue where a mesh from an Alembic file with visibility samples gets wrongly serialized in scenes.
 - Fixed the Normals import settings of the Importer.
 - When a user changes HDRP quality settings, the Editor no longer re-imports Alembic assets.
 
 ## [2.3.0] - 2022-01-28
-### Added
 ### Changed
 - When building unsupported standalone targets, Unity excludes the Alembic components from the build.
 
@@ -23,14 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a compile error when a project does not have the analytics module.
 
 ## [2.3.0-pre.3] - 2021-10-02
-### Added
-### Changed
 ### Fixed
 - Prevent build error when the Scene contains empty AlembicStreamPlayer components.
 
 ## [2.3.0-pre.2] - 2021-09-02
-### Added
-### Changed
 ### Fixed
 - Prevent mesh import failure when changing import options after having set up material assignment overrides.
 - Fixed a UI issue affecting the use of Importer options in multi-editing context.
@@ -45,21 +40,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - GameObjects that only have a Transform component are now included when exporting Alembic files.
 - Automatically set the timeline clip length when dragging an AlembicStreamPlayer onto a timeline Alembic track.
+
 ### Fixed
 - Fixed a bug that caused Unity Cloth Alembic export to ignore the world scale.
 - Fixed a bug that caused an error when manually adding an AlembicStreamPlayer Component.
 - Prevented material assignments from being lost for a streamed external Alembic file when changing the Alembic source file link.
 
 ## [2.2.0] - 2021-06-10
-### Added
-### Changed
 ### Fixed
 - Fixed an issue where changing the start value of the streaming time range would slightly change the end of range value.
 - Fixed a bug that was causing visual artefacts due to motion vector persistence when pausing Alembic playback.
 
 ## [2.2.0-pre.4] - 2021-04-27
-### Added
-### Changed
 ### Fixed
 - Fixed a bug that caused out of project stream files to have the wrong number of material slots.
 - Fixed a bug that was causing data loss when resetting the AlembicStreamPlayer.
