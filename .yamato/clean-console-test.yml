@@ -3,7 +3,7 @@
 
 # Package clean console test jobs
 {% for platform in test_platforms %}
-{% for editor in clean_test_editors %}
+{% for editor in clean_console_test_editors %}
 clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Package clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -24,7 +24,7 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
 
 # Clean console test jobs for AlembicHDRP project
 {% for platform in test_platforms %}
-{% for editor in clean_test_editors %}
+{% for editor in clean_console_test_editors %}
 AlembicHDRP_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicHDRP clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -45,7 +45,7 @@ AlembicHDRP_clean_console_test_{{ platform.name }}_{{ editor.version }}:
 
 # Clean console test jobs for AlembicRecorder project
 {% for platform in test_platforms %}
-{% for editor in clean_test_editors %}
+{% for editor in clean_console_test_editors %}
 AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicRecorder clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -62,4 +62,16 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   dependencies:
     - .yamato/package-pack.yml#pack
 {% endfor %}
+{% endfor %}
+
+# Clean console test trigger which runs package clean console test jobs on Win, 
+# AlembicHDRP project clean console test on Mac 
+# and AlembicRecorder project clean console test on Ubuntu20
+clean_console_test_trigger:
+  name: Clean console test trigger
+  dependencies:
+{% for editor in clean_console_test_editors %}
+    - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
+    - .yamato/clean-console-test.yml#AlembicHDRP_clean_console_test_mac_{{ editor.version }}
+    - .yamato/clean-console-test.yml#AlembicRecorder_clean_console_test_ubuntu20_{{ editor.version }}
 {% endfor %}

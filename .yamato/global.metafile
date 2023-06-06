@@ -6,7 +6,7 @@ test_editors:
   - version: 2023.1
   - version: trunk
 
-clean_test_editors:
+clean_console_test_editors:
   - version: 2022.2
   - version: 2023.1
   - version: trunk  
