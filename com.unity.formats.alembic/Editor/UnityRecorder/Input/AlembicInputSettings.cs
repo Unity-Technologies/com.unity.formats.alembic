@@ -12,11 +12,6 @@ namespace UnityEditor.Formats.Alembic.Recorder
     class AlembicInputSettings : RecorderInputSettings
     {
         protected override Type InputType => typeof(AlembicInput);
-
-        protected override bool ValidityCheck(List<string> errors)
-        {
-            return true;
-        }
     }
 }
 #endif
