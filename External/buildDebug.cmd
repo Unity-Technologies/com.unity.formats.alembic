@@ -20,8 +20,7 @@ cmake ..\OpenExr\IlmBase -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_PREFIX_PATH=%installdir% ^
     -DNAMESPACE_VERSIONING=OFF ^
     -DBUILD_SHARED_LIBS=OFF ^
-    -DCMAKE_CXX_FLAGS="/MP" ^
-    -G "Visual Studio 16 2019" -A x64
+    -DCMAKE_CXX_FLAGS="/MP"
 cmake --build . --target install --config Debug 
 cd ..
 
@@ -38,7 +37,6 @@ cmake ..\alembic -DCMAKE_BUILD_TYPE=Debug ^
     -DALEMBIC_SHARED_LIBS=OFF ^
     -DALEMBIC_ILMBASE_LINK_STATIC=ON ^
     -DILMBASE_ROOT=%installdir% ^
-    -DCMAKE_CXX_FLAGS="/MP" ^
-    -G "Visual Studio 16 2019" -A x64
+    -DCMAKE_CXX_FLAGS="/MP"
 cmake --build . --target install --config Debug
 cd ..
