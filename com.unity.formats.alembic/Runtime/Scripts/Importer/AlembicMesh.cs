@@ -121,9 +121,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_submeshData.DisposeIfPossible();
             
             foreach (var subMesh in m_submeshes)
-            {
                 subMesh.Dispose();
-            }
             m_submeshes.Clear();
         }
 
