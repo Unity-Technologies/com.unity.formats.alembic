@@ -8,6 +8,7 @@ The **Alembic Point Renderer** component allows you to customize the appearance 
 
 | ***Property*** || ***Description*** |
 |:---|:---|:---|
+| **Script** || The script that defines this component. You cannot modify this property. |
 | **Mesh** || Set a reference to the Mesh that you want to use as the shape for each particle. Defaults to the Cube shape. |
 | ***Materials*** |||
 | **Size** || Set the number of different Materials to use for points. For example, to use a fire Material for some of the particles and a smoke Material for the rest, enter **2**. <br/>A corresponding number of **Element** properties appear below this option. <br/>Defaults to 0. |

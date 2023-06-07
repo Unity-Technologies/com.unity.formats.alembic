@@ -1,0 +1,59 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+# Publish dry run job
+publish_dry_run:
+  name: Publish to Internal Registry (dry run)
+  agent:
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
+  commands:
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - upm-ci package publish --package-path com.unity.formats.alembic --dry-run
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    Package.zip:
+      paths:
+        - "upm-ci~/package/*.tgz"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% endfor %}
+
+publish:
+  name: Publish to Internal Registry
+  agent:
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
+  variables:
+    UPMCI_ENABLE_PACKAGE_SIGNING: 1
+  commands:
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
+    - upm-ci package publish --package-path com.unity.formats.alembic
+  artifacts:
+    logs.zip:
+      paths:
+        - "upm-ci~/logs/**/*"
+        - "upm-ci~/test-results/**/*"
+    Package.zip:
+      paths:
+        - "upm-ci~/package/*.tgz"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,46 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+build_win:
+  name: Build on Win
+  agent:
+    type: {{ win_platform.type }}
+    image: {{ win_platform.image }}
+    flavor: {{ win_platform.flavor }}
+  commands:
+    - git submodule update --init --recursive
+    - build.cmd
+  artifacts:
+    plugin:
+      paths:
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.dll"
+        
+
+build_mac:
+  name: Build on Mac
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
+  commands:
+    - brew install cmake
+    - git submodule update --init --recursive
+    - ./build.sh
+  artifacts:
+    plugin:
+      paths:
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abc*"
+
+build_centOS:
+  name: Build on CentOS
+  agent:
+    type: Unity::VM
+    image: {{ centos_platform_gpu.image }}
+    flavor: {{ centos_platform_gpu.flavor }}
+  commands:
+    -  git submodule update --init --recursive 
+    -  scl enable devtoolset-7 ./build.sh
+  artifacts:
+    plugin:
+      paths:
+        - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.so"

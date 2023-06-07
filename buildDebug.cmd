@@ -19,7 +19,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug ^
     -DENABLE_DEPLOY=OFF ^
     -DCMAKE_PREFIX_PATH=%depsdir% ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
-    -DCMAKE_CXX_FLAGS="/MP" ^
-    -G "Visual Studio 16 2019" -A x64
+    -DCMAKE_CXX_FLAGS="/MP"
 cmake --build . --target INSTALL --config Debug
 cd ..

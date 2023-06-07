@@ -263,10 +263,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("normals"),
-                    Enum.GetNames(typeof(NormalsMode)));
-                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("tangents"),
-                    Enum.GetNames(typeof(TangentsMode)));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("normals"));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("tangents"));
                 EditorGUILayout.PropertyField(settings.FindPropertyRelative("flipFaces"));
                 EditorGUI.indentLevel--;
             }
@@ -275,9 +273,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField("Cameras", EditorStyles.boldLabel);
             {
                 EditorGUI.indentLevel++;
-                AlembicImporterEditor.DisplayEnumProperty(settings.FindPropertyRelative("cameraAspectRatio"),
-                    Enum.GetNames(typeof(AspectRatioMode)),
-                    new GUIContent("Aspect Ratio", ""));
+                EditorGUILayout.PropertyField(settings.FindPropertyRelative("cameraAspectRatio"), new GUIContent("Aspect Ratio", ""));
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();

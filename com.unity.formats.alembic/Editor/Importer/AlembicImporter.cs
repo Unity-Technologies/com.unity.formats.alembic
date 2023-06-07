@@ -365,6 +365,12 @@ namespace UnityEditor.Formats.Alembic.Importer
         static readonly TimeSpan checkDependencyFrequency = TimeSpan.FromSeconds(5);
         static DateTime lastCheck;
 
+        /// <summary>
+        /// Generates a hash based on the default material returned by the active render pipeline.
+        /// In the case of HDRP and URP, default material is always the same,
+        /// regardless of the active render pipeline asset.
+        /// </summary>
+        /// <returns></returns>
         static ulong ComputeHash()
         {
             var newPipelineHash = 0UL;
@@ -374,7 +380,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
             else
             {
-                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline, out var guid,
+                if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(GraphicsSettings.currentRenderPipeline.defaultMaterial, out var guid,
                     out long fileId))
                 {
                     newPipelineHash =
@@ -385,6 +391,11 @@ namespace UnityEditor.Formats.Alembic.Importer
             return newPipelineHash;
         }
 
+        /// <summary>
+        /// Sets dirty the custom dependencies when necessary.
+        /// If the render pipeline's default material has changed, the <see cref="AssetDatabase"/> will
+        /// reimport all Alembic assets.
+        /// </summary>
         static void DirtyCustomDependencies()
         {
             var now = DateTime.Now;

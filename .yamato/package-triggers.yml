@@ -1,0 +1,50 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+# PR trigger
+test_trigger_pr:
+  name: Pull Request Tests Trigger
+  triggers:
+    cancel_old_ci: true
+    expression: pull_request.(target match ".*" AND NOT draft)
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-validation.yml#validate_api_doc
+    - .yamato/package-validation.yml#validate_api_osx
+    - .yamato/package-validation.yml#validate_api_win
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% for platform in standalone_test_platforms %}
+    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% endfor %}
+    - .yamato/package-format.yml#formatting
+
+# Nightly test trigger
+nightly_test_trigger:
+  name: Nightly tests Trigger
+  triggers:
+    recurring:
+      - branch: main
+        frequency: daily
+        rerun: always    
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-triggers.yml#test_trigger_pr
+{% for editor in test_editors %}
+{% for platform in standalone_test_platforms_gpu %}
+# Only run standalone tests in 2022.2 and trunk on platforms with GPU
+{% if editor.version == 2022.2 or editor.version == trunk %}
+    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% for editor in test_editors %}
+{% for platform in test_platforms %}
+    - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
+{% endfor %}
