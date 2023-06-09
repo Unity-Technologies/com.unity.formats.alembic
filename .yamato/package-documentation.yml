@@ -1,0 +1,17 @@
+{% metadata_file .yamato/global.metafile %}
+---
+
+generate_documentation:
+  name : Generate documentation
+  agent:
+    type: {{ mac_platform.type }}
+    image: {{ mac_platform.image }}
+    flavor: {{ mac_platform.flavor }}
+  commands:
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.2.0
+      variables:
+        EDITOR_VERSION: {{ clean_console_test_editors.first.version }}
+        PACKAGE_NAME: com.unity.formats.alembic
+        PACKAGE_PATH: com.unity.formats.alembic
+        #Treat doc build warnings as errors
+        WARNINGS_AS_ERRORS: true
