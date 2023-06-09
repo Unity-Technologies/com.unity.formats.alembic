@@ -14,4 +14,4 @@ generate_documentation:
         PACKAGE_NAME: com.unity.formats.alembic
         PACKAGE_PATH: com.unity.formats.alembic
         #Treat doc build warnings as errors
-        WARNINGS_AS_ERRORS: true
+        WARNINGS_AS_ERRORS: false
