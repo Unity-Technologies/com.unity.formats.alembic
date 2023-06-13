@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -20,6 +19,22 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental;
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 namespace UnityEditor.Formats.Alembic.Importer
 {
+    class AlembicAssetPostProcessor : AssetPostprocessor
+    {
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
+        {
+            foreach (var path in movedAssets)
+            {
+                if (path.EndsWith(".abc", StringComparison.OrdinalIgnoreCase))
+                {
+                    var desc = AssetDatabase.LoadAssetAtPath<AlembicStreamDescriptor>(path);
+                    desc.PathToAbc = path;
+                    AssetDatabase.SaveAssetIfDirty(desc);
+                }
+            }
+        }
+    }
+
     class AlembicAssetModificationProcessor : AssetModificationProcessor
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
