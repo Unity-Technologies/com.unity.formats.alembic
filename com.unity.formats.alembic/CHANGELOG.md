@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Prevent a warning in the Console due to deprecated `RecorderInputSetting.ValidityCheck()` when Alembic is installed along with Recorder.
 - Prevent warnings related to FindObjectOfType<> calls on package installation with Unity Editor 2023.1+.
+- Prevent broken links in Alembic files that had been imported then moved outside of the Unity Editor.
 
 ### Removed
 - Removed support of Stadia as a build target.
