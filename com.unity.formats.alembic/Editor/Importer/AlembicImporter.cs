@@ -29,7 +29,12 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     var desc = AssetDatabase.LoadAssetAtPath<AlembicStreamDescriptor>(path);
                     desc.PathToAbc = path;
+
+#if UNITY_2020_3_OR_NEWER
                     AssetDatabase.SaveAssetIfDirty(desc);
+#else
+                    AssetDatabase.SaveAssets();
+#endif
                 }
             }
         }
