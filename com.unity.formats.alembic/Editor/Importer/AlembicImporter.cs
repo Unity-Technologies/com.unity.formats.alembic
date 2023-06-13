@@ -21,7 +21,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 {
     class AlembicAssetPostProcessor : AssetPostprocessor
     {
-#if UNITY_2020_3_OR_NEWER
+#if UNITY_2021_3_OR_NEWER
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
 #else
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
