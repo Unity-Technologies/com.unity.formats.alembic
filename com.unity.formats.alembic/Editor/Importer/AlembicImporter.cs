@@ -87,13 +87,13 @@ namespace UnityEditor.Formats.Alembic.Importer
         };
 
         [SerializeField]
-#pragma warning disable 0649
+#pragma warning disable 0649, 0414
         private string rootGameObjectId;
         [SerializeField]
         private string rootGameObjectName;
         [UsedImplicitly]
         [SerializeField] int importerVersion = (int)ImporterVersions.FacesetNames;
-#pragma warning restore 0649
+#pragma warning restore 0649, 0414
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         public AlembicStreamSettings StreamSettings
