@@ -43,8 +43,9 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             m_FilesToDelete.Add(Path.GetDirectoryName(newLocation));
 
-            desc = AssetDatabase.LoadAssetAtPath<AlembicStreamDescriptor>("Assets/Tests/myAsset.abc");
-            Assert.That(desc.PathToAbc, Is.EqualTo("Assets/Tests/myAsset.abc"));
+            desc = AssetDatabase.LoadAssetAtPath<AlembicStreamDescriptor>(newLocation);
+            Assert.That(desc.PathToAbc, Is.EqualTo(newLocation),
+                "PathToAbc should have been updated to the new path.");
         }
     }
 }
