@@ -16,4 +16,4 @@ To create an Alembic Shot:
 
    A new Alembic clip appears in the Clips view.
 
-3. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline window.
+3. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Packages/com.unity.timeline@latest/index.html?subfolder=/manual/tl-play-ctrls.html) in the Timeline window.
