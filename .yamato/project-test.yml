@@ -66,7 +66,9 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
 
 
 # HDRP test project
+# Exclude 2019.4 from running because of HDRP test project compatinility issue
 {% for editor in test_editors %}
+{% if editor.version != "2019.4" %}
 {% for platform in test_platforms %}
 test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
   name : Project test {{ hdrp_test_project.name }} in version {{ editor.version }} on {{ platform.name }}
@@ -84,4 +86,5 @@ test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version 
   dependencies:
     - .yamato/package-pack.yml#pack
 {% endfor %}
+{% endif %}
 {% endfor %}
