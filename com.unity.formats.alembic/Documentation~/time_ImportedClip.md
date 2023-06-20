@@ -1,6 +1,6 @@
 # Playback using an Alembic Animation clip
 
-When Unity imports an Alembic file, it automatically imports the animation as an Animation clip. To access the imported clip, expand the imported Alembic Asset.
+When Unity imports an Alembic file, it automatically imports the animation as an Animation clip. To access the imported clip, expand the imported Alembic Asset in the Project view.
 
 ![Expanded Alembic Asset](images/abc_expanded_asset.png)
 
@@ -20,6 +20,6 @@ To play back the clip in [Timeline](https://docs.unity3d.com/Manual/TimelineSect
 
 4. Set the Animator driving the Animation clip to the newly created Animator component.
 
-4. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Manual/TimelinePlaybackControls.html) in the Timeline view.
+5. Play back the animation using the [Timeline Play controls](https://docs.unity3d.com/Packages/com.unity.timeline@latest/index.html?subfolder=/manual/tl-play-ctrls.html) in the Timeline view.
 
 You can also use the Animator to play back the clip by adding it to the [Animation Controller](https://docs.unity3d.com/Manual/Animator.html) just like any other clip.
