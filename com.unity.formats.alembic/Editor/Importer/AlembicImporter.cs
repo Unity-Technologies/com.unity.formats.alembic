@@ -30,16 +30,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             foreach (var path in movedAssets)
             {
                 if (path.EndsWith(".abc", StringComparison.OrdinalIgnoreCase))
-                {
-                    var desc = AssetDatabase.LoadAssetAtPath<AlembicStreamDescriptor>(path);
-                    desc.PathToAbc = path;
-
-#if UNITY_2020_3_OR_NEWER
-                    AssetDatabase.SaveAssetIfDirty(desc);
-#else
-                    AssetDatabase.SaveAssets();
-#endif
-                }
+                    AssetDatabase.ImportAsset(path);
             }
         }
     }
