@@ -54,3 +54,7 @@ To manually assign materials of your project to the imported Alembic asset subme
    **Note:** If you leave a material override field set to "None (Material)", the Default Material assignation continues to apply to the submesh.
 
 4. Click on **Apply**.
+
+## Toggle visibility of large hierarchies of submeshes
+
+Press **Alt** while clicking the drop-down arrow (►) to collapse or un-collapse recursively the hierarchy.
