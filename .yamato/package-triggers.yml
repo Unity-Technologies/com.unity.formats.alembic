@@ -48,11 +48,12 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
-{% for editor in test_editors %}
-# Exclude 2019.4 from HDRP tests
-{% if editor.version != "2019.4" %}
 {% for platform in test_platforms %}
+{% for editor in hdrp_test_project.test_editors %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
-{% endif %}
+
+{% for editor in hdrp_test_project_latest.test_editors %}
+    - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
 {% endfor %}
