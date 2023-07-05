@@ -1,6 +1,6 @@
 {
   "exempts":{
-    "ABC-413" : "The exemptions of EditorAnalytics's obsolete API warnings need to be removed once  ABC-408 is resolved",
+    "ABC-413" : "The exemptions of EditorAnalytics's obsolete API warnings need to be removed once ABC-408 is resolved",
     "messages": [
     "'EditorAnalytics.SendEventWithLimit(string, object)' is obsolete: 'Editor Analytics APIs have changed significantly, please see: https://docs.editor-data.unity3d.com/Contribute/EditorAnalytics/cs_guide/'",
     "'EditorAnalytics.RegisterEventWithLimit(string, int, int, string)' is obsolete: 'Editor Analytics APIs have changed significantly, please see: https://docs.editor-data.unity3d.com/Contribute/EditorAnalytics/cs_guide/'"
