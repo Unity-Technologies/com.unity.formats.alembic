@@ -22,11 +22,11 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
-# Clean console test jobs for AlembicHDRP project
+# Clean console test jobs for AlembicHDRPLatest project
 {% for platform in test_platforms %}
 {% for editor in clean_console_test_editors %}
-AlembicHDRP_clean_console_test_{{ platform.name }}_{{ editor.version }}:
-  name: Project AlembicHDRP clean console test in {{ editor.version }} on {{ platform.name }}
+AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
+  name: Project AlembicHDRPLatest clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
     image: {{ platform.image }}
@@ -35,7 +35,7 @@ AlembicHDRP_clean_console_test_{{ platform.name }}_{{ editor.version }}:
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.2.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: project
-        PROJECT_PATH: {{ hdrp_test_project.path }}
+        PROJECT_PATH: {{ hdrp_test_project_latest.path }}
         EDITOR_VERSION: {{ editor.version }}
         WARNINGS_AS_ERRORS: false
   dependencies:
@@ -65,13 +65,13 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 
 # Clean console test trigger which runs package clean console test jobs on Win, 
-# AlembicHDRP project clean console test on Mac 
+# AlembicHDRPLatest project clean console test on Mac 
 # and AlembicRecorder project clean console test on Ubuntu20
 clean_console_test_trigger:
   name: Clean console test trigger
   dependencies:
 {% for editor in clean_console_test_editors %}
     - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
-    - .yamato/clean-console-test.yml#AlembicHDRP_clean_console_test_mac_{{ editor.version }}
+    - .yamato/clean-console-test.yml#AlembicHDRPLatest_clean_console_test_mac_{{ editor.version }}
     - .yamato/clean-console-test.yml#AlembicRecorder_clean_console_test_ubuntu20_{{ editor.version }}
 {% endfor %}

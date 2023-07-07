@@ -1,0 +1,9 @@
+{
+    "name": "Unity.Formats.Alembic.HDRPTests.Editor",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}
