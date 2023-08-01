@@ -57,4 +57,4 @@ To manually assign materials of your project to the imported Alembic asset subme
 
 ## Toggle visibility of large hierarchies of submeshes
 
-Press **Alt** while clicking the drop-down arrow (►) to collapse or un-collapse recursively the hierarchy.
+Press **Alt** on Windows or **Option** on Mac while clicking the drop-down arrow (►) to collapse or un-collapse recursively the hierarchy.
