@@ -23,5 +23,27 @@ test_{{ platform.name }}_{{ editor.version }}:
         - "upm-ci~/test-results/**/*"
   dependencies:
     - .yamato/package-pack.yml#pack
+
+# Package vetting tests execute package validation suite, clean console, and package has tests (not package tests).
+vetting_test_{{ platform.name }}_{{ editor.version }}:
+  name : Package vetting test in version {{ editor.version }} on {{ platform.name }}
+  agent:
+    type: {{ platform.type }}
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor}}
+# Exclude 2019.4 from clean console test because of a known warning in console
+{% if editor.version != '2019.4' %}
+  variables:
+    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
+{% endif %}
+  commands:
+     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+     - upm-ci package test --unity-version {{ editor.version }} --type vetting-tests --package-path com.unity.formats.alembic
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+  dependencies:
+    - .yamato/package-pack.yml#pack
 {% endfor %}
 {% endfor %}

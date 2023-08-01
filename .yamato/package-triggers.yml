@@ -1,12 +1,22 @@
 {% metadata_file .yamato/global.metafile %}
 ---
 
+# PR trigger for doc only changes (.md files), it will run package vetting tests in trunk on Win and documentation generation test.
+test_trigger_pr_documentation:
+  name: Pull Request Tests Trigger for documentation changes
+  triggers:
+    cancel_old_ci: true
+    expression: pull_request.(target match ".*" AND push.changes.all match "**/*.md" AND NOT draft)
+  dependencies:
+    - .yamato/package-documentation.yml#generate_documentation
+    - .yamato/package-test.yml#vetting_test_win_trunk
+
 # PR trigger
 test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND NOT draft)
+    expression: pull_request.(target match ".*" AND NOT push.changes.all match "**/*.md" AND NOT draft)
   dependencies:
     - .yamato/package-pack.yml#pack
     - .yamato/package-validation.yml#validate_api_doc
@@ -48,11 +58,12 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
-{% for editor in test_editors %}
-# Exclude 2019.4 from HDRP tests
-{% if editor.version != "2019.4" %}
 {% for platform in test_platforms %}
+{% for editor in hdrp_test_project.test_editors %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
-{% endif %}
+
+{% for editor in hdrp_test_project_latest.test_editors %}
+    - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
+{% endfor %}
 {% endfor %}
