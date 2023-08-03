@@ -55,6 +55,6 @@ To manually assign materials of your project to the imported Alembic asset subme
 
 4. Click on **Apply**.
 
-## Toggle visibility of large hierarchies of submeshes
+## Expand and collapse large hierarchies of submeshes
 
-Press **Alt** on Windows or **Option** on Mac while clicking the drop-down arrow (►) to collapse or un-collapse recursively the hierarchy.
+To quickly expand or collapse the whole sub-hierarchy of any node in the **Meshes / Face Sets** list, click on the arrow beside the node name while pressing **Alt** (on Windows) or **Option** (on macOS).
