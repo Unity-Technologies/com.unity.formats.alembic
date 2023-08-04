@@ -1,3 +1,41 @@
 // This file is generated. Do not modify by hand.
 // XML documentation file not found. To check if public methods have XML comments,
 // make sure the XML doc file is present and located next to the scraped dll
+namespace UnityEditor.Formats.Alembic.Importer
+{
+    public struct SpeedTreeFile
+    {
+        public string File;
+        public string Source;
+        public static SpeedTreeFile ReadFromXML(System.Xml.XmlReader reader);
+    }
+
+    public class SpeedTreeMaterial
+    {
+        public SpeedTreeFile AO;
+        public SpeedTreeFile Color;
+        public UnityEngine.Vector3 Custom;
+        public float Custom2;
+        public bool FlipNormalsOnBackside;
+        public bool FlipOpacity;
+        public SpeedTreeFile Gloss;
+        public float Height;
+        public int ID;
+        public bool IsTwoSided;
+        public string Name;
+        public SpeedTreeFile Normal;
+        public SpeedTreeFile Opacity;
+        public UnityEngine.Vector3 Specular;
+        public SpeedTreeFile SubsurfaceAmount;
+        public SpeedTreeFile SubsurfaceColor;
+        public float VertexOpacity;
+        public SpeedTreeMaterial() {}
+        public static UnityEngine.Vector3 ReadRGBFromXML(System.Xml.XmlReader reader);
+    }
+
+    public class SpeedTreeXMLImporter
+    {
+        public SpeedTreeXMLImporter() {}
+        public static void LoadMaterialsFromSidecar(string sidecarFilePath);
+    }
+}

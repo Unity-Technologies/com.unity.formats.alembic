@@ -285,6 +285,19 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
             }
 
+            EditorGUILayout.Separator();
+
+            var sidecarFilePath = EditorGUILayout.TextField("Sidecar file", "C:\\Users\\rose_hirigoyen\\Downloads\\Material_Offset_Seasons-20230804T140057Z-001\\Material_Offset_Seasons\\Material_Offset_Seasons.stmat");
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Load Materials"))
+                {
+                    SpeedTreeXMLImporter.LoadMaterialsFromSidecar(sidecarFilePath);
+                }
+            }
+
             var newRootFoldout = EditorGUILayout.Foldout(materialRootFold, "Meshes / Face Sets", true);
             if (materialRootFold != newRootFoldout && Event.current != null && Event.current.alt)
             {
