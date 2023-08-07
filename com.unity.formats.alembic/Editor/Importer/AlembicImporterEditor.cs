@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Importer;
+using static UnityEditor.Formats.Alembic.Importer.AlembicImporter;
 
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
@@ -14,15 +15,71 @@ using UnityEditor.AssetImporters;
 using UnityEditor.Experimental.AssetImporters;
 #endif
 
+#if HAIR_ENABLED
+using Unity.DemoTeam.Hair;
+#endif
+
 namespace UnityEditor.Formats.Alembic.Importer
 {
+#if HAIR_ENABLED
+    class HairAssetDragAndDrop
+    {
+        [InitializeOnLoadMethod]
+        static void HandleDropHairAssetInScene()
+        {
+            DragAndDrop.AddDropHandler(OnDragOntoScene);
+            DragAndDrop.AddDropHandler(OnDragOntoHierarchy);
+        }
+
+        static DragAndDropVisualMode OnDragOntoScene(UnityEngine.Object dropUpon, Vector3 worldPosition, Vector2 viewportPosition, Transform parentForDraggedObjects, bool perform)
+        {
+            var hairAsset = DragAndDrop.objectReferences.FirstOrDefault(o => o is HairAsset) as HairAsset;
+            if (hairAsset != null)
+            {
+                if (perform)
+                {
+                    var go = new GameObject(hairAsset.name, typeof(HairInstance));
+                    var hairInstance = go.GetComponent<HairInstance>();
+                    hairInstance.strandGroupProviders[0].hairAsset = hairAsset;
+                    hairInstance.strandGroupProviders[0].hairAssetQuickEdit = true;
+                    go.transform.position = worldPosition;
+
+                    Selection.activeGameObject = go;
+                }
+                return DragAndDropVisualMode.Generic;
+            }
+            return DragAndDropVisualMode.None;
+        }
+
+        static DragAndDropVisualMode OnDragOntoHierarchy(int dropTargetInstanceID, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform)
+        {
+            var hairAsset = DragAndDrop.objectReferences.FirstOrDefault(o => o is HairAsset) as HairAsset;
+            if (hairAsset != null)
+            {
+                if (perform)
+                {
+                    var go = new GameObject(hairAsset.name, typeof(HairInstance));
+                    var hairInstance = go.GetComponent<HairInstance>();
+                    hairInstance.strandGroupProviders[0].hairAsset = hairAsset;
+                    hairInstance.strandGroupProviders[0].hairAssetQuickEdit = true;
+
+                    Selection.activeGameObject = go;
+                }
+                return DragAndDropVisualMode.Generic;
+            }
+            return DragAndDropVisualMode.None;
+        }
+    }
+#endif
+
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
     class AlembicImporterEditor : ScriptedImporterEditor
     {
         enum UITab
         {
             Model,
-            Material
+            Material,
+            Hair
         };
 
         enum MaterialSearchLocation
@@ -47,10 +104,23 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             serializedObject.Update();
             var importer = serializedObject.targetObject as AlembicImporter;
+            var assetTypeProp = serializedObject.FindProperty("m_AssetType");
+            EditorGUI.BeginChangeCheck();
+            var assetTypeValue = (AlembicImporter.AssetType)EditorGUILayout.EnumPopup(new GUIContent("Type"), importer.assetType);
+            if (EditorGUI.EndChangeCheck())
+            {
+                assetTypeProp.enumValueIndex = (int)assetTypeValue;
+            }
+
+            if (importer.assetType == AlembicImporter.AssetType.HairSource)
+            {
+
+            }
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials", "Hair"});
                 GUILayout.FlexibleSpace();
             }
 
@@ -58,11 +128,10 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
             }
-            else
+            else if (uiTab == (int)UITab.Material)
             {
                 DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
             }
-
 
             serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
@@ -190,6 +259,31 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorGUI.indentLevel--;
             }
             EditorGUILayout.Separator();
+
+            GUI.enabled = importer.assetType == AssetType.HairSource;
+            EditorGUILayout.LabelField("Hair", EditorStyles.boldLabel);
+            {
+                EditorGUI.indentLevel++;
+                if (GUILayout.Button("Generate Hair Asset"))
+                {
+#if HAIR_ENABLED
+                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                    string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+
+                    var hair = ScriptableObject.CreateInstance<HairAsset>();
+                    hair.name = go.name + "_Hair";
+                    hair.settingsBasic.type = HairAsset.Type.Alembic;
+                    hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
+                    AssetDatabase.CreateAsset(hair, path);
+
+                    HairAssetBuilder.BuildHairAsset(hair);
+                    AssetDatabase.SaveAssetIfDirty(hair);
+#endif
+                }
+                GUI.enabled = true;
+                EditorGUI.indentLevel--;
+            }
+            GUI.enabled = true;
         }
 
         static List<AlembicImporter.MaterialEntry> GenMaterialSlotsPresetUI(AlembicImporter importer)

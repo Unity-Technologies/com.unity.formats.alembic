@@ -13,10 +13,18 @@ using Object = UnityEngine.Object;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
 using static UnityEditor.AssetDatabase;
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using UnityEngine.UIElements;
 #else
 using UnityEditor.Experimental.AssetImporters;
 using static UnityEditor.Experimental.AssetDatabaseExperimental;
 #endif
+
+#if HAIR_ENABLED
+using Unity.DemoTeam.Hair;
+#endif
+
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 namespace UnityEditor.Formats.Alembic.Importer
 {
@@ -86,6 +94,12 @@ namespace UnityEditor.Formats.Alembic.Importer
             Latest = FacesetNames
         };
 
+        internal enum AssetType
+        {
+            Generic,
+            HairSource
+        }
+
         [SerializeField]
 #pragma warning disable 0649, 0414
         private string rootGameObjectId;
@@ -142,6 +156,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             get { return isHDF5; }
         }
         [SerializeField] bool isHDF5;
+
+        internal AssetType assetType
+        {
+            get => m_AssetType;
+            set => m_AssetType = value;
+        }
+        [SerializeField] AssetType m_AssetType = AssetType.Generic;
 
         void OnValidate()
         {
@@ -241,6 +262,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
             }
 
+            //var hair = ScriptableObject.CreateInstance<HairAsset>();
+            //hair.name = go.name + "_Hair";
+            //hair.settingsBasic.type = HairAsset.Type.Alembic;
+            //hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
+            //ctx.AddObjectToAsset("hair", hair);
             firstImport = false;
         }
 
@@ -260,6 +286,10 @@ namespace UnityEditor.Formats.Alembic.Importer
                     continue;
                 }
 
+#if HAIR_ENABLED
+                if (r.Key.type == typeof(HairAsset))
+                    continue;
+#endif
                 var pathFaceId = r.Key.name.Split(':');
                 var path = pathFaceId[0];
                 var materialId = Int32.Parse(pathFaceId[1]);
