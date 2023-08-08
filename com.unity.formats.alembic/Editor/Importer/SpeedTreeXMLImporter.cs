@@ -136,15 +136,16 @@ namespace UnityEditor.Formats.Alembic.Importer
             return materials;
         }
 
-        public static Texture2D LoadPNG(SpeedTreeFile filePath) {
+        static Texture2D LoadPNG(SpeedTreeFile filePath) {
 
             Texture2D tex = null;
-            byte[] fileData;
+            //string assetsFilePath = AssetDatabase.FindAssets();
 
-            string assetsFilePath = AssetDatabase.FindAssets("n: Pf{")
+            // Todo: Try to find it with just the asset name
+            // If not found, roll back to source file
 
-            if (File.Exists(filePath)) 	{
-                fileData = File.ReadAllBytes(filePath);
+            if (File.Exists(filePath.Source)) 	{
+                var fileData = File.ReadAllBytes(filePath.Source);
                 tex = new Texture2D(0, 0);
                 tex.LoadImage(fileData);
             }
