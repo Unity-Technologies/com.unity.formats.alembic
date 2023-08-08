@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace UnityEditor.Formats.Alembic.Importer
@@ -134,6 +136,21 @@ namespace UnityEditor.Formats.Alembic.Importer
             return materials;
         }
 
+        public static Texture2D LoadPNG(SpeedTreeFile filePath) {
+
+            Texture2D tex = null;
+            byte[] fileData;
+
+            string assetsFilePath = AssetDatabase.FindAssets("n: Pf{")
+
+            if (File.Exists(filePath)) 	{
+                fileData = File.ReadAllBytes(filePath);
+                tex = new Texture2D(0, 0);
+                tex.LoadImage(fileData);
+            }
+            return tex;
+        }
+
         static void CreateMaterialsAssets(List<SpeedTreeMaterial> materials)
         {
             foreach (var matDesc in materials)
@@ -142,6 +159,18 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 newMaterial.EnableKeyword("_NORMALMAP");
                 newMaterial.EnableKeyword("_METALLICGLOSSMAP");
+
+                newMaterial.SetTexture("_MainTex", LoadPNG(matDesc.Color));
+                //Set the Normal map using the Texture you assign in the Inspector
+                newMaterial.SetTexture("_NormalMap", LoadPNG(matDesc.Normal));
+                //Set the Metallic Texture as a Texture you assign in the Inspector
+                newMaterial.SetTexture ("_MetallicGlossMap", LoadPNG(matDesc.Gloss));
+                newMaterial.SetTexture("_OcclusionMap", LoadPNG(matDesc.AO));
+
+                newMaterial.SetFloat("_Smoothness", matDesc.Specular.x);
+
+                AssetDatabase.CreateAsset(newMaterial, $"Assets/{matDesc.Name}.mat");
+                break;
             }
         }
 
