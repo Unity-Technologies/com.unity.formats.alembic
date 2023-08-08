@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Formats.Alembic.Importer;
 using static UnityEditor.Formats.Alembic.Importer.AlembicImporter;
 
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
+using System.Drawing.Printing;
 #else
 using UnityEditor.Experimental.AssetImporters;
 #endif
@@ -78,8 +78,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         enum UITab
         {
             Model,
-            Material,
-            Hair
+            Material
         };
 
         enum MaterialSearchLocation
@@ -110,17 +109,22 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (EditorGUI.EndChangeCheck())
             {
                 assetTypeProp.enumValueIndex = (int)assetTypeValue;
-            }
-
-            if (importer.assetType == AlembicImporter.AssetType.HairSource)
-            {
-
+                if (assetTypeValue == AssetType.HairSource)
+                {
+                    const string pathSettings = "streamSettings.";
+                    serializedObject.FindProperty(pathSettings + "importCurves").boolValue = true;
+                    serializedObject.FindProperty(pathSettings + "importCameras").boolValue = false;
+                    serializedObject.FindProperty(pathSettings + "importMeshes").boolValue = false;
+                    serializedObject.FindProperty(pathSettings + "importPoints").boolValue = false;
+                    serializedObject.FindProperty(pathSettings + "interpolateSamples").boolValue = false;
+                    EditorUtility.SetDirty(importer);
+                }
             }
 
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials", "Hair"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials"});
                 GUILayout.FlexibleSpace();
             }
 
@@ -276,8 +280,10 @@ namespace UnityEditor.Formats.Alembic.Importer
                     hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
                     AssetDatabase.CreateAsset(hair, path);
 
-                    HairAssetBuilder.BuildHairAsset(hair);
+                    // User must manually build the strands group.
+                    //HairAssetBuilder.BuildHairAsset(hair);
                     AssetDatabase.SaveAssetIfDirty(hair);
+                    Selection.activeObject = hair;
 #endif
                 }
                 GUI.enabled = true;
