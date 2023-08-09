@@ -94,12 +94,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             Latest = FacesetNames
         };
 
-        internal enum AssetType
-        {
-            Generic,
-            HairSource
-        }
-
         [SerializeField]
 #pragma warning disable 0649, 0414
         private string rootGameObjectId;
@@ -156,13 +150,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             get { return isHDF5; }
         }
         [SerializeField] bool isHDF5;
-
-        internal AssetType assetType
-        {
-            get => m_AssetType;
-            set => m_AssetType = value;
-        }
-        [SerializeField] AssetType m_AssetType = AssetType.Generic;
 
         void OnValidate()
         {

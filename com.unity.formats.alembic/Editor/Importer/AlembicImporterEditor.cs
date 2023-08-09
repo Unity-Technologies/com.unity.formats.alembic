@@ -103,23 +103,32 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             serializedObject.Update();
             var importer = serializedObject.targetObject as AlembicImporter;
-            var assetTypeProp = serializedObject.FindProperty("m_AssetType");
-            EditorGUI.BeginChangeCheck();
-            var assetTypeValue = (AlembicImporter.AssetType)EditorGUILayout.EnumPopup(new GUIContent("Type"), importer.assetType);
-            if (EditorGUI.EndChangeCheck())
+
+            EditorGUILayout.LabelField("Hair", EditorStyles.boldLabel);
             {
-                assetTypeProp.enumValueIndex = (int)assetTypeValue;
-                if (assetTypeValue == AssetType.HairSource)
+                EditorGUI.indentLevel++;
+                if (GUILayout.Button("Generate Hair Asset"))
                 {
-                    const string pathSettings = "streamSettings.";
-                    serializedObject.FindProperty(pathSettings + "importCurves").boolValue = true;
-                    serializedObject.FindProperty(pathSettings + "importCameras").boolValue = false;
-                    serializedObject.FindProperty(pathSettings + "importMeshes").boolValue = false;
-                    serializedObject.FindProperty(pathSettings + "importPoints").boolValue = false;
-                    serializedObject.FindProperty(pathSettings + "interpolateSamples").boolValue = false;
-                    EditorUtility.SetDirty(importer);
+#if HAIR_ENABLED
+                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                    string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+
+                    var hair = ScriptableObject.CreateInstance<HairAsset>();
+                    hair.name = go.name + "_Hair";
+                    hair.settingsBasic.type = HairAsset.Type.Alembic;
+                    hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
+                    AssetDatabase.CreateAsset(hair, path);
+
+                    HairAssetBuilder.BuildHairAsset(hair);
+                    AssetDatabase.SaveAssetIfDirty(hair);
+                    Selection.activeObject = hair;
+#endif
                 }
+                GUI.enabled = true;
+                EditorGUI.indentLevel--;
             }
+
+            EditorGUILayout.Separator();
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -264,31 +273,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
             EditorGUILayout.Separator();
 
-            GUI.enabled = importer.assetType == AssetType.HairSource;
-            EditorGUILayout.LabelField("Hair", EditorStyles.boldLabel);
-            {
-                EditorGUI.indentLevel++;
-                if (GUILayout.Button("Generate Hair Asset"))
-                {
-#if HAIR_ENABLED
-                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
-                    string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
-
-                    var hair = ScriptableObject.CreateInstance<HairAsset>();
-                    hair.name = go.name + "_Hair";
-                    hair.settingsBasic.type = HairAsset.Type.Alembic;
-                    hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
-                    AssetDatabase.CreateAsset(hair, path);
-
-                    // User must manually build the strands group.
-                    //HairAssetBuilder.BuildHairAsset(hair);
-                    AssetDatabase.SaveAssetIfDirty(hair);
-                    Selection.activeObject = hair;
-#endif
-                }
-                GUI.enabled = true;
-                EditorGUI.indentLevel--;
-            }
             GUI.enabled = true;
         }
 
