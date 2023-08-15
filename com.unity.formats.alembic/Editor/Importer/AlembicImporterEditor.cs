@@ -38,14 +38,16 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 if (perform)
                 {
+                    DragAndDrop.AcceptDrag();
                     var go = new GameObject(hairAsset.name, typeof(HairInstance));
                     var hairInstance = go.GetComponent<HairInstance>();
                     hairInstance.strandGroupProviders[0].hairAsset = hairAsset;
                     hairInstance.strandGroupProviders[0].hairAssetQuickEdit = true;
                     go.transform.position = worldPosition;
-
+                    go.transform.SetParent(parentForDraggedObjects);
                     Selection.activeGameObject = go;
                 }
+
                 return DragAndDropVisualMode.Generic;
             }
             return DragAndDropVisualMode.None;
@@ -58,10 +60,28 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 if (perform)
                 {
+                    DragAndDrop.AcceptDrag();
                     var go = new GameObject(hairAsset.name, typeof(HairInstance));
                     var hairInstance = go.GetComponent<HairInstance>();
                     hairInstance.strandGroupProviders[0].hairAsset = hairAsset;
                     hairInstance.strandGroupProviders[0].hairAssetQuickEdit = true;
+
+                    if (dropMode == HierarchyDropFlags.DropUpon)
+                    {
+                        go.transform.SetParent((EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject)?.transform, true);
+                    }
+                    else if (dropMode.HasFlag(HierarchyDropFlags.DropAbove))
+                    {
+                        var sibling = EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject;
+                        go.transform.SetParent(sibling.transform.parent, true);
+                        go.transform.SetAsFirstSibling();
+                    }
+                    else if (dropMode == HierarchyDropFlags.DropBetween)
+                    {
+                        var sibling = EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject;
+                        go.transform.SetParent(sibling.transform.parent, true);
+                        go.transform.SetSiblingIndex(sibling.transform.GetSiblingIndex() + 1);
+                    }
 
                     Selection.activeGameObject = go;
                 }
