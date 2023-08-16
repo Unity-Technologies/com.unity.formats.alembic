@@ -19,22 +19,6 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental;
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 namespace UnityEditor.Formats.Alembic.Importer
 {
-    class AlembicAssetPostProcessor : AssetPostprocessor
-    {
-#if UNITY_2021_3_OR_NEWER
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
-#else
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-#endif
-        {
-            foreach (var path in movedAssets)
-            {
-                if (path.EndsWith(".abc", StringComparison.OrdinalIgnoreCase))
-                    AssetDatabase.ImportAsset(path);
-            }
-        }
-    }
-
     class AlembicAssetModificationProcessor : AssetModificationProcessor
     {
         public static AssetDeleteResult OnWillDeleteAsset(string assetPath, RemoveAssetOptions rao)
@@ -257,6 +241,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             firstImport = false;
+
+            ctx.DependsOnSourceAsset(assetPath);
         }
 
         public override bool SupportsRemappedAssetType(Type type)
