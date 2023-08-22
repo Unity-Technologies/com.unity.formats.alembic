@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -242,6 +241,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             firstImport = false;
+
+            ctx.DependsOnSourceAsset(assetPath);
         }
 
         public override bool SupportsRemappedAssetType(Type type)
