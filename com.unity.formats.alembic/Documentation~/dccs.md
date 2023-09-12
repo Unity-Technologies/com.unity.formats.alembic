@@ -10,4 +10,4 @@ Many Digital Content Creation applications allow you to export models as Alembic
 | Color Sets | On export, enable **Write Color Sets** | In the  **Export Data**  section, enable  **Vertex Colors** | Vertex Colors allow you to define a specific color for each vertex of a mesh. During rendering, this color will be used as the surface color of the object.                                                                                                                          |
 | UV Sets    | On export, enable **Write UV Sets**    | In the **Export Data**  section, enable  **UVs**            | UVs are used to map textures onto polygon meshes. They define what portion of a texture should be applied to which polygon of a mesh. They can also be used to encode arbitrary data into them that can later be used for various cases.                                                                                                                           |
 
-Please note that there is currently no way to export materials for alembic in a straighforward way.
+Please note that there is currently no way to export an alembic file that includes materials.
