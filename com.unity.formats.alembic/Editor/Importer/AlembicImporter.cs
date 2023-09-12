@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -87,13 +86,13 @@ namespace UnityEditor.Formats.Alembic.Importer
         };
 
         [SerializeField]
-#pragma warning disable 0649
+#pragma warning disable 0649, 0414
         private string rootGameObjectId;
         [SerializeField]
         private string rootGameObjectName;
         [UsedImplicitly]
         [SerializeField] int importerVersion = (int)ImporterVersions.FacesetNames;
-#pragma warning restore 0649
+#pragma warning restore 0649, 0414
         [SerializeField]
         private AlembicStreamSettings streamSettings = new AlembicStreamSettings();
         public AlembicStreamSettings StreamSettings
@@ -242,6 +241,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             }
 
             firstImport = false;
+
+            ctx.DependsOnSourceAsset(assetPath);
         }
 
         public override bool SupportsRemappedAssetType(Type type)

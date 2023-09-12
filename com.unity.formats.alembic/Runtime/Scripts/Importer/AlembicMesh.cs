@@ -119,6 +119,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
+
+            foreach (var subMesh in m_submeshes)
+                subMesh.Dispose();
+            m_submeshes.Clear();
         }
 
         void UpdateSplits(int numSplits)

@@ -1,6 +1,7 @@
 //#define DEBUG_ANALYTICS
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,15 +22,31 @@ namespace UnityEngine.Formats.Alembic.Exporter
 #if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
             if (!EditorAnalytics.enabled)
                 return;
-
+#if UNITY_2023_2_OR_NEWER
+            EditorAnalytics.SendAnalytic(new ExporterEventAnalytic(CreateEvent(settings)));
+#else
             EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
 
             var data = CreateEvent(settings);
             EditorAnalytics.SendEventWithLimit(EventName, data);
+#endif
 #if DEBUG_ANALYTICS
             var json = JsonUtility.ToJson(data, prettyPrint: true);
             Debug.Log($"{EventName}->{json}");
 #endif
+#endif
+        }
+
+        static IEnumerable<T> GetTargets<T>(this AlembicRecorderSettings settings) where T : Component
+        {
+            if (settings.Scope == ExportScope.TargetBranch)
+            {
+                return settings.TargetBranch != null ? settings.TargetBranch.GetComponentsInChildren<T>() : Enumerable.Empty<T>();
+            }
+#if UNITY_2023_1_OR_NEWER
+            return Object.FindObjectsByType<T>(FindObjectsSortMode.InstanceID);
+#else
+            return Object.FindObjectsOfType<T>();
 #endif
         }
 
@@ -47,20 +64,38 @@ namespace UnityEngine.Formats.Alembic.Exporter
             return evt;
         }
 
-        static IEnumerable<T> GetTargets<T>(this AlembicRecorderSettings settings) where T : Component
+#if UNITY_2023_2_OR_NEWER
+        [Analytics.AnalyticInfo(eventName: EventName, vendorKey: VendorKey, maxEventsPerHour: MAXEventsPerHour, maxNumberOfElements: MAXNumberOfElements)]
+        class ExporterEventAnalytic : Analytics.IAnalytic
         {
-            if (settings.Scope == ExportScope.TargetBranch)
+            private AlembicExporterAnalyticsEvent? data = null;
+
+            public ExporterEventAnalytic(AlembicExporterAnalyticsEvent data)
             {
-                return settings.TargetBranch != null ? settings.TargetBranch.GetComponentsInChildren<T>() : Enumerable.Empty<T>();
+                this.data = data;
             }
 
-            return Object.FindObjectsOfType<T>();
+            public bool TryGatherData(out Analytics.IAnalytic.IData data, [NotNullWhen(false)] out Exception error)
+            {
+                error = null;
+                data = this.data;
+                return data != null;
+            }
         }
+
+        [Serializable]
+        internal struct AlembicExporterAnalyticsEvent : Analytics.IAnalytic.IData
+        {
+            public bool capture_mesh, skinned_mesh, camera, static_mesh_renderers;
+        }
+#else
+
 
         [Serializable]
         internal struct AlembicExporterAnalyticsEvent
         {
             public bool capture_mesh, skinned_mesh, camera, static_mesh_renderers;
         }
+#endif
     }
 }
