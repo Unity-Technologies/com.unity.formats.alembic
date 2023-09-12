@@ -1,6 +1,6 @@
 # Using the Alembic Clip Recorder
 
-The other to export alembics out of Unity is to use the Alembic Clip Recorder, which is an extension of the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html). It becomes available as soon as you install both the _Alembic for Unity_ and _Unity Recorder_ packages.
+Another way to export alembics out of Unity is to use the Alembic Clip Recorder, which is an extension of the [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html). It becomes available as soon as you install both the _Alembic for Unity_ and _Unity Recorder_ packages.
 
 The Alembic Clip Recorder includes the overall functionality of the Unity Recorder in addition to its own [Recorder properties](ref_Recorder.md):
 
