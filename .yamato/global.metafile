@@ -28,6 +28,13 @@ mac_platform: &mac
   image: package-ci/macos-12:v4
   flavor: m1.mac
 
+mac_arm64_platform: &mac_arm64
+  name: mac_arm64
+  type: Unity::VM::osx
+  model: M1
+  image: package-ci/macos-13-arm64:v4
+  flavor: m1.mac
+
 ubuntu20_platform: &ubuntu20
   name: ubuntu20
   type: Unity::VM
@@ -56,12 +63,14 @@ ubuntu18_platform_gpu: &ubuntu18_gpu
 test_platforms:
   - *win
   - *mac
+  - *mac_arm64
   - *ubuntu20
 
 # When running tests on standalone platforms, "--platform standalone" flag needs to be passed to upm-ci
 standalone_test_platforms:
   - *win
   - *mac
+  - *mac_arm64
 
 standalone_test_platforms_gpu:
   - *mac_gpu

@@ -7,6 +7,9 @@ test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
 # Exclude 2019.4 from clean console test because of a known warning in console
@@ -29,6 +32,9 @@ vetting_test_{{ platform.name }}_{{ editor.version }}:
   name : Package vetting test in version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
 # Exclude 2019.4 from clean console test because of a known warning in console

@@ -8,6 +8,9 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
   name : Project test ({{ recorder_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -29,6 +32,9 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -50,6 +56,9 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -72,6 +81,9 @@ test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version 
   name : Project test {{ hdrp_test_project.name }} in version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -93,6 +105,9 @@ test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.v
   name : Project test {{ hdrp_test_project_latest.name }} in version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
