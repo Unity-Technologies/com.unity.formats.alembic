@@ -48,13 +48,6 @@ mac_platform_gpu: &mac_gpu
   image: package-ci/macos-12:v4
   flavor: m1.mac
 
-mac_arm64_platform: &mac_arm64_gpu
-  name: mac_arm64_gpu
-  type: Unity::metal::macmini
-  model: M1
-  image: package-ci/macos-13-arm64:v4
-  flavor: m1.mac
-
 centos_platform_gpu: &centos_gpu
   name: centos_gpu
   type: Unity::VM::GPU
@@ -70,7 +63,7 @@ ubuntu18_platform_gpu: &ubuntu18_gpu
 test_platforms:
   - *win
   - *mac
-  - *mac_arm64_gpu
+  - *mac_arm64
   - *ubuntu20
 
 # When running tests on standalone platforms, "--platform standalone" flag needs to be passed to upm-ci
