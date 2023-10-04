@@ -112,7 +112,12 @@ test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.v
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+{% if platform.model == "M1" %}
+     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+     - upm-ci project test  --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version .Editor
+{% else %}
      - upm-ci project test  --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version {{ editor.version }}
+{% endif %}
   artifacts:
     logs:
       paths:
