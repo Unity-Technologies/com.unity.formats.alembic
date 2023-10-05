@@ -18,7 +18,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
 {% endif %}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
   {% if editor.version == 2019.4 or editor.version == 2020.3 %}
