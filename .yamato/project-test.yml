@@ -14,8 +14,18 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+    - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+  {% else %}
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version .Editor
+  {% endif %}
+{% else %}
+    - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -38,8 +48,18 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+  {% else %}
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
+  {% endif %}
+{% else %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -62,8 +82,18 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+  {% else %}
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
+  {% endif %}
+{% else %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -74,7 +104,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
 {% endfor %}
 
 
-# Old HDRP test project which is used in 2020.3 and 2021.3
+# Old HDRP test project which is used in 2021.3
 {% for editor in hdrp_test_project.test_editors %}
 {% for platform in test_platforms %}
 test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
@@ -88,7 +118,13 @@ test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version 
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+     - upm-ci project test --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version .Editor
+{% else %}
+     - upm-ci project test --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -112,11 +148,12 @@ test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.v
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
      - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
-     - upm-ci project test  --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version .Editor
+     - upm-ci project test --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version .Editor
 {% else %}
-     - upm-ci project test  --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version {{ editor.version }}
+     - upm-ci project test --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version {{ editor.version }}
 {% endif %}
   artifacts:
     logs:
