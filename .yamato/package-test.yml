@@ -21,7 +21,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
-  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+  {% if editor.version == "2019.4" or editor.version == "2020.3" %}
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
   {% else %}
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait

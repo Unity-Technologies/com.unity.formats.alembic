@@ -17,7 +17,7 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
-  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+  {% if editor.version == "2019.4" or editor.version == "2020.3" %}
     - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
   {% else %}
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
@@ -51,7 +51,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
-  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+  {% if editor.version == "2019.4" or editor.version == "2020.3" %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
   {% else %}
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
@@ -85,7 +85,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
 {% if platform.model == "M1" %}
-  {% if editor.version == 2019.4 or editor.version == 2020.3 %}
+  {% if editor.version == "2019.4" or editor.version == "2020.3" %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
   {% else %}
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
