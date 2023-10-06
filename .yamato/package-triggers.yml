@@ -76,9 +76,12 @@ nightly_test_trigger:
 {% endfor %}
 
 {% for platform in test_platforms %}
+# For the legacy HDRP test project, don't run tests on Silicon Mac
+{% if platform != "M1" %}
 {% for editor in hdrp_test_project.test_editors %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
+{% endif %}
 
 {% for editor in hdrp_test_project_latest.test_editors %}
 {% if platform.model == "M1" %}
