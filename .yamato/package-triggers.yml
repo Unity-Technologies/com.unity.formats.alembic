@@ -24,13 +24,13 @@ test_trigger_pr:
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
 # If on Silicon Mac, only run tests in trunk
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "trunk" %}
+{% if platform.model != "M1" or editor.version == "trunk" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% for platform in standalone_test_platforms %}
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "trunk" %}
+{% if platform.model != "M1" or editor.version == "trunk" %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
@@ -54,13 +54,13 @@ nightly_test_trigger:
 {% for editor in nightly_test_editors %}
 {% for platform in test_platforms %}
 # If on Silicon Mac, only run tests in trunk
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "trunk" %}
+{% if platform.model != "M1" or editor.version == "trunk" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% for platform in standalone_test_platforms %}
-{% if platform.model != "M1" or platform.model == "M1" and editor.version == "trunk" %}
+{% if platform.model != "M1" or editor.version == "trunk" %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
@@ -84,12 +84,8 @@ nightly_test_trigger:
 {% endif %}
 
 {% for editor in hdrp_test_project_latest.test_editors %}
-{% if platform.model == "M1" %}
-# If on Silicon Mac, only run AlembicHDRPLatest in 2023.2 and trunk. It fails in 2022.3 and 2023.1 probably because of the old .NET version which doesn't fully support ARM64 macOS.
-  {% if editor.version == "2023.2" or editor.version == "trunk" %}
-    - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
-  {% endif %}
-{% else %}
+# On Silicon Mac, only run AlembicHDRPLatest in 2023.2 and trunk. It fails in 2022.3 and 2023.1 because old .NET versions don't fully support ARM64 macOS. On other platforms, run tests in all Editor versions.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
