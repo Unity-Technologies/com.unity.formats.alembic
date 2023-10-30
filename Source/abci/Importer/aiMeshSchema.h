@@ -121,6 +121,7 @@ public:
 template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
+    IArray<int>  getRGBIndices(MeshRefiner& refiner);
 public:
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
@@ -428,6 +429,19 @@ template<typename T, typename U>
 const aiMeshSummaryInternal& aiMeshSchema<T, U>::getSummary() const
 {
     return m_summary;
+}
+
+template<typename T, typename U>
+IArray<int> aiMeshSchema<T, U>::getRGBIndices(MeshRefiner& refiner) {
+    int* rgb_indices = new int[refiner.indices.size()];
+    int  m = 0;
+    for (int i = 0; i < refiner.counts.size(); i++) {
+        for (int j = 0; j < refiner.counts[i]; j++) {
+            rgb_indices[m] = i;
+            m++;
+        }
+    }
+    return {rgb_indices, refiner.indices.size() };
 }
 
 template<typename T, typename U>
@@ -957,6 +971,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         else if (src.size() == refiner.points.size())
         {
             refiner.template addIndexedAttribute<abcC3>(src, refiner.indices, dst, topology.m_remap_rgb);
+        }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> rgb_indices = getRGBIndices(refiner);
+            refiner.template addIndexedAttribute<abcC3>(src, rgb_indices, dst, topology.m_remap_rgb);
         }
         else
         {
