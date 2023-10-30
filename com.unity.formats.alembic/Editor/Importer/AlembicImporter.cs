@@ -375,7 +375,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         static ulong ComputeHash()
         {
             var newPipelineHash = 0UL;
-            if (GraphicsSettings.currentRenderPipeline == null)
+            if (GraphicsSettings.currentRenderPipeline == null || GraphicsSettings.currentRenderPipeline.defaultMaterial == null)
             {
                 newPipelineHash = 0;
             }
@@ -435,7 +435,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 {
                     if (m_defaultMaterial == null)
                     {
-                        if (GraphicsSettings.currentRenderPipeline == null)
+                        if (GraphicsSettings.currentRenderPipeline == null || GraphicsSettings.currentRenderPipeline.defaultMaterial == null)
                         {
                             m_defaultMaterial = GetMaterial("Standard.shader");
                         }
