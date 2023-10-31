@@ -47,5 +47,39 @@ namespace UnityEditor.Formats.Alembic.Importer
             Assert.That(desc.PathToAbc, Is.EqualTo(newLocation),
                 "PathToAbc should have been updated to the new path.");
         }
+        
+        [Test]
+        public void FaceColorAttributes_AreProcessedCorrectly()
+        {
+            string guid = "45d4eb6bc4cd3ac479e0f4a21b192ed9";
+
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+
+            var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+
+            GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
+
+            var meshFilter = GameObject.Find("cube_face").GetComponentInChildren<MeshFilter>();
+
+            Color[] expectedColors =
+            {
+                new (0.136873f, 0.570807f, 0.034585f, 1.0f),
+                new (0.807873f, 0.292345f, 0.0282118f, 1.0f),
+                new (0.638699f, 0.320457f, 0.676918f, 1.0f),
+                new (0.849678f, 0.0295019f, 0.185701f, 1.0f),
+                new (0.410384f, 0.133891f, 0.293169f, 1.0f),
+                new (0.0560673f, 0.955198f, 0.474951f, 1.0f)
+            };
+
+            for (int i = 0; i < expectedColors.Length; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    var meshColor = meshFilter.sharedMesh.colors[i * 4 + j];
+                    Assert.IsTrue(expectedColors[i] == meshColor,"Expected: {expectedColors[i]}, But was: {meshColor}");
+                }
+            }
+        }
     }
+
 }
