@@ -3,10 +3,11 @@ if(ISPC_FOUND)
 endif()
 
 include(CMakeParseArguments)
+include(CMakePrintHelpers)
 
 find_program(7ZA 7za HINTS ${CMAKE_SOURCE_DIR}/External/7z)
 
-set(ISPC_VERSION 1.14.1)
+set(ISPC_VERSION 1.21.0)
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(ISPC_DIR "ispc-v${ISPC_VERSION}-linux")
         execute_process(
@@ -31,7 +32,7 @@ set(ISPC_VERSION 1.14.1)
             COMMAND ${7ZA} x -aoa -o* ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.zip
         )
     endif()
-
+    cmake_print_variables(CMAKE_SYSTEM_PROCESSOR)
     set(ISPC "${CMAKE_BINARY_DIR}/${ISPC_DIR}/bin/ispc" CACHE PATH "" FORCE)
 
 # e.g:
@@ -50,12 +51,19 @@ function(add_ispc_targets)
         get_filename_component(name ${source} NAME_WE)
         set(header "${arg_OUTDIR}/${name}.h")
         set(object "${arg_OUTDIR}/${name}${CMAKE_CXX_OUTPUT_EXTENSION}")
-        set(objects 
-            ${object}
-            "${arg_OUTDIR}/${name}_sse4${CMAKE_CXX_OUTPUT_EXTENSION}"
-            "${arg_OUTDIR}/${name}_avx${CMAKE_CXX_OUTPUT_EXTENSION}"
-            "${arg_OUTDIR}/${name}_avx512skx${CMAKE_CXX_OUTPUT_EXTENSION}"
-        )
+
+        if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+            set(objects 
+                ${object}
+            )
+        else()
+            set(objects 
+                ${object}
+                "${arg_OUTDIR}/${name}_sse4${CMAKE_CXX_OUTPUT_EXTENSION}"
+                "${arg_OUTDIR}/${name}_avx${CMAKE_CXX_OUTPUT_EXTENSION}"
+                "${arg_OUTDIR}/${name}_avx512skx${CMAKE_CXX_OUTPUT_EXTENSION}"
+            )
+        endif()
        
         if( CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             set(object_arm64 "${arg_OUTDIR}/${name}_arm64${CMAKE_CXX_OUTPUT_EXTENSION}")
@@ -66,16 +74,28 @@ function(add_ispc_targets)
 
             list(APPEND objects ${object_arm64})
         endif()
-
+        
         set(outputs ${header} ${objects})
-        add_custom_command(
-            OUTPUT ${outputs}
-            COMMAND ${ISPC}
-            ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math
-            COMMENT "running:  ${ISPC} ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86-64 --opt=fast-masked-vload --opt=fast-math"
-            DEPENDS ${source} ${arg_HEADERS}
-            MAIN_DEPENDENCY ${source}
+
+        if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+            add_custom_command(
+                OUTPUT ${outputs}
+                COMMAND ${ISPC}
+                ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=neon --arch=aarch64 --opt=fast-masked-vload --opt=fast-math
+                COMMENT "running:  ${ISPC} ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=neon --arch=aarch64 --opt=fast-masked-vload --opt=fast-math"
+                DEPENDS ${source} ${arg_HEADERS}
+                MAIN_DEPENDENCY ${source}
         )
+        else()
+            add_custom_command(
+                OUTPUT ${outputs}
+                COMMAND ${ISPC}
+                ARGS ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86_64 --opt=fast-masked-vload --opt=fast-math
+                COMMENT "running:  ${ISPC} ${source} -o ${object} -h ${header} ${ISPC_OPTS} --target=sse4-i32x4,avx1-i32x8,avx512skx-i32x16 --arch=x86_64 --opt=fast-masked-vload --opt=fast-math"
+                DEPENDS ${source} ${arg_HEADERS}
+                MAIN_DEPENDENCY ${source}
+            )
+        endif()
 
         list(APPEND _ispc_headers ${header})
         list(APPEND _ispc_objects ${objects})
