@@ -899,11 +899,6 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv0);
         }
-        else if (src.size() == refiner.counts.size())
-        {
-            IArray<int> uv0_indices = getAttributesIndices(refiner);
-            refiner.template addIndexedAttribute<abcV2>(src, uv0_indices, dst, topology.m_remap_rgb);
-        }
         else
         {
             DebugLog("Invalid attribute");
@@ -929,11 +924,6 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         else if (src.size() == refiner.points.size())
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv1);
-        }
-        else if (src.size() == refiner.counts.size())
-        {
-            IArray<int> uv1_indices = getAttributesIndices(refiner);
-            refiner.template addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_rgb);
         }
         else
         {
