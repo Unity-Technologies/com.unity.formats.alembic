@@ -16,10 +16,17 @@ file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importe
 list(APPEND sources ${ISPC_SOURCES})
 list(APPEND sources ${ISPC_OBJECTS})
 
-add_plugin(abci
-    SOURCES ${sources}
-    PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    add_plugin(abci
+        SOURCES ${sources}
+        PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64
 )
+else()
+    add_plugin(abci
+        SOURCES ${sources}
+        PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64
+    )
+endif()
 
 target_include_directories(abci
     PRIVATE
@@ -42,8 +49,12 @@ target_link_libraries(abci
         ${OPENEXR_Iex_LIBRARY}
         ${OPENEXR_IexMath_LIBRARY}
 )
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64)
+else()
+    install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
+endif()
 
-install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
 
 ########################################
 # Unit tests
