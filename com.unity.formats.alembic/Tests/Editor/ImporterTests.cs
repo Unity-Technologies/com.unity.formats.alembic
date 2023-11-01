@@ -121,9 +121,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         [TestCase( "cube_face")]
         [TestCase( "cube_point")]
         [TestCase( "cube_vertex")]
-        public void ColorAttributes_AreProcessedCorrectly(string scope)
+        public void RgbAttributes_AreProcessedCorrectly(string scope)
         {
-            string guid = "45d4eb6bc4cd3ac479e0f4a21b192ed9";
+            string guid = "dd3554fc098614b9e99b49873fe18cd6";
             var path = AssetDatabase.GUIDToAssetPath(guid);
             var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
