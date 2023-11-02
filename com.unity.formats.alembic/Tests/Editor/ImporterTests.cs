@@ -48,7 +48,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 "PathToAbc should have been updated to the new path.");
         }
 
-        private Dictionary<string, List<Color>> ScopeExpectedColors = new Dictionary<string, List<Color>>
+        static readonly Dictionary<string, List<Color>> k_VertexColorScopeTestData = new Dictionary<string, List<Color>>
         {
             { "cube_face", new List<Color>
             {
@@ -118,9 +118,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         };
 
         [Test]
-        [TestCase( "cube_face")]
-        [TestCase( "cube_point")]
-        [TestCase( "cube_vertex")]
+        [TestCase("cube_face")]
+        [TestCase("cube_point")]
+        [TestCase("cube_vertex")]
         public void RgbAttributes_AreProcessedCorrectly(string scope)
         {
             string guid = "dd3554fc098614b9e99b49873fe18cd6";
