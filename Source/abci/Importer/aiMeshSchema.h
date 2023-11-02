@@ -435,10 +435,12 @@ template<typename T, typename U>
 IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
 {
    int* attributes_indices = new int[refiner.indices.size()];
+   auto faceCounts = refiner.counts;
   
-   for (int i = 0; i < refiner.counts.size(); i++) {
-       for (int j = 0; j < refiner.counts[i]; j++) {
-           attributes_indices[refiner.counts[i] * i + j] = i;
+   for (int i = 0; i < faceCounts.size(); i++)
+   {
+       for (int j = 0; j < faceCounts[i]; j++) {
+           attributes_indices[faceCounts[i] * i + j] = i;
        }
     }
 
