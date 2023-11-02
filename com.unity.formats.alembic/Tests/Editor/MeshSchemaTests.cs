@@ -75,13 +75,48 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+        static readonly Dictionary<string, List<Color>> k_VertexRgbaScopeTestData = new()
+        {
+            { "face_grid", new List<Color>
+            {
+                new (0.123443f, 0.316637f, 0.231753f, 0.522791f),
+                new (0.123443f, 0.316637f, 0.231753f, 0.522791f),
+                new (0.123443f, 0.316637f, 0.231753f, 0.522791f),
+                new (0.123443f, 0.316637f, 0.231753f, 0.522791f),
+                new (0.845502f, 0.209966f, 0.239808f, 0.466761f),
+                new (0.845502f, 0.209966f, 0.239808f, 0.466761f),
+                new (0.845502f, 0.209966f, 0.239808f, 0.466761f),
+                new (0.845502f, 0.209966f, 0.239808f, 0.466761f),
+            }},
+            { "point_grid", new List<Color>
+            {
+                new (0.839161f, 0.152978f, 0.577921f, 0.444734f),
+                new (0.639696f, 0.252602f, 0.571499f, 0.656393f),
+                new (0.822681f, 0.982065f, 0.645432f, 0.907562f),
+                new (0.645021f, 0.330725f, 0.396846f, 0.165953f),
+                new (0.979039f, 0.845975f, 0.0268883f, 0.969148f),
+                new (0.171811f, 0.407435f, 0.896118f, 0.831778f)
+            }},
+            { "vertex_grid", new List<Color>
+            {
+                new (0.699117f, 0.283595f, 0.844144f, 0.944193f),
+                new (0.954809f, 0.0829239f, 0.5548f, 0.315697f),
+                new (0.1405f, 0.60224f, 0.242197f, 0.642945f),
+                new (0.461596f, 0.0950942f, 0.56585f, 0.176854f),
+                new (0.119768f, 0.956445f, 0.342202f, 0.80795f),
+                new (0.655877f, 0.981544f, 0.658537f, 0.57736f),
+                new (0.0532411f, 0.201442f, 0.183963f, 0.996724f),
+                new (0.970232f, 0.646445f, 0.934467f, 0.718449f)
+            }}
+        };
+
         [Test]
         [TestCase("cube_face")]
         [TestCase("cube_point")]
         [TestCase("cube_vertex")]
         public void VertexRgb_AreProcessedCorrectlyForScope(string scope)
         {
-            string guid = "dd3554fc098614b9e99b49873fe18cd6";
+            string guid = "dd3554fc098614b9e99b49873fe18cd6"; // cubes_coloured.abc
             var path = AssetDatabase.GUIDToAssetPath(guid);
             var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
@@ -89,6 +124,30 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
 
             var expectedColors = k_VertexRgbScopeTestData[scope];
+
+            for (int i = 0; i < expectedColors.Count; i++)
+            {
+                var meshColor = meshFilter.sharedMesh.colors[i];
+
+                Assert.IsTrue(meshColor == expectedColors[i],
+                        $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColor}");
+            }
+        }
+
+        [Test]
+        [TestCase("face_grid")]
+        [TestCase("point_grid")]
+        [TestCase("vertex_grid")]
+        public void VertexRgba_AreProcessedCorrectlyForScope(string scope)
+        {
+            string guid = "8e71ed6608e0b984b8b90d6ea71b11eb"; // rgba_grid.abc
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
+
+            var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+
+            var expectedColors = k_VertexRgbaScopeTestData[scope];
 
             for (int i = 0; i < expectedColors.Count; i++)
             {
