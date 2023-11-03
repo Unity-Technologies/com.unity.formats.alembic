@@ -110,6 +110,42 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+        static readonly Dictionary<string, List<Vector2>> k_VertexUVScopeTestData = new()
+        {
+            { "face_uv_grid", new List<Vector2>
+            {
+                new(0.150535f, 0.70265f),
+                new(0.150535f, 0.70265f),
+                new(0.150535f, 0.70265f),
+                new(0.150535f, 0.70265f),
+                new(0.532512f, 0.736863f),
+                new(0.532512f, 0.736863f),
+                new(0.532512f, 0.736863f),
+                new(0.532512f, 0.736863f)
+            }},
+            { "point_uv_grid", new List<Vector2>
+            {
+                new ( 0.839161f, 0.152978f),
+                new ( 0.639696f, 0.252602f),
+                new (  0.645021f, 0.330725f),
+                new (  0.979039f, 0.845975f),
+                new (  0.171811f, 0.407435f),
+                new (  0.822681f, 0.982065f)
+
+            }},
+            { "vertex_uv_grid", new List<Vector2>
+            {
+                new(0.868606f, 0.457556f),
+                new( 0.515431f, 0.508874f),
+                new( 0.0333328f, 0.798657f),
+                new( 0.0986392f, 0.53505f),
+                new( 0.737957f, 0.512172f),
+                new( 0.892787f, 0.0975446f),
+                new( 0.68879f, 0.285097f),
+                new( 0.800312f, 0.687608f)
+            }}
+        };
+
         [Test]
         [TestCase("cube_face")]
         [TestCase("cube_point")]
@@ -155,6 +191,30 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 
                 Assert.IsTrue(meshColor == expectedColors[i],
                         $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColor}");
+            }
+        }
+
+        [Test]
+        [TestCase("face_uv_grid")]
+        [TestCase("point_uv_grid")]
+        [TestCase("vertex_uv_grid")]
+        public void VertexUV_AreProcessedCorrectlyForScope(string scope)
+        {
+            string guid = "eba4f4e4413e7ea48a63bd27ddf3a329"; // uv_grid.abc
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
+
+            var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+
+            var expectedUV = k_VertexUVScopeTestData[scope];
+
+            for (int i = 0; i < expectedUV.Count; i++)
+            {
+                var meshUV = meshFilter.sharedMesh.uv[i];
+
+                Assert.IsTrue(meshUV == expectedUV[i],
+                    $"Scope: {scope}, Expected: {expectedUV[i]}, But was: {meshUV}");
             }
         }
     }
