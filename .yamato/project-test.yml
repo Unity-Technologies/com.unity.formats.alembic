@@ -8,11 +8,21 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
   name : Project test ({{ recorder_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# 2019.4 and 2020.3 doesn't have Silicon version Editor, so download x64 version for them even on Silicon Mac. On other platforms, always download x64 version.
+{% if platform.model != "M1" or editor.version == "2019.4" or editor.version == "2020.3" %}
+    - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+{% else %}
+# Explicitly download Silicon version Editor for 2021.3+(included) on Silicon Mac
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version .Editor
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -29,11 +39,21 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# 2019.4 and 2020.3 doesn't have Silicon version Editor, so download x64 version for them even on Silicon Mac. On other platforms, always download x64 version.
+{% if platform.model != "M1" or editor.version == "2019.4" or editor.version == "2020.3" %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+{% else %}
+# Explicitly download Silicon version Editor for 2021.3+(included) on Silicon Mac
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -50,11 +70,22 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+# upm-ci uses unity-downloader-cli under the hood to download Editor and currently it always downloads x64 verion Editor no matter on which platform.
+# For 2019.4 and 2020.3, they don't have Silicon version Editor. So if the editor version is 2019.4 or 2020.3, or it is a non-Silicon Mac platform, just call upm-ci which will use x64 version editor for testing.
+{% if platform.model != "M1" or editor.version == "2019.4" or editor.version == "2020.3" %}
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
+{% else %}
+# Explicitly download Silicon version Editor for 2021.3+(included) which will be used by upm-ci to run tests on Silicon Mac
+    - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -65,18 +96,27 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
 {% endfor %}
 
 
-# Old HDRP test project which is used in 2020.3 and 2021.3
+# Old HDRP test project which is used in 2021.3
 {% for editor in hdrp_test_project.test_editors %}
 {% for platform in test_platforms %}
 test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
   name : Project test {{ hdrp_test_project.name }} in version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+     - upm-ci project test --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version .Editor
+{% else %}
+     - upm-ci project test --project-path {{ hdrp_test_project.path }} --type project-tests --unity-version {{ editor.version }}
+{% endif %}
   artifacts:
     logs:
       paths:
@@ -93,11 +133,20 @@ test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.v
   name : Project test {{ hdrp_test_project_latest.name }} in version {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-     - upm-ci project test  --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version {{ editor.version }}
+# Use Silicon Unity Editor for tests on Silicon Mac, but only for 2021.3+ versions (included)
+{% if platform.model == "M1" %}
+     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+     - upm-ci project test --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version .Editor
+{% else %}
+     - upm-ci project test --project-path {{ hdrp_test_project_latest.path }} --type project-tests --unity-version {{ editor.version }}
+{% endif %}
   artifacts:
     logs:
       paths:
