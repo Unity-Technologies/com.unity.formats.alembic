@@ -7,9 +7,16 @@ test_editors:
   - version: 2023.2
   - version: trunk
 
-clean_console_test_editors:
+nightly_test_editors:
+  - version: 2021.3
   - version: 2022.3
   - version: 2023.1
+  - version: 2023.2
+  - version: trunk  
+
+clean_console_test_editors:
+  - version: 2022.3
+  - version: 2023.2
   - version: trunk  
 
 promotion_test_editors:
@@ -26,6 +33,13 @@ mac_platform: &mac
   name: mac
   type: Unity::VM::osx
   image: package-ci/macos-12:v4
+  flavor: m1.mac
+
+mac_arm64_platform: &mac_arm64
+  name: mac_arm64
+  type: Unity::VM::osx
+  model: M1
+  image: package-ci/macos-13-arm64:v4
   flavor: m1.mac
 
 ubuntu20_platform: &ubuntu20
@@ -56,12 +70,14 @@ ubuntu18_platform_gpu: &ubuntu18_gpu
 test_platforms:
   - *win
   - *mac
+  - *mac_arm64
   - *ubuntu20
 
 # When running tests on standalone platforms, "--platform standalone" flag needs to be passed to upm-ci
 standalone_test_platforms:
   - *win
   - *mac
+  - *mac_arm64
 
 standalone_test_platforms_gpu:
   - *mac_gpu
@@ -85,7 +101,6 @@ hdrp_test_project:
   name: AlembicHDRP
   path: TestProjects/AlembicHDRP
   test_editors:
-    - version: 2020.3
     - version: 2021.3
 
 # New HDRP test project for 2022.2+ versions
