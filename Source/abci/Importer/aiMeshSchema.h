@@ -434,17 +434,17 @@ const aiMeshSummaryInternal& aiMeshSchema<T, U>::getSummary() const
 template<typename T, typename U>
 IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
 {
-   int* attributes_indices = new int[refiner.indices.size()];
-   auto faceCounts = refiner.counts;
-  
-   for (int i = 0; i < faceCounts.size(); i++)
-   {
-       for (int j = 0; j < faceCounts[i]; j++) {
-           attributes_indices[faceCounts[i] * i + j] = i;
-       }
+    int* indices = new int[refiner.indices.size()];
+    int   m = 0;
+    for (int i = 0; i < refiner.counts.size(); i++) {
+        for (int j = 0; j < refiner.counts[i]; j++) {
+            indices[m] = i;
+            m++;
+        }
     }
+    return { indices, refiner.indices.size() };
 
-   return {attributes_indices, refiner.indices.size() };
+ 
 }
 
 template<typename T, typename U>
