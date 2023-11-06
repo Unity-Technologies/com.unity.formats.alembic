@@ -21,22 +21,11 @@ test_trigger_pr:
     - .yamato/package-validation.yml#validate_api_doc
     - .yamato/package-validation.yml#validate_api_osx
     - .yamato/package-validation.yml#validate_api_win
+# Only run tests on Win for PR trigger
 {% for editor in test_editors %}
-{% for platform in test_platforms %}
-# When on non-Silicon Mac platforms, run package and AlembicRecorder tests in all Editor versions.
-# When on Silicon Mac, only run package and AlembicRecorder tests in 2023.2 and trunk because of known compilation errors.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
-    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
-    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
-{% for platform in standalone_test_platforms %}
-# When on non-Silicon Mac platforms, run AlembicStandaloneBuild tests in all Editor versions.
-# When on Silicon Mac, only run standalone tests in trunk because of known compilation errors.
-{% if platform.model != "M1" or editor.version == "trunk" %}
-    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
+    - .yamato/package-test.yml#test_win_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_win_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_win_{{ editor.version }}
 {% endfor %}
     - .yamato/package-format.yml#formatting
 # Only run package clean console test jobs on Win for PR trigger
