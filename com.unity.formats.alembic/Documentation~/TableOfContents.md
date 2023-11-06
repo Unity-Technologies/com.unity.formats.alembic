@@ -9,7 +9,6 @@
   * [Record and play back the Alembic using an Infinite clip](time_InfiniteClip.md)
   * [Playback using an Alembic Animation clip](time_ImportedClip.md)
 * [Using Alembic with Unity Animation](animClip.md)
-* [Using Animation events with Alembic files](time_frameAnimEvent.md)
 * [Exporting Unity GameObjects to Alembic](export.md)
 * [Working with Particles](particles.md)
 * [Working with Materials](materials.md)

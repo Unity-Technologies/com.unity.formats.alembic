@@ -8,6 +8,9 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Package clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -29,6 +32,9 @@ AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicHDRPLatest clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -50,6 +56,9 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicRecorder clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
+{% if platform.model %}
+    model: {{ platform.model }}
+{% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
@@ -64,7 +73,7 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
-# Clean console test trigger which runs package clean console test jobs on Win, 
+# Clean console test trigger which runs package clean console test jobs on Win and Silicon Mac (only trunk)
 # AlembicHDRPLatest project clean console test on Mac 
 # and AlembicRecorder project clean console test on Ubuntu20
 clean_console_test_trigger:
@@ -75,3 +84,4 @@ clean_console_test_trigger:
     - .yamato/clean-console-test.yml#AlembicHDRPLatest_clean_console_test_mac_{{ editor.version }}
     - .yamato/clean-console-test.yml#AlembicRecorder_clean_console_test_ubuntu20_{{ editor.version }}
 {% endfor %}
+    - .yamato/clean-console-test.yml#clean_console_test_mac_arm64_trunk
