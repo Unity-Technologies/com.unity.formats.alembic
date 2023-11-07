@@ -6,7 +6,7 @@ test_trigger_pr_documentation:
   name: Pull Request Tests Trigger for documentation changes
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(target match ".*" AND push.changes.any match "com.unity.formats.alembic/Documentation~/**" AND NOT draft)
   dependencies:
     - .yamato/package-documentation.yml#generate_documentation
     - .yamato/package-test.yml#vetting_test_win_trunk
@@ -16,7 +16,7 @@ test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND NOT push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(target match ".*" AND NOT push.changes.all match ["com.unity.formats.alembic/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
     - .yamato/package-validation.yml#validate_api_doc
     - .yamato/package-validation.yml#validate_api_osx
