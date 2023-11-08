@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
 
 namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 {
@@ -146,6 +147,75 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = new Dictionary<string, List<Vector3>>()
+        {
+            { "face_normal_grid", new List<Vector3>
+            {
+                new Vector3(0,0,1),
+                new Vector3(0,0,1),
+                new Vector3(0,0,1),
+                new Vector3(0,0,1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0)
+            }},
+            { "point_normal_grid", new List<Vector3>
+            {
+                new Vector3(0.57735f, -0.57735f, 0.57735f),
+                new Vector3( -0.57735f, -0.57735f, 0.57735f),
+                new Vector3(  -0.57735f, 0.57735f, 0.57735f),
+                new Vector3( 0.57735f, 0.57735f, 0.57735f),
+                new Vector3(-0.57735f, -0.57735f, -0.57735f),
+                new Vector3(0.57735f, -0.57735f, -0.57735f),
+                new Vector3(0.57735f, 0.57735f, -0.57735f),
+                new Vector3(-0.57735f, 0.57735f, -0.57735f)
+            }},
+            { "vertex_normal_grid", new List<Vector3>
+            {
+                new Vector3(0, 0, 1),
+                new Vector3(0, 0, 1),
+                new Vector3(0, 0, 1),
+                new Vector3(0, 0, 1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, 1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(0, -1, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0),
+                new Vector3(-1, 0, 0)
+            }}
+        };
+
         [Test]
         [TestCase("cube_face")]
         [TestCase("cube_point")]
@@ -215,6 +285,35 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 
                 Assert.IsTrue(meshUV == expectedUV[i],
                     $"Scope: {scope}, Expected: {expectedUV[i]}, But was: {meshUV}");
+            }
+        }
+
+        [Test]
+        [TestCase("face_normal_grid")]
+        [TestCase("point_normal_grid")]
+        [TestCase("vertex_normal_grid")]
+        public void VertexNormals_AreProcessedCorrectlyForScope(string scope)
+        {
+            string guid = "39e35f70a7d718e4aa4cafea6714d5e3"; // cubes_normals.abc
+
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var abc = meshPrefab.GetComponent<AlembicStreamPlayer>();
+
+            if(abc.Settings.SwapHandedness)
+               abc.Settings.SwapHandedness = false;
+
+            GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
+            var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+
+            var expectedNormal = k_VertexNormalScopeTestData[scope];
+
+            for (int i = 0; i < expectedNormal.Count; i++)
+            {
+                var meshNormal = meshFilter.sharedMesh.normals[i];
+
+                Assert.IsTrue(meshNormal == expectedNormal[i],
+                    $"Scope: {scope}, Expected: {expectedNormal[i]}, But was: {meshNormal}");
             }
         }
     }
