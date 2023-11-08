@@ -291,10 +291,13 @@ namespace UnityEngine.Formats.Alembic.Importer
             if (!top)
                 return;
 
+            aiSampleSelector ss = default;
+            NativeMethods.aiTimeToSampleSelector2(ref ss, time);
+
             m_importContext = new ImportContext
             {
                 alembicTreeNode = node,
-                ss = NativeMethods.aiTimeToSampleSelector(time),
+                ss = ss,
                 createMissingNodes = createMissingNodes,
             };
             top.EachChild(ImportCallback);
