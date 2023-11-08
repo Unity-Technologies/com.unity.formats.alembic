@@ -49,6 +49,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             UpdateMesh(curves);
         }
 
+        void OnEnable()
+        {
+            Init();
+        }
+        
         void UpdateMesh(AlembicCurves curves)
         {
             if (curves.Positions.Length == 0)
