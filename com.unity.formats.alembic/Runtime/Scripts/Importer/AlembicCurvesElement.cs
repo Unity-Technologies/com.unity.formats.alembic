@@ -77,7 +77,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var data = m_abcData[0];
 
             if (abcTreeNode.stream.streamDescriptor.Settings.ImportVisibility)
-                abcTreeNode.gameObject.SetActive(data.visibility); // Here is where we set the vis, breaking the code
+                abcTreeNode.gameObject.SetActive(data.visibility);
 
             var curves = abcTreeNode.gameObject.GetComponent<AlembicCurves>();
 
