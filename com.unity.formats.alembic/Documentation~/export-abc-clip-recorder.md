@@ -32,7 +32,7 @@ To set up an Alembic Clip Recorder:
 
 3. Set the [Recorder properties](ref_Recorder.md) according to your output needs:
 
-   * In **Capture Settings**, specify specify the targeted export scope and the type of data you want to export.
+   * In **Capture Settings**, specify the targeted export scope and the type of data you want to export.
 
    * In **Alembic Settings**, specify the ways to output the data as an Alembic file.
 
