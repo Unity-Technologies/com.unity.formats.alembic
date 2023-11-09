@@ -10,6 +10,8 @@
   * [Playback using an Alembic Animation clip](time_ImportedClip.md)
 * [Using Alembic with Unity Animation](animClip.md)
 * [Exporting Unity GameObjects to Alembic](export.md)
+  * [Export via an Alembic Exporter component](export-abc-exporter.md)
+  * [Export via an Alembic Clip Recorder](export-abc-clip-recorder.md)
 * [Working with Particles](particles.md)
 * [Working with Materials](materials.md)
 * [Working with Curves](curves.md)
