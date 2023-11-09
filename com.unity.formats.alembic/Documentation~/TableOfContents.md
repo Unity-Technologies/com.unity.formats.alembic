@@ -30,5 +30,4 @@
     * [Alembic Stream Player component](ref_StreamPlayer.md)
   * Timeline clip
     * [Alembic Shot Asset clip settings](ref_Shot.md)
-* [Tutorial – Import and play back Alembic](tutorial.md)
 * [Limitations and known issues](known-issues.md)
