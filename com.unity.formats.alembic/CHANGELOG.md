@@ -4,12 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### Fixed
-- Fixed the processing of RGB, RGBA, UV and Normals attributes in "Face" scope. 
-- Fixed the processing of UV in "Points" scope.
-
 ## [2.4.0-pre.1] - 2023-11-07
+### Fixed
+- Fixed the processing of RGB, RGBA, UV and Normals attributes in "Face" scope.
+- Fixed the processing of UV in "Points" scope.
 
 ## [2.3.4] - 2023-10-30
 ### Fixed
