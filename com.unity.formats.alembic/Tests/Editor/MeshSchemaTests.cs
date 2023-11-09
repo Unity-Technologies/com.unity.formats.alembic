@@ -228,15 +228,14 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
 
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+            var meshColors = meshFilter.sharedMesh.colors;
 
             var expectedColors = k_VertexRgbScopeTestData[scope];
 
             for (int i = 0; i < expectedColors.Count; i++)
             {
-                var meshColor = meshFilter.sharedMesh.colors[i];
-
-                Assert.IsTrue(meshColor == expectedColors[i],
-                        $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColor}");
+                Assert.IsTrue( meshColors[i] == expectedColors[i],
+                        $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColors}");
             }
         }
 
@@ -252,15 +251,14 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
 
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+            var meshColors = meshFilter.sharedMesh.colors;
 
             var expectedColors = k_VertexRgbaScopeTestData[scope];
 
             for (int i = 0; i < expectedColors.Count; i++)
             {
-                var meshColor = meshFilter.sharedMesh.colors[i];
-
-                Assert.IsTrue(meshColor == expectedColors[i],
-                        $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColor}");
+                Assert.IsTrue(meshColors[i] == expectedColors[i],
+                        $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColors[i]}");
             }
         }
 
@@ -276,15 +274,14 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
 
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+            var meshUVs = meshFilter.sharedMesh.uv;
 
             var expectedUV = k_VertexUVScopeTestData[scope];
 
             for (int i = 0; i < expectedUV.Count; i++)
             {
-                var meshUV = meshFilter.sharedMesh.uv[i];
-
-                Assert.IsTrue(meshUV == expectedUV[i],
-                    $"Scope: {scope}, Expected: {expectedUV[i]}, But was: {meshUV}");
+                Assert.IsTrue(meshUVs[i] == expectedUV[i],
+                    $"Scope: {scope}, Expected: {expectedUV[i]}, But was: {meshUVs[i]}");
             }
         }
 
@@ -295,7 +292,6 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
         public void VertexNormals_AreProcessedCorrectlyForScope(string scope)
         {
             string guid = "39e35f70a7d718e4aa4cafea6714d5e3"; // cubes_normals.abc
-
             var path = AssetDatabase.GUIDToAssetPath(guid);
             var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var abc = meshPrefab.GetComponent<AlembicStreamPlayer>();
@@ -305,15 +301,14 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
+            var meshNormals = meshFilter.sharedMesh.normals;
 
             var expectedNormal = k_VertexNormalScopeTestData[scope];
 
             for (int i = 0; i < expectedNormal.Count; i++)
             {
-                var meshNormal = meshFilter.sharedMesh.normals[i];
-
-                Assert.IsTrue(meshNormal == expectedNormal[i],
-                    $"Scope: {scope}, Expected: {expectedNormal[i]}, But was: {meshNormal}");
+                Assert.IsTrue(meshNormals[i] == expectedNormal[i],
+                    $"Scope: {scope}, Expected: {expectedNormal[i]}, But was: {meshNormals[i]}");
             }
         }
     }
