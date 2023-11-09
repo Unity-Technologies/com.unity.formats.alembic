@@ -122,6 +122,7 @@ template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
     IArray<int>  getAttributesIndices(MeshRefiner& refiner);
+
 public:
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
