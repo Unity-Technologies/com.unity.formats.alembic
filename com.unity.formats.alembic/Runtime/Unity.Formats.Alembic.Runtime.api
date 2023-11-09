@@ -3,7 +3,7 @@
 // make sure the XML doc file is present and located next to the scraped dll
 namespace UnityEngine.Formats.Alembic.Exporter
 {
-    [ExecuteInEditMode] public class AlembicExporter : MonoBehaviour
+    [UnityEngine.ExecuteInEditMode] public class AlembicExporter : UnityEngine.MonoBehaviour
     {
         public bool CaptureOnStart { get; set; }
         public bool IgnoreFirstFrame { get; set; }
@@ -18,48 +18,48 @@ namespace UnityEngine.Formats.Alembic.Exporter
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
-    [DisallowMultipleComponent] public class AlembicCurves : MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] public class AlembicCurves : UnityEngine.MonoBehaviour
     {
-        public event AlembicCurves.OnUpdateDataHandler OnUpdateData;
+        public event UnityEngine.Formats.Alembic.Importer.AlembicCurves.OnUpdateDataHandler OnUpdateData;
         public int[] CurveOffsets { get; }
-        public Vector3[] Positions { get; }
-        public Vector2[] UVs { get; }
-        public Vector3[] Velocities { get; }
+        public UnityEngine.Vector3[] Positions { get; }
+        public UnityEngine.Vector2[] UVs { get; }
+        public UnityEngine.Vector3[] Velocities { get; }
         public float[] Widths { get; }
         public AlembicCurves() {}
-        public delegate void OnUpdateDataHandler(AlembicCurves curves);
+        public delegate void OnUpdateDataHandler(UnityEngine.Formats.Alembic.Importer.AlembicCurves curves);
     }
 
-    [ExecuteInEditMode] [RequireComponent(typeof(AlembicCurves))] [RequireComponent(typeof(MeshFilter))] [RequireComponent(typeof(MeshRenderer))] public class AlembicCurvesRenderer : MonoBehaviour
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.RequireComponent(typeof(UnityEngine.Formats.Alembic.Importer.AlembicCurves))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshFilter))] [UnityEngine.RequireComponent(typeof(UnityEngine.MeshRenderer))] public class AlembicCurvesRenderer : UnityEngine.MonoBehaviour
     {
         public AlembicCurvesRenderer() {}
     }
 
-    public class AlembicCustomData : MonoBehaviour
+    public class AlembicCustomData : UnityEngine.MonoBehaviour
     {
         public System.Collections.Generic.List<string> FaceSetNames { get; }
         public AlembicCustomData() {}
     }
 
-    [ExecuteInEditMode] public class AlembicPointsCloud : MonoBehaviour
+    [UnityEngine.ExecuteInEditMode] public class AlembicPointsCloud : UnityEngine.MonoBehaviour
     {
-        public Vector3 BoundsCenter { get; }
-        public Vector3 BoundsExtents { get; }
+        public UnityEngine.Vector3 BoundsCenter { get; }
+        public UnityEngine.Vector3 BoundsExtents { get; }
         public System.Collections.Generic.List<System.UInt32> Ids { get; }
-        public System.Collections.Generic.List<Vector3> Positions { get; }
-        public System.Collections.Generic.List<Vector3> Velocities { get; }
+        public System.Collections.Generic.List<UnityEngine.Vector3> Positions { get; }
+        public System.Collections.Generic.List<UnityEngine.Vector3> Velocities { get; }
         public AlembicPointsCloud() {}
     }
 
-    [ExecuteInEditMode] [RequireComponent(typeof(AlembicPointsCloud))] public class AlembicPointsRenderer : MonoBehaviour
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.RequireComponent(typeof(UnityEngine.Formats.Alembic.Importer.AlembicPointsCloud))] public class AlembicPointsRenderer : UnityEngine.MonoBehaviour
     {
-        public Mesh InstancedMesh { get; set; }
-        public System.Collections.Generic.List<Material> Materials { get; set; }
-        public Material MotionVectorMaterial { get; set; }
+        public UnityEngine.Mesh InstancedMesh { get; set; }
+        public System.Collections.Generic.List<UnityEngine.Material> Materials { get; set; }
+        public UnityEngine.Material MotionVectorMaterial { get; set; }
         public AlembicPointsRenderer() {}
     }
 
-    [DisallowMultipleComponent] [ExecuteInEditMode] public class AlembicStreamPlayer : MonoBehaviour, ISerializationCallbackReceiver
+    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class AlembicStreamPlayer : UnityEngine.MonoBehaviour, UnityEngine.ISerializationCallbackReceiver
     {
         public float CurrentTime { get; set; }
         public float Duration { get; }
@@ -68,12 +68,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         public float MediaEndTime { get; }
         public float MediaStartTime { get; }
         public string PathToAbc { get; }
-        public AlembicStreamSettings Settings { get; set; }
+        public UnityEngine.Formats.Alembic.Importer.AlembicStreamSettings Settings { get; set; }
         public float StartTime { get; set; }
         public float VertexMotionScale { get; set; }
         public AlembicStreamPlayer() {}
         public bool LoadFromFile(string newPath);
-        public bool ReloadStream(bool createMissingNodes = false);
+        public bool ReloadStream(bool createMissingNodes = False);
         public void RemoveObsoleteGameObjects();
         public void UpdateImmediately(float time);
     }
@@ -105,33 +105,37 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public float ScaleFactor { get; set; }
         public bool SwapFaces { get; set; }
         public bool SwapHandedness { get; set; }
-        public TimeSamplingType TimeSamplingType { get; set; }
-        public TransformType TranformType { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.TimeSamplingType TimeSamplingType { get; set; }
+        public UnityEngine.Formats.Alembic.Sdk.TransformType TranformType { get; set; }
         public AlembicExportOptions() {}
     }
 
     public enum NormalsMode
     {
-        AlwaysCalculate = 2,
-        CalculateIfMissing = 1,
+        public const UnityEngine.Formats.Alembic.Sdk.NormalsMode AlwaysCalculate = 2;
+        public const UnityEngine.Formats.Alembic.Sdk.NormalsMode CalculateIfMissing = 1;
+        public int value__;
     }
 
     public enum TangentsMode
     {
-        Calculate = 1,
-        None = 0,
+        public const UnityEngine.Formats.Alembic.Sdk.TangentsMode Calculate = 1;
+        public const UnityEngine.Formats.Alembic.Sdk.TangentsMode None = 0;
+        public int value__;
     }
 
     public enum TimeSamplingType
     {
-        Acyclic = 2,
-        Uniform = 0,
+        public const UnityEngine.Formats.Alembic.Sdk.TimeSamplingType Acyclic = 2;
+        public const UnityEngine.Formats.Alembic.Sdk.TimeSamplingType Uniform = 0;
+        public int value__;
     }
 
     public enum TransformType
     {
-        Matrix = 0,
-        TRS = 1,
+        public const UnityEngine.Formats.Alembic.Sdk.TransformType Matrix = 0;
+        public const UnityEngine.Formats.Alembic.Sdk.TransformType TRS = 1;
+        public int value__;
     }
 }
 
@@ -139,14 +143,14 @@ namespace UnityEngine.Formats.Alembic.Timeline
 {
     [System.ComponentModel.DisplayName(@"Alembic Shot")] public class AlembicShotAsset : UnityEngine.Playables.PlayableAsset, UnityEngine.Timeline.IPropertyPreview, UnityEngine.Timeline.ITimelineClipAsset
     {
-        public override double duration { get; }
+        public virtual double duration { get; }
         public UnityEngine.ExposedReference<UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer> StreamPlayer { get; set; }
         public AlembicShotAsset() {}
-        public override UnityEngine.Playables.Playable CreatePlayable(UnityEngine.Playables.PlayableGraph graph, GameObject owner);
-        public void GatherProperties(UnityEngine.Playables.PlayableDirector director, UnityEngine.Timeline.IPropertyCollector driver);
+        public virtual UnityEngine.Playables.Playable CreatePlayable(UnityEngine.Playables.PlayableGraph graph, UnityEngine.GameObject owner);
+        public virtual void GatherProperties(UnityEngine.Playables.PlayableDirector director, UnityEngine.Timeline.IPropertyCollector driver);
     }
 
-    [UnityEngine.Timeline.TrackClipType(typeof(AlembicShotAsset))] [UnityEngine.Timeline.TrackColor(0.53f, 0f, 0.08f)] public class AlembicTrack : UnityEngine.Timeline.TrackAsset
+    [UnityEngine.Timeline.TrackClipType(typeof(UnityEngine.Formats.Alembic.Timeline.AlembicShotAsset))] [UnityEngine.Timeline.TrackColor(0.53, 0, 0.08)] public class AlembicTrack : UnityEngine.Timeline.TrackAsset
     {
         public AlembicTrack() {}
     }
@@ -158,11 +162,11 @@ namespace UnityEngine.Formats.Alembic.Util
     {
         public int FrameCount { get; set; }
         public bool Recording { get; }
-        public AlembicRecorderSettings Settings { get; set; }
-        public GameObject TargetBranch { get; set; }
+        public UnityEngine.Formats.Alembic.Util.AlembicRecorderSettings Settings { get; set; }
+        public UnityEngine.GameObject TargetBranch { get; set; }
         public AlembicRecorder() {}
         public bool BeginRecording();
-        public void Dispose();
+        public virtual void Dispose();
         public void EndRecording();
         public static void ForceDisableBatching();
         public void ProcessRecording();
@@ -183,14 +187,15 @@ namespace UnityEngine.Formats.Alembic.Util
         public bool MeshUV0 { get; set; }
         public bool MeshUV1 { get; set; }
         public string OutputPath { get; set; }
-        public ExportScope Scope { get; set; }
-        public GameObject TargetBranch { get; set; }
+        public UnityEngine.Formats.Alembic.Util.ExportScope Scope { get; set; }
+        public UnityEngine.GameObject TargetBranch { get; set; }
         public AlembicRecorderSettings() {}
     }
 
     public enum ExportScope
     {
-        EntireScene = 0,
-        TargetBranch = 1,
+        public const UnityEngine.Formats.Alembic.Util.ExportScope EntireScene = 0;
+        public const UnityEngine.Formats.Alembic.Util.ExportScope TargetBranch = 1;
+        public int value__;
     }
 }
