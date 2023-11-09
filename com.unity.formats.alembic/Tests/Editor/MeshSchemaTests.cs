@@ -234,7 +234,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 
             for (int i = 0; i < expectedColors.Count; i++)
             {
-                Assert.IsTrue( meshColors[i] == expectedColors[i],
+                Assert.IsTrue(meshColors[i] == expectedColors[i],
                         $"Scope: {scope}, Expected: {expectedColors[i]}, But was: {meshColors}");
             }
         }
