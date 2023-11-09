@@ -147,7 +147,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
-static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = new Dictionary<string, List<Vector3>>()
+        static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = new Dictionary<string, List<Vector3>>()
         {
             { "face_normal_grid", new List<Vector3>
             {
@@ -300,8 +300,8 @@ static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = 
             var meshPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var abc = meshPrefab.GetComponent<AlembicStreamPlayer>();
 
-            if(abc.Settings.SwapHandedness)
-               abc.Settings.SwapHandedness = false;
+            if (abc.Settings.SwapHandedness)
+                abc.Settings.SwapHandedness = false;
 
             GameObject.Instantiate(meshPrefab); // needed to add the mesh filter component
             var meshFilter = GameObject.Find(scope).GetComponentInChildren<MeshFilter>();
@@ -318,4 +318,3 @@ static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = 
         }
     }
 }
-

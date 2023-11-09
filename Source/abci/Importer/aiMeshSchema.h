@@ -436,15 +436,15 @@ IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
 {
     int* indices = new int[refiner.indices.size()];
     int   m = 0;
-    for (int i = 0; i < refiner.counts.size(); i++) {
-        for (int j = 0; j < refiner.counts[i]; j++) {
+    for (int i = 0; i < refiner.counts.size(); i++)
+    {
+        for (int j = 0; j < refiner.counts[i]; j++)
+        {
             indices[m] = i;
             m++;
         }
     }
     return { indices, refiner.indices.size() };
-
- 
 }
 
 template<typename T, typename U>
