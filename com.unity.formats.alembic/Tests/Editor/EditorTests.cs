@@ -86,12 +86,17 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void Alembic_WithInvisibleNode_SetAddCurveRenderers_True_DoesNotThrowException()
         {
-            var path = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // F.head model
+            // make a copy of the prefab
+            var originPath = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // F.head model
+            var path = Path.Combine(Path.GetDirectoryName(originPath),"!InvisibleNodeTest.abc");
+            AssetDatabase.CopyAsset(originPath, path);
+            deleteFileList.Add(path);
 
+            // set CreateCurveRenderer to true
             var importer = (AlembicImporter) AssetImporter.GetAtPath(path);
             importer.StreamSettings.CreateCurveRenderers = true;
             EditorUtility.SetDirty(importer);
-            importer.SaveAndReimport(); // achtung: asset state is changed. Cleanup/restore is required
+            importer.SaveAndReimport();
 
             // instantiate prefab
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
