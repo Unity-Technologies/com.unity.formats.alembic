@@ -84,6 +84,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
+        public IEnumerator Alembic_WithInvisibleNode_SetAddCurveRenderers_True_DoesNotThrowException()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // headmodel
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = inst.GetComponent<AlembicStreamPlayer>();
+            Assume.That(player != null);
+
+            // Act
+            player.StreamDescriptor.Settings.CreateCurveRenderers = addCurve;
+
+            yield return new WaitForSeconds(1f);
+
+            // Assert
+            Assert.isTrue(true);
+
+        }
+
+        [UnityTest]
         public IEnumerator MultipleActivationsTracksCanActOnTheSameStreamPlayer()
         {
             var path = AssetDatabase.GUIDToAssetPath("253cca792b1714bd985e9752217590a8");  // curves asset
