@@ -83,23 +83,25 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsTrue(inst.GetComponentInChildren<AlembicCurvesRenderer>() != null ^ addCurve);
         }
 
-        [UnityTest]
-        public IEnumerator Alembic_WithInvisibleNode_SetAddCurveRenderers_True_DoesNotThrowException()
+        [Test]
+        public void Alembic_WithInvisibleNode_SetAddCurveRenderers_True_DoesNotThrowException()
         {
-            var path = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // headmodel
+            var path = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // F.head model
+
+            var importer = (AlembicImporter) AssetImporter.GetAtPath(path);
+            importer.StreamSettings.CreateCurveRenderers = true;
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport(); // achtung: asset state is changed. Cleanup/restore is required
+
+            // instantiate prefab
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             var player = inst.GetComponent<AlembicStreamPlayer>();
             Assume.That(player != null);
 
-            // Act
-            player.StreamDescriptor.Settings.CreateCurveRenderers = addCurve;
-
-            yield return new WaitForSeconds(1f);
-
             // Assert
-            Assert.isTrue(true);
-
+            var curvesRenderer = inst.GetComponentInChildren<AlembicCurvesRenderer>();
+            Assert.IsTrue(curvesRenderer != null);
         }
 
         [UnityTest]
