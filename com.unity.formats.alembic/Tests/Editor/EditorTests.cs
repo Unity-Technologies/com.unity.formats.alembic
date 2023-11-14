@@ -88,12 +88,12 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             // make a copy of the prefab
             var originPath = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // F.head model
-            var path = Path.Combine(Path.GetDirectoryName(originPath),"!InvisibleNodeTest.abc");
+            var path = Path.Combine(Path.GetDirectoryName(originPath), "!InvisibleNodeTest.abc");
             AssetDatabase.CopyAsset(originPath, path);
             deleteFileList.Add(path);
 
             // set CreateCurveRenderer to true
-            var importer = (AlembicImporter) AssetImporter.GetAtPath(path);
+            var importer = (AlembicImporter)AssetImporter.GetAtPath(path);
             importer.StreamSettings.CreateCurveRenderers = true;
             EditorUtility.SetDirty(importer);
             importer.SaveAndReimport();
