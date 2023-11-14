@@ -105,7 +105,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assume.That(player != null);
 
             // Assert
-            var curvesRenderer = inst.GetComponentInChildren<AlembicCurvesRenderer>();
+            var curvesRenderer = inst.GetComponentInChildren<AlembicCurvesRenderer>(true);
             Assert.IsTrue(curvesRenderer != null);
         }
 
