@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
@@ -387,6 +388,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
         internal aiSubD AsSubD() { return NativeMethods.aiObjectAsSubD(self); }
 
+
+
         public void EachChild(Action<aiObject> act)
         {
             if (act == null)
@@ -412,6 +415,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiCurves(aiSchema v) { var tmp = default(aiCurves); tmp.self = v.self; return tmp; }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
         public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
+        public void ReadingAttribute(ref AlembicElement.AttributeData dst) { NativeMethods.aiReadingAttribute(self, ref dst); }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -434,6 +438,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator aiSchema(aiCamera v) { return v.schema; }
 
         public aiCameraSample sample { get { return NativeMethods.aiCamera.aiSchemaGetSample(self); } }
+        //public void ReadingAttribute(string name,ref AlembicSubD.AttributeData dst) { NativeMethods.aiReadingAttribute(self, name, ref dst);; }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -458,6 +463,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public aiPolyMeshSample sample { get { return NativeMethods.aiSubD.aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiSubDGetSummary(self, ref dst); }
+       // public void ReadingAttribute(string name,ref AlembicSubD.AttributeData dst) { NativeMethods.aiReadingAttribute(self, name, ref dst);; }
     }
 
 
@@ -551,6 +557,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
                 NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
             }
         }
+
+
+
     }
 
     struct aiPointsSample

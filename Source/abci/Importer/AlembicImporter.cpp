@@ -254,6 +254,13 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
         sample->fillVertexBuffer(vbs, ibs);
 }
 
+
+abciAPI void aiReadingAttribute(aiSubD* schema, AttributeData* dst)
+{
+    if (schema)
+      *dst = schema->ReadAttribute();
+}
+
 abciAPI void aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst)
 {
     if (schema)

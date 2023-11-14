@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
@@ -48,10 +49,25 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             disposed = true;
         }
+       unsafe public struct AttributeData {
+            public IntPtr data;
+            public int size;
+            public string type;
+            public string name;
+        }
 
         internal virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             m_abcObj = abcObj;
+            AttributeData a = new AttributeData() ;
+            abcSchema.ReadingAttribute(ref a);
+            unsafe
+            {
+                int numFloats = a.size / sizeof(float);
+                float[] managedArray = new float[numFloats];
+
+                Marshal.Copy(a.data, managedArray, 0, numFloats);
+            }
         }
 
         // called before update samples

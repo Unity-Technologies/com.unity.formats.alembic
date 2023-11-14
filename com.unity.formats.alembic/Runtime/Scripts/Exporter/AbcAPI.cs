@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
 
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Runtime")]
@@ -395,6 +396,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiSubDGetSummary(IntPtr schema, ref aiMeshSummary dst);
+        [DllImport(Abci.Lib)] public static extern void aiReadingAttribute(IntPtr schema,  ref AlembicElement.AttributeData dst);
 
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSort(IntPtr schema, Bool v);
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);

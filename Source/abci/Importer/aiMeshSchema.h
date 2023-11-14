@@ -1,5 +1,6 @@
 #pragma once
 #include "aiMeshOps.h"
+#include "Alembic/Abc/ITypedScalarProperty.h"
 
 namespace
 {
@@ -15,7 +16,12 @@ namespace
 }
 using abcFaceSetSchemas = std::vector<AbcGeom::IFaceSetSchema>;
 using abcFaceSetSamples = std::vector<AbcGeom::IFaceSetSchema::Sample>;
-
+ struct AttributeData {
+    void* data;
+    int size;
+    char* type;
+    char* name;
+};
 struct aiMeshSummaryInternal : public aiMeshSummary
 {
     bool has_velocities_prop = false;
@@ -118,12 +124,17 @@ public:
     std::future<void> m_async_copy;
 };
 
+
 template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
     IArray<int>  getAttributesIndices(MeshRefiner& refiner);
 
 public:
+   
+
+    AttributeData& ReadAttribute( );
+
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
     void updateSummary();
@@ -165,6 +176,25 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     auto param = this->m_schema.getNormalsParam();
     return param;
 }
+
+
+
+template<typename T, typename U>
+AttributeData& aiMeshSchema<T, U>::ReadAttribute()
+{
+    float arr[] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+  
+    AttributeData attrData;
+    attrData.size = 5 * sizeof(float);
+    attrData.data = new float[5]; 
+
+    std::memcpy(attrData.data, arr, attrData.size);
+
+    attrData.type = "float[]"; 
+    attrData.name = "arr"; 
+
+    return attrData;
+};
 
 template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject * parent, const abcObject & abc)
