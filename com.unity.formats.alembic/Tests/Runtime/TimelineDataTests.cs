@@ -34,7 +34,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var t0 = cubeGO.transform.position;
             player.UpdateImmediately(player.Duration - 1e-5f);
             var t1 = cubeGO.transform.position;
-            Assert.IsFalse(t0 != t1);
+            Assert.AreNotEqual(t0, t1);
         }
 
         [SetUp]
