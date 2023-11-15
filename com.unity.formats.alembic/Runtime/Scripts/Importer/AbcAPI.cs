@@ -131,7 +131,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     struct aiSampleSelector
     {
-        public long requestedIndex { get; set; }
+        public ulong requestedIndex { get; set; }
         public double requestedTime { get; set; }
         public int requestedTimeIndexType { get; set; }
     }
