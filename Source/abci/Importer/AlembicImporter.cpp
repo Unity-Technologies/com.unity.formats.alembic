@@ -19,7 +19,7 @@ abciAPI void aiTimeToSampleSelector2(aiTimeToSampleSelectorInfo* data, double ti
     data->requestedTimeIndexType = ss.getRequestedTimeIndexType();
 }
 
-abciAPI abcSampleSelector aiTimeToSampleSelector(abcChrono time)
+abciAPI abcSampleSelector aiTimeToSampleSelector(double time)
 {
     return abcSampleSelector(time, abcSampleSelector::kFloorIndex);
 }

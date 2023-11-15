@@ -272,9 +272,9 @@ struct aiPropertyData
 
 struct aiTimeToSampleSelectorInfo
 {
-    long requestedIndex = -1;
-    double requestedTime = 0;
-    int requestedTimeIndexType = 0;
+    int64_t requestedIndex = 0;
+    abcChrono requestedTime = 0.0;
+    int requestedTimeIndexType = 2;
 };
 
 abciAPI void            aiTimeToSampleSelector2(aiTimeToSampleSelectorInfo* data, double time);
