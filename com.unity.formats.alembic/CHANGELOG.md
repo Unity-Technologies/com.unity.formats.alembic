@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0-pre.1] - 2023-11-07
 
+### Added
+- Add library for Windows ARM64 platform.
+
 ## [2.3.4] - 2023-10-30
 ### Fixed
 - Prevent a NullReferenceException when upgrading a project with URP and Alembic to Unity 2023.3.
