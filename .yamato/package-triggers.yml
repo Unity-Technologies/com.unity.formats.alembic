@@ -6,7 +6,7 @@ test_trigger_pr_documentation:
   name: Pull Request Tests Trigger for documentation changes
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(target match ".*" AND push.changes.any match "com.unity.formats.alembic/Documentation~/**" AND NOT draft)
   dependencies:
     - .yamato/package-documentation.yml#generate_documentation
     - .yamato/package-test.yml#vetting_test_win_trunk
@@ -16,20 +16,16 @@ test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND NOT push.changes.all match "**/*.md" AND NOT draft)
+    expression: pull_request.(target match ".*" AND NOT push.changes.all match ["com.unity.formats.alembic/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
-    - .yamato/package-pack.yml#pack
     - .yamato/package-validation.yml#validate_api_doc
     - .yamato/package-validation.yml#validate_api_osx
     - .yamato/package-validation.yml#validate_api_win
+# Only run tests on Win for PR trigger
 {% for editor in test_editors %}
-{% for platform in test_platforms %}
-    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
-    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
-{% for platform in standalone_test_platforms %}
-    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
+    - .yamato/package-test.yml#test_win_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_win_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_win_{{ editor.version }}
 {% endfor %}
     - .yamato/package-format.yml#formatting
 # Only run package clean console test jobs on Win for PR trigger
@@ -46,24 +42,47 @@ nightly_test_trigger:
         frequency: daily
         rerun: always    
   dependencies:
-    - .yamato/package-pack.yml#pack
-    - .yamato/package-triggers.yml#test_trigger_pr
     - .yamato/clean-console-test.yml#clean_console_test_trigger
-{% for editor in test_editors %}
+{% for editor in nightly_test_editors %}
+{% for platform in test_platforms %}
+# For 2023.2 and trunk, run package and AlembicRecorder tests on ALL platforms including Silicon Mac.
+# For 2023.1 and below, only run tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endif %}
+{% endfor %}
+{% for platform in standalone_test_platforms %}
+# For trunk, run standalone build tests on ALL platforms including Silicon Mac.
+# For 2023.2 and below, only run standalone tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
+{% if platform.model != "M1" or editor.version == "trunk" %}
+    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% for editor in nightly_test_editors %}
 {% for platform in standalone_test_platforms_gpu %}
-# Only run standalone tests in 2022.2 and trunk on platforms with GPU
-{% if editor.version == 2022.2 or editor.version == trunk %}
+# Only run standalone tests in 2022.3 and trunk on platforms with GPU
+{% if editor.version == "2022.3" or editor.version == "trunk" %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% endfor %}
 
 {% for platform in test_platforms %}
+# For the legacy HDRP test project, don't run tests on Silicon Mac because the tests have compilation error in 2021.3 on Silicon Mac.
+{% if platform.model != "M1" %}
 {% for editor in hdrp_test_project.test_editors %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
+{% endif %}
 
 {% for editor in hdrp_test_project_latest.test_editors %}
+# For 2023.2 and trunk, run AlembicHDRPLatest tests on ALL platforms including Silicon Mac.
+# For 2023.1 and below, only run AlembicHDRPLatest tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
+{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
+{% endif %}
 {% endfor %}
 {% endfor %}
