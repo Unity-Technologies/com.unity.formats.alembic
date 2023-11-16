@@ -22,7 +22,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         enum UITab
         {
             Model,
-            Material
+            Material,
+            Hair
         };
 
         enum MaterialSearchLocation
@@ -30,7 +31,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             ProjectWide,
             CurrentFolder
         }
-
 
         bool materialRootFold = true;
         List<bool> materialFold = new List<bool>();
@@ -50,19 +50,22 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials", "Hair"});
                 GUILayout.FlexibleSpace();
             }
 
-            if (uiTab == (int)UITab.Model)
+            switch (uiTab)
             {
-                DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
+                case (int) UITab.Material:
+                    DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
+                    break;
+                case (int) UITab.Hair:
+                    DrawHairUI(importer, serializedObject.isEditingMultipleObjects);
+                    break;
+                default:
+                    DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
+                    break;
             }
-            else
-            {
-                DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
-            }
-
 
             serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
@@ -396,6 +399,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
 
             return AssetDatabase.LoadAssetAtPath<Material>(path);
+        }
+
+        void DrawHairUI(AlembicImporter importer, bool isMultiEdit)
+        {
+
         }
     }
 
