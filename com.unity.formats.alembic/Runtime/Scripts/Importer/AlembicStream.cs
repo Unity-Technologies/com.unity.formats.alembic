@@ -292,7 +292,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return;
 
             aiSampleSelector ss = default;
-            NativeMethods.aiTimeToSampleSelector2(ref ss, time);
+            NativeMethods.aiTimeToSampleSelector(time, ref ss);
 
             m_importContext = new ImportContext
             {
