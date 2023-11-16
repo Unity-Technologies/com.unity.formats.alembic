@@ -2,6 +2,7 @@
 #include "aiInternal.h"
 #include "aiContext.h"
 #include "aiObject.h"
+#include "aiSampleSelector.h"
 #include <istream>
 #ifdef WIN32
     #include <windows.h>

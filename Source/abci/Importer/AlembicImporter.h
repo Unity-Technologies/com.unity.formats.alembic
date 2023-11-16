@@ -278,8 +278,6 @@ struct aiTimeToSampleSelectorInfo
 };
 
 abciAPI void            aiTimeToSampleSelector(double time, aiTimeToSampleSelectorInfo* dst);
-abcSampleSelector aiTimeToSampleSelector(double time);
-abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
 abciAPI void            aiClearContextsWithPath(const char *path);
 

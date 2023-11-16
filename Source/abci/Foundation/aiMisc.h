@@ -1,4 +1,5 @@
 #pragma once
+#include <Importer/aiSampleSelector.h>
 
 template<class IntType> inline IntType ceildiv(IntType a, IntType b) { return a / b + (a % b == 0 ? 0 : 1); }
 template<class IntType> inline IntType ceilup(IntType a, IntType b) { return ceildiv(a, b) * b; }

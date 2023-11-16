@@ -1,5 +1,6 @@
 #pragma once
 #include "aiMeshOps.h"
+#include "aiSampleSelector.h"
 
 namespace
 {
