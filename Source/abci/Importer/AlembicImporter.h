@@ -323,7 +323,7 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
-abciAPI void            aiReadingAttribute(aiSubD* schema, AttributeData* dst);
+abciAPI void            aiReadingAttribute(aiPolyMesh* schema, AttributeData* dst);
 
 abciAPI void            aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst);
 abciAPI void            aiSubDGetSampleSummary(aiSubDSample* sample, aiMeshSampleSummary* dst);

@@ -65,7 +65,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 int numFloats = a.size / sizeof(float);
                 float[] managedArray = new float[numFloats];
-
+Debug.Log("executed");
                 Marshal.Copy(a.data, managedArray, 0, numFloats);
             }
         }
