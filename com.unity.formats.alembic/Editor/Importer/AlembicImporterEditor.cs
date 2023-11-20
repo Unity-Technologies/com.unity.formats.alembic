@@ -403,7 +403,10 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer, bool isMultiEdit)
         {
-            EditorGUILayout.LabelField("[icon] Hair", EditorStyles.boldLabel);
+            var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
+                EditorGUIUtility.IconContent("info").image);
+
+            EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
             {
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Generate Hair Assets"))
