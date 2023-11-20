@@ -414,8 +414,68 @@ namespace UnityEditor.Formats.Alembic.Importer
                     Debug.Log("Surprise!");
                 }
             }
+        }
+
+        const float k_IndentMargin = 15.0f;
+
+        /// <summary>Draw a help box with a button.</summary>
+        /// <param name="message">The message.</param>
+        /// <param name="buttonLabel">The button text.</param>
+        /// <param name="action">When the user clicks the button, Unity performs this action.</param>
+        void ButtonHelpbox(string message, string buttonLabel, Action action)
+        {
+            var content = EditorGUIUtility.TrTextContentWithIcon(
+                message, EditorGUIUtility.TrIconContent("console.warnicon").image);
+            EditorGUILayout.BeginHorizontal();
+
+            float indent = EditorGUI.indentLevel * k_IndentMargin - EditorStyles.helpBox.margin.left;
+            GUILayoutUtility.GetRect(
+                indent, EditorGUIUtility.singleLineHeight,
+                EditorStyles.helpBox, GUILayout.ExpandWidth(false));
+
+            Rect leftRect = GUILayoutUtility.GetRect(
+                new GUIContent(buttonLabel), EditorStyles.miniButton, GUILayout.MinWidth(60));
+            Rect rect = GUILayoutUtility.GetRect(content, EditorStyles.helpBox);
+            Rect boxRect = new Rect(leftRect.x, rect.y, rect.xMax - leftRect.xMin, rect.height);
+
+            int oldIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            if (Event.current.type == EventType.Repaint)
+                EditorStyles.helpBox.Draw(boxRect, false, false, false, false);
+
+            Rect labelRect = new Rect(boxRect.x + 4, boxRect.y + 3, rect.width - 8, rect.height);
+            EditorGUI.LabelField(labelRect, content, helpBox);
+
+            var buttonRect = leftRect;
+            buttonRect.x += rect.width - 2;
+            buttonRect.y = rect.yMin + (rect.height - EditorGUIUtility.singleLineHeight) / 2;
+            bool clicked = GUI.Button(buttonRect, buttonLabel);
+
+            EditorGUI.indentLevel = oldIndent;
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.EndHorizontal();
+
+            if (clicked)
+                action();
 
         }
+
+        static Lazy<GUIStyle> m_HelpBox = new(() =>
+        {
+            var style = new GUIStyle()
+            {
+                imagePosition = ImagePosition.ImageLeft,
+                fontSize = 10,
+                wordWrap = true,
+                alignment = TextAnchor.MiddleLeft
+            };
+            style.normal.textColor = EditorStyles.helpBox.normal.textColor;
+            return style;
+        });
+        internal static GUIStyle helpBox => m_HelpBox.Value;
+
     }
 
     class SavedInt
