@@ -26,6 +26,11 @@
             "name": "com.unity.timeline",
             "expression": "1.6.0-pre.5",
             "define": "TIMELINE_1_6_0"
+        },
+        {
+            "name": "com.unity.demoteam.hair",
+            "expression": "0.11.0-exp.1",
+            "define": "HAIR_0_11_0"
         }
     ],
     "noEngineReferences": false

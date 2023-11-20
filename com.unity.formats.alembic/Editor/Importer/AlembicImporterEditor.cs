@@ -409,10 +409,22 @@ namespace UnityEditor.Formats.Alembic.Importer
             EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
             {
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Generate Hair Assets"))
-                {
-                    Debug.Log("Surprise!");
-                }
+
+#if !HAIR_0_11_0
+            var msg = "There is no Hair package installed. " +
+                      "Install the hair package first to generate " +
+                      "a curve-based groom <a href=\"https://unity.com/\">Learn More</a>";
+
+            GUILayout.FlexibleSpace();
+
+            ButtonHelpbox(msg, "Install",
+                () => { Debug.Log("a"); });
+#else
+            if (GUILayout.Button("Generate Hair Assets"))
+            {
+                Debug.Log("Surprise!");
+            }
+#endif
             }
         }
 
