@@ -411,14 +411,20 @@ namespace UnityEditor.Formats.Alembic.Importer
                 GUILayout.FlexibleSpace();
 
 #if !HAIR_0_11_0
-            var msg = "There is no Hair package installed. " +
-                      "Install the hair package first to generate " +
-                      "a curve-based groom <a href=\"https://unity.com/\">Learn More</a>";
+                var msg = "There is no Hair package installed. " +
+                          "Install the hair package first to generate " +
+                          "a curve-based groom. ";
+                   //   + "<a href=\"https://unity.com/\">Learn More</a>";
 
             GUILayout.FlexibleSpace();
 
             ButtonHelpbox(msg, "Install",
-                () => { Debug.Log("a"); });
+                () =>
+                {
+                    var hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
+                    Application.OpenURL(hairRepoLink);
+
+                });
 #else
             if (GUILayout.Button("Generate Hair Assets"))
             {
