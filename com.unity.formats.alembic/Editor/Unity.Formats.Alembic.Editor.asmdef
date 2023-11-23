@@ -5,7 +5,9 @@
         "Unity.Formats.Alembic.Runtime",
         "Unity.Timeline",
         "Unity.Recorder.Editor",
-        "Unity.Timeline.Editor"
+        "Unity.Timeline.Editor",
+        "Unity.DemoTeam.Hair.Runtime",
+        "Unity.DemoTeam.Hair.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -30,7 +32,7 @@
         {
             "name": "com.unity.demoteam.hair",
             "expression": "0.11.0-exp.1",
-            "define": "HAIR_0_11_0"
+            "define": "HAIR_AVAILABLE"
         }
     ],
     "noEngineReferences": false

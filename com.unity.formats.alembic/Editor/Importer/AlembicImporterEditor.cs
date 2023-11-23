@@ -14,6 +14,10 @@ using UnityEditor.AssetImporters;
 using UnityEditor.Experimental.AssetImporters;
 #endif
 
+#if HAIR_AVAILABLE
+using Unity.DemoTeam.Hair;
+#endif
+
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
@@ -410,7 +414,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 GUILayout.FlexibleSpace();
 
-#if !HAIR_0_11_0
+#if !HAIR_AVAILABLE
                 var msg = "There is no Hair package installed. " +
                           "Install the hair package first to generate " +
                           "a curve-based groom. ";
