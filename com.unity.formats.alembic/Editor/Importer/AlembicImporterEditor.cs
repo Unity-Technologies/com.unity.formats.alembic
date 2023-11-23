@@ -414,18 +414,17 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 GUILayout.FlexibleSpace();
 
-#if !HAIR_AVAILABLE
-                var msg = "There is no Hair package installed. " +
-                          "Install the hair package first to generate " +
-                          "a curve-based groom. ";
-                   //   + "<a href=\"https://unity.com/\">Learn More</a>";
+#if HAIR_AVAILABLE
+                const string msg = "There is no Hair package installed. " +
+                                   "Install the hair package first to generate " +
+                                   "a curve-based groom.";
+                                    // + "<a href=\"https://unity.com/\">Learn More</a>";
 
-            GUILayout.FlexibleSpace();
-
-            ButtonHelpbox(msg, "Install",
+                GUILayout.FlexibleSpace();
+                ButtonHelpbox(msg, "Install",
                 () =>
                 {
-                    var hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
+                    const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
                     Application.OpenURL(hairRepoLink);
 
                 });
@@ -458,6 +457,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         /// <param name="action">When the user clicks the button, Unity performs this action.</param>
         void ButtonHelpbox(string message, string buttonLabel, Action action)
         {
+            // code taken from UnityCoreUtils.FixMeBox()
             var content = EditorGUIUtility.TrTextContentWithIcon(
                 message, EditorGUIUtility.TrIconContent("console.warnicon").image);
             EditorGUILayout.BeginHorizontal();
