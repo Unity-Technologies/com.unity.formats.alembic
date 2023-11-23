@@ -430,10 +430,22 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 });
 #else
-            if (GUILayout.Button("Generate Hair Assets"))
-            {
-                Debug.Log("Surprise!");
-            }
+                if (GUILayout.Button("Generate Hair Asset"))
+                {
+                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                    string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+
+                    var hair = CreateInstance<HairAsset>();
+                    hair.name = go.name + "_Hair";
+                    hair.settingsBasic.type = HairAsset.Type.Alembic;
+                    hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
+                    AssetDatabase.CreateAsset(hair, path);
+
+                    HairAssetBuilder.BuildHairAsset(hair);
+                    AssetDatabase.SaveAssetIfDirty(hair);
+                    Selection.activeObject = hair;
+                }
+                GUI.enabled = true;
 #endif
             }
         }
