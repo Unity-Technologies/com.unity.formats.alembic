@@ -192,6 +192,7 @@ struct aiPolyMeshData
     abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
+    std::vector<AttributeData>* m_attributes_param = nullptr;
     int vertex_count = 0;
     int index_count = 0;
 
@@ -323,7 +324,7 @@ abciAPI void            aiPolyMeshGetSampleSummary(aiPolyMeshSample* sample, aiM
 abciAPI void            aiPolyMeshGetSplitSummaries(aiPolyMeshSample* sample, aiMeshSplitSummary *dst);
 abciAPI void            aiPolyMeshGetSubmeshSummaries(aiPolyMeshSample* sample, aiSubmeshSummary* dst);
 abciAPI void            aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData* vbs, aiSubmeshData* ibs);
-abciAPI void            aiReadingAttribute(aiPolyMesh* schema, AttributeData* dst);
+abciAPI void aiReadingAttribute(aiPolyMesh* schema, aiObject* object, std::vector<AttributeData*>* attributes);
 
 abciAPI void            aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst);
 abciAPI void            aiSubDGetSampleSummary(aiSubDSample* sample, aiMeshSampleSummary* dst);
