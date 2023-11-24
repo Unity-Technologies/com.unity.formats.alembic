@@ -1,20 +1,14 @@
 # Creating Alembic files in Autodesk® Digital Content Creation applications
 
+Many Digital Content Creation (DCC) applications allow you to export models as Alembic (­­­­.abc­­­­) files. Depending on your asset roundtrip scenario, you might need to export your Alembic files from your DCC application with additional data so that Unity can access and properly interpret this data at import.
 
+The table below gives high-level instructions according to the type of data you would need to export from either Autodesk® Maya® or Autodesk® 3ds Max® and use in Unity.
 
-## Creating Alembic files in Autodesk® Maya®
+| Data to export | Autodesk® Maya® | Autodesk® 3ds Max® | Typical use case |
+| :--- | :--- | :--- | :--- |
+| Face Sets | On export, enable **Write Face Sets** | In the **Export Data** section, enable **Material IDs** | When Unity imports an Alembic mesh that contains face sets, it creates a sub-mesh for every face set. This allows you to apply a unique material for every face set/sub-mesh instead of one material for the whole object.<br /><br />**Note:** You need face sets to use the [Alembic Material Remapper](materials.md#automatic-re-mapping-based-on-face-set-names). |
+| Color Sets | On export, enable **Write Color Sets** | In the **Export Data** section, enable **Vertex Colors** | Vertex Colors allow you to define a specific color for each vertex of a mesh. During rendering, Unity uses this color as the surface color of the object. |
+| UV Sets | On export, enable **Write UV Sets** | In the **Export Data** section, enable **UVs** | UVs are used to map textures onto polygon meshes. They define what portion of a texture should be applied to which polygon of a mesh. |
 
-You can import Autodesk® Maya®'s shading group as a sub-Mesh. Before exporting to an Alembic file, enable the **Write Face Sets** option in Autodesk® Maya®, which is disabled by default.
-
-The Alembic package also supports Autodesk® Maya®'s vertex color and multiple UV sets. Before exporting to an Alembic file, enable the **Write Color Sets** and **Write UV Sets** options in Autodesk® Maya®, both of which are disabled by default.
-
-![Autodesk® Maya® Alembic](images/abc_maya_options.png)
-
-
-
-## Creating Alembic files in Autodesk® 3ds Max®
-
-The Alembic package also supports Autodesk® 3ds Max®'s vertex colors and multiple UV sets. Before exporting to an Alembic file, open the Autodesk® 3ds Max® Alembic export settings, navigate to the **Export Data** section, and enable **UVs**, **Vertex Colors**, and **Material IDs**.
-
-
-![Autodesk® 3ds Max® Alembic](images/abc_max_options.png)
+>[!NOTE]
+>There is currently no way to export an Alembic file that includes materials.
