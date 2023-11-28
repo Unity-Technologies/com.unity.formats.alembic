@@ -429,24 +429,45 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 });
 #else
-                if (GUILayout.Button("Generate Hair Asset"))
+                var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
+
+                if (HasCurves(alembicStreamPlayer))
                 {
-                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
-                    string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+                    if (GUILayout.Button("Generate Hair Asset"))
+                    {
+                        string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
 
-                    var hair = CreateInstance<HairAsset>();
-                    hair.name = go.name + "_Hair";
-                    hair.settingsBasic.type = HairAsset.Type.Alembic;
-                    hair.settingsAlembic.alembicAsset = go.GetComponent<AlembicStreamPlayer>();
-                    AssetDatabase.CreateAsset(hair, path);
+                        var hairAsset = CreateInstance<HairAsset>();
+                        hairAsset.name = go.name + "_Hair";
+                        hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
+                        hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
+                        AssetDatabase.CreateAsset(hairAsset, path);
 
-                    HairAssetBuilder.BuildHairAsset(hair);
-                    AssetDatabase.SaveAssetIfDirty(hair);
-                    Selection.activeObject = hair;
+                        HairAssetBuilder.BuildHairAsset(hairAsset);
+                        AssetDatabase.SaveAssetIfDirty(hairAsset);
+                        Selection.activeObject = hairAsset;
+                    }
+
+                    GUI.enabled = true;
                 }
-                GUI.enabled = true;
+                else
+                {
+                    GUI.enabled = false;
+                    GUILayout.Button("Generate Hair Asset");
+                    GUI.enabled = true;
+                    EditorGUILayout.HelpBox("There is no curve data detected in the alembic asset.", MessageType.Warning);
+                }
 #endif
             }
+        }
+
+
+        bool HasCurves(AlembicStreamPlayer alembicStreamPlayer)
+        {
+            return (alembicStreamPlayer != null
+                    && alembicStreamPlayer.GetComponentInChildren<AlembicCurves>(includeInactive: true) != null);
+
         }
 
         const float k_IndentMargin = 15.0f;
