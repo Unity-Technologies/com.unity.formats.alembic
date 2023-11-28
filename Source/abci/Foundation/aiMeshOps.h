@@ -253,7 +253,7 @@ private:
 
     RawVector<IAttribute*> attributes;
     RawVector<char> buf_attributes;
-    static const int max_attributes = 8; // you can increase this if needed
+    static const int max_attributes = 20; // you can increase this if needed
 };
 
 

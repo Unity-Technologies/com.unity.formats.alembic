@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -396,7 +397,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiSubDGetSummary(IntPtr schema, ref aiMeshSummary dst);
-        [DllImport(Abci.Lib)] public static extern void aiReadingAttribute(IntPtr schema,  ref AlembicElement.AttributeData dst);
+        //[DllImport(Abci.Lib)] public static extern unsafe void aiReadingAttribute(IntPtr schema, aiObject* obj, IntPtr attributes);
 
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSort(IntPtr schema, Bool v);
         [DllImport(Abci.Lib)] public static extern void aiPointsSetSortBasePosition(IntPtr schema, Vector3 v);

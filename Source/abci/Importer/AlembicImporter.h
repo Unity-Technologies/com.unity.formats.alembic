@@ -139,6 +139,7 @@ struct aiMeshSummary
     bool has_tangents = false;
     bool has_uv0 = false;
     bool has_uv1 = false;
+    std::vector<bool>* has_attributes = new std::vector<bool>();
     bool has_rgba = false;
     bool has_rgb = false;
     bool constant_points = false;
@@ -149,6 +150,7 @@ struct aiMeshSummary
     bool constant_uv1 = false;
     bool constant_rgba = false;
     bool constant_rgb = false;
+    std::vector<bool>* constant_attributes = new std::vector<bool>();
 };
 
 struct aiMeshSampleSummary
@@ -192,7 +194,7 @@ struct aiPolyMeshData
     abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
-    std::vector<AttributeData>* m_attributes_param = nullptr;
+    std::vector<AttributeData*>* m_attributes = new std::vector<AttributeData*>();
     int vertex_count = 0;
     int index_count = 0;
 

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -192,6 +193,21 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiTopology topology { get; set; }
     }
 
+   unsafe internal struct AttributeData
+    {
+        public void* data;
+        public void* samples1;
+        public void* samples2;
+        public void* reference;
+        public void* att, att2, att_int;
+        public void* constant_att;
+        public void* remap;
+        public int size;
+        public aiPropertyType type;
+        public string name;
+        public bool interpolate ;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     unsafe struct aiPolyMeshData
     {
@@ -205,6 +221,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* rgb;
 
         public IntPtr indices;
+        public Vector<IntPtr>* attributes;
 
         public int vertexCount;
         public int indexCount;
@@ -415,7 +432,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiCurves(aiSchema v) { var tmp = default(aiCurves); tmp.self = v.self; return tmp; }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
         public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
-        public void ReadingAttribute(ref AlembicElement.AttributeData dst) { NativeMethods.aiReadingAttribute(self, ref dst); }
+
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -438,7 +455,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator aiSchema(aiCamera v) { return v.schema; }
 
         public aiCameraSample sample { get { return NativeMethods.aiCamera.aiSchemaGetSample(self); } }
-        //public void ReadingAttribute(string name,ref AlembicSubD.AttributeData dst) { NativeMethods.aiReadingAttribute(self, name, ref dst);; }
+
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -463,7 +480,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public aiPolyMeshSample sample { get { return NativeMethods.aiSubD.aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiSubDGetSummary(self, ref dst); }
-       // public void ReadingAttribute(string name,ref AlembicSubD.AttributeData dst) { NativeMethods.aiReadingAttribute(self, name, ref dst);; }
+       // public unsafe void ReadingAttribute(aiObject* obj, IntPtr attr, ref AttributeData dst) { NativeMethods.aiReadingAttribute(self, obj, attr);; }
     }
 
 

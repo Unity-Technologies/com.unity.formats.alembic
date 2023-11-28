@@ -26,7 +26,7 @@ struct aiMeshSummaryInternal : public aiMeshSummary
     bool has_uv1_prop = false;
     bool has_rgba_prop = false;
     bool has_rgb_prop = false;
-    //std::vector<bool>* has_attributes = new std::vector<bool>();
+    std::vector<bool>* has_attributes_prop = new std::vector<bool>(false);
 
     bool interpolate_points = false;
     bool interpolate_normals = false;
@@ -37,6 +37,7 @@ struct aiMeshSummaryInternal : public aiMeshSummary
     bool compute_normals = false;
     bool compute_tangents = false;
     bool compute_velocities = false;
+    std::vector<bool>* interpolate_attributes = new std::vector<bool>(has_attributes_prop->size(), false);
 };
 
 class aiMeshTopology
@@ -66,6 +67,7 @@ public:
     RawVector<int> m_remap_uv0, m_remap_uv1;
     RawVector<int> m_remap_rgba;
     RawVector<int> m_remap_rgb;
+    RawVector<std::vector<AttributeData*>*> m_remap_attributes; 
 
     int m_vertex_count = 0;
     int m_index_count = 0; // triangulated
@@ -97,6 +99,7 @@ public:
     AbcGeom::IC4fGeomParam::Sample m_rgba_sp, m_rgba_sp2;
     AbcGeom::IC3fGeomParam::Sample m_rgb_sp, m_rgb_sp2;
     Abc::Box3d m_bounds;
+  //  std::vector<AttributeData*>* m_attributes_sp, m_attributes_sp2;
    // need to access th samples in it : method to extract the samples ? std::vector<AttributeData>* m_attributes_sp;
 
     IArray<abcV3> m_points_ref;
@@ -106,7 +109,7 @@ public:
     IArray<abcV4> m_tangents_ref;
     IArray<abcC4> m_rgba_ref;
     IArray<abcC3> m_rgb_ref;
-    IArray<std::vector<AttributeData>> m_attributes_ref;
+   std::vector<AttributeData*>* m_attributes_ref = new std::vector<AttributeData*>();
 
     RawVector<abcV3> m_points, m_points2, m_points_int, m_points_prev;
     RawVector<abcV3> m_velocities;
@@ -152,7 +155,7 @@ public:
     RawVector<abcV2> m_constant_uv1;
     RawVector<abcC4> m_constant_rgba;
     RawVector<abcC3> m_constant_rgb;
-  
+    std::vector<AttributeData*>* m_constant_attributes;
 
 protected:
     virtual AbcGeom::IN3fGeomParam readNormalsParam();
@@ -174,6 +177,7 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     auto param = this->m_schema.getNormalsParam();
     return param;
 }
+
 
 // copyied 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
@@ -251,12 +255,22 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
     }
     return aiPropertyType::Unknown;
 }
+
+
 struct AttributeData {
     void* data;
+    AbcGeom::IV2fGeomParam::Sample samples1;
+    AbcGeom::IV2fGeomParam::Sample samples2;
+    IArray<abcV2> ref;
+    RawVector<abcV2> att, att2, att_int;
+    RawVector<abcV2> constant_att;
+    RawVector<int> remap;
     int size;
     aiPropertyType type;
     std::string name;
+    bool interpolate = false;
 };
+
 
 template<typename T, typename U>
 template <typename Tp>
@@ -295,7 +309,6 @@ void aiMeshSchema<T, U>::ReadAttribute(aiObject* object , std::vector<AttributeD
 
                       //allSamples->push_back(data);
                   }
-             
 
                     AttributeData* attribute = new AttributeData();
                     attribute->data = param; // param or samples ? 
@@ -311,16 +324,18 @@ void aiMeshSchema<T, U>::ReadAttribute(aiObject* object , std::vector<AttributeD
 
 }
 
+
+
 template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     : aiTSchema<T>(parent, abc)
 {
     ReadAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param);
+  //  ReadAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param);
   
 
 
- //   auto geom_params = this->m_schema.getArbGeomParams();
+   auto geom_params = this->m_schema.getArbGeomParams();
 
 /*   if (geom_params.valid())
 {
@@ -338,9 +353,20 @@ inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
                 m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
             }
         }
-    }
-*/    // m_rgba_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
-
+    }*/
+  // size_t num_geom_params = geom_params.getNumProperties();
+  /* if (geom_params.valid())
+   {
+       for (size_t i = 0; i < num_geom_params; ++i)
+       {
+           auto& header = geom_params.getPropertyHeader(i);
+           if (AbcGeom::IV2fGeomParam::matches(header))
+           {
+               m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, header.getName());
+           };
+       };
+   };
+   */
     // find face set schema in children
     size_t num_children = this->getAbcObject().getNumChildren();
     for (size_t i = 0; i < num_children; ++i)
@@ -370,7 +396,7 @@ static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner
     }
 }
 
-template<class T1, class T2>
+    template<class T1, class T2>
 static inline void copy_or_clear_3_to_4(T1* dst, const IArray<T2>& src, const MeshRefiner::Split& split)
 {
     if (dst)
@@ -479,15 +505,29 @@ void aiMeshSchema<T, U>::updateSummary()
                 this->m_constant = false;
         }
     }
-/*
-    for (auto& attr : m_attributes_param) {
-        if (attr.param.valid() && attr.param.getNumSamples() > 0 && attr.param.getScope() != AbcGeom::kUnknownScope) {
 
-            // Add similar conditions for other specific attributes if necessary.
-            add vector in summury to hold info about custom attribtes 
+    for (size_t i = 0; i < m_attributes_param->size(); ++i) {
+
+        auto* param = static_cast<AbcGeom::IV2fGeomParam*>((*m_attributes_param)[i]->data);
+      
+      
+            if (param->valid() && param->getNumSamples() > 0 && param->getScope() != AbcGeom::kUnknownScope) {
+               
+                summary.has_attributes_prop->push_back(true);
+                summary.has_attributes->push_back(true);
+              
+                bool isConstant = param->isConstant();
+                if (isConstant) {
+                  summary.constant_attributes->push_back(true);
+                }
+                else {
+                 
+                    this->m_constant = false;
+                }
+            
         }
     }
-*/
+
     // colors
     {
         auto& param = m_rgba_param;
@@ -576,7 +616,23 @@ void aiMeshSchema<T, U>::updateSummary()
             summary.interpolate_rgba = true;
         if (summary.has_rgb_prop && !summary.constant_rgb)
             summary.interpolate_rgb = true;
-        // here 
+
+        for (int i = 0; i < summary.has_attributes -> size(); i++)
+        {
+            if ((!summary.has_attributes_prop->empty()) && (!(summary.constant_attributes->empty())))
+            {
+                if ((*summary.has_attributes_prop)[i] && !((*summary.constant_attributes)[i]))
+                {
+
+                    (*summary.interpolate_attributes).push_back(true);
+
+                }
+                else { (*summary.interpolate_attributes).push_back(false); };
+            }
+            else { (*summary.interpolate_attributes).push_back(false); };
+        };
+
+     
     }
 }
 
@@ -674,7 +730,23 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
             m_uv1_param.getIndexed(sample.m_uv1_sp2, ss2);
         }
     }
+    
+    for (size_t i = 0; i < summary.has_attributes_prop->size(); ++i) {
+      
+        if ((((*m_attributes_param)[i])->constant_att.empty()) && ((*summary.has_attributes_prop)[i])) {
+            auto* attrib = (*m_attributes_param)[i];
+        
+            auto* param = static_cast<AbcGeom::IV2fGeomParam*>(attrib->data);
+        
+            param->getIndexed(attrib->samples1, ss);
 
+            if (attrib->interpolate) {
+             
+                param->getIndexed(attrib->samples2, ss2);
+            }
+        }
+        
+    }
     // colors
     if (m_constant_rgba.empty() && summary.has_rgba_prop)
     {
@@ -694,19 +766,7 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
             m_rgb_param.getIndexed(sample.m_rgb_sp2, ss2);
         }
     }
-    /*
-    for (auto& attr : m_attributes_param) {
-        if (attr.empty() && summary.has_rgb_prop)
-        {
-            m_rgb_param.getIndexed(sample.m_rgb_sp, ss);
-            if (summary.interpolate_rgb)
-            {
-                m_rgb_param.getIndexed(sample.m_rgb_sp2, ss2);
-            }
-        }
-    }
- 
- */
+
     auto bounds_param = this->m_schema.getSelfBoundsProperty();
     if (bounds_param && bounds_param.getNumSamples() > 0)
         bounds_param.get(sample.m_bounds, ss);
@@ -775,6 +835,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             Remap(sample.m_uv0, *sample.m_uv0_sp.getVals(), topology.m_remap_uv0);
             sample.m_uv0_ref = sample.m_uv0;
         }
+        int i = 0;
 
         if (!m_constant_uv1.empty())
         {
@@ -786,15 +847,31 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             sample.m_uv1_ref = sample.m_uv1;
         }
 
-        if (!m_constant_rgba.empty())
-        {
-            sample.m_rgba_ref = m_constant_rgba;
+
+        for (size_t i = 0; i < summary.has_attributes_prop->size(); ++i) {
+           
+            sample.m_attributes_ref = m_attributes_param;
+
+            if (((*m_attributes_param)[i])->constant_att.empty())
+            {
+               ((*m_attributes_param)[i]->ref)=((*m_attributes_param)[i]->constant_att);
+
+
+            }
+            else if ((*summary.has_attributes_prop)[i]) {
+
+
+                auto att_sp2 =  ((*m_attributes_param)[i]->samples2);
+                 Remap((*m_attributes_param)[i]->att2, *att_sp2.getVals(), (*m_attributes_param)[i]->remap);
+             
+                ((*m_attributes_param)[i]->ref) = ((*m_attributes_param)[i]->att);
+
+          
+            }
+
         }
-        else if (summary.has_rgba_prop)
-        {
-            Remap(sample.m_rgba, *sample.m_rgba_sp.getVals(), topology.m_remap_rgba);
-            sample.m_rgba_ref = sample.m_rgba;
-        }
+
+
 
         if (!m_constant_rgb.empty())
         {
@@ -835,6 +912,16 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         {
             Remap(sample.m_uv02, *sample.m_uv0_sp2.getVals(), topology.m_remap_uv0);
         }
+
+    
+        for (int i=0; i < (m_attributes_param)->size(); i++) {
+
+            if ((*m_attributes_param)[i]->interpolate) {
+                auto att_sp2 =  ((*m_attributes_param)[i]-> samples2);
+                
+                Remap((*m_attributes_param)[i]->att2, *att_sp2.getVals(), (*m_attributes_param)[i]->remap);
+            };
+        };
 
         if (summary.interpolate_uv1)
         {
@@ -974,6 +1061,15 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         Lerp(sample.m_rgb_int, sample.m_rgb, sample.m_rgb2, this->m_current_time_offset);
         sample.m_rgb_ref = sample.m_rgb_int;
     }
+
+
+    for (int i = 0; i < m_attributes_param->size(); i++) {
+
+        if ((*m_attributes_param)[i]->interpolate) {
+            // Lerp((*sample.m_attributes_int)[i], (*(sample.m_attributes))[i], (*(sample.m_attributes2))[i], this->m_current_time_offset);
+       
+        };
+    };
 }
 
 template<typename T, typename U>
@@ -1002,7 +1098,9 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     bool has_valid_uv1 = false;
     bool has_valid_rgba = false;
     bool has_valid_rgb = false;
-    //vector<bool> has_valid_customs = new vector<bool>();
+
+    std::vector<bool>* has_valid_attributes = new std::vector<bool>(m_attributes_param->size(), false);
+
 
     if (sample.m_normals_sp.valid() && !summary.compute_normals)
     {
@@ -1055,6 +1153,40 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
             has_valid_uv0 = false;
         }
     }
+
+   for (int i = 0; i < m_attributes_param->size(); i++) {
+
+       auto* attrib = (*m_attributes_param)[i];
+       if ((attrib->samples1).valid()) {
+           IArray<abcV2> src{ (attrib->samples1).getVals()->get(), (attrib->samples1).getVals()->size() };
+
+           auto& dst = (*(summary.constant_attributes))[i] ? (*(m_attributes_param))[i]->constant_att : (*(m_attributes_param))[i]->att;
+          ( *has_valid_attributes)[i] = true;
+
+           if ((attrib->samples1).isIndexed() && (attrib->samples1).getIndices()->size() == refiner.indices.size())
+           {
+               IArray<int> indices{ (int*)(attrib->samples1).getIndices()->get(), (attrib->samples1).getIndices()->size() };
+               refiner.template addIndexedAttribute<abcV2>(src, indices, dst, (*(m_attributes_param))[i]->remap);
+           }
+           else if (src.size() == refiner.indices.size())
+           {
+               refiner.template addExpandedAttribute<abcV2>(src, dst, (*(m_attributes_param))[i]->remap);
+           }
+           else if (src.size() == refiner.points.size())
+           {
+               refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, (*(m_attributes_param))[i]->remap);
+           }
+           else
+           {
+               DebugLog("Invalid attribute");
+               (*has_valid_attributes)[i] = false;
+           }
+
+           // to be able to access it in copy or cleaar, for now they point same place
+           sample.m_attributes_ref = m_attributes_param;
+  
+       }
+}
 
     if (sample.m_uv1_sp.valid())
     {
@@ -1200,6 +1332,19 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     else
         sample.m_uv1_ref.reset();
 
+    for (size_t i = 0; i < (*has_valid_attributes).size(); ++i) {
+
+        if (((*has_valid_attributes)[i])) {
+            ((*m_attributes_param)[i])->ref = !(((*m_attributes_param)[i])->constant_att.empty()) ? ((*m_attributes_param)[i])->constant_att : ((*m_attributes_param)[i])->att;
+        
+        }
+           else {
+        
+            ((*m_attributes_param)[i])->ref.reset();
+      }
+    }
+
+
     if (has_valid_rgba)
         sample.m_rgba_ref = !m_constant_rgba.empty() ? m_constant_rgba : sample.m_rgba;
     else
@@ -1275,7 +1420,8 @@ void aiMeshSample<T>::reset()
     m_tangents_ref.reset();
     m_rgba_ref.reset();
     m_rgb_ref.reset();
-   // m_attributes_ref.reset();
+
+    //todo :resetting 
 }
 
 template<typename T>
@@ -1349,8 +1495,9 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
+   // copy_or_clear_vector(data.m_attributes, m_attributes_ref);// need to pick the right data to transfer, right format ? abcC2 ? 
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
-    copy_or_clear(data.m_attributes_param, m_attributes_ref, split);
+   // copy_or_clear_vec(data.m_attributes_param, m_attributes_ref, split);
 }
 
 template<typename T>
