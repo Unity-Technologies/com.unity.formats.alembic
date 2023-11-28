@@ -16,6 +16,8 @@ using UnityEditor.Experimental.AssetImporters;
 
 #if HAIR_AVAILABLE
 using Unity.DemoTeam.Hair;
+#else
+using UnityEditor.PackageManager;
 #endif
 
 namespace UnityEditor.Formats.Alembic.Importer
@@ -414,7 +416,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             {
                 GUILayout.FlexibleSpace();
 
-#if HAIR_AVAILABLE
+#if !HAIR_AVAILABLE
                 const string msg = "There is no Hair package installed. " +
                                    "Install the hair package first to generate " +
                                    "a curve-based groom.";
@@ -427,6 +429,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
                     Application.OpenURL(hairRepoLink);
 
+                    // Use this when Hair package is published
+                    // Client.Add("com.unity.demoteam.hair");
                 });
 #else
                 var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
