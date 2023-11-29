@@ -56,7 +56,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials", "Hair"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] {L10n.Tr("Model"), L10n.Tr("Materials"), L10n.Tr("Hair")});
                 GUILayout.FlexibleSpace();
             }
 
@@ -417,13 +417,13 @@ namespace UnityEditor.Formats.Alembic.Importer
                 GUILayout.FlexibleSpace();
 
 #if !HAIR_AVAILABLE
-                const string msg = "There is no Hair package installed. " +
+                const string msg = L10n.Tr("There is no Hair package installed. " +
                                    "Install the hair package first to generate " +
-                                   "a curve-based groom.";
-                                    // + "<a href=\"https://unity.com/\">Learn More</a>";
+                                   "a curve-based groom.");
+                                    // + "<a href=\"https://unity.com/\">Learn More</a>");
 
                 GUILayout.FlexibleSpace();
-                ButtonHelpbox(msg, "Install",
+                ButtonHelpbox(msg, L10n.Tr("Install"),
                 () =>
                 {
                     const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
@@ -438,9 +438,10 @@ namespace UnityEditor.Formats.Alembic.Importer
 
                 if (HasCurves(alembicStreamPlayer))
                 {
-                    if (GUILayout.Button("Generate Hair Asset"))
+                    if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
                     {
                         string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+                        path = AssetDatabase.GenerateUniqueAssetPath(path);
 
                         var hairAsset = CreateInstance<HairAsset>();
                         hairAsset.name = go.name + "_Hair";
@@ -458,9 +459,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                 else
                 {
                     GUI.enabled = false;
-                    GUILayout.Button("Generate Hair Asset");
+                    GUILayout.Button(L10n.Tr("Generate Hair Asset"));
                     GUI.enabled = true;
-                    EditorGUILayout.HelpBox("There is no curve data detected in the alembic asset.", MessageType.Warning);
+                    EditorGUILayout.HelpBox(L10n.Tr("There is no curve data detected in the alembic asset."), MessageType.Warning);
                 }
 #endif
             }
