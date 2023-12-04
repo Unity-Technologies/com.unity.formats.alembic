@@ -409,8 +409,9 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer, bool isMultiEdit)
         {
-            var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
-                EditorGUIUtility.IconContent("info").image);
+            var hairLabel = L10n.Tr("Generate Hair Asset");
+            // var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
+            //     EditorGUIUtility.IconContent("info").image); // Title with Icon
 
             EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
             {
@@ -450,6 +451,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                         AssetDatabase.CreateAsset(hairAsset, path);
 
                         HairAssetBuilder.BuildHairAsset(hairAsset);
+                        EditorGUIUtility.PingObject(hairAsset);
                         AssetDatabase.SaveAssetIfDirty(hairAsset);
                         Selection.activeObject = hairAsset;
                     }
