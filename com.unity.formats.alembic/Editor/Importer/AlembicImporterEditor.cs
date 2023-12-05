@@ -409,7 +409,7 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer, bool isMultiEdit)
         {
-            var hairLabel = L10n.Tr("Generate Hair Asset");
+            var hairLabel = L10n.Tr("Hair");
             // var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
             //     EditorGUIUtility.IconContent("info").image); // Title with Icon
 
@@ -460,6 +460,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
                 else
                 {
+                    if(!ImportCurvesEnabled())
+                        EditorGUILayout.HelpBox(L10n.Tr("Import Curves is disabled. Cannot detect curves in the alembic asset."), MessageType.Warning);
                     GUI.enabled = false;
                     GUILayout.Button(L10n.Tr("Generate Hair Asset"));
                     GUI.enabled = true;
@@ -474,7 +476,12 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             return (alembicStreamPlayer != null
                     && alembicStreamPlayer.GetComponentInChildren<AlembicCurves>(includeInactive: true) != null);
+        }
 
+        bool ImportCurvesEnabled()
+        {
+            var importCurvesProp = serializedObject.FindProperty("streamSettings.importCurves");
+            return importCurvesProp.boolValue;
         }
 
         const float k_IndentMargin = 15.0f;
