@@ -534,8 +534,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 action();
 
         }
-
-        static Lazy<GUIStyle> m_HelpBox = new(() =>
+        static GUIStyle HelpBox()
         {
             var style = new GUIStyle()
             {
@@ -546,8 +545,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             };
             style.normal.textColor = EditorStyles.helpBox.normal.textColor;
             return style;
-        });
-        static GUIStyle helpBox => m_HelpBox.Value;
+
+        }
 
     }
 
