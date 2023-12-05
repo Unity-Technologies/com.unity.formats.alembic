@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Any subsequent(*) commands which fail will cause the shell script to exit immediately, otherwise the job will fail silently.
-set -e
+set -e 
 
 # Produce fast and small code (but not debuggable), and produce it to be
 # relocatable since in the end we'll link it all together in a shared object.
