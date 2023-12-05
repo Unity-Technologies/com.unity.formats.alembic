@@ -56,7 +56,8 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {L10n.Tr("Model"), L10n.Tr("Materials"), L10n.Tr("Hair")});
+                uiTab.value = GUILayout.Toolbar(uiTab,
+                    new[] {L10n.Tr("Model"), L10n.Tr("Materials"), L10n.Tr("Hair")});
                 GUILayout.FlexibleSpace();
             }
 
@@ -460,12 +461,15 @@ namespace UnityEditor.Formats.Alembic.Importer
                 }
                 else
                 {
-                    if(!ImportCurvesEnabled())
-                        EditorGUILayout.HelpBox(L10n.Tr("Import Curves is disabled. Cannot detect curves in the alembic asset."), MessageType.Warning);
                     GUI.enabled = false;
                     GUILayout.Button(L10n.Tr("Generate Hair Asset"));
                     GUI.enabled = true;
-                    EditorGUILayout.HelpBox(L10n.Tr("There is no curve data detected in the alembic asset."), MessageType.Warning);
+
+                    var message = L10n.Tr("Unable to locate curves in the alembic asset. " +
+                                          "Ensure that the asset contains curves and \"Import Curves\" is enabled.");
+                    EditorGUILayout.HelpBox(message, MessageType.Warning);
+
+
                 }
 #endif
             }
@@ -543,7 +547,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             style.normal.textColor = EditorStyles.helpBox.normal.textColor;
             return style;
         });
-        internal static GUIStyle helpBox => m_HelpBox.Value;
+        static GUIStyle helpBox => m_HelpBox.Value;
 
     }
 
