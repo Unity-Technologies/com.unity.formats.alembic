@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0-pre.1] - 2023-11-07
 ### Fixed
-- Prevented black vertex colors appeared when RGB, RGBA, and Normals attributes were processed within the 'Face' scope
-- Prevented Editor crash when UV attribute was processed in "Points" or "Face" scope.
+- Fixed bug where vertex color displayed as black when processing RGB, RGBA, and Normal attributes in the `Face` scope
+- Fixed bug causing Editor to crash when a UV attribute is processed in the `Points` or `Face` scope.
 
 ## [2.3.4] - 2023-10-30
 ### Fixed
