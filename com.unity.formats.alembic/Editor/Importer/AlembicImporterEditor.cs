@@ -482,12 +482,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                     && alembicStreamPlayer.GetComponentInChildren<AlembicCurves>(includeInactive: true) != null);
         }
 
-        bool ImportCurvesEnabled()
-        {
-            var importCurvesProp = serializedObject.FindProperty("streamSettings.importCurves");
-            return importCurvesProp.boolValue;
-        }
-
         const float k_IndentMargin = 15.0f;
 
         /// <summary>Draw a help box with a button.</summary>
