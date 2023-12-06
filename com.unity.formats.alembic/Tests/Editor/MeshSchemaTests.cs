@@ -220,7 +220,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
         [TestCase("cube_face")]
         [TestCase("cube_point")]
         [TestCase("cube_vertex")]
-        public void VertexRgb_AreProcessedCorrectlyForScope(string scope)
+        public void Import_InScope_VertexRgb_Colors_AreAsExpected(string scope)
         {
             string guid = "dd3554fc098614b9e99b49873fe18cd6"; // cubes_coloured.abc
             var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -243,7 +243,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
         [TestCase("face_grid")]
         [TestCase("point_grid")]
         [TestCase("vertex_grid")]
-        public void VertexRgba_AreProcessedCorrectlyForScope(string scope)
+        public void Import_InScope_VertexRgba_Colors_AreAsExpected(string scope)
         {
             string guid = "8e71ed6608e0b984b8b90d6ea71b11eb"; // rgba_grid.abc
             var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -266,7 +266,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
         [TestCase("face_uv_grid")]
         [TestCase("point_uv_grid")]
         [TestCase("vertex_uv_grid")]
-        public void VertexUV_AreProcessedCorrectlyForScope(string scope)
+        public void Import_InScope_VertexUV_Colors_AreAsExpected(string scope)
         {
             string guid = "eba4f4e4413e7ea48a63bd27ddf3a329"; // uv_grid.abc
             var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -289,7 +289,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
         [TestCase("face_normal_grid")]
         [TestCase("point_normal_grid")]
         [TestCase("vertex_normal_grid")]
-        public void VertexNormals_AreProcessedCorrectlyForScope(string scope)
+        public void Import_InScope_VertexNormals_Colors_AreAsExpected(string scope)
         {
             string guid = "39e35f70a7d718e4aa4cafea6714d5e3"; // cubes_normals.abc
             var path = AssetDatabase.GUIDToAssetPath(guid);
