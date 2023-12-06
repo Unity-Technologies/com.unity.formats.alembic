@@ -518,7 +518,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 EditorStyles.helpBox.Draw(boxRect, false, false, false, false);
 
             Rect labelRect = new Rect(boxRect.x + 4, boxRect.y + 3, rect.width - 8, rect.height);
-            EditorGUI.LabelField(labelRect, content, helpBox);
+            EditorGUI.LabelField(labelRect, content, HelpBox());
 
             var buttonRect = leftRect;
             buttonRect.x += rect.width - 2;
