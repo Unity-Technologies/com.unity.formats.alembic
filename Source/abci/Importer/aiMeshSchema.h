@@ -266,11 +266,20 @@ struct AttributeData {
     RawVector<abcV2> constant_att;
     RawVector<int> remap;
     int size;
-    aiPropertyType type;
+    aiPropertyType type1;
     std::string name;
     bool interpolate = false;
 };
 
+//template <typename TP>
+struct AttributeDataToTransfer {
+    int size;
+    //using Typ = TP
+    void* data; 
+   // std::string name;
+    aiPropertyType type1;
+   // std::string type2;
+};
 
 template<typename T, typename U>
 template <typename Tp>
@@ -313,7 +322,7 @@ void aiMeshSchema<T, U>::ReadAttribute(aiObject* object , std::vector<AttributeD
                     AttributeData* attribute = new AttributeData();
                     attribute->data = param; // param or samples ? 
                     attribute->size = sizeof(param); // for now 
-                    attribute->type = aiGetPropertyType(header); // aiGetPropertyTypeID<abcGeomType> //
+                    attribute->type1 = aiGetPropertyType(header); // aiGetPropertyTypeID<abcGeomType> //
                     attribute->name = header.getName();
                     attributes->push_back(attribute);
                 }
@@ -1495,10 +1504,31 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-   // copy_or_clear_vector(data.m_attributes, m_attributes_ref);// need to pick the right data to transfer, right format ? abcC2 ? 
+    data.m_attributes =  new AttributeDataToTransfer[11];
+    copy_or_clear_vector(data.m_attributes, m_attributes_ref);
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
-   // copy_or_clear_vec(data.m_attributes_param, m_attributes_ref, split);
 }
+
+
+    static inline void copy_or_clear_vector(AttributeDataToTransfer dst[], const std::vector<AttributeData*>* src)
+    {
+        if (!src->empty()) {
+            for (int i = 0; i < src->size(); i++) {
+                AttributeDataToTransfer a(); 
+                dst[i].data = static_cast<abcV2*>((*src)[i]->data);
+                dst[i].type1 = (*src)[i]->type1;
+                dst[i].size = sizeof(abcV2);
+            }
+        }
+ 
+        
+
+      /*  (*dst).data = static_cast<abcV2*>((*src)[0]->data);
+        //(*dst)[i]->name = (*src)[i]->name;
+        (*dst).type1 = (*src)[0]->type1;
+        // (*dst)[i]->type2 = "abcV2";
+        (*dst).size = 3;*/
+    }
 
 template<typename T>
 void aiMeshSample<T>::fillSubmeshIndices(int submesh_index, aiSubmeshData& data) const

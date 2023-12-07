@@ -193,19 +193,15 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public aiTopology topology { get; set; }
     }
 
-   unsafe internal struct AttributeData
+    [StructLayout(LayoutKind.Sequential)]
+    unsafe struct AttributeData
     {
-        public void* data;
-        public void* samples1;
-        public void* samples2;
-        public void* reference;
-        public void* att, att2, att_int;
-        public void* constant_att;
-        public void* remap;
         public int size;
-        public aiPropertyType type;
-        public string name;
-        public bool interpolate ;
+        public void* data;
+        // Assuming size is an integer
+        //public string name;
+        public aiPropertyType type1;  // Use the actual enum type here
+     //   public string type2;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -221,7 +217,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* rgb;
 
         public IntPtr indices;
-        public Vector<IntPtr>* attributes;
+        public IntPtr attributes;
 
         public int vertexCount;
         public int indexCount;

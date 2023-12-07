@@ -33,6 +33,8 @@ class aiSubD;     // : aiSchema
 class aiPoints;   // : aiSchema
 class aiProperty;
 struct AttributeData;
+struct AttributeDataToTransfer;
+
 
 enum class NormalsMode
 {
@@ -194,7 +196,7 @@ struct aiPolyMeshData
     abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
-    std::vector<AttributeData*>* m_attributes = new std::vector<AttributeData*>();
+    AttributeDataToTransfer* m_attributes ;
     int vertex_count = 0;
     int index_count = 0;
 
