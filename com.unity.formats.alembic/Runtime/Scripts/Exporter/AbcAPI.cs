@@ -191,6 +191,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public IntPtr uv1;              // Vector2*. can be null
         public IntPtr colors;           // Vector2*. can be null
         public IntPtr submeshes;        // aeSubmeshData*. can be null
+        public Vector<IntPtr> attributes;
         public int submeshCount;
     }
 

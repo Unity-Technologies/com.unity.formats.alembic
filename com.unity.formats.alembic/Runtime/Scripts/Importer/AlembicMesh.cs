@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -34,6 +35,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public NativeArray<Vector4> tangents;
             public NativeArray<Vector2> uv0;
             public NativeArray<Vector2> uv1;
+            public NativeArray<AttributeData> attributes;
             public NativeArray<Color> rgba;
             public NativeArray<Color> rgb;
 
@@ -259,6 +261,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
+               vertexData.attributes = (IntPtr)split.attributes.GetPointer();
+
                 m_splitData[spi] = vertexData;
             }
 
@@ -296,7 +300,20 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Execute()
             {
+                Vector<AttributeData> vec = new Vector<AttributeData>();
+
                 sample.FillVertexBuffer(splitData, submeshData);
+
+                IntPtr attributesPtr = splitData[0].attributes;
+                int numAttributes = 11;
+
+                AttributeData[] arr = new AttributeData[numAttributes];
+                for (int i = 0; i < numAttributes; i++)
+                {
+                    IntPtr currentPtr = IntPtr.Add(attributesPtr, i * Marshal.SizeOf<AttributeData>());
+                    arr[i] = Marshal.PtrToStructure<AttributeData>(currentPtr);
+                }
+
             }
         }
 #if BURST_AVAILABLE
@@ -422,6 +439,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.velocitiesSet = true;
                     }
 
+                    if (split.attributes.Length > 0)
+                        ProcessData(split);
                     if (split.rgba.Length > 0)
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
@@ -482,6 +501,23 @@ namespace UnityEngine.Formats.Alembic.Importer
                     var customData = split.host.GetOrAddComponent<AlembicCustomData>();
                     customData.SetFacesetNames(facesetName[sum.splitIndex]);
                 }
+            }
+        }
+
+        private void ProcessData(Split split)
+        {
+            unsafe
+            {
+                if (split.attributes[0].type1 == aiPropertyType.Float2)
+
+                {
+                    //void* vector2DataPtr;
+                   // vector2DataPtr = split.attributes[0].data;
+                    Vector2* vector2Array = (Vector2*)split.attributes[0].data;
+                    Mesh mesh = split.mesh;
+                    mesh.SetUVs(1, new List<Vector2> { *vector2Array });
+                }
+
             }
         }
 
