@@ -533,7 +533,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                 imagePosition = ImagePosition.ImageLeft,
                 fontSize = 10,
                 wordWrap = true,
-                alignment = TextAnchor.MiddleLeft
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(0,0,1,7)
             };
             style.normal.textColor = EditorStyles.helpBox.normal.textColor;
             return style;
