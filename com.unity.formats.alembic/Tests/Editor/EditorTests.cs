@@ -83,6 +83,32 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsTrue(inst.GetComponentInChildren<AlembicCurvesRenderer>() != null ^ addCurve);
         }
 
+        [Test]
+        public void Alembic_WithInvisibleNode_SetAddCurveRenderers_True_DoesNotThrowException()
+        {
+            // make a copy of the prefab
+            var originPath = AssetDatabase.GUIDToAssetPath("728c5b2b461c74d4991ce0a5e90433af"); // F.head model
+            var path = "Assets/!InvisibleNodeTest.abc";
+            AssetDatabase.CopyAsset(originPath, path);
+            deleteFileList.Add(path);
+
+            // set CreateCurveRenderer to true
+            var importer = (AlembicImporter)AssetImporter.GetAtPath(path);
+            importer.StreamSettings.CreateCurveRenderers = true;
+            EditorUtility.SetDirty(importer);
+            importer.SaveAndReimport();
+
+            // instantiate prefab
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            var player = inst.GetComponent<AlembicStreamPlayer>();
+            Assume.That(player != null);
+
+            // Assert
+            var curvesRenderer = inst.GetComponentInChildren<AlembicCurvesRenderer>(true);
+            Assert.IsTrue(curvesRenderer != null);
+        }
+
         [UnityTest]
         public IEnumerator MultipleActivationsTracksCanActOnTheSameStreamPlayer()
         {
