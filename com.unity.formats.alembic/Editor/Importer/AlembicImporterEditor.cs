@@ -422,7 +422,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                 string msg = L10n.Tr("There is no Hair package installed. " +
                                      "Install the hair package first to generate " +
                                      "a curve-based groom.");
-                                    // + "<a href=\"https://unity.com/\">Learn More</a>");
 
                 GUILayout.FlexibleSpace();
                 ButtonHelpbox(msg, L10n.Tr("Install"),
