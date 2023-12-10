@@ -151,6 +151,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
         public Bool hasRgba { get; set; }
+
+        public Bool hasAttributes { get; set; }
         public Bool hasRgb { get; set; }
         public Bool constantPoints { get; set; }
         public Bool constantVelocities { get; set; }
@@ -217,7 +219,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* rgb;
 
         public IntPtr indices;
-        public IntPtr attributes;
+        public void* attributes;
 
         public int vertexCount;
         public int indexCount;

@@ -74,7 +74,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         aiPolyMesh m_abcSchema;
-        protected aiMeshSummary m_summary;
+        protected aiMeshSummary m_summary;// interpolate attributes encapsulated in attributeData
         aiMeshSampleSummary m_sampleSummary;
         NativeArray<aiMeshSplitSummary> m_splitSummaries;
         NativeArray<aiSubmeshSummary> m_submeshSummaries;
@@ -261,7 +261,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-               vertexData.attributes = (IntPtr)split.attributes.GetPointer();
+
+
+                split.attributes.ResizeIfNeeded(11); // all the custom attribute and all their data (of all the vertex counts )will be already stored inside
+               vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -304,15 +307,15 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                 sample.FillVertexBuffer(splitData, submeshData);
 
-                IntPtr attributesPtr = splitData[0].attributes;
-                int numAttributes = 11;
+              //  IntPtr attributesPtr = splitData[0].attributes;
+              //  int numAttributes = 11;
 
-                AttributeData[] arr = new AttributeData[numAttributes];
-                for (int i = 0; i < numAttributes; i++)
+                /*
+              for (int i = 0; i < numAttributes; i++)
                 {
                     IntPtr currentPtr = IntPtr.Add(attributesPtr, i * Marshal.SizeOf<AttributeData>());
-                    arr[i] = Marshal.PtrToStructure<AttributeData>(currentPtr);
-                }
+                    splitData[0].attributes[] = Marshal.PtrToStructure<AttributeData>(currentPtr);
+                }*/
 
             }
         }
@@ -508,15 +511,12 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             unsafe
             {
-                if (split.attributes[0].type1 == aiPropertyType.Float2)
-
-                {
-                    //void* vector2DataPtr;
-                   // vector2DataPtr = split.attributes[0].data;
+               //  if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly 
+                    void* vector2DataPtr;
+                    vector2DataPtr = split.attributes[0].data;
                     Vector2* vector2Array = (Vector2*)split.attributes[0].data;
                     Mesh mesh = split.mesh;
-                    mesh.SetUVs(1, new List<Vector2> { *vector2Array });
-                }
+                    mesh.SetUVs(1, new List<Vector2> { *vector2Array , *(vector2Array+1), *(vector2Array+2), *(vector2Array+3)  }); // construct the list using the vertexcount
 
             }
         }
