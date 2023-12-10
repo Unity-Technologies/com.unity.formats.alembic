@@ -1547,7 +1547,7 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-    data.m_attributes =  new AttributeDataToTransfer[11];
+    //data.m_attributes =  new AttributeDataToTransfer[11];
     copy_or_clear_vector(data.m_attributes, m_attributes_ref);
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
 }
@@ -1555,16 +1555,18 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
 
     static inline void copy_or_clear_vector(AttributeDataToTransfer dst[], const std::vector<AttributeData*>* src)
     {
+
+        auto ptrArray = new AttributeDataToTransfer[11];
         if (!src->empty()) {
             for (int i = 0; i < src->size(); i++) {
                 AttributeDataToTransfer a(); 
-                dst[i].data = static_cast<abcV2*>((*src)[i]->data);
-                dst[i].type1 = (*src)[i]->type1;
-                dst[i].size = sizeof(abcV2);
+                ptrArray[i].data = static_cast<abcV2*>((*src)[i]->data);
+                ptrArray[i].type1 = (*src)[i]->type1;
+                ptrArray[i].size = sizeof(abcV2);
             }
         }
  
-        
+      memcpy(dst, ptrArray, sizeof(AttributeDataToTransfer)*11);
 
       /*  (*dst).data = static_cast<abcV2*>((*src)[0]->data);
         //(*dst)[i]->name = (*src)[i]->name;
