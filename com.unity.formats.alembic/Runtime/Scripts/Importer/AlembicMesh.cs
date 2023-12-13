@@ -191,6 +191,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             sample.GetSplitSummaries(m_splitSummaries);
             sample.GetSubmeshSummaries(m_submeshSummaries);
+             int customAttributesCount= 3; // to be raplaced with func
+
+
 
             UpdateSplits(splitCount);
 
@@ -261,9 +264,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-
-
-                split.attributes.ResizeIfNeeded(11); // all the custom attribute and all their data (of all the vertex counts )will be already stored inside
+               split.attributes.ResizeIfNeeded(customAttributesCount);
                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
@@ -303,20 +304,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             public void Execute()
             {
-                Vector<AttributeData> vec = new Vector<AttributeData>();
-
                 sample.FillVertexBuffer(splitData, submeshData);
-
-              //  IntPtr attributesPtr = splitData[0].attributes;
-              //  int numAttributes = 11;
-
-                /*
-              for (int i = 0; i < numAttributes; i++)
-                {
-                    IntPtr currentPtr = IntPtr.Add(attributesPtr, i * Marshal.SizeOf<AttributeData>());
-                    splitData[0].attributes[] = Marshal.PtrToStructure<AttributeData>(currentPtr);
-                }*/
-
             }
         }
 #if BURST_AVAILABLE
@@ -443,7 +431,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     }
 
                     if (split.attributes.Length > 0)
-                        ProcessData(split);
+                        ProcessData(split, s);
                     if (split.rgba.Length > 0)
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
@@ -507,17 +495,19 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
         }
 
-        private void ProcessData(Split split)
+        private void ProcessData(Split split, int spi)
         {
             unsafe
             {
-               //  if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly 
-                    void* vector2DataPtr;
-                    vector2DataPtr = split.attributes[0].data;
-                    Vector2* vector2Array = (Vector2*)split.attributes[0].data;
-                    Mesh mesh = split.mesh;
-                    mesh.SetUVs(1, new List<Vector2> { *vector2Array , *(vector2Array+1), *(vector2Array+2), *(vector2Array+3)  }); // construct the list using the vertexcount
-
+             // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
+             List<Color> colors = new List<Color>();
+             for(int i=0 ; i<m_splitSummaries[spi].vertexCount ; ++i)
+               {
+                    if (split.attributes[0].data==null) break;
+                        colors.Add(*(((Color*)(split.attributes[0].data))+i));
+               }
+             if (colors.Count==m_splitSummaries[spi].vertexCount)
+                split.mesh.SetColors(colors);
             }
         }
 
