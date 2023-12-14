@@ -467,7 +467,6 @@ namespace UnityEditor.Formats.Alembic.Importer
                     var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
                                           "Ensure that the asset contains curves and \"Import Curves\" is " +
                                           "enabled in the \"Model\" tab.");
-                    
                     EditorGUILayout.HelpBox(message, MessageType.Warning);
                 }
 #endif
