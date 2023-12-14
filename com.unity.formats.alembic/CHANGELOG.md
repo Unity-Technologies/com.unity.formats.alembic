@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0-pre.1] - 2023-11-07
 ### Added
-- The Alembic Importer window now has a Hair tab to generate a Hair asset from an Alembic file containing curves.
+- New "Hair" tab in the Alembic Importer window to generate a Hair asset from an Alembic file containing curves (subject to Hair package installation).
 
 ## [2.3.4] - 2023-10-30
 ### Fixed
