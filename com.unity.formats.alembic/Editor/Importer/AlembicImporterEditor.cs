@@ -67,7 +67,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
                     break;
                 case (int) UITab.Hair:
-                    DrawHairUI(importer, serializedObject.isEditingMultipleObjects);
+                    DrawHairUI(importer);
                     break;
                 default:
                     DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
@@ -408,7 +408,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             return AssetDatabase.LoadAssetAtPath<Material>(path);
         }
 
-        void DrawHairUI(AlembicImporter importer, bool isMultiEdit)
+        void DrawHairUI(AlembicImporter importer)
         {
             var hairLabel = L10n.Tr("Hair");
             // var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
@@ -467,9 +467,8 @@ namespace UnityEditor.Formats.Alembic.Importer
                     var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
                                           "Ensure that the asset contains curves and \"Import Curves\" is " +
                                           "enabled in the \"Model\" tab.");
+                    
                     EditorGUILayout.HelpBox(message, MessageType.Warning);
-
-
                 }
 #endif
             }
