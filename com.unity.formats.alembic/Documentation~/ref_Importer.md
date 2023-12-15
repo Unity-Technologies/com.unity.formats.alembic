@@ -74,6 +74,10 @@ This section of the Materials tab lists all meshes and submeshes of the imported
 | (2) | Submeshes of mesh (1), identified by the names of their corresponding Face Sets in the original Alembic file.<br /><br />**Note:** "Empty" means the corresponding Face Set has no name in the original Alembic file. In that case, you can only assign a material manually. |
 | (3) | The current material override status of the submesh.<br /><br />Use the target fields to manually assign materials to the listed submeshes. For automatic name-based material assignation, use [Material Search](#material-search).<br /><br />**Note:** "None (Material)" means the Alembic Importer still assigns the Default Material to the submesh. |
 
+## Hair
+
+[!include[](ref-Importer-hair.md)]
+
 ## Apply and Revert buttons
 
 If you change properties in any tab of the **Import Settings (Alembic Importer)** window, the Alembic Importer does not take them into account until you manually apply them.
