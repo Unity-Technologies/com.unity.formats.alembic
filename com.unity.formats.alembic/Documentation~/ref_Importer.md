@@ -7,12 +7,13 @@ To access the Import Settings window, select the Alembic file in your Project wi
 
 ![The Import Settings window (Model tab)](images/abc_import_options.png)
 
-The Import Settings window consists of two tabs:
+The Import Settings window consists of three tabs:
 
 - [Model](#model): to customize the Alembic file import through Scene, Time, Geometry and Camera options.
 - [Materials](#materials): to map the submeshes of the imported Alembic asset with existing materials of your project.
+- [Hair](#hair): to generate a groom from the curves of the imported Alembic asset.
 
-**Note:** These two tabs share the same [**Apply** and **Revert** buttons](#apply-and-revert-buttons).
+**Note:** These three tabs share the same [**Apply** and **Revert** buttons](#apply-and-revert-buttons).
 
 ## Model
 
@@ -74,8 +75,7 @@ This section of the Materials tab lists all meshes and submeshes of the imported
 | (2) | Submeshes of mesh (1), identified by the names of their corresponding Face Sets in the original Alembic file.<br /><br />**Note:** "Empty" means the corresponding Face Set has no name in the original Alembic file. In that case, you can only assign a material manually. |
 | (3) | The current material override status of the submesh.<br /><br />Use the target fields to manually assign materials to the listed submeshes. For automatic name-based material assignation, use [Material Search](#material-search).<br /><br />**Note:** "None (Material)" means the Alembic Importer still assigns the Default Material to the submesh. |
 
-## Hair
-
+[comment]: # (Hair section)
 [!include[](ref-Importer-hair.md)]
 
 ## Apply and Revert buttons
@@ -86,5 +86,7 @@ If you change properties in any tab of the **Import Settings (Alembic Importer)*
 | :--- | :--- |
 | **Apply** | Applies all changes you made in both the **Model** and **Materials** tabs for the current imported Alembic asset. |
 | **Revert** | Abandons any changes you might have done in any of the **Model** and **Materials** tabs. This reverts all property values to their previous state and has no impact on the current imported Alembic asset in Unity. |
+
+[comment]: # "TODO: Something about how the Hair tab does not result in changes to apply/revert"
 
 >**Note:** If these buttons are inactive, it means that the Alembic Importer currently uses the import options as seen in the window.
