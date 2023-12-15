@@ -14,6 +14,12 @@ using UnityEditor.AssetImporters;
 using UnityEditor.Experimental.AssetImporters;
 #endif
 
+#if HAIR_AVAILABLE
+using Unity.DemoTeam.Hair;
+#else
+using UnityEditor.PackageManager;
+#endif
+
 namespace UnityEditor.Formats.Alembic.Importer
 {
     [CustomEditor(typeof(AlembicImporter)), CanEditMultipleObjects]
@@ -22,7 +28,8 @@ namespace UnityEditor.Formats.Alembic.Importer
         enum UITab
         {
             Model,
-            Material
+            Material,
+            Hair
         };
 
         enum MaterialSearchLocation
@@ -30,7 +37,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             ProjectWide,
             CurrentFolder
         }
-
 
         bool materialRootFold = true;
         List<bool> materialFold = new List<bool>();
@@ -50,19 +56,23 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials"});
+                uiTab.value = GUILayout.Toolbar(uiTab,
+                    new[] {L10n.Tr("Model"), L10n.Tr("Materials"), L10n.Tr("Hair")});
                 GUILayout.FlexibleSpace();
             }
 
-            if (uiTab == (int)UITab.Model)
+            switch (uiTab)
             {
-                DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
+                case (int) UITab.Material:
+                    DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
+                    break;
+                case (int) UITab.Hair:
+                    DrawHairUI(importer);
+                    break;
+                default:
+                    DrawModelUI(importer, serializedObject.isEditingMultipleObjects);
+                    break;
             }
-            else
-            {
-                DrawMaterialUI(importer, serializedObject.isEditingMultipleObjects);
-            }
-
 
             serializedObject.ApplyModifiedProperties();
             ApplyRevertGUI();
@@ -397,6 +407,139 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             return AssetDatabase.LoadAssetAtPath<Material>(path);
         }
+
+        void DrawHairUI(AlembicImporter importer)
+        {
+            var hairLabel = L10n.Tr("Hair");
+            // var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
+            //     EditorGUIUtility.IconContent("info").image); // Title with Icon
+
+            EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
+            {
+                GUILayout.FlexibleSpace();
+
+#if !HAIR_AVAILABLE
+                string msg = L10n.Tr("Hair package not found. " +
+                                     "You have to install it first to generate " +
+                                     "a curve-based groom.");
+
+                GUILayout.FlexibleSpace();
+                ButtonHelpbox(msg, L10n.Tr("Install"),
+                () =>
+                {
+                    const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
+                    Application.OpenURL(hairRepoLink);
+
+                    // Use this when Hair package is published
+                    // Client.Add("com.unity.demoteam.hair");
+                });
+#else
+                var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
+
+                if (HasCurves(alembicStreamPlayer))
+                {
+                    if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
+                    {
+                        string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+                        path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+                        var hairAsset = CreateInstance<HairAsset>();
+                        hairAsset.name = go.name + "_Hair";
+                        hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
+                        hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
+                        AssetDatabase.CreateAsset(hairAsset, path);
+
+                        HairAssetBuilder.BuildHairAsset(hairAsset);
+                        EditorGUIUtility.PingObject(hairAsset);
+                        AssetDatabase.SaveAssetIfDirty(hairAsset);
+                        Selection.activeObject = hairAsset;
+                    }
+
+                    GUI.enabled = true;
+                }
+                else
+                {
+                    GUI.enabled = false;
+                    GUILayout.Button(L10n.Tr("Generate Hair Asset"));
+                    GUI.enabled = true;
+
+                    var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
+                                          "Ensure that the asset contains curves and \"Import Curves\" is " +
+                                          "enabled in the \"Model\" tab.");
+                    EditorGUILayout.HelpBox(message, MessageType.Warning);
+                }
+#endif
+            }
+        }
+
+
+        bool HasCurves(AlembicStreamPlayer alembicStreamPlayer)
+        {
+            return (alembicStreamPlayer != null
+                    && alembicStreamPlayer.GetComponentInChildren<AlembicCurves>(includeInactive: true) != null);
+        }
+
+        const float k_IndentMargin = 15.0f;
+
+        /// <summary>Draw a help box with a button.</summary>
+        /// <param name="message">The message.</param>
+        /// <param name="buttonLabel">The button text.</param>
+        /// <param name="action">When the user clicks the button, Unity performs this action.</param>
+        void ButtonHelpbox(string message, string buttonLabel, Action action)
+        {
+            // code taken from UnityCoreUtils.FixMeBox()
+            var content = EditorGUIUtility.TrTextContentWithIcon(
+                message, EditorGUIUtility.TrIconContent("console.warnicon").image);
+            EditorGUILayout.BeginHorizontal();
+
+            float indent = EditorGUI.indentLevel * k_IndentMargin - EditorStyles.helpBox.margin.left;
+            GUILayoutUtility.GetRect(
+                indent, EditorGUIUtility.singleLineHeight,
+                EditorStyles.helpBox, GUILayout.ExpandWidth(false));
+
+            Rect leftRect = GUILayoutUtility.GetRect(
+                new GUIContent(buttonLabel), EditorStyles.miniButton, GUILayout.MinWidth(60));
+            Rect rect = GUILayoutUtility.GetRect(content, EditorStyles.helpBox);
+            Rect boxRect = new Rect(leftRect.x, rect.y, rect.xMax - leftRect.xMin, rect.height);
+
+            int oldIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            if (Event.current.type == EventType.Repaint)
+                EditorStyles.helpBox.Draw(boxRect, false, false, false, false);
+
+            Rect labelRect = new Rect(boxRect.x + 4, boxRect.y + 3, rect.width - 8, rect.height);
+            EditorGUI.LabelField(labelRect, content, HelpBox());
+
+            var buttonRect = leftRect;
+            buttonRect.x += rect.width - 2;
+            buttonRect.y = rect.yMin + (rect.height - EditorGUIUtility.singleLineHeight) / 2;
+            bool clicked = GUI.Button(buttonRect, buttonLabel);
+
+            EditorGUI.indentLevel = oldIndent;
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.EndHorizontal();
+
+            if (clicked)
+                action();
+
+        }
+        static GUIStyle HelpBox()
+        {
+            var style = new GUIStyle()
+            {
+                imagePosition = ImagePosition.ImageLeft,
+                fontSize = 10,
+                wordWrap = true,
+                alignment = TextAnchor.MiddleLeft
+            };
+            style.normal.textColor = EditorStyles.helpBox.normal.textColor;
+            return style;
+
+        }
+
     }
 
     class SavedInt
