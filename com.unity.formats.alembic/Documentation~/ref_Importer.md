@@ -75,8 +75,16 @@ This section of the Materials tab lists all meshes and submeshes of the imported
 | (2) | Submeshes of mesh (1), identified by the names of their corresponding Face Sets in the original Alembic file.<br /><br />**Note:** "Empty" means the corresponding Face Set has no name in the original Alembic file. In that case, you can only assign a material manually. |
 | (3) | The current material override status of the submesh.<br /><br />Use the target fields to manually assign materials to the listed submeshes. For automatic name-based material assignation, use [Material Search](#material-search).<br /><br />**Note:** "None (Material)" means the Alembic Importer still assigns the Default Material to the submesh. |
 
-[comment]: # (Hair section)
-[!include[](ref-Importer-hair.md)]
+## Hair
+
+The Hair tab helps you generate a groom from the imported Alembic file.
+
+![The Import Settings window (Hair tab)](images/abc_import_options_hair.png)
+
+### Generate Hair Asset
+
+This button generates a Hair Asset based on the imported Alembic asset. For this, your Alembic asset must include curves data.
+
 
 ## Apply and Revert buttons
 
