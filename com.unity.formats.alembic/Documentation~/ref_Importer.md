@@ -85,7 +85,6 @@ The Hair tab helps you generate a groom from the imported Alembic file.
 
 This button generates a Hair Asset based on the imported Alembic asset. For this, your Alembic asset must include curves data.
 
-
 ## Apply and Revert buttons
 
 If you change properties in any tab of the **Import Settings (Alembic Importer)** window, the Alembic Importer does not take them into account until you manually apply them.
