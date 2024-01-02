@@ -478,7 +478,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public aiPolyMeshSample sample { get { return NativeMethods.aiSubD.aiSchemaGetSample(self); } }
         public void GetSummary(ref aiMeshSummary dst) { NativeMethods.aiSubDGetSummary(self, ref dst); }
-       // public unsafe void ReadingAttribute(aiObject* obj, IntPtr attr, ref AttributeData dst) { NativeMethods.aiReadingAttribute(self, obj, attr);; }
     }
 
 
