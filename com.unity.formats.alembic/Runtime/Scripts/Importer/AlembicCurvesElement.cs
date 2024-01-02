@@ -18,6 +18,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
+
         {
             base.AbcSetup(abcObj, abcSchema);
             m_abcSchema = (aiCurves)abcSchema;
@@ -63,6 +64,10 @@ namespace UnityEngine.Formats.Alembic.Importer
                 curves.uvs.ResizeDiscard(m_sampleSummary.positionCount);
                 data.uvs = curves.uvs;
             }
+
+            curves.attributesList.ResizeDiscard(2);
+
+            data.attributes =curves.attributesList;
 
             m_abcData[0] = data;
             sample.FillData(m_abcData);

@@ -82,6 +82,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         NativeArray<aiPolyMeshData> m_splitData;
         NativeArray<aiSubmeshData> m_submeshData;
 
+
         JobHandle fillVertexBufferHandle;
         List<Split> m_splits = new List<Split>();
         List<JobHandle> m_PostProcessJobs = new List<JobHandle>();
@@ -172,6 +173,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_abcSchema = (aiPolyMesh)abcSchema;
 
             m_abcSchema.GetSummary(ref m_summary);
+
         }
 
         public override unsafe void AbcSyncDataBegin()
@@ -192,6 +194,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             sample.GetSplitSummaries(m_splitSummaries);
             sample.GetSubmeshSummaries(m_submeshSummaries);
+
+             int customAttributesCount= 1; // to be raplaced with func
+
 
             UpdateSplits(splitCount);
 
@@ -502,10 +507,13 @@ namespace UnityEngine.Formats.Alembic.Importer
              for(int i=0 ; i<m_splitSummaries[spi].vertexCount ; ++i)
                {
                     if (split.attributes[0].data==null) break;
-                        colors.Add(*(((Color*)(split.attributes[0].data))+i));
+                    var temp = *(((Vector3*)(split.attributes[0].data))+i);
+
+                  colors.Add(*((Color*)(split.attributes[0].data)+i));
+                   Debug.Log(*((Color*)(split.attributes[0].data)+i));
                }
-             if (colors.Count==m_splitSummaries[spi].vertexCount)
-                split.mesh.SetColors(colors);
+           if (colors.Count==m_splitSummaries[spi].vertexCount)
+               split.mesh.SetColors(colors);
             }
         }
 
