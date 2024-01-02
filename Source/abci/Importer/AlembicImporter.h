@@ -141,7 +141,7 @@ struct aiMeshSummary
     bool has_tangents = false;
     bool has_uv0 = false;
     bool has_uv1 = false;
-    std::vector<bool>* has_attributes = new std::vector<bool>();
+    int  has_attributes = 0;
     bool has_rgba = false;
     bool has_rgb = false;
     bool constant_points = false;

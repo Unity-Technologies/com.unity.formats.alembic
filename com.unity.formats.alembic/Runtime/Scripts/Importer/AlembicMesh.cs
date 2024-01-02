@@ -63,6 +63,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 uv1.DisposeIfPossible();
                 rgba.DisposeIfPossible();
                 rgb.DisposeIfPossible();
+                attributes.DisposeIfPossible();
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
                     DestroyUnityObject(mesh);
@@ -191,9 +192,6 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             sample.GetSplitSummaries(m_splitSummaries);
             sample.GetSubmeshSummaries(m_submeshSummaries);
-             int customAttributesCount= 3; // to be raplaced with func
-
-
 
             UpdateSplits(splitCount);
 
@@ -264,7 +262,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-               split.attributes.ResizeIfNeeded(customAttributesCount);
+               split.attributes.ResizeIfNeeded(summary.hasAttributes);
                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
