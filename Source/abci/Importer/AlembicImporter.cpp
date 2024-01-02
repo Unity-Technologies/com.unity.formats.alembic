@@ -254,16 +254,6 @@ abciAPI void aiPolyMeshFillVertexBuffer(aiPolyMeshSample* sample, aiPolyMeshData
         sample->fillVertexBuffer(vbs, ibs);
 }
 
-
-// just to test , more likely to be passed like other attributes now (m_rgb.. ) as data member of mesh
-/*
-abciAPI void aiReadingAttribute(aiPolyMesh* schema, aiObject* object, std::vector<AttributeData*>* attributes)
-{
-    if (schema)
-        schema->ReadAttribute<AbcGeom::IC4fGeomParam >(object, attributes);
-}; 
-*/
-
 abciAPI void aiSubDGetSummary(aiSubD* schema, aiMeshSummary* dst)
 {
     if (schema)
