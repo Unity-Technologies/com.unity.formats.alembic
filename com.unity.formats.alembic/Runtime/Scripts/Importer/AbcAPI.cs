@@ -568,14 +568,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
             }
         }
 
-        internal int GetNumberOfAttributes()
-        {
-            unsafe
-            {
-                return NativeMethods.aiGetNumberOfAttributes(self);
-            }
-        }
-
         internal void FillVertexBuffer(NativeArray<aiPolyMeshData> vbs, NativeArray<aiSubmeshData> ibs)
         {
             unsafe
@@ -583,8 +575,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
                 NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
             }
         }
-
-
 
     }
 
