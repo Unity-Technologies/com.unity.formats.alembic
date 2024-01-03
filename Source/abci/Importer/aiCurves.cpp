@@ -271,12 +271,7 @@ aiCurves::aiCurves(aiObject *parent, const abcObject &abc) : super(parent, abc)
 {
 
     ReadAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IV3fGeomParam>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::ITypedGeomParam<Abc::V2fTPTraits>>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IV2fProperty>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IFloatProperty>(parent, m_attributes_param);
-    ReadAttribute < AbcGeom::IFloatGeomParam > (parent, m_attributes_param);
+    
     updateSummary();
 }
 
@@ -420,8 +415,6 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
 
     //ONTOPOLOGYCHANGE ??
     for (int i = 0; i < (m_attributes_param)->size(); i++) {
-     
-      
 
             if ((((*m_attributes_param)[i])->constant_att) != nullptr)
             {
