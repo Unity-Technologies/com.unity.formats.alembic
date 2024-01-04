@@ -12,8 +12,8 @@ struct aiCurvesSummaryInternal : aiCurvesSummary
     bool has_velocity; 
     std::vector<bool>* has_attributes = new std::vector<bool>(false);
     std::vector<bool>* constant_attribute = new std::vector<bool>(false);
-    std::vector<bool>* has_attributes_prop = new std::vector<bool>(false);
-    std::vector<bool>* interpolate_attributes = new std::vector<bool>(false);
+    std::vector<bool> has_attributes_prop ;
+    std::vector<bool> interpolate_attributes;
 };
 
 class aiCurvesSample : public aiSample
@@ -40,7 +40,7 @@ public:
     Abc::V3fArraySamplePtr m_velocities_sp;
     RawVector<abcV3> m_velocities;
 
-    std::vector<AttributeData*>* m_attributes_ref = new std::vector<AttributeData*>();
+    std::vector<AttributeData*> m_attributes_ref;
 
     void fillData(aiCurvesData& data);
 };
@@ -62,9 +62,9 @@ public:
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
     template < typename Tp >
-    void ReadAttribute(aiObject* object, std::vector<AttributeData*>* attributes);
+    void ReadAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
     const aiCurvesSummaryInternal& getSummary() const {return m_summary;}
-    std::vector<AttributeData*>* m_attributes_param = new std::vector<AttributeData*>();
+    std::vector<AttributeData*> m_attributes_param;
     bool m_varying_topology = false;
 
 private:

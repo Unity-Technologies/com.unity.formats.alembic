@@ -295,6 +295,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public int positionCount { get; set; }
         public int numVerticesCount { get; set; }
+
+
     }
 
     [StructLayout(LayoutKind.Sequential)]
