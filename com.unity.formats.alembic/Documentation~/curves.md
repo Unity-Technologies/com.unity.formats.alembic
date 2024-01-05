@@ -35,3 +35,7 @@ In the hierarchy of the imported Prefab instance, the Alembic importer adds thre
 
 ![](images/abc_import_curves.png)
 <br />_Example of imported curves with the basic rendering option enabled for preview purposes._
+
+## Special Case: Hair
+
+Curves are often used to represent hair. You can further manage hair via [Hair Asset creation when using the Hair package](hair.md).
