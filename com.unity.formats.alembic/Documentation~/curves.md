@@ -38,4 +38,4 @@ In the hierarchy of the imported Prefab instance, the Alembic importer adds thre
 
 ## Special Case: Hair
 
-Curves are often used to represent hair. You can further manage hair via [Hair Asset creation when using the Hair package](hair.md).
+Curves are often used to represent hair. You can further manage hair using the Hair Package's Hair Asset objects. For more information on how to manage that, go to the [Working with hair page](hair.md).
