@@ -319,6 +319,7 @@ inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
 {
     ReadAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
     ReadAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
+    ReadAttribute<AbcGeom::IFloatProperty>(parent, m_attributes_param);
 
 
    auto geom_params = this->m_schema.getArbGeomParams();
@@ -770,7 +771,7 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
 
                 param->getIndexed(*samp1, ss);
 
-                if (attrib->interpolate) {
+                if (attrib->interpolate) { // change by summary.interpolate_attribute
                     param->getIndexed(*samp2, ss2);
                 }
                 break;
