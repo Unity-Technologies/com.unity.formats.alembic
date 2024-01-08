@@ -254,7 +254,7 @@ void aiCurves::ReadAttribute(aiObject* object, std::vector<AttributeData*>& attr
 
                     AttributeData* attribute = new AttributeData();
                     attribute->data = param; // param or samples ? 
-                    attribute->size = sizeof(param); // for now 
+                    attribute->size = sizeof(param); // for now
                     attribute->type1 = aiGetPropertyType(header); // aiGetPropertyTypeID<abcGeomType> //
                     attribute->name = header.getName();
                     attributes.push_back(attribute);
@@ -269,7 +269,6 @@ void aiCurves::ReadAttribute(aiObject* object, std::vector<AttributeData*>& attr
 
 aiCurves::aiCurves(aiObject *parent, const abcObject &abc) : super(parent, abc)
 {
-
     ReadAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
     
     updateSummary();
@@ -349,11 +348,10 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
             AbcGeom::IC3fGeomParam::Sample* samp2 = static_cast<AbcGeom::IC3fGeomParam::Sample*> (attrib->samples2);
             param->getExpanded(*samp1, ss);// or getindexed???
 
-            if (attrib->interpolate) {
+            if ((*(summary.constant_attributes))[i]) {
                 param->getExpanded(*samp2, ss2);
             }
         }
-
        
     }
 }
@@ -416,29 +414,31 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
     //ONTOPOLOGYCHANGE ??
     for (int i = 0; i < m_attributes_param.size(); i++) {
         auto attrib = m_attributes_param[i];
-            if (attrib->constant_att != nullptr)
-            {
-                std::cout << "const";
-            }
-            else if (m_summary.has_attributes_prop[i])
+
+        // no need to check if constant attribute, as this will be checked when dealing with sample 2 
+        
+        if (m_summary.has_attributes_prop[i])
             {
 
-                if (attrib->att == nullptr) // void* make it point to nullptr ! 
-                {
+            if (attrib->att == nullptr) // void* make it point to nullptr !
+            {
                     attrib->att = new RawVector<abcC3>(); // otherwise null and crash
-                }
-                auto* att1_cast = static_cast<RawVector<abcC3>*>(attrib->att);
-                auto att_sp1 = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attrib->samples1));
-                Assign(*att1_cast, att_sp1.getVals(), att_sp1.getVals()->size());
+            }
 
-                if (attrib->interpolate) {
-                    if (attrib->att2 == nullptr) // void* make it point to nullptr ! 
-                    {
-                        attrib->att2 = new RawVector<abcC3>(); // otherwise null and crash
-                    }
-                    auto* att2_cast = static_cast<RawVector<abcC3>*>(attrib->att2);
-                    auto att_sp2 = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attrib->samples2));
-                    Assign(*att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
+            auto* att1_cast = static_cast<RawVector<abcC3>*>(attrib->att);
+            auto att_sp1 = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attrib->samples1));
+            Assign(*att1_cast, att_sp1.getVals(), att_sp1.getVals()->size());
+
+            if (m_summary.interpolate_attributes[i]) { 
+                if (attrib->att2 == nullptr) // void* make it point to nullptr !
+                {
+                    attrib->att2 = new RawVector<abcC3>(); // otherwise null and crash
+                }
+
+                auto* att2_cast = static_cast<RawVector<abcC3>*>(attrib->att2);
+                auto att_sp2 = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attrib->samples2));
+
+                Assign(*att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
 
                     //Lerp(sample.m_widths.data(), sample.m_widths.data(), sample.m_widths2.data(),
                        // sample.m_widths.size(), m_current_time_offset);
@@ -496,17 +496,20 @@ void aiCurves::updateSummary()
 
            if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
                //m_summary.has_attributes++;
+              // m_summary.attribute_count++;
                
                m_summary.has_attributes_prop.push_back(true);
 
-               m_summary.constant_attribute->push_back(param.isConstant());
+               m_summary.constant_attributes->push_back(param.isConstant());
+
+               m_summary.interpolate_attributes.push_back(false);
            }
       
        }
 
    //m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
    auto& config = this->getConfig();
-   this->m_constant = this->m_schema.isConstant();
+   this->m_constant = this->m_schema.isConstant();  // is this same as param ? 
    bool interpolate = config.interpolate_samples && !this->m_constant;// && !m_varying_topology;
   
    if (interpolate) {
@@ -515,11 +518,9 @@ void aiCurves::updateSummary()
            bool shouldInterpolate = !m_summary.has_attributes_prop.empty() &&
                m_summary.has_attributes_prop[i] && !(*(m_summary.constant_attributes))[i];
 
-           m_summary.interpolate_attributes.push_back(shouldInterpolate);
+           m_summary.interpolate_attributes[i] = true; 
 
        }
    }
-
-
 
 }
