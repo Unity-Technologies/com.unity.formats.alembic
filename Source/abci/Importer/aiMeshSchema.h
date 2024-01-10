@@ -2,9 +2,6 @@
 #include "aiMeshOps.h"
 #include "Alembic/Abc/ITypedScalarProperty.h"
 #include "aiProperty.h"
-#include "Alembic/AbcGeom/IGeomParam.h"
-#include "Alembic/Abc/TypedPropertyTraits.h"
-#include "Alembic/Util/PlainOldDataType.h"
 
 namespace
 {
