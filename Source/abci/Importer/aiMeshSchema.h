@@ -93,8 +93,6 @@ public:
     void fillSubmeshIndices(int submesh_index, aiSubmeshData& data) const;
     void fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs);
 
-    void getCustomAttributes(std::vector<AttributeData*>* attributesContainer);
-
 public:
     Abc::P3fArraySamplePtr m_points_sp, m_points_sp2;
     Abc::V3fArraySamplePtr m_velocities_sp;
@@ -1773,10 +1771,4 @@ void aiMeshSample<T>::fillVertexBuffer(aiPolyMeshData* vbs, aiSubmeshData* ibs)
         fillSplitVertices(spi, vbs[spi]);
     for (int smi = 0; smi < (int)refiner.submeshes.size(); ++smi)
         fillSubmeshIndices(smi, ibs[smi]);
-}
-
-template<typename T>
-void aiMeshSample<T>::getCustomAttributes(std::vector<AttributeData*>* attributesContainer)
-{
-    attributesContainer = m_attributes_ref;
 }
