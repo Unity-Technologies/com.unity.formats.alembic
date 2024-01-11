@@ -61,11 +61,25 @@ public:
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
-    template < typename Tp >
-    void ReadAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
+   
     const aiCurvesSummaryInternal& getSummary() const {return m_summary;}
     std::vector<AttributeData*> m_attributes_param;
     bool m_varying_topology = false;
+
+    template < typename Tp >
+    void readAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
+
+    template <typename Tp>
+    void updateArbPropertySummaryAt(int paramIndex);
+
+    template <typename Tp, typename TpSample>
+    void readArbPropertySampleAt(int paramIndex, abcSampleSelector& ss, abcSampleSelector& ss2);
+
+    template <typename Tp, typename TpSample, typename VECTYPE>
+    void AssignArbPropertySampleAt(int paramIndex);
+
+    template <typename Tp, typename TpSample, typename VECTYPE>
+    void remapSecondAttributeSet(int paramIndex);
 
 private:
     void updateSummary();
