@@ -6,6 +6,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
 
+using Unity.Burst;
 namespace UnityEngine.Formats.Alembic.Importer
 {
     internal class AlembicMesh : AlembicElement
