@@ -61,7 +61,6 @@ public:
     Sample* newSample() override;
     void readSampleBody(Sample& sample, uint64_t idx) override;
     void cookSampleBody(Sample& sample) override;
-   
     const aiCurvesSummaryInternal& getSummary() const {return m_summary;}
     std::vector<AttributeData*> m_attributes_param;
     bool m_varying_topology = false;
