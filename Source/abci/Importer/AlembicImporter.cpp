@@ -30,7 +30,7 @@ abciAPI void aiClearContextsWithPath(const char *path)
     aiContextManager::destroyContextsWithPath(path);
 }
 
-abciAPI aiContext* aiContextCreate(int uid)
+abciAPI aiContext* aiContextCreate(uint64_t uid)
 {
     return aiContextManager::getContext(uid);
 }

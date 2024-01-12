@@ -324,7 +324,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator bool(aiContext v) { return v.self != IntPtr.Zero; }
         public static bool ToBool(aiContext v) { return v; }
 
-        public static aiContext Create(int uid) { return NativeMethods.aiContextCreate(uid); }
+        public static aiContext Create(UInt64 uid) { return NativeMethods.aiContextCreate(uid); }
 
         public static void DestroyByPath(string path)
         {

@@ -156,7 +156,7 @@ bool lockFreeIStream::updatedIOLimit = false;
 
 aiContextManager aiContextManager::s_instance;
 
-aiContext* aiContextManager::getContext(int uid)
+aiContext* aiContextManager::getContext(uint64_t uid)
 {
     auto it = s_instance.m_contexts.find(uid);
     if (it != s_instance.m_contexts.end())
@@ -171,7 +171,7 @@ aiContext* aiContextManager::getContext(int uid)
     return ctx;
 }
 
-void aiContextManager::destroyContext(int uid)
+void aiContextManager::destroyContext(uint64_t uid)
 {
     auto it = s_instance.m_contexts.find(uid);
     if (it != s_instance.m_contexts.end())
@@ -207,7 +207,7 @@ aiContextManager::~aiContextManager()
     m_contexts.clear();
 }
 
-aiContext::aiContext(int uid)
+aiContext::aiContext(uint64_t uid)
     : m_path(),
     m_streams(),
     m_archive(),
@@ -284,7 +284,7 @@ int aiContext::getTimeSamplingIndex(Abc::TimeSamplingPtr ts)
     return 0;
 }
 
-int aiContext::getUid() const
+uint64_t aiContext::getUid() const
 {
     return m_uid;
 }

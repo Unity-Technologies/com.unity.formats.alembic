@@ -276,7 +276,7 @@ abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
 abciAPI void            aiCleanup();
 abciAPI void            aiClearContextsWithPath(const char *path);
 
-abciAPI aiContext*      aiContextCreate(int uid);
+abciAPI aiContext*      aiContextCreate(uint64_t uid);
 abciAPI void            aiContextDestroy(aiContext* ctx);
 abciAPI bool            aiContextLoad(aiContext* ctx, const char *path);
 abciAPI bool            aiContextGetIsHDF5(aiContext* ctx);
