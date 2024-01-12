@@ -85,4 +85,3 @@ private:
     void updateSummary();
     aiCurvesSummaryInternal m_summary;
 };
-

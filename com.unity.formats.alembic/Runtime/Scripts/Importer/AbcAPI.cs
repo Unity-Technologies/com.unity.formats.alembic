@@ -295,15 +295,12 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public int positionCount { get; set; }
         public int numVerticesCount { get; set; }
-
-
     }
 
     [StructLayout(LayoutKind.Sequential)]
    unsafe struct aiCurvesData
     {
         public IntPtr attributes;
-
         public IntPtr positions;
         public IntPtr numVertices;
         public IntPtr uvs;

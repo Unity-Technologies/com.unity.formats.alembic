@@ -18,7 +18,6 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         internal override void AbcSetup(aiObject abcObj, aiSchema abcSchema)
-
         {
             base.AbcSetup(abcObj, abcSchema);
             m_abcSchema = (aiCurves)abcSchema;

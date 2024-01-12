@@ -35,8 +35,6 @@ class aiProperty;
 struct AttributeData;
 struct AttributeDataToTransfer;
 
-
-
 enum class NormalsMode
 {
     //ReadFromFile,
@@ -185,9 +183,6 @@ struct aiSubmeshSummary
     aiTopology topology = aiTopology::Triangles;
 };
 
-
-
-
 struct aiPolyMeshData
 {
     abcV3 *points = nullptr;
@@ -247,15 +242,11 @@ struct aiCurvesSampleSummary
 struct aiCurvesData
 {
     void* m_attributes;
- 
-   
-
     abcV3       *positions = nullptr;
     int32_t     *numVertices = nullptr;
     abcV2       *uvs = nullptr;
     float       *widths = nullptr;
     abcV3       *velocities = nullptr;
-
     int32_t     count = 0;
     bool        visibility = true;
     //abcV3       center = { 0.0f, 0.0f, 0.0f };

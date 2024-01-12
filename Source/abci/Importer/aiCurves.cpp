@@ -24,20 +24,17 @@ struct AttributeData {
     AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
 };
 
-//template <typename TP>
+
 struct AttributeDataToTransfer {
     int size;
-    //using Typ = TP
     void* data;
-    // std::string name;
     aiPropertyType type1;
-    // std::string type2;
 };
-aiCurvesSample::aiCurvesSample(aiCurves *schema) : super(schema)
+aiCurvesSample::aiCurvesSample(aiCurves* schema) : super(schema)
 {
 }
 
-void aiCurvesSample::getSummary(aiCurvesSampleSummary &dst)
+void aiCurvesSample::getSummary(aiCurvesSampleSummary& dst)
 {
     dst.positionCount = m_positions.size();
     dst.numVerticesCount = m_numVertices.size();
@@ -53,8 +50,7 @@ void aiCurves::updateArbPropertySummaryAt(int paramIndex)
     if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
     {
         if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
-            //m_summary.has_attributes++;
-           // m_summary.attribute_count++;
+           // m_summary.attributeCount++;
 
             m_summary.has_attributes_prop.push_back(true);
 
@@ -154,28 +150,28 @@ static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTr
 
     auto ptrArray = new AttributeDataToTransfer();
 
-        auto temp = static_cast<RawVector<abcC3>*>(src[paramIndex]->att);
+    auto temp = static_cast<RawVector<abcC3>*>(src[paramIndex]->att);
 
-        if (temp == nullptr)
-            ptrArray->data = nullptr;
-        else
+    if (temp == nullptr)
+        ptrArray->data = nullptr;
+    else
+    {
+        ptrArray->data = new abcC4[temp->size()];
+        for (size_t j = 0; j < temp->size(); ++j)
         {
-            ptrArray->data = new abcC4[temp->size()];
-            for (size_t j = 0; j < temp->size(); ++j)
-            {
-                abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[paramIndex].data);
+            abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[paramIndex].data);
 
-                dataPtr[j].r = temp->data()[j].x;
-                dataPtr[j].g = temp->data()[j].y;
-                dataPtr[j].b = temp->data()[j].z;
-                dataPtr[j].a = 1.0f;
-            }
+            dataPtr[j].r = temp->data()[j].x;
+            dataPtr[j].g = temp->data()[j].y;
+            dataPtr[j].b = temp->data()[j].z;
+            dataPtr[j].a = 1.0f;
         }
+    }
 
-        ptrArray[paramIndex].type1 = src[paramIndex]->type1;
-        ptrArray[paramIndex].size = sizeof(abcC4);
+    ptrArray[paramIndex].type1 = src[paramIndex]->type1;
+    ptrArray[paramIndex].size = sizeof(abcC4);
 
-        memcpy(dst + paramIndex , ptrArray, sizeof(AttributeDataToTransfer));
+    memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
 }
 
 
@@ -326,7 +322,7 @@ void aiCurvesSample::fillData(aiCurvesData& data)
             m_velocities.copy_to(data.velocities);
     }
 
-   
+
 
     for (size_t i = 0; i < m_attributes_ref.size(); ++i) {
         auto attrib = m_attributes_ref[i];
@@ -358,40 +354,47 @@ void aiCurvesSample::fillData(aiCurvesData& data)
         case(aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
         }
     }
- 
+
 }
 
 
-aiCurves::aiCurves(aiObject *parent, const abcObject &abc) : super(parent, abc)
+aiCurves::aiCurves(aiObject* parent, const abcObject& abc) : super(parent, abc)
 {
+    readAttribute<AbcGeom::IInt32GeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IUInt32GeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IFloatGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IV3fGeomParam>(parent, m_attributes_param);
     readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
-    
+    readAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IM44fGeomParam>(parent, m_attributes_param);
+
     updateSummary();
 }
 
-aiCurvesSample *aiCurves::newSample()
+aiCurvesSample* aiCurves::newSample()
 {
     return new Sample(this);
 }
 
 
-void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
+void aiCurves::readSampleBody(aiCurvesSample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
     auto ss2 = aiIndexToSampleSelector(idx + 1);
-  
+
     auto& summary = getSummary();
     bool interpolate = getConfig().interpolate_samples;
 
 
     bool topology_changed = m_varying_topology || this->m_force_update_local;
 
-  //  auto& topology = *sample.m_topology;
- //   auto& refiner = topology.m_refiner;
-   // if (topology_changed)
-      //  topology.clear();
+    //  auto& topology = *sample.m_topology;
+   //   auto& refiner = topology.m_refiner;
+     // if (topology_changed)
+        //  topology.clear();
 
-    // points
+      // points
     if (summary.has_position)
     {
         {
@@ -434,8 +437,8 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
     for (size_t i = 0; i < m_attributes_param.size(); ++i) {
 
         auto attrib = (m_attributes_param)[i];
- 
-        if  ((summary.has_attributes_prop)[i])
+
+        if ((summary.has_attributes_prop)[i])
         {
             switch (attrib->type1)
             {
@@ -467,11 +470,11 @@ void aiCurves::readSampleBody(aiCurvesSample &sample, uint64_t idx)
         }
 
 
-       
+
     }
 }
 
-void aiCurves::cookSampleBody(aiCurvesSample &sample)
+void aiCurves::cookSampleBody(aiCurvesSample& sample)
 {
     auto& config = getConfig();
     int point_count = (int)sample.m_position_sp->size();
@@ -557,7 +560,7 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
         }
 
         sample.m_attributes_ref = m_attributes_param;
-        
+
     };
 
 
@@ -581,7 +584,6 @@ void aiCurves::cookSampleBody(aiCurvesSample &sample)
     }
 }
 
-
 void aiCurves::updateSummary()
 {
     {
@@ -600,51 +602,51 @@ void aiCurves::updateSummary()
         auto prop = m_schema.getVelocitiesProperty();
         m_summary.has_velocity = prop.valid() && prop.getNumSamples() > 0;
     }
-   for (size_t i = 0; i < m_attributes_param.size(); ++i) {
-       switch (m_attributes_param[i]->type1)
-       {
-       case(aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
-       case(aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
-       case(aiPropertyType::UIntArray): this->updateArbPropertySummaryAt<AbcGeom::IUInt32GeomParam>(i); break;
-       case(aiPropertyType::FloatArray): this->updateArbPropertySummaryAt<AbcGeom::IFloatGeomParam>(i); break;
-       case(aiPropertyType::Float2Array): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
-       case(aiPropertyType::Float3Array):
-       {
-           if (AbcGeom::IV3fGeomParam::matches(m_attributes_param[i]->header))
-               this->updateArbPropertySummaryAt<AbcGeom::IV3fGeomParam>(i);
-           else if (AbcGeom::IC3fGeomParam::matches(m_attributes_param[i]->header))
-               this->updateArbPropertySummaryAt<AbcGeom::IC3fGeomParam>(i);
-           else if (AbcGeom::IN3fGeomParam::matches(m_attributes_param[i]->header))
-               this->updateArbPropertySummaryAt<AbcGeom::IN3fGeomParam>(i);
-           break;
-       }
-       case(aiPropertyType::Float4Array):
-       {
-           if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
-               this->updateArbPropertySummaryAt<AbcGeom::IC4fGeomParam>(i);
-           break;
-       }
-       case(aiPropertyType::Float4x4): this->updateArbPropertySummaryAt<AbcGeom::IM44fGeomParam>(i); break;
-       default:
-       case(aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
-       };
-      
-       }
+    for (size_t i = 0; i < m_attributes_param.size(); ++i) {
+        switch (m_attributes_param[i]->type1)
+        {
+        case(aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
+        case(aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
+        case(aiPropertyType::UIntArray): this->updateArbPropertySummaryAt<AbcGeom::IUInt32GeomParam>(i); break;
+        case(aiPropertyType::FloatArray): this->updateArbPropertySummaryAt<AbcGeom::IFloatGeomParam>(i); break;
+        case(aiPropertyType::Float2Array): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
+        case(aiPropertyType::Float3Array):
+        {
+            if (AbcGeom::IV3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IV3fGeomParam>(i);
+            else if (AbcGeom::IC3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IC3fGeomParam>(i);
+            else if (AbcGeom::IN3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IN3fGeomParam>(i);
+            break;
+        }
+        case(aiPropertyType::Float4Array):
+        {
+            if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IC4fGeomParam>(i);
+            break;
+        }
+        case(aiPropertyType::Float4x4): this->updateArbPropertySummaryAt<AbcGeom::IM44fGeomParam>(i); break;
+        default:
+        case(aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
+        };
 
-   //m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
-   auto& config = this->getConfig();
-   this->m_constant = this->m_schema.isConstant();  // is this same as param ? 
-   bool interpolate = config.interpolate_samples && !this->m_constant;// && !m_varying_topology;
-  
-   if (interpolate) {
-       for (int i = 0; i < m_summary.has_attributes_prop.size(); i++)
-       {
-           bool shouldInterpolate = !m_summary.has_attributes_prop.empty() &&
-               m_summary.has_attributes_prop[i] && !(*(m_summary.constant_attributes))[i];
+    }
 
-           m_summary.interpolate_attributes[i] = true; 
+    //m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+    auto& config = this->getConfig();
+    this->m_constant = this->m_schema.isConstant();  // is this same as param ? 
+    bool interpolate = config.interpolate_samples && !this->m_constant;// && !m_varying_topology;
 
-       }
-   }
+    if (interpolate) {
+        for (int i = 0; i < m_summary.has_attributes_prop.size(); i++)
+        {
+            bool shouldInterpolate = !m_summary.has_attributes_prop.empty() &&
+                m_summary.has_attributes_prop[i] && !(*(m_summary.constant_attributes))[i];
+
+            m_summary.interpolate_attributes[i] = true;
+
+        }
+    }
 
 }
