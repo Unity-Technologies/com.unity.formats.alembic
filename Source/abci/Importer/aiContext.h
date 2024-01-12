@@ -32,15 +32,15 @@ class aiObject;
 class aiContextManager
 {
 public:
-    static aiContext* getContext(int uid);
-    static void destroyContext(int uid);
+    static aiContext* getContext(uint64_t uid);
+    static void destroyContext(uint64_t uid);
     static void destroyContextsWithPath(const char* assetPath);
 
 private:
     ~aiContextManager();
 
     using ContextPtr = std::unique_ptr<aiContext>;
-    std::map<int, ContextPtr> m_contexts;
+    std::map<uint64_t, ContextPtr> m_contexts;
     static aiContextManager s_instance;
 };
 
@@ -48,7 +48,7 @@ private:
 class aiContext
 {
 public:
-    explicit aiContext(int uid = -1);
+    explicit aiContext(uint64_t uid = -1);
     ~aiContext();
 
     bool load(const char *path);
@@ -61,7 +61,7 @@ public:
 
     Abc::IArchive getArchive() const;
     const std::string& getPath() const;
-    int getUid() const;
+    uint64_t getUid() const;
 
     int getTimeSamplingCount() const;
     aiTimeSampling* getTimeSampling(int i);
