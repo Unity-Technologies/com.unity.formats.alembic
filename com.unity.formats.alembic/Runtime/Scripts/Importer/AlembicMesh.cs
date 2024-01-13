@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -499,6 +500,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                {
                     if (split.attributes[0].data==null) break;
                         colors.Add(*(((Color*)(split.attributes[0].data))+i));
+
+                        Debug.Log("color: "+colors[i]);;
                }
              if (colors.Count==m_splitSummaries[spi].vertexCount)
                 split.mesh.SetColors(colors);
