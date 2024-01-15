@@ -11,7 +11,6 @@ struct aiCurvesSummaryInternal : aiCurvesSummary
 {
     bool has_velocity; 
     std::vector<bool>* has_attributes = new std::vector<bool>(false);
-    std::vector<bool>* constant_attribute = new std::vector<bool>(false);
     std::vector<bool> has_attributes_prop ;
     std::vector<bool> interpolate_attributes;
 };

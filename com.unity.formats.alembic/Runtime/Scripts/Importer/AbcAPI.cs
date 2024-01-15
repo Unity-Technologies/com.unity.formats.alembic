@@ -63,7 +63,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-   public  enum  aiPropertyType
+   public enum aiPropertyType
     {
         Unknown,
 
@@ -298,7 +298,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
-   unsafe struct aiCurvesData
+    struct aiCurvesData
     {
         public IntPtr attributes;
         public IntPtr positions;
