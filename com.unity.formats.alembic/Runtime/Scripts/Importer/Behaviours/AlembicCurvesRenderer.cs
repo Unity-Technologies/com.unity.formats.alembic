@@ -26,19 +26,20 @@ namespace UnityEngine.Formats.Alembic.Importer
         //  [NonSerialized] RenderMethod prevRenderMethod;
         ProfilerMarker setMeshProperties = new ProfilerMarker("SetMeshProperties");
 
-
         enum RenderMethod
         {
             Line,
             Strip
         }
 
-        void OnEnable()
+        internal void Init()
         {
             curves = GetComponent<AlembicCurves>();
             //curves.OnUpdate += UpdateMesh;
 
-            mesh = new Mesh { hideFlags = HideFlags.DontSave };
+            if (mesh == null)
+                mesh = new Mesh { hideFlags = HideFlags.DontSave };
+
             GetComponent<MeshFilter>().sharedMesh = mesh;
             var meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer.sharedMaterial == null)
@@ -46,6 +47,11 @@ namespace UnityEngine.Formats.Alembic.Importer
                 meshRenderer.sharedMaterial = GetDefaultMaterial();
             }
             UpdateMesh(curves);
+        }
+
+        void OnEnable()
+        {
+            Init();
         }
 
         void UpdateMesh(AlembicCurves curves)
