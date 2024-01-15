@@ -433,10 +433,10 @@ namespace UnityEngine.Formats.Alembic.Importer
 
                     if (split.attributes.Length > 0)
                         ProcessData(split, s);
-                   // if (split.rgba.Length > 0)
-                       // split.mesh.SetColors(split.rgba);
-                    //else if (split.rgb.Length > 0)
-                       // split.mesh.SetColors(split.rgb);
+                    if (split.rgba.Length > 0)
+                        split.mesh.SetColors(split.rgba);
+                    else if (split.rgb.Length > 0)
+                        split.mesh.SetColors(split.rgb);
 
                     // update the bounds
                     var data = m_splitData[s];
