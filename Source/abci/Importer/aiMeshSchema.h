@@ -128,6 +128,8 @@ public:
 template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
+    IArray<int>  getAttributesIndices(MeshRefiner& refiner);
+
 public:
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
@@ -770,6 +772,22 @@ const aiMeshSummaryInternal& aiMeshSchema<T, U>::getSummary() const
 }
 
 template<typename T, typename U>
+IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
+{
+    int* indices = new int[refiner.indices.size()];
+    int m = 0;
+    for (int i = 0; i < refiner.counts.size(); i++)
+    {
+        for (int j = 0; j < refiner.counts[i]; j++)
+        {
+            indices[m] = i;
+            m++;
+        }
+    }
+    return { indices, refiner.indices.size() };
+}
+
+template<typename T, typename U>
 void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
@@ -1284,6 +1302,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV3>(src, refiner.indices, dst, topology.m_remap_normals);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> normals_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV3>(src, normals_indices, dst, topology.m_remap_normals);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1340,6 +1363,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv0);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> uv0_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV2>(src, uv0_indices, dst, topology.m_remap_uv0);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1367,6 +1395,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv1);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> uv1_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1393,6 +1426,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcC4>(src, refiner.indices, dst, topology.m_remap_rgba);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> rgba_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcC4>(src, rgba_indices, dst, topology.m_remap_rgba);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1418,6 +1456,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         else if (src.size() == refiner.points.size())
         {
             refiner.template addIndexedAttribute<abcC3>(src, refiner.indices, dst, topology.m_remap_rgb);
+        }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> rgb_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcC3>(src, rgb_indices, dst, topology.m_remap_rgb);
         }
         else
         {
