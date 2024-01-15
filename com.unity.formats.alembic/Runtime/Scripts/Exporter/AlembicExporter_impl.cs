@@ -831,7 +831,7 @@ namespace UnityEngine.Formats.Alembic.Util
 
         class CaptureNode
         {
-            public int instanceID;
+            public InstanceID instanceID;
             public Type componentType;
             public CaptureNode parent;
             public Transform transform;
@@ -869,9 +869,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
         aeContext m_ctx;
         ComponentCapturer m_root;
-        Dictionary<int, CaptureNode> m_nodes;
+        Dictionary<InstanceID, CaptureNode> m_nodes;
         List<CaptureNode> m_newNodes;
-        List<int> m_iidToRemove;
+        List<InstanceID> m_iidToRemove;
         int m_lastTimeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
 
@@ -971,7 +971,7 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (node == null) { return null; }
 
-            int iid = node.gameObject.GetInstanceID();
+            InstanceID iid = node.gameObject.GetInstanceID();
             CaptureNode cn;
             if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
@@ -1136,9 +1136,9 @@ namespace UnityEngine.Formats.Alembic.Util
             }
 
             m_root = new RootCapturer(this, m_ctx.topObject);
-            m_nodes = new Dictionary<int, CaptureNode>();
+            m_nodes = new Dictionary<InstanceID, CaptureNode>();
             m_newNodes = new List<CaptureNode>();
-            m_iidToRemove = new List<int>();
+            m_iidToRemove = new List<InstanceID>();
             m_lastTimeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
@@ -1211,7 +1211,7 @@ namespace UnityEngine.Formats.Alembic.Util
             m_ctx.MarkFrameEnd();
 
             // remove deleted GameObjects
-            foreach (int iid in m_iidToRemove)
+            foreach (InstanceID iid in m_iidToRemove)
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
 
