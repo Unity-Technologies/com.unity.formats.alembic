@@ -142,8 +142,6 @@ public:
     void onTopologyChange(U& sample);
     void onTopologyDetermined();
 
-    IArray<int> getAttributesIndices(MeshRefiner& refiner);
-
     template < typename Tp >
     void readAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
 
