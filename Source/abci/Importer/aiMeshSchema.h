@@ -160,7 +160,7 @@ public:
     template <typename Tp, typename VECTYPE>
     void topologyChangeArbPropertyAt(int paramIndex, U& sample);
 
-    template <typename TpSample, typename VECTYPE>
+    template <typename VECTYPE>
     void interpolateAt(int paramIndex);
 
 public:
@@ -476,7 +476,7 @@ void aiMeshSchema<T, U>::readArbPropertySampleAt(int paramIndex, abcSampleSelect
 
 
 template<typename T, typename U>
-template <typename TpSample, typename VECTYPE>
+template <typename VECTYPE>
 void aiMeshSchema<T, U>::interpolateAt(int paramIndex)
 {
     auto attrib = m_attributes_param[paramIndex];
@@ -489,7 +489,6 @@ void aiMeshSchema<T, U>::interpolateAt(int paramIndex)
     RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att_int);
     RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att);
     RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att2);
-    TpSample& att_sp2 = *(static_cast<TpSample*>(attrib->samples2));
 
     Lerp(att_int_cast, att_cast, att2_cast, this->m_current_time_offset);
     attrib->ref = static_cast<RawVector<VECTYPE>*>(attrib->att_int);
@@ -1284,26 +1283,25 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             auto attrib = m_attributes_param[i];
             switch (attrib->type1)
             {
-           // case(aiPropertyType::IntArray): this->interpolateAt<AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
-           // case(aiPropertyType::UIntArray): this->interpolateAt<AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
-          //case(aiPropertyType::FloatArray):this->interpolateAt<AbcGeom::IFloatGeomParam::Sample, float>(i); break;
-            case(aiPropertyType::Float2Array): this->interpolateAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
+           // case(aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
+           // case(aiPropertyType::UIntArray): this->interpolateAt<uint32_t>(i); break;
+           case(aiPropertyType::FloatArray):this->interpolateAt<float>(i); break;
+            case(aiPropertyType::Float2Array): this->interpolateAt<abcV2>(i); break;
             case(aiPropertyType::Float3Array):
             {
                 if (AbcGeom::IV3fGeomParam::matches(attrib->header))
-                    this->interpolateAt<AbcGeom::IV3fGeomParam::Sample, abcV3>(i);
+                    this->interpolateAt<abcV3>(i);
                 else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
-                    this->interpolateAt<AbcGeom::IC3fGeomParam::Sample, abcC3>(i);
+                    this->interpolateAt<abcC3>(i);
                 else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
-                    this->interpolateAt<AbcGeom::IN3fGeomParam::Sample, abcV3>(i);
+                    this->interpolateAt<abcV3>(i);
 
                 break;
             }
-            case(aiPropertyType::Float4Array): this->interpolateAt<AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
-           // case(aiPropertyType::Float4x4):this->interpolateAt<AbcGeom::IM44fGeomParam::Sample, abcM44>(i); break;
+            case(aiPropertyType::Float4Array): this->interpolateAt<abcC4>(i); break;
+            //case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
             default:
-            case(aiPropertyType::Unknown): this->interpolateAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
-            //case(aiPropertyType::Float4Array): this->interpolateAt<AbcGeom::IC4fGeomParam::Sample, abcC4>(i);
+            case(aiPropertyType::Unknown): this->interpolateAt<abcV2>(i); break;
             }
 
 
