@@ -198,22 +198,6 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     return param;
 }
 
-template<typename T, typename U>
-IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
-{
-    int* indices = new int[refiner.indices.size()];
-    int m = 0;
-    for (int i = 0; i < refiner.counts.size(); i++)
-    {
-        for (int j = 0; j < refiner.counts[i]; j++)
-        {
-            indices[m] = i;
-            m++;
-        }
-    }
-    return { indices, refiner.indices.size() };
-}
-
 // copyied 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
 {
