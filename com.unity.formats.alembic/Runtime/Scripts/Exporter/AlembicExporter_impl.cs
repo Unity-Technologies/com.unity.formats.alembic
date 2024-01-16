@@ -971,7 +971,7 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (node == null) { return null; }
 
-            InstanceID iid = node.gameObject.GetInstanceID();
+            var iid = node.gameObject.GetInstanceID();
             CaptureNode cn;
             if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
@@ -1211,7 +1211,7 @@ namespace UnityEngine.Formats.Alembic.Util
             m_ctx.MarkFrameEnd();
 
             // remove deleted GameObjects
-            foreach (InstanceID iid in m_iidToRemove)
+            foreach (var iid in m_iidToRemove)
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
 
