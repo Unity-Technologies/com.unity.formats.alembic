@@ -17,6 +17,7 @@ void NormalizeISPC(abcV3 *dst, int num)
     ispc::Normalize((ispc::float3*)dst, num);
 }
 
+
 void LerpISPC(float *dst, const float * v1, const float * v2, int num, float w)
 {
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num, w);
@@ -33,6 +34,11 @@ void LerpISPC(abcV3 *dst, const abcV3 * v1, const abcV3 * v2, int num, float w)
 }
 
 void LerpISPC(abcC4 *dst, const abcC4 * v1, const abcC4 * v2, int num, float w)
+{
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 4, w);
+}
+
+void LerpISPC(abcM44* dst, const abcM44* v1, const abcM44* v2, int num, float w)
 {
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 4, w);
 }
@@ -105,6 +111,15 @@ void LerpGeneric(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
 }
 
 void LerpGeneric(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w)
+{
+    float iw = 1.0f - w;
+    for (int i = 0; i < num; ++i)
+    {
+        dst[i] = (v1[i] * iw) + (v2[i] * w);
+    }
+}
+
+void LerpGeneric(abcM44* dst, const abcM44* v1, const abcM44* v2, int num, float w)
 {
     float iw = 1.0f - w;
     for (int i = 0; i < num; ++i)
@@ -270,6 +285,11 @@ void Lerp(abcV3 *dst, const abcV3 *v1, const abcV3 *v2, int num, float w)
 }
 
 void Lerp(abcC4 *dst, const abcC4 *v1, const abcC4 *v2, int num, float w)
+{
+    Impl(Lerp, dst, v1, v2, num, w);
+}
+
+void Lerp(abcM44* dst, const abcM44* v1, const abcM44* v2, int num, float w)
 {
     Impl(Lerp, dst, v1, v2, num, w);
 }

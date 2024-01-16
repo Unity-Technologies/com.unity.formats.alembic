@@ -1283,9 +1283,9 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             auto attrib = m_attributes_param[i];
             switch (attrib->type1)
             {
-           // case(aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
+            //case(aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
            // case(aiPropertyType::UIntArray): this->interpolateAt<uint32_t>(i); break;
-           case(aiPropertyType::FloatArray):this->interpolateAt<float>(i); break;
+            case(aiPropertyType::FloatArray):this->interpolateAt<float>(i); break;
             case(aiPropertyType::Float2Array): this->interpolateAt<abcV2>(i); break;
             case(aiPropertyType::Float3Array):
             {
@@ -1299,7 +1299,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
                 break;
             }
             case(aiPropertyType::Float4Array): this->interpolateAt<abcC4>(i); break;
-            //case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
+            case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
             default:
             case(aiPropertyType::Unknown): this->interpolateAt<abcV2>(i); break;
             }
