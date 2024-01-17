@@ -13,7 +13,7 @@ The Import Settings window consists of three tabs:
 - [Materials](#materials): to map the submeshes of the imported Alembic asset with existing materials of your project.
 - [Hair](#hair): to generate a groom from the curves of the imported Alembic asset.
 
-**Note:** These three tabs share the same [**Apply** and **Revert** buttons](#apply-and-revert-buttons).
+**Note:** The [**Apply** and **Revert** buttons](#apply-and-revert-buttons) are available regardless to the tab selected.
 
 ## Model
 
@@ -77,13 +77,15 @@ This section of the Materials tab lists all meshes and submeshes of the imported
 
 ## Hair
 
-The Hair tab helps you generate a groom from the imported Alembic file.
+The Hair tab helps you generate a groom from the imported Alembic file when it includes curves.
 
 ![The Import Settings window (Hair tab)](images/abc_import_options_hair.png)
 
 ### Generate Hair Asset
 
 This button generates a Hair Asset based on the imported Alembic asset. For this, your Alembic asset must include curves data.
+
+Once generated, the Hair Asset is independent from the imported Alembic file.
 
 ## Apply and Revert buttons
 
@@ -94,6 +96,6 @@ If you change properties in any tab of the **Import Settings (Alembic Importer)*
 | **Apply** | Applies all changes you made in both the **Model** and **Materials** tabs for the current imported Alembic asset. |
 | **Revert** | Abandons any changes you might have done in any of the **Model** and **Materials** tabs. This reverts all property values to their previous state and has no impact on the current imported Alembic asset in Unity. |
 
-[comment]: # "TODO: Something about how the Hair tab does not result in changes to apply/revert"
-
->**Note:** If these buttons are inactive, it means that the Alembic Importer currently uses the import options as seen in the window.
+>**Note:**
+>* If these buttons are inactive, it means that the Alembic Importer currently uses the import options as seen in the window.
+>* These buttons have no effect on Hair Assets already generated via the **Hair** tab.
