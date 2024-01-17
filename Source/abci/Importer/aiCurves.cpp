@@ -97,7 +97,7 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
     if (m_summary.interpolate_attributes[paramIndex]) {
         if (attr->att2 == nullptr) // void* make it point to nullptr !
         {
-            attr->att2 = new RawVector<abcC3>(); // otherwise null and crash
+            attr->att2 = new RawVector<VECTYPE>(); // otherwise null and crash
         }
 
         auto* att2_cast = static_cast<RawVector<VECTYPE>*>(attr->att2);
