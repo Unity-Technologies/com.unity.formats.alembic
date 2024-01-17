@@ -13,6 +13,7 @@ namespace UnityEditor.Formats.Alembic
         /// Store previously loaded icons in this cache for re-usage.
         /// </summary>
         static readonly Dictionary<string, Texture2D> s_CachedIcons = new Dictionary<string, Texture2D>();
+        internal static readonly string s_IconNamePattern = @"(?<baseName>\w*\w*)(?<scaleSuffix>@\d*x)?.png";
 
         /// <summary>
         /// Indicates if the icon is unique to a skin or common to all.
@@ -87,7 +88,7 @@ namespace UnityEditor.Formats.Alembic
         static IEnumerable<string> GetIconsFilePath()
         {
             // Captures file path from "Editor Default Resources/Icons/<theme>", with optional scale suffix (e.g. @2x).
-            var regex = new Regex(@"(?<baseName>\w*/\w*)(?<scaleSuffix>@\dx)?.png");
+            var regex = new Regex(s_IconNamePattern);
 
             var basePath = BuildBasePath(IconType.UniqueToSkin);
             var files = Directory.GetFiles(basePath, "*.png", SearchOption.AllDirectories);
