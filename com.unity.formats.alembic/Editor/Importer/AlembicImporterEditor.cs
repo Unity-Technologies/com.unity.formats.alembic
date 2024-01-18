@@ -418,8 +418,10 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField(icon, GUILayout.Width(icon.image.width));
-                EditorGUILayout.LabelField(hairLabel);
+                EditorGUILayout.LabelField(icon,
+                    GUILayout.Width(icon.image.width+2),
+                    GUILayout.Height(icon.image.width + 2));
+                EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
             }
             
