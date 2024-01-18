@@ -1675,8 +1675,6 @@ static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer 
     ptrArray[paramIndex].size = sizeof(VECTYPE);
 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
-
-    delete[] ptrArray;
 };
 
 template<>
@@ -1707,8 +1705,6 @@ static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTr
     ptrArray[paramIndex].size = sizeof(abcC4);
 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
-
-    delete[] ptrArray;
 }
 
 template<typename T>
