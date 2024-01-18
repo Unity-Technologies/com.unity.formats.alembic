@@ -51,7 +51,7 @@ void LerpISPC(abcC4 *dst, const abcC4 * v1, const abcC4 * v2, int num, float w)
 
 void LerpISPC(abcM44* dst, const abcM44* v1, const abcM44* v2, int num, float w)
 {
-    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 4, w);
+    ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num * 16, w);
 }
 
 void GenerateVelocitiesISPC(abcV3 *dst, const abcV3 *p1, const abcV3 *p2, int num, float motion_scale)
