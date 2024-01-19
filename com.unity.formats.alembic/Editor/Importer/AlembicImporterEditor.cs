@@ -439,41 +439,41 @@ namespace UnityEditor.Formats.Alembic.Importer
                         // Client.Add("com.unity.demoteam.hair");
                     });
 #else
-                var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
-                var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
+                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                    var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
 
-                if (HasCurves(alembicStreamPlayer))
-                {
-                    if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
+                    if (HasCurves(alembicStreamPlayer))
                     {
-                        string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
-                        path = AssetDatabase.GenerateUniqueAssetPath(path);
+                        if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
+                        {
+                            string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+                            path = AssetDatabase.GenerateUniqueAssetPath(path);
 
-                        var hairAsset = CreateInstance<HairAsset>();
-                        hairAsset.name = go.name + "_Hair";
-                        hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
-                        hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
-                        AssetDatabase.CreateAsset(hairAsset, path);
+                            var hairAsset = CreateInstance<HairAsset>();
+                            hairAsset.name = go.name + "_Hair";
+                            hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
+                            hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
+                            AssetDatabase.CreateAsset(hairAsset, path);
 
-                        HairAssetBuilder.BuildHairAsset(hairAsset);
-                        EditorGUIUtility.PingObject(hairAsset);
-                        AssetDatabase.SaveAssetIfDirty(hairAsset);
-                        Selection.activeObject = hairAsset;
+                            HairAssetBuilder.BuildHairAsset(hairAsset);
+                            EditorGUIUtility.PingObject(hairAsset);
+                            AssetDatabase.SaveAssetIfDirty(hairAsset);
+                            Selection.activeObject = hairAsset;
+                        }
+
+                        GUI.enabled = true;
                     }
+                    else
+                    {
+                        GUI.enabled = false;
+                        GUILayout.Button(L10n.Tr("Generate Hair Asset"));
+                        GUI.enabled = true;
 
-                    GUI.enabled = true;
-                }
-                else
-                {
-                    GUI.enabled = false;
-                    GUILayout.Button(L10n.Tr("Generate Hair Asset"));
-                    GUI.enabled = true;
-
-                    var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
-                                          "Ensure that the asset contains curves and \"Import Curves\" is " +
-                                          "enabled in the \"Model\" tab.");
-                    EditorGUILayout.HelpBox(message, MessageType.Warning);
-                }
+                        var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
+                                              "Ensure that the asset contains curves and \"Import Curves\" is " +
+                                              "enabled in the \"Model\" tab.");
+                        EditorGUILayout.HelpBox(message, MessageType.Warning);
+                    }
 #endif
                 }
             }
