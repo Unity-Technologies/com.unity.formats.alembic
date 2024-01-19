@@ -424,9 +424,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                     GUILayout.FlexibleSpace();
 
 #if !HAIR_AVAILABLE
-                    string msg = L10n.Tr("Hair package not found. " +
-                                         "You have to install it first to generate " +
-                                         "a curve-based groom.");
+                    string msg = "Hair package not found. " +
+                                 "You have to install it first to generate " +
+                                 "a curve-based groom.";
 
                     GUILayout.FlexibleSpace();
                     UIHelper.HelpBoxWithAction(msg, MessageType.Warning, L10n.Tr("Install"),
@@ -469,9 +469,9 @@ namespace UnityEditor.Formats.Alembic.Importer
                         GUILayout.Button(L10n.Tr("Generate Hair Asset"));
                         GUI.enabled = true;
 
-                        var message = L10n.Tr("Unable to locate curves in the Alembic asset. " +
-                                              "Ensure that the asset contains curves and \"Import Curves\" is " +
-                                              "enabled in the \"Model\" tab.");
+                        var message = "Unable to locate curves in the Alembic asset. " +
+                                      "Ensure that the asset contains curves and \"Import Curves\" is " +
+                                      "enabled in the \"Model\" tab.";
                         EditorGUILayout.HelpBox(message, MessageType.Warning);
                     }
 #endif

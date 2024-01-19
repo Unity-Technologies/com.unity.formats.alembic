@@ -29,7 +29,7 @@ namespace UnityEditor.Formats.Alembic
         }
 
         /// <summary>Draw a help box with a button.</summary>
-        /// <param name="message">The message.</param>
+        /// <param name="message">The message, unlocalized.</param>
         /// <param name="buttonLabel">The button text.</param>
         /// <param name="action">When the user clicks the button, Unity performs this action.</param>
         internal static void HelpBoxWithAction(string message, MessageType messageType, string buttonLabel, Action action)
