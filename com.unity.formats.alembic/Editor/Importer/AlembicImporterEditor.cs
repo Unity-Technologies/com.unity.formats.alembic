@@ -413,18 +413,9 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer)
         {
-            var icon = new GUIContent(IconUtility.LoadIcon("StrandBasedHair", IconUtility.IconType.UniqueToSkin));
-            var hairLabel = EditorGUIUtility.TrTextContent("Hair Asset");
+            var hairAssetTitle = EditorGUIUtility.TrTextContentWithIcon("Hair Asset", IconUtility.LoadIcon("StrandBasedHair", IconUtility.IconType.UniqueToSkin));
+            EditorGUILayout.LabelField(hairAssetTitle, EditorStyles.boldLabel);
 
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(icon,
-                    GUILayout.Width(icon.image.width+2),
-                    GUILayout.Height(icon.image.width + 2));
-                EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
-                GUILayout.FlexibleSpace();
-            }
-            
             using (new EditorGUILayout.VerticalScope())
             {
                 EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
