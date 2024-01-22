@@ -1,11 +1,8 @@
 using System;
 using System.IO;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
-using UnityEngine.Formats.Alembic.Importer;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
@@ -151,7 +148,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
 
-        public int hasAttributes { get; set; }
+        public int attributesCount { get; set; }
         public Bool hasRgba { get; set; }
         public Bool hasRgb { get; set; }
         public Bool constantPoints { get; set; }

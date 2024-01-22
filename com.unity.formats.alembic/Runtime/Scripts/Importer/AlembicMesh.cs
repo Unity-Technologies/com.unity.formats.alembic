@@ -259,7 +259,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-               split.attributes.ResizeIfNeeded(summary.hasAttributes);
+               split.attributes.ResizeIfNeeded(summary.attributesCount);
                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
