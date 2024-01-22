@@ -33,7 +33,7 @@ namespace UnityEditor.Formats.Alembic
         public void IconName_ConstraintEnforcedInDarkAndLightFolders()
         {
             var regex = new Regex(IconUtility.s_IconNamePattern);
-            string[] folders = {"Dark", "Light"};  // icons in the "Common" folder does not follow the same naming convention
+            string[] folders = { "Dark", "Light" };  // icons in the "Common" folder does not follow the same naming convention
 
             foreach (var folder in folders)
             {
@@ -54,7 +54,7 @@ namespace UnityEditor.Formats.Alembic
         }
 
         [Test]
-        [TestCase("StrandBasedHair",  true)]
+        [TestCase("StrandBasedHair", true)]
         [TestCase("Strand Based Hair", true)]
         [TestCase("StrandBasedHair@2x", true)]
         [TestCase("Strand Based Hair@2x", true)]
