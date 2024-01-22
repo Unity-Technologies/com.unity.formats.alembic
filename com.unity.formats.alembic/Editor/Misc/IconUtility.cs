@@ -112,12 +112,15 @@ namespace UnityEditor.Formats.Alembic
 
         static string GetThemeFolder(IconType type)
         {
-            return type switch
+            switch (type)
             {
-                IconType.CommonToAllSkin => "Common",
-                IconType.UniqueToSkin => EditorGUIUtility.isProSkin ? "Dark" : "Light",
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
-            };
+                case IconType.CommonToAllSkin:
+                    return "Common";
+                case IconType.UniqueToSkin:
+                    return EditorGUIUtility.isProSkin ? "Dark" : "Light";
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }
