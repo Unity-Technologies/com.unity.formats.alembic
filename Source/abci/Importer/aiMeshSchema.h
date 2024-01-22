@@ -282,7 +282,8 @@ struct AttributeData {
     void* ref = nullptr;
     void* att = nullptr;
     void* att2 = nullptr;
-    void* att_int = nullptr;
+    // att_interpolate is equivalent to other variables such as rgb_int, uv_int ...etc.
+    void* att_interpolate = nullptr;
     void* constant_att = nullptr;
     RawVector<int> remap;
     int size;
@@ -1741,7 +1742,7 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-    copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
+    copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split); 
 
     for (size_t i = 0; i < m_attributes_ref.size(); ++i) {
         auto attrib = m_attributes_ref[i];
