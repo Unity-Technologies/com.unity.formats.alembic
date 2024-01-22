@@ -10,6 +10,8 @@ using UnityEngine.Formats.Alembic.Importer;
 
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
+using Codice.Client.BaseCommands.BranchExplorer;
+
 #else
 using UnityEditor.Experimental.AssetImporters;
 #endif
@@ -413,14 +415,15 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer)
         {
-            var hairAssetTitle = EditorGUIUtility.TrTextContentWithIcon("Hair Asset", IconUtility.LoadIcon("StrandBasedHair", IconUtility.IconType.UniqueToSkin));
-            EditorGUILayout.LabelField(hairAssetTitle, EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(new GUIContent(IconUtility.LoadIcon("StrandBasedHair", IconUtility.IconType.UniqueToSkin)), GUILayout.Width(18));
+                EditorGUILayout.LabelField(EditorGUIUtility.TrTextContent("Hair Asset"), EditorStyles.boldLabel);
+            }
 
             using (new EditorGUILayout.VerticalScope())
             {
-
-                GUILayout.FlexibleSpace();
-
+                EditorGUILayout.Space();
 #if !HAIR_AVAILABLE
                 string msg = "Hair package not found. " +
                              "You have to install it first to generate " +
