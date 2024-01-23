@@ -450,6 +450,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             player.LoadFromFile(dst);
             Assert.AreEqual(mat, renderer.sharedMaterial);
+
+            GameObject.DestroyImmediate(player.gameObject);
         }
 
         [Test]
