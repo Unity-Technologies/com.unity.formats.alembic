@@ -1299,13 +1299,10 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
                 break;
             }
             case(aiPropertyType::Float4Array): this->interpolateAt<abcC4>(i); break;
-            case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
+            // case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
             default:
             case(aiPropertyType::Unknown): this->interpolateAt<abcV2>(i); break;
             }
-
-
-
         }
     }
 }
