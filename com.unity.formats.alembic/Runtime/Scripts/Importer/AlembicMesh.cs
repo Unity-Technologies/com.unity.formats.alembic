@@ -259,8 +259,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-               split.attributes.ResizeIfNeeded(summary.hasAttributes);
-               vertexData.attributes = split.attributes.GetPointer();
+                split.attributes.ResizeIfNeeded(summary.attributesCount);
+                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -425,8 +425,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.velocitiesSet = true;
                     }
 
-                    if (split.attributes.Length > 0)
-                        ProcessData(split, s);
+                    //if (split.attributes.Length > 0)
+                    //    ProcessData(split, s);
                     if (split.rgba.Length > 0)
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
@@ -490,23 +490,26 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
         }
 
-        private void ProcessData(Split split, int spi)
-        {
-            unsafe
-            {
-             // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
-             List<Color> colors = new List<Color>();
-             for(int i=0 ; i<m_splitSummaries[spi].vertexCount ; ++i)
-               {
-                    if (split.attributes[0].data==null) break;
-                        colors.Add(*(((Color*)(split.attributes[0].data))+i));
+        //private void ProcessData(Split split, int spi)
+        //{
+        //    if (split.attributes.Length == 0)
+        //        return;
 
-                        Debug.Log("color: "+colors[i]);;
-               }
-             if (colors.Count==m_splitSummaries[spi].vertexCount)
-                split.mesh.SetColors(colors);
-            }
-        }
+        //    unsafe
+        //    {
+        //        // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
+        //        List<Color> colors = new List<Color>();
+        //        for (int i = 0; i < m_splitSummaries[spi].vertexCount; ++i)
+        //        {
+        //            if (split.attributes[0].data == null) break;
+        //            colors.Add(*(((Color*)(split.attributes[0].data)) + i));
+
+        //            Debug.Log("color: " + colors[i]); ;
+        //        }
+        //        if (colors.Count == m_splitSummaries[spi].vertexCount)
+        //            split.mesh.SetColors(colors);
+        //    }
+        //}
 
         internal void ClearMotionVectors()
         {
