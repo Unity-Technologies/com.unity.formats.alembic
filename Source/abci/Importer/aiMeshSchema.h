@@ -467,17 +467,17 @@ void aiMeshSchema<T, U>::interpolateAt(int paramIndex)
 {
     auto attrib = m_attributes_param[paramIndex];
 
-    if (attrib->att_int == nullptr)
+    if (attrib->att_interpolate == nullptr)
     {
-        attrib->att_int = new RawVector<VECTYPE>;
+        attrib->att_interpolate = new RawVector<VECTYPE>;
     }
 
-    RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att_int);
+    RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
     RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att);
     RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att2);
 
     Lerp(att_int_cast, att_cast, att2_cast, this->m_current_time_offset);
-    attrib->ref = static_cast<RawVector<VECTYPE>*>(attrib->att_int);
+    attrib->ref = static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
 }
 
 
