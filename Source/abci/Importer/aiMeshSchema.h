@@ -160,6 +160,9 @@ public:
     template<typename Tp, typename VECTYPE>
     void topologyChangeArbPropertyAt(int paramIndex, U& sample);
 
+    template <typename VECTYPE>
+    void interpolateAt(int paramIndex);
+
 public:
 
     RawVector<abcV3> m_constant_points;
@@ -329,6 +332,7 @@ void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeDa
     }
 }
 
+
 template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     : aiTSchema<T>(parent, abc)
@@ -432,6 +436,7 @@ void aiMeshSchema<T, U>::updateArbPropertySummaryAt(int paramIndex)
 
         m_summary.constant_attributes->push_back(param.isConstant());
         m_summary.has_valid_attributes.push_back(false);
+        m_summary.interpolate_attributes.push_back(false);
     }
 }
 
@@ -450,11 +455,31 @@ void aiMeshSchema<T, U>::readArbPropertySampleAt(int paramIndex, abcSampleSelect
 
     param->getIndexed(*samp1, ss);
 
-    if (attrib->interpolate)
-    {
+    if (m_summary.interpolate_attributes[paramIndex]) {
         param->getIndexed(*samp2, ss2);
     }
 }
+
+
+template<typename T, typename U>
+template <typename VECTYPE>
+void aiMeshSchema<T, U>::interpolateAt(int paramIndex)
+{
+    auto attrib = m_attributes_param[paramIndex];
+
+    if (attrib->att_interpolate == nullptr)
+    {
+        attrib->att_interpolate = new RawVector<VECTYPE>;
+    }
+
+    RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
+    RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att);
+    RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att2);
+
+    Lerp(att_int_cast, att_cast, att2_cast, this->m_current_time_offset);
+    attrib->ref = static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
+}
+
 
 template<typename T, typename U>
 template<typename Tp, typename TpSample, typename VECTYPE>
@@ -522,6 +547,11 @@ void aiMeshSchema<T, U>::topologyChangeArbPropertyAt(int paramIndex, U& sample)
     else if (src.size() == refiner.points.size())
     {
         refiner.template addIndexedAttribute<VECTYPE>(src, refiner.indices, *dst, attrib->remap);
+    }
+    else if (src.size() == refiner.counts.size())
+    {
+        IArray<int> uv1_indices = getAttributesIndices(refiner);
+        refiner.template addIndexedAttribute<VECTYPE>(src, uv1_indices, *dst, attrib->remap);
     }
     else
     {
@@ -747,7 +777,8 @@ void aiMeshSchema<T, U>::updateSummary()
             bool shouldInterpolate = !summary.has_attributes_prop.empty() &&
                 summary.has_attributes_prop[i] && !(*(summary.constant_attributes))[i];
 
-            summary.interpolate_attributes.push_back(shouldInterpolate);
+            if (shouldInterpolate)
+                summary.interpolate_attributes[i] = true; // interpolate_attributes is initialized with false 
         }
     }
 }
@@ -1078,7 +1109,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
 
         for (int i = 0; i < m_attributes_param.size(); i++)
         {
-            if (m_attributes_param[i]->interpolate)
+            if (summary.interpolate_attributes[i])
             {
                 switch (m_attributes_param[i]->type1)
                 {
@@ -1234,12 +1265,32 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         sample.m_rgb_ref = sample.m_rgb_int;
     }
 
-    // custom attributes - handled in ticket ABC-484
-    for (int i = 0; i < m_attributes_param.size(); i++)
-    {
-        if ((m_attributes_param)[i]->interpolate)
-        {
-            // Lerp((*sample.m_attributes_int)[i], (*(sample.m_attributes))[i], (*(sample.m_attributes2))[i], this->m_current_time_offset);
+    for (int i = 0; i < m_attributes_param.size(); i++) {
+
+        if (summary.interpolate_attributes[i]) {
+            auto attrib = m_attributes_param[i];
+            switch (attrib->type1)
+            {
+            case(aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
+            case(aiPropertyType::UIntArray): this->interpolateAt<uint32_t>(i); break;
+            case(aiPropertyType::FloatArray):this->interpolateAt<float>(i); break;
+            case(aiPropertyType::Float2Array): this->interpolateAt<abcV2>(i); break;
+            case(aiPropertyType::Float3Array):
+            {
+                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                    this->interpolateAt<abcV3>(i);
+                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                    this->interpolateAt<abcC3>(i);
+                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                    this->interpolateAt<abcV3>(i);
+
+                break;
+            }
+            case(aiPropertyType::Float4Array): this->interpolateAt<abcC4>(i); break;
+            // case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
+            default:
+            case(aiPropertyType::Unknown): this->interpolateAt<abcV2>(i); break;
+            }
         }
     }
 }
