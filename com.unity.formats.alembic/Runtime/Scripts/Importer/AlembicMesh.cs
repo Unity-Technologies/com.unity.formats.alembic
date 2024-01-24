@@ -492,6 +492,9 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         private void ProcessData(Split split, int spi)
         {
+            if (split.attributes.Length == 0)
+                return;
+
             unsafe
             {
                 // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
