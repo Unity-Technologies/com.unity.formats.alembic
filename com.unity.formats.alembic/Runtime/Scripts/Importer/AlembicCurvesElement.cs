@@ -66,7 +66,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             curves.attributesList.ResizeDiscard(2);
 
-            data.attributes =curves.attributesList;
+            data.attributes = curves.attributesList;
 
             m_abcData[0] = data;
             sample.FillData(m_abcData);

@@ -209,7 +209,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     {
                         theMesh.SetUVs(5, curves.Velocities);
                     }
-                    
+
                     theMesh.RecalculateBounds();
                     theMesh.Optimize();
                 }

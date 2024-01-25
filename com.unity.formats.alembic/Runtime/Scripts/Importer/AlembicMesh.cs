@@ -259,8 +259,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-               split.attributes.ResizeIfNeeded(summary.hasAttributes);
-               vertexData.attributes = split.attributes.GetPointer();
+                split.attributes.ResizeIfNeeded(summary.hasAttributes);
+                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -495,12 +495,12 @@ namespace UnityEngine.Formats.Alembic.Importer
             {
                 // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
                 List<Color> colors = new List<Color>();
-                for(int i=0 ; i<m_splitSummaries[spi].vertexCount ; ++i)
+                for (int i = 0; i < m_splitSummaries[spi].vertexCount; ++i)
                 {
-                    if (split.attributes[0].data==null) break;
-                    colors.Add(*(((Color*)(split.attributes[0].data))+i));
+                    if (split.attributes[0].data == null) break;
+                    colors.Add(*(((Color*)(split.attributes[0].data)) + i));
                 }
-                if (colors.Count==m_splitSummaries[spi].vertexCount)
+                if (colors.Count == m_splitSummaries[spi].vertexCount)
                     split.mesh.SetColors(colors);
             }
         }

@@ -195,7 +195,7 @@ struct aiPolyMeshData
     abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
-    AttributeDataToTransfer* m_attributes = nullptr ;
+    AttributeDataToTransfer* m_attributes = nullptr;
     int vertex_count = 0;
     int index_count = 0;
 
@@ -215,7 +215,6 @@ struct aiCurvesSummary
     bool has_UVs = false;
     bool has_widths = false;
     std::vector<bool>* constant_attributes = new std::vector<bool>();
-
 };
 
 struct aiPointsSummary

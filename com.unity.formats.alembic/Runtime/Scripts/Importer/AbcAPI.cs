@@ -63,7 +63,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-   public enum aiPropertyType
+    public enum aiPropertyType
     {
         Unknown,
 
@@ -203,7 +203,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         // Assuming size is an integer
         //public string name;
         public aiPropertyType type1;  // Use the actual enum type here
-     //   public string type2;
+                                      //   public string type2;
     }
 
     [StructLayout(LayoutKind.Sequential)]
