@@ -124,13 +124,12 @@ public:
     std::future<void> m_async_copy;
 };
 
-
 template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
 public:
- template < typename Tp >
-    void ReadAttribute( aiObject* object, std::vector<AttributeData*>& attributes);
+    template<typename Tp>
+    void ReadAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
 
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
@@ -142,6 +141,12 @@ public:
 
     void onTopologyChange(U& sample);
     void onTopologyDetermined();
+
+    template <typename Tp, typename TpSample, typename VECTYPE>
+    void cookArbPropertySampleAt(int paramIndex);
+
+    template <typename Tp, typename TpSample, typename VECTYPE>
+    void remapSecondAttributeSet(int paramIndex);
 
 public:
 
@@ -175,6 +180,32 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     return param;
 }
 
+template<typename T, typename U>
+template<typename Tp, typename TpSample, typename VECTYPE>
+void aiMeshSchema<T, U>::cookArbPropertySampleAt(int paramIndex)
+{
+    auto attr = m_attributes_param[paramIndex];
+
+    auto att_cast = static_cast<RawVector<VECTYPE>*>(attr->att);
+    auto att_sp = *(static_cast<TpSample*>(attr->samples1));
+
+    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+}
+
+template<typename T, typename U>
+template<typename TP, typename TpSample, typename VECTYPE>
+void aiMeshSchema<T, U>::remapSecondAttributeSet(int paramIndex)
+{
+    auto param = m_attributes_param[paramIndex];
+
+    if (param->att2 == nullptr) // otherwise risk to dereference nullptr 
+        param->att2 = new RawVector<VECTYPE>;
+
+    auto att2_cast = static_cast<RawVector<VECTYPE>*>(param->att2);
+    auto att_sp2 = *(static_cast<TpSample*>(param->samples2));
+
+    Remap(*att2_cast, *att_sp2.getVals(), param->remap);
+}
 
 // copyied 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
@@ -929,30 +960,14 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
                 switch (attr->type1)
                 {
                 case(aiPropertyType::Unknown):
-                {
-
-                    RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
-                    AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
-
-                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
-                    break;
-                }
                 case(aiPropertyType::Float2Array):
                 {
-
-                    RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
-                    AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
-
-                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+                    this->cookArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i);
                     break;
                 }
                 case(aiPropertyType::Float3Array):
                 {
-
-                    RawVector<abcC3>* att_cast = (static_cast<RawVector<abcC3>*>(attr->att));
-                    AbcGeom::IC3fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attr->samples1));
-
-                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+                    this->cookArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i);
                     break;
                 }
                 }
@@ -999,200 +1014,173 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             Remap(sample.m_uv02, *sample.m_uv0_sp2.getVals(), topology.m_remap_uv0);
         }
 
-    
+
         for (int i = 0; i < m_attributes_param.size(); i++) {
 
-            auto attr = m_attributes_param[i]; 
+            auto attr = m_attributes_param[i];
             if (attr->interpolate) {
                 switch (attr->type1) {
 
-                case aiPropertyType::Unknown: {
-
-                    if (attr->att2 == nullptr) 
-                        attr->att2 = new RawVector<abcV2>; // otherwise it will dereference nullptr 
-
-                    RawVector<abcV2>* att2_cast = static_cast<RawVector<abcV2>*> (attr->att2);
-                    AbcGeom::IV2fGeomParam::Sample att_sp2 = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples2));
-
-                    Remap(*att2_cast, *att_sp2.getVals(), attr->remap);
-                    break;
+                case aiPropertyType::Unknown:
+                case aiPropertyType::Float2Array:
+                {
+                    remapSecondAttributeSet<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                 }
-
-                case aiPropertyType::Float2Array: {
-
-                    if (attr->att2 == nullptr) // otherwise risk to dereference nullptr 
-                        attr->att2 = new RawVector<abcV2>; 
-
-                    RawVector<abcV2>* att2_cast = static_cast<RawVector<abcV2>*>(attr->att2);
-                    AbcGeom::IV2fGeomParam::Sample att_sp2 = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples2));
-
-                    Remap(*att2_cast, *att_sp2.getVals(), attr->remap);
-                    break;
+                case aiPropertyType::Float3Array:
+                {
+                    remapSecondAttributeSet<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i); break;
                 }
-
-                case aiPropertyType::Float3Array: {
-
-                    if (attr->att2 == nullptr)  // otherwise risk to dereference nullptr
-                        attr->att2 = new RawVector<abcC3>;
-
-                    RawVector<abcC3>* att2_cast = static_cast<RawVector<abcC3>*>(attr->att2);
-                    AbcGeom::IC3fGeomParam::Sample att_sp2 = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attr->samples2));
-
-                    Remap(*att2_cast, *att_sp2.getVals(), attr->remap);
-                    break;
-                }
-                }
-               
+                };
             };
-        };
 
-        if (summary.interpolate_uv1)
-        {
-            Remap(sample.m_uv12, *sample.m_uv1_sp2.getVals(), topology.m_remap_uv1);
-        }
-
-        if (summary.interpolate_rgba)
-        {
-            Remap(sample.m_rgba2, *sample.m_rgba_sp2.getVals(), topology.m_remap_rgba);
-        }
-
-        if (summary.interpolate_rgb)
-        {
-            Remap(sample.m_rgb2, *sample.m_rgb_sp2.getVals(), topology.m_remap_rgb);
-        }
-
-        if (!m_constant_velocities.empty())
-        {
-            sample.m_velocities_ref = m_constant_velocities;
-        }
-        else if (!summary.compute_velocities && summary.has_velocities_prop)
-        {
-            auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
-            Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
-            if (config.swap_handedness)
-                SwapHandedness(dst.data(), (int)dst.size());
-            if (config.scale_factor != 1.0f)
-                ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
-            sample.m_velocities_ref = dst;
-        }
-    }
-
-    // interpolate or compute data
-
-    // points
-    if (summary.interpolate_points)
-    {
-        if (summary.compute_velocities)
-            sample.m_points_int.swap(sample.m_points_prev);
-
-        Lerp(sample.m_points_int, sample.m_points, sample.m_points2, this->m_current_time_offset);
-        sample.m_points_ref = sample.m_points_int;
-
-        if (summary.compute_velocities)
-        {
-            sample.m_velocities.resize_discard(sample.m_points.size());
-            if (sample.m_points_int.size() == sample.m_points_prev.size())
+            if (summary.interpolate_uv1)
             {
-                GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
-                    (int)sample.m_points_int.size(), config.vertex_motion_scale);
+                Remap(sample.m_uv12, *sample.m_uv1_sp2.getVals(), topology.m_remap_uv1);
+            }
+
+            if (summary.interpolate_rgba)
+            {
+                Remap(sample.m_rgba2, *sample.m_rgba_sp2.getVals(), topology.m_remap_rgba);
+            }
+
+            if (summary.interpolate_rgb)
+            {
+                Remap(sample.m_rgb2, *sample.m_rgb_sp2.getVals(), topology.m_remap_rgb);
+            }
+
+            if (!m_constant_velocities.empty())
+            {
+                sample.m_velocities_ref = m_constant_velocities;
+            }
+            else if (!summary.compute_velocities && summary.has_velocities_prop)
+            {
+                auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
+                Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
+                if (config.swap_handedness)
+                    SwapHandedness(dst.data(), (int)dst.size());
+                if (config.scale_factor != 1.0f)
+                    ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
+                sample.m_velocities_ref = dst;
+            }
+        }
+
+        // interpolate or compute data
+
+        // points
+        if (summary.interpolate_points)
+        {
+            if (summary.compute_velocities)
+                sample.m_points_int.swap(sample.m_points_prev);
+
+            Lerp(sample.m_points_int, sample.m_points, sample.m_points2, this->m_current_time_offset);
+            sample.m_points_ref = sample.m_points_int;
+
+            if (summary.compute_velocities)
+            {
+                sample.m_velocities.resize_discard(sample.m_points.size());
+                if (sample.m_points_int.size() == sample.m_points_prev.size())
+                {
+                    GenerateVelocities(sample.m_velocities.data(), sample.m_points_int.data(), sample.m_points_prev.data(),
+                        (int)sample.m_points_int.size(), config.vertex_motion_scale);
+                }
+                else
+                {
+                    sample.m_velocities.zeroclear();
+                }
+                sample.m_velocities_ref = sample.m_velocities;
+            }
+        }
+
+        // normals
+        if (!m_constant_normals.empty())
+        {
+            // do nothing
+        }
+        else if (summary.interpolate_normals)
+        {
+            Lerp(sample.m_normals_int, sample.m_normals, sample.m_normals2, (float)this->m_current_time_offset);
+            Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
+            sample.m_normals_ref = sample.m_normals_int;
+        }
+        else if (summary.compute_normals && (this->m_sample_index_changed || summary.interpolate_points))
+        {
+            if (sample.m_points_ref.empty())
+            {
+                DebugError("something is wrong!!");
+                sample.m_normals_ref.reset();
             }
             else
             {
-                sample.m_velocities.zeroclear();
+                const auto& indices = topology.m_refiner.new_indices_tri;
+                sample.m_normals.resize_discard(sample.m_points_ref.size());
+                GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
+                    sample.m_normals.data(), topology.m_remap_points.data(),
+                    static_cast<int>(topology.m_counts_sp->size()),
+                    static_cast<int>(topology.m_remap_points.size()),
+                    static_cast<int>(sample.m_points_sp->size()));
+                sample.m_normals_ref = sample.m_normals;
             }
-            sample.m_velocities_ref = sample.m_velocities;
         }
-    }
 
-    // normals
-    if (!m_constant_normals.empty())
-    {
-        // do nothing
-    }
-    else if (summary.interpolate_normals)
-    {
-        Lerp(sample.m_normals_int, sample.m_normals, sample.m_normals2, (float)this->m_current_time_offset);
-        Normalize(sample.m_normals_int.data(), (int)sample.m_normals.size());
-        sample.m_normals_ref = sample.m_normals_int;
-    }
-    else if (summary.compute_normals && (this->m_sample_index_changed || summary.interpolate_points))
-    {
-        if (sample.m_points_ref.empty())
+        // tangents
+        if (!m_constant_tangents.empty())
         {
-            DebugError("something is wrong!!");
-            sample.m_normals_ref.reset();
+            // do nothing
         }
-        else
+        else if (summary.compute_tangents && (this->m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals))
         {
-            const auto& indices = topology.m_refiner.new_indices_tri;
-            sample.m_normals.resize_discard(sample.m_points_ref.size());
-            GeneratePointNormals(topology.m_counts_sp->get(), topology.m_indices_sp->get(), sample.m_points_sp->get(),
-                sample.m_normals.data(), topology.m_remap_points.data(),
-                static_cast<int>(topology.m_counts_sp->size()),
-                static_cast<int>(topology.m_remap_points.size()),
-                static_cast<int>(sample.m_points_sp->size()));
-            sample.m_normals_ref = sample.m_normals;
+            if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty())
+            {
+                DebugError("something is wrong!!");
+                sample.m_tangents_ref.reset();
+            }
+            else
+            {
+                const auto& indices = topology.m_refiner.new_indices_tri;
+                sample.m_tangents.resize_discard(sample.m_points_ref.size());
+                GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
+                    indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
+                sample.m_tangents_ref = sample.m_tangents;
+            }
         }
-    }
 
-    // tangents
-    if (!m_constant_tangents.empty())
-    {
-        // do nothing
-    }
-    else if (summary.compute_tangents && (this->m_sample_index_changed || summary.interpolate_points || summary.interpolate_normals))
-    {
-        if (sample.m_points_ref.empty() || sample.m_uv0_ref.empty() || sample.m_normals_ref.empty())
+        // uv0
+        if (summary.interpolate_uv0)
         {
-            DebugError("something is wrong!!");
-            sample.m_tangents_ref.reset();
+            Lerp(sample.m_uv0_int, sample.m_uv0, sample.m_uv02, this->m_current_time_offset);
+            sample.m_uv0_ref = sample.m_uv0_int;
         }
-        else
+
+        // uv1
+        if (summary.interpolate_uv1)
         {
-            const auto& indices = topology.m_refiner.new_indices_tri;
-            sample.m_tangents.resize_discard(sample.m_points_ref.size());
-            GenerateTangents(sample.m_tangents.data(), sample.m_points_ref.data(), sample.m_uv0_ref.data(), sample.m_normals_ref.data(),
-                indices.data(), (int)sample.m_points_ref.size(), (int)indices.size() / 3);
-            sample.m_tangents_ref = sample.m_tangents;
+            Lerp(sample.m_uv1_int, sample.m_uv1, sample.m_uv12, this->m_current_time_offset);
+            sample.m_uv1_ref = sample.m_uv1_int;
         }
-    }
 
-    // uv0
-    if (summary.interpolate_uv0)
-    {
-        Lerp(sample.m_uv0_int, sample.m_uv0, sample.m_uv02, this->m_current_time_offset);
-        sample.m_uv0_ref = sample.m_uv0_int;
-    }
+        // colors
+        if (summary.interpolate_rgba)
+        {
+            Lerp(sample.m_rgba_int, sample.m_rgba, sample.m_rgba2, this->m_current_time_offset);
+            sample.m_rgba_ref = sample.m_rgba_int;
+        }
 
-    // uv1
-    if (summary.interpolate_uv1)
-    {
-        Lerp(sample.m_uv1_int, sample.m_uv1, sample.m_uv12, this->m_current_time_offset);
-        sample.m_uv1_ref = sample.m_uv1_int;
-    }
+        // rgb
+        if (summary.interpolate_rgb)
+        {
+            Lerp(sample.m_rgb_int, sample.m_rgb, sample.m_rgb2, this->m_current_time_offset);
+            sample.m_rgb_ref = sample.m_rgb_int;
+        }
 
-    // colors
-    if (summary.interpolate_rgba)
-    {
-        Lerp(sample.m_rgba_int, sample.m_rgba, sample.m_rgba2, this->m_current_time_offset);
-        sample.m_rgba_ref = sample.m_rgba_int;
-    }
+        // custom attributes - handled in ticket ABC-484
+        for (int i = 0; i < m_attributes_param.size(); i++) {
 
-    // rgb
-    if (summary.interpolate_rgb)
-    {
-        Lerp(sample.m_rgb_int, sample.m_rgb, sample.m_rgb2, this->m_current_time_offset);
-        sample.m_rgb_ref = sample.m_rgb_int;
-    }
+            if ((m_attributes_param)[i]->interpolate) {
+                // Lerp((*sample.m_attributes_int)[i], (*(sample.m_attributes))[i], (*(sample.m_attributes2))[i], this->m_current_time_offset);
 
-    // custom attributes - handled in ticket ABC-484
-    for (int i = 0; i < m_attributes_param.size(); i++) {
-
-        if ((m_attributes_param)[i]->interpolate) {
-            // Lerp((*sample.m_attributes_int)[i], (*(sample.m_attributes))[i], (*(sample.m_attributes2))[i], this->m_current_time_offset);
-      
+            };
         };
-    };
+    }
 }
 
 template<typename T, typename U>
