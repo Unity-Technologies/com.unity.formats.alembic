@@ -527,9 +527,8 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
             {
                 switch (attr->type1)
                 {
-                    //case(aiPropertyType::BoolArray): this->cookArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample, bool>(i); break;
-                case(aiPropertyType::IntArray): this->AssignArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
-                case(aiPropertyType::UIntArray): this->AssignArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
+                case(aiPropertyType::IntArray): this->AssignArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int>(i); break;
+                case(aiPropertyType::UIntArray): this->AssignArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, unsigned int>(i); break;
                 case(aiPropertyType::FloatArray): this->AssignArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
                 case(aiPropertyType::Float2Array): this->AssignArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                 case(aiPropertyType::Float3Array):
