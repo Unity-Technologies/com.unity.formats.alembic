@@ -413,69 +413,68 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         void DrawHairUI(AlembicImporter importer)
         {
-            var hairLabel = L10n.Tr("Hair");
-            // var hairLabel = EditorGUIUtility.TrTextContentWithIcon("Hair",
-            //     EditorGUIUtility.IconContent("info").image); // Title with Icon
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(new GUIContent(IconUtility.LoadIcon("StrandBasedHair", IconUtility.IconType.UniqueToSkin)), GUILayout.Width(18));
+                EditorGUILayout.LabelField(EditorGUIUtility.TrTextContent("Hair Asset"), EditorStyles.boldLabel);
+            }
 
             using (new EditorGUILayout.VerticalScope())
             {
-                EditorGUILayout.LabelField(hairLabel, EditorStyles.boldLabel);
-                {
-                    GUILayout.FlexibleSpace();
-
+                EditorGUILayout.Space();
 #if !HAIR_AVAILABLE
-                    string msg = "Hair package not found. " +
-                                 "You have to install it first to generate " +
-                                 "a curve-based groom.";
+                string msg = "Hair package not found. " +
+                             "You have to install it first to generate " +
+                             "a curve-based groom.";
 
-                    GUILayout.FlexibleSpace();
-                    UIHelper.HelpBoxWithAction(msg, MessageType.Warning, L10n.Tr("Install"),
-                    () =>
-                    {
-                        const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
-                        Application.OpenURL(hairRepoLink);
+                GUILayout.FlexibleSpace();
+                UIHelper.HelpBoxWithAction(msg, MessageType.Warning, L10n.Tr("Install"),
+                () =>
+                {
+                    const string hairRepoLink = "https://github.com/Unity-Technologies/com.unity.demoteam.hair";
+                    Application.OpenURL(hairRepoLink);
 
-                        // Use this when Hair package is published
-                        // Client.Add("com.unity.demoteam.hair");
-                    });
+                    // Use this when Hair package is published
+                    // Client.Add("com.unity.demoteam.hair");
+                });
 #else
-                    var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
-                    var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
+                var go = AssetDatabase.LoadMainAssetAtPath(importer.assetPath) as GameObject;
+                var alembicStreamPlayer = go.GetComponent<AlembicStreamPlayer>();
 
-                    if (HasCurves(alembicStreamPlayer))
+                if (HasCurves(alembicStreamPlayer))
+                {
+                    if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
                     {
-                        if (GUILayout.Button(L10n.Tr("Generate Hair Asset")))
-                        {
-                            string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
-                            path = AssetDatabase.GenerateUniqueAssetPath(path);
+                        string path = Path.GetDirectoryName(importer.assetPath) + "/" + go.name + "_Hair.asset";
+                        path = AssetDatabase.GenerateUniqueAssetPath(path);
 
-                            var hairAsset = CreateInstance<HairAsset>();
-                            hairAsset.name = go.name + "_Hair";
-                            hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
-                            hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
-                            AssetDatabase.CreateAsset(hairAsset, path);
+                        var hairAsset = CreateInstance<HairAsset>();
+                        hairAsset.name = go.name + "_Hair";
+                        hairAsset.settingsBasic.type = HairAsset.Type.Alembic;
+                        hairAsset.settingsAlembic.alembicAsset = alembicStreamPlayer;
+                        AssetDatabase.CreateAsset(hairAsset, path);
 
-                            HairAssetBuilder.BuildHairAsset(hairAsset);
-                            EditorGUIUtility.PingObject(hairAsset);
-                            AssetDatabase.SaveAssetIfDirty(hairAsset);
-                            Selection.activeObject = hairAsset;
-                        }
-
-                        GUI.enabled = true;
+                        HairAssetBuilder.BuildHairAsset(hairAsset);
+                        EditorGUIUtility.PingObject(hairAsset);
+                        AssetDatabase.SaveAssetIfDirty(hairAsset);
+                        Selection.activeObject = hairAsset;
                     }
-                    else
-                    {
-                        GUI.enabled = false;
-                        GUILayout.Button(L10n.Tr("Generate Hair Asset"));
-                        GUI.enabled = true;
 
-                        var message = "Unable to locate curves in the Alembic asset. " +
-                                      "Ensure that the asset contains curves and \"Import Curves\" is " +
-                                      "enabled in the \"Model\" tab.";
-                        EditorGUILayout.HelpBox(message, MessageType.Warning);
-                    }
-#endif
+                    GUI.enabled = true;
                 }
+                else
+                {
+                    GUI.enabled = false;
+                    GUILayout.Button(L10n.Tr("Generate Hair Asset"));
+                    GUI.enabled = true;
+
+                    var message = "Unable to locate curves in the Alembic asset. " +
+                                  "Ensure that the asset contains curves and \"Import Curves\" is " +
+                                  "enabled in the \"Model\" tab.";
+                    EditorGUILayout.HelpBox(message, MessageType.Warning);
+                }
+#endif
+
             }
         }
 
