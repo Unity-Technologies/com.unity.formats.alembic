@@ -289,7 +289,7 @@ struct AttributeData
     RawVector<int> remap;
     int size;
     aiPropertyType type1;
-    std::string name;
+    const char* name;
     bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
@@ -302,6 +302,12 @@ struct AttributeDataToTransfer
     void* data;
     aiPropertyType type;
 };
+
+struct AttributeSummary {
+    const char* name;
+    int size;
+};
+
 
 template<typename T, typename U>
 template<typename Tp>
@@ -324,8 +330,8 @@ void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeDa
                 AttributeData* attribute = new AttributeData(header);
                 attribute->data = param;
                 attribute->size = sizeof(param);
-                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites
-                attribute->name = header.getName();
+                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
+                attribute->name = header.getName().c_str();
                 attributes.push_back(attribute);
             }
         }
@@ -1678,6 +1684,18 @@ void aiMeshSample<T>::getSummary(aiMeshSampleSummary& dst) const
     dst.vertex_count = m_topology->getVertexCount();
     dst.index_count = m_topology->getIndexCount();
     dst.topology_changed = m_topology_changed;
+
+    AttributeSummary* ptrArray = new AttributeSummary[m_attributes_ref.size()];
+
+    for (size_t i = 0; i < m_attributes_ref.size(); i++) {
+        ptrArray[i].size = m_attributes_ref[i]->size;
+        ptrArray[i].name = m_attributes_ref[i]->name;
+    }
+
+    memcpy(dst.attributes, ptrArray, m_attributes_ref.size() * sizeof(AttributeSummary));
+
+    delete[] ptrArray;
+ 
 }
 
 template<typename T>

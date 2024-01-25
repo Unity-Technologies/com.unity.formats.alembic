@@ -162,9 +162,17 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    struct aiAttributesSummary
+    {
+       public IntPtr name;
+       public int size;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiMeshSampleSummary
     {
         public Bool visibility { get; set; }
+        public unsafe void* attributes;
 
         public int splitCount { get; set; }
         public int submeshCount { get; set; }

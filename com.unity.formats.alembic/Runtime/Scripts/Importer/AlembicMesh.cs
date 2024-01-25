@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -78,6 +79,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         NativeArray<aiSubmeshSummary> m_submeshSummaries;
         NativeArray<aiPolyMeshData> m_splitData;
         NativeArray<aiSubmeshData> m_submeshData;
+        NativeArray<aiAttributesSummary> m_attributesSummary;
 
         JobHandle fillVertexBufferHandle;
         List<Split> m_splits = new List<Split>();
@@ -119,6 +121,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
+
+            m_attributesSummary.DisposeIfPossible();
 
             foreach (var subMesh in m_submeshes)
                 subMesh.Dispose();
@@ -178,7 +182,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var sample = m_abcSchema.sample;
 
+            m_attributesSummary.ResizeIfNeeded(m_summary.attributesCount);
+            m_sampleSummary.attributes= m_attributesSummary.GetPointer();
+
             sample.GetSummary(ref m_sampleSummary);
+
             var splitCount = m_sampleSummary.splitCount;
             var submeshCount = m_sampleSummary.submeshCount;
 
