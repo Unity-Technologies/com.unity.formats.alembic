@@ -142,6 +142,9 @@ public:
     void onTopologyChange(U& sample);
     void onTopologyDetermined();
 
+    template < typename Tp >
+    void readAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
+
     template <typename Tp, typename TpSample, typename VECTYPE>
     void cookArbPropertySampleAt(int paramIndex);
 
@@ -205,6 +208,37 @@ void aiMeshSchema<T, U>::remapSecondAttributeSet(int paramIndex)
     auto att_sp2 = *(static_cast<TpSample*>(param->samples2));
 
     Remap(*att2_cast, *att_sp2.getVals(), param->remap);
+}
+
+template<typename T, typename U>
+template <typename Tp>
+void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
+{
+    using abcGeomType = Tp;
+
+    auto geom_params = this->m_schema.getArbGeomParams();
+
+    if (geom_params.valid())
+    {
+        size_t num_geom_params = geom_params.getNumProperties();
+        for (size_t i = 0; i < num_geom_params; ++i)
+        {
+            auto& header = geom_params.getPropertyHeader(i);
+            if (abcGeomType::matches(header))
+            {
+                abcGeomType* param = new abcGeomType(geom_params, header.getName());
+
+                AttributeData* attribute = new AttributeData(header);
+                attribute->data = param;
+                attribute->size = sizeof(param);
+                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
+                attribute->name = header.getName();
+                attributes.push_back(attribute);
+
+            }
+
+        }
+    }
 }
 
 // copyied 
@@ -299,6 +333,9 @@ struct AttributeData {
     aiPropertyType type1;
     std::string name;
     bool interpolate = false;
+    const Alembic::Abc::PropertyHeader& header;
+
+    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
 };
 
 struct AttributeDataToTransfer {
@@ -308,45 +345,17 @@ struct AttributeDataToTransfer {
 };
 
 template<typename T, typename U>
-template <typename Tp>
-void aiMeshSchema<T, U>::ReadAttribute(aiObject* object , std::vector<AttributeData*>& attributes)
-{
-    using abcGeomType = Tp;
-   
-    auto geom_params = this->m_schema.getArbGeomParams();
-
-    if (geom_params.valid())
-    {
-        size_t num_geom_params = geom_params.getNumProperties();
-        for (size_t i = 0; i < num_geom_params; ++i)
-        {
-           auto& header = geom_params.getPropertyHeader(i);
-            if (abcGeomType::matches(header))
-
-            {
-                abcGeomType* param = new abcGeomType(geom_params, header.getName());
-
-                AttributeData* attribute = new AttributeData();
-                attribute->data = param;  
-                attribute->size = sizeof(param);
-                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
-                attribute->name = header.getName();
-                attributes.push_back(attribute);
-                
-            }
-         
-        }
-    }
-
-}
-
-template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     : aiTSchema<T>(parent, abc)
 {
-    ReadAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
-    ReadAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
-
+    readAttribute<AbcGeom::IInt32GeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IUInt32GeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IFloatGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IV2fGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IV3fGeomParam>(parent, m_attributes_param);
+    readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
+    //readAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param); //crash
+    readAttribute<AbcGeom::IM44fGeomParam>(parent, m_attributes_param);
 
    auto geom_params = this->m_schema.getArbGeomParams();
 
