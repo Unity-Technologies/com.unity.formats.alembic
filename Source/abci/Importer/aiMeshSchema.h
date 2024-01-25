@@ -128,9 +128,6 @@ template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
 public:
-    template<typename Tp>
-    void ReadAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
-
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
     void updateSummary();
@@ -144,6 +141,9 @@ public:
 
     template < typename Tp >
     void readAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
+
+    template <typename Tp>
+    void updateArbPropertySummaryAt(int paramIndex);
 
     template <typename Tp, typename TpSample, typename VECTYPE>
     void cookArbPropertySampleAt(int paramIndex);
@@ -174,72 +174,6 @@ protected:
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
 };
-
-template<typename T, typename U>
-AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
-{
-    auto& summary = m_summary;
-    auto param = this->m_schema.getNormalsParam();
-    return param;
-}
-
-template<typename T, typename U>
-template<typename Tp, typename TpSample, typename VECTYPE>
-void aiMeshSchema<T, U>::cookArbPropertySampleAt(int paramIndex)
-{
-    auto attr = m_attributes_param[paramIndex];
-
-    auto att_cast = static_cast<RawVector<VECTYPE>*>(attr->att);
-    auto att_sp = *(static_cast<TpSample*>(attr->samples1));
-
-    Remap(*att_cast, *att_sp.getVals(), attr->remap);
-}
-
-template<typename T, typename U>
-template<typename TP, typename TpSample, typename VECTYPE>
-void aiMeshSchema<T, U>::remapSecondAttributeSet(int paramIndex)
-{
-    auto param = m_attributes_param[paramIndex];
-
-    if (param->att2 == nullptr) // otherwise risk to dereference nullptr 
-        param->att2 = new RawVector<VECTYPE>;
-
-    auto att2_cast = static_cast<RawVector<VECTYPE>*>(param->att2);
-    auto att_sp2 = *(static_cast<TpSample*>(param->samples2));
-
-    Remap(*att2_cast, *att_sp2.getVals(), param->remap);
-}
-
-template<typename T, typename U>
-template <typename Tp>
-void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
-{
-    using abcGeomType = Tp;
-
-    auto geom_params = this->m_schema.getArbGeomParams();
-
-    if (geom_params.valid())
-    {
-        size_t num_geom_params = geom_params.getNumProperties();
-        for (size_t i = 0; i < num_geom_params; ++i)
-        {
-            auto& header = geom_params.getPropertyHeader(i);
-            if (abcGeomType::matches(header))
-            {
-                abcGeomType* param = new abcGeomType(geom_params, header.getName());
-
-                AttributeData* attribute = new AttributeData(header);
-                attribute->data = param;
-                attribute->size = sizeof(param);
-                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
-                attribute->name = header.getName();
-                attributes.push_back(attribute);
-
-            }
-
-        }
-    }
-}
 
 // copyied 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
@@ -318,6 +252,87 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
     return aiPropertyType::Unknown;
 }
 
+template<typename T, typename U>
+AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
+{
+    auto& summary = m_summary;
+    auto param = this->m_schema.getNormalsParam();
+    return param;
+}
+
+template<typename T, typename U>
+template<typename Tp, typename TpSample, typename VECTYPE>
+void aiMeshSchema<T, U>::cookArbPropertySampleAt(int paramIndex)
+{
+    auto attr = m_attributes_param[paramIndex];
+
+    auto att_cast = static_cast<RawVector<VECTYPE>*>(attr->att);
+    auto att_sp = *(static_cast<TpSample*>(attr->samples1));
+
+    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+}
+
+template<typename T, typename U>
+template<typename TP, typename TpSample, typename VECTYPE>
+void aiMeshSchema<T, U>::remapSecondAttributeSet(int paramIndex)
+{
+    auto param = m_attributes_param[paramIndex];
+
+    if (param->att2 == nullptr) // otherwise risk to dereference nullptr 
+        param->att2 = new RawVector<VECTYPE>;
+
+    auto att2_cast = static_cast<RawVector<VECTYPE>*>(param->att2);
+    auto att_sp2 = *(static_cast<TpSample*>(param->samples2));
+
+    Remap(*att2_cast, *att_sp2.getVals(), param->remap);
+}
+
+template<typename T, typename U>
+template<typename Tp>
+void aiMeshSchema<T, U>::updateArbPropertySummaryAt(int paramIndex)
+{
+    auto& param = *static_cast<Tp*>(m_attributes_param[paramIndex]->data);
+
+    if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
+    {
+        m_summary.has_attributes_prop.push_back(true);
+        m_summary.has_attributes++;
+
+        m_summary.constant_attributes->push_back(param.isConstant());
+        m_summary.has_valid_attributes.push_back(false);
+    }
+}
+
+template<typename T, typename U>
+template <typename Tp>
+void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
+{
+    using abcGeomType = Tp;
+
+    auto geom_params = this->m_schema.getArbGeomParams();
+
+    if (geom_params.valid())
+    {
+        size_t num_geom_params = geom_params.getNumProperties();
+        for (size_t i = 0; i < num_geom_params; ++i)
+        {
+            auto& header = geom_params.getPropertyHeader(i);
+            if (abcGeomType::matches(header))
+            {
+                abcGeomType* param = new abcGeomType(geom_params, header.getName());
+
+                AttributeData* attribute = new AttributeData(header);
+                attribute->data = param;
+                attribute->size = sizeof(param);
+                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
+                attribute->name = header.getName();
+                attributes.push_back(attribute);
+
+            }
+
+        }
+    }
+}
 
 struct AttributeData {
     void* data = nullptr;
@@ -531,60 +546,32 @@ void aiMeshSchema<T, U>::updateSummary()
     }
 
     for (size_t i = 0; i < m_attributes_param.size(); ++i) {
-
-        auto attrib = m_attributes_param[i];
-
-        switch (attrib->type1) {
-        case(aiPropertyType::Unknown):
+        switch (m_attributes_param[i]->type1)
         {
-            auto& param = *static_cast<AbcGeom::IV2fGeomParam*>(attrib->data);
-
-            if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
-            {
-                summary.has_attributes_prop.push_back(true);
-                summary.has_attributes++;
-
-                summary.constant_attributes->push_back(param.isConstant());
-                summary.has_valid_attributes.push_back(false);
-
-
-            }
-            break;
-        };
-
-
-        case(aiPropertyType::Float2Array):
-        {
-            auto& param = *static_cast<AbcGeom::IV2fGeomParam*>(attrib->data);
-
-            if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
-            {
-                summary.has_attributes_prop.push_back(true);
-                summary.has_attributes++;
-
-                summary.constant_attributes->push_back(param.isConstant());
-                summary.has_valid_attributes.push_back(false);
-
-            }
-            break;
-        };
-
-
+        case(aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
+        case(aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
+        case(aiPropertyType::UIntArray): this->updateArbPropertySummaryAt<AbcGeom::IUInt32GeomParam>(i); break;
+        case(aiPropertyType::FloatArray): this->updateArbPropertySummaryAt<AbcGeom::IFloatGeomParam>(i); break;
+        case(aiPropertyType::Float2Array): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
         case(aiPropertyType::Float3Array):
         {
-            auto& param = *static_cast<AbcGeom::IC3fGeomParam*>(attrib->data);
-
-            if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
-            {
-                summary.has_attributes_prop.push_back(true);
-                summary.has_attributes++;
-
-                summary.constant_attributes->push_back(param.isConstant());
-                summary.has_valid_attributes.push_back(false);
-
-            }
+            if (AbcGeom::IV3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IV3fGeomParam>(i);
+            else if (AbcGeom::IC3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IC3fGeomParam>(i);
+            else if (AbcGeom::IN3fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IN3fGeomParam>(i);
             break;
-        };
+        }
+        case(aiPropertyType::Float4Array):
+        {
+            if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
+                this->updateArbPropertySummaryAt<AbcGeom::IC4fGeomParam>(i);
+            break;
+        }
+        case(aiPropertyType::Float4x4): this->updateArbPropertySummaryAt<AbcGeom::IM44fGeomParam>(i); break;
+        default:
+        case(aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
         };
     }
 
