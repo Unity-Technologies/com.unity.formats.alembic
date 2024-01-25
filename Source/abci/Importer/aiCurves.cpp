@@ -12,7 +12,7 @@ struct AttributeData {
     void* ref;
     void* att = nullptr;
     void* att2;
-    void* att_int;
+    void* att_interpolation;
     void* constant_att = nullptr;
     RawVector<int> remap;
     int size;
@@ -103,12 +103,12 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
         attr->att2 = new RawVector<VECTYPE>;
 
       
-        attr->att_int = new RawVector<VECTYPE>;
+        attr->att_interpolation = new RawVector<VECTYPE>;
 
 
         RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attr->att2);
         auto att_sp2 = *(static_cast<TpSample*>(attr->samples2));
-        RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attr->att_int);
+        RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attr->att_interpolation);
 
         Assign(att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
 
