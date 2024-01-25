@@ -162,8 +162,6 @@ protected:
     AbcGeom::IC3fGeomParam m_rgb_param;
     std::vector<AttributeData*> m_attributes_param;
 
-
-
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
@@ -384,7 +382,7 @@ static inline void copy_or_clear(T* dst, const IArray<T>& src, const MeshRefiner
     }
 }
 
-    template<class T1, class T2>
+template<class T1, class T2>
 static inline void copy_or_clear_3_to_4(T1* dst, const IArray<T2>& src, const MeshRefiner::Split& split)
 {
     if (dst)
@@ -919,55 +917,47 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
 
         // Custom Attributes
         for (size_t i = 0; i < summary.has_attributes_prop.size(); ++i) {
-          
+
             auto attr = (m_attributes_param)[i];
 
-                if ((attr->constant_att) != nullptr)
+            if ((attr->constant_att) != nullptr)
+            {
+                attr->ref = attr->constant_att;
+            }
+            else if ((summary.has_attributes_prop)[i])
+            {
+                switch (attr->type1)
                 {
-                    attr->ref = attr->constant_att;
+                case(aiPropertyType::Unknown):
+                {
+
+                    RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
+                    AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
+
+                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+                    break;
                 }
-                else if ((summary.has_attributes_prop)[i]) {
+                case(aiPropertyType::Float2Array):
+                {
 
+                    RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
+                    AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
 
-                    switch (attr->type1)
-                    {
+                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+                    break;
+                }
+                case(aiPropertyType::Float3Array):
+                {
 
-                    case(aiPropertyType::Unknown):
-                    {
+                    RawVector<abcC3>* att_cast = (static_cast<RawVector<abcC3>*>(attr->att));
+                    AbcGeom::IC3fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attr->samples1));
 
-                        RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
-                        AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
-
-                        Remap(*att_cast, *att_sp.getVals(), attr->remap);
-                        break;
-                    }
-                        
-
-                    case(aiPropertyType::Float2Array):
-                    {
-
-                        RawVector<abcV2>* att_cast = (static_cast<RawVector<abcV2>*>(attr->att));
-                        AbcGeom::IV2fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IV2fGeomParam::Sample*>(attr->samples1));
-
-                        Remap(*att_cast, *att_sp.getVals(), attr->remap);
-                        break;
-                    }
-
-                    case(aiPropertyType::Float3Array):
-                    {
-
-                        RawVector<abcC3>* att_cast = (static_cast<RawVector<abcC3>*>(attr->att));
-                        AbcGeom::IC3fGeomParam::Sample att_sp = *(static_cast<AbcGeom::IC3fGeomParam::Sample*>(attr->samples1));
-
-                        Remap(*att_cast, *att_sp.getVals(), attr->remap);
-                        break;
-                    }
-
-                    }
-
+                    Remap(*att_cast, *att_sp.getVals(), attr->remap);
+                    break;
+                }
                 }
             }
-
+        }
 
         if (!m_constant_rgb.empty())
         {
@@ -1762,79 +1752,77 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
 }
 
 
-    static inline void copy_or_clear_vector(AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
-    {
+inline void copy_or_clear_vector(AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
+{
 
-        auto ptrArray = new AttributeDataToTransfer[11];
-        for (int i = 0; i < src.size(); i++) {
-            AttributeDataToTransfer a();
+    auto ptrArray = new AttributeDataToTransfer[11];
+    for (int i = 0; i < src.size(); i++) {
+        AttributeDataToTransfer a();
 
-            switch ((src)[i]->type1) {
+        switch ((src)[i]->type1) {
 
-            case(aiPropertyType::Unknown):
-            {
-                auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
+        case(aiPropertyType::Unknown):
+        {
+            auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
 
-                if (temp == nullptr)
-                    ptrArray[i].data = nullptr;
-                else
-                    ptrArray[i].data = temp->data();
+            if (temp == nullptr)
+                ptrArray[i].data = nullptr;
+            else
+                ptrArray[i].data = temp->data();
 
-                ptrArray[i].type = (src)[i]->type1;
-                ptrArray[i].size = sizeof(abcV2);
+            ptrArray[i].type = (src)[i]->type1;
+            ptrArray[i].size = sizeof(abcV2);
 
-                break;
-            }
-
-
-            case(aiPropertyType::Float2Array):
-            {
-                auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
-
-                if (temp == nullptr)
-                    ptrArray[i].data = nullptr;
-                else
-                    ptrArray[i].data = temp->data();
-
-                ptrArray[i].type = (src)[i]->type1;
-                ptrArray[i].size = sizeof(abcV2);
-
-                break;
-            }
-
-            // color : unity only accepts color as rgba 
-            case(aiPropertyType::Float3Array):
-            {
-                auto temp = static_cast<RawVector<abcC3>*>((src)[i]->ref);
-                if (temp == nullptr)
-                    ptrArray[i].data = nullptr;
-                else
-                {
-                    //ptrArray[i].data = (abcC4*)temp->data();
-
-                    ptrArray[i].data = new abcC4[temp->size()];
-                    for (size_t j = 0; j < temp->size(); ++j)
-                    {
-                        abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[i].data);
-
-                        dataPtr[j].r = temp->data()[j].x;
-                        dataPtr[j].g = temp->data()[j].y;
-                        dataPtr[j].b = temp->data()[j].z;
-                        dataPtr[j].a = 1.0f; 
-                    }
-                }
-
-                ptrArray[i].type = (src)[i]->type1;
-                ptrArray[i].size = sizeof(abcC3);
-
-                break; }
-            }
+            break;
         }
 
 
-        memcpy(dst, ptrArray, sizeof(AttributeDataToTransfer)* src.size());
+        case(aiPropertyType::Float2Array):
+        {
+            auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
 
+            if (temp == nullptr)
+                ptrArray[i].data = nullptr;
+            else
+                ptrArray[i].data = temp->data();
+
+            ptrArray[i].type = (src)[i]->type1;
+            ptrArray[i].size = sizeof(abcV2);
+
+            break;
+        }
+
+        // color : unity only accepts color as rgba 
+        case(aiPropertyType::Float3Array):
+        {
+            auto temp = static_cast<RawVector<abcC3>*>((src)[i]->ref);
+            if (temp == nullptr)
+                ptrArray[i].data = nullptr;
+            else
+            {
+                //ptrArray[i].data = (abcC4*)temp->data();
+
+                ptrArray[i].data = new abcC4[temp->size()];
+                for (size_t j = 0; j < temp->size(); ++j)
+                {
+                    abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[i].data);
+
+                    dataPtr[j].r = temp->data()[j].x;
+                    dataPtr[j].g = temp->data()[j].y;
+                    dataPtr[j].b = temp->data()[j].z;
+                    dataPtr[j].a = 1.0f;
+                }
+            }
+
+            ptrArray[i].type = (src)[i]->type1;
+            ptrArray[i].size = sizeof(abcC3);
+
+            break; }
+        }
     }
+
+    memcpy(dst, ptrArray, sizeof(AttributeDataToTransfer) * src.size());
+}
 
 template<typename T>
 void aiMeshSample<T>::fillSubmeshIndices(int submesh_index, aiSubmeshData& data) const
