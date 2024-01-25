@@ -50,13 +50,16 @@ void aiCurves::updateArbPropertySummaryAt(int paramIndex)
     if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
     {
         if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
-           // m_summary.attributeCount++;
+            // m_summary.attributeCount++;
 
             m_summary.has_attributes_prop.push_back(true);
 
             m_summary.constant_attributes->push_back(param.isConstant());
 
             m_summary.interpolate_attributes.push_back(false);
+
+            if (!param.isConstant())
+                this->m_constant = false;
         }
     }
 }
@@ -76,7 +79,7 @@ void aiCurves::readArbPropertySampleAt(int paramIndex, abcSampleSelector& ss, ab
 
     param->getExpanded(*samp1, ss);
 
-    if (attrib->interpolate) {
+    if (m_summary.interpolate_attributes[paramIndex]) {
         param->getExpanded(*samp2, ss2);
     }
 }
@@ -89,41 +92,29 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
     if (attr->att == nullptr) // otherwise risk to dereference nullptr 
         attr->att = new RawVector<VECTYPE>;
 
-    auto att_cast = static_cast<RawVector<VECTYPE>*>(attr->att);
+    RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attr->att);
     auto att_sp = *(static_cast<TpSample*>(attr->samples1));
 
-    Assign(*att_cast, att_sp.getVals(), att_sp.getVals()->size());
+    Assign(att_cast, att_sp.getVals(), att_sp.getVals()->size());
 
     if (m_summary.interpolate_attributes[paramIndex]) {
-        if (attr->att2 == nullptr) // void* make it point to nullptr !
-        {
-            attr->att2 = new RawVector<abcC3>(); // otherwise null and crash
-        }
 
-        auto* att2_cast = static_cast<RawVector<VECTYPE>*>(attr->att2);
+         // otherwise risk to dereference nullptr 
+        attr->att2 = new RawVector<VECTYPE>;
+
+      
+        attr->att_int = new RawVector<VECTYPE>;
+
+
+        RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attr->att2);
         auto att_sp2 = *(static_cast<TpSample*>(attr->samples2));
+        RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attr->att_int);
 
-        Assign(*att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
+        Assign(att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
 
-        //Lerp(sample.m_widths.data(), sample.m_widths.data(), sample.m_widths2.data(),
-           // sample.m_widths.size(), m_current_time_offset);
+        Lerp(att_cast.data(), att_cast.data(), att2_cast.data(), (int)att_cast.size(), m_current_time_offset);
     }
 
-}
-
-
-template<typename TP, typename TpSample, typename VECTYPE>
-void aiCurves::remapSecondAttributeSet(int paramIndex)
-{
-    auto param = m_attributes_param[paramIndex];
-
-    if (param->att2 == nullptr) // otherwise risk to dereference nullptr 
-        param->att2 = new RawVector<VECTYPE>;
-
-    auto att2_cast = static_cast<RawVector<VECTYPE>*>(param->att2);
-    auto att_sp2 = *(static_cast<TpSample*>(param->samples2));
-
-    Remap(*att2_cast, *att_sp2.getVals(), param->remap);
 }
 
 template< typename VECTYPE>
@@ -478,7 +469,7 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
 {
     auto& config = getConfig();
     int point_count = (int)sample.m_position_sp->size();
-    bool interpolate = config.interpolate_samples;
+    bool interpolate = config.interpolate_samples && !this->m_constant;
 
     //if (!m_sample_index_changed)
     //  return;
@@ -537,8 +528,8 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
                 switch (attr->type1)
                 {
                     //case(aiPropertyType::BoolArray): this->cookArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample, bool>(i); break;
-                case(aiPropertyType::IntArray): this->AssignArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int>(i); break;
-                case(aiPropertyType::UIntArray): this->AssignArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, unsigned int>(i); break;
+                case(aiPropertyType::IntArray): this->AssignArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
+                case(aiPropertyType::UIntArray): this->AssignArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
                 case(aiPropertyType::FloatArray): this->AssignArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
                 case(aiPropertyType::Float2Array): this->AssignArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                 case(aiPropertyType::Float3Array):
@@ -552,7 +543,7 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
                     break;
                 }
                 case(aiPropertyType::Float4Array): this->AssignArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
-                case(aiPropertyType::Float4x4): this->AssignArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
+                    //  case(aiPropertyType::Float4x4): this->AssignArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
                 default:
                 case(aiPropertyType::Unknown): this->AssignArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                 }
@@ -586,22 +577,38 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
 
 void aiCurves::updateSummary()
 {
+    this->m_constant = this->m_schema.isConstant();
+
+    // m_schema.isConstant() doesn't consider custom properties. check them    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
+    {
+        this->m_constant = false;
+    }
+
     {
         auto prop = m_schema.getPositionsProperty();
         m_summary.has_position = prop.valid() && prop.getNumSamples() > 0;
+        if (m_summary.has_position && !prop.isConstant())
+            this->m_constant = false;
     }
     {
         auto prop = m_schema.getUVsParam();
         m_summary.has_UVs = prop.valid() && prop.getNumSamples() > 0;
+        if (m_summary.has_UVs  && !prop.isConstant())
+            this->m_constant = false;
     }
     {
         auto prop = m_schema.getWidthsParam();
         m_summary.has_widths = prop.valid() && prop.getNumSamples() > 0;
+        if (m_summary.has_widths && !prop.isConstant())
+            this->m_constant = false;
     }
     {
         auto prop = m_schema.getVelocitiesProperty();
         m_summary.has_velocity = prop.valid() && prop.getNumSamples() > 0;
+        if (m_summary.has_velocity && !prop.isConstant())
+            this->m_constant = false;
     }
+
     for (size_t i = 0; i < m_attributes_param.size(); ++i) {
         switch (m_attributes_param[i]->type1)
         {
@@ -630,21 +637,18 @@ void aiCurves::updateSummary()
         default:
         case(aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
         };
-
     }
 
-    //m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
+  
     auto& config = this->getConfig();
-    this->m_constant = this->m_schema.isConstant();  // is this same as param ? 
-    bool interpolate = config.interpolate_samples && !this->m_constant;// && !m_varying_topology;
-
+   
+    bool interpolate = config.interpolate_samples && !this->m_constant;
     if (interpolate) {
         for (int i = 0; i < m_summary.has_attributes_prop.size(); i++)
         {
-            bool shouldInterpolate = !m_summary.has_attributes_prop.empty() &&
-                m_summary.has_attributes_prop[i] && !(*(m_summary.constant_attributes))[i];
+             bool shouldInterpolate = !(*(m_summary.constant_attributes))[i]; // only interpolate when needed 
 
-            m_summary.interpolate_attributes[i] = true;
+             m_summary.interpolate_attributes[i] = true;
 
         }
     }
