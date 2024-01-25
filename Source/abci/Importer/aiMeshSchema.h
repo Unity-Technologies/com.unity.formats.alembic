@@ -340,8 +340,6 @@ void aiMeshSchema<T, U>::ReadAttribute(aiObject* object , std::vector<AttributeD
 
 }
 
-
-
 template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     : aiTSchema<T>(parent, abc)
@@ -1705,56 +1703,6 @@ void aiMeshSample<T>::getSubmeshSummaries(aiSubmeshSummary* dst) const
     }
 }
 
-template<typename T>
-void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) const
-{
-    auto& schema = *dynamic_cast<T*>(getSchema());
-    auto& summary = schema.getSummary();
-    auto& splits = m_topology->m_refiner.splits;
-    if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].vertex_count == 0)
-        return;
-
-    auto& refiner = m_topology->m_refiner;
-    auto& split = refiner.splits[split_index];
-
-    if (data.points)
-    {
-        m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
-
-        // bounds
-        abcV3 bbmin, bbmax;
-        MinMax(bbmin, bbmax, data.points, split.vertex_count);
-        data.center = (bbmin + bbmax) * 0.5f;
-        data.extents = bbmax - bbmin;
-    }
-
-    // note: velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
-    copy_or_clear(data.velocities, m_velocities_ref, split);
-    copy_or_clear(data.normals, m_normals_ref, split);
-    copy_or_clear(data.tangents, m_tangents_ref, split);
-    copy_or_clear(data.uv0, m_uv0_ref, split);
-    copy_or_clear(data.uv1, m_uv1_ref, split);
-    copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-    copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
-
-    for (size_t i = 0; i < m_attributes_ref.size(); ++i) {
-        auto attrib = m_attributes_ref[i];
-        switch (attrib->type1)
-        {
-            //case(aiPropertyType::BoolArray): copy_or_clear_vector<AbcGeom::IBoolGeomParam, int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::IntArray):copy_or_clear_vector<int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::UIntArray):  copy_or_clear_vector<unsigned int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::FloatArray): copy_or_clear_vector<float>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::Float2Array): copy_or_clear_vector< abcV2>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::Float3Array): copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::Float4Array): copy_or_clear_vector<abcC4>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            case(aiPropertyType::Float4x4): copy_or_clear_vector<abcM44d>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-            default:
-                case(aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        }
-    }
-}
-
 template< typename VECTYPE>
 inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
 {
@@ -1805,6 +1753,56 @@ inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
 
     delete[] ptrArray;
+}
+
+template<typename T>
+void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) const
+{
+    auto& schema = *dynamic_cast<T*>(getSchema());
+    auto& summary = schema.getSummary();
+    auto& splits = m_topology->m_refiner.splits;
+    if (split_index < 0 || size_t(split_index) >= splits.size() || splits[split_index].vertex_count == 0)
+        return;
+
+    auto& refiner = m_topology->m_refiner;
+    auto& split = refiner.splits[split_index];
+
+    if (data.points)
+    {
+        m_points_ref.copy_to(data.points, split.vertex_count, split.vertex_offset);
+
+        // bounds
+        abcV3 bbmin, bbmax;
+        MinMax(bbmin, bbmax, data.points, split.vertex_count);
+        data.center = (bbmin + bbmax) * 0.5f;
+        data.extents = bbmax - bbmin;
+    }
+
+    // note: velocity can be empty even if summary.has_velocities is true (compute is enabled & first frame)
+    copy_or_clear(data.velocities, m_velocities_ref, split);
+    copy_or_clear(data.normals, m_normals_ref, split);
+    copy_or_clear(data.tangents, m_tangents_ref, split);
+    copy_or_clear(data.uv0, m_uv0_ref, split);
+    copy_or_clear(data.uv1, m_uv1_ref, split);
+    copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
+    copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
+
+    for (size_t i = 0; i < m_attributes_ref.size(); ++i) {
+        auto attrib = m_attributes_ref[i];
+        switch (attrib->type1)
+        {
+            //case(aiPropertyType::BoolArray): copy_or_clear_vector<AbcGeom::IBoolGeomParam, int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::IntArray):copy_or_clear_vector<int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::UIntArray):  copy_or_clear_vector<unsigned int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::FloatArray): copy_or_clear_vector<float>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::Float2Array): copy_or_clear_vector< abcV2>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::Float3Array): copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::Float4Array): copy_or_clear_vector<abcC4>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case(aiPropertyType::Float4x4): copy_or_clear_vector<abcM44d>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            default:
+                case(aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+        }
+    }
 }
 
 template<typename T>
