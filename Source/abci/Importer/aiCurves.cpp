@@ -12,7 +12,8 @@ struct AttributeData {
     void* ref;
     void* att = nullptr;
     void* att2;
-    void* att_int;
+    // att_interpolate is equivalent to rgb_int, uv_int ...etc. 
+    void* att_interpolate;
     void* constant_att = nullptr;
     RawVector<int> remap;
     int size;
