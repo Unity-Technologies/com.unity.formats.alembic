@@ -17,7 +17,6 @@ void NormalizeISPC(abcV3 *dst, int num)
     ispc::Normalize((ispc::float3*)dst, num);
 }
 
-
 void LerpISPC(int32_t* dst, const int32_t* v1, const int32_t* v2, int num, float w)
 {
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num, w);
@@ -27,7 +26,6 @@ void LerpISPC(uint32_t* dst, const uint32_t* v1, const uint32_t* v2, int num, fl
 {
     ispc::Lerp((float*)dst, (float*)v1, (float*)v2, num, w);
 }
-
 
 void LerpISPC(float *dst, const float * v1, const float * v2, int num, float w)
 {

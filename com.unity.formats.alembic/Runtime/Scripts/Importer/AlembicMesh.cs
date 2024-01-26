@@ -183,7 +183,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             var sample = m_abcSchema.sample;
 
             m_attributesSummary.ResizeIfNeeded(m_summary.attributesCount);
-            m_sampleSummary.attributes= m_attributesSummary.GetPointer();
+            m_sampleSummary.attributes = m_attributesSummary.GetPointer();
 
             sample.GetSummary(ref m_sampleSummary);
 

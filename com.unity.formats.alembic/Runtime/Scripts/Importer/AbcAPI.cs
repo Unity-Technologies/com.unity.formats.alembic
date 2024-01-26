@@ -164,8 +164,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     struct aiAttributesSummary
     {
-       public IntPtr name;
-       public int size;
+        public IntPtr name;
+        public int size;
     }
 
     [StructLayout(LayoutKind.Sequential)]
