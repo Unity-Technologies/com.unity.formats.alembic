@@ -576,7 +576,8 @@ void aiMeshSchema<T, U>::updateSummary()
     summary = {};
     this->m_constant = this->m_schema.isConstant();
 
-    // m_schema.isConstant() doesn't consider custom properties. check them    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
+    // m_schema.isConstant() doesn't consider custom properties. check them
+    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
     {
         this->m_constant = false;
     }
