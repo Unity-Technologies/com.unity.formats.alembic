@@ -175,6 +175,33 @@ protected:
     bool m_varying_topology = false;
 };
 
+struct AttributeData
+{
+    void* data = nullptr;
+    void* samples1 = nullptr;
+    void* samples2 = nullptr;
+    void* ref = nullptr;
+    void* att = nullptr;
+    void* att2 = nullptr;
+    void* att_int = nullptr;
+    void* constant_att = nullptr;
+    RawVector<int> remap;
+    int size;
+    aiPropertyType type1;
+    std::string name;
+    bool interpolate = false;
+    const Alembic::Abc::PropertyHeader& header;
+
+    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
+};
+
+struct AttributeDataToTransfer
+{
+    int size;
+    void* data;
+    aiPropertyType type;
+};
+
 // copyied 
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
 {
@@ -333,31 +360,6 @@ void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeDa
         }
     }
 }
-
-struct AttributeData {
-    void* data = nullptr;
-    void* samples1 = nullptr;
-    void* samples2 = nullptr;
-    void* ref = nullptr;
-    void* att = nullptr;
-    void* att2 = nullptr;
-    void* att_int = nullptr;
-    void* constant_att = nullptr;
-    RawVector<int> remap;
-    int size;
-    aiPropertyType type1;
-    std::string name;
-    bool interpolate = false;
-    const Alembic::Abc::PropertyHeader& header;
-
-    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
-};
-
-struct AttributeDataToTransfer {
-    int size;
-    void* data; 
-    aiPropertyType type;
-};
 
 template<typename T, typename U>
 inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
