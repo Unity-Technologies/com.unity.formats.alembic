@@ -1,0 +1,8 @@
+{
+  "exempts":{
+    "ABC-496" : "CI: Exempt 'CopyToBuildProfile called when build profile scripting is not available' warning in clean console tests",
+    "messages": [
+    "CopyToBuildProfile called when build profile scripting is not available"
+    ]
+  }
+}
