@@ -165,7 +165,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     struct aiAttributesSummary
     {
         public IntPtr name;
-        public int size;
+        public ulong size;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -203,7 +203,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     unsafe struct AttributeData
     {
-        public int size;
+        public ulong size;
         public void* data;
         // Assuming size is an integer
         //public string name;

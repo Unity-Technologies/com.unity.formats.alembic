@@ -209,7 +209,7 @@ struct AttributeData
     void* att_interpolate = nullptr;
     void* constant_att = nullptr;
     RawVector<int> remap;
-    int size;
+    size_t size;
     aiPropertyType type1;
     const char* name;
     bool interpolate = false;
@@ -227,7 +227,7 @@ struct AttributeData
 
 struct AttributeDataToTransfer
 {
-    int size;
+    size_t size;
     void* data;
     aiPropertyType type;
 };
@@ -235,7 +235,7 @@ struct AttributeDataToTransfer
 struct AttributeSummary
 {
     const char* name;
-    int size;
+    size_t size;
 };
 
 
