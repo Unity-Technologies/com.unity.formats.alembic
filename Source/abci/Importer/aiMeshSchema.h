@@ -1,7 +1,7 @@
 #pragma once
 #include "aiMeshOps.h"
-#include "Alembic/Abc/ITypedScalarProperty.h"
 #include "aiProperty.h"
+#include "Alembic/Abc/ITypedScalarProperty.h"
 
 namespace
 {
@@ -197,84 +197,6 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     return param;
 }
 
-// copyied
-static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
-{
-    const auto& dt = header.getDataType();
-
-    if (header.getPropertyType() == Abc::kScalarProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::Bool;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Int;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UInt;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Float;
-                case 8: return aiPropertyType::Float2;
-                case 12: return aiPropertyType::Float3;
-                case 16: return aiPropertyType::Float4;
-                case 64: return aiPropertyType::Float4x4;
-            }
-        }
-    }
-    else if (header.getPropertyType() == Abc::kArrayProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::BoolArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::IntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UIntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::FloatArray;
-                case 8: return aiPropertyType::Float2Array;
-                case 12: return aiPropertyType::Float3Array;
-                case 16: return aiPropertyType::Float4Array;
-                case 64: return aiPropertyType::Float4x4Array;
-            }
-        }
-    }
-    return aiPropertyType::Unknown;
-}
-
 struct AttributeData
 {
     void* data = nullptr;
@@ -293,7 +215,14 @@ struct AttributeData
     bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
-    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
+    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header):
+        data(dataPtr),
+        size(dataSize),
+        header(header),
+        type1(aiGetPropertyType(header)),
+        name(header.getName().c_str())
+    {
+    };
 };
 
 struct AttributeDataToTransfer
@@ -314,7 +243,7 @@ template<typename T, typename U>
 template<typename Tp>
 void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
 {
-    using abcGeomType = Tp;
+    using abcGeomParamType = Tp;
 
     auto geom_params = this->m_schema.getArbGeomParams();
 
@@ -324,15 +253,10 @@ void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeDa
         for (size_t i = 0; i < num_geom_params; ++i)
         {
             auto& header = geom_params.getPropertyHeader(i);
-            if (abcGeomType::matches(header))
+            if (abcGeomParamType::matches(header))
             {
-                abcGeomType* param = new abcGeomType(geom_params, header.getName());
-
-                AttributeData* attribute = new AttributeData(header);
-                attribute->data = param;
-                attribute->size = sizeof(param);
-                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites
-                attribute->name = header.getName().c_str();
+                abcGeomParamType* param = new abcGeomParamType(geom_params, header.getName());
+                AttributeData* attribute = new AttributeData(param, sizeof(param), header);
                 attributes.push_back(attribute);
             }
         }
@@ -351,8 +275,6 @@ inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
     readAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param);
     readAttribute<AbcGeom::IM44fGeomParam>(parent, m_attributes_param);
-    //readAttribute<AbcGeom::IV2dGeomParam>(parent, m_attributes_param);
-    //readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
 
     // find vertex color and additional uv params
     auto geom_params = this->m_schema.getArbGeomParams();

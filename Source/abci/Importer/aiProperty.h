@@ -27,4 +27,5 @@ protected:
     bool m_active = false;
 };
 
+aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header);
 aiProperty* aiMakeProperty(aiSchema *schema, abcProperties cprop, Abc::PropertyHeader header);
