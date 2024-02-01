@@ -165,7 +165,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct aiAttributesSummary
+    public struct aiAttributesSummary
     {
         public IntPtr name;
         public ulong size;
@@ -176,7 +176,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public Bool visibility { get; set; }
         public unsafe void* attributes;
-
         public int splitCount { get; set; }
         public int submeshCount { get; set; }
         public int vertexCount { get; set; }
@@ -294,7 +293,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasPositions { get; set; }
         public Bool hasUVs { get; set; }
         public Bool hasWidths { get; set; }
-        public Bool hasAttributes { get; set; }
+        public int attributeCount { get; set; }
 
         // public Bool constantVelocities { get; set; }
         // public Bool constantIDs { get; set; }
@@ -304,6 +303,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
     {
         public int positionCount { get; set; }
         public int numVerticesCount { get; set; }
+
+        public unsafe void* attributes;
     }
 
     [StructLayout(LayoutKind.Sequential)]

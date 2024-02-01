@@ -37,7 +37,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// Returns an array of Velocities (optional), if the imported file contained UVs.
         /// </summary>
         public Vector3[] Velocities => velocitiesList.GetArray();
+
         public AttributeData[] attributes => attributesList.GetArray();
+
+        public aiAttributesSummary[] attributesSummary => attributesSummaryList.GetArray();
 
         /// <summary>
         /// Is an event that is invoked every time the data in the component is updated by the AlembicStreamPlayer. This is caused by the evaluation time or import options changing.
@@ -61,7 +64,9 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal PinnedList<Vector2> uvs { get; } = new PinnedList<Vector2>();
         internal PinnedList<float> widths { get; } = new PinnedList<float>();
         internal PinnedList<Vector3> velocitiesList { get; } = new PinnedList<Vector3>();
-        internal PinnedList<AttributeData> attributesList { get; } = new PinnedList<AttributeData>();
+        internal PinnedList<AttributeData> attributesList { get; }   = new PinnedList<AttributeData>();
+        internal PinnedList<aiAttributesSummary> attributesSummaryList { get; }   = new PinnedList<aiAttributesSummary>();
+
 
     }
 }
