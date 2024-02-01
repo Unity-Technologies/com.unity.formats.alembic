@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using static UnityEngine.Formats.Alembic.Importer.RuntimeUtils;
-using Unity.Burst;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
@@ -78,6 +79,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         NativeArray<aiSubmeshSummary> m_submeshSummaries;
         NativeArray<aiPolyMeshData> m_splitData;
         NativeArray<aiSubmeshData> m_submeshData;
+        NativeArray<aiAttributesSummary> m_attributesSummary;
 
         JobHandle fillVertexBufferHandle;
         List<Split> m_splits = new List<Split>();
@@ -119,6 +121,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
+
+            m_attributesSummary.DisposeIfPossible();
 
             foreach (var subMesh in m_submeshes)
                 subMesh.Dispose();
@@ -178,7 +182,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var sample = m_abcSchema.sample;
 
+            m_attributesSummary.ResizeIfNeeded(m_summary.attributesCount);
+            m_sampleSummary.attributes = m_attributesSummary.GetPointer();
+
             sample.GetSummary(ref m_sampleSummary);
+
             var splitCount = m_sampleSummary.splitCount;
             var submeshCount = m_sampleSummary.submeshCount;
 
@@ -259,7 +267,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
                 vertexData.rgb = split.rgb.GetPointer();
 
-                split.attributes.ResizeIfNeeded(summary.hasAttributes);
+                split.attributes.ResizeIfNeeded(summary.attributesCount);
                 vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
@@ -425,8 +433,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.velocitiesSet = true;
                     }
 
-                    if (split.attributes.Length > 0)
-                        ProcessData(split, s);
+                    //if (split.attributes.Length > 0)
+                    //    ProcessData(split, s);
                     if (split.rgba.Length > 0)
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
@@ -489,21 +497,27 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
             }
         }
-        private void ProcessData(Split split, int spi)
-        {
-            unsafe
-            {
-                // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
-                List<Color> colors = new List<Color>();
-                for (int i = 0; i < m_splitSummaries[spi].vertexCount; ++i)
-                {
-                    if (split.attributes[0].data == null) break;
-                    colors.Add(*(((Color*)(split.attributes[0].data)) + i));
-                }
-                if (colors.Count == m_splitSummaries[spi].vertexCount)
-                    split.mesh.SetColors(colors);
-            }
-        }
+
+        //private void ProcessData(Split split, int spi)
+        //{
+        //    if (split.attributes.Length == 0)
+        //        return;
+
+        //    unsafe
+        //    {
+        //        // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
+        //        List<Color> colors = new List<Color>();
+        //        for (int i = 0; i < m_splitSummaries[spi].vertexCount; ++i)
+        //        {
+        //            if (split.attributes[0].data == null) break;
+        //            colors.Add(*(((Color*)(split.attributes[0].data)) + i));
+
+        //            Debug.Log("color: " + colors[i]); ;
+        //        }
+        //        if (colors.Count == m_splitSummaries[spi].vertexCount)
+        //            split.mesh.SetColors(colors);
+        //    }
+        //}
 
         internal void ClearMotionVectors()
         {

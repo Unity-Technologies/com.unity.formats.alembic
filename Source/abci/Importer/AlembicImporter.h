@@ -34,6 +34,7 @@ class aiPoints;   // : aiSchema
 class aiProperty;
 struct AttributeData;
 struct AttributeDataToTransfer;
+struct AttributeSummary;
 
 enum class NormalsMode
 {
@@ -157,7 +158,7 @@ struct aiMeshSummary
 struct aiMeshSampleSummary
 {
     bool visibility = true;
-
+    AttributeSummary* attributes = nullptr;
     int split_count = 0;
     int submesh_count = 0;
     int vertex_count = 0;
@@ -241,6 +242,7 @@ struct aiCurvesSampleSummary
 struct aiCurvesData
 {
     void* m_attributes;
+
     abcV3       *positions = nullptr;
     int32_t     *numVertices = nullptr;
     abcV2       *uvs = nullptr;
