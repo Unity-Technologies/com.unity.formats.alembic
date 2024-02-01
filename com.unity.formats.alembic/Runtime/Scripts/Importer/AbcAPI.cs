@@ -7,6 +7,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
 
+
 namespace UnityEngine.Formats.Alembic.Sdk
 {
     enum AspectRatioMode
@@ -63,7 +64,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-   public enum aiPropertyType
+    public enum aiPropertyType
     {
         Unknown,
 
@@ -150,8 +151,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasTangents { get; set; }
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
-
-        public int hasAttributes { get; set; }
+        public int attributesCount { get; set; }
         public Bool hasRgba { get; set; }
         public Bool hasRgb { get; set; }
         public Bool constantPoints { get; set; }
@@ -165,9 +165,17 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    struct aiAttributesSummary
+    {
+        public IntPtr name;
+        public ulong size;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiMeshSampleSummary
     {
         public Bool visibility { get; set; }
+        public unsafe void* attributes;
 
         public int splitCount { get; set; }
         public int submeshCount { get; set; }
@@ -196,6 +204,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
+
     unsafe public struct AttributeData
     {
         public int size;
@@ -203,7 +212,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         // Assuming size is an integer
         //public string name;
         public aiPropertyType type1;  // Use the actual enum type here
-     //   public string type2;
+                                      //   public string type2;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -574,7 +583,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
                 NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
             }
         }
-
     }
 
     struct aiPointsSample

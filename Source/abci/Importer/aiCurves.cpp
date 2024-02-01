@@ -5,14 +5,16 @@
 #include "Alembic/Abc/ITypedScalarProperty.h"
 
 
-struct AttributeData {
+struct AttributeData
+{
     void* data;
     void* samples1;
     void* samples2;
     void* ref;
     void* att = nullptr;
     void* att2;
-    void* att_interpolation;
+    // att_interpolate is equivalent to rgb_int, uv_int ...etc.
+    void* att_interpolate;
     void* constant_att = nullptr;
     RawVector<int> remap;
     int size;
@@ -25,7 +27,8 @@ struct AttributeData {
 };
 
 
-struct AttributeDataToTransfer {
+struct AttributeDataToTransfer
+{
     int size;
     void* data;
     aiPropertyType type1;
@@ -39,8 +42,6 @@ void aiCurvesSample::getSummary(aiCurvesSampleSummary& dst)
     dst.positionCount = m_positions.size();
     dst.numVerticesCount = m_numVertices.size();
 }
-
-
 
 template<typename Tp>
 void aiCurves::updateArbPropertySummaryAt(int paramIndex)
@@ -64,18 +65,17 @@ void aiCurves::updateArbPropertySummaryAt(int paramIndex)
     }
 }
 
-
 template<typename Tp, typename TpSample>
 void aiCurves::readArbPropertySampleAt(int paramIndex, abcSampleSelector& ss, abcSampleSelector& ss2)
 {
     auto attrib = m_attributes_param[paramIndex];
     auto* param = static_cast<Tp*>(attrib->data);
 
-    attrib->samples1 = new TpSample; // otherwise dereference nullptr 
+    attrib->samples1 = new TpSample; // otherwise dereference nullptr
     attrib->samples2 = new TpSample;
 
     TpSample* samp1 = static_cast<TpSample*>(attrib->samples1);
-    TpSample* samp2 = static_cast<TpSample*> (attrib->samples2);
+    TpSample* samp2 = static_cast<TpSample*>(attrib->samples2);
 
     param->getExpanded(*samp1, ss);
 
@@ -89,7 +89,7 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
 {
     auto attr = m_attributes_param[paramIndex];
 
-    if (attr->att == nullptr) // otherwise risk to dereference nullptr 
+    if (attr->att == nullptr) // otherwise risk to dereference nullptr
         attr->att = new RawVector<VECTYPE>;
 
     RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attr->att);
@@ -117,7 +117,7 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
 
 }
 
-template< typename VECTYPE>
+template<typename VECTYPE>
 static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
 {
     auto ptrArray = new AttributeDataToTransfer();
@@ -138,7 +138,6 @@ static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer 
 template<>
 static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
 {
-
     auto ptrArray = new AttributeDataToTransfer();
 
     auto temp = static_cast<RawVector<abcC3>*>(src[paramIndex]->att);
@@ -165,9 +164,7 @@ static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTr
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
 }
 
-
-
-template <typename Tp>
+template<typename Tp>
 void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
 {
     using abcGeomType = Tp;
@@ -181,28 +178,26 @@ void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attr
         {
             auto& header = geom_params.getPropertyHeader(i);
             if (abcGeomType::matches(header))
-
             {
                 abcGeomType* param = new abcGeomType(geom_params, header.getName());
 
-                // store samples ?? 
+                // store samples ??
                 size_t numSamples = param->getNumSamples();
                 if (numSamples > 0)
                 {
                     AttributeData* attribute = new AttributeData(header);
-                    attribute->data = param; // param or samples ? 
+                    attribute->data = param; // param or samples ?
                     attribute->size = sizeof(param); // for now
                     attribute->type1 = aiGetPropertyType(header); // aiGetPropertyTypeID<abcGeomType> //
                     attribute->name = header.getName();
                     attributes.push_back(attribute);
                 }
             }
-
         }
     }
-
 }
-// copyied 
+
+// copyied
 static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
 {
     const auto& dt = header.getDataType();
@@ -213,32 +208,32 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
         {
             switch (dt.getNumBytes())
             {
-            case 1: return aiPropertyType::Bool;
+                case 1: return aiPropertyType::Bool;
             }
         }
         else if (dt.getPod() == Abc::kInt32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::Int;
+                case 4: return aiPropertyType::Int;
             }
         }
         else if (dt.getPod() == Abc::kUint32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::UInt;
+                case 4: return aiPropertyType::UInt;
             }
         }
         else if (dt.getPod() == Abc::kFloat32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::Float;
-            case 8: return aiPropertyType::Float2;
-            case 12: return aiPropertyType::Float3;
-            case 16: return aiPropertyType::Float4;
-            case 64: return aiPropertyType::Float4x4;
+                case 4: return aiPropertyType::Float;
+                case 8: return aiPropertyType::Float2;
+                case 12: return aiPropertyType::Float3;
+                case 16: return aiPropertyType::Float4;
+                case 64: return aiPropertyType::Float4x4;
             }
         }
     }
@@ -248,39 +243,37 @@ static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
         {
             switch (dt.getNumBytes())
             {
-            case 1: return aiPropertyType::BoolArray;
+                case 1: return aiPropertyType::BoolArray;
             }
         }
         else if (dt.getPod() == Abc::kInt32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::IntArray;
+                case 4: return aiPropertyType::IntArray;
             }
         }
         else if (dt.getPod() == Abc::kUint32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::UIntArray;
+                case 4: return aiPropertyType::UIntArray;
             }
         }
         else if (dt.getPod() == Abc::kFloat32POD)
         {
             switch (dt.getNumBytes())
             {
-            case 4: return aiPropertyType::FloatArray;
-            case 8: return aiPropertyType::Float2Array;
-            case 12: return aiPropertyType::Float3Array;
-            case 16: return aiPropertyType::Float4Array;
-            case 64: return aiPropertyType::Float4x4Array;
+                case 4: return aiPropertyType::FloatArray;
+                case 8: return aiPropertyType::Float2Array;
+                case 12: return aiPropertyType::Float3Array;
+                case 16: return aiPropertyType::Float4Array;
+                case 64: return aiPropertyType::Float4x4Array;
             }
         }
     }
     return aiPropertyType::Unknown;
 }
-
-
 
 void aiCurvesSample::fillData(aiCurvesData& data)
 {
@@ -314,40 +307,38 @@ void aiCurvesSample::fillData(aiCurvesData& data)
     }
 
 
-
-    for (size_t i = 0; i < m_attributes_ref.size(); ++i) {
+    for (size_t i = 0; i < m_attributes_ref.size(); ++i)
+    {
         auto attrib = m_attributes_ref[i];
         switch (attrib->type1)
         {
             //  case(aiPropertyType::BoolArray): copy_or_clear_vector<AbcGeom::IBoolGeomParam, int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        case(aiPropertyType::IntArray):copy_or_clear_vector<int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        case(aiPropertyType::UIntArray):  copy_or_clear_vector<unsigned int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        case(aiPropertyType::FloatArray): copy_or_clear_vector<float>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        case(aiPropertyType::Float2Array): copy_or_clear_vector< abcV2>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        case(aiPropertyType::Float3Array):
-        {
-            if (AbcGeom::IV3fGeomParam::matches(attrib->header))
-                copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
-            else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
-                copy_or_clear_vector<abcC3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
-            else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
-                copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
-            break;
-        }
-        case(aiPropertyType::Float4Array):
-        {
-            if (AbcGeom::IC4fGeomParam::matches(attrib->header))
-                copy_or_clear_vector<abcC4>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
-            break;
-        }
-        case(aiPropertyType::Float4x4): copy_or_clear_vector<abcM44d>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
-        default:
-        case(aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::IntArray): copy_or_clear_vector<int>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::UIntArray):  copy_or_clear_vector<unsigned int>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::FloatArray): copy_or_clear_vector<float>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::Float2Array): copy_or_clear_vector<abcV2>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::Float3Array):
+            {
+                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcC3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                break;
+            }
+            case (aiPropertyType::Float4Array):
+            {
+                if (AbcGeom::IC4fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcC4>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                break;
+            }
+            case (aiPropertyType::Float4x4): copy_or_clear_vector<abcM44d>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            default:
+            case (aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
         }
     }
-
 }
-
 
 aiCurves::aiCurves(aiObject* parent, const abcObject& abc) : super(parent, abc)
 {
@@ -368,7 +359,6 @@ aiCurvesSample* aiCurves::newSample()
     return new Sample(this);
 }
 
-
 void aiCurves::readSampleBody(aiCurvesSample& sample, uint64_t idx)
 {
     auto ss = aiIndexToSampleSelector(idx);
@@ -381,11 +371,11 @@ void aiCurves::readSampleBody(aiCurvesSample& sample, uint64_t idx)
     bool topology_changed = m_varying_topology || this->m_force_update_local;
 
     //  auto& topology = *sample.m_topology;
-   //   auto& refiner = topology.m_refiner;
-     // if (topology_changed)
-        //  topology.clear();
+    //   auto& refiner = topology.m_refiner;
+    // if (topology_changed)
+    //  topology.clear();
 
-      // points
+    // points
     if (summary.has_position)
     {
         {
@@ -425,43 +415,40 @@ void aiCurves::readSampleBody(aiCurvesSample& sample, uint64_t idx)
     }
 
 
-    for (size_t i = 0; i < m_attributes_param.size(); ++i) {
-
+    for (size_t i = 0; i < m_attributes_param.size(); ++i)
+    {
         auto attrib = (m_attributes_param)[i];
 
         if ((summary.has_attributes_prop)[i])
         {
             switch (attrib->type1)
             {
-            case(aiPropertyType::BoolArray): this->readArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::IntArray): this->readArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::UIntArray): this->readArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::FloatArray): this->readArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample>(i, ss, ss2); break;
-            case(aiPropertyType::Float2Array): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
-            case(aiPropertyType::Float3Array):
-            {
-                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample>(i, ss, ss2);
-                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample>(i, ss, ss2);
-                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample>(i, ss, ss2);
-                break;
-            }
-            case(aiPropertyType::Float4Array):
-            {
-                if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
-                    this->readArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample>(i, ss, ss2);
-                break;
-            }
-            case(aiPropertyType::Float4x4): this->readArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample>(i, ss, ss2); break;
-            default:
-            case(aiPropertyType::Unknown): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::BoolArray): this->readArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::IntArray): this->readArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::UIntArray): this->readArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::FloatArray): this->readArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::Float2Array): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::Float3Array):
+                {
+                    if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample>(i, ss, ss2);
+                    else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample>(i, ss, ss2);
+                    else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample>(i, ss, ss2);
+                    break;
+                }
+                case (aiPropertyType::Float4Array):
+                {
+                    if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
+                        this->readArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample>(i, ss, ss2);
+                    break;
+                }
+                case (aiPropertyType::Float4x4): this->readArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample>(i, ss, ss2); break;
+                default:
+                case (aiPropertyType::Unknown): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
             }
         }
-
-
-
     }
 }
 
@@ -520,10 +507,12 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
         ApplyScale(sample.m_positions.data(), (int)sample.m_positions.size(), config.scale_factor);
     }
 
-    for (int i = 0; i < m_attributes_param.size(); i++) {
+    for (int i = 0; i < m_attributes_param.size(); i++)
+    {
         auto attr = m_attributes_param[i];
 
-        if (m_summary.has_attributes_prop[i]) {
+        if (m_summary.has_attributes_prop[i])
+        {
             {
                 switch (attr->type1)
                 {
@@ -550,8 +539,8 @@ void aiCurves::cookSampleBody(aiCurvesSample& sample)
         }
 
         sample.m_attributes_ref = m_attributes_param;
-
-    };
+    }
+    ;
 
 
     if (m_summary.has_velocity)
@@ -651,5 +640,4 @@ void aiCurves::updateSummary()
 
         }
     }
-
 }

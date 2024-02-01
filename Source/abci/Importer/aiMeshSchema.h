@@ -1,7 +1,7 @@
 #pragma once
 #include "aiMeshOps.h"
-#include "Alembic/Abc/ITypedScalarProperty.h"
 #include "aiProperty.h"
+#include "Alembic/Abc/ITypedScalarProperty.h"
 
 namespace
 {
@@ -128,6 +128,8 @@ public:
 template<typename T, typename U>
 class aiMeshSchema : public aiTSchema<T>
 {
+    IArray<int>  getAttributesIndices(MeshRefiner& refiner);
+
 public:
     aiMeshSchema(aiObject* parent, const abcObject& abc);
     ~aiMeshSchema();
@@ -140,23 +142,26 @@ public:
     void onTopologyChange(U& sample);
     void onTopologyDetermined();
 
-    template < typename Tp >
+    template<typename Tp>
     void readAttribute(aiObject* object, std::vector<AttributeData*>& attributes);
 
-    template <typename Tp>
+    template<typename Tp>
     void updateArbPropertySummaryAt(int paramIndex);
 
-    template <typename Tp, typename TpSample>
+    template<typename Tp, typename TpSample>
     void readArbPropertySampleAt(int paramIndex, abcSampleSelector& ss, abcSampleSelector& ss2);
 
-    template <typename Tp, typename TpSample, typename VECTYPE>
+    template<typename Tp, typename TpSample, typename VECTYPE>
     void cookArbPropertySampleAt(int paramIndex);
 
-    template <typename Tp, typename TpSample, typename VECTYPE>
+    template<typename Tp, typename TpSample, typename VECTYPE>
     void remapSecondAttributeSet(int paramIndex);
 
-    template <typename Tp, typename VECTYPE>
+    template<typename Tp, typename VECTYPE>
     void topologyChangeArbPropertyAt(int paramIndex, U& sample);
+
+    template<typename VECTYPE>
+    void interpolateAt(int paramIndex);
 
 public:
 
@@ -179,7 +184,6 @@ protected:
     std::vector<AttributeData*> m_attributes_param;
 
 
-
     TopologyPtr m_shared_topology;
     abcFaceSetSchemas m_facesets;
     bool m_varying_topology = false;
@@ -193,116 +197,53 @@ AbcGeom::IN3fGeomParam aiMeshSchema<T, U>::readNormalsParam()
     return param;
 }
 
-
-// copyied 
-static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
+struct AttributeData
 {
-    const auto& dt = header.getDataType();
-
-    if (header.getPropertyType() == Abc::kScalarProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 1: return aiPropertyType::Bool;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::Int;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::UInt;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::Float;
-            case 8: return aiPropertyType::Float2;
-            case 12: return aiPropertyType::Float3;
-            case 16: return aiPropertyType::Float4;
-            case 64: return aiPropertyType::Float4x4;
-            }
-        }
-    }
-    else if (header.getPropertyType() == Abc::kArrayProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 1: return aiPropertyType::BoolArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::IntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::UIntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-            case 4: return aiPropertyType::FloatArray;
-            case 8: return aiPropertyType::Float2Array;
-            case 12: return aiPropertyType::Float3Array;
-            case 16: return aiPropertyType::Float4Array;
-            case 64: return aiPropertyType::Float4x4Array;
-            }
-        }
-    }
-    return aiPropertyType::Unknown;
-}
-
-
-struct AttributeData {
     void* data = nullptr;
     void* samples1 = nullptr;
     void* samples2 = nullptr;
     void* ref = nullptr;
     void* att = nullptr;
     void* att2 = nullptr;
-    void* att_int = nullptr;
+    // att_interpolate is equivalent to other variables such as rgb_int, uv_int ...etc.
+    void* att_interpolate = nullptr;
     void* constant_att = nullptr;
     RawVector<int> remap;
-    int size;
+    size_t size;
     aiPropertyType type1;
-    std::string name;
+    const char* name;
     bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
-    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
+    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header):
+        data(dataPtr),
+        size(dataSize),
+        header(header),
+        type1(aiGetPropertyType(header)),
+        name(header.getName().c_str())
+    {
+    };
 };
 
-struct AttributeDataToTransfer {
-    int size;
+struct AttributeDataToTransfer
+{
+    size_t size;
     void* data;
     aiPropertyType type;
 };
 
+struct AttributeSummary
+{
+    const char* name;
+    size_t size;
+};
+
+
 template<typename T, typename U>
-template <typename Tp>
+template<typename Tp>
 void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
 {
-    using abcGeomType = Tp;
+    using abcGeomParamType = Tp;
 
     auto geom_params = this->m_schema.getArbGeomParams();
 
@@ -312,23 +253,14 @@ void aiMeshSchema<T, U>::readAttribute(aiObject* object, std::vector<AttributeDa
         for (size_t i = 0; i < num_geom_params; ++i)
         {
             auto& header = geom_params.getPropertyHeader(i);
-            if (abcGeomType::matches(header))
-
+            if (abcGeomParamType::matches(header))
             {
-                abcGeomType* param = new abcGeomType(geom_params, header.getName());
-
-                AttributeData* attribute = new AttributeData(header);
-                attribute->data = param;
-                attribute->size = sizeof(param);
-                attribute->type1 = aiGetPropertyType(header);  // or store type in string as geomparam for more possibilites 
-                attribute->name = header.getName();
+                abcGeomParamType* param = new abcGeomParamType(geom_params, header.getName());
+                AttributeData* attribute = new AttributeData(param, sizeof(param), header);
                 attributes.push_back(attribute);
-
             }
-
         }
     }
-
 }
 
 template<typename T, typename U>
@@ -343,49 +275,36 @@ inline aiMeshSchema<T, U>::aiMeshSchema(aiObject* parent, const abcObject& abc)
     readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
     readAttribute<AbcGeom::IC4fGeomParam>(parent, m_attributes_param);
     readAttribute<AbcGeom::IM44fGeomParam>(parent, m_attributes_param);
-    //readAttribute<AbcGeom::IV2dGeomParam>(parent, m_attributes_param);
-    //readAttribute<AbcGeom::IC3fGeomParam>(parent, m_attributes_param);
 
-    //auto geom_params = this->m_schema.getArbGeomParams();
-
-    /*   if (geom_params.valid())
+    // find vertex color and additional uv params
+    auto geom_params = this->m_schema.getArbGeomParams();
+    if (geom_params.valid())
     {
-            size_t num_geom_params = geom_params.getNumProperties();
-            for (size_t i = 0; i < num_geom_params; ++i)
+        size_t num_geom_params = geom_params.getNumProperties();
+        for (size_t i = 0; i < num_geom_params; ++i)
+        {
+            auto& header = geom_params.getPropertyHeader(i);
+
+            // vertex color
+            if (AbcGeom::IC4fGeomParam::matches(header))
             {
-                auto& header = geom_params.getPropertyHeader(i);
-                // vertex color
-                if (AbcGeom::IC4fGeomParam::matches(header))
-                {
-                    m_rgba_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
-                }
-                if (AbcGeom::IC3fGeomParam::matches(header))
-                {
-                    m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
-                }
+                m_rgba_param = AbcGeom::IC4fGeomParam(geom_params, header.getName());
             }
             if (AbcGeom::IC3fGeomParam::matches(header))
             {
                 m_rgb_param = AbcGeom::IC3fGeomParam(geom_params, header.getName());
             }
+
+            // uv
+            if (AbcGeom::IV2fGeomParam::matches(header))
+            {
+                m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, header.getName());
+            }
         }
-    }*/
-    // size_t num_geom_params = geom_params.getNumProperties();
-    /* if (geom_params.valid())
-     {
-         for (size_t i = 0; i < num_geom_params; ++i)
-         {
-             auto& header = geom_params.getPropertyHeader(i);
-             if (AbcGeom::IV2fGeomParam::matches(header))
-             {
-                 m_uv1_param = AbcGeom::IV2fGeomParam(geom_params, header.getName());
-             };
-         };
-     };
-     */
+    }
 
 
-     // find face set schema in children
+    // find face set schema in children
     size_t num_children = this->getAbcObject().getNumChildren();
     for (size_t i = 0; i < num_children; ++i)
     {
@@ -445,6 +364,7 @@ void aiMeshSchema<T, U>::updateArbPropertySummaryAt(int paramIndex)
 
         m_summary.constant_attributes->push_back(param.isConstant());
         m_summary.has_valid_attributes.push_back(false);
+        m_summary.interpolate_attributes.push_back(false);
     }
 }
 
@@ -455,17 +375,37 @@ void aiMeshSchema<T, U>::readArbPropertySampleAt(int paramIndex, abcSampleSelect
     auto attrib = m_attributes_param[paramIndex];
     auto* param = static_cast<Tp*>(attrib->data);
 
-    attrib->samples1 = new TpSample; // otherwise dereference nullptr 
+    attrib->samples1 = new TpSample; // otherwise dereference nullptr
     attrib->samples2 = new TpSample;
 
     TpSample* samp1 = static_cast<TpSample*>(attrib->samples1);
-    TpSample* samp2 = static_cast<TpSample*> (attrib->samples2);
+    TpSample* samp2 = static_cast<TpSample*>(attrib->samples2);
 
     param->getIndexed(*samp1, ss);
 
-    if (attrib->interpolate) {
+    if (m_summary.interpolate_attributes[paramIndex])
+    {
         param->getIndexed(*samp2, ss2);
     }
+}
+
+template<typename T, typename U>
+template<typename VECTYPE>
+void aiMeshSchema<T, U>::interpolateAt(int paramIndex)
+{
+    auto attrib = m_attributes_param[paramIndex];
+
+    if (attrib->att_interpolate == nullptr)
+    {
+        attrib->att_interpolate = new RawVector<VECTYPE>;
+    }
+
+    RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
+    RawVector<VECTYPE>& att_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att);
+    RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attrib->att2);
+
+    Lerp(att_int_cast, att_cast, att2_cast, this->m_current_time_offset);
+    attrib->ref = static_cast<RawVector<VECTYPE>*>(attrib->att_interpolate);
 }
 
 template<typename T, typename U>
@@ -486,7 +426,7 @@ void aiMeshSchema<T, U>::remapSecondAttributeSet(int paramIndex)
 {
     auto param = m_attributes_param[paramIndex];
 
-    if (param->att2 == nullptr) // otherwise risk to dereference nullptr 
+    if (param->att2 == nullptr) // otherwise risk to dereference nullptr
         param->att2 = new RawVector<VECTYPE>;
 
     auto att2_cast = static_cast<RawVector<VECTYPE>*>(param->att2);
@@ -510,7 +450,7 @@ void aiMeshSchema<T, U>::topologyChangeArbPropertyAt(int paramIndex, U& sample)
 
     IArray<VECTYPE> src{ att_sp1.getVals()->get(), att_sp1.getVals()->size() };
 
-    if (attrib->constant_att == nullptr) // void* make it point to nullptr ! 
+    if (attrib->constant_att == nullptr) // void* make it point to nullptr !
         attrib->constant_att = new RawVector<VECTYPE>(); // otherwise null and crash
 
     if (attrib->att == nullptr)
@@ -535,6 +475,11 @@ void aiMeshSchema<T, U>::topologyChangeArbPropertyAt(int paramIndex, U& sample)
     {
         refiner.template addIndexedAttribute<VECTYPE>(src, refiner.indices, *dst, attrib->remap);
     }
+    else if (src.size() == refiner.counts.size())
+    {
+        IArray<int> uv1_indices = getAttributesIndices(refiner);
+        refiner.template addIndexedAttribute<VECTYPE>(src, uv1_indices, *dst, attrib->remap);
+    }
     else
     {
         DebugLog("Invalid attribute");
@@ -552,7 +497,8 @@ void aiMeshSchema<T, U>::updateSummary()
     summary = {};
     this->m_constant = this->m_schema.isConstant();
 
-    // m_schema.isConstant() doesn't consider custom properties. check them    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
+    // m_schema.isConstant() doesn't consider custom properties. check them
+    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
     {
         this->m_constant = false;
     }
@@ -633,34 +579,36 @@ void aiMeshSchema<T, U>::updateSummary()
         }
     }
 
-    for (size_t i = 0; i < m_attributes_param.size(); ++i) {
+    for (size_t i = 0; i < m_attributes_param.size(); ++i)
+    {
         switch (m_attributes_param[i]->type1)
         {
-        case(aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
-        case(aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
-        case(aiPropertyType::UIntArray): this->updateArbPropertySummaryAt<AbcGeom::IUInt32GeomParam>(i); break;
-        case(aiPropertyType::FloatArray): this->updateArbPropertySummaryAt<AbcGeom::IFloatGeomParam>(i); break;
-        case(aiPropertyType::Float2Array): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
-        case(aiPropertyType::Float3Array):
-        {
-            if (AbcGeom::IV3fGeomParam::matches(m_attributes_param[i]->header))
-                this->updateArbPropertySummaryAt<AbcGeom::IV3fGeomParam>(i);
-            else if (AbcGeom::IC3fGeomParam::matches(m_attributes_param[i]->header))
-                this->updateArbPropertySummaryAt<AbcGeom::IC3fGeomParam>(i);
-            else if (AbcGeom::IN3fGeomParam::matches(m_attributes_param[i]->header))
-                this->updateArbPropertySummaryAt<AbcGeom::IN3fGeomParam>(i);
+            case (aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
+            case (aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
+            case (aiPropertyType::UIntArray): this->updateArbPropertySummaryAt<AbcGeom::IUInt32GeomParam>(i); break;
+            case (aiPropertyType::FloatArray): this->updateArbPropertySummaryAt<AbcGeom::IFloatGeomParam>(i); break;
+            case (aiPropertyType::Float2Array): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
+            case (aiPropertyType::Float3Array):
+            {
+                if (AbcGeom::IV3fGeomParam::matches(m_attributes_param[i]->header))
+                    this->updateArbPropertySummaryAt<AbcGeom::IV3fGeomParam>(i);
+                else if (AbcGeom::IC3fGeomParam::matches(m_attributes_param[i]->header))
+                    this->updateArbPropertySummaryAt<AbcGeom::IC3fGeomParam>(i);
+                else if (AbcGeom::IN3fGeomParam::matches(m_attributes_param[i]->header))
+                    this->updateArbPropertySummaryAt<AbcGeom::IN3fGeomParam>(i);
                 break;
+            }
+            case (aiPropertyType::Float4Array):
+            {
+                if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
+                    this->updateArbPropertySummaryAt<AbcGeom::IC4fGeomParam>(i);
+                break;
+            }
+            case (aiPropertyType::Float4x4): this->updateArbPropertySummaryAt<AbcGeom::IM44fGeomParam>(i); break;
+            default:
+            case (aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
         }
-        case(aiPropertyType::Float4Array):
-        {
-            if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
-                this->updateArbPropertySummaryAt<AbcGeom::IC4fGeomParam>(i);
-            break;
-        }
-        case(aiPropertyType::Float4x4): this->updateArbPropertySummaryAt<AbcGeom::IM44fGeomParam>(i); break;
-        default:
-        case(aiPropertyType::Unknown): this->updateArbPropertySummaryAt<AbcGeom::IV2fGeomParam>(i); break;
-        };
+        ;
     }
 
     // colors
@@ -754,11 +702,11 @@ void aiMeshSchema<T, U>::updateSummary()
 
         for (int i = 0; i < summary.has_attributes; i++)
         {
-
             bool shouldInterpolate = !summary.has_attributes_prop.empty() &&
                 summary.has_attributes_prop[i] && !(*(summary.constant_attributes))[i];
 
-            summary.interpolate_attributes.push_back(shouldInterpolate);
+            if (shouldInterpolate)
+                summary.interpolate_attributes[i] = true; // interpolate_attributes is initialized with false
         }
     }
 }
@@ -767,6 +715,22 @@ template<typename T, typename U>
 const aiMeshSummaryInternal& aiMeshSchema<T, U>::getSummary() const
 {
     return m_summary;
+}
+
+template<typename T, typename U>
+IArray<int> aiMeshSchema<T, U>::getAttributesIndices(MeshRefiner& refiner)
+{
+    int* indices = new int[refiner.indices.size()];
+    int m = 0;
+    for (int i = 0; i < refiner.counts.size(); i++)
+    {
+        for (int j = 0; j < refiner.counts[i]; j++)
+        {
+            indices[m] = i;
+            m++;
+        }
+    }
+    return { indices, refiner.indices.size() };
 }
 
 template<typename T, typename U>
@@ -865,29 +829,29 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
         {
             switch (attrib->type1)
             {
-            case(aiPropertyType::BoolArray): this->readArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::IntArray): this->readArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::UIntArray): this->readArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample >(i, ss, ss2); break;
-            case(aiPropertyType::FloatArray): this->readArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample>(i, ss, ss2); break;
-            case(aiPropertyType::Float2Array): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
-            case(aiPropertyType::Float3Array):
-            {
-                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample>(i, ss, ss2);
-                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample>(i, ss, ss2);
-                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
-                    this->readArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample>(i, ss, ss2);
-                break;
-            }
-            case(aiPropertyType::Float4Array):
-            {
-                if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
-                    this->readArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample>(i, ss, ss2);
-                break;
-            }
-            default:
-            case(aiPropertyType::Unknown): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::BoolArray): this->readArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::IntArray): this->readArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::UIntArray): this->readArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::FloatArray): this->readArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::Float2Array): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
+                case (aiPropertyType::Float3Array):
+                {
+                    if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample>(i, ss, ss2);
+                    else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample>(i, ss, ss2);
+                    else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                        this->readArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample>(i, ss, ss2);
+                    break;
+                }
+                case (aiPropertyType::Float4Array):
+                {
+                    if (AbcGeom::IC4fGeomParam::matches(m_attributes_param[i]->header))
+                        this->readArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample>(i, ss, ss2);
+                    break;
+                }
+                default:
+                case (aiPropertyType::Unknown): this->readArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample>(i, ss, ss2); break;
             }
         }
     }
@@ -1001,29 +965,30 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             {
                 attr->ref = attr->constant_att;
             }
-            else if ((summary.has_attributes_prop)[i]) {
+            else if ((summary.has_attributes_prop)[i])
+            {
                 {
                     switch (attr->type1)
                     {
                         //case(aiPropertyType::BoolArray): this->cookArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample, bool>(i); break;
-                    case(aiPropertyType::IntArray): this->cookArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int>(i); break;
-                    case(aiPropertyType::UIntArray): this->cookArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, unsigned int>(i); break;
-                    case(aiPropertyType::FloatArray): this->cookArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
-                    case(aiPropertyType::Float2Array): this->cookArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
-                    case(aiPropertyType::Float3Array):
-                    {
-                        if (AbcGeom::IV3dGeomParam::matches(attr->header))
-                            this->cookArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample, abcV3>(i);
-                        else if (AbcGeom::IC3fGeomParam::matches(attr->header))
-                            this->cookArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i);
-                        else if (AbcGeom::IN3fGeomParam::matches(attr->header))
-                            this->cookArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample, abcV3>(i);
-                        break;
-                    }
-                    case(aiPropertyType::Float4Array): this->cookArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
-                    case(aiPropertyType::Float4x4): this->cookArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
-                    default:
-                    case(aiPropertyType::Unknown): this->cookArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
+                        case (aiPropertyType::IntArray): this->cookArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int>(i); break;
+                        case (aiPropertyType::UIntArray): this->cookArbPropertySampleAt<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, unsigned int>(i); break;
+                        case (aiPropertyType::FloatArray): this->cookArbPropertySampleAt<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
+                        case (aiPropertyType::Float2Array): this->cookArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
+                        case (aiPropertyType::Float3Array):
+                        {
+                            if (AbcGeom::IV3dGeomParam::matches(attr->header))
+                                this->cookArbPropertySampleAt<AbcGeom::IV3fGeomParam, AbcGeom::IV3fGeomParam::Sample, abcV3>(i);
+                            else if (AbcGeom::IC3fGeomParam::matches(attr->header))
+                                this->cookArbPropertySampleAt<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i);
+                            else if (AbcGeom::IN3fGeomParam::matches(attr->header))
+                                this->cookArbPropertySampleAt<AbcGeom::IN3fGeomParam, AbcGeom::IN3fGeomParam::Sample, abcV3>(i);
+                            break;
+                        }
+                        case (aiPropertyType::Float4Array): this->cookArbPropertySampleAt<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
+                        case (aiPropertyType::Float4x4): this->cookArbPropertySampleAt<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
+                        default:
+                        case (aiPropertyType::Unknown): this->cookArbPropertySampleAt<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                     }
                 }
             }
@@ -1072,19 +1037,19 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
 
         for (int i = 0; i < m_attributes_param.size(); i++)
         {
-            if (m_attributes_param[i]->interpolate)
+            if (summary.interpolate_attributes[i])
             {
                 switch (m_attributes_param[i]->type1)
                 {
-                case(aiPropertyType::IntArray): remapSecondAttributeSet<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
-                case(aiPropertyType::UIntArray): remapSecondAttributeSet<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
-                case(aiPropertyType::FloatArray): remapSecondAttributeSet<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
-                case(aiPropertyType::Float2Array): remapSecondAttributeSet<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
-                case(aiPropertyType::Float3Array): remapSecondAttributeSet<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i); break;
-                case(aiPropertyType::Float4Array): remapSecondAttributeSet<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
-                case(aiPropertyType::Float4x4): remapSecondAttributeSet<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
-                default:
-                case(aiPropertyType::Unknown): remapSecondAttributeSet<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
+                    case (aiPropertyType::IntArray): remapSecondAttributeSet<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
+                    case (aiPropertyType::UIntArray): remapSecondAttributeSet<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
+                    case (aiPropertyType::FloatArray): remapSecondAttributeSet<AbcGeom::IFloatGeomParam, AbcGeom::IFloatGeomParam::Sample, float>(i); break;
+                    case (aiPropertyType::Float2Array): remapSecondAttributeSet<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
+                    case (aiPropertyType::Float3Array): remapSecondAttributeSet<AbcGeom::IC3fGeomParam, AbcGeom::IC3fGeomParam::Sample, abcC3>(i); break;
+                    case (aiPropertyType::Float4Array): remapSecondAttributeSet<AbcGeom::IC4fGeomParam, AbcGeom::IC4fGeomParam::Sample, abcC4>(i); break;
+                    case (aiPropertyType::Float4x4): remapSecondAttributeSet<AbcGeom::IM44dGeomParam, AbcGeom::IM44dGeomParam::Sample, abcM44d>(i); break;
+                    default:
+                    case (aiPropertyType::Unknown): remapSecondAttributeSet<AbcGeom::IV2fGeomParam, AbcGeom::IV2fGeomParam::Sample, abcV2>(i); break;
                 }
             }
         }
@@ -1228,11 +1193,33 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         sample.m_rgb_ref = sample.m_rgb_int;
     }
 
-    // custom attributes - handled in ticket ABC-484
-    for (int i = 0; i < m_attributes_param.size(); i++) {
+    for (int i = 0; i < m_attributes_param.size(); i++)
+    {
+        if (summary.interpolate_attributes[i])
+        {
+            auto attrib = m_attributes_param[i];
+            switch (attrib->type1)
+            {
+                case (aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
+                case (aiPropertyType::UIntArray): this->interpolateAt<uint32_t>(i); break;
+                case (aiPropertyType::FloatArray): this->interpolateAt<float>(i); break;
+                case (aiPropertyType::Float2Array): this->interpolateAt<abcV2>(i); break;
+                case (aiPropertyType::Float3Array):
+                {
+                    if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                        this->interpolateAt<abcV3>(i);
+                    else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                        this->interpolateAt<abcC3>(i);
+                    else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                        this->interpolateAt<abcV3>(i);
 
-        if ((m_attributes_param)[i]->interpolate) {
-            // Lerp((*sample.m_attributes_int)[i], (*(sample.m_attributes))[i], (*(sample.m_attributes2))[i], this->m_current_time_offset);
+                    break;
+                }
+                case (aiPropertyType::Float4Array): this->interpolateAt<abcC4>(i); break;
+                // case(aiPropertyType::Float4x4):this->interpolateAt<abcM44>(i); break;
+                default:
+                case (aiPropertyType::Unknown): this->interpolateAt<abcV2>(i); break;
+            }
         }
     }
 }
@@ -1284,6 +1271,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV3>(src, refiner.indices, dst, topology.m_remap_normals);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> normals_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV3>(src, normals_indices, dst, topology.m_remap_normals);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1291,31 +1283,31 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         }
     }
 
-    for (int i = 0; i < m_attributes_param.size(); i++) {
-
+    for (int i = 0; i < m_attributes_param.size(); i++)
+    {
         auto attrib = m_attributes_param[i];
         switch (attrib->type1)
         {
             //case(aiPropertyType::BoolArray): this->topologyChangeArbPropertyAt<AbcGeom::IBoolGeomParam::Sample, Alembic::Util::bool_t>(i, has_valid_attributes, sample); break;
-        case(aiPropertyType::IntArray): this->topologyChangeArbPropertyAt<AbcGeom::IInt32GeomParam::Sample, int32_t>(i, sample); break;
-        case(aiPropertyType::UIntArray): this->topologyChangeArbPropertyAt<AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i, sample); break;
-        case(aiPropertyType::FloatArray): this->topologyChangeArbPropertyAt<AbcGeom::IFloatGeomParam::Sample, float>(i, sample); break;
-        case(aiPropertyType::Float2Array): this->topologyChangeArbPropertyAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i, sample); break;
-        case(aiPropertyType::Float3Array):
-        {
-            if (AbcGeom::IV3fGeomParam::matches(attrib->header))
-                this->topologyChangeArbPropertyAt<AbcGeom::IV3fGeomParam::Sample, abcV3>(i, sample);
-            else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
-                this->topologyChangeArbPropertyAt<AbcGeom::IC3fGeomParam::Sample, abcC3>(i, sample);
-            else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
-                this->topologyChangeArbPropertyAt<AbcGeom::IN3fGeomParam::Sample, abcV3>(i, sample);
+            case (aiPropertyType::IntArray): this->topologyChangeArbPropertyAt<AbcGeom::IInt32GeomParam::Sample, int32_t>(i, sample); break;
+            case (aiPropertyType::UIntArray): this->topologyChangeArbPropertyAt<AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i, sample); break;
+            case (aiPropertyType::FloatArray): this->topologyChangeArbPropertyAt<AbcGeom::IFloatGeomParam::Sample, float>(i, sample); break;
+            case (aiPropertyType::Float2Array): this->topologyChangeArbPropertyAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i, sample); break;
+            case (aiPropertyType::Float3Array):
+            {
+                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                    this->topologyChangeArbPropertyAt<AbcGeom::IV3fGeomParam::Sample, abcV3>(i, sample);
+                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                    this->topologyChangeArbPropertyAt<AbcGeom::IC3fGeomParam::Sample, abcC3>(i, sample);
+                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                    this->topologyChangeArbPropertyAt<AbcGeom::IN3fGeomParam::Sample, abcV3>(i, sample);
 
-            break;
-        }
-        case(aiPropertyType::Float4Array): this->topologyChangeArbPropertyAt<AbcGeom::IC4fGeomParam::Sample, abcC4>(i, sample); break;
-        case(aiPropertyType::Float4x4): this->topologyChangeArbPropertyAt<AbcGeom::IM44fGeomParam::Sample, abcM44>(i, sample); break;
-        default:
-        case(aiPropertyType::Unknown): this->topologyChangeArbPropertyAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i, sample); break;
+                break;
+            }
+            case (aiPropertyType::Float4Array): this->topologyChangeArbPropertyAt<AbcGeom::IC4fGeomParam::Sample, abcC4>(i, sample); break;
+            case (aiPropertyType::Float4x4): this->topologyChangeArbPropertyAt<AbcGeom::IM44fGeomParam::Sample, abcM44>(i, sample); break;
+            default:
+            case (aiPropertyType::Unknown): this->topologyChangeArbPropertyAt<AbcGeom::IV2fGeomParam::Sample, abcV2>(i, sample); break;
         }
 
         sample.m_attributes_ref = m_attributes_param;
@@ -1339,6 +1331,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         else if (src.size() == refiner.points.size())
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv0);
+        }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> uv0_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV2>(src, uv0_indices, dst, topology.m_remap_uv0);
         }
         else
         {
@@ -1367,6 +1364,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcV2>(src, refiner.indices, dst, topology.m_remap_uv1);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> uv1_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcV2>(src, uv1_indices, dst, topology.m_remap_uv1);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1393,6 +1395,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         {
             refiner.template addIndexedAttribute<abcC4>(src, refiner.indices, dst, topology.m_remap_rgba);
         }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> rgba_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcC4>(src, rgba_indices, dst, topology.m_remap_rgba);
+        }
         else
         {
             DebugLog("Invalid attribute");
@@ -1418,6 +1425,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
         else if (src.size() == refiner.points.size())
         {
             refiner.template addIndexedAttribute<abcC3>(src, refiner.indices, dst, topology.m_remap_rgb);
+        }
+        else if (src.size() == refiner.counts.size())
+        {
+            IArray<int> rgb_indices = getAttributesIndices(refiner);
+            refiner.template addIndexedAttribute<abcC3>(src, rgb_indices, dst, topology.m_remap_rgb);
         }
         else
         {
@@ -1492,8 +1504,8 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     else
         sample.m_uv1_ref.reset();
 
-    for (size_t i = 0; i < summary.has_valid_attributes.size(); ++i) {
-
+    for (size_t i = 0; i < summary.has_valid_attributes.size(); ++i)
+    {
         auto attrib = m_attributes_param[i];
 
         if (summary.has_valid_attributes[i])
@@ -1583,7 +1595,7 @@ void aiMeshSample<T>::reset()
     m_rgba_ref.reset();
     m_rgb_ref.reset();
 
-    //todo :resetting 
+    //todo :resetting
 }
 
 template<typename T>
@@ -1595,6 +1607,18 @@ void aiMeshSample<T>::getSummary(aiMeshSampleSummary& dst) const
     dst.vertex_count = m_topology->getVertexCount();
     dst.index_count = m_topology->getIndexCount();
     dst.topology_changed = m_topology_changed;
+
+    AttributeSummary* ptrArray = new AttributeSummary[m_attributes_ref.size()];
+
+    for (size_t i = 0; i < m_attributes_ref.size(); i++)
+    {
+        ptrArray[i].size = m_attributes_ref[i]->size;
+        ptrArray[i].name = m_attributes_ref[i]->name;
+    }
+
+    memcpy(dst.attributes, ptrArray, m_attributes_ref.size() * sizeof(AttributeSummary));
+
+    delete[] ptrArray;
 }
 
 template<typename T>
@@ -1627,6 +1651,57 @@ void aiMeshSample<T>::getSubmeshSummaries(aiSubmeshSummary* dst) const
     }
 }
 
+template<typename VECTYPE>
+inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
+{
+    auto ptrArray = new AttributeDataToTransfer();
+
+    auto temp = static_cast<RawVector<VECTYPE>*>(src[paramIndex]->ref);
+
+    if (temp == nullptr)
+        ptrArray[paramIndex].data = nullptr;
+    else
+        ptrArray[paramIndex].data = temp->data();
+
+    ptrArray[paramIndex].type = src[paramIndex]->type1;
+    ptrArray[paramIndex].size = sizeof(VECTYPE);
+
+    memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
+
+    delete[] ptrArray;
+};
+
+template<>
+inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
+{
+    auto ptrArray = new AttributeDataToTransfer();
+
+    auto temp = static_cast<RawVector<abcC3>*>(src[paramIndex]->ref);
+
+    if (temp == nullptr)
+        ptrArray->data = nullptr;
+    else
+    {
+        ptrArray->data = new abcC4[temp->size()];
+        for (size_t j = 0; j < temp->size(); ++j)
+        {
+            abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[paramIndex].data);
+
+            dataPtr[j].r = temp->data()[j].x;
+            dataPtr[j].g = temp->data()[j].y;
+            dataPtr[j].b = temp->data()[j].z;
+            dataPtr[j].a = 1.0f;
+        }
+    }
+
+    ptrArray[paramIndex].type = src[paramIndex]->type1;
+    ptrArray[paramIndex].size = sizeof(abcC4);
+
+    memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
+
+    delete[] ptrArray;
+}
+
 template<typename T>
 void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) const
 {
@@ -1657,95 +1732,39 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     copy_or_clear(data.uv0, m_uv0_ref, split);
     copy_or_clear(data.uv1, m_uv1_ref, split);
     copy_or_clear((abcC4*)data.rgba, m_rgba_ref, split);
-    copy_or_clear_vector(data.m_attributes, m_attributes_ref);
     copy_or_clear_3_to_4<abcC4, abcC3>((abcC4*)data.rgb, m_rgb_ref, split);
-}
 
-static inline void copy_or_clear_vector(AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
-{
-    auto ptrArray = new AttributeDataToTransfer[11];
-    for (int i = 0; i < src.size(); i++) {
-        AttributeDataToTransfer a();
-
-        switch ((src)[i]->type1) {
-
-        case(aiPropertyType::Unknown):
+    for (size_t i = 0; i < m_attributes_ref.size(); ++i)
+    {
+        auto attrib = m_attributes_ref[i];
+        switch (attrib->type1)
         {
-            auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
-
-            if (temp == nullptr)
-                ptrArray[i].data = nullptr;
-            else
-                ptrArray[i].data = temp->data();
-
-            ptrArray[i].type = (src)[i]->type1;
-            ptrArray[i].size = sizeof(abcV2);
-
-            break;
-        }
-
-
-        case(aiPropertyType::Float2Array):
-        {
-            auto temp = static_cast<RawVector<abcV2>*>((src)[i]->ref);
-
-            if (temp == nullptr)
-                ptrArray[i].data = nullptr;
-            else
-                ptrArray[i].data = temp->data();
-
-            ptrArray[i].type = (src)[i]->type1;
-            ptrArray[i].size = sizeof(abcV2);
-
-            break;
-        }
-
-        // color : unity only accepts color as rgba 
-        case(aiPropertyType::Float3Array):
-        {
-            if (AbcGeom::IC3fGeomParam::matches((src)[i]->header))
+            //  case(aiPropertyType::BoolArray): copy_or_clear_vector<AbcGeom::IBoolGeomParam, int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::IntArray): copy_or_clear_vector<int>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::UIntArray):  copy_or_clear_vector<unsigned int>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::FloatArray): copy_or_clear_vector<float>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::Float2Array): copy_or_clear_vector<abcV2>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            case (aiPropertyType::Float3Array):
             {
-                auto temp = static_cast<RawVector<abcC3>*>((src)[i]->ref);
-                if (temp == nullptr)
-                    ptrArray[i].data = nullptr;
-                else
-                {
-                    //ptrArray[i].data = (abcC4*)temp->data();
-
-                    ptrArray[i].data = new abcC4[temp->size()];
-                    for (size_t j = 0; j < temp->size(); ++j)
-                    {
-                        abcC4* dataPtr = reinterpret_cast<abcC4*>(ptrArray[i].data);
-
-                        dataPtr[j].r = temp->data()[j].x;
-                        dataPtr[j].g = temp->data()[j].y;
-                        dataPtr[j].b = temp->data()[j].z;
-                        dataPtr[j].a = 1.0f;
-                    }
-                }
-
-                ptrArray[i].type = (src)[i]->type1;
-                ptrArray[i].size = sizeof(abcC3);
+                if (AbcGeom::IV3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                else if (AbcGeom::IC3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcC3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                else if (AbcGeom::IN3fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcV3>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                break;
             }
-            break;
-        }
-        case(aiPropertyType::Float4Array):
-        {
-            auto temp = static_cast<RawVector<abcC4>*>((src)[i]->ref);
-
-            if (temp == nullptr)
-                ptrArray[i].data = nullptr;
-            else
-                ptrArray[i].data = temp->data();
-
-            ptrArray[i].type = (src)[i]->type1;
-            ptrArray[i].size = sizeof(abcC4);
-
-            break;
-        }
+            case (aiPropertyType::Float4Array):
+            {
+                if (AbcGeom::IC4fGeomParam::matches(attrib->header))
+                    copy_or_clear_vector<abcC4>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref);
+                break;
+            }
+            case (aiPropertyType::Float4x4): copy_or_clear_vector<abcM44d>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
+            default:
+            case (aiPropertyType::Unknown): copy_or_clear_vector<AbcGeom::IV2fGeomParam::Sample>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
         }
     }
-    memcpy(dst, ptrArray, sizeof(AttributeDataToTransfer) * src.size());
 }
 
 template<typename T>

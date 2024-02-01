@@ -36,7 +36,8 @@ namespace UnityEngine.Formats.Alembic.Importer
             var curves = abcTreeNode.gameObject.GetOrAddComponent<AlembicCurves>();
             if (CreateRenderingComponent)
             {
-                abcTreeNode.gameObject.GetOrAddComponent<AlembicCurvesRenderer>();
+                var curvesRenderer = abcTreeNode.gameObject.GetOrAddComponent<AlembicCurvesRenderer>();
+                curvesRenderer.Init();
             }
 
             var data = default(aiCurvesData);
@@ -66,7 +67,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             curves.attributesList.ResizeDiscard(2);
 
-            data.attributes =curves.attributesList;
+            data.attributes = curves.attributesList;
 
             m_abcData[0] = data;
             sample.FillData(m_abcData);

@@ -101,8 +101,7 @@ void LerpGeneric(float *dst, const float *v1, const float *v2, int num, float w)
     }
 }
 
-
-void LerpGeneric(int32_t* dst, const int32_t* v1, const int32_t* v2, int num, float w)
+void LerpGeneric(int32_t*dst, const int32_t*v1, const int32_t*v2, int num, float w)
 {
     float iw = 1.0f - w;
     for (int i = 0; i < num; ++i)
@@ -111,7 +110,7 @@ void LerpGeneric(int32_t* dst, const int32_t* v1, const int32_t* v2, int num, fl
     }
 }
 
-void LerpGeneric(uint32_t* dst, const uint32_t* v1, const uint32_t* v2, int num, float w)
+void LerpGeneric(uint32_t*dst, const uint32_t*v1, const uint32_t*v2, int num, float w)
 {
     float iw = 1.0f - w;
     for (int i = 0; i < num; ++i)

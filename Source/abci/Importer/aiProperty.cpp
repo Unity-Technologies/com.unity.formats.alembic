@@ -198,7 +198,7 @@ struct aiMakePropertyImpl<T, true>
     }
 };
 
-static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
+aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
 {
     const auto &dt = header.getDataType();
     if (header.getPropertyType() == Abc::kScalarProperty)
