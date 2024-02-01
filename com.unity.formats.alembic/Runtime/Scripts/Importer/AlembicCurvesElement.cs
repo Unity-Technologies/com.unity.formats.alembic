@@ -44,10 +44,6 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             sample.GetSummary(ref m_sampleSummary);
 
-            // to test
-          string name = Marshal.PtrToStringAnsi(curves.attributesSummaryList[0].name);
-           Debug.Log("name: " + name);
-
             var data = default(aiCurvesData);
 
             if (m_summary.hasPositions)
