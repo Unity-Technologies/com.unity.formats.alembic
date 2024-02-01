@@ -14,7 +14,7 @@ struct AttributeData
     void* att = nullptr;
     void* att2;
     // att_interpolate is equivalent to rgb_int, uv_int ...etc.
-    void* att_interpolate;
+    void* att_interpolation;
     void* constant_att = nullptr;
     RawVector<int> remap;
     int size;
@@ -101,14 +101,11 @@ void aiCurves::AssignArbPropertySampleAt(int paramIndex)
 
          // otherwise risk to dereference nullptr 
         attr->att2 = new RawVector<VECTYPE>;
-
       
         attr->att_interpolation = new RawVector<VECTYPE>;
 
-
         RawVector<VECTYPE>& att2_cast = *static_cast<RawVector<VECTYPE>*>(attr->att2);
         auto att_sp2 = *(static_cast<TpSample*>(attr->samples2));
-        RawVector<VECTYPE>& att_int_cast = *static_cast<RawVector<VECTYPE>*>(attr->att_interpolation);
 
         Assign(att2_cast, att_sp2.getVals(), att_sp2.getVals()->size());
 
@@ -567,7 +564,8 @@ void aiCurves::updateSummary()
 {
     this->m_constant = this->m_schema.isConstant();
 
-    // m_schema.isConstant() doesn't consider custom properties. check them    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
+    // m_schema.isConstant() doesn't consider custom properties. check them
+    if (this->m_visibility_prop.valid() && !this->m_visibility_prop.isConstant())
     {
         this->m_constant = false;
     }
