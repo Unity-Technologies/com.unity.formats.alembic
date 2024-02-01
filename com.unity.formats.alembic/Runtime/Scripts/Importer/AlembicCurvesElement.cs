@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
@@ -24,21 +26,27 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_abcSchema.GetSummary(ref m_summary);
         }
 
-        public override void AbcSyncDataBegin()
+        public override unsafe void AbcSyncDataBegin()
         {
             if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;
 
             var sample = m_abcSchema.sample;
-            sample.GetSummary(ref m_sampleSummary);
-
-            // get points cloud component
             var curves = abcTreeNode.gameObject.GetOrAddComponent<AlembicCurves>();
             if (CreateRenderingComponent)
             {
                 var curvesRenderer = abcTreeNode.gameObject.GetOrAddComponent<AlembicCurvesRenderer>();
                 curvesRenderer.Init();
             }
+
+            curves.attributesSummaryList.ResizeDiscard(m_summary.attributeCount);
+            m_sampleSummary.attributes =  (void*)curves.attributesSummaryList.Pointer;
+
+            sample.GetSummary(ref m_sampleSummary);
+
+            // to test
+          string name = Marshal.PtrToStringAnsi(curves.attributesSummaryList[0].name);
+           Debug.Log("name: " + name);
 
             var data = default(aiCurvesData);
 
@@ -65,7 +73,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 data.uvs = curves.uvs;
             }
 
-            curves.attributesList.ResizeDiscard(2);
+            curves.attributesList.ResizeDiscard(m_summary.attributeCount);
 
             data.attributes = curves.attributesList;
 
@@ -73,7 +81,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             sample.FillData(m_abcData);
         }
 
-        public override void AbcSyncDataEnd()
+        public override unsafe void AbcSyncDataEnd()
         {
             if (disposed || !m_abcSchema.schema.isDataUpdated)
                 return;

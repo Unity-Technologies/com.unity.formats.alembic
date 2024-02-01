@@ -20,7 +20,7 @@ struct AttributeData
     RawVector<int> remap;
     int size;
     aiPropertyType type1;
-    std::string name;
+    const char* name;
     bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
@@ -41,6 +41,12 @@ struct AttributeDataToTransfer
     void* data;
     aiPropertyType type1;
 };
+
+struct AttributeSummary {
+    const char* name;
+    int size;
+};
+
 aiCurvesSample::aiCurvesSample(aiCurves* schema) : super(schema)
 {
 }
@@ -49,6 +55,17 @@ void aiCurvesSample::getSummary(aiCurvesSampleSummary& dst)
 {
     dst.positionCount = m_positions.size();
     dst.numVerticesCount = m_numVertices.size();
+
+    AttributeSummary* ptrArray = new AttributeSummary[m_attributes_ref.size()];
+
+    for (size_t i = 0; i < m_attributes_ref.size(); i++) {
+        ptrArray[i].size = m_attributes_ref[i]->size;
+        ptrArray[i].name = m_attributes_ref[i]->name;
+    }
+
+    memcpy(dst.attributeSummary, ptrArray, m_attributes_ref.size() * sizeof(AttributeSummary));
+
+    delete[] ptrArray;
 }
 
 template<typename Tp>
@@ -58,9 +75,8 @@ void aiCurves::updateArbPropertySummaryAt(int paramIndex)
 
     if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
     {
-        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
-        {
-            // m_summary.attributeCount++;
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+            m_summary.attributeCount++;
 
             m_summary.has_attributes_prop.push_back(true);
 
@@ -198,8 +214,12 @@ void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attr
             if (abcGeomParamType::matches(header))
             {
                 abcGeomParamType* param = new abcGeomParamType(geom_params, header.getName());
-                AttributeData* attribute = new AttributeData(param, sizeof(param), header);
-                attributes.push_back(attribute);
+                size_t numSamples = param->getNumSamples();
+                if (numSamples > 0)
+                {
+                    AttributeData* attribute = new AttributeData(param, sizeof(param), header);
+                    attributes.push_back(attribute);
+                }
             }
         }
     }

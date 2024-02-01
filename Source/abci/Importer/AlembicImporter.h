@@ -215,6 +215,7 @@ struct aiCurvesSummary
     bool has_position = false;
     bool has_UVs = false;
     bool has_widths = false;
+    int  attributeCount = 0;
     std::vector<bool>* constant_attributes = new std::vector<bool>();
 };
 
@@ -237,6 +238,7 @@ struct aiCurvesSampleSummary
 {
     int positionCount = 0;
     int numVerticesCount = 0;
+    AttributeSummary* attributeSummary = nullptr;
 };
 
 struct aiCurvesData
