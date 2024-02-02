@@ -300,11 +300,6 @@ void aiCurves::readSampleBody(aiCurvesSample& sample, uint64_t idx)
 
     bool topology_changed = m_varying_topology || this->m_force_update_local;
 
-    //  auto& topology = *sample.m_topology;
-    //   auto& refiner = topology.m_refiner;
-    // if (topology_changed)
-    //  topology.clear();
-
     // points
     if (summary.has_position)
     {
