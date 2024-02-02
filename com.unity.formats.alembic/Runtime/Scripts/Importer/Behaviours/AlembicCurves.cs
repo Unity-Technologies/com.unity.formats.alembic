@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Sdk;
@@ -68,5 +70,72 @@ namespace UnityEngine.Formats.Alembic.Importer
         internal PinnedList<aiAttributesSummary> attributesSummaryList { get; }   = new PinnedList<aiAttributesSummary>();
 
 
+        public List<T> GetAttributeWithName<T>(string name) where T : unmanaged
+        {
+            List<T> col = new List<T>();
+            for (int j = 0; j < attributes.Length; j++)
+            {
+                if(Marshal.PtrToStringAnsi(attributesSummary[j].name) == name)
+                    for (int i = 0; i < attributes[j].length; i++)
+                    {
+                        unsafe
+                        {
+                            if (attributes[j].data == null) break;
+                            col.Add(*(((T*)(attributes[0].data)) + i));
+                        }
+                    }
+            }
+            return col;
+        }
+
+        // has attribute with name : return boolean
+        public bool HasAttributeWithName(string name)
+        {
+            for (int j = 0; j < attributes.Length; j++)
+            {
+                if (Marshal.PtrToStringAnsi(attributesSummary[j].name) == name)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool getAttributeType(string name, out aiPropertyType type)
+        {
+            bool found = false;
+            type = aiPropertyType.Unknown;
+            for (int j = 0; j < attributes.Length; j++)
+            {
+                if (Marshal.PtrToStringAnsi(attributesSummary[j].name) == name)
+                {
+                    type = attributes[j].type1;
+                    found = true;
+                }
+            }
+
+            // or just return unknown?
+            return found;
+        }
+
+
+        public bool getAttributeSize(string name, out ulong size)
+        {
+            bool found = false;
+            size = 0;
+            for (int j = 0; j < attributes.Length; j++)
+            {
+                if (Marshal.PtrToStringAnsi(attributesSummary[j].name) == name)
+                {
+                    size = attributesSummary[j].size * (ulong)attributes[j].length;
+                    found = true;
+                }
+            }
+           // or just return 0?
+            return found;
+        }
+
+        public int GetAttributeCount()
+        {
+            return attributesList.Count;
+        }
     }
 }

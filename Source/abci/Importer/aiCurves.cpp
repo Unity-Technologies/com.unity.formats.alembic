@@ -17,7 +17,7 @@ struct AttributeData
     void* att_interpolate;
     void* constant_att = nullptr;
     RawVector<int> remap;
-    int size;
+    size_t size;
     aiPropertyType type1;
     const char* name;
     bool interpolate = false;
@@ -32,6 +32,7 @@ struct AttributeDataToTransfer
     int size;
     void* data;
     aiPropertyType type1;
+    int length;
 };
 
 struct AttributeSummary {
@@ -157,6 +158,8 @@ static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer 
 
     ptrArray[paramIndex].type1 = src[paramIndex]->type1;
     ptrArray[paramIndex].size = sizeof(VECTYPE);
+    ptrArray[paramIndex].length = temp->size();
+
 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
 };
@@ -181,6 +184,7 @@ static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTr
             dataPtr[j].g = temp->data()[j].y;
             dataPtr[j].b = temp->data()[j].z;
             dataPtr[j].a = 1.0f;
+            ptrArray[paramIndex].length = temp->size();
         }
     }
 

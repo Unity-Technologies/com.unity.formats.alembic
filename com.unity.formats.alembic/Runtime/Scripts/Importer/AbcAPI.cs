@@ -211,7 +211,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         // Assuming size is an integer
         //public string name;
         public aiPropertyType type1;  // Use the actual enum type here
-                                      //   public string type2;
+        public int length;
     }
 
     [StructLayout(LayoutKind.Sequential)]
