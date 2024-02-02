@@ -2,6 +2,7 @@
 #include <Foundation/aiMath.h>
 #include "aiCurves.h"
 #include "aiUtils.h"
+#include "aiProperty.h"
 #include "Alembic/Abc/ITypedScalarProperty.h"
 
 
@@ -23,7 +24,14 @@ struct AttributeData
     bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
-    AttributeData(const Alembic::Abc::PropertyHeader& header) : header(header) {};
+    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header) :
+        data(dataPtr),
+        size(dataSize),
+        header(header),
+        type1(aiGetPropertyType(header)),
+        name(header.getName().c_str())
+    {
+    };
 };
 
 
@@ -177,7 +185,7 @@ static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTr
 template<typename Tp>
 void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attributes)
 {
-    using abcGeomType = Tp;
+    using abcGeomParamType = Tp;
 
     auto geom_params = this->m_schema.getArbGeomParams();
 
@@ -187,102 +195,14 @@ void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attr
         for (size_t i = 0; i < num_geom_params; ++i)
         {
             auto& header = geom_params.getPropertyHeader(i);
-            if (abcGeomType::matches(header))
+            if (abcGeomParamType::matches(header))
             {
-                abcGeomType* param = new abcGeomType(geom_params, header.getName());
-
-                // store samples ??
-                size_t numSamples = param->getNumSamples();
-                if (numSamples > 0)
-                {
-                    AttributeData* attribute = new AttributeData(header);
-                    attribute->data = param; // param or samples ?
-                    attribute->size = sizeof(param); // for now
-                    attribute->type1 = aiGetPropertyType(header); // aiGetPropertyTypeID<abcGeomType> //
-                    attribute->name = header.getName();
-                    attributes.push_back(attribute);
-                }
+                abcGeomParamType* param = new abcGeomParamType(geom_params, header.getName());
+                AttributeData* attribute = new AttributeData(param, sizeof(param), header);
+                attributes.push_back(attribute);
             }
         }
     }
-}
-
-// copyied
-static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
-{
-    const auto& dt = header.getDataType();
-
-    if (header.getPropertyType() == Abc::kScalarProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::Bool;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Int;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UInt;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Float;
-                case 8: return aiPropertyType::Float2;
-                case 12: return aiPropertyType::Float3;
-                case 16: return aiPropertyType::Float4;
-                case 64: return aiPropertyType::Float4x4;
-            }
-        }
-    }
-    else if (header.getPropertyType() == Abc::kArrayProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::BoolArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::IntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UIntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::FloatArray;
-                case 8: return aiPropertyType::Float2Array;
-                case 12: return aiPropertyType::Float3Array;
-                case 16: return aiPropertyType::Float4Array;
-                case 64: return aiPropertyType::Float4x4Array;
-            }
-        }
-    }
-    return aiPropertyType::Unknown;
 }
 
 void aiCurvesSample::fillData(aiCurvesData& data)
