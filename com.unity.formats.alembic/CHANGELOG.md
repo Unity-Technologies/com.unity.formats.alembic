@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.0-pre.1] - 2023-11-07
 
 ### Added
-- Add library for Windows ARM64 platform.
+- Add library for Windows ARM64 platform support.
 
 ## [2.3.4] - 2023-10-30
 ### Fixed
