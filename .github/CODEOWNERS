@@ -1,5 +1,5 @@
 # Code owners
-*.cs @arejayelle @lucillecaillaud @SanaJal @thomas-tu
+*.cs @arejayelle @mfe @thomas-tu
 
 # Documentation owner
 *.md @Unity-Technologies/docs-vprod
