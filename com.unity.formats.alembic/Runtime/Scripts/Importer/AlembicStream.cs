@@ -237,7 +237,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             m_config.importTrianglePolygon = settings.ImportTrianglePolygon;
 
             m_context.SetConfig(ref m_config);
-            m_loaded = m_context.Load(m_streamDesc.PathToAbc);
+
+#if UNITY_2021_3_OR_NEWER
+            string filePath = FileUtil.GetPhysicalPath(m_streamDesc.PathToAbc); // use logical path
+#else
+            string filePath = m_streamDesc.PathToAbc; // use relative path
+#endif
+
+            m_loaded = m_context.Load(filePath);
 
             if (m_loaded)
             {
@@ -246,17 +253,17 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             else
             {
-                if (!File.Exists(m_streamDesc.PathToAbc))
+                if (!File.Exists(filePath))
                 {
-                    Debug.LogError("File does not exist: " + m_streamDesc.PathToAbc);
+                    Debug.LogError("File does not exist: " + filePath);
                 }
                 else if (m_context.IsHDF5())
                 {
-                    Debug.LogError("Failed to load HDF5 alembic. Please convert to Ogawa: " + m_streamDesc.PathToAbc);
+                    Debug.LogError("Failed to load HDF5 alembic. Please convert to Ogawa: " + filePath);
                 }
                 else
                 {
-                    Debug.LogError("File is in unknown format: " + m_streamDesc.PathToAbc);
+                    Debug.LogError("File is in unknown format: " + filePath);
                 }
             }
 
