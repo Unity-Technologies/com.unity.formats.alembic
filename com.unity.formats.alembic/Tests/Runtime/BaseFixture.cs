@@ -20,7 +20,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected GameObject TestAbcImported(string abcPath, double minDuration = 0.1)
         {
             AssetDatabase.Refresh();
-            Assert.That(File.Exists(abcPath));
+            Assert.That(FileManipulationHelper.FileExists(abcPath));
 
             // now try loading the asset to see if it imported properly
             var obj = AssetDatabase.LoadMainAssetAtPath(abcPath);

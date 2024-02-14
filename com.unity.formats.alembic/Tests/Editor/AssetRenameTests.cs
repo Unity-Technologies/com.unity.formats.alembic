@@ -1,10 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEditor.Formats.Alembic.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -20,8 +21,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             const string dummyGUID = "a6d019a425afe49d7a8fd029c82c0455";
             var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
             var srcDummyFile = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AlembicStreamPlayer>().First().StreamDescriptor.PathToAbc;
-            File.Copy(srcDummyFile, copiedAbcFile, true);
-            AssetDatabase.Refresh();
+            AssetDatabase.CopyAsset(srcDummyFile, copiedAbcFile);
             var asset = AssetDatabase.LoadMainAssetAtPath(copiedAbcFile);
             go = PrefabUtility.InstantiatePrefab(asset) as GameObject;
         }
@@ -65,13 +65,14 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             CollectionAssert.AreNotEqual(v0, v1);
         }
 
-        [Test]
-        public void ChangingOptionsOnExistingImportedAssetsWorks()
+        [UnityTest]
+        public IEnumerator ChangingOptionsOnExistingImportedAssetsWorks()
         {
             deleteFileList.Add(copiedAbcFile);
             var path = AssetDatabase.GUIDToAssetPath("369d852cb291c4c6aa11efc087bf3d2b");
-            File.Copy(path, copiedAbcFile, true);
 
+            AssetDatabase.CopyAsset(path, copiedAbcFile);
+            yield return null;
             AssetDatabase.ImportAsset(copiedAbcFile, ImportAssetOptions.ForceSynchronousImport);
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(copiedAbcFile);
             Assert.IsNull(asset.GetComponentInChildren<AlembicPointsCloud>());

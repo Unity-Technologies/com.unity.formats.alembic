@@ -62,6 +62,11 @@ namespace UnityEditor.Formats.Alembic.Importer
                         using (new EditorGUILayout.HorizontalScope())
                         {
                             filePath = EditorGUILayout.DelayedTextField(filePath);
+
+#if UNITY_2021_3_OR_NEWER
+                            filePath = FileUtil.GetPhysicalPath(filePath); // use physical path
+#endif
+
                             if (GUILayout.Button(new GUIContent("..."), GUILayout.MaxWidth(30)))
                             {
                                 var dir = "";
