@@ -65,24 +65,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             CollectionAssert.AreNotEqual(v0, v1);
         }
 
-        [UnityTest]
-        public IEnumerator ChangingOptionsOnExistingImportedAssetsWorks()
+        [Test]
+        public void ChangingOptionsOnExistingImportedAssetsWorks()
         {
             deleteFileList.Add(copiedAbcFile);
             var path = AssetDatabase.GUIDToAssetPath("369d852cb291c4c6aa11efc087bf3d2b");
 
             AssetDatabase.CopyAsset(path, copiedAbcFile);
-            yield return null;
             AssetDatabase.ImportAsset(copiedAbcFile, ImportAssetOptions.ForceSynchronousImport);
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(copiedAbcFile);
-            Assert.IsNull(asset.GetComponentInChildren<AlembicPointsCloud>());
+            Assert.IsNotNull(asset.GetComponentInChildren<AlembicPointsCloud>());
 
             var importer = AssetImporter.GetAtPath(copiedAbcFile) as AlembicImporter;
-            importer.StreamSettings.ImportPoints = true;
+            importer.StreamSettings.ImportPoints = false;
             EditorUtility.SetDirty(importer);
             AssetDatabase.ImportAsset(copiedAbcFile, ImportAssetOptions.ForceSynchronousImport);
             AssetDatabase.Refresh();
-            Assert.IsNotNull(asset.GetComponentInChildren<AlembicPointsCloud>());
+            Assert.IsNull(asset.GetComponentInChildren<AlembicPointsCloud>());
         }
     }
 }
