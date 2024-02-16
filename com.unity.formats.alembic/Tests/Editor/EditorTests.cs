@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEditor.Formats.Alembic.Importer;
@@ -169,7 +170,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(typeof(AlembicStreamDescriptor), player.StreamDescriptor.GetType());
             var asd = player.StreamDescriptor as AlembicStreamDescriptor;
             Assert.IsTrue(!string.IsNullOrEmpty(asd.PathToAbc));
-            Assert.IsTrue(FileManipulationHelper.FileExists(asd.PathToAbc));
+            Assert.IsTrue(File.Exists(EditorHelper.BuildPathIfNecessary(asd.PathToAbc)));
         }
 
         [UnityTest]

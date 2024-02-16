@@ -7,6 +7,7 @@ using UnityEngine.Formats.Alembic.Exporter;
 using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEditor.Formats.Alembic.Importer;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
@@ -20,7 +21,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         protected GameObject TestAbcImported(string abcPath, double minDuration = 0.1)
         {
             AssetDatabase.Refresh();
-            Assert.That(FileManipulationHelper.FileExists(abcPath));
+            Assert.That(File.Exists(EditorHelper.BuildPathIfNecessary(abcPath)));
 
             // now try loading the asset to see if it imported properly
             var obj = AssetDatabase.LoadMainAssetAtPath(abcPath);
