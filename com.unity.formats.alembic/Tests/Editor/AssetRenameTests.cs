@@ -1,11 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEditor.Formats.Alembic.Importer;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
-using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
