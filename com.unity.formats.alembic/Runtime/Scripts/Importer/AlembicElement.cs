@@ -1,4 +1,6 @@
 using System;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
@@ -49,9 +51,14 @@ namespace UnityEngine.Formats.Alembic.Importer
             disposed = true;
         }
 
+
+
         internal virtual void AbcSetup(aiObject abcObj, aiSchema abcSchema)
         {
             m_abcObj = abcObj;
+            // Vector<AttributeData*> a = new Vector<AttributeData*>();
+
+            //   ReadingAttribute(abcObj,  a);
         }
 
         // called before update samples

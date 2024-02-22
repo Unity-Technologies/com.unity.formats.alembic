@@ -1,8 +1,12 @@
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using UnityEngine.Formats.Alembic.Importer;
+
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
@@ -60,7 +64,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         Quads,
     };
 
-    enum aiPropertyType
+    public enum aiPropertyType
     {
         Unknown,
 
@@ -147,7 +151,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasTangents { get; set; }
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
-
         public int attributesCount { get; set; }
         public Bool hasRgba { get; set; }
         public Bool hasRgb { get; set; }
@@ -201,9 +204,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    unsafe struct AttributeData
+
+    unsafe public struct AttributeData
     {
-        public ulong size;
+        public int size;
         public void* data;
         // Assuming size is an integer
         //public string name;
@@ -290,6 +294,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasPositions { get; set; }
         public Bool hasUVs { get; set; }
         public Bool hasWidths { get; set; }
+        public Bool hasAttributes { get; set; }
+
         // public Bool constantVelocities { get; set; }
         // public Bool constantIDs { get; set; }
     };
@@ -303,14 +309,15 @@ namespace UnityEngine.Formats.Alembic.Sdk
     [StructLayout(LayoutKind.Sequential)]
     struct aiCurvesData
     {
-        public Bool visibility;
-
+        public IntPtr attributes;
         public IntPtr positions;
         public IntPtr numVertices;
         public IntPtr uvs;
         public IntPtr widths;
         public IntPtr velocities;
         public int count;
+        public Bool visibility;
+
         /*
          public Vector3 boundsCenter;
          public Vector3 boundsExtents;*/
@@ -576,9 +583,6 @@ namespace UnityEngine.Formats.Alembic.Sdk
                 NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
             }
         }
-
-
-
     }
 
     struct aiPointsSample
@@ -590,6 +594,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void GetSummary(ref aiPointsSampleSummary dst) { NativeMethods.aiPointsGetSampleSummary(self, ref dst); }
         public void FillData(PinnedList<aiPointsData> dst) { NativeMethods.aiPointsFillData(self, dst); }
     }
+
 
     struct aiCurvesSample
     {
