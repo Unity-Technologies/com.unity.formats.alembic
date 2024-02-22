@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 
 namespace UnityEngine.Formats.Alembic.Sdk
 {
@@ -148,6 +147,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public Bool hasTangents { get; set; }
         public Bool hasUV0 { get; set; }
         public Bool hasUV1 { get; set; }
+
+        public int attributesCount { get; set; }
         public Bool hasRgba { get; set; }
         public Bool hasRgb { get; set; }
         public Bool constantPoints { get; set; }
@@ -161,9 +162,17 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    struct aiAttributesSummary
+    {
+        public IntPtr name;
+        public ulong size;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct aiMeshSampleSummary
     {
         public Bool visibility { get; set; }
+        public unsafe void* attributes;
 
         public int splitCount { get; set; }
         public int submeshCount { get; set; }
@@ -192,6 +201,17 @@ namespace UnityEngine.Formats.Alembic.Sdk
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    unsafe struct AttributeData
+    {
+        public ulong size;
+        public void* data;
+        // Assuming size is an integer
+        //public string name;
+        public aiPropertyType type1;  // Use the actual enum type here
+                                      //   public string type2;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     unsafe struct aiPolyMeshData
     {
         public void* positions;
@@ -204,6 +224,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public void* rgb;
 
         public IntPtr indices;
+        public void* attributes;
 
         public int vertexCount;
         public int indexCount;
@@ -387,6 +408,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal aiPolyMesh AsPolyMesh() { return NativeMethods.aiObjectAsPolyMesh(self); }
         internal aiSubD AsSubD() { return NativeMethods.aiObjectAsSubD(self); }
 
+
+
         public void EachChild(Action<aiObject> act)
         {
             if (act == null)
@@ -412,6 +435,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static explicit operator aiCurves(aiSchema v) { var tmp = default(aiCurves); tmp.self = v.self; return tmp; }
         public bool isDataUpdated { get { NativeMethods.aiSchemaSync(self); return NativeMethods.aiSchemaIsDataUpdated(self); } }
         public void UpdateSample(ref aiSampleSelector ss) { NativeMethods.aiSchemaUpdateSample(self, ref ss); }
+
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -434,6 +458,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         public static implicit operator aiSchema(aiCamera v) { return v.schema; }
 
         public aiCameraSample sample { get { return NativeMethods.aiCamera.aiSchemaGetSample(self); } }
+
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -551,6 +576,9 @@ namespace UnityEngine.Formats.Alembic.Sdk
                 NativeMethods.aiPolyMeshFillVertexBuffer(self, new IntPtr(vbs.GetUnsafePtr()), new IntPtr(ibs.GetUnsafePtr()));
             }
         }
+
+
+
     }
 
     struct aiPointsSample

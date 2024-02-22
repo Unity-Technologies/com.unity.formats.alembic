@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
@@ -34,6 +33,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             public NativeArray<Vector4> tangents;
             public NativeArray<Vector2> uv0;
             public NativeArray<Vector2> uv1;
+            public NativeArray<AttributeData> attributes;
             public NativeArray<Color> rgba;
             public NativeArray<Color> rgb;
 
@@ -61,6 +61,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 uv1.DisposeIfPossible();
                 rgba.DisposeIfPossible();
                 rgb.DisposeIfPossible();
+                attributes.DisposeIfPossible();
                 if (mesh != null && (mesh.hideFlags & HideFlags.DontSave) != 0)
                 {
                     DestroyUnityObject(mesh);
@@ -72,12 +73,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         aiPolyMesh m_abcSchema;
-        protected aiMeshSummary m_summary;
+        protected aiMeshSummary m_summary;// interpolate attributes encapsulated in attributeData
         aiMeshSampleSummary m_sampleSummary;
         NativeArray<aiMeshSplitSummary> m_splitSummaries;
         NativeArray<aiSubmeshSummary> m_submeshSummaries;
         NativeArray<aiPolyMeshData> m_splitData;
         NativeArray<aiSubmeshData> m_submeshData;
+        NativeArray<aiAttributesSummary> m_attributesSummary;
 
         JobHandle fillVertexBufferHandle;
         List<Split> m_splits = new List<Split>();
@@ -119,6 +121,8 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_splitData.DisposeIfPossible();
             m_submeshData.DisposeIfPossible();
+
+            m_attributesSummary.DisposeIfPossible();
 
             foreach (var subMesh in m_submeshes)
                 subMesh.Dispose();
@@ -178,7 +182,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             var sample = m_abcSchema.sample;
 
+            m_attributesSummary.ResizeIfNeeded(m_summary.attributesCount);
+            m_sampleSummary.attributes = m_attributesSummary.GetPointer();
+
             sample.GetSummary(ref m_sampleSummary);
+
             var splitCount = m_sampleSummary.splitCount;
             var submeshCount = m_sampleSummary.submeshCount;
 
@@ -258,6 +266,9 @@ namespace UnityEngine.Formats.Alembic.Importer
                     split.rgb.ResizeIfNeeded(0);
                 }
                 vertexData.rgb = split.rgb.GetPointer();
+
+                split.attributes.ResizeIfNeeded(summary.attributesCount);
+                vertexData.attributes = split.attributes.GetPointer();
 
                 m_splitData[spi] = vertexData;
             }
@@ -422,6 +433,8 @@ namespace UnityEngine.Formats.Alembic.Importer
                         split.velocitiesSet = true;
                     }
 
+                    //if (split.attributes.Length > 0)
+                    //    ProcessData(split, s);
                     if (split.rgba.Length > 0)
                         split.mesh.SetColors(split.rgba);
                     else if (split.rgb.Length > 0)
@@ -484,6 +497,27 @@ namespace UnityEngine.Formats.Alembic.Importer
                 }
             }
         }
+
+        //private void ProcessData(Split split, int spi)
+        //{
+        //    if (split.attributes.Length == 0)
+        //        return;
+
+        //    unsafe
+        //    {
+        //        // if (split.attributes[0].type1 == aiPropertyType.Float2) accordingly
+        //        List<Color> colors = new List<Color>();
+        //        for (int i = 0; i < m_splitSummaries[spi].vertexCount; ++i)
+        //        {
+        //            if (split.attributes[0].data == null) break;
+        //            colors.Add(*(((Color*)(split.attributes[0].data)) + i));
+
+        //            Debug.Log("color: " + colors[i]); ;
+        //        }
+        //        if (colors.Count == m_splitSummaries[spi].vertexCount)
+        //            split.mesh.SetColors(colors);
+        //    }
+        //}
 
         internal void ClearMotionVectors()
         {

@@ -32,6 +32,9 @@ class aiPolyMesh; // : aiSchema
 class aiSubD;     // : aiSchema
 class aiPoints;   // : aiSchema
 class aiProperty;
+struct AttributeData;
+struct AttributeDataToTransfer;
+struct AttributeSummary;
 
 enum class NormalsMode
 {
@@ -138,6 +141,7 @@ struct aiMeshSummary
     bool has_tangents = false;
     bool has_uv0 = false;
     bool has_uv1 = false;
+    int  has_attributes = 0;
     bool has_rgba = false;
     bool has_rgb = false;
     bool constant_points = false;
@@ -148,12 +152,13 @@ struct aiMeshSummary
     bool constant_uv1 = false;
     bool constant_rgba = false;
     bool constant_rgb = false;
+    std::vector<bool>* constant_attributes = new std::vector<bool>();
 };
 
 struct aiMeshSampleSummary
 {
     bool visibility = true;
-
+    AttributeSummary* attributes = nullptr;
     int split_count = 0;
     int submesh_count = 0;
     int vertex_count = 0;
@@ -191,6 +196,7 @@ struct aiPolyMeshData
     abcV4 *rgb = nullptr;
     int *indices = nullptr;
 
+    AttributeDataToTransfer* m_attributes = nullptr;
     int vertex_count = 0;
     int index_count = 0;
 
