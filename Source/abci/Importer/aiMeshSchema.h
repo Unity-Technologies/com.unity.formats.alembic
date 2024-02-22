@@ -214,7 +214,7 @@ struct AttributeData
     const char* name;
     const Alembic::Abc::PropertyHeader& header;
 
-    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header):
+    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header) :
         data(dataPtr),
         size(dataSize),
         header(header),
