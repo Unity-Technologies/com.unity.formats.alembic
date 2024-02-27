@@ -642,6 +642,7 @@ void aiCurves::updateSummary()
 
     //m_varying_topology = (this->m_schema.getTopologyVariance() == AbcGeom::kHeterogeneousTopology);
     auto& config = this->getConfig();
+
     this->m_constant = this->m_schema.isConstant();  // is this same as param ?
     bool interpolate = config.interpolate_samples && !this->m_constant;// && !m_varying_topology;
 

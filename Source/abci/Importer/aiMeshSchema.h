@@ -210,16 +210,15 @@ struct AttributeData
     void* constant_att = nullptr;
     RawVector<int> remap;
     size_t size;
-    aiPropertyType type1;
+    aiPropertyType type;
     const char* name;
-    bool interpolate = false;
     const Alembic::Abc::PropertyHeader& header;
 
-    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header):
+    AttributeData(void* dataPtr, size_t dataSize, const Alembic::Abc::PropertyHeader& header) :
         data(dataPtr),
         size(dataSize),
         header(header),
-        type1(aiGetPropertyType(header)),
+        type(aiGetPropertyType(header)),
         name(header.getName().c_str())
     {
     };
@@ -581,7 +580,7 @@ void aiMeshSchema<T, U>::updateSummary()
 
     for (size_t i = 0; i < m_attributes_param.size(); ++i)
     {
-        switch (m_attributes_param[i]->type1)
+        switch (m_attributes_param[i]->type)
         {
             case (aiPropertyType::BoolArray): this->updateArbPropertySummaryAt<AbcGeom::IBoolGeomParam>(i); break;
             case (aiPropertyType::IntArray): this->updateArbPropertySummaryAt<AbcGeom::IInt32GeomParam>(i); break;
@@ -827,7 +826,7 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
         auto attrib = (m_attributes_param)[i];
         if ((attrib->constant_att == nullptr) && ((summary.has_attributes_prop)[i]))
         {
-            switch (attrib->type1)
+            switch (attrib->type)
             {
                 case (aiPropertyType::BoolArray): this->readArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample>(i, ss, ss2); break;
                 case (aiPropertyType::IntArray): this->readArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample>(i, ss, ss2); break;
@@ -968,7 +967,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
             else if ((summary.has_attributes_prop)[i])
             {
                 {
-                    switch (attr->type1)
+                    switch (attr->type)
                     {
                         //case(aiPropertyType::BoolArray): this->cookArbPropertySampleAt<AbcGeom::IBoolGeomParam, AbcGeom::IBoolGeomParam::Sample, bool>(i); break;
                         case (aiPropertyType::IntArray): this->cookArbPropertySampleAt<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int>(i); break;
@@ -1039,7 +1038,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         {
             if (summary.interpolate_attributes[i])
             {
-                switch (m_attributes_param[i]->type1)
+                switch (m_attributes_param[i]->type)
                 {
                     case (aiPropertyType::IntArray): remapSecondAttributeSet<AbcGeom::IInt32GeomParam, AbcGeom::IInt32GeomParam::Sample, int32_t>(i); break;
                     case (aiPropertyType::UIntArray): remapSecondAttributeSet<AbcGeom::IUInt32GeomParam, AbcGeom::IUInt32GeomParam::Sample, uint32_t>(i); break;
@@ -1198,7 +1197,7 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         if (summary.interpolate_attributes[i])
         {
             auto attrib = m_attributes_param[i];
-            switch (attrib->type1)
+            switch (attrib->type)
             {
                 case (aiPropertyType::IntArray): this->interpolateAt<int32_t>(i); break;
                 case (aiPropertyType::UIntArray): this->interpolateAt<uint32_t>(i); break;
@@ -1286,7 +1285,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     for (int i = 0; i < m_attributes_param.size(); i++)
     {
         auto attrib = m_attributes_param[i];
-        switch (attrib->type1)
+        switch (attrib->type)
         {
             //case(aiPropertyType::BoolArray): this->topologyChangeArbPropertyAt<AbcGeom::IBoolGeomParam::Sample, Alembic::Util::bool_t>(i, has_valid_attributes, sample); break;
             case (aiPropertyType::IntArray): this->topologyChangeArbPropertyAt<AbcGeom::IInt32GeomParam::Sample, int32_t>(i, sample); break;
@@ -1594,8 +1593,6 @@ void aiMeshSample<T>::reset()
     m_tangents_ref.reset();
     m_rgba_ref.reset();
     m_rgb_ref.reset();
-
-    //todo :resetting
 }
 
 template<typename T>
@@ -1663,7 +1660,7 @@ inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], 
     else
         ptrArray[paramIndex].data = temp->data();
 
-    ptrArray[paramIndex].type = src[paramIndex]->type1;
+    ptrArray[paramIndex].type = src[paramIndex]->type;
     ptrArray[paramIndex].size = sizeof(VECTYPE);
 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
@@ -1694,7 +1691,7 @@ inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer 
         }
     }
 
-    ptrArray[paramIndex].type = src[paramIndex]->type1;
+    ptrArray[paramIndex].type = src[paramIndex]->type;
     ptrArray[paramIndex].size = sizeof(abcC4);
 
     memcpy(dst + paramIndex, ptrArray, sizeof(AttributeDataToTransfer));
@@ -1737,7 +1734,7 @@ void aiMeshSample<T>::fillSplitVertices(int split_index, aiPolyMeshData& data) c
     for (size_t i = 0; i < m_attributes_ref.size(); ++i)
     {
         auto attrib = m_attributes_ref[i];
-        switch (attrib->type1)
+        switch (attrib->type)
         {
             //  case(aiPropertyType::BoolArray): copy_or_clear_vector<AbcGeom::IBoolGeomParam, int >(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
             case (aiPropertyType::IntArray): copy_or_clear_vector<int>(i, (AttributeDataToTransfer*)data.m_attributes, m_attributes_ref); break;
