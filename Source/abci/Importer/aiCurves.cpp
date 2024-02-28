@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <Foundation/aiMath.h>
 #include "aiCurves.h"
+#include "aiProperty.h"
 #include "aiUtils.h"
 #include "Alembic/Abc/ITypedScalarProperty.h"
 
@@ -224,84 +225,6 @@ void aiCurves::readAttribute(aiObject* object, std::vector<AttributeData*>& attr
             }
         }
     }
-}
-
-// copyied
-static aiPropertyType aiGetPropertyType(const Abc::PropertyHeader& header)
-{
-    const auto& dt = header.getDataType();
-
-    if (header.getPropertyType() == Abc::kScalarProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::Bool;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Int;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UInt;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::Float;
-                case 8: return aiPropertyType::Float2;
-                case 12: return aiPropertyType::Float3;
-                case 16: return aiPropertyType::Float4;
-                case 64: return aiPropertyType::Float4x4;
-            }
-        }
-    }
-    else if (header.getPropertyType() == Abc::kArrayProperty)
-    {
-        if (dt.getPod() == Abc::kBooleanPOD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 1: return aiPropertyType::BoolArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kInt32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::IntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kUint32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::UIntArray;
-            }
-        }
-        else if (dt.getPod() == Abc::kFloat32POD)
-        {
-            switch (dt.getNumBytes())
-            {
-                case 4: return aiPropertyType::FloatArray;
-                case 8: return aiPropertyType::Float2Array;
-                case 12: return aiPropertyType::Float3Array;
-                case 16: return aiPropertyType::Float4Array;
-                case 64: return aiPropertyType::Float4x4Array;
-            }
-        }
-    }
-    return aiPropertyType::Unknown;
 }
 
 void aiCurvesSample::fillData(aiCurvesData& data)
