@@ -147,7 +147,7 @@ void aiCurves::remapSecondAttributeSet(int paramIndex)
 }
 
 template<typename VECTYPE>
-static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
+inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
 {
     auto ptrArray = new AttributeDataToTransfer();
 
@@ -165,7 +165,7 @@ static inline void copy_or_clear_vector(int paramIndex, AttributeDataToTransfer 
 };
 
 template<>
-static inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
+inline void copy_or_clear_vector<abcC3>(int paramIndex, AttributeDataToTransfer dst[], const std::vector<AttributeData*>& src)
 {
     auto ptrArray = new AttributeDataToTransfer();
 
