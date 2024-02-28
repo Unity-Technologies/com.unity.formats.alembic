@@ -34,7 +34,8 @@ struct AttributeDataToTransfer
     aiPropertyType type1;
 };
 
-struct AttributeSummary {
+struct AttributeSummary
+{
     const char* name;
     int size;
 };
@@ -50,7 +51,8 @@ void aiCurvesSample::getSummary(aiCurvesSampleSummary& dst)
 
     AttributeSummary* ptrArray = new AttributeSummary[m_attributes_ref.size()];
 
-    for (size_t i = 0; i < m_attributes_ref.size(); i++) {
+    for (size_t i = 0; i < m_attributes_ref.size(); i++)
+    {
         ptrArray[i].size = m_attributes_ref[i]->size;
         ptrArray[i].name = m_attributes_ref[i]->name;
     }
@@ -67,7 +69,8 @@ void aiCurves::updateArbPropertySummaryAt(int paramIndex)
 
     if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
     {
-        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope) {
+        if (param.valid() && param.getNumSamples() > 0 && param.getScope() != AbcGeom::kUnknownScope)
+        {
             m_summary.attributeCount++;
 
             m_summary.has_attributes_prop.push_back(true);

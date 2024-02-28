@@ -40,7 +40,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
 
             curves.attributesSummaryList.ResizeDiscard(m_summary.attributeCount);
-            m_sampleSummary.attributes =  (void*)curves.attributesSummaryList.Pointer;
+            m_sampleSummary.attributes = (void*)curves.attributesSummaryList.Pointer;
 
             sample.GetSummary(ref m_sampleSummary);
 
