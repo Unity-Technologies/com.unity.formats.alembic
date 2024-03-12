@@ -270,9 +270,14 @@ struct aiPropertyData
     aiPropertyData(void *d, int s, aiPropertyType t) : data(d), size(s), type(t) {}
 };
 
+struct aiTimeToSampleSelectorInfo
+{
+    int64_t requestedIndex = 0;
+    abcChrono requestedTime = 0.0;
+    int requestedTimeIndexType = 2;
+};
 
-abciAPI abcSampleSelector aiTimeToSampleSelector(double time);
-abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index);
+abciAPI void            aiTimeToSampleSelector(double time, aiTimeToSampleSelectorInfo* dst);
 abciAPI void            aiCleanup();
 abciAPI void            aiClearContextsWithPath(const char *path);
 

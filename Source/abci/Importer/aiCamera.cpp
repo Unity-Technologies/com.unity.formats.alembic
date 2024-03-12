@@ -4,6 +4,7 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiCamera.h"
+#include "aiSampleSelector.h"
 
 
 aiCameraSample::aiCameraSample(aiCamera *schema)

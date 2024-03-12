@@ -4,6 +4,7 @@
 #include "aiObject.h"
 #include "aiSchema.h"
 #include "aiXForm.h"
+#include "aiSampleSelector.h"
 
 
 aiXformSample::aiXformSample(aiXform *schema)

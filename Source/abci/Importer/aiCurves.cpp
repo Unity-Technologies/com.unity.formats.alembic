@@ -2,6 +2,7 @@
 #include <Foundation/aiMath.h>
 #include "aiCurves.h"
 #include "aiUtils.h"
+#include "aiSampleSelector.h"
 
 aiCurvesSample::aiCurvesSample(aiCurves *schema) : super(schema)
 {

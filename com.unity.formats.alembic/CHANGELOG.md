@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bug causing Editor to crash when a UV attribute is processed in the `Points` or `Face` scope.
 - Prevent a NullReferenceException when adding a curve renderer to an Alembic file with non-visible meshes.
 
+### Added
+- Add library for Windows ARM64 platform support.
+
 ## [2.3.4] - 2023-10-30
 ### Fixed
 - Prevent a NullReferenceException when upgrading a project with URP and Alembic to Unity 2023.3.

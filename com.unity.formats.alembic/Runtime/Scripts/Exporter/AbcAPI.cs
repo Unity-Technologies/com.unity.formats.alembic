@@ -423,7 +423,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern aiPropertyType aiPropertyGetType(IntPtr prop);
         [DllImport(Abci.Lib)] public static extern void aiPropertyGetData(IntPtr prop, aiPropertyData oData);
 
-        [DllImport(Abci.Lib)] public static extern aiSampleSelector aiTimeToSampleSelector(double time);
+        [DllImport(Abci.Lib)] public static extern void aiTimeToSampleSelector(double time, ref aiSampleSelector dst);
+
         [DllImport(Abci.Lib)] public static extern void aiCleanup();
 
         internal struct aiXform

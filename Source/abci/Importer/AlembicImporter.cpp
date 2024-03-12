@@ -11,14 +11,12 @@
 #include "aiCurves.h"
 #include "aiProperty.h"
 
-abciAPI abcSampleSelector aiTimeToSampleSelector(double time)
+abciAPI void aiTimeToSampleSelector(double time, aiTimeToSampleSelectorInfo* dst)
 {
-    return abcSampleSelector(time, Abc::ISampleSelector::kFloorIndex);
-}
-
-abciAPI abcSampleSelector aiIndexToSampleSelector(int64_t index)
-{
-    return abcSampleSelector(index);
+    auto ss = aiTimeToSampleSelector(time);
+    dst->requestedIndex = ss.getRequestedIndex();
+    dst->requestedTime = ss.getRequestedTime();
+    dst->requestedTimeIndexType = ss.getRequestedTimeIndexType();
 }
 
 abciAPI void aiCleanup()
