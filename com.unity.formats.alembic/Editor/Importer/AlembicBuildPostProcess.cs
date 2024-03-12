@@ -42,24 +42,24 @@ namespace UnityEditor.Formats.Alembic.Importer
 
             foreach (var files in FilesToCopy)
             {
-                if (!File.Exists(files.Key))
+                if (!File.Exists(EditorHelper.BuildPathIfNecessary(files.Key)))
                 {
                     continue;
                 }
 
                 var dir = Path.GetDirectoryName(files.Value);
-                if (dir != null && !Directory.Exists(dir))
+                if (dir != null && !Directory.Exists(EditorHelper.BuildPathIfNecessary(dir)))
                 {
                     Directory.CreateDirectory(dir);
                 }
 
-                if (File.Exists(files.Value))
+                if (File.Exists(EditorHelper.BuildPathIfNecessary(files.Value)))
                 {
                     var attrs = File.GetAttributes(files.Value);
                     attrs &= ~FileAttributes.ReadOnly;
                     File.SetAttributes(files.Value, attrs);
                 }
-                File.Copy(files.Key, files.Value, true);
+                File.Copy(EditorHelper.BuildPathIfNecessary(files.Key), files.Value, true);
             }
             FilesToCopy.Clear();
         }

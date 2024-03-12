@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -24,15 +23,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         public void TearDown()
         {
             foreach (var file in deleteFileList)
-            {
                 AssetDatabase.DeleteAsset(file);
-                var meta = file + ".meta";
-                if (File.Exists(meta))
-                {
-                    File.Delete(meta);
-                }
-            }
-
             deleteFileList.Clear();
         }
 
@@ -179,7 +170,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.AreEqual(typeof(AlembicStreamDescriptor), player.StreamDescriptor.GetType());
             var asd = player.StreamDescriptor as AlembicStreamDescriptor;
             Assert.IsTrue(!string.IsNullOrEmpty(asd.PathToAbc));
-            Assert.IsTrue(File.Exists(asd.PathToAbc));
+            Assert.IsTrue(File.Exists(EditorHelper.BuildPathIfNecessary(asd.PathToAbc)));
         }
 
         [UnityTest]
@@ -198,7 +189,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var path = AssetDatabase.GUIDToAssetPath(dummyGUID);
             var srcDummyFile = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AlembicStreamPlayer>().First()
                 .StreamDescriptor.PathToAbc;
-            File.Copy(srcDummyFile, copiedAbcFile, true);
+            AssetDatabase.CopyAsset(srcDummyFile, copiedAbcFile);
             deleteFileList.Add(copiedAbcFile);
 
             AssetDatabase.Refresh();
@@ -379,7 +370,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             const string dst = "Assets/dst.abc";
             var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
-            File.Copy(src, dst);
+            AssetDatabase.CopyAsset(src, dst);
             deleteFileList.Add(dst);
             var player = new GameObject().AddComponent<AlembicStreamPlayer>();
             player.LoadFromFile(src);
@@ -401,7 +392,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             // create copy of bad triangle
             var src = AssetDatabase.GUIDToAssetPath(badTriangleGUID);
-            File.Copy(src, copyTrianglePath);
+            AssetDatabase.CopyAsset(src, copyTrianglePath);
             deleteFileList.Add(copyTrianglePath);
 
             AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
@@ -433,7 +424,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             // create copy of bad triangle
             var src = AssetDatabase.GUIDToAssetPath(badTriangleGUID);
-            File.Copy(src, copyTrianglePath);
+            AssetDatabase.CopyAsset(src, copyTrianglePath);
             deleteFileList.Add(copyTrianglePath);
 
             AssetDatabase.ImportAsset(copyTrianglePath, ImportAssetOptions.ForceSynchronousImport);
@@ -460,7 +451,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             const string dst = "Assets/src.abc";
             const string matPath = "Assets/mat.mat";
             var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
-            File.Copy(src, dst);
+            AssetDatabase.CopyAsset(src, dst);
             var mat = new Material(Shader.Find("Standard"));
             AssetDatabase.CreateAsset(mat, matPath);
             deleteFileList.Add(dst);
@@ -485,7 +476,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             const string dst = "Assets/src.abc";
             const string matPath = "Assets/mat.mat";
             var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
-            File.Copy(src, dst);
+            AssetDatabase.CopyAsset(src, dst);
             var mat = new Material(Shader.Find("Standard"));
             AssetDatabase.CreateAsset(mat, matPath);
             deleteFileList.Add(dst);
@@ -506,7 +497,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             const string dst = "Assets/src.abc";
             const string matPath = "Assets/mat.mat";
             var src = AssetDatabase.GUIDToAssetPath("1a066d124049a413fb12b82470b82811");
-            File.Copy(src, dst);
+            AssetDatabase.CopyAsset(src, dst);
             var mat = new Material(Shader.Find("Standard"));
             AssetDatabase.CreateAsset(mat, matPath);
             deleteFileList.Add(dst);
