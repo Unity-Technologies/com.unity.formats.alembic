@@ -262,6 +262,7 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }
         }
 
+        [Ignore("(ABC-502) Disabling this test due to crashes on Windows Arm64.")]
         [Test]
         [TestCase("face_uv_grid")]
         [TestCase("point_uv_grid")]
