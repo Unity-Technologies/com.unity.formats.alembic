@@ -4,7 +4,7 @@ This page lists some known issues and limitations that you might experience with
 
 #### Limited support of build targets
 
-**Limitation:** Alembic for Unity **only supports** the following build targets: **Windows 64-bit**, **MacOS X**, **Linux 64-bit**, and **Stadia**.
+**Limitation:** Alembic for Unity **only supports** the following build targets: **Windows 64-bit/Arm64**, **MacOS X**, **Linux 64-bit**, and **Stadia**.
 
 #### Material import/export not supported
 
