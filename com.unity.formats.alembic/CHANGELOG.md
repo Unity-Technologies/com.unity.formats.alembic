@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Updated Alembic to 1.8.5 (was 1.7.16).
+- Updated ISPC to 1.21.0 (was 1.14.1).
 
 ### Fixed
 - Fixed bug where vertex color displayed as black when processing RGB, RGBA, and Normal attributes in the `Face` scope
