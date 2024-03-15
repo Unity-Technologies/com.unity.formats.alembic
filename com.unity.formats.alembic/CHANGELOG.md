@@ -4,14 +4,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.0-pre.1] - 2023-11-07
+## [2.4.0] - 2024-03-13
+### Added
+- Added library for Windows ARM64 platform support.
+
+### Changed
+- Updated Alembic to 1.8.5 (was 1.7.16).
+- Updated ISPC to 1.21.0 (was 1.14.1).
+
 ### Fixed
 - Fixed bug where vertex color displayed as black when processing RGB, RGBA, and Normal attributes in the `Face` scope
 - Fixed bug causing Editor to crash when a UV attribute is processed in the `Points` or `Face` scope.
 - Prevent a NullReferenceException when adding a curve renderer to an Alembic file with non-visible meshes.
-
-### Added
-- Add library for Windows ARM64 platform support.
 
 ## [2.3.4] - 2023-10-30
 ### Fixed
