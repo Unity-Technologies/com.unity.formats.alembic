@@ -45,17 +45,17 @@ nightly_test_trigger:
     - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in nightly_test_editors %}
 {% for platform in test_platforms %}
-# For 2023.2 and trunk, run package and AlembicRecorder tests on ALL platforms including Silicon Mac.
-# For 2023.1 and below, only run tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
+# Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
+# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% for platform in standalone_test_platforms %}
-# For trunk, run standalone build tests on ALL platforms including Silicon Mac.
-# For 2023.2 and below, only run standalone tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
-{% if platform.model != "M1" or editor.version == "trunk" %}
+# Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
+# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
@@ -71,17 +71,17 @@ nightly_test_trigger:
 {% endfor %}
 
 {% for platform in test_platforms %}
-# For the legacy HDRP test project, don't run tests on Silicon Mac because the tests have compilation error in 2021.3 on Silicon Mac.
-{% if platform.model != "M1" %}
+# For the legacy HDRP test project, don't run tests on Silicon Mac nor ARM64 Windows because 2021.3 is not supported well on these two platforms.
+{% if platform.model != "M1" and platform.model != "arm" %}
 {% for editor in hdrp_test_project.test_editors %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endfor %}
 {% endif %}
 
 {% for editor in hdrp_test_project_latest.test_editors %}
-# For 2023.2 and trunk, run AlembicHDRPLatest tests on ALL platforms including Silicon Mac.
-# For 2023.1 and below, only run AlembicHDRPLatest tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
+# If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
+# If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in trunk.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}

@@ -3,14 +3,12 @@ test_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.3
-  - version: 2023.1
   - version: 2023.2
   - version: trunk
 
 nightly_test_editors:
   - version: 2021.3
   - version: 2022.3
-  - version: 2023.1
   - version: 2023.2
   - version: trunk  
 
@@ -27,6 +25,13 @@ win_platform: &win
   name: win
   type: Unity::VM
   image: package-ci/win10:v4
+  flavor: b1.large
+
+win_arm64_platform: &win_arm64
+  name: win_arm64
+  type: Unity::VM::Azure
+  model: arm
+  image: package-ci/win11-arm64:v4
   flavor: b1.large
 
 mac_platform: &mac
@@ -61,14 +66,15 @@ centos_platform_gpu: &centos_gpu
   image: package-ci/centos:latest
   flavor: b1.large
 
-ubuntu18_platform_gpu: &ubuntu18_gpu
-  name: ubuntu18_gpu
+ubuntu20_platform_gpu: &ubuntu20_gpu
+  name: ubuntu20_gpu
   type: Unity::VM::GPU
   image: package-ci/ubuntu-18.04:v4
   flavor: b1.large
 
 test_platforms:
   - *win
+  - *win_arm64
   - *mac
   - *mac_arm64
   - *ubuntu20
@@ -76,13 +82,14 @@ test_platforms:
 # When running tests on standalone platforms, "--platform standalone" flag needs to be passed to upm-ci
 standalone_test_platforms:
   - *win
+  - *win_arm64
   - *mac
   - *mac_arm64
 
 standalone_test_platforms_gpu:
   - *mac_gpu
   - *centos_gpu
-  - *ubuntu18_gpu
+  - *ubuntu20_gpu
 
 promotion_test_platforms:
   - *win
@@ -109,7 +116,6 @@ hdrp_test_project_latest:
   path: TestProjects/AlembicHDRPLatest
   test_editors:
     - version: 2022.3
-    - version: 2023.1
     - version: 2023.2
     - version: trunk
 
