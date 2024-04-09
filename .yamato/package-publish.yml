@@ -25,9 +25,9 @@ publish_dry_run:
     - .yamato/package-pack.yml#pack
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
-# For 2023.2 and trunk, run package and AlembicRecorder tests on ALL platforms including Silicon Mac.
-# For 2023.1 and below, only run tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
+# Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
+# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
@@ -57,9 +57,9 @@ publish:
     - .yamato/package-pack.yml#pack
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
-# For 2023.2 and trunk, run package and AlembicRecorder tests on ALL platforms including Silicon Mac.
-# For 2023.1 and below, only run tests on non-Silicon Mac platforms because of known compilation errors on Silicon Mac.
-{% if platform.model != "M1" or editor.version == "2023.2" or editor.version == "trunk" %}
+# Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
+# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
