@@ -60,6 +60,12 @@ mac_platform_gpu: &mac_gpu
   image: package-ci/macos-12:v4
   flavor: m1.mac
 
+centos_platform: &centos
+  name: centos
+  type: Unity::VM
+  image: package-ci/centos:latest
+  flavor: b1.large
+
 ubuntu20_platform_gpu: &ubuntu20_gpu
   name: ubuntu20_gpu
   type: Unity::VM::GPU

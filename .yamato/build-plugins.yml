@@ -35,8 +35,8 @@ build_centOS:
   name: Build on CentOS
   agent:
     type: Unity::VM
-    image: {{ centos_platform_gpu.image }}
-    flavor: {{ centos_platform_gpu.flavor }}
+    image: {{ centos_platform.image }}
+    flavor: {{ centos_platform.flavor }}
   commands:
     -  git submodule update --init --recursive 
     -  scl enable devtoolset-7 ./build.sh
