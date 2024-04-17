@@ -60,16 +60,16 @@ mac_platform_gpu: &mac_gpu
   image: package-ci/macos-12:v4
   flavor: m1.mac
 
-centos_platform_gpu: &centos_gpu
-  name: centos_gpu
-  type: Unity::VM::GPU
+centos_platform: &centos
+  name: centos
+  type: Unity::VM
   image: package-ci/centos:latest
   flavor: b1.large
 
 ubuntu20_platform_gpu: &ubuntu20_gpu
   name: ubuntu20_gpu
   type: Unity::VM::GPU
-  image: package-ci/ubuntu-18.04:v4
+  image: package-ci/ubuntu-20.04:v4
   flavor: b1.large
 
 test_platforms:
@@ -88,7 +88,6 @@ standalone_test_platforms:
 
 standalone_test_platforms_gpu:
   - *mac_gpu
-  - *centos_gpu
   - *ubuntu20_gpu
 
 promotion_test_platforms:
