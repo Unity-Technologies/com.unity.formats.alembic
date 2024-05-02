@@ -14,6 +14,21 @@ build_win:
     plugin:
       paths:
         - "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.dll"
+
+build_win_arm64:
+  name: Build on ARM64 Win
+  agent:
+    type: {{ win_arm64_platform.type }}
+    model: {{ win_arm64_platform.model }}
+    image: {{ win_arm64_platform.image }}
+    flavor: {{ win_arm64_platform.flavor }}
+  commands:
+    - git submodule update --init --recursive
+    - build.cmd
+  artifacts:
+    plugin:
+      paths:
+        - "com.unity.formats.alembic/Runtime/Plugins/ARM64/abc*.dll"
         
 
 build_mac:
