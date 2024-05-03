@@ -16,6 +16,7 @@ file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importe
 list(APPEND sources ${ISPC_SOURCES})
 list(APPEND sources ${ISPC_OBJECTS})
 
+message(STATUS "The value of CMAKE_GENERATOR_PLATFORM is: ${CMAKE_GENERATOR_PLATFORM}")
 if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     add_plugin(abci
         SOURCES ${sources}
