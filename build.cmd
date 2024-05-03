@@ -2,14 +2,19 @@
 
 cd External
 call build.cmd
+
+IF %ERRORLEVEL% NEQ 0 (
+	echo Failed to build ilmbase lib or alembic lib
+	exit 1
+)
 cd ..
 
 SET depsdir=%cd%\External\install
 SET installdir=%cd%
 if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-    SET targetArch = "ARM64"
+    SET targetArch=ARM64
 ) else (
-    SET targetArch = "x64"
+    SET targetArch=x64
 )
 
 
@@ -29,4 +34,9 @@ cmake .. ^
     -DCMAKE_INSTALL_PREFIX=%installdir% ^
     -DCMAKE_CXX_FLAGS="/MP"
 cmake --build . --target INSTALL --config Release
+
+IF %ERRORLEVEL% NEQ 0 (
+	echo Failed to build ilmbase or alembic
+	exit 1
+)
 cd ..
