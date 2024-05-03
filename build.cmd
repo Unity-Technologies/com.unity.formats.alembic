@@ -6,6 +6,11 @@ cd ..
 
 SET depsdir=%cd%\External\install
 SET installdir=%cd%
+if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    SET targetArch = "ARM64"
+) else (
+    SET targetArch = "x64"
+)
 
 
 if exist build (
@@ -13,7 +18,10 @@ if exist build (
 )
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release ^
+cmake .. ^
+    -A %targetArch% ^
+    -DCMAKE_GENERATOR_PLATFORM=%targetArch% ^
+    -DCMAKE_BUILD_TYPE=Release ^
     -DALEMBIC_DIR=%depsdir% ^
     -DUSE_STATIC=ON ^
     -DENABLE_DEPLOY=OFF ^

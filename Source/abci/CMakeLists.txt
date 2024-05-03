@@ -16,7 +16,7 @@ file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importe
 list(APPEND sources ${ISPC_SOURCES})
 list(APPEND sources ${ISPC_OBJECTS})
 
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     add_plugin(abci
         SOURCES ${sources}
         PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64

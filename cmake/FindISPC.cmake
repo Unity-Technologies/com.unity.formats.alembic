@@ -32,7 +32,7 @@ set(ISPC_VERSION 1.21.0)
             COMMAND ${7ZA} x -aoa -o* ${CMAKE_SOURCE_DIR}/External/ispc/${ISPC_DIR}.zip
         )
     endif()
-    cmake_print_variables(CMAKE_SYSTEM_PROCESSOR)
+    cmake_print_variables(CMAKE_GENERATOR_PLATFORM)
     set(ISPC "${CMAKE_BINARY_DIR}/${ISPC_DIR}/bin/ispc" CACHE PATH "" FORCE)
 
 # e.g:
@@ -52,7 +52,7 @@ function(add_ispc_targets)
         set(header "${arg_OUTDIR}/${name}.h")
         set(object "${arg_OUTDIR}/${name}${CMAKE_CXX_OUTPUT_EXTENSION}")
 
-        if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+        if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
             set(objects 
                 ${object}
             )
@@ -77,7 +77,7 @@ function(add_ispc_targets)
         
         set(outputs ${header} ${objects})
 
-        if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+        if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
             add_custom_command(
                 OUTPUT ${outputs}
                 COMMAND ${ISPC}
