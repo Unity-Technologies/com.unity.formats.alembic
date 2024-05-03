@@ -50,7 +50,7 @@ target_link_libraries(abci
         ${OPENEXR_Iex_LIBRARY}
         ${OPENEXR_IexMath_LIBRARY}
 )
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64)
 else()
     install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)
