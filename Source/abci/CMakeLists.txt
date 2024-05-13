@@ -16,7 +16,8 @@ file(GLOB sources *.cpp *.h Foundation/*.h Foundation/*.cpp Importer/*.h Importe
 list(APPEND sources ${ISPC_SOURCES})
 list(APPEND sources ${ISPC_OBJECTS})
 
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+message(STATUS "The value of CMAKE_GENERATOR_PLATFORM is: ${CMAKE_GENERATOR_PLATFORM}")
+if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     add_plugin(abci
         SOURCES ${sources}
         PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64
@@ -49,7 +50,7 @@ target_link_libraries(abci
         ${OPENEXR_Iex_LIBRARY}
         ${OPENEXR_IexMath_LIBRARY}
 )
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+if (CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/ARM64)
 else()
     install(TARGETS abci DESTINATION ${CMAKE_INSTALL_PREFIX}/com.unity.formats.alembic/Runtime/Plugins/x86_64)

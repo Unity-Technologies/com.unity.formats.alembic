@@ -3,18 +3,15 @@ test_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.3
-  - version: 2023.2
   - version: trunk
 
 nightly_test_editors:
   - version: 2021.3
   - version: 2022.3
-  - version: 2023.2
   - version: trunk  
 
 clean_console_test_editors:
   - version: 2022.3
-  - version: 2023.2
   - version: trunk  
 
 promotion_test_editors:
@@ -115,7 +112,6 @@ hdrp_test_project_latest:
   path: TestProjects/AlembicHDRPLatest
   test_editors:
     - version: 2022.3
-    - version: 2023.2
     - version: trunk
 
 api_test_project:
