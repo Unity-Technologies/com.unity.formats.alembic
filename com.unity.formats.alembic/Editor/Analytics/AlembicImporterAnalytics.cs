@@ -90,7 +90,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             var evt = new AlembicImporterAnalyticsEvent
             {
                 material_override_count = importer.GetExternalObjectMap().Count,
-                guid = AssetDatabase.AssetPathToGUID(importer.assetPath),
+                guid = AssetDatabase.GUIDFromAssetPath(importer.assetPath).ToString(),
                 app = root.stream.abcContext.GetApplication(),
                 render_pipeline = GetCurrentRenderPipeline()
             };
