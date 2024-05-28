@@ -6,7 +6,7 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:v2.0.1
+    image: package-ci/win10:v4
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
@@ -18,14 +18,14 @@ platforms:
 #    flavor: b1.large
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.large
 
 
 
 standalone_platforms:
   - name: win
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     runtime: standalone
     type: Unity::VM
@@ -57,7 +57,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
@@ -100,7 +100,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
@@ -278,7 +278,7 @@ format_check_win:
   name : FormatCheck on Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
@@ -317,7 +317,7 @@ test_bizarro:
   name: TestsTriggerBizarro
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - dir
@@ -352,7 +352,7 @@ publish_dry_run:
   name: PublishDryRun
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   commands:
@@ -379,7 +379,7 @@ publish:
   name: Publish
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   commands:
