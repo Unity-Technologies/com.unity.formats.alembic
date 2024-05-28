@@ -235,7 +235,10 @@ test_trigger_hdrp:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
+    # Skip running hdrp tests in 2019.4.
+    {% unless editor.version == "2019.4" %}
     - .yamato/upm-ci.yml#testProject_hdrp_{{platform.name}}_{{editor.version}}
+    {% endunless %}
     {% endfor %}
     {% endfor %}
 
@@ -252,8 +255,11 @@ test_trigger:
     - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
     {% endfor %}
     
-    {% for platform in standalone_platforms %}  
+    {% for platform in standalone_platforms %}
+    # Skip running standalone tests in 2019.4.
+    {% unless editor.version == "2019.4" %}
     - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
+    {% endunless %}
     {% endfor %}
     {% endfor %}
     - .yamato/upm-ci.yml#format_check_win
