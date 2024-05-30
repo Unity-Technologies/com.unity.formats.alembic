@@ -6,11 +6,11 @@ editors:
 platforms:
   - name: win
     type: Unity::VM
-    image: package-ci/win10:v2.0.1
+    image: package-ci/win10:v4
     flavor: b1.large
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
 #  - name: centOS
 #    type: Unity::VM::GPU
@@ -18,27 +18,27 @@ platforms:
 #    flavor: b1.large
   - name: ubuntu
     type: Unity::VM
-    image: package-ci/ubuntu:stable
+    image: package-ci/ubuntu-18.04:v4
     flavor: b1.large
 
 
 
 standalone_platforms:
   - name: win
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     runtime: standalone
     type: Unity::VM
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
     runtime: standalone
 
 bizarro_standalone_platforms:
   - name: mac_m2
     type: Unity::metal::devkit
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
     runtime: standalone
   - name: centOS
@@ -57,7 +57,7 @@ build_win:
   name: Build Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git submodule update --init --recursive
@@ -71,7 +71,7 @@ build_mac:
   name: Build Mac
   agent:
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-12:v4
     flavor: m1.mac
   commands:
     - git submodule update --init --recursive
@@ -100,7 +100,7 @@ pack:
   name: Pack
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
@@ -235,7 +235,10 @@ test_trigger_hdrp:
     - .yamato/upm-ci.yml#pack
     {% for editor in editors %}
     {% for platform in platforms %}
+    # Skip running hdrp tests in 2019.4.
+    {% unless editor.version == "2019.4" %}
     - .yamato/upm-ci.yml#testProject_hdrp_{{platform.name}}_{{editor.version}}
+    {% endunless %}
     {% endfor %}
     {% endfor %}
 
@@ -252,8 +255,11 @@ test_trigger:
     - .yamato/upm-ci.yml#testProject_{{platform.name}}_{{editor.version}}
     {% endfor %}
     
-    {% for platform in standalone_platforms %}  
+    {% for platform in standalone_platforms %}
+    # Skip running standalone tests in 2019.4.
+    {% unless editor.version == "2019.4" %}
     - .yamato/upm-ci.yml#testStandalone_{{platform.name}}_{{editor.version}}
+    {% endunless %}
     {% endfor %}
     {% endfor %}
     - .yamato/upm-ci.yml#format_check_win
@@ -278,7 +284,7 @@ format_check_win:
   name : FormatCheck on Win
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
@@ -317,7 +323,7 @@ test_bizarro:
   name: TestsTriggerBizarro
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
   commands:
     - dir
@@ -352,7 +358,7 @@ publish_dry_run:
   name: PublishDryRun
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   commands:
@@ -379,7 +385,7 @@ publish:
   name: Publish
   agent:
     type: Unity::VM
-    image: package-ci/win10:v1.15.0
+    image: package-ci/win10:v4
     flavor: b1.large
     name: Runner
   commands:
