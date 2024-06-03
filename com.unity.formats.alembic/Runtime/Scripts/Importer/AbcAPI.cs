@@ -306,11 +306,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
     internal static class Abci
     {
-#if UNITY_EDITOR_OSX
-        internal const string Lib = "Packages/com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci";
-#else
         internal const string Lib = "abci";
-#endif
     }
 
     struct aiContext
