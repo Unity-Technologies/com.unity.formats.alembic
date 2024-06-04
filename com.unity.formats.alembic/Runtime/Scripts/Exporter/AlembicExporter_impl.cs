@@ -1061,7 +1061,8 @@ namespace UnityEngine.Formats.Alembic.Util
                 foreach (var t in GetTargets(kvp.Key))
                 {
                     var node = ConstructTree(t.GetComponent<Transform>());
-                    node.componentType = t.GetType();
+                    if (node.componentType == null || node.componentType == typeof(Transform))
+                        node.componentType = t.GetType();
                 }
             }
 
