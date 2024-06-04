@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
@@ -28,6 +30,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             yield return new WaitForEndOfFrame();
             mesh.GetUVs(5, velocity);
             Assert.IsTrue(velocity.All(x => x == Vector3.zero));
+
+            GameObject.DestroyImmediate(go);
         }
 
 #endif
