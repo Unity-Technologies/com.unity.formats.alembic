@@ -67,7 +67,11 @@ namespace UnityEditor.Formats.Alembic.Importer
 
         static void UpdateMeshStats(ref AlembicImporterAnalyticsEvent evt, AlembicMesh m)
         {
-            var mesh = m.abcTreeNode.gameObject.GetComponent<MeshFilter>().sharedMesh;
+            var meshFilter = m.abcTreeNode.gameObject.GetComponent<MeshFilter>();
+            if (meshFilter == null)
+                return;
+
+            var mesh = meshFilter.sharedMesh;
             var indices = 0;
             for (var i = 0; i < mesh.subMeshCount; ++i)
             {
