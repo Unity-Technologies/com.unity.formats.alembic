@@ -989,12 +989,15 @@ namespace UnityEngine.Formats.Alembic.Util
             if (m_capturerTable.Count != 0)
                 return;
 
-            foreach (var type in TypeCache.GetTypesWithAttribute<CaptureTarget>())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                var attr = type.GetCustomAttributes(typeof(CaptureTarget), true);
-                if (attr.Length > 0)
+                foreach (Type type in assembly.GetTypes())
                 {
-                    m_capturerTable[(attr[0] as CaptureTarget).componentType] = new CapturerRecord { type = type };
+                    var attr = type.GetCustomAttributes(typeof(CaptureTarget), true);
+                    if (attr.Length > 0)
+                    {
+                        m_capturerTable[(attr[0] as CaptureTarget).componentType] = new CapturerRecord { type = type };
+                    }
                 }
             }
 
