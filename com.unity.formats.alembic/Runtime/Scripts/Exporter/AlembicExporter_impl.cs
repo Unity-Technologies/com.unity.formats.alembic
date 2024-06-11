@@ -989,7 +989,7 @@ namespace UnityEngine.Formats.Alembic.Util
             if (m_capturerTable.Count != 0)
                 return;
 
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in Assemblies.CurrentAssemblies.GetLoadedAssemblies())
             {
                 foreach (Type type in assembly.GetTypes())
                 {
