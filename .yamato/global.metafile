@@ -54,7 +54,7 @@ ubuntu20_platform: &ubuntu20
 mac_platform_gpu: &mac_gpu
   name: mac_gpu
   type: Unity::metal::macmini
-  image: package-ci/macos-12:v4
+  image: package-ci/macos-12:v4.50.0
   flavor: m1.mac
 
 centos_platform: &centos
