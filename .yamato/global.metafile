@@ -21,7 +21,7 @@ promotion_test_editors:
 win_platform: &win
   name: win
   type: Unity::VM
-  image: package-ci/win10:v4
+  image: package-ci/win10:v4.50.0 #https://jira.unity3d.com/browse/ABC-521
   flavor: b1.large
 
 win_arm64_platform: &win_arm64
@@ -54,7 +54,7 @@ ubuntu20_platform: &ubuntu20
 mac_platform_gpu: &mac_gpu
   name: mac_gpu
   type: Unity::metal::macmini
-  image: package-ci/macos-12:v4.50.0
+  image: package-ci/macos-12:v4.50.0 #https://jira.unity3d.com/browse/ABC-521
   flavor: m1.mac
 
 centos_platform: &centos
