@@ -76,7 +76,7 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-    [ScriptedImporter(11, "abc")]
+    [ScriptedImporter(11, "abc", -50)]
     internal class AlembicImporter : ScriptedImporter
     {
         enum ImporterVersions
