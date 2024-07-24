@@ -11,12 +11,12 @@ pack:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm 
     - upm-ci package pack --package-path com.unity.formats.alembic
     - upm-pvp xray --packages "upm-ci~/packages/*.tgz" --results upm-ci~/xray
-    # Require once without exemptions (and without Yamato reporting) to generate a new exemption file "new_exemptions.json"
+    # Require once without applying exemptions (and without Yamato reporting) to generate a new exemption file "new_exemptions.json"
     # "new_exemptions.json" always contains all errors at the moment
     - upm-pvp require "supported rme" --allow-missing --no-report --results upm-ci~/xray --exemptions "upm-ci~/xray/new_exemptions.json"
-    # Require once with exemptions (pvp_xray_exemptions.json) to determine job status and report errors
-    # If the job fails because of new errors which are not exempted by pvp_xray_exemptions.json and thought expected, we can use new_exemptions.json to replace the exemptions in pvp_xray_exemptions.json
-    # - upm-pvp require "supported rme ./pvp_xray_exemptions.json" --allow-missing --results "upm-ci~/xray"
+    # Require once with exemptions applied (pvp_xray_exemptions.json) to determine job status and report errors
+    # If the job fails because of new errors which are NOT exempted by pvp_xray_exemptions.json and thought expected, we can use new_exemptions.json to replace the exemptions in pvp_xray_exemptions.json
+    - upm-pvp require "supported rme ./pvp_xray_exemptions.json" --allow-missing --results "upm-ci~/xray"
   artifacts:
     packages:
       paths:
