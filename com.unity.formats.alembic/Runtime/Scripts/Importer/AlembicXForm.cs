@@ -37,8 +37,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             }
             else
             {
-                trans.position = m_abcData.translation;
-                trans.rotation = m_abcData.rotation;
+                trans.SetPositionAndRotation(m_abcData.translation, m_abcData.rotation);
                 trans.localScale = m_abcData.scale;
             }
         }
