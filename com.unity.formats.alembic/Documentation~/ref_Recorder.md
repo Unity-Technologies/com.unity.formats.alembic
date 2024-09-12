@@ -13,6 +13,14 @@ The Alembic Clip Recorder properties fall into three main categories:
 * [Alembic Settings](#alembic-settings)
 * [Capture Settings](#capture-settings)
 
+(The [Input](#input) section is only relevant when you set the recording section's Playback property to Variable, and the Output Format section is always empty for this type of recorder.)
+
+## Input
+
+| Property | Description |
+| :--- | :--- |
+| **Render Frame Step** | Available when you set **Playback** to **Variable**. Specifies the number of rendered frames to discard between recorded frames. The duration of the discarded frames is preserved, reducing frames per second. Example: if the value is 2, every second frame is discarded, but the duration of the recording remains the same. |
+
 
 ## Output File
 
