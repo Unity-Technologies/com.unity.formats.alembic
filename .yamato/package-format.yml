@@ -28,8 +28,8 @@
      image: package-ci/ubuntu:v1.3.1-719011
      flavor: b1.small
    commands:
-     - git config --global user.name "noreply@unity3d.com"
-     - git config --global user.email "noreply@unity3d.com"
+     - git config --global user.name "Alembic CI"
+     - git config --global user.email $YAMATO_OWNER_EMAIL
      - git checkout $GIT_BRANCH
      - git pull origin $GIT_BRANCH # In case the job was not run on the latest commit, attempt to get it. There may be situations with merge conflicts, in that case wait for everyone to push their changes and then only run the formatting job on HEAD.
      - "echo -e \"[extensions]\nlargefiles=\n\" > ~/.hgrc"
