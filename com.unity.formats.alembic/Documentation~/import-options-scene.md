@@ -10,7 +10,7 @@ Use these options to customize the scale factor, handedness, interpolation, and 
 | __Interpolate Samples__ | Enable to interpolate animation for Transform, Camera, and Mesh components for which the topology does not change (that is, for which the number of vertices and indices are immutable).<br/>If **Interpolate Samples** is enabled, or velocity data is included in the .abc file, you can pass velocity data to an Alembic shader. |
 | __Import Visibility__ | Enable to import Visibility (i.e. the control of the active state of the objects). |
 | __Import Camera__ | Enable to import Camera data. |
-| __Import Meshes__ | Enable to import Mesh data. |
+| __Import Meshes__ | Enable to import Mesh data.<br />**Note:** If a file includes [SubD surface](https://en.wikipedia.org/wiki/Subdivision_surface) data, the importer only imports the base outer mesh and ignores the inner mesh calculation data as the Unity Editor cannot interpret it. |
 | __Import Points__ | Enable to import Point (particle cloud) data. |
 | __Import Curves__ | Enable to import Curve (hair or fur) data. See [Working with Curves](curves.md) for more details. |
 | __Add Curve Renderers__ | Enable to get a [basic preview](curves.md#rendering-alembic-curves) of the Alembic curves in your Scene and Game views if you don't have a curve renderer.<br />This option is only available when you select __Import Curves__. |
