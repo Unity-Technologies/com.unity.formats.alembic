@@ -3,15 +3,18 @@ test_editors:
   - version: 2020.3
   - version: 2021.3
   - version: 2022.3
+  - version: 6000.0
   - version: trunk
 
 nightly_test_editors:
   - version: 2021.3
   - version: 2022.3
+  - version: 6000.0
   - version: trunk  
 
 clean_console_test_editors:
   - version: 2022.3
+  - version: 6000.0
   - version: trunk  
 
 promotion_test_editors:

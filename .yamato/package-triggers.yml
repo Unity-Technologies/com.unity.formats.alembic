@@ -6,7 +6,7 @@ test_trigger_pr_documentation:
   name: Pull Request Tests Trigger for documentation changes
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND push.changes.any match "com.unity.formats.alembic/Documentation~/**" AND NOT draft)
+    expression: pull_request.(target match ".*" AND changes.any match "com.unity.formats.alembic/Documentation~/**" AND NOT draft)
   dependencies:
     - .yamato/package-documentation.yml#generate_documentation
     - .yamato/package-test.yml#vetting_test_win_trunk
@@ -16,7 +16,7 @@ test_trigger_pr:
   name: Pull Request Tests Trigger
   triggers:
     cancel_old_ci: true
-    expression: pull_request.(target match ".*" AND NOT push.changes.all match ["com.unity.formats.alembic/Documentation~/**", "**/*.md"] AND NOT draft)
+    expression: pull_request.(target match ".*" AND NOT changes.all match ["com.unity.formats.alembic/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
     - .yamato/package-validation.yml#validate_api_doc
     - .yamato/package-validation.yml#validate_api_osx
@@ -46,16 +46,16 @@ nightly_test_trigger:
 {% for editor in nightly_test_editors %}
 {% for platform in test_platforms %}
 # Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
-# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
-{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+# If on Silicon Mac or ARM64 Windows, only run tests in 6000.0 and trunk.
+{% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
 {% for platform in standalone_test_platforms %}
 # Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
-# If on Silicon Mac or ARM64 Windows, only run tests in trunk.
-{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+# If on Silicon Mac or ARM64 Windows, only run tests in 6000.0 and trunk.
+{% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
@@ -80,8 +80,8 @@ nightly_test_trigger:
 
 {% for editor in hdrp_test_project_latest.test_editors %}
 # If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
-# If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in trunk.
-{% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
+# If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in 6000.0 and trunk.
+{% if editor.version == "6000.0" or editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/project-test.yml#test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
 {% endfor %}
