@@ -651,8 +651,7 @@ namespace UnityEngine.Formats.Alembic.Util
             public override void Setup(Component c)
             {
                 m_target = c as MeshRenderer;
-                MeshFilter meshFilter = m_target.GetComponent<MeshFilter>();
-                if (meshFilter == null)
+                if (!m_target.TryGetComponent<MeshFilter>(out var meshFilter))
                 {
                     m_target = null;
                     return;
@@ -712,8 +711,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     m_mbuf.SetupSubmeshes(abcObject, mesh);
 
                 m_meshSrc = target.sharedMesh;
-                m_cloth = m_target.GetComponent<Cloth>();
-                if (m_cloth != null)
+                if (m_target.TryGetComponent<Cloth>(out m_cloth))
                 {
                     m_cbuf = new ClothBuffer();
                     m_cbuf.rootBone = m_target.rootBone != null ? m_target.rootBone : m_target.GetComponent<Transform>();
