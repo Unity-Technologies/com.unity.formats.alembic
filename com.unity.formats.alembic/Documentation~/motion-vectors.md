@@ -1,4 +1,4 @@
-# Applying motion blur and shaders
+# Apply motion blur and shaders
 
 This section contains information about how to set up [Motion Blur](#blur). It also lists the [Shaders](#shaders) included in this package and specifically customized to work with Alembic.
 

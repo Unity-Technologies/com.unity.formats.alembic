@@ -1,8 +1,8 @@
-# Working with Curves
+# Work with Curves
 
 You can import Alembic files with curve data to Unity, and optionally preview the curves in your Scene and Game views if you don't have a custom curve renderer.
 
-## Importing Alembic Curve data
+## Import Alembic Curve data
 
 To import an Alembic file with curve data, start the Alembic file [import process](import.md), and then in the [import settings](ref_Importer.md), select **Import Curves**.
 
@@ -18,7 +18,7 @@ Unity imports the curves as piecewise linear segments, and the imported curve da
 
 >**Note:** The imported curve data does **not** include the spline information from the original Alembic Curve schema.
 
-## Rendering Alembic Curves
+## Render Alembic Curves
 
 Unity does not currently include any built-in curve renderer. This means that, by default, you cannot see the imported curves in the Scene and Game views of your Unity Editor, unless you implemented a custom curve renderer.
 

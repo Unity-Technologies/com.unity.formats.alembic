@@ -1,4 +1,4 @@
-# Playback using an Alembic Animation clip
+# Playback with an Alembic Animation clip
 
 When Unity imports an Alembic file, it automatically imports the animation as an Animation clip. To access the imported clip, expand the imported Alembic Asset in the Project view.
 

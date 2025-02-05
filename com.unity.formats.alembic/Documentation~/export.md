@@ -1,4 +1,4 @@
-# Exporting Unity GameObjects to Alembic
+# Export Unity GameObjects to Alembic
 
 Using alembic to export objects out of Unity is useful when you want to bake data that is not key-frame animated. This allows you to get deterministic data that you can re-use in other Digital Content Creation Softwares (DCCs) or in Unity itself.
 

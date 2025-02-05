@@ -1,4 +1,4 @@
-# Working with Particles
+# Work with Particles
 
 When you import an Alembic file that contains particles, the Alembic package automatically adds two custom components to help you work with particles:
 
