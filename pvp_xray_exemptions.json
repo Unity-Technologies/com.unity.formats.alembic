@@ -23,11 +23,6 @@
             "UnityEngine.Formats.Alembic.Util.AlembicRecorder: Recording: unexpected <returns>; use <value> instead",
             "UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer: bool ReloadStream(bool): text or XML content outside a top-level tag"
           ]
-        },
-        "PVP-41-1": {
-          "errors": [
-            "CHANGELOG.md: line 9: Unreleased section is not allowed for public release"
-          ]
         }
       }
     }
