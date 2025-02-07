@@ -56,6 +56,15 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));
         }
 
+        [Test]
+        public void CorruptedAlembicFileIsHandledGracefully()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("0c10a673a92234124a1fc31297198530");
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            Assert.IsNotNull(asset);
+        }
+
         [UnityTest]
         public IEnumerator AddCurveRenderingSettingIsObeyed([Values] bool addCurve)
         {
