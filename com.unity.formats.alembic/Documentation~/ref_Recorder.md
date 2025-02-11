@@ -13,7 +13,8 @@ The Alembic Clip Recorder properties fall into three main categories:
 * [Alembic Settings](#alembic-settings)
 * [Capture Settings](#capture-settings)
 
-(The [Input](#input) section is only relevant when you set the recording section's Playback property to Variable, and the Output Format section is always empty for this type of recorder.)
+> [!NOTE]
+> The [Input](#input) section is only relevant when you set the recording section's Playback property to Variable, and the Output Format section is empty because this recorder type only exports to the Alembic format.
 
 ## Input
 
