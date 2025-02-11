@@ -5,7 +5,7 @@ The **Alembic Point Cloud** component allows you to define the shape and volume 
 To access the Alembic Point Cloud component, in the Hierarchy, within an imported Alembic asset instance, select a GameObject that corresponds to an Alembic node that contains particles.
 
 > [!NOTE]
-> When you imported the Alembic asset in Unity, you must have selected **Import Points** among the Alembic import settings.
+> When you import the Alembic asset in Unity, you must select **Import Points** among the Alembic import settings.
 
 ![Alembic Point Cloud component options](images/abc_point_cloud_options.png)
 
@@ -19,5 +19,5 @@ To access the Alembic Point Cloud component, in the Hierarchy, within an importe
 
 ## Additional resources
 
-* [Importing Alembic files](import.md)
-* [Working with Particles](particles.md)
+* [Import Alembic files](import.md)
+* [Work with Particles](particles.md)

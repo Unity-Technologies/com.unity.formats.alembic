@@ -5,7 +5,7 @@ The Alembic Curves Renderer component provides a basic representation of Alembic
 To access the Alembic Curves Renderer component, in the Hierarchy, within an imported Alembic asset instance, select a GameObject that corresponds to an Alembic curve node.
 
 > [!NOTE]
-> When you imported the Alembic asset in Unity, you must have selected **Import Curves** and **Add Curve Renderer** among the Alembic import settings.
+> When you import the Alembic asset in Unity, you must select **Import Curves** and **Add Curve Renderer** among the Alembic import settings.
 
 ![The Alembic Curves Renderer component](images/abc_curves_renderer_options.png)
 
@@ -15,5 +15,5 @@ To access the Alembic Curves Renderer component, in the Hierarchy, within an imp
 
 ## Additional resources
 
-* [Importing Alembic files](import.md)
-* [Working with Curves](curves.md)
+* [Import Alembic files](import.md)
+* [Work with Curves](curves.md)

@@ -5,7 +5,7 @@ The **Alembic Point Renderer** component allows you to customize the appearance 
 To access the Alembic Point Renderer component, in the Hierarchy, within an imported Alembic asset instance, select a GameObject that corresponds to an Alembic node that contains particles.
 
 > [!NOTE]
-> When you imported the Alembic asset in Unity, you must have selected **Import Points** among the Alembic import settings.
+> When you import the Alembic asset in Unity, you must select **Import Points** among the Alembic import settings.
 
 ![Alembic Point Renderer component options](images/abc_point_renderer_options.png)
 
@@ -29,5 +29,5 @@ To access the Alembic Point Renderer component, in the Hierarchy, within an impo
 
 ## Additional resources
 
-* [Importing Alembic files](import.md)
-* [Working with Particles](particles.md)
+* [Import Alembic files](import.md)
+* [Work with Particles](particles.md)
