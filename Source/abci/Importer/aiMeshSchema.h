@@ -708,13 +708,17 @@ void aiMeshSchema<T, U>::cookSampleBody(U& sample)
         }
         else if (!summary.compute_velocities && summary.has_velocities_prop)
         {
-            auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
-            Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
-            if (config.swap_handedness)
-                SwapHandedness(dst.data(), (int)dst.size());
-            if (config.scale_factor != 1.0f)
-                ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
-            sample.m_velocities_ref = dst;
+            // `sample.m_velocities_sp` can be null when `summary.has_points` is false
+            if (sample.m_velocities_sp != nullptr)
+            {
+                auto& dst = summary.constant_velocities ? m_constant_velocities : sample.m_velocities;
+                Remap(dst, *sample.m_velocities_sp, topology.m_remap_points);
+                if (config.swap_handedness)
+                    SwapHandedness(dst.data(), (int)dst.size());
+                if (config.scale_factor != 1.0f)
+                    ApplyScale(dst.data(), (int)dst.size(), config.scale_factor);
+                sample.m_velocities_ref = dst;
+            }
         }
     }
 

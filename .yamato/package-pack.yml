@@ -16,7 +16,7 @@ pack:
     - upm-pvp require "supported rme" --allow-missing --no-report --results upm-ci~/xray --exemptions "upm-ci~/xray/new_exemptions.json"
     # Require once with exemptions applied (pvp_xray_exemptions.json) to determine job status and report errors
     # If the job fails because of new errors which are NOT exempted by pvp_xray_exemptions.json and thought expected, we can use new_exemptions.json to replace the exemptions in pvp_xray_exemptions.json
-    - upm-pvp require "supported rme ./pvp_xray_exemptions.json" --allow-missing --results "upm-ci~/xray"
+    - upm-pvp require "supported rme -PVP-41-1 ./pvp_xray_exemptions.json" --allow-missing --results "upm-ci~/xray"
   artifacts:
     packages:
       paths:
