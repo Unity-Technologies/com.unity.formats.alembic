@@ -1,4 +1,4 @@
-# Controlling Alembic playback
+# Play back Alembic clips in Unity
 
 You can customize importing and playing back Alembic data through the properties on the [Alembic Stream Player component](ref_StreamPlayer.md).
 

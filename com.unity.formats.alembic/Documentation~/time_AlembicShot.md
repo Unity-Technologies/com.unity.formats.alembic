@@ -1,4 +1,4 @@
-# Play back using an Alembic Shot clip
+# Playback with an Alembic Shot clip
 
 You can play back Alembic as an **Alembic Shot** on an **Alembic Track**.
 

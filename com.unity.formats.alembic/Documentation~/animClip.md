@@ -1,4 +1,4 @@
-# Using Alembic with Unity Animation
+# Playback with Unity Animation
 
 You can control the playback of Alembic using Unity's Animation System bound to the GameObject that contains the [Alembic Stream Player](ref_StreamPlayer.md) component.
 

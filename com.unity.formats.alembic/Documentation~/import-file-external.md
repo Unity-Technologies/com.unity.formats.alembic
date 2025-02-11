@@ -1,4 +1,4 @@
-# Importing an external Alembic file from outside your project folder
+# Import an external Alembic file from outside your project folder
 
 Use this method when you cannot or do not want to manage the Alembic source file through a copy of a folder of your Unity project, for example:
 * To import very large assets.
@@ -6,7 +6,7 @@ Use this method when you cannot or do not want to manage the Alembic source file
 
 >**Note:** If you can afford managing a copy of the Alembic inside your project folder, you should preferably use the [default recommended import method](import-file-local.md).
 
-## Importing the file
+## Import the file
 
 To import an Alembic file from outside your Unity project:
 
@@ -19,7 +19,7 @@ To import an Alembic file from outside your Unity project:
 
 4. Adjust the properties of the [Alembic Stream Player component](ref_StreamPlayer.md#alembic-asset-located-outside-your-project) to customize the import process.
 
-## Applying Materials
+## Apply Materials
 
 The Alembic format doesn't support any Material data.
 
@@ -27,13 +27,13 @@ By default, to guarantee an acceptable basic display of the used Alembic asset, 
 
 However, once you added the Alembic asset to the Scene Hierarchy, you can manually [re-assign materials for each GameObject](https://docs.unity3d.com/Manual/materials-introduction.html).
 
-## Editing the import options
+## Edit the import options
 
 You can adjust the import options after you linked the external Alembic file to your project.
 
 To do so, edit the properties of the [Alembic Stream Player component](ref_StreamPlayer.md#alembic-asset-located-outside-your-project). The Alembic importer automatically applies them to the imported asset.
 
-## Synchronizing the Alembic nodes
+## Synchronize the Alembic nodes
 
 The Alembic Stream Player does not automatically synchronize the GameObject hierarchy of the imported asset with the node structure of the external Alembic file. If changes occur in the hierarchy of the external file, for example due to collaborative work, you must manually perform the synchronization on your imported assed.
 

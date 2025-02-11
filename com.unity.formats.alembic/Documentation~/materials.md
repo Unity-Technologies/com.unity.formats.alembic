@@ -1,4 +1,4 @@
-# Working with Materials
+# Work with Materials
 
 The Alembic format doesn't support any material data. Thus, when you import an Alembic file in Unity, the resulting imported asset can't have specific materials assigned by default to its submeshes.
 
