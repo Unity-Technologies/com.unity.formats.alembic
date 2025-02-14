@@ -916,6 +916,7 @@ validate_-_formats_alembic_-_6000_1_-_ubuntu:
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor
     timeout: 10
     retries: 1
+  - command: python -c "import json; data = {}; data['disableBatchMode']=True; file=open('test-formats.alembic/TestRunnerOptions.json', 'w'); json.dump(data, file, indent=4), file.close()"
   - command: echo No internal packages to add.
   - command: upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results upm-ci~/pvp
     timeout: 20
@@ -1054,6 +1055,7 @@ validate_-_formats_alembic_-_6000_2_-_macos:
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor
     timeout: 10
     retries: 1
+  - command: python -c "import json; data = {}; data['disableBatchMode']=True; file=open('test-formats.alembic/TestRunnerOptions.json', 'w'); json.dump(data, file, indent=4), file.close()"
   - command: echo No internal packages to add.
   - command: upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results upm-ci~/pvp
     timeout: 20
@@ -1192,7 +1194,7 @@ validate_-_formats_alembic_-_6000_2_-_windows:
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor
     timeout: 10
     retries: 1
-  - command: python -c "import json; data = {}; data['disableBatchMode']=True; file=open('create-test-project/TestRunnerOptions.json', 'w'); json.dump(data, file, indent=4), file.close()"
+  - command: python -c "import json; data = {}; data['disableBatchMode']=True; file=open('test-formats.alembic/TestRunnerOptions.json', 'w'); json.dump(data, file, indent=4), file.close()"
   - command: echo No internal packages to add.
   - command: upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results upm-ci~/pvp
     timeout: 20
