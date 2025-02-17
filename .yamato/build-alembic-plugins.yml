@@ -34,7 +34,7 @@ build_plugins_-_macos-12:
 build_plugins_-_win10:
   name: Build plugins - win10
   agent:
-    image: package-ci/win10:v4:default
+    image: package-ci/win10:default
     type: Unity::VM
     flavor: b1.large
   commands:

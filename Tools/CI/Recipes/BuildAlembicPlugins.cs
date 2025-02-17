@@ -27,7 +27,7 @@ public class BuildAlembicPlugins : RecipeBase
 
         //Build agents
         Agent winArm64 = new Agent("package-ci/win11-arm64:default", FlavorType.BuildLarge, ResourceType.Azure, "arm");
-        Agent win = new Agent("package-ci/win10:v4:default", FlavorType.BuildLarge, ResourceType.Vm);
+        Agent win = new Agent("package-ci/win10:default", FlavorType.BuildLarge, ResourceType.Vm);
         Agent centOS = new Agent("package-ci/centos:latest", FlavorType.BuildLarge, ResourceType.Vm);
         Agent mac = new Agent("package-ci/macos-12:default", FlavorType.MacDefault, ResourceType.VmOsx);
 
