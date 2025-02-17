@@ -23,18 +23,18 @@ public class BuildAlembicPlugins : RecipeBase
     {
         var settings = AlembicSettings.Instance;
 
-        var platforms = settings.Wrench.Packages[AlembicSettings.AlembicPackageName].EditorPlatforms;
-        //Agents to build plugins on which include Win, WinArm64, Mac and Ubuntu
         List<Agent> buildAgents = new();
-        foreach (var platform in platforms)
-        {
-            buildAgents.Add(platform.Value.Agent);
-        }
 
-        //Add WinArm64 to build agents
-        Agent winArm64 = new Agent("package-ci/win11-arm64:default", FlavorType.BuildExtraLarge, ResourceType.Azure, "arm");
+        //Build agents
+        Agent winArm64 = new Agent("package-ci/win11-arm64:default", FlavorType.BuildLarge, ResourceType.Azure, "arm");
+        Agent win = new Agent("package-ci/win10:v4:default", FlavorType.BuildLarge, ResourceType.Vm);
+        Agent centOS = new Agent("package-ci/centos:latest", FlavorType.BuildLarge, ResourceType.Vm);
+        Agent mac = new Agent("package-ci/macos-12:default", FlavorType.MacDefault, ResourceType.VmOsx);
+
         buildAgents.Add(winArm64);
-
+        buildAgents.Add(win);
+        buildAgents.Add(centOS);
+        buildAgents.Add(mac);
 
         List<IJobBuilder> builders = new ();
         foreach (var agent in buildAgents)
@@ -68,7 +68,7 @@ public class BuildAlembicPlugins : RecipeBase
             {
                 builder.WithCommands(c => c
                         .Add("git submodule update --init --recursive")
-                        .Add("./build.sh"))
+                        .Add("scl enable devtoolset-7 ./build.sh"))
                     .WithArtifact("plugins", "com.unity.formats.alembic/Runtime/Plugins/x86_64/abc*.so");
             }
             builders.Add(builder);
