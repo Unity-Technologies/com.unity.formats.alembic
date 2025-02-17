@@ -27,8 +27,8 @@ public class AlembicSettings : AnnotatedSettingsBase
                 {
                     Dependencies = new List<Dependency>()
                     {
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_ubuntu-20_04"),
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-13"),
+                        new Dependency("BuildAlembicPlugins", "build_plugins_-_centos"),
+                        new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-12"),
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64"),
                     }

@@ -28,8 +28,8 @@ package_pack_-_formats_alembic:
       paths:
       - upm-ci~/packages/**/*
   dependencies:
-  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_macos-13
-  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_ubuntu-20_04
+  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_centos
+  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_macos-12
   - path: .yamato/build-alembic-plugins.yml#build_plugins_-_win10
   - path: .yamato/build-alembic-plugins.yml#build_plugins_-_win11-arm64
   variables:
