@@ -15,8 +15,7 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# 2019.4 and 2020.3 doesn't have ARM64 version Editor, so download x64 version for them even if on Silicon Mac or ARM64 Windows. On other platforms, always download x64 version.
-{% if editor.version == "2019.4" or editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
+{% if platform.model != "M1" and platform.model != "arm" %}
     - upm-ci project test --project-path {{ recorder_test_project.path }} --type project-tests --unity-version {{ editor.version }}
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
@@ -46,8 +45,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# 2019.4 and 2020.3 doesn't have ARM64 version Editor, so download x64 version for them even if on Silicon Mac or ARM64 Windows. On other platforms, always download x64 version.
-{% if editor.version == "2019.4" or editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
+{% if platform.model != "M1" and platform.model != "arm" %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone --extra-utr-arg=--RunPlayerViaEditor
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
@@ -77,9 +75,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# upm-ci uses unity-downloader-cli under the hood to download Editor and currently it always downloads x64 verion Editor no matter on which platform.
-# 2019.4 and 2020.3 doesn't have ARM64 version Editor, so download x64 version for them even if on Silicon Mac or ARM64 Windows. On other platforms, always download x64 version.
-{% if editor.version == "2019.4" or editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
+{% if platform.model != "M1" and platform.model != "arm" %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone --extra-utr-arg=--RunPlayerViaEditor
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
