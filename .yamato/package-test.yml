@@ -12,16 +12,12 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
-# Exclude 2019.4 from clean console test because of a known warning in console
-{% if editor.version != '2019.4' %}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
-{% endif %}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-# upm-ci uses unity-downloader-cli under the hood to download Editor and currently it always downloads x64 verion Editor no matter on which platform.
-# For 2019.4 and 2020.3, they don't have Silicon version Editor. So if the editor version is 2019.4 or 2020.3, or it is not a Silicon Mac platform nor ARM64 Windows, just call upm-ci which will use x64 version editor for testing.
-{% if editor.version == "2019.4" or editor.version == "2020.3" or platform.model != "M1" and platform.model != "arm" %}
+# If not on Silicon Mac nor ARM64 Windows, just call upm-ci which will use x64 version editor for testing.
+{% if platform.model != "M1" and platform.model != "arm" %}
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
 {% else %}
 # Explicitly download ARM64 version Editor for 2021.3+(included) on Silicon Mac or ARM64 Windows.
@@ -45,11 +41,8 @@ vetting_test_{{ platform.name }}_{{ editor.version }}:
 {% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
-# Exclude 2019.4 from clean console test because of a known warning in console
-{% if editor.version != '2019.4' %}
   variables:
     UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
-{% endif %}
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      - upm-ci package test --unity-version {{ editor.version }} --type vetting-tests --package-path com.unity.formats.alembic

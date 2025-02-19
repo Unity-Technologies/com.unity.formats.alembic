@@ -1,24 +1,25 @@
 test_editors:
-  - version: 2019.4
-  - version: 2020.3
   - version: 2021.3
   - version: 2022.3
   - version: 6000.0
+  - version: 6000.1
   - version: trunk
 
 nightly_test_editors:
   - version: 2021.3
   - version: 2022.3
   - version: 6000.0
+  - version: 6000.1
   - version: trunk  
 
 clean_console_test_editors:
   - version: 2022.3
   - version: 6000.0
+  - version: 6000.1
   - version: trunk  
 
 promotion_test_editors:
-  - version: 2019.4
+  - version: 2021.3
 
 # Platforms used in CI
 win_platform: &win
@@ -115,6 +116,7 @@ hdrp_test_project_latest:
   path: TestProjects/AlembicHDRPLatest
   test_editors:
     - version: 2022.3
+    - version: 6000.1
     - version: trunk
 
 api_test_project:
