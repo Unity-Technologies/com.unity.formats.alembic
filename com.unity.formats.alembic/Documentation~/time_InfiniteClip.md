@@ -1,4 +1,4 @@
-# Record and play back the Alembic using an Infinite clip
+# Playback with recorded keys in an Infinite clip
 
 To control the playback of Alembic, use an **Infinite clip** on a Timeline **Animation Track** bound to the GameObject that contains the [Alembic Stream Player](ref_StreamPlayer.md) component.
 

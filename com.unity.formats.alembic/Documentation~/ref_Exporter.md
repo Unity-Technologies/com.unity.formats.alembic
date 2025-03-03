@@ -2,6 +2,8 @@
 
 The Alembic Exporter component allows you to customize how the Alembic package exports animation to an Alembic file.
 
+To use an Alembic Exporter component, add it to any GameObject of the Hierarchy. Refer to [Export via an Alembic Exporter component](export-abc-exporter.md) for more details.
+
 ![The Export Settings window](images/abc_export_options.png)
 
 The following topics describe the properties of the Alembic Exporter component in detail:

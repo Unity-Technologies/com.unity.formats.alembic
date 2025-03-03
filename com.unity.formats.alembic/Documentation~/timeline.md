@@ -1,4 +1,4 @@
-# Using Alembic with Timeline
+# Playback with Timeline
 
 You can use Timeline to play back and record Alembic animation including:
 

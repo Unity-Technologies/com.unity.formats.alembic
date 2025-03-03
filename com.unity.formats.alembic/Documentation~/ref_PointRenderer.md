@@ -2,9 +2,12 @@
 
 The **Alembic Point Renderer** component allows you to customize the appearance of the points.
 
+To access the Alembic Point Renderer component, in the Hierarchy, within an imported Alembic asset instance, select a GameObject that corresponds to an Alembic node that contains particles.
+
+> [!NOTE]
+> When you import the Alembic asset in Unity, you must select **Import Points** among the Alembic import settings.
+
 ![Alembic Point Renderer component options](images/abc_point_renderer_options.png)
-
-
 
 | ***Property*** || ***Description*** |
 |:---|:---|:---|
@@ -23,3 +26,8 @@ The **Alembic Point Renderer** component allows you to customize the appearance 
 | **Receive Shadows** || Enable to have points receive shadows. |
 | **Generate Motion Vector** || Enable to generate motion vectors for points. |
 | **Point Size** || Set the size of points in meters. |
+
+## Additional resources
+
+* [Import Alembic files](import.md)
+* [Work with Particles](particles.md)

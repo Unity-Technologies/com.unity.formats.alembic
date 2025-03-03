@@ -38,7 +38,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 This version of Alembic for Unity is compatible with the following versions of the Unity Editor:
 
-* 2019.3 and later (recommended)
+* 2021.3 and later (recommended)
 
 ### Limitations and known issues
 
