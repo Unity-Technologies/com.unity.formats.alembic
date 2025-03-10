@@ -1,4 +1,4 @@
-﻿using Alembic.Cookbook.Settings;
+using Alembic.Cookbook.Settings;
 using RecipeEngine;
 using RecipeEngine.Modules.Wrench.Helpers;
 

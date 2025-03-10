@@ -14,7 +14,7 @@ public class BuildAlembicPlugins : RecipeBase
         => Combine.Collections(GetJobs()).SelectJobs();
 
     public string GetJobName(Agent agent)
-        => $"Build plugins - {agent.Image.Split(new []{'/', ':'})[1]}";
+        => $"Build plugins - {agent.Image.Split(new[] { '/', ':' })[1]}";
 
     public IEnumerable<Dependency> AsDependencies()
         => this.Jobs.ToDependencies(this);
@@ -36,7 +36,7 @@ public class BuildAlembicPlugins : RecipeBase
         buildAgents.Add(centOS);
         buildAgents.Add(mac);
 
-        List<IJobBuilder> builders = new ();
+        List<IJobBuilder> builders = new();
         foreach (var agent in buildAgents)
         {
             var builder = JobBuilder.Create(GetJobName(agent))

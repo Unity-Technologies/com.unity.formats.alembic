@@ -1,4 +1,4 @@
-﻿using RecipeEngine.Api.Dependencies;
+using RecipeEngine.Api.Dependencies;
 using RecipeEngine.Api.Settings;
 using RecipeEngine.Modules.Wrench.Models;
 using RecipeEngine.Modules.Wrench.Settings;
@@ -8,7 +8,7 @@ namespace Alembic.Cookbook.Settings;
 public class AlembicSettings : AnnotatedSettingsBase
 {
     // Path from the root of the repository where packages are located.
-    readonly string[] PackagesRootPaths = {"./com.unity.formats.alembic"};
+    readonly string[] PackagesRootPaths = { "./com.unity.formats.alembic" };
 
     public static readonly string AlembicPackageName = "com.unity.formats.alembic";
 
