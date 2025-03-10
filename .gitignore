@@ -55,7 +55,9 @@ com.unity.formats.alembic/Runtime/Plugins/x86_64/*.so
 automation
 cmake-build-debug
 *.csproj
+!Tools/CI/*.csproj
 *.sln
+!Tools/CI/*.sln
 *.preformat.bak*
 
 

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Alembic": {
+      "commandName": "Project",
+      "workingDirectory": "$(SolutionDir)/../../"
+    }
+  }
+}

@@ -185,8 +185,8 @@ namespace UnityEngine.Formats.Alembic.Importer
         /// <summary>
         /// Closes and reopens the Alembic stream. Use this method to apply the new stream settings.
         /// </summary>
-        /// <param name="createMissingNodes">If true, it also recreates the missing GameObjects for the Alembic nodes. </param>>
-        /// <returns>True if the stream was successfully reopened, false otherwise.</returns>>
+        /// <param name="createMissingNodes">If true, it also recreates the missing GameObjects for the Alembic nodes. </param>
+        /// <returns>True if the stream was successfully reopened, false otherwise.</returns>
         public bool ReloadStream(bool createMissingNodes = false)
         {
             if (abcStream != null)
