@@ -8,11 +8,6 @@
             "Runtime/Plugins/x86_64/abci.dll"
           ]
         },
-        "PVP-26-4": {
-          "errors": [
-            "Runtime/Plugins/x86_64/abci.bundle/Contents/Info.plist.meta: Meta file without corresponding asset"
-          ]
-        },
         "PVP-37-1": {
           "errors": [
             "Runtime/Materials/Overlay.mat"
