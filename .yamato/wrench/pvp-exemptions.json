@@ -1,0 +1,19 @@
+{
+  "per_package": {
+    "com.unity.formats.alembic@2": {
+      "exempts": {
+        "PVP-25-1": {
+          "errors": [
+            "Runtime/Plugins/ARM64/abci.dll",
+            "Runtime/Plugins/x86_64/abci.dll"
+          ]
+        },
+        "PVP-37-1": {
+          "errors": [
+            "Runtime/Materials/Overlay.mat"
+          ]
+        }
+      }
+    }
+  }
+}

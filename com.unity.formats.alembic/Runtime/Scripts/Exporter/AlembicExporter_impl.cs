@@ -906,7 +906,7 @@ namespace UnityEngine.Formats.Alembic.Util
         /// <summary>
         /// Get the recording status.
         /// </summary>
-        /// <returns>True if a recording session is active.</returns>
+        /// <value>True if a recording session is active.</value>
         public bool Recording { get { return m_recording; } }
 
         /// <summary>
