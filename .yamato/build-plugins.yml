@@ -35,7 +35,7 @@ build_mac:
   name: Build on Mac
   agent:
     type: {{ mac_platform.type }}
-    image: {{ mac_platform.image }}
+    image: package-ci/macos-12:v4.70.0
     flavor: {{ mac_platform.flavor }}
   commands:
     - git submodule update --init --recursive
