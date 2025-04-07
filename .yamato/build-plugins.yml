@@ -38,7 +38,6 @@ build_mac:
     image: {{ mac_platform.image }}
     flavor: {{ mac_platform.flavor }}
   commands:
-    - brew install cmake
     - git submodule update --init --recursive
     - ./build.sh
   artifacts:
