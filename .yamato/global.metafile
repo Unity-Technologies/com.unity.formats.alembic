@@ -51,7 +51,7 @@ mac_arm64_platform: &mac_arm64
 ubuntu20_platform: &ubuntu20
   name: ubuntu20
   type: Unity::VM
-  image: package-ci/ubuntu-20.04:v4
+  image: package-ci/ubuntu-22.04:v4
   flavor: b1.large
 
 # Platform definitions with GPU
@@ -70,7 +70,7 @@ centos_platform: &centos
 ubuntu20_platform_gpu: &ubuntu20_gpu
   name: ubuntu20_gpu
   type: Unity::VM::GPU
-  image: package-ci/ubuntu-20.04:v4
+  image: package-ci/ubuntu-22.04:v4
   flavor: b1.large
 
 test_platforms:
