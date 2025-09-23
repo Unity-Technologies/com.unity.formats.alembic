@@ -32,6 +32,10 @@ public class AlembicSettings : AnnotatedSettingsBase
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64"),
                     }
+                },
+                ValidationOptions = new ValidationOptions()
+                {
+                    DisableBatchMode = true
                 }
             }
         }
