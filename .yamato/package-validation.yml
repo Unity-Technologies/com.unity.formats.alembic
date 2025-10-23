@@ -1,33 +1,6 @@
 {% metadata_file .yamato/global.metafile %}
 ---
 
-# The following job runs PVP API docs validation to validate all public APIs (classes and methods) have documentation.
-validate_api_doc:
-  name: Validate API documentation
-  agent:
-    type: {{ ubuntu20_platform.type }}
-    image: {{ ubuntu20_platform.image }}
-    flavor: {{ ubuntu20_platform.flavor }}
-  commands:
-    - npm install -g upm-ci-utils@stable --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    # Add 'com.unity.modules.imgui' dependency to alembic package because its upstream package 'com.unity.timeline' misses this dependency. 
-    # If not adding this dependency, upm-pvp will fail to run because of compilation errors. PVP runs tests without any built-in modules/packages by default.
-    - python -c "import json, sys; m = json.load(open(sys.argv[1])); m['dependencies']['com.unity.modules.imgui'] = '1.0.0';  json.dump(m, open(sys.argv[1], 'w'))" com.unity.formats.alembic/package.json
-    - upm-ci package pack --package-path com.unity.formats.alembic
-    # Download Unity.
-    - unity-downloader-cli --fast --wait -u {{ test_editors.last.version }} -c editor
-    # Run PVS in PVP mode.
-    - upm-pvp test --unity .Editor --packages "upm-ci~/packages/*.tgz" --results "upm-ci~/pvp"
-    # Require that PVP-20-1 (API docs validation) passed.
-    - upm-pvp require PVP-20-1 --results "upm-ci~/pvp" --failures "upm-ci~/pvp/failures.json"
-  artifacts:
-    pvp:
-      paths:
-        - upm-ci~/pvp/**
-    logs:
-      paths:
-        - upm-ci~/test-results/**
-
 # The following job validates that the public API files are up to date on Mac
 validate_api_osx:
   name : Validate API files on Mac

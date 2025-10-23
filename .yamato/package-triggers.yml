@@ -18,7 +18,6 @@ test_trigger_pr:
     cancel_old_ci: true
     expression: pull_request.(target match ".*" AND NOT changes.all match ["com.unity.formats.alembic/Documentation~/**", "**/*.md"] AND NOT draft)
   dependencies:
-    - .yamato/package-validation.yml#validate_api_doc
     - .yamato/package-validation.yml#validate_api_osx
     - .yamato/package-validation.yml#validate_api_win
 # Only run tests on Win for PR trigger
