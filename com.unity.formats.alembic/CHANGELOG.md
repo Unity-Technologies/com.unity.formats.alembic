@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Re-serialize material as text
+- Re-serialized material as text, as binary files are not supported anymore.
 
 ## [2.4.1] - 2025-09-22
 ### Changed
