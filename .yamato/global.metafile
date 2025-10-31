@@ -8,7 +8,6 @@ test_editors:
   - version: trunk
 
 nightly_test_editors:
-  - version: 2021.3
   - version: 2022.3
   - version: 6000.0
   - version: 6000.2
