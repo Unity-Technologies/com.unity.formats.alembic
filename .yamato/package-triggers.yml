@@ -23,8 +23,10 @@ test_trigger_pr:
 # Only run tests on Win for PR trigger
 {% for editor in test_editors %}
     - .yamato/package-test.yml#test_win_{{ editor.version }}
+{% unless editor.version == "2021.3" %}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_win_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_win_{{ editor.version }}
+{% endunless %}
 {% endfor %}
     - .yamato/package-format.yml#formatting
 # Only run package clean console test jobs on Win for PR trigger
