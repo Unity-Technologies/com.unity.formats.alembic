@@ -105,20 +105,13 @@ standalone_test_project:
   name: AlembicStandaloneBuild
   path: TestProjects/AlembicStandaloneBuild
 
-# HDRP project created in 2019.4 which is too old for 2022.2+ versions
-hdrp_test_project:
-  name: AlembicHDRP
-  path: TestProjects/AlembicHDRP
-  test_editors:
-    - version: 2021.3
-
 # New HDRP test project for 2022.2+ versions
 hdrp_test_project_latest:
   name: AlembicHDRPLatest
   path: TestProjects/AlembicHDRPLatest
   test_editors:
     - version: 2022.3
-    - version: 6000.1
+    - version: 6000.3
     - version: trunk
 
 api_test_project:

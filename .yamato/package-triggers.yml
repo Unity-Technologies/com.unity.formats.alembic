@@ -69,14 +69,6 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
-{% for platform in test_platforms %}
-# For the legacy HDRP test project, don't run tests on Silicon Mac nor ARM64 Windows because 2021.3 is not supported well on these two platforms.
-{% if platform.model != "M1" and platform.model != "arm" %}
-{% for editor in hdrp_test_project.test_editors %}
-    - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
-{% endif %}
-
 {% for editor in hdrp_test_project_latest.test_editors %}
 # If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
 # If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in 6000.0 and trunk.
