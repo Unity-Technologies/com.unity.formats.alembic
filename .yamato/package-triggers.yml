@@ -69,6 +69,7 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
+{% for platform in test_platforms %}
 {% for editor in hdrp_test_project_latest.test_editors %}
 # If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
 # If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in 6000.0 and trunk.
