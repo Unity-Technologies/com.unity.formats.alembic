@@ -90,7 +90,6 @@ standalone_test_platforms:
   - *mac_arm64
 
 standalone_test_platforms_gpu:
-  - *mac_gpu
   - *ubuntu20_gpu
 
 promotion_test_platforms:

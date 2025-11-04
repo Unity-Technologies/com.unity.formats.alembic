@@ -62,15 +62,6 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
-{% for editor in nightly_test_editors %}
-{% for platform in standalone_test_platforms_gpu %}
-# Only run standalone tests in trunk on platforms with GPU
-{% if editor.version == "trunk" %}
-    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
-{% endfor %}
-
 {% for platform in test_platforms %}
 {% for editor in hdrp_test_project_latest.test_editors %}
 # If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
