@@ -23,8 +23,10 @@ test_trigger_pr:
 # Only run tests on Win for PR trigger
 {% for editor in test_editors %}
     - .yamato/package-test.yml#test_win_{{ editor.version }}
+{% unless editor.version == "2021.3" %}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_win_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_win_{{ editor.version }}
+{% endunless %}
 {% endfor %}
     - .yamato/package-format.yml#formatting
 # Only run package clean console test jobs on Win for PR trigger
@@ -60,23 +62,7 @@ nightly_test_trigger:
 {% endfor %}
 {% endfor %}
 
-{% for editor in nightly_test_editors %}
-{% for platform in standalone_test_platforms_gpu %}
-# Only run standalone tests in 2022.3 and trunk on platforms with GPU
-{% if editor.version == "2022.3" or editor.version == "trunk" %}
-    - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endif %}
-{% endfor %}
-{% endfor %}
-
 {% for platform in test_platforms %}
-# For the legacy HDRP test project, don't run tests on Silicon Mac nor ARM64 Windows because 2021.3 is not supported well on these two platforms.
-{% if platform.model != "M1" and platform.model != "arm" %}
-{% for editor in hdrp_test_project.test_editors %}
-    - .yamato/project-test.yml#test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version }}
-{% endfor %}
-{% endif %}
-
 {% for editor in hdrp_test_project_latest.test_editors %}
 # If not on Silicon Mac nor ARM64 Windows, run AlembicHDRPLatest tests in all editor versions.
 # If on Silicon Mac or ARM64 Windows, only run AlembicHDRPLatest tests in 6000.0 and trunk.

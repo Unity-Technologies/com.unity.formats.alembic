@@ -46,11 +46,11 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 {% if platform.model != "M1" and platform.model != "arm" %}
-    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone --extra-utr-arg=--RunPlayerViaEditor
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
-    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone --extra-utr-arg=--RunPlayerViaEditor
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
 {% endif %}
   artifacts:
     logs:
@@ -76,11 +76,11 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 {% if platform.model != "M1" and platform.model != "arm" %}
-    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone --extra-utr-arg=--RunPlayerViaEditor
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version {{ editor.version }} --platform standalone
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
-    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone --extra-utr-arg=--RunPlayerViaEditor
+    - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
 {% endif %}
   artifacts:
     logs:
