@@ -6,6 +6,9 @@ using System.Reflection;
 using UnityEditor;
 #endif
 using UnityEngine.Formats.Alembic.Sdk;
+#if UNITY_6000_5_OR_NEWER
+using UnityEngine.Assemblies;
+#endif
 
 namespace UnityEngine.Formats.Alembic.Util
 {
@@ -989,7 +992,11 @@ namespace UnityEngine.Formats.Alembic.Util
             if (m_capturerTable.Count != 0)
                 return;
 
+#if UNITY_6000_5_OR_NEWER
+            foreach (Assembly assembly in CurrentAssemblies.GetLoadedAssemblies())
+#else
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+#endif
             {
                 foreach (Type type in assembly.GetTypes())
                 {
