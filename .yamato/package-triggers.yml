@@ -38,10 +38,7 @@ test_trigger_pr:
 nightly_test_trigger:
   name: Nightly tests Trigger
   triggers:
-    recurring:
-      - branch: main
-        frequency: daily
-        rerun: always    
+    expression: push.branch eq "main"
   dependencies:
     - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in nightly_test_editors %}
