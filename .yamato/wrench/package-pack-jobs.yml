@@ -22,9 +22,8 @@ package_pack_-_formats_alembic:
       - upm-ci~/packages/**/*
   dependencies:
   - path: .yamato/build-alembic-plugins.yml#build_plugins_-_centos
-  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_macos-12
-  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_win10
-  - path: .yamato/build-alembic-plugins.yml#build_plugins_-_win11-arm64
+  - path: .yamato/code-signing.yml#sign_binaries_for_alembic_on_macos
+  - path: .yamato/code-signing.yml#sign_binaries_for_alembic_on_windows
   variables:
     UPMCI_ACK_LARGE_PACKAGE: 1
   metadata:
