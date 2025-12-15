@@ -13,7 +13,7 @@ sign_binaries_for_alembic_on_macos:
       CERTIFICATE_NAME: apple-developer-id-application-unity-technologies-sf
   - command: |-
       security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db
-      codesign --verbose=3 --timestamp --options=runtime --force --sign "$(<certificate_thumbprint.txt)" com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle
+      codesign --verbose=3 --timestamp --options=runtime --sign "$(<certificate_thumbprint.txt)" com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle
       security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db
       codesign --verify --verbose com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle
     timeout: 2

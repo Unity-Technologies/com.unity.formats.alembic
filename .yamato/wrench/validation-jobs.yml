@@ -403,9 +403,9 @@ validate_-_formats_alembic_-_2022_3_-_windows:
   labels:
   - Packages:formats.alembic
 
-# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.2 - macos (6000.2 - MacOS).
-validate_-_formats_alembic_-_6000_2_-_macos:
-  name: Validate - formats.alembic - 6000.2 - macos
+# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.0 - macos (6000.0 - MacOS).
+validate_-_formats_alembic_-_6000_0_-_macos:
+  name: Validate - formats.alembic - 6000.0 - macos
   agent:
     image: package-ci/macos-13:default
     type: Unity::VM::osx
@@ -415,7 +415,7 @@ validate_-_formats_alembic_-_6000_2_-_macos:
   - command: 7z x -aoa wrench-localapv.zip
   - command: pip install semver requests --index-url https://artifactory-slo.bf.unity3d.com/artifactory/api/pypi/pypi/simple
   - command: python PythonScripts/print_machine_info.py
-  - command: unity-downloader-cli -u 6000.2/staging -c editor --path .Editor --fast
+  - command: unity-downloader-cli -u 6000.0/staging -c editor --path .Editor --fast
     timeout: 10
     retries: 3
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor
@@ -470,9 +470,9 @@ validate_-_formats_alembic_-_6000_2_-_macos:
   labels:
   - Packages:formats.alembic
 
-# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.2 - ubuntu (6000.2 - Ubuntu).
-validate_-_formats_alembic_-_6000_2_-_ubuntu:
-  name: Validate - formats.alembic - 6000.2 - ubuntu
+# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.0 - ubuntu (6000.0 - Ubuntu).
+validate_-_formats_alembic_-_6000_0_-_ubuntu:
+  name: Validate - formats.alembic - 6000.0 - ubuntu
   agent:
     image: package-ci/ubuntu-22.04:v4
     type: Unity::VM
@@ -482,7 +482,7 @@ validate_-_formats_alembic_-_6000_2_-_ubuntu:
   - command: 7z x -aoa wrench-localapv.zip
   - command: pip install semver requests --index-url https://artifactory-slo.bf.unity3d.com/artifactory/api/pypi/pypi/simple
   - command: python PythonScripts/print_machine_info.py
-  - command: unity-downloader-cli -u 6000.2/staging -c editor --path .Editor --fast
+  - command: unity-downloader-cli -u 6000.0/staging -c editor --path .Editor --fast
     timeout: 10
     retries: 3
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor
@@ -537,9 +537,9 @@ validate_-_formats_alembic_-_6000_2_-_ubuntu:
   labels:
   - Packages:formats.alembic
 
-# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.2 - windows (6000.2 - Windows).
-validate_-_formats_alembic_-_6000_2_-_windows:
-  name: Validate - formats.alembic - 6000.2 - windows
+# PVP Editor and Playmode tests for Validate - formats.alembic - 6000.0 - windows (6000.0 - Windows).
+validate_-_formats_alembic_-_6000_0_-_windows:
+  name: Validate - formats.alembic - 6000.0 - windows
   agent:
     image: package-ci/win10:default
     type: Unity::VM
@@ -549,7 +549,7 @@ validate_-_formats_alembic_-_6000_2_-_windows:
   - command: 7z x -aoa wrench-localapv.zip
   - command: pip install semver requests --index-url https://artifactory-slo.bf.unity3d.com/artifactory/api/pypi/pypi/simple
   - command: python PythonScripts/print_machine_info.py
-  - command: unity-downloader-cli -u 6000.2/staging -c editor --path .Editor --fast
+  - command: unity-downloader-cli -u 6000.0/staging -c editor --path .Editor --fast
     timeout: 10
     retries: 3
   - command: upm-pvp create-test-project test-formats.alembic --packages "upm-ci~/packages/*.tgz" --unity .Editor

@@ -24,7 +24,7 @@ internal static class JobBuilderExtensions
                             ("CERTIFICATE_NAME", "apple-developer-id-application-unity-technologies-sf")))
                     .WithBlockCommand(3, 2,b => b
                         .WithLine("security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db")
-                        .WithLine($"codesign --verbose=3 --timestamp --options=runtime --force --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
+                        .WithLine($"codesign --verbose=3 --timestamp --options=runtime --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
                         .WithLine("security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db")
                         .WithLine($"codesign --verify --verbose {binariesToSign}")
                     );

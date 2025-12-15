@@ -86,33 +86,33 @@ publish_dry_run_formats_alembic:
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_macos
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_macos
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-macos
+        location: results/UTR/validate-formats.alembic-6000.0-macos
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-macos
+        location: results/pvp/validate-formats.alembic-6000.0-macos
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_ubuntu
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_ubuntu
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-ubuntu
+        location: results/UTR/validate-formats.alembic-6000.0-ubuntu
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-ubuntu
+        location: results/pvp/validate-formats.alembic-6000.0-ubuntu
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_windows
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_windows
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-windows
+        location: results/UTR/validate-formats.alembic-6000.0-windows
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-windows
+        location: results/pvp/validate-formats.alembic-6000.0-windows
         unzip: true
       packages:
         ignore_artifact: true
@@ -298,33 +298,33 @@ publish_formats_alembic:
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_macos
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_macos
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-macos
+        location: results/UTR/validate-formats.alembic-6000.0-macos
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-macos
+        location: results/pvp/validate-formats.alembic-6000.0-macos
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_ubuntu
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_ubuntu
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-ubuntu
+        location: results/UTR/validate-formats.alembic-6000.0-ubuntu
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-ubuntu
+        location: results/pvp/validate-formats.alembic-6000.0-ubuntu
         unzip: true
       packages:
         ignore_artifact: true
-  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_2_-_windows
+  - path: .yamato/wrench/validation-jobs.yml#validate_-_formats_alembic_-_6000_0_-_windows
     specific_options:
       UTR:
-        location: results/UTR/validate-formats.alembic-6000.2-windows
+        location: results/UTR/validate-formats.alembic-6000.0-windows
         unzip: true
       pvp-results:
-        location: results/pvp/validate-formats.alembic-6000.2-windows
+        location: results/pvp/validate-formats.alembic-6000.0-windows
         unzip: true
       packages:
         ignore_artifact: true
