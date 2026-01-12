@@ -25,12 +25,12 @@ public class AlembicSettings : AnnotatedSettingsBase
                 ReleaseOptions = new ReleaseOptions() { IsReleasing = true },
                 PackJobOptions = new PackJobOptions()
                 {
-                    Dependencies = new List<Dependency>()
+                    Dependencies = new List<Dependency>
                     {
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_centos"),
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-12"),
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64"),
+                        new ("BuildAlembicPlugins", "build_plugins_-_centos"),
+                        //On Mac and Windows, code signing on binaries is required before packing
+                        new ("CodeSigning", "sign_binaries_for_alembic_on_macos"),
+                        new ("CodeSigning", "sign_binaries_for_alembic_on_windows")
                     }
                 },
                 ValidationOptions = new ValidationOptions()

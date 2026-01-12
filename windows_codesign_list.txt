@@ -1,0 +1,2 @@
+com.unity.formats.alembic/Runtime/Plugins/ARM64/abci.dll
+com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.dll

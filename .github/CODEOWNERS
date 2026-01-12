@@ -1,8 +1,8 @@
 # Code owners
-*.cs @arejayelle @mfe @thomas-tu
+*.cs @Unity-Technologies/cinepipe-maintainers
 
 # Documentation owner
 *.md @Unity-Technologies/docs-vprod
 
 # CI owner
-/.yamato/ @windxu88
+/.yamato/ @Unity-Technologies/cinepipe-maintainers
