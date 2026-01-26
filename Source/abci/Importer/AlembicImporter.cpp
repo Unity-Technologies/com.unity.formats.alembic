@@ -41,7 +41,12 @@ abciAPI void aiContextDestroy(aiContext* ctx)
 
 abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
 {
-    return ctx ? ctx->load(path) : false;
+    //Unity expects C ABI, which means no c++ exceptions
+    try {
+        return ctx ? ctx->load(path) : false;
+    } catch (const std::exception &e) {
+        return false;
+    }
 }
 
 abciAPI bool aiContextGetIsHDF5(aiContext* ctx)
