@@ -42,9 +42,12 @@ abciAPI void aiContextDestroy(aiContext* ctx)
 abciAPI bool aiContextLoad(aiContext* ctx, const char *path)
 {
     //Unity expects C ABI, which means no c++ exceptions
-    try {
+    try
+    {
         return ctx ? ctx->load(path) : false;
-    } catch (const std::exception &e) {
+    }
+    catch (const std::exception &e)
+    {
         return false;
     }
 }
