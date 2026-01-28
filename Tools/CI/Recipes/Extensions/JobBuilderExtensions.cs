@@ -7,7 +7,7 @@ namespace Alembic.Cookbook.Recipes.Extensions;
 
 internal static class JobBuilderExtensions
 {
-        /// <summary>
+    /// <summary>
     /// Adds platform-specific code signing commands to the given job.
     /// </summary>
     /// <param name="job">The job builder to which the code signing commands will be added.</param>
@@ -22,11 +22,11 @@ internal static class JobBuilderExtensions
                 job.WithCommands(c => c
                         .AddBrick("git@github.cds.internal.unity3d.com:unity/macos.cds.ci.code-signing.git@v2.0.8",
                             ("CERTIFICATE_NAME", "apple-developer-id-application-unity-technologies-sf")))
-                    .WithBlockCommand(3, 2,b => b
-                        .WithLine("security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db")
-                        .WithLine($"codesign --verbose=3 --timestamp --options=runtime --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
-                        .WithLine("security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db")
-                        .WithLine($"codesign --verify --verbose {binariesToSign}")
+                    .WithBlockCommand(3, 2, b => b
+                         .WithLine("security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db")
+                         .WithLine($"codesign --verbose=3 --timestamp --options=runtime --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
+                         .WithLine("security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db")
+                         .WithLine($"codesign --verify --verbose {binariesToSign}")
                     );
                 break;
             case SystemType.Windows:

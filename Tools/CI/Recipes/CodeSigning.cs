@@ -12,7 +12,7 @@ using RecipeEngine.Platforms;
 
 namespace Alembic.Cookbook.Recipes;
 
-public class CodeSigning: RecipeBase
+public class CodeSigning : RecipeBase
 {
     string alembicCodeSignListFileWindows = "windows_codesign_list.txt";
 
@@ -48,7 +48,7 @@ public class CodeSigning: RecipeBase
             var packageName = package.Value.ShortName;
             foreach (var platform in platforms)
             {
-                if(platform.Key != SystemType.MacOS && platform.Key != SystemType.Windows)
+                if (platform.Key != SystemType.MacOS && platform.Key != SystemType.Windows)
                 {
                     continue;
                 }
@@ -91,7 +91,7 @@ public class CodeSigning: RecipeBase
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64")
                         )
-                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnWindows", alembicBinariesToSignOnWin));;
+                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnWindows", alembicBinariesToSignOnWin));
                 break;
             default:
                 return null;
