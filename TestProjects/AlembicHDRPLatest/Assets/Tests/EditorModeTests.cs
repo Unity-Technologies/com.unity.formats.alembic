@@ -1,5 +1,7 @@
 using System.Collections;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Tests
@@ -19,7 +21,7 @@ namespace UnityEditor.Formats.Alembic.Tests
         {
             var fileSource = "Assets/Data~/CrashAsset.abc";
             //generate unique name, as previous import failures might prevent the import process to run.
-            var fileDestination = $"Assets/CrashAsset-{UnityEngine.GUID.Generate().ToString()}.abc";
+            var fileDestination = $"Assets/CrashAsset-{GUID.Generate().ToString()}.abc";
 
             try
             {
