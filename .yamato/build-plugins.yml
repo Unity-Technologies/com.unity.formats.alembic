@@ -38,6 +38,7 @@ build_mac:
     image: package-ci/macos-12:v4.70.0
     flavor: {{ mac_platform.flavor }}
   commands:
+    - mkdir -p com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS
     - git submodule update --init --recursive
     - ./build.sh
   artifacts:
