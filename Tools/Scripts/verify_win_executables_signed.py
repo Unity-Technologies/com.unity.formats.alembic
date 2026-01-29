@@ -23,7 +23,7 @@ def verify_signatures(args):
     if not signtool_path:
         print(f"signtool.exe not found with pattern: {signtool_pattern}")
         sys.exit(1)
-    
+
     files_to_verify = []
     with open(codesign_list_file, 'r') as f:
         files_to_verify = [line.strip() for line in f if line.strip()]
