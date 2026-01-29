@@ -21,7 +21,7 @@ sign_binaries_for_alembic_on_macos:
   artifacts:
     Alembic_SignedBinariesOnMac:
       paths:
-      - com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle
+      - com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/**
   dependencies:
   - path: .yamato/build-alembic-plugins.yml#build_plugins_-_macos-12
 
