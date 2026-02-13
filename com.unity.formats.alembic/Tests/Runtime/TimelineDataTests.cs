@@ -78,6 +78,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         }
 
         [UnityTest]
+        [UnityPlatform(exclude = new RuntimePlatform[] {
+            RuntimePlatform.OSXEditor // Disabled for Instability https://jira.unity3d.com/browse/UUM-132046
+        })]
         public IEnumerator TestTimeSampling([Values(TimeSamplingType.Acyclic, TimeSamplingType.Uniform)] int sampleType)
         {
             director.Play();
