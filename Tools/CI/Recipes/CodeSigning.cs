@@ -16,10 +16,8 @@ public class CodeSigning : RecipeBase
 {
     string alembicCodeSignListFileWindows = "windows_codesign_list.txt";
 
-    string[] alembicBinariesToSignOnMac =
-    [
-        "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle"
-    ];
+    private string alembicBinariesToSignOnMac = "com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle";
+
     string[] alembicBinariesToSignOnWin =
     [
         "com.unity.formats.alembic/Runtime/Plugins/ARM64/abci.dll",
@@ -79,11 +77,11 @@ public class CodeSigning : RecipeBase
         switch (platform.System)
         {
             case SystemType.MacOS:
-                job.WithCodeSigningCommands(platform, string.Join(" ", alembicBinariesToSignOnMac))
+                job.WithCodeSigningCommands(platform, alembicBinariesToSignOnMac)
                     .WithDependencies(
                         new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-12")
                         )
-                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnMac", alembicBinariesToSignOnMac));
+                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnMac", $"{alembicBinariesToSignOnMac}/**"));
                 break;
             case SystemType.Windows:
                 job.WithCodeSigningCommands(platform, alembicCodeSignListFileWindows)
