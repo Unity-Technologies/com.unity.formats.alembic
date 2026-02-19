@@ -29,8 +29,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                 return;
             }
 
-            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
-            if (cloud != null)
+            if (abcTreeNode.gameObject.TryGetComponent<AlembicPointsCloud>(out var cloud))
             {
                 m_abcSchema.sort = cloud.m_sort;
                 if (cloud.m_sort && cloud.m_sortFrom != null)
@@ -49,8 +48,7 @@ namespace UnityEngine.Formats.Alembic.Importer
             sample.GetSummary(ref m_sampleSummary);
 
             // get points cloud component
-            var cloud = abcTreeNode.gameObject.GetComponent<AlembicPointsCloud>();
-            if (cloud == null)
+            if (!abcTreeNode.gameObject.TryGetComponent<AlembicPointsCloud>(out var cloud))
             {
                 cloud = abcTreeNode.gameObject.AddComponent<AlembicPointsCloud>();
                 abcTreeNode.gameObject.AddComponent<AlembicPointsRenderer>();
