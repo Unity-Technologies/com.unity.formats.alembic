@@ -953,7 +953,9 @@ namespace UnityEngine.Formats.Alembic.Util
             if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
                 return TargetBranch.GetComponentsInChildren(type);
             else
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
+                return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type), e => (Component)e);
+#elif UNITY_2023_1_OR_NEWER
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
 #else
                 return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
