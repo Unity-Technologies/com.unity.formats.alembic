@@ -274,7 +274,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         static Material GetDefaultMaterial()
         {
-            return GraphicsSettings.renderPipelineAsset != null ? GraphicsSettings.renderPipelineAsset.defaultMaterial : new Material(Shader.Find("Diffuse"));
+            return GraphicsSettings.defaultRenderPipeline != null ? GraphicsSettings.defaultRenderPipeline.defaultMaterial : new Material(Shader.Find("Diffuse"));
         }
     }
 }

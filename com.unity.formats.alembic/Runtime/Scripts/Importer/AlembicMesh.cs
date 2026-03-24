@@ -533,7 +533,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
         internal static Material GetDefaultMaterial()
         {
-            var pipelineAsset = GraphicsSettings.renderPipelineAsset;
+            var pipelineAsset = GraphicsSettings.defaultRenderPipeline;
             if (pipelineAsset != null)
             {
                 return pipelineAsset.defaultMaterial;
