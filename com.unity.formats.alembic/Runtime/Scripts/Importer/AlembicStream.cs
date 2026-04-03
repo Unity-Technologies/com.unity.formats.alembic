@@ -222,7 +222,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         public bool AbcLoad(bool createMissingNodes, bool serializeMesh)
         {
             m_time = 0.0f;
+#if UNITY_6000_4_OR_NEWER
+            m_context = new SafeContext(aiContext.Create((int)EntityId.ToULong(m_abcTreeRoot.gameObject.GetEntityId())));
+#else
             m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
+#endif
 
             var settings = m_streamDesc.Settings;
             m_config.swapHandedness = settings.SwapHandedness;
