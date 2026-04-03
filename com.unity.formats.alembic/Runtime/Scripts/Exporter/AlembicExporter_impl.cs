@@ -546,7 +546,11 @@ namespace UnityEngine.Formats.Alembic.Util
                     m_target = null;
                     return;
                 }
+#if UNITY_6000_4_OR_NEWER
+                abcObject = parent.abcObject.NewXform(target.name + " (" + EntityId.ToULong(target.GetEntityId()).ToString("X8") + ")", timeSamplingIndex);
+#else
                 abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
+#endif
                 m_target = target;
             }
 
@@ -976,7 +980,11 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (node == null) { return null; }
 
+#if UNITY_6000_4_OR_NEWER
+            int iid = (int)EntityId.ToULong(node.gameObject.GetEntityId());
+#else
             int iid = node.gameObject.GetInstanceID();
+#endif
             CaptureNode cn;
             if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
