@@ -839,7 +839,11 @@ namespace UnityEngine.Formats.Alembic.Util
 
         class CaptureNode
         {
+#if UNITY_6000_4_OR_NEWER
+            public ulong entityId;
+#else
             public int instanceID;
+#endif
             public Type componentType;
             public CaptureNode parent;
             public Transform transform;
@@ -877,9 +881,15 @@ namespace UnityEngine.Formats.Alembic.Util
 
         aeContext m_ctx;
         ComponentCapturer m_root;
+#if UNITY_6000_4_OR_NEWER
+        Dictionary<ulong, CaptureNode> m_nodes;
+        List<CaptureNode> m_newNodes;
+        List<ulong> m_entityIdsToRemove;
+#else
         Dictionary<int, CaptureNode> m_nodes;
         List<CaptureNode> m_newNodes;
         List<int> m_iidToRemove;
+#endif
         int m_lastTimeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
 
@@ -1029,11 +1039,20 @@ namespace UnityEngine.Formats.Alembic.Util
             if (node == null) { return null; }
 
 #if UNITY_6000_4_OR_NEWER
-            int iid = (int)EntityId.ToULong(node.gameObject.GetEntityId());
+            ulong entityId = EntityId.ToULong(node.gameObject.GetEntityId());
 #else
             int iid = node.gameObject.GetInstanceID();
 #endif
             CaptureNode cn;
+#if UNITY_6000_4_OR_NEWER
+            if (m_nodes.TryGetValue(entityId, out cn)) { return cn; }
+
+            cn = new CaptureNode();
+            cn.entityId = entityId;
+            cn.transform = node;
+            cn.parent = ConstructTree(node.parent);
+            m_nodes.Add(entityId, cn);
+#else
             if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
             cn = new CaptureNode();
@@ -1041,6 +1060,7 @@ namespace UnityEngine.Formats.Alembic.Util
             cn.transform = node;
             cn.parent = ConstructTree(node.parent);
             m_nodes.Add(iid, cn);
+#endif
             m_newNodes.Add(cn);
             return cn;
         }
@@ -1086,9 +1106,15 @@ namespace UnityEngine.Formats.Alembic.Util
             if (parent != null && parent.transformCapturer == null)
             {
                 SetupComponentCapturer(parent);
+#if UNITY_6000_4_OR_NEWER
+                if (!m_nodes.ContainsKey(parent.entityId) || !m_newNodes.Contains(parent))
+                {
+                    m_nodes.Add(parent.entityId, parent);
+#else
                 if (!m_nodes.ContainsKey(parent.instanceID) || !m_newNodes.Contains(parent))
                 {
                     m_nodes.Add(parent.instanceID, parent);
+#endif
                     m_newNodes.Add(parent);
                 }
             }
@@ -1201,9 +1227,15 @@ namespace UnityEngine.Formats.Alembic.Util
             }
 
             m_root = new RootCapturer(this, m_ctx.topObject);
+#if UNITY_6000_4_OR_NEWER
+            m_nodes = new Dictionary<ulong, CaptureNode>();
+            m_newNodes = new List<CaptureNode>();
+            m_entityIdsToRemove = new List<ulong>();
+#else
             m_nodes = new Dictionary<int, CaptureNode>();
             m_newNodes = new List<CaptureNode>();
             m_iidToRemove = new List<int>();
+#endif
             m_lastTimeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
@@ -1228,7 +1260,11 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (!m_recording) { return; }
 
+#if UNITY_6000_4_OR_NEWER
+            m_entityIdsToRemove = null;
+#else
             m_iidToRemove = null;
+#endif
             m_newNodes = null;
             m_nodes = null;
             m_root = null;
@@ -1271,14 +1307,24 @@ namespace UnityEngine.Formats.Alembic.Util
                 var node = kvp.Value;
                 node.Capture();
                 if (node.transform == null)
+#if UNITY_6000_4_OR_NEWER
+                    m_entityIdsToRemove.Add(node.entityId);
+#else
                     m_iidToRemove.Add(node.instanceID);
+#endif
             }
             m_ctx.MarkFrameEnd();
 
             // remove deleted GameObjects
+#if UNITY_6000_4_OR_NEWER
+            foreach (ulong entityId in m_entityIdsToRemove)
+                m_nodes.Remove(entityId);
+            m_entityIdsToRemove.Clear();
+#else
             foreach (int iid in m_iidToRemove)
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
+#endif
 
             // advance time
             ++m_frameCount;
