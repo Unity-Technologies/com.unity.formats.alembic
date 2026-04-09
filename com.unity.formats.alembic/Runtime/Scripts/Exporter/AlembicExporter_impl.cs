@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -951,6 +952,50 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #endif
 
+#if UNITY_6000_4_OR_NEWER
+        /// <summary>
+        /// Deterministic order for export: loaded scene (path, build index), then hierarchy (sibling indices from root).
+        /// Does not use InstanceID/EntityId ordering (see Unity 6+ engine guidance).
+        /// </summary>
+        static void SortComponentsByStableSceneHierarchy(Component[] components)
+        {
+            if (components == null || components.Length <= 1)
+                return;
+
+            var keys = new string[components.Length];
+            var sb = new StringBuilder(128);
+            for (int i = 0; i < components.Length; i++)
+            {
+                sb.Clear();
+                AppendStableHierarchySortKey(sb, components[i]);
+                keys[i] = sb.ToString();
+            }
+
+            Array.Sort(keys, components, StringComparer.Ordinal);
+        }
+
+        static void AppendStableHierarchySortKey(StringBuilder sb, Component c)
+        {
+            var scene = c.gameObject.scene;
+            sb.Append(scene.path);
+            sb.Append('\x1');
+            sb.Append(scene.buildIndex.ToString("D4"));
+            sb.Append('\x1');
+            var t = c.transform;
+            var indices = new List<int>(8);
+            while (t != null)
+            {
+                indices.Add(t.GetSiblingIndex());
+                t = t.parent;
+            }
+            for (int i = indices.Count - 1; i >= 0; i--)
+            {
+                if (i < indices.Count - 1)
+                    sb.Append('.');
+                sb.Append(indices[i].ToString("D8"));
+            }
+        }
+#endif
 
         Component[] GetTargets(Type type)
         {
@@ -959,8 +1004,9 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #if UNITY_6000_4_OR_NEWER
             var objects = GameObject.FindObjectsByType(type);
-            Array.Sort(objects, (a, b) => EntityId.ToULong(a.GetEntityId()).CompareTo(EntityId.ToULong(b.GetEntityId())));
-            return Array.ConvertAll<UnityEngine.Object, Component>(objects, e => (Component)e);
+            var components = Array.ConvertAll<UnityEngine.Object, Component>(objects, e => (Component)e);
+            SortComponentsByStableSceneHierarchy(components);
+            return components;
 #elif UNITY_2023_1_OR_NEWER
             return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
 #else
