@@ -967,7 +967,7 @@ namespace UnityEngine.Formats.Alembic.Util
         /// Deterministic order for export: loaded scene (path, build index), then hierarchy (sibling indices from root).
         /// Does not use InstanceID/EntityId ordering (see Unity 6+ engine guidance).
         /// </summary>
-        static void SortComponentsByStableSceneHierarchy(Component[] components)
+        internal static void SortComponentsByStableSceneHierarchy(Component[] components)
         {
             if (components == null || components.Length <= 1)
                 return;
@@ -984,7 +984,7 @@ namespace UnityEngine.Formats.Alembic.Util
             Array.Sort(keys, components, StringComparer.Ordinal);
         }
 
-        static void AppendStableHierarchySortKey(StringBuilder sb, Component c)
+        internal static void AppendStableHierarchySortKey(StringBuilder sb, Component c)
         {
             var scene = c.gameObject.scene;
             sb.Append(scene.path);
