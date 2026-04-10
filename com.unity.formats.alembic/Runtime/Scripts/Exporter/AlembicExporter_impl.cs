@@ -964,9 +964,24 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #if UNITY_6000_4_OR_NEWER
         /// <summary>
-        /// Deterministic order for export: loaded scene (path, build index), then hierarchy (sibling indices from root).
-        /// Does not use InstanceID/EntityId ordering (see Unity 6+ engine guidance).
+        /// Sorts <paramref name="components"/> in place into a stable order derived from each object’s scene and
+        /// transform hierarchy (see <see cref="AppendStableHierarchySortKey"/>).
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// On Unity 6.4 and newer, sort mode is deprecated for <c>FindObjectsByType</c>, so the returned array has no
+        /// defined order. Sorting by <c>InstanceID</c> / <c>EntityId</c> is also discouraged. This method reorders the
+        /// array so exporter iteration (for example from <c>GetTargets</c>) is deterministic and aligned with scene and
+        /// hierarchy rather than identity allocation.
+        /// </para>
+        /// <para>
+        /// Implementation: allocate a parallel <c>string[]</c> of the same length, fill each entry by clearing a shared
+        /// <see cref="StringBuilder"/>, calling <see cref="AppendStableHierarchySortKey(StringBuilder, Component)"/>, and
+        /// assigning <c>keys[i] = sb.ToString()</c>. Then <c>Array.Sort(keys, components, StringComparer.Ordinal)</c>
+        /// reorders <paramref name="components"/> to match ascending key order. Arrays of length 0 or 1, or a null
+        /// reference, are left unchanged without allocating.
+        /// </para>
+        /// </remarks>
         internal static void SortComponentsByStableSceneHierarchy(Component[] components)
         {
             if (components == null || components.Length <= 1)
@@ -984,6 +999,23 @@ namespace UnityEngine.Formats.Alembic.Util
             Array.Sort(keys, components, StringComparer.Ordinal);
         }
 
+        /// <summary>
+        /// Appends a deterministic sort key for <paramref name="c"/> to <paramref name="sb"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Unity 6.4+ no longer guarantees an ordering for <c>FindObjectsByType</c>, and engine guidance is to avoid
+        /// sorting by <c>InstanceID</c> / <c>EntityId</c>. This key instead fixes a stable order from scene identity
+        /// and transform hierarchy so export iteration is reproducible.
+        /// </para>
+        /// <para>
+        /// The key is built as: <c>scene.path</c>, a U+0001 separator, <c>scene.buildIndex</c> formatted as four digits,
+        /// another separator, then the path from scene root to the component’s transform as dot-separated
+        /// <see cref="Transform.GetSiblingIndex"/> values, each formatted as eight digits (<c>D8</c>) so lexical
+        /// string order matches numeric sibling order. Walking from leaf to root and emitting indices root-first yields
+        /// depth-first hierarchy order when keys are compared with <see cref="StringComparer.Ordinal"/>.
+        /// </para>
+        /// </remarks>
         internal static void AppendStableHierarchySortKey(StringBuilder sb, Component c)
         {
             var scene = c.gameObject.scene;
