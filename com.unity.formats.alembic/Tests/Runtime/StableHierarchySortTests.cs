@@ -1,5 +1,6 @@
 #if UNITY_6000_4_OR_NEWER
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using UnityEngine;
@@ -19,6 +20,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         {
             AlembicRecorder.SortComponentsByStableSceneHierarchy(null);
             AlembicRecorder.SortComponentsByStableSceneHierarchy(new Component[0]);
+            var go = new GameObject("single");
+            AlembicRecorder.SortComponentsByStableSceneHierarchy(new Component[] { go.AddComponent<MeshRenderer>() });
+            Object.DestroyImmediate(go);
         }
 
         [UnityTest]
@@ -38,8 +42,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             var sbA = new StringBuilder();
             var sbB = new StringBuilder();
-            AlembicRecorder.AppendStableHierarchySortKey(sbA, a);
-            AlembicRecorder.AppendStableHierarchySortKey(sbB, b);
+            var scratchpad = new List<int>();
+            AlembicRecorder.AppendStableHierarchySortKey(sbA, a, scratchpad);
+            scratchpad.Clear();
+            AlembicRecorder.AppendStableHierarchySortKey(sbB, b, scratchpad);
 
             Assert.Less(string.CompareOrdinal(sbA.ToString(), sbB.ToString()), 0);
 
@@ -62,8 +68,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
             var sbP = new StringBuilder();
             var sbC = new StringBuilder();
-            AlembicRecorder.AppendStableHierarchySortKey(sbP, cParent);
-            AlembicRecorder.AppendStableHierarchySortKey(sbC, cChild);
+            var scratchpad = new List<int>();
+            AlembicRecorder.AppendStableHierarchySortKey(sbP, cParent, scratchpad);
+            scratchpad.Clear();
+            AlembicRecorder.AppendStableHierarchySortKey(sbC, cChild, scratchpad);
 
             Assert.Less(string.CompareOrdinal(sbP.ToString(), sbC.ToString()), 0);
 

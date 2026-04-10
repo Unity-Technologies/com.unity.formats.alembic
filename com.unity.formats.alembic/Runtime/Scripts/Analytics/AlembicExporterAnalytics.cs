@@ -44,6 +44,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
                 return settings.TargetBranch != null ? settings.TargetBranch.GetComponentsInChildren<T>() : Enumerable.Empty<T>();
             }
 #if UNITY_6000_4_OR_NEWER
+            // Analytics only counts component instances; order does not affect the result.
             return Object.FindObjectsByType<T>();
 #elif UNITY_2023_1_OR_NEWER
             return Object.FindObjectsByType<T>(FindObjectsSortMode.InstanceID);

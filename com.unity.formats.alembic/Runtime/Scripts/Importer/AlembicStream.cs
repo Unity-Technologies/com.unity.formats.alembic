@@ -91,7 +91,10 @@ namespace UnityEngine.Formats.Alembic.Importer
         static List<AlembicStream> s_streams = new List<AlembicStream>();
 
 #if UNITY_6000_4_OR_NEWER
-        // Native aiContext keys are int; use a monotonic surrogate instead of narrowing EntityId.
+        // Native aiContext keys are int; use a monotonic surrogate instead of narrowing EntityId (ulong → int
+        // would silently discard the upper 32 bits). Starts at 0; Interlocked.Increment returns 1 on the
+        // first call, so UID 0 is never issued — matching GetInstanceID's guarantee for live objects.
+        // Theoretical int overflow after ~2 billion AbcLoad calls is impossible in practice.
         static int s_nextNativeContextUid;
 
         static int AllocateNativeContextUid() => Interlocked.Increment(ref s_nextNativeContextUid);

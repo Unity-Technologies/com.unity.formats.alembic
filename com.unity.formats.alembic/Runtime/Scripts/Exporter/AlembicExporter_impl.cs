@@ -548,7 +548,7 @@ namespace UnityEngine.Formats.Alembic.Util
                     return;
                 }
 #if UNITY_6000_4_OR_NEWER
-                abcObject = parent.abcObject.NewXform(target.name + " (" + EntityId.ToULong(target.GetEntityId()).ToString("X8") + ")", timeSamplingIndex);
+                abcObject = parent.abcObject.NewXform(target.name + " (" + EntityId.ToULong(target.GetEntityId()).ToString("X16") + ")", timeSamplingIndex);
 #else
                 abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
 #endif
@@ -965,7 +965,7 @@ namespace UnityEngine.Formats.Alembic.Util
 #if UNITY_6000_4_OR_NEWER
         /// <summary>
         /// Sorts <paramref name="components"/> in place into a stable order derived from each object’s scene and
-        /// transform hierarchy (see <see cref="AppendStableHierarchySortKey"/>).
+        /// transform hierarchy (see <see cref="AppendStableHierarchySortKey(StringBuilder, Component, List{int})"/>).
         /// </summary>
         /// <remarks>
         /// <para>
@@ -976,8 +976,9 @@ namespace UnityEngine.Formats.Alembic.Util
         /// </para>
         /// <para>
         /// Implementation: allocate a parallel <c>string[]</c> of the same length, fill each entry by clearing a shared
-        /// <see cref="StringBuilder"/>, calling <see cref="AppendStableHierarchySortKey(StringBuilder, Component)"/>, and
-        /// assigning <c>keys[i] = sb.ToString()</c>. Then <c>Array.Sort(keys, components, StringComparer.Ordinal)</c>
+        /// <see cref="StringBuilder"/> and a shared <c>List&lt;int&gt;</c> scratchpad, calling
+        /// <see cref="AppendStableHierarchySortKey(StringBuilder, Component, List{int})"/>, and assigning
+        /// <c>keys[i] = sb.ToString()</c>. Then <c>Array.Sort(keys, components, StringComparer.Ordinal)</c>
         /// reorders <paramref name="components"/> to match ascending key order. Arrays of length 0 or 1, or a null
         /// reference, are left unchanged without allocating.
         /// </para>
@@ -989,10 +990,12 @@ namespace UnityEngine.Formats.Alembic.Util
 
             var keys = new string[components.Length];
             var sb = new StringBuilder(128);
+            var scratchpad = new List<int>(8);
             for (int i = 0; i < components.Length; i++)
             {
                 sb.Clear();
-                AppendStableHierarchySortKey(sb, components[i]);
+                scratchpad.Clear();
+                AppendStableHierarchySortKey(sb, components[i], scratchpad);
                 keys[i] = sb.ToString();
             }
 
@@ -1009,32 +1012,28 @@ namespace UnityEngine.Formats.Alembic.Util
         /// and transform hierarchy so export iteration is reproducible.
         /// </para>
         /// <para>
-        /// The key is built as: <c>scene.path</c>, a U+0001 separator, <c>scene.buildIndex</c> formatted as four digits,
-        /// another separator, then the path from scene root to the component’s transform as dot-separated
+        /// The key is built as: <c>scene.path</c>, a U+0001 separator, then the path from scene root to the component’s transform as dot-separated
         /// <see cref="Transform.GetSiblingIndex"/> values, each formatted as eight digits (<c>D8</c>) so lexical
         /// string order matches numeric sibling order. Walking from leaf to root and emitting indices root-first yields
         /// depth-first hierarchy order when keys are compared with <see cref="StringComparer.Ordinal"/>.
         /// </para>
         /// </remarks>
-        internal static void AppendStableHierarchySortKey(StringBuilder sb, Component c)
+        internal static void AppendStableHierarchySortKey(StringBuilder sb, Component c, List<int> scratchpad)
         {
             var scene = c.gameObject.scene;
             sb.Append(scene.path);
             sb.Append('\x1');
-            sb.Append(scene.buildIndex.ToString("D4"));
-            sb.Append('\x1');
             var t = c.transform;
-            var indices = new List<int>(8);
             while (t != null)
             {
-                indices.Add(t.GetSiblingIndex());
+                scratchpad.Add(t.GetSiblingIndex());
                 t = t.parent;
             }
-            for (int i = indices.Count - 1; i >= 0; i--)
+            for (int i = scratchpad.Count - 1; i >= 0; i--)
             {
-                if (i < indices.Count - 1)
+                if (i < scratchpad.Count - 1)
                     sb.Append('.');
-                sb.Append(indices[i].ToString("D8"));
+                sb.Append(scratchpad[i].ToString("D8"));
             }
         }
 #endif
