@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if UNITY_6000_4_OR_NEWER
+using System.Threading;
+#endif
 using Unity.Jobs;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -86,6 +89,13 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         static List<AlembicStream> s_streams = new List<AlembicStream>();
+
+#if UNITY_6000_4_OR_NEWER
+        // Native aiContext keys are int; use a monotonic surrogate instead of narrowing EntityId.
+        static int s_nextNativeContextUid;
+
+        static int AllocateNativeContextUid() => Interlocked.Increment(ref s_nextNativeContextUid);
+#endif
 
         public static void DisconnectStreamsWithPath(string path)
         {
@@ -223,7 +233,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         {
             m_time = 0.0f;
 #if UNITY_6000_4_OR_NEWER
-            m_context = new SafeContext(aiContext.Create((int)EntityId.ToULong(m_abcTreeRoot.gameObject.GetEntityId())));
+            m_context = new SafeContext(aiContext.Create(AllocateNativeContextUid()));
 #else
             m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
 #endif
