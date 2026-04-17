@@ -506,19 +506,6 @@ void aiMeshSchema<T, U>::readSampleBody(U& sample, uint64_t idx)
         }
     }
 
-    // Validate loaded data from potentially corrupted Alembic file
-    // Check immediately after loading to avoid wasted refinement work
-    if (topology_changed)
-    {
-        if ((topology.m_counts_sp && !topology.m_counts_sp->get()) ||
-            (topology.m_indices_sp && !topology.m_indices_sp->get()) ||
-            (sample.m_points_sp && !sample.m_points_sp->get()))
-        {
-            DebugLog("cookSampleBody: Corrupted mesh data detected (NULL arrays in valid smart pointers), skipping sample");
-            return;
-        }
-    }
-
     // normals
     if (m_constant_normals.empty() && summary.has_normals_prop && !summary.compute_normals)
     {
@@ -851,6 +838,15 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     auto& topology = *sample.m_topology;
     auto& refiner = topology.m_refiner;
     auto& config = this->getConfig();
+
+    // Validate smart pointers exist AND contain valid data (not NULL)
+    // Corrupted Alembic files can have valid smart pointers but NULL data
+    if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp ||
+        !topology.m_counts_sp->get() || !topology.m_indices_sp->get() || !sample.m_points_sp->get())
+    {
+        DebugLog("onTopologyChange: Invalid or corrupted topology data, skipping");
+        return;
+    }
 
     refiner.clear();
     refiner.split_unit = config.split_unit;
