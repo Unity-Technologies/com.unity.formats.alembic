@@ -47,9 +47,7 @@ namespace UnityEditor.Formats.Alembic.Tests
 
             try
             {
-                AssetDatabase.StartAssetEditing();
                 FileUtil.CopyFileOrDirectory(fileSource, fileDestination);
-                AssetDatabase.StopAssetEditing();
                 AssetDatabase.ImportAsset(fileDestination);
             }
             finally
