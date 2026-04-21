@@ -1033,8 +1033,21 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 if (i < scratchpad.Count - 1)
                     sb.Append('.');
-                sb.Append(scratchpad[i].ToString("D8"));
+                AppendD8(sb, scratchpad[i]);
             }
+        }
+
+        // Appends value zero-padded to 8 digits directly into sb with no string allocation.
+        static void AppendD8(StringBuilder sb, int value)
+        {
+            sb.Append((char)('0' + value / 10000000 % 10));
+            sb.Append((char)('0' + value / 1000000  % 10));
+            sb.Append((char)('0' + value / 100000   % 10));
+            sb.Append((char)('0' + value / 10000    % 10));
+            sb.Append((char)('0' + value / 1000     % 10));
+            sb.Append((char)('0' + value / 100      % 10));
+            sb.Append((char)('0' + value / 10       % 10));
+            sb.Append((char)('0' + value             % 10));
         }
 #endif
 
