@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if UNITY_6000_4_OR_NEWER
+using System.Threading;
+#endif
 using Unity.Jobs;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -86,6 +89,16 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
         static List<AlembicStream> s_streams = new List<AlembicStream>();
+
+#if UNITY_6000_4_OR_NEWER
+        // Native aiContext keys are int; use a monotonic surrogate instead of narrowing EntityId (ulong → int
+        // would silently discard the upper 32 bits). Starts at 0; Interlocked.Increment returns 1 on the
+        // first call, so UID 0 is never issued — matching GetInstanceID's guarantee for live objects.
+        // Theoretical int overflow after ~2 billion AbcLoad calls is impossible in practice.
+        static int s_nextNativeContextUid;
+
+        static int AllocateNativeContextUid() => Interlocked.Increment(ref s_nextNativeContextUid);
+#endif
 
         public static void DisconnectStreamsWithPath(string path)
         {
@@ -222,7 +235,11 @@ namespace UnityEngine.Formats.Alembic.Importer
         public bool AbcLoad(bool createMissingNodes, bool serializeMesh)
         {
             m_time = 0.0f;
+#if UNITY_6000_4_OR_NEWER
+            m_context = new SafeContext(aiContext.Create(AllocateNativeContextUid()));
+#else
             m_context = new SafeContext(aiContext.Create(m_abcTreeRoot.gameObject.GetInstanceID()));
+#endif
 
             var settings = m_streamDesc.Settings;
             m_config.swapHandedness = settings.SwapHandedness;

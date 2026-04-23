@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -546,7 +547,11 @@ namespace UnityEngine.Formats.Alembic.Util
                     m_target = null;
                     return;
                 }
+#if UNITY_6000_4_OR_NEWER
+                abcObject = parent.abcObject.NewXform(target.name + " (" + EntityId.ToULong(target.GetEntityId()).ToString("X16") + ")", timeSamplingIndex);
+#else
                 abcObject = parent.abcObject.NewXform(target.name + " (" + target.GetInstanceID().ToString("X8") + ")", timeSamplingIndex);
+#endif
                 m_target = target;
             }
 
@@ -834,7 +839,11 @@ namespace UnityEngine.Formats.Alembic.Util
 
         class CaptureNode
         {
+#if UNITY_6000_4_OR_NEWER
+            public ulong entityId;
+#else
             public int instanceID;
+#endif
             public Type componentType;
             public CaptureNode parent;
             public Transform transform;
@@ -872,9 +881,15 @@ namespace UnityEngine.Formats.Alembic.Util
 
         aeContext m_ctx;
         ComponentCapturer m_root;
+#if UNITY_6000_4_OR_NEWER
+        Dictionary<ulong, CaptureNode> m_nodes;
+        List<CaptureNode> m_newNodes;
+        List<ulong> m_entityIdsToRemove;
+#else
         Dictionary<int, CaptureNode> m_nodes;
         List<CaptureNode> m_newNodes;
         List<int> m_iidToRemove;
+#endif
         int m_lastTimeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
 
@@ -947,16 +962,109 @@ namespace UnityEngine.Formats.Alembic.Util
 
 #endif
 
+#if UNITY_6000_4_OR_NEWER
+        /// <summary>
+        /// Sorts <paramref name="components"/> in place into a stable order derived from each object’s scene and
+        /// transform hierarchy (see <see cref="AppendStableHierarchySortKey(StringBuilder, Component, List{int})"/>).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// On Unity 6.4 and newer, sort mode is deprecated for <c>FindObjectsByType</c>, so the returned array has no
+        /// defined order. Sorting by <c>InstanceID</c> / <c>EntityId</c> is also discouraged. This method reorders the
+        /// array so exporter iteration (for example from <c>GetTargets</c>) is deterministic and aligned with scene and
+        /// hierarchy rather than identity allocation.
+        /// </para>
+        /// <para>
+        /// Implementation: allocate a parallel <c>string[]</c> of the same length, fill each entry by clearing a shared
+        /// <see cref="StringBuilder"/> and a shared <c>List&lt;int&gt;</c> scratchpad, calling
+        /// <see cref="AppendStableHierarchySortKey(StringBuilder, Component, List{int})"/>, and assigning
+        /// <c>keys[i] = sb.ToString()</c>. Then <c>Array.Sort(keys, components, StringComparer.Ordinal)</c>
+        /// reorders <paramref name="components"/> to match ascending key order. Arrays of length 0 or 1, or a null
+        /// reference, are left unchanged without allocating.
+        /// </para>
+        /// </remarks>
+        internal static void SortComponentsByStableSceneHierarchy(Component[] components)
+        {
+            if (components == null || components.Length <= 1)
+                return;
+
+            var keys = new string[components.Length];
+            var sb = new StringBuilder(128);
+            var scratchpad = new List<int>(8);
+            for (int i = 0; i < components.Length; i++)
+            {
+                sb.Clear();
+                scratchpad.Clear();
+                AppendStableHierarchySortKey(sb, components[i], scratchpad);
+                keys[i] = sb.ToString();
+            }
+
+            Array.Sort(keys, components, StringComparer.Ordinal);
+        }
+
+        /// <summary>
+        /// Appends a deterministic sort key for <paramref name="c"/> to <paramref name="sb"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Unity 6.4+ no longer guarantees an ordering for <c>FindObjectsByType</c>, and engine guidance is to avoid
+        /// sorting by <c>InstanceID</c> / <c>EntityId</c>. This key instead fixes a stable order from scene identity
+        /// and transform hierarchy so export iteration is reproducible.
+        /// </para>
+        /// <para>
+        /// The key is built as: <c>scene.path</c>, a U+0001 separator, then the path from scene root to the component’s transform as dot-separated
+        /// <see cref="Transform.GetSiblingIndex"/> values, each formatted as eight digits (<c>D8</c>) so lexical
+        /// string order matches numeric sibling order. Walking from leaf to root and emitting indices root-first yields
+        /// depth-first hierarchy order when keys are compared with <see cref="StringComparer.Ordinal"/>.
+        /// </para>
+        /// </remarks>
+        internal static void AppendStableHierarchySortKey(StringBuilder sb, Component c, List<int> scratchpad)
+        {
+            var scene = c.gameObject.scene;
+            sb.Append(scene.path);
+            sb.Append('\x1');
+            var t = c.transform;
+            while (t != null)
+            {
+                scratchpad.Add(t.GetSiblingIndex());
+                t = t.parent;
+            }
+            for (int i = scratchpad.Count - 1; i >= 0; i--)
+            {
+                if (i < scratchpad.Count - 1)
+                    sb.Append('.');
+                AppendD8(sb, scratchpad[i]);
+            }
+        }
+
+        // Appends value zero-padded to 8 digits directly into sb with no string allocation.
+        static void AppendD8(StringBuilder sb, int value)
+        {
+            sb.Append((char)('0' + value / 10000000 % 10));
+            sb.Append((char)('0' + value / 1000000  % 10));
+            sb.Append((char)('0' + value / 100000   % 10));
+            sb.Append((char)('0' + value / 10000    % 10));
+            sb.Append((char)('0' + value / 1000     % 10));
+            sb.Append((char)('0' + value / 100      % 10));
+            sb.Append((char)('0' + value / 10       % 10));
+            sb.Append((char)('0' + value             % 10));
+        }
+#endif
 
         Component[] GetTargets(Type type)
         {
             if (m_settings.Scope == ExportScope.TargetBranch && TargetBranch != null)
                 return TargetBranch.GetComponentsInChildren(type);
-            else
-#if UNITY_2023_1_OR_NEWER
-                return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
+
+#if UNITY_6000_4_OR_NEWER
+            var objects = GameObject.FindObjectsByType(type);
+            var components = Array.ConvertAll<UnityEngine.Object, Component>(objects, e => (Component)e);
+            SortComponentsByStableSceneHierarchy(components);
+            return components;
+#elif UNITY_2023_1_OR_NEWER
+            return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
 #else
-                return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
+            return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
 #endif
         }
 
@@ -974,8 +1082,21 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (node == null) { return null; }
 
+#if UNITY_6000_4_OR_NEWER
+            ulong entityId = EntityId.ToULong(node.gameObject.GetEntityId());
+#else
             int iid = node.gameObject.GetInstanceID();
+#endif
             CaptureNode cn;
+#if UNITY_6000_4_OR_NEWER
+            if (m_nodes.TryGetValue(entityId, out cn)) { return cn; }
+
+            cn = new CaptureNode();
+            cn.entityId = entityId;
+            cn.transform = node;
+            cn.parent = ConstructTree(node.parent);
+            m_nodes.Add(entityId, cn);
+#else
             if (m_nodes.TryGetValue(iid, out cn)) { return cn; }
 
             cn = new CaptureNode();
@@ -983,6 +1104,7 @@ namespace UnityEngine.Formats.Alembic.Util
             cn.transform = node;
             cn.parent = ConstructTree(node.parent);
             m_nodes.Add(iid, cn);
+#endif
             m_newNodes.Add(cn);
             return cn;
         }
@@ -1028,9 +1150,15 @@ namespace UnityEngine.Formats.Alembic.Util
             if (parent != null && parent.transformCapturer == null)
             {
                 SetupComponentCapturer(parent);
+#if UNITY_6000_4_OR_NEWER
+                if (!m_nodes.ContainsKey(parent.entityId) || !m_newNodes.Contains(parent))
+                {
+                    m_nodes.Add(parent.entityId, parent);
+#else
                 if (!m_nodes.ContainsKey(parent.instanceID) || !m_newNodes.Contains(parent))
                 {
                     m_nodes.Add(parent.instanceID, parent);
+#endif
                     m_newNodes.Add(parent);
                 }
             }
@@ -1143,9 +1271,15 @@ namespace UnityEngine.Formats.Alembic.Util
             }
 
             m_root = new RootCapturer(this, m_ctx.topObject);
+#if UNITY_6000_4_OR_NEWER
+            m_nodes = new Dictionary<ulong, CaptureNode>();
+            m_newNodes = new List<CaptureNode>();
+            m_entityIdsToRemove = new List<ulong>();
+#else
             m_nodes = new Dictionary<int, CaptureNode>();
             m_newNodes = new List<CaptureNode>();
             m_iidToRemove = new List<int>();
+#endif
             m_lastTimeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
@@ -1170,7 +1304,11 @@ namespace UnityEngine.Formats.Alembic.Util
         {
             if (!m_recording) { return; }
 
+#if UNITY_6000_4_OR_NEWER
+            m_entityIdsToRemove = null;
+#else
             m_iidToRemove = null;
+#endif
             m_newNodes = null;
             m_nodes = null;
             m_root = null;
@@ -1213,14 +1351,24 @@ namespace UnityEngine.Formats.Alembic.Util
                 var node = kvp.Value;
                 node.Capture();
                 if (node.transform == null)
+#if UNITY_6000_4_OR_NEWER
+                    m_entityIdsToRemove.Add(node.entityId);
+#else
                     m_iidToRemove.Add(node.instanceID);
+#endif
             }
             m_ctx.MarkFrameEnd();
 
             // remove deleted GameObjects
+#if UNITY_6000_4_OR_NEWER
+            foreach (ulong entityId in m_entityIdsToRemove)
+                m_nodes.Remove(entityId);
+            m_entityIdsToRemove.Clear();
+#else
             foreach (int iid in m_iidToRemove)
                 m_nodes.Remove(iid);
             m_iidToRemove.Clear();
+#endif
 
             // advance time
             ++m_frameCount;
