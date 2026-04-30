@@ -852,6 +852,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
             this->getFullName());
         topology.m_index_count = 0;
         topology.m_vertex_count = 0;
+        refiner.clear();
         onTopologyDetermined();
         return;
     }
