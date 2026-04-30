@@ -364,10 +364,20 @@ namespace UnityEngine.Formats.Alembic.Importer
             // the MeshFilter invariant holds for the rest of the pipeline.
             if (m_sampleSummary.splitCount == 0)
             {
-                if (topologyChanged && abcTreeNode.gameObject.GetComponent<MeshFilter>() == null)
+                if (topologyChanged)
                 {
-                    Debug.LogWarning($"[Alembic] '{abcTreeNode.gameObject.name}' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.");
-                    AddMeshComponents(abcTreeNode.gameObject);
+                    // Clear geometry on any existing splits so stale faces don't persist
+                    // when the mesh transitions from having faces to having none.
+                    foreach (var split in m_splits)
+                    {
+                        if (split.mesh != null)
+                            split.mesh.Clear();
+                    }
+                    if (abcTreeNode.gameObject.GetComponent<MeshFilter>() == null)
+                    {
+                        Debug.LogWarning($"[Alembic] '{abcTreeNode.gameObject.name}' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.");
+                        AddMeshComponents(abcTreeNode.gameObject);
+                    }
                 }
                 return;
             }
