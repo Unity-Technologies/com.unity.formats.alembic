@@ -142,7 +142,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                         m_splits[i].active = true;
                 }
             }
-            else
+            else if (numSplits > 0)
             {
                 if (m_splits.Count == 0)
                 {
@@ -357,6 +357,19 @@ namespace UnityEngine.Formats.Alembic.Importer
                 abcTreeNode.gameObject.SetActive(visible);
                 if (!visible && !topologyChanged)
                     return;
+            }
+
+            // Zero-face mesh: vertices exist but there are no faces.
+            // Create an empty MeshFilter/MeshRenderer so the node is importable and
+            // the MeshFilter invariant holds for the rest of the pipeline.
+            if (m_sampleSummary.splitCount == 0)
+            {
+                if (topologyChanged && abcTreeNode.gameObject.GetComponent<MeshFilter>() == null)
+                {
+                    Debug.LogWarning($"[Alembic] '{abcTreeNode.gameObject.name}' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.");
+                    AddMeshComponents(abcTreeNode.gameObject);
+                }
+                return;
             }
 
             bool useSubObjects = m_sampleSummary.splitCount > 1;
