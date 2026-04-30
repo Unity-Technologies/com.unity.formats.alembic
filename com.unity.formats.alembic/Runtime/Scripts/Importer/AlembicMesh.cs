@@ -375,7 +375,7 @@ namespace UnityEngine.Formats.Alembic.Importer
                     }
                     if (abcTreeNode.gameObject.GetComponent<MeshFilter>() == null)
                     {
-                        Debug.LogWarning($"[Alembic] '{abcTreeNode.gameObject.name}' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.");
+                        Debug.Log($"[Alembic] '{abcTreeNode.gameObject.name}' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.");
                         AddMeshComponents(abcTreeNode.gameObject);
                     }
                 }
