@@ -53,7 +53,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
-            Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));
+            Assert.IsNotEmpty(inst.GetComponentsInChildren<MeshFilter>());
         }
 
         [Test]
