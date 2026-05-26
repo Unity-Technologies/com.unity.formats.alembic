@@ -842,6 +842,21 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     if (!topology.m_counts_sp || !topology.m_indices_sp || !sample.m_points_sp)
         return;
 
+    // Guard against zero-face meshes that have vertices but no faces.
+    // GeneratePointNormals crashes when face_count==0 because std::partial_sum
+    // is called with a reversed range (end = begin - 1) when face_vertex_counts
+    // is a null pointer from an empty Alembic array sample.
+    if (topology.m_counts_sp->size() == 0)
+    {
+        DebugWarning("aiPolyMesh: '%s' has vertices but no faces; skipping to avoid crash.",
+            this->getFullName());
+        topology.m_index_count = 0;
+        topology.m_vertex_count = 0;
+        refiner.clear();
+        onTopologyDetermined();
+        return;
+    }
+
     refiner.clear();
     refiner.split_unit = config.split_unit;
     refiner.gen_points = config.import_point_polygon;

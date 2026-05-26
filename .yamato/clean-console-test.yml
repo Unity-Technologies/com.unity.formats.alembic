@@ -14,11 +14,12 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.2.0
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: package
         PACKAGE_PATH: ./com.unity.formats.alembic
         EDITOR_VERSION: {{ editor.version }}
+        EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
     - .yamato/package-pack.yml#pack
@@ -38,11 +39,12 @@ AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.2.0
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ hdrp_test_project_latest.path }}
         EDITOR_VERSION: {{ editor.version }}
+        EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
     - .yamato/package-pack.yml#pack
@@ -62,11 +64,12 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.2.0
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ recorder_test_project.path }}
         EDITOR_VERSION: {{ editor.version }}
+        EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
     - .yamato/package-pack.yml#pack

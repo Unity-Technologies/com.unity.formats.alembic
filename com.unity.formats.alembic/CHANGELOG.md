@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update deprecated and obsolete APIs available in Unity 6000.4 and above.
 
+### Fixed
+- Fixed a crash when importing an Alembic PolyMesh that has vertices but no faces (IN-133221).
+
 ## [2.4.4] - 2026-01-29
 ### Changed
 - Signed binaries on Windows and Mac.

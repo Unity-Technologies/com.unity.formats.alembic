@@ -294,6 +294,11 @@ void GenerateTangents(abcV4 *dst,
 void GeneratePointNormals(const int *face_vertex_counts, const int *face_indices, const abcV3 *points, abcV3 *normals,
     const int *remapped_point_indices, const int face_count, const int remapped_count, const int orig_point_count)
 {
+    // face_count - 1 underflows to -1 when face_count == 0, making partial_sum iterate a
+    // reversed range [begin, begin-1) which reads *nullptr when the pointer is null.
+    if (face_count <= 0 || remapped_count <= 0)
+        return;
+
     std::vector<int> face_start_indices(face_count);
     std::partial_sum(face_vertex_counts, face_vertex_counts + face_count - 1, face_start_indices.begin() + 1);
     memset(normals, 0, remapped_count * 3 * sizeof(float));

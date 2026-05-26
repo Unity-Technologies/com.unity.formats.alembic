@@ -53,7 +53,18 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
-            Assert.IsEmpty(inst.GetComponentsInChildren<MeshFilter>().Select(x => x.sharedMesh != null));
+            Assert.IsNotEmpty(inst.GetComponentsInChildren<MeshFilter>());
+        }
+
+        [Test]
+        public void ZeroFaceMesh_IsImportedSuccessfully()
+        {
+            var path = AssetDatabase.GUIDToAssetPath("c6fbb68dd844c5549bcc9f7135a291f9");
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            Assert.IsNotNull(asset, "zerofacemesh.abc failed to import.");
+            var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+            Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
+            Assert.IsNotEmpty(inst.GetComponentsInChildren<MeshFilter>());
         }
 
         [Test]
