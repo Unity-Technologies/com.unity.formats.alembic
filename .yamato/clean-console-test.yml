@@ -14,7 +14,7 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@25505461657b1dede811d8237c171ef6235e58cd
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: package
         PACKAGE_PATH: ./com.unity.formats.alembic
@@ -39,7 +39,7 @@ AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@25505461657b1dede811d8237c171ef6235e58cd
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ hdrp_test_project_latest.path }}
@@ -64,7 +64,7 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@25505461657b1dede811d8237c171ef6235e58cd
+    - brick_source: git@github.cds.internal.unity3d.com:wind-xu/clean_console_test_brick.git@v0.4.0
       variables:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ recorder_test_project.path }}
