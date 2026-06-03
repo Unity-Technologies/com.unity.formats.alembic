@@ -39,19 +39,19 @@ public class CodeSigning : RecipeBase
     {
         var settings = AlembicSettings.Instance;
         var jobBuilders = new List<IJobBuilder>();
-        var platforms = settings.Wrench.Packages[AlembicSettings.AlembicPackageName].EditorPlatforms;
+        var platforms = settings.Wrench.Packages[AlembicSettings.AlembicPackageName].UnityEditors.Last().EditorPlatforms;
         var packages = settings.Wrench.Packages.Where(p => p.Value.ReleaseOptions.IsReleasing);
         foreach (var package in packages)
         {
             var packageName = package.Value.ShortName;
             foreach (var platform in platforms)
             {
-                if (platform.Key != SystemType.MacOS && platform.Key != SystemType.Windows)
+                if (platform.System != SystemType.MacOS && platform.System != SystemType.Windows)
                 {
                     continue;
                 }
 
-                var signJob = CreateCodeSigningJob(platform.Value, packageName);
+                var signJob = CreateCodeSigningJob(platform, packageName);
                 if (signJob != null)
                 {
                     jobBuilders.Add(signJob);
