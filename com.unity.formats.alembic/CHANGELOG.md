@@ -4,7 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.6] - 2026-06-30
 ### Fixed
 - Fixed the Windows ARM64 native plugin being incorrectly included in non-ARM64 player builds (such as GameCore x64), where it failed to load with an architecture mismatch.
 
