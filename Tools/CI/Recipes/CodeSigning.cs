@@ -29,7 +29,7 @@ public class CodeSigning : RecipeBase
 
     public string GetJobName(Platform platform, string packageName)
     {
-        return $"Sign binaries for {packageName} on {platform.System.AsString()}";
+        return $"Sign binaries for {packageName} on {platform.Host.Name}";
     }
 
     public IEnumerable<Dependency> AsDependencies()
@@ -46,7 +46,7 @@ public class CodeSigning : RecipeBase
             var packageName = package.Value.ShortName;
             foreach (var platform in platforms)
             {
-                if (platform.System != SystemType.MacOS && platform.System != SystemType.Windows)
+                if (!platform.Host.IsMac && !platform.Host.IsWindows)
                 {
                     continue;
                 }
@@ -74,25 +74,26 @@ public class CodeSigning : RecipeBase
             .WithDescription(GetJobName(platform, packageName))
             .WithPlatform(platform);
 
-        switch (platform.System)
+        if (platform.Host.IsMac)
         {
-            case SystemType.MacOS:
-                job.WithCodeSigningCommands(platform, alembicBinariesToSignOnMac)
-                    .WithDependencies(
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-12")
-                        )
-                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnMac", $"{alembicBinariesToSignOnMac}/**"));
-                break;
-            case SystemType.Windows:
-                job.WithCodeSigningCommands(platform, alembicCodeSignListFileWindows)
-                    .WithDependencies(
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
-                        new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64")
-                        )
-                    .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnWindows", alembicBinariesToSignOnWin));
-                break;
-            default:
-                return null;
+            job.WithCodeSigningCommands(platform, alembicBinariesToSignOnMac)
+                .WithDependencies(
+                    new Dependency("BuildAlembicPlugins", "build_plugins_-_macos-12")
+                    )
+                .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnMac", $"{alembicBinariesToSignOnMac}/**"));
+        }
+        else if (platform.Host.IsWindows)
+        {
+            job.WithCodeSigningCommands(platform, alembicCodeSignListFileWindows)
+                .WithDependencies(
+                    new Dependency("BuildAlembicPlugins", "build_plugins_-_win10"),
+                    new Dependency("BuildAlembicPlugins", "build_plugins_-_win11-arm64")
+                    )
+                .WithArtifact(new Artifact($"{packageName}_SignedBinariesOnWindows", alembicBinariesToSignOnWin));
+        }
+        else
+        {
+            return null;
         }
         return job;
     }
