@@ -26,7 +26,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
         string CopyFixtureIntoAssets(string fileName)
         {
-            var src = Path.GetFullPath(Path.Combine(k_FixturesDir, fileName));
+            // FileUtil.GetPhysicalPath resolves the "Packages/..." virtual path to the real
+            // location, which works whether the package is embedded, a local file dependency, or
+            // in the package cache (unlike Path.GetFullPath, which assumes it is under the project).
+            var src = EditorHelper.BuildPathIfNecessary($"{k_FixturesDir}/{fileName}");
             var dst = "Assets/" + fileName;
             File.Copy(src, dst, overwrite: true);
             if (File.Exists(src + ".meta"))
