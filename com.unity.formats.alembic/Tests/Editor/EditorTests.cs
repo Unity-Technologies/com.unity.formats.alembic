@@ -21,8 +21,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
         // Zero-face / corrupted fixtures live in an ignored "~" folder so Unity does not
         // auto-import them on project load (that would emit console logs and break clean-console
-        // tests). Tests copy them into Assets on demand and clean them up in TearDown.
+        // tests). Tests copy them into a dedicated temp folder on demand; TearDown deletes it.
         const string k_FixturesDir = "Packages/com.unity.formats.alembic/Tests/Editor/Fixtures~";
+        const string k_TempFixtureDir = "Assets/TempAlembicFixtures";
 
         string CopyFixtureIntoAssets(string fileName)
         {
@@ -30,14 +31,23 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             // location, which works whether the package is embedded, a local file dependency, or
             // in the package cache (unlike Path.GetFullPath, which assumes it is under the project).
             var src = EditorHelper.BuildPathIfNecessary($"{k_FixturesDir}/{fileName}");
-            var dst = "Assets/" + fileName;
-            File.Copy(src, dst, overwrite: true);
+            Directory.CreateDirectory(k_TempFixtureDir);
+            var dst = $"{k_TempFixtureDir}/{fileName}";
+            CopyWritable(src, dst);
             if (File.Exists(src + ".meta"))
-                File.Copy(src + ".meta", dst + ".meta", overwrite: true); // preserves the fixture's GUID/import settings
-            deleteFileList.Add(dst);
+                CopyWritable(src + ".meta", dst + ".meta"); // preserves the fixture's GUID/import settings
             AssetDatabase.Refresh();
-            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
             return dst;
+        }
+
+        // Package-cache files are read-only; File.Copy preserves that, which would make Unity fail
+        // to update the .meta on import and block a later overwrite. Copy, then clear read-only.
+        static void CopyWritable(string src, string dst)
+        {
+            if (File.Exists(dst))
+                File.SetAttributes(dst, FileAttributes.Normal);
+            File.Copy(src, dst, overwrite: true);
+            File.SetAttributes(dst, File.GetAttributes(dst) & ~FileAttributes.ReadOnly);
         }
 
         [TearDown]
@@ -46,6 +56,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             foreach (var file in deleteFileList)
                 AssetDatabase.DeleteAsset(file);
             deleteFileList.Clear();
+            if (AssetDatabase.IsValidFolder(k_TempFixtureDir))
+                AssetDatabase.DeleteAsset(k_TempFixtureDir); // removes the temp fixtures + their .meta files
         }
 
         [Test]
