@@ -39,8 +39,13 @@ public class BuildAlembicPlugins : RecipeBase
         List<IJobBuilder> builders = new();
         foreach (var agent in buildAgents)
         {
+            var arch = agent.Image.Contains("arm64") ? Architecture.Arm64 : Architecture.x64;
+            HostPlatform host = agent.Image.Contains("win") ? HostPlatform.Windows
+                : agent.Image.Contains("mac") ? HostPlatform.MacOS
+                : HostPlatform.CentOS;
+            var target = new TargetPlatform(host.Name, arch);
             var builder = JobBuilder.Create(GetJobName(agent))
-                .WithPlatform(new Platform(agent, SystemType.Unknown))
+                .WithPlatform(new Platform(agent, host, target))
                 .WithDescription(GetJobName(agent));
 
             if (agent.Image.Contains("win"))
