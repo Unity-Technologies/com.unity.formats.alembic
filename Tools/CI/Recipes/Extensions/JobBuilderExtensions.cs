@@ -18,24 +18,24 @@ internal static class JobBuilderExtensions
     {
         if (platform.Host.IsMac)
         {
-                job.WithCommands(c => c
-                        .AddBrick("git@github.cds.internal.unity3d.com:unity/macos.cds.ci.code-signing.git@v2.0.8",
-                            ("CERTIFICATE_NAME", "apple-developer-id-application-unity-technologies-sf")))
-                    .WithBlockCommand(3, 2, b => b
-                         .WithLine("security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db")
-                         .WithLine($"codesign --verbose=3 --timestamp --options=runtime --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
-                         .WithLine("security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db")
-                         .WithLine($"codesign --verify --verbose {binariesToSign}")
-                    );
+            job.WithCommands(c => c
+                    .AddBrick("git@github.cds.internal.unity3d.com:unity/macos.cds.ci.code-signing.git@v2.0.8",
+                        ("CERTIFICATE_NAME", "apple-developer-id-application-unity-technologies-sf")))
+                .WithBlockCommand(3, 2, b => b
+                     .WithLine("security unlock-keychain -p $UNITY_KEYCHAIN_PASSWORD /Users/$USER/Library/Keychains/login.keychain-db")
+                     .WithLine($"codesign --verbose=3 --timestamp --options=runtime --sign \"$(<certificate_thumbprint.txt)\" {binariesToSign}")
+                     .WithLine("security lock-keychain /Users/$USER/Library/Keychains/login.keychain-db")
+                     .WithLine($"codesign --verify --verbose {binariesToSign}")
+                );
         }
         else if (platform.Host.IsWindows)
         {
-                job.WithCommands(c => c
-                    .AddBrick("git@github.cds.internal.unity3d.com:unity/batch.cds.ci.code-signing.git@v2.0.8",
-                        ("AZURE_VAULT_URI", "https://unity-cs-kv-euw1-prd.vault.azure.net/"),
-                        ("AZURE_CERTIFICATE", "ev-unity-technologies-sf"),
-                        ("FILE_LIST", $"{binariesToSign}"))
-                    .Add($"python Tools/Scripts/verify_win_executables_signed.py --architecture x64 --codesign-list-file {binariesToSign}"));
+            job.WithCommands(c => c
+                .AddBrick("git@github.cds.internal.unity3d.com:unity/batch.cds.ci.code-signing.git@v2.0.8",
+                    ("AZURE_VAULT_URI", "https://unity-cs-kv-euw1-prd.vault.azure.net/"),
+                    ("AZURE_CERTIFICATE", "ev-unity-technologies-sf"),
+                    ("FILE_LIST", $"{binariesToSign}"))
+                .Add($"python Tools/Scripts/verify_win_executables_signed.py --architecture x64 --codesign-list-file {binariesToSign}"));
         }
         else
         {

@@ -19,12 +19,33 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     {
         readonly List<string> deleteFileList = new List<string>();
 
+        // Zero-face / corrupted fixtures are stored as ".abc.bytes" so Unity imports them as inert
+        // TextAssets (the AlembicImporter never runs on project load, so no console logs / broken
+        // clean-console tests). Each test materializes one into a real .abc on demand and TearDown
+        // deletes the temp folder. The fixture is looked up via its TextAsset GUID (not a package
+        // path) so it resolves whether tests run from the package itself or the split ".tests"
+        // package that upm-ci builds.
+        const string k_TempFixtureDir = "Assets/TempAlembicFixtures";
+
+        string ImportFixture(string bytesGuid, string fileName)
+        {
+            var bytes = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(bytesGuid));
+            Assert.IsNotNull(bytes, $"Fixture '{fileName}' (guid {bytesGuid}) was not found.");
+            Directory.CreateDirectory(k_TempFixtureDir);
+            var dst = $"{k_TempFixtureDir}/{fileName}";
+            File.WriteAllBytes(dst, bytes.bytes); // the .bytes payload is the raw .abc
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
+            return dst;
+        }
+
         [TearDown]
         public void TearDown()
         {
             foreach (var file in deleteFileList)
                 AssetDatabase.DeleteAsset(file);
             deleteFileList.Clear();
+            if (AssetDatabase.IsValidFolder(k_TempFixtureDir))
+                AssetDatabase.DeleteAsset(k_TempFixtureDir); // removes the temp fixtures + their .meta files
         }
 
         [Test]
@@ -49,7 +70,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void EmptyMeshFileIsHandledGracefully()
         {
-            var path = AssetDatabase.GUIDToAssetPath("66b8b570b5eec42bd80704392a7001b5");
+            var path = ImportFixture("84b7c658eb95d4bcb8ab167b810ffd46", "emptymesh.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
@@ -59,7 +80,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void ZeroFaceMesh_IsImportedSuccessfully()
         {
-            var path = AssetDatabase.GUIDToAssetPath("c6fbb68dd844c5549bcc9f7135a291f9");
+            var path = ImportFixture("8f9e27419d5cf426e843aeb36d5ae605", "zerofacemesh.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             Assert.IsNotNull(asset, "zerofacemesh.abc failed to import.");
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
@@ -70,8 +91,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void CorruptedAlembicFileIsHandledGracefully()
         {
-            var path = AssetDatabase.GUIDToAssetPath("0c10a673a92234124a1fc31297198530");
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var path = ImportFixture("aedc45f2a7b344335ac1a2e1d55cb83d", "SlimeMolding.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             Assert.IsNotNull(asset);
         }

@@ -1,9 +1,0 @@
-{
-  "exempts":{
-    "messages": [
-      "[Alembic] 'polymshShape' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.",
-      "[Alembic] 'ZeroFaceMeshShape_' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh.",
-      "[Alembic] 'Cube_001' has vertices but no faces (zero-face mesh). It will be imported as an empty mesh."
-    ]
-  }
-}
