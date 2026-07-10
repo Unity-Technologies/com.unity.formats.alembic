@@ -4,7 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.7] - 2026-07-10
 ### Changed
 - Empty/zero-face Alembic test fixtures are now imported only within their tests instead of on project load, so loading the package's tests no longer emits console log messages on internal CI.
 
