@@ -19,10 +19,11 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     {
         readonly List<string> deleteFileList = new List<string>();
 
-        // Zero-face / corrupted fixtures live in an ignored "~" folder so Unity does not
-        // auto-import them on project load (that would emit console logs and break clean-console
-        // tests). Tests copy them into a dedicated temp folder on demand; TearDown deletes it.
-        const string k_FixturesDir = "Packages/com.unity.formats.alembic/Tests/Editor/Fixtures~";
+        // Zero-face / corrupted fixtures are stored as ".abc.bytes" so Unity imports them as inert
+        // TextAssets (the AlembicImporter never runs on project load, so no console logs / broken
+        // clean-console tests). They ship in the package as normal assets (unlike a "~" folder,
+        // which package pack strips). Tests copy each to a real .abc on demand; TearDown deletes it.
+        const string k_FixturesDir = "Packages/com.unity.formats.alembic/Tests/Editor/Fixtures";
         const string k_TempFixtureDir = "Assets/TempAlembicFixtures";
 
         string CopyFixtureIntoAssets(string fileName)
@@ -30,12 +31,10 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             // FileUtil.GetPhysicalPath resolves the "Packages/..." virtual path to the real
             // location, which works whether the package is embedded, a local file dependency, or
             // in the package cache (unlike Path.GetFullPath, which assumes it is under the project).
-            var src = EditorHelper.BuildPathIfNecessary($"{k_FixturesDir}/{fileName}");
+            var src = EditorHelper.BuildPathIfNecessary($"{k_FixturesDir}/{fileName}.bytes");
             Directory.CreateDirectory(k_TempFixtureDir);
             var dst = $"{k_TempFixtureDir}/{fileName}";
-            CopyWritable(src, dst);
-            if (File.Exists(src + ".meta"))
-                CopyWritable(src + ".meta", dst + ".meta"); // preserves the fixture's GUID/import settings
+            CopyWritable(src, dst); // the .bytes payload is the raw .abc; import it as an Alembic asset
             AssetDatabase.Refresh();
             return dst;
         }
