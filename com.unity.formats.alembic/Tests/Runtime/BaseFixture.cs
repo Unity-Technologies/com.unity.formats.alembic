@@ -11,6 +11,8 @@ using UnityEditor.Formats.Alembic.Importer;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
+    [PrebuildSetup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
+    [PostBuildCleanup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
     class BaseFixture
     {
         internal AlembicExporter exporter;
