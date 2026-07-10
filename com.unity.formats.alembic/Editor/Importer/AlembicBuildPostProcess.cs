@@ -70,7 +70,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
+#pragma warning disable CS0618 // Type or member is obsolete
     class AlembicScenePlayerStripper : IProcessSceneWithReport
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         static readonly Type[] kStrippableBehaviourTypes =
         {
@@ -103,7 +105,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
+#pragma warning disable CS0618 // Type or member is obsolete
     class AlembicProcessScene : IProcessSceneWithReport
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         public int callbackOrder => 9999; // Run late to catch potential Alembics that were created during a Scene post process.
 

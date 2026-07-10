@@ -90,5 +90,11 @@ namespace UnityEngine.Formats.Alembic.Importer
             cloud.BoundsCenter = data.boundsCenter;
             cloud.BoundsExtents = data.boundsExtents;
         }
+
+        protected override void Dispose(bool v)
+        {
+            base.Dispose(v);
+            m_abcData.Dispose();
+        }
     }
 }
