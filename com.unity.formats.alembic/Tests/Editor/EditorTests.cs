@@ -21,32 +21,21 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 
         // Zero-face / corrupted fixtures are stored as ".abc.bytes" so Unity imports them as inert
         // TextAssets (the AlembicImporter never runs on project load, so no console logs / broken
-        // clean-console tests). They ship in the package as normal assets (unlike a "~" folder,
-        // which package pack strips). Tests copy each to a real .abc on demand; TearDown deletes it.
-        const string k_FixturesDir = "Packages/com.unity.formats.alembic/Tests/Editor/Fixtures";
+        // clean-console tests). Each test materializes one into a real .abc on demand and TearDown
+        // deletes the temp folder. The fixture is looked up via its TextAsset GUID (not a package
+        // path) so it resolves whether tests run from the package itself or the split ".tests"
+        // package that upm-ci builds.
         const string k_TempFixtureDir = "Assets/TempAlembicFixtures";
 
-        string CopyFixtureIntoAssets(string fileName)
+        string ImportFixture(string bytesGuid, string fileName)
         {
-            // FileUtil.GetPhysicalPath resolves the "Packages/..." virtual path to the real
-            // location, which works whether the package is embedded, a local file dependency, or
-            // in the package cache (unlike Path.GetFullPath, which assumes it is under the project).
-            var src = EditorHelper.BuildPathIfNecessary($"{k_FixturesDir}/{fileName}.bytes");
+            var bytes = AssetDatabase.LoadAssetAtPath<TextAsset>(AssetDatabase.GUIDToAssetPath(bytesGuid));
+            Assert.IsNotNull(bytes, $"Fixture '{fileName}' (guid {bytesGuid}) was not found.");
             Directory.CreateDirectory(k_TempFixtureDir);
             var dst = $"{k_TempFixtureDir}/{fileName}";
-            CopyWritable(src, dst); // the .bytes payload is the raw .abc; import it as an Alembic asset
-            AssetDatabase.Refresh();
+            File.WriteAllBytes(dst, bytes.bytes); // the .bytes payload is the raw .abc
+            AssetDatabase.ImportAsset(dst, ImportAssetOptions.ForceSynchronousImport);
             return dst;
-        }
-
-        // Package-cache files are read-only; File.Copy preserves that, which would make Unity fail
-        // to update the .meta on import and block a later overwrite. Copy, then clear read-only.
-        static void CopyWritable(string src, string dst)
-        {
-            if (File.Exists(dst))
-                File.SetAttributes(dst, FileAttributes.Normal);
-            File.Copy(src, dst, overwrite: true);
-            File.SetAttributes(dst, File.GetAttributes(dst) & ~FileAttributes.ReadOnly);
         }
 
         [TearDown]
@@ -81,7 +70,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void EmptyMeshFileIsHandledGracefully()
         {
-            var path = CopyFixtureIntoAssets("emptymesh.abc");
+            var path = ImportFixture("84b7c658eb95d4bcb8ab167b810ffd46", "emptymesh.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
             Assert.IsNotNull(inst.GetComponent<AlembicStreamPlayer>());
@@ -91,7 +80,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void ZeroFaceMesh_IsImportedSuccessfully()
         {
-            var path = CopyFixtureIntoAssets("zerofacemesh.abc");
+            var path = ImportFixture("8f9e27419d5cf426e843aeb36d5ae605", "zerofacemesh.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             Assert.IsNotNull(asset, "zerofacemesh.abc failed to import.");
             var inst = PrefabUtility.InstantiatePrefab(asset) as GameObject;
@@ -102,7 +91,7 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
         [Test]
         public void CorruptedAlembicFileIsHandledGracefully()
         {
-            var path = CopyFixtureIntoAssets("SlimeMolding.abc");
+            var path = ImportFixture("aedc45f2a7b344335ac1a2e1d55cb83d", "SlimeMolding.abc");
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             Assert.IsNotNull(asset);
         }
