@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Empty/zero-face Alembic test fixtures are now imported only within their tests instead of on project load, so loading the package's tests no longer emits console log messages on internal CI.
+
 ## [2.4.6] - 2026-06-30
 ### Fixed
 - Fixed the Windows ARM64 native plugin being incorrectly included in non-ARM64 player builds (such as GameCore x64), where it failed to load with an architecture mismatch.
