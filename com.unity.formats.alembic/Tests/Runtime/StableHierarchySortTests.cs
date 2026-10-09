@@ -13,6 +13,8 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
     /// <summary>
     /// Tests for deterministic export ordering (scene + hierarchy path), Unity 6.4+.
     /// </summary>
+    [PrebuildSetup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
+    [PostBuildCleanup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
     class StableHierarchySortTests
     {
         [Test]
