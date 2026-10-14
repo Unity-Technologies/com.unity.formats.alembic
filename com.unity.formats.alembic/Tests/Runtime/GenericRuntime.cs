@@ -8,6 +8,8 @@ using UnityEngine.TestTools;
 
 namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
 {
+    [PrebuildSetup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
+    [PostBuildCleanup("Unity.Formats.Alembic.UnitTests.ForceDomainReloadOnPlay")]
     public class GenericRuntime
     {
 #if UNITY_EDITOR
