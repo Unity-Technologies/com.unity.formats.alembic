@@ -91,5 +91,11 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             curves.InvokeOnUpdate(curves);
         }
+
+        protected override void Dispose(bool v)
+        {
+            base.Dispose(v);
+            m_abcData.Dispose();
+        }
     }
 }
