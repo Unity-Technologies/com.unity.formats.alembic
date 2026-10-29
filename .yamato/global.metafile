@@ -4,6 +4,8 @@ test_editors:
   - version: 6000.3
   - version: 6000.4
   - version: 6000.5
+  - version: 6000.6
+  - version: 6000.7
   - version: trunk
 
 nightly_test_editors:
@@ -11,6 +13,8 @@ nightly_test_editors:
   - version: 6000.3
   - version: 6000.4
   - version: 6000.5
+  - version: 6000.6
+  - version: 6000.7
   - version: trunk
 
 clean_console_test_editors:
@@ -18,6 +22,8 @@ clean_console_test_editors:
   - version: 6000.3
   - version: 6000.4
   - version: 6000.5
+  - version: 6000.6
+  - version: 6000.7
   - version: trunk
 
 promotion_test_editors:
