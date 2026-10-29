@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Suppressed the upcoming obsolete-API warning (CS0618) on the build post-process scene callbacks (`IProcessSceneWithReport`).
+
+### Fixed
+- Fixed the Alembic recorder leaking pinned mesh buffers after a recording ended; capturers are now disposed once the archive has been flushed (SCP-2272).
+- Fixed Alembic curves and points importers keeping pinned arrays alive after the User ALC unloads.
+- Fixed `aiContextGetIsHDF5` return value being marshalled as a 4-byte bool instead of a single byte in the native call.
+
 ## [2.4.7] - 2026-07-10
 ### Changed
 - Empty/zero-face Alembic test fixtures are now imported only within their tests instead of on project load, so loading the package's tests no longer emits console log messages on internal CI.
