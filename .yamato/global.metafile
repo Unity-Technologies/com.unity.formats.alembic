@@ -1,9 +1,6 @@
 test_editors:
-  - version: 2021.3
   - version: 6000.0
   - version: 6000.3
-  - version: 6000.4
-  - version: 6000.5
   - version: 6000.6
   - version: 6000.7
   - version: trunk
@@ -11,8 +8,6 @@ test_editors:
 nightly_test_editors:
   - version: 6000.0
   - version: 6000.3
-  - version: 6000.4
-  - version: 6000.5
   - version: 6000.6
   - version: 6000.7
   - version: trunk
@@ -20,8 +15,6 @@ nightly_test_editors:
 clean_console_test_editors:
   - version: 6000.0
   - version: 6000.3
-  - version: 6000.4
-  - version: 6000.5
   - version: 6000.6
   - version: 6000.7
   - version: trunk
