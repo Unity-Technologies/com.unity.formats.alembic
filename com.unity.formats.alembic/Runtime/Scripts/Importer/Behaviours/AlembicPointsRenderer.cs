@@ -9,6 +9,9 @@ using UnityEditor;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     static class VPMatrices
     {
         static Dictionary<Camera, Matrix4x4> s_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();

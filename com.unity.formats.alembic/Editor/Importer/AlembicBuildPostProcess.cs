@@ -14,6 +14,9 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     static class AlembicBuildPostProcess
     {
         internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, macOS X, and Linux 64-bit.";
@@ -70,6 +73,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
 #pragma warning disable CS0618 // Type or member is obsolete
     class AlembicScenePlayerStripper : IProcessSceneWithReport
 #pragma warning restore CS0618 // Type or member is obsolete

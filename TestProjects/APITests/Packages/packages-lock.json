@@ -1,12 +1,10 @@
 {
   "dependencies": {
     "com.unity.coding": {
-      "version": "0.1.0-preview.20",
+      "version": "0.1.0-preview.26",
       "depth": 0,
       "source": "registry",
-      "dependencies": {
-        "nuget.moq": "1.0.0"
-      },
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.ext.nunit": {

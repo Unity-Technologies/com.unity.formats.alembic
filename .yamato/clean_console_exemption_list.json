@@ -1,0 +1,8 @@
+{
+  "exempts": {
+    "messages": [
+      "com.unity.purchasing@",
+      "CleanConsoleTests"
+    ]
+  }
+}
