@@ -10,7 +10,7 @@ validate_api_osx:
     flavor: {{ mac_platform.flavor }}
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u {{ test_editors[1].version }} -c Editor
+    - unity-downloader-cli -u {{ test_editors.first.version }} -c Editor
     - utr/utr --suite=editor --editor-location=.Editor --testproject={{ api_test_project.path }} --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/package-pack.yml#pack
@@ -24,7 +24,7 @@ validate_api_win:
     flavor: {{ win_platform.flavor }}
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-    - unity-downloader-cli -u {{ test_editors[1].version }} -c Editor
+    - unity-downloader-cli -u {{ test_editors.first.version }} -c Editor
     - utr/utr.bat --suite=editor --editor-location=.Editor --testproject={{ api_test_project.path }} --artifacts_path=artifacts --reruncount=0
   dependencies:
     - .yamato/package-pack.yml#pack
