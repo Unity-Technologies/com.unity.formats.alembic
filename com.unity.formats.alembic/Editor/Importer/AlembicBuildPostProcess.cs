@@ -73,6 +73,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
 #pragma warning disable CS0618 // Type or member is obsolete
     class AlembicScenePlayerStripper : IProcessSceneWithReport
 #pragma warning restore CS0618 // Type or member is obsolete
