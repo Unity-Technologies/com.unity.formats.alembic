@@ -13,6 +13,9 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEngine.Formats.Alembic.Importer
 {
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     sealed class AlembicStream : IDisposable
     {
         /// <summary>

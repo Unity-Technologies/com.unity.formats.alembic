@@ -76,6 +76,9 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
+#if UNITY_6000_6_OR_NEWER
+    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
     [ScriptedImporter(11, "abc")]
     internal class AlembicImporter : ScriptedImporter
     {

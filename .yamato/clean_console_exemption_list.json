@@ -1,0 +1,9 @@
+{
+  "exempts": {
+    "messages": [
+      "'GooglePlayProrationMode' is obsolete",
+      "'AppStore.UDP' is obsolete",
+      "'IUDPExtensions' is obsolete"
+    ]
+  }
+}
