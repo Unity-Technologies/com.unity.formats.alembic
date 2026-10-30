@@ -44,6 +44,9 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             sphere.transform.localPosition = new Vector3(0, -1, 0);
             var plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             cloth = plane.AddComponent<Cloth>();
+            // Cloth only simulates while its renderer is visible unless updateWhenOffscreen is set. On CI no camera
+            // renders the plane, so without this the cloth stays frozen and the export has a single time sample.
+            plane.GetComponent<SkinnedMeshRenderer>().updateWhenOffscreen = true;
             cloth.sphereColliders = new[] { new ClothSphereColliderPair(sphere.GetComponent<SphereCollider>()) };
             cloth.clothSolverFrequency = 300;
         }
