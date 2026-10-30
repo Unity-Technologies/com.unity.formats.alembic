@@ -866,6 +866,13 @@ namespace UnityEngine.Formats.Alembic.Util
                 if (componentCapturer != null)
                     componentCapturer.Capture();
             }
+
+            public void Dispose()
+            {
+                var disposable = componentCapturer as IDisposable;
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
 
         class CapturerRecord
@@ -890,6 +897,7 @@ namespace UnityEngine.Formats.Alembic.Util
         List<CaptureNode> m_newNodes;
         List<int> m_iidToRemove;
 #endif
+        List<CaptureNode> m_removedNodes;
         int m_lastTimeSamplingIndex;
         int m_startFrameOfLastTimeSampling;
 
@@ -1280,6 +1288,7 @@ namespace UnityEngine.Formats.Alembic.Util
             m_newNodes = new List<CaptureNode>();
             m_iidToRemove = new List<int>();
 #endif
+            m_removedNodes = new List<CaptureNode>();
             m_lastTimeSamplingIndex = 1;
             m_startFrameOfLastTimeSampling = 0;
 
@@ -1309,10 +1318,18 @@ namespace UnityEngine.Formats.Alembic.Util
 #else
             m_iidToRemove = null;
 #endif
+            m_ctx.Destroy(); // flush archive
+
+            // release the capturers' pinned buffers only after the archive is flushed
+            foreach (var kvp in m_nodes)
+                kvp.Value.Dispose();
+            foreach (var node in m_removedNodes)
+                node.Dispose();
+
+            m_removedNodes = null;
             m_newNodes = null;
             m_nodes = null;
             m_root = null;
-            m_ctx.Destroy(); // flush archive
             m_recording = false;
 
             Debug.Log("AlembicRecorder: end: " + m_settings.OutputPath);
@@ -1362,11 +1379,17 @@ namespace UnityEngine.Formats.Alembic.Util
             // remove deleted GameObjects
 #if UNITY_6000_4_OR_NEWER
             foreach (ulong entityId in m_entityIdsToRemove)
+            {
+                m_removedNodes.Add(m_nodes[entityId]);
                 m_nodes.Remove(entityId);
+            }
             m_entityIdsToRemove.Clear();
 #else
             foreach (int iid in m_iidToRemove)
+            {
+                m_removedNodes.Add(m_nodes[iid]);
                 m_nodes.Remove(iid);
+            }
             m_iidToRemove.Clear();
 #endif
 
