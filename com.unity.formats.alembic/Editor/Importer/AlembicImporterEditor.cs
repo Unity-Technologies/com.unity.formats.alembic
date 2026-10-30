@@ -336,7 +336,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                                             {
                                                 importer.RemoveRemap(o.ToSourceAssetIdentifier());
                                             }
-                                            else if (AssetDatabase.GetAssetPath(assign).ToLower().EndsWith("abc"))
+                                            else if (AssetDatabase.GetAssetPath(assign).EndsWith("abc", StringComparison.OrdinalIgnoreCase))
                                             {
                                                 Debug.LogError("Materials cannot be remapped to materials bundled with Alembic files.");
                                             }
@@ -389,7 +389,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                     string.Equals(Path.GetFileNameWithoutExtension(str), assetName,
                         StringComparison.CurrentCultureIgnoreCase));
 
-            if (path == null || path.ToLower().EndsWith("abc")) // we don't want to assign materials from other alembics since these gets recreated on every re-import.
+            if (path == null || path.EndsWith("abc", StringComparison.OrdinalIgnoreCase)) // we don't want to assign materials from other alembics since these gets recreated on every re-import.
             {
                 return null;
             }
