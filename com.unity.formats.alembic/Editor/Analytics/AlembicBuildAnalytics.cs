@@ -19,20 +19,13 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (!EditorAnalytics.enabled)
                 return;
 
-#if UNITY_2023_2_OR_NEWER
             EditorAnalytics.SendAnalytic(new BuildEventAnalytic(CreateEvent(target)));
-#else
-            EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
-            var data = CreateEvent(target);
-            EditorAnalytics.SendEventWithLimit(EventName, data);
-#endif
 #if DEBUG_ANALYTICS
             var json = JsonUtility.ToJson(data, prettyPrint: true);
             Debug.Log($"{EventName}->{json}");
 #endif
         }
 
-#if UNITY_2023_2_OR_NEWER
         internal static AlembicBuildAnalyticsEvent CreateEvent(BuildTarget target)
         {
             var evt = new AlembicBuildAnalyticsEvent
@@ -66,22 +59,5 @@ namespace UnityEditor.Formats.Alembic.Importer
         {
             public string target_platform;
         }
-#else
-        internal static AlembicBuildAnalyticsEvent CreateEvent(BuildTarget target)
-        {
-            var evt = new AlembicBuildAnalyticsEvent
-            {
-                target_platform = target.ToString()
-            };
-
-            return evt;
-        }
-
-        [Serializable]
-        internal struct AlembicBuildAnalyticsEvent
-        {
-            public string target_platform;
-        }
-#endif
     }
 }
