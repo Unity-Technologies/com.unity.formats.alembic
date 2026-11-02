@@ -4,6 +4,8 @@
 # Recorder test project
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
   name : Project test ({{ recorder_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -28,12 +30,15 @@ test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.vers
         - "upm-ci~/test-results/**/*"
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
 # Standalone test project
 {% for editor in test_editors %}
 {% for platform in standalone_test_platforms %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.version }}:
   name : Standalone test ({{ standalone_test_project.name }}) in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -63,6 +68,7 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
         - "upm-ci~/test-results/**/*"
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
@@ -130,6 +136,8 @@ test_project_{{ hdrp_test_project.name }}_{{ platform.name }}_{{ editor.version 
 # New HDRP test project which is used in 2022.2+ versions
 {% for editor in hdrp_test_project_latest.test_editors %}
 {% for platform in test_platforms %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.version }}:
   name : Project test {{ hdrp_test_project_latest.name }} in version {{ editor.version }} on {{ platform.name }}
   agent:
@@ -154,5 +162,6 @@ test_project_{{ hdrp_test_project_latest.name }}_{{ platform.name }}_{{ editor.v
         - "upm-ci~/test-results/**/*"
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}

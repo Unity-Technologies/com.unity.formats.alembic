@@ -3,6 +3,8 @@
 
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 test_{{ platform.name }}_{{ editor.version }}:
   name : Test version {{ editor.version }} on {{ platform.name }}
   agent:
@@ -52,5 +54,6 @@ vetting_test_{{ platform.name }}_{{ editor.version }}:
         - "upm-ci~/test-results/**/*"
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
