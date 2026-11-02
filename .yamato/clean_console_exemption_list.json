@@ -2,9 +2,7 @@
   "exempts": {
     "messages": [
       "com.unity.purchasing@",
-      "Static members: logEntries",
-      "Static members: ExemptedPackageVersions",
-      "CleanConsoleEditorLogsAPV.cs(90,45)"
+      "CleanConsoleTests"
     ]
   }
 }
