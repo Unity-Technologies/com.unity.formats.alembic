@@ -50,6 +50,11 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
 {% else %}
 # Explicitly download ARM64 version Editor if on Silicon Mac or ARM64 Windows.
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
+{% if platform.name == "win_arm64" %}
+# The ARM64 Windows image raises an unattended Windows Firewall prompt for the Editor and the player, and the player then stalls ~30s in PlayerConnection cleanup (ABC-556).
+    - netsh advfirewall firewall add rule name="Alembic CI Editor" dir=in action=allow enable=yes profile=any program="%CD%\.Editor\Unity.exe" || echo Could not add the Editor firewall rule
+    - netsh advfirewall firewall add rule name="Alembic CI Player" dir=in action=allow enable=yes profile=any program="%CD%\build\players\{{ standalone_test_project.name }}\PlayerWithTests.exe" || echo Could not add the player firewall rule
+{% endif %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
 {% endif %}
   artifacts:
