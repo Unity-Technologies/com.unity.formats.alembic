@@ -21,6 +21,9 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
         CLEAN_CONSOLE_TEST_FOR: package
         PACKAGE_PATH: ./com.unity.formats.alembic
         EDITOR_VERSION: {{ editor.version }}
+{% if platform.model == "M1" %}
+        EDITOR_ARCHITECTURE: arm64
+{% endif %}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
@@ -49,6 +52,9 @@ AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ hdrp_test_project_latest.path }}
         EDITOR_VERSION: {{ editor.version }}
+{% if platform.model == "M1" %}
+        EDITOR_ARCHITECTURE: arm64
+{% endif %}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
@@ -77,6 +83,9 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
         CLEAN_CONSOLE_TEST_FOR: project
         PROJECT_PATH: {{ recorder_test_project.path }}
         EDITOR_VERSION: {{ editor.version }}
+{% if platform.model == "M1" %}
+        EDITOR_ARCHITECTURE: arm64
+{% endif %}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
   dependencies:
