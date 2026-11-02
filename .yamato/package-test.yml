@@ -22,7 +22,7 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% if platform.model != "M1" and platform.model != "arm" %}
     - upm-ci package test --unity-version {{ editor.version }} --package-path com.unity.formats.alembic
 {% else %}
-# Explicitly download ARM64 version Editor for 2021.3+(included) on Silicon Mac or ARM64 Windows.
+# Explicitly download ARM64 version Editor on Silicon Mac or ARM64 Windows.
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
     - upm-ci package test --unity-version .Editor --package-path com.unity.formats.alembic
 {% endif %}

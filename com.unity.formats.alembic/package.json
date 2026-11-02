@@ -15,6 +15,6 @@
     "simulation"
   ],
   "name": "com.unity.formats.alembic",
-  "unity": "2021.3",
+  "unity": "6000.0",
   "version": "2.4.7"
 }

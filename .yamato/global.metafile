@@ -20,7 +20,7 @@ clean_console_test_editors:
   - version: trunk
 
 promotion_test_editors:
-  - version: 2021.3
+  - version: 6000.0
 
 # Platforms used in CI
 win_platform: &win
@@ -103,12 +103,11 @@ standalone_test_project:
   name: AlembicStandaloneBuild
   path: TestProjects/AlembicStandaloneBuild
 
-# New HDRP test project for 2022.2+ versions
+# HDRP test project
 hdrp_test_project_latest:
   name: AlembicHDRPLatest
   path: TestProjects/AlembicHDRPLatest
   test_editors:
-    - version: 2022.3
     - version: 6000.3
     - version: trunk
 
