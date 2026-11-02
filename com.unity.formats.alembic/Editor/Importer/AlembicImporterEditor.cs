@@ -44,7 +44,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.FlexibleSpace();
-                uiTab.value = GUILayout.Toolbar(uiTab, new[] {"Model", "Materials"});
+                uiTab.value = GUILayout.Toolbar(uiTab, new[] { "Model", "Materials" });
                 GUILayout.FlexibleSpace();
             }
 
@@ -194,7 +194,10 @@ namespace UnityEditor.Formats.Alembic.Importer
                 var toks = r.Key.name.Split(':');
                 var entry = new AlembicImporter.MaterialEntry
                 {
-                    path = toks[0], index = int.Parse(toks[1]), facesetName = toks[2], material = r.Value as Material
+                    path = toks[0],
+                    index = int.Parse(toks[1]),
+                    facesetName = toks[2],
+                    material = r.Value as Material
                 };
                 ret.Add(entry);
             }
