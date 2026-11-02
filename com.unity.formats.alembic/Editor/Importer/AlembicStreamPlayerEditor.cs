@@ -6,7 +6,7 @@ using UnityEngine.Formats.Alembic.Sdk;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-#if UNITY_6000_6_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
     [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
 #endif
     [CustomEditor(typeof(AlembicStreamPlayer)), CanEditMultipleObjects]

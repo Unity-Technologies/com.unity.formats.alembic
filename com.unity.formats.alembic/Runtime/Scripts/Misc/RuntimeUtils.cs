@@ -88,7 +88,7 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
 #if UNITY_EDITOR
-#if UNITY_6000_6_OR_NEWER
+#if UNITY_6000_7_OR_NEWER
         [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
 #endif
         internal class DisableUndoGuard : IDisposable
