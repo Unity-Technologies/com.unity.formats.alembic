@@ -261,7 +261,7 @@ namespace UnityEngine.Formats.Alembic.Importer
 
             m_context.SetConfig(ref m_config);
 
-#if UNITY_EDITOR && UNITY_2021_3_OR_NEWER
+#if UNITY_EDITOR
             string filePath = FileUtil.GetPhysicalPath(m_streamDesc.PathToAbc); // use physical path
 #else
             string filePath = m_streamDesc.PathToAbc; // use relative path
