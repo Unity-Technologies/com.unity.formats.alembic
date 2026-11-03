@@ -57,7 +57,6 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     - unity-downloader-cli -u {{ editor.version }} -a arm64 -c Editor --fast --wait
 {% if platform.name == "win_arm64" %}
 # On the ARM64 Windows image the player stalls ~30s in PlayerConnection cleanup after the tests pass, so run it via the Editor as before #619 (ABC-556).
-    - start "" /b powershell -NoProfile -ExecutionPolicy Bypass -File .yamato\scripts\player-hang-diagnostics.ps1 -OutDir hang-diagnostics
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone --extra-utr-arg=--RunPlayerViaEditor
 {% else %}
     - upm-ci project test --project-path {{ standalone_test_project.path }} --type project-tests --unity-version .Editor --platform standalone
@@ -67,9 +66,6 @@ test_project_{{ standalone_test_project.name }}_{{ platform.name }}_{{ editor.ve
     logs:
       paths:
         - "upm-ci~/test-results/**/*"
-{% if platform.name == "win_arm64" %}
-        - "hang-diagnostics/**/*"
-{% endif %}
   dependencies:
     - .yamato/package-pack.yml#pack
 {% endunless %}
