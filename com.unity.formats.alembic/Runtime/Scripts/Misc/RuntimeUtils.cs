@@ -88,12 +88,15 @@ namespace UnityEngine.Formats.Alembic.Importer
         }
 
 #if UNITY_EDITOR
-#if UNITY_6000_7_OR_NEWER
-        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
-#endif
         internal class DisableUndoGuard : IDisposable
         {
+#if UNITY_6000_7_OR_NEWER
+            [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
             internal static bool enableUndo = true;
+#if UNITY_6000_7_OR_NEWER
+            [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
             static readonly Stack<bool> m_UndoStateStack = new Stack<bool>();
             bool m_Disposed;
             public DisableUndoGuard(bool disable)

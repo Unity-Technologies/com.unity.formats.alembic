@@ -7,6 +7,9 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
 {
     public class MeshSchemaTests
     {
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<string, List<Color>> k_VertexRgbScopeTestData = new Dictionary<string, List<Color>>()
         {
             { "cube_face", new List<Color>
@@ -76,6 +79,9 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<string, List<Color>> k_VertexRgbaScopeTestData = new Dictionary<string, List<Color>>()
         {
             { "face_grid", new List<Color>
@@ -111,6 +117,9 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<string, List<Vector2>> k_VertexUVScopeTestData = new Dictionary<string, List<Vector2>>()
         {
             { "face_uv_grid", new List<Vector2>
@@ -147,6 +156,9 @@ namespace UnityEditor.Formats.Alembic.Importer.MeshSchema
             }}
         };
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<string, List<Vector3>> k_VertexNormalScopeTestData = new Dictionary<string, List<Vector3>>()
         {
             { "face_normal_grid", new List<Vector3>

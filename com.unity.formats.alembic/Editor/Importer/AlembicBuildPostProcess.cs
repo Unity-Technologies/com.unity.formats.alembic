@@ -14,14 +14,17 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.Formats.Alembic.Importer
 {
-#if UNITY_6000_7_OR_NEWER
-    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
-#endif
     static class AlembicBuildPostProcess
     {
         internal const string kUnsupportedTarget = "Alembic only supports the following build targets: Windows 64-bit, macOS X, and Linux 64-bit.";
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         internal static readonly HashSet<KeyValuePair<string, string>> FilesToCopy = new HashSet<KeyValuePair<string, string>>();
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         internal static bool HaveAlembicInstances = false;
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
@@ -73,13 +76,13 @@ namespace UnityEditor.Formats.Alembic.Importer
         }
     }
 
-#if UNITY_6000_7_OR_NEWER
-    [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
-#endif
 #pragma warning disable CS0618 // Type or member is obsolete
     class AlembicScenePlayerStripper : IProcessSceneWithReport
 #pragma warning restore CS0618 // Type or member is obsolete
     {
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static readonly Type[] kStrippableBehaviourTypes =
         {
             typeof(AlembicStreamPlayer),
