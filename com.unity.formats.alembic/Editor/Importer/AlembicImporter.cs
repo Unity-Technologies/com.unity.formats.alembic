@@ -362,8 +362,14 @@ namespace UnityEditor.Formats.Alembic.Importer
             pipelineHash = ComputeHash();
         }
 
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static ulong pipelineHash;
         static readonly TimeSpan checkDependencyFrequency = TimeSpan.FromSeconds(5);
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static DateTime lastCheck;
 
         /// <summary>

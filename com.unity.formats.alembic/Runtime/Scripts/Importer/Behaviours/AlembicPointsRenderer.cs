@@ -11,8 +11,17 @@ namespace UnityEngine.Formats.Alembic.Importer
 {
     static class VPMatrices
     {
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static Dictionary<Camera, Matrix4x4> s_currentVPMatrix = new Dictionary<Camera, Matrix4x4>();
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static Dictionary<Camera, Matrix4x4> s_previousVPMatrix = new Dictionary<Camera, Matrix4x4>();
+#if UNITY_6000_7_OR_NEWER
+        [Unity.Scripting.LifecycleManagement.NoAutoStaticsCleanup]
+#endif
         static int s_frameCount;
 
         public static Matrix4x4 Get(Camera camera)
