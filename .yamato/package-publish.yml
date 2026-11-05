@@ -27,10 +27,13 @@ publish_dry_run:
 {% for platform in test_platforms %}
 # Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
 # If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
@@ -59,9 +62,12 @@ publish:
 {% for platform in test_platforms %}
 # Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.
 # If on Silicon Mac or ARM64 Windows, only run tests in trunk.
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 {% if editor.version == "trunk" or platform.model != "M1" and platform.model != "arm" %}
     - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
     - .yamato/project-test.yml#test_project_{{ recorder_test_project.name }}_{{ platform.name }}_{{ editor.version }}
 {% endif %}
+{% endunless %}
 {% endfor %}
 {% endfor %}

@@ -4,6 +4,8 @@
 # Package clean console test jobs
 {% for platform in test_platforms %}
 {% for editor in clean_console_test_editors %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Package clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -21,14 +23,22 @@ clean_console_test_{{ platform.name }}_{{ editor.version }}:
         EDITOR_VERSION: {{ editor.version }}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
+{% if platform.model == "M1" %}
+  # Download the arm64 Editor on Silicon Mac. Set at job level because the brick does not receive it as a brick variable (ABC-556).
+  variables:
+    EDITOR_ARCHITECTURE: arm64
+{% endif %}
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
 # Clean console test jobs for AlembicHDRPLatest project
 {% for platform in test_platforms %}
 {% for editor in clean_console_test_editors %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicHDRPLatest clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -46,14 +56,22 @@ AlembicHDRPLatest_clean_console_test_{{ platform.name }}_{{ editor.version }}:
         EDITOR_VERSION: {{ editor.version }}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
+{% if platform.model == "M1" %}
+  # Download the arm64 Editor on Silicon Mac. Set at job level because the brick does not receive it as a brick variable (ABC-556).
+  variables:
+    EDITOR_ARCHITECTURE: arm64
+{% endif %}
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
 # Clean console test jobs for AlembicRecorder project
 {% for platform in test_platforms %}
 {% for editor in clean_console_test_editors %}
+# Trunk has no Intel (x64) macOS Editor, so these jobs are not generated for the Intel Mac platform (ABC-556).
+{% unless editor.version == "trunk" and platform.name == "mac" %}
 AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
   name: Project AlembicRecorder clean console test in {{ editor.version }} on {{ platform.name }}
   agent:
@@ -71,8 +89,14 @@ AlembicRecorder_clean_console_test_{{ platform.name }}_{{ editor.version }}:
         EDITOR_VERSION: {{ editor.version }}
         EXEMPTION_FILE_DIR: .yamato
         WARNINGS_AS_ERRORS: false
+{% if platform.model == "M1" %}
+  # Download the arm64 Editor on Silicon Mac. Set at job level because the brick does not receive it as a brick variable (ABC-556).
+  variables:
+    EDITOR_ARCHITECTURE: arm64
+{% endif %}
   dependencies:
     - .yamato/package-pack.yml#pack
+{% endunless %}
 {% endfor %}
 {% endfor %}
 
@@ -84,7 +108,10 @@ clean_console_test_trigger:
   dependencies:
 {% for editor in clean_console_test_editors %}
     - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
+{% unless editor.version == "trunk" %}
     - .yamato/clean-console-test.yml#AlembicHDRPLatest_clean_console_test_mac_{{ editor.version }}
+{% endunless %}
     - .yamato/clean-console-test.yml#AlembicRecorder_clean_console_test_ubuntu20_{{ editor.version }}
 {% endfor %}
     - .yamato/clean-console-test.yml#clean_console_test_mac_arm64_trunk
+    - .yamato/clean-console-test.yml#AlembicHDRPLatest_clean_console_test_mac_arm64_trunk
