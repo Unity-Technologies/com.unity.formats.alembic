@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Suppressed the upcoming obsolete-API warning (CS0618) on the build post-process scene callbacks (`IProcessSceneWithReport`).
+- Replaced the surface shader in `StandardInstanced.shader` with its expanded generated passes, ported from the trunk copy of the package.
 
 ### Fixed
 - Fixed the Alembic recorder leaking pinned mesh buffers after a recording ended; capturers are now disposed once the archive has been flushed (SCP-2272).
