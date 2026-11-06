@@ -9,10 +9,10 @@ Shader "Alembic/Points Standard" {
     SubShader {
         Tags { "RenderType"="Opaque" }
 
-        
+
     // ------------------------------------------------------------
     // Surface shader code generated out of a CGPROGRAM block:
-    
+
 
     // ---- forward rendering base pass:
     Pass {
@@ -106,7 +106,7 @@ CGPROGRAM
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 // no lightmaps:
@@ -335,7 +335,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: INSTANCING_ON 
+// -------- variant for: INSTANCING_ON
 #if defined(INSTANCING_ON) && !defined(PROCEDURAL_INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -404,7 +404,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 // no lightmaps:
@@ -633,7 +633,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: PROCEDURAL_INSTANCING_ON 
+// -------- variant for: PROCEDURAL_INSTANCING_ON
 #if defined(PROCEDURAL_INSTANCING_ON) && !defined(INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -702,7 +702,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 // no lightmaps:
@@ -1030,7 +1030,7 @@ CGPROGRAM
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -1123,7 +1123,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: PROCEDURAL_INSTANCING_ON 
+// -------- variant for: PROCEDURAL_INSTANCING_ON
 #if defined(PROCEDURAL_INSTANCING_ON) && !defined(INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -1192,7 +1192,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -1382,7 +1382,7 @@ CGPROGRAM
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -1550,7 +1550,7 @@ fixed3 originalNormal = o.Normal;
 
 #endif
 
-// -------- variant for: INSTANCING_ON 
+// -------- variant for: INSTANCING_ON
 #if defined(INSTANCING_ON) && !defined(PROCEDURAL_INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -1618,7 +1618,7 @@ fixed3 originalNormal = o.Normal;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -1786,7 +1786,7 @@ fixed3 originalNormal = o.Normal;
 
 #endif
 
-// -------- variant for: PROCEDURAL_INSTANCING_ON 
+// -------- variant for: PROCEDURAL_INSTANCING_ON
 #if defined(PROCEDURAL_INSTANCING_ON) && !defined(INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -1854,7 +1854,7 @@ fixed3 originalNormal = o.Normal;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -2118,7 +2118,7 @@ CGPROGRAM
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -2182,7 +2182,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: INSTANCING_ON 
+// -------- variant for: INSTANCING_ON
 #if defined(INSTANCING_ON) && !defined(PROCEDURAL_INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -2249,7 +2249,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -2313,7 +2313,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: PROCEDURAL_INSTANCING_ON 
+// -------- variant for: PROCEDURAL_INSTANCING_ON
 #if defined(PROCEDURAL_INSTANCING_ON) && !defined(INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -2380,7 +2380,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 
 // vertex-to-fragment interpolation data
 struct v2f_surf {
@@ -2542,7 +2542,7 @@ CGPROGRAM
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 #include "UnityMetaPass.cginc"
 
 // vertex-to-fragment interpolation data
@@ -2634,7 +2634,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: INSTANCING_ON 
+// -------- variant for: INSTANCING_ON
 #if defined(INSTANCING_ON) && !defined(PROCEDURAL_INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -2702,7 +2702,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 #include "UnityMetaPass.cginc"
 
 // vertex-to-fragment interpolation data
@@ -2794,7 +2794,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 
 #endif
 
-// -------- variant for: PROCEDURAL_INSTANCING_ON 
+// -------- variant for: PROCEDURAL_INSTANCING_ON
 #if defined(PROCEDURAL_INSTANCING_ON) && !defined(INSTANCING_ON)
 // Surface shader code generated based on:
 // writes to per-pixel normal: no
@@ -2862,7 +2862,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
         }
-        
+
 #include "UnityMetaPass.cginc"
 
 // vertex-to-fragment interpolation data
