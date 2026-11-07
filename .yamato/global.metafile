@@ -108,6 +108,7 @@ hdrp_test_project_latest:
   name: AlembicHDRPLatest
   path: TestProjects/AlembicHDRPLatest
   test_editors:
+    - version: 6000.0
     - version: 6000.3
     - version: trunk
 
