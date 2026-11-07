@@ -9,13 +9,8 @@ using UnityEngine.Formats.Alembic.Importer;
 using UnityEngine.Formats.Alembic.Sdk;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
-#if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
 using static UnityEditor.AssetDatabase;
-#else
-using UnityEditor.Experimental.AssetImporters;
-using static UnityEditor.Experimental.AssetDatabaseExperimental;
-#endif
 [assembly: InternalsVisibleTo("Unity.Formats.Alembic.UnitTests.Editor")]
 namespace UnityEditor.Formats.Alembic.Importer
 {

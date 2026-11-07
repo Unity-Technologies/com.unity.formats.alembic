@@ -24,11 +24,7 @@ namespace UnityEditor.Formats.Alembic.Importer
                 return;
             }
 
-#if TIMELINE_1_6_0
             var fps = TimelineEditor.inspectedAsset.editorSettings.frameRate;
-#else
-            var fps = TimelineEditor.inspectedAsset.editorSettings.fps;
-#endif
             clip.duration = asp.Duration > 1 / fps ? asp.Duration : 1; // Clips that are under 1 frame are 1s long (tiny clips are hard to select in the UI)
         }
     }

@@ -115,11 +115,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
             scaleFactor = 0.01f;
             aspectRatio = -1.0f;
             vertexMotionScale = 1.0f;
-#if UNITY_2017_3_OR_NEWER
             splitUnit = 0x7fffffff;
-#else
-            splitUnit = 65000;
-#endif
             swapHandedness = true;
             flipFaces = false;
             interpolateSamples = true;

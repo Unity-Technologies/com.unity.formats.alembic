@@ -757,18 +757,8 @@ namespace UnityEngine.Formats.Alembic.Util
                         }
 
                         m_meshBake.Clear();
-#if UNITY_2020_2_OR_NEWER
                         m_target.BakeMesh(m_meshBake, true);
                         m_mbuf.Capture(m_meshBake, Matrix4x4.identity, recorder.m_settings);
-#else
-                        m_target.BakeMesh(m_meshBake);
-
-                        var withScale = m_target.transform.worldToLocalMatrix;
-                        var noScale = m_target.transform.WorldNoScale();
-                        // The Skinned mesh baker disregards the world scale.
-                        // This matrix transform inverts the wrong Unity transforms are reapplies the full world scale.
-                        m_mbuf.Capture(m_meshBake, withScale * noScale.inverse, recorder.m_settings);
-#endif
                     }
                 }
                 m_mbuf.WriteSample(abcObject);
@@ -955,15 +945,7 @@ namespace UnityEngine.Formats.Alembic.Util
             {
                 method.Invoke(null, new object[] { BuildTarget.StandaloneWindows, 0, 0 });
                 method.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, 0, 0 });
-#if UNITY_2017_3_OR_NEWER
                 method.Invoke(null, new object[] { BuildTarget.StandaloneOSX, 0, 0 });
-#else
-                method.Invoke(null, new object[] { BuildTarget.StandaloneOSXUniversal, 0, 0 });
-#endif
-// Deprecated in 2019.2
-#if !UNITY_2019_2_OR_NEWER
-                method.Invoke(null, new object[] { BuildTarget.StandaloneLinux, 0, 0 });
-#endif
                 method.Invoke(null, new object[] { BuildTarget.StandaloneLinux64, 0, 0 });
             }
         }
@@ -1069,10 +1051,8 @@ namespace UnityEngine.Formats.Alembic.Util
             var components = Array.ConvertAll<UnityEngine.Object, Component>(objects, e => (Component)e);
             SortComponentsByStableSceneHierarchy(components);
             return components;
-#elif UNITY_2023_1_OR_NEWER
-            return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
 #else
-            return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsOfType(type), e => (Component)e);
+            return Array.ConvertAll<UnityEngine.Object, Component>(GameObject.FindObjectsByType(type, FindObjectsSortMode.InstanceID), e => (Component)e);
 #endif
         }
 

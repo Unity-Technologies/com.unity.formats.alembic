@@ -65,16 +65,8 @@ cmake-build-debug
 # to package.json though.
 .npmrc
 
-# Package Validation Suite files are not tracked
-AlembicImporter/ValidationSuiteResults/*
-
-# Rulesets in this location should not be tracked
-AlembicImporter/*.ruleset
-
 InitTestScene*.unity
 InitTestScene*.unity.meta
 
-TestProjects/AlembicImporter/Assets/Plugins.meta
-TestProjects/AlembicImporter/Assets/Plugins/Editor/JetBrains.meta
 com.unity.formats.alembic/Runtime/Plugins/x86_64/abci.bundle/Contents/MacOS/abci
 com.unity.formats.alembic/TestRunnerOptions.json.meta

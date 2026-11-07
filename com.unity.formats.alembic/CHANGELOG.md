@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Bump minimum Unity version to 6000.0.
 - Suppressed the upcoming obsolete-API warning (CS0618) on the build post-process scene callbacks (`IProcessSceneWithReport`).
 
 ### Fixed

@@ -20,14 +20,7 @@ namespace UnityEditor.Formats.Alembic.Importer
             if (!EditorAnalytics.enabled || importer.IsHDF5) // Ignore HDF5 failed files.
                 return;
 
-#if UNITY_2023_2_OR_NEWER
             EditorAnalytics.SendAnalytic(new ImporterEventAnalytic(CreateEvent(root, importer)));
-#else
-            EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
-
-            var data = CreateEvent(root, importer);
-            EditorAnalytics.SendEventWithLimit(EventName, data);
-#endif
 #if DEBUG_ANALYTICS
             var json = JsonUtility.ToJson(data, prettyPrint: true);
             Debug.Log($"{EventName}->{json}");
@@ -99,7 +92,6 @@ namespace UnityEditor.Formats.Alembic.Importer
             return evt;
         }
 
-#if UNITY_2023_2_OR_NEWER
         [UnityEngine.Analytics.AnalyticInfo(eventName: EventName, vendorKey: VendorKey, maxEventsPerHour: MAXEventsPerHour, maxNumberOfElements: MAXNumberOfElements)]
         class ImporterEventAnalytic : UnityEngine.Analytics.IAnalytic
         {
@@ -136,25 +128,5 @@ namespace UnityEditor.Formats.Alembic.Importer
             public string app, guid, render_pipeline;
             public bool mesh_variable_topology;
         }
-#else
-        [Serializable]
-        internal struct AlembicImporterAnalyticsEvent
-        {
-            public int mesh_node_count,
-                       sub_d_node_count,
-                       xform_node_count,
-                       camera_node_count,
-                       point_cloud_node_count,
-                       curve_node_count,
-                       max_mesh_vertex_count,
-                       max_mesh_index_count,
-                       max_points_count,
-                       max_curve_count,
-                       material_override_count;
-
-            public string app, guid, render_pipeline;
-            public bool mesh_variable_topology;
-        }
-#endif
     }
 }

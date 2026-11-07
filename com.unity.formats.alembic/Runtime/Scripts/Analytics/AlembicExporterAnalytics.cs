@@ -22,14 +22,7 @@ namespace UnityEngine.Formats.Alembic.Exporter
 #if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS
             if (!EditorAnalytics.enabled)
                 return;
-#if UNITY_2023_2_OR_NEWER
             EditorAnalytics.SendAnalytic(new ExporterEventAnalytic(CreateEvent(settings)));
-#else
-            EditorAnalytics.RegisterEventWithLimit(EventName, MAXEventsPerHour, MAXNumberOfElements, VendorKey);
-
-            var data = CreateEvent(settings);
-            EditorAnalytics.SendEventWithLimit(EventName, data);
-#endif
 #if DEBUG_ANALYTICS
             var json = JsonUtility.ToJson(data, prettyPrint: true);
             Debug.Log($"{EventName}->{json}");
@@ -46,10 +39,8 @@ namespace UnityEngine.Formats.Alembic.Exporter
 #if UNITY_6000_4_OR_NEWER
             // Analytics only counts component instances; order does not affect the result.
             return Object.FindObjectsByType<T>();
-#elif UNITY_2023_1_OR_NEWER
-            return Object.FindObjectsByType<T>(FindObjectsSortMode.InstanceID);
 #else
-            return Object.FindObjectsOfType<T>();
+            return Object.FindObjectsByType<T>(FindObjectsSortMode.InstanceID);
 #endif
         }
 
@@ -67,7 +58,6 @@ namespace UnityEngine.Formats.Alembic.Exporter
             return evt;
         }
 
-#if UNITY_2023_2_OR_NEWER
         [Analytics.AnalyticInfo(eventName: EventName, vendorKey: VendorKey, maxEventsPerHour: MAXEventsPerHour, maxNumberOfElements: MAXNumberOfElements)]
         class ExporterEventAnalytic : Analytics.IAnalytic
         {
@@ -91,14 +81,5 @@ namespace UnityEngine.Formats.Alembic.Exporter
         {
             public bool capture_mesh, skinned_mesh, camera, static_mesh_renderers;
         }
-#else
-
-
-        [Serializable]
-        internal struct AlembicExporterAnalyticsEvent
-        {
-            public bool capture_mesh, skinned_mesh, camera, static_mesh_renderers;
-        }
-#endif
     }
 }

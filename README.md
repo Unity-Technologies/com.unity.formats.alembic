@@ -15,7 +15,7 @@ The main features of the package include Alembic file import and export, which a
 ### Requirements
 
 The latest official version of Alembic for Unity built from this repository is compatible with the following versions of the Unity Editor:
-- 2019.4 and later (recommended)
+- 6000.0 and later (recommended)
 
 You can build and use the Alembic for Unity package on the following 64-bit desktop platforms:
 - Microsoft Windows (x86-64)
