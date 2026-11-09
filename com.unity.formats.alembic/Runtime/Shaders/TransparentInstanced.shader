@@ -17,7 +17,6 @@ Shader "Alembic/Points Transparent" {
         ZTest[_ZTest]
         ZWrite[_ZWrite]
         Blend[_SrcBlend][_DstBlend]
-        Lighting Off
 
         Pass
         {
