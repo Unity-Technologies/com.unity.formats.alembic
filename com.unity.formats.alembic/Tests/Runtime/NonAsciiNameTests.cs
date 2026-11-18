@@ -29,5 +29,24 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
                 found |= t.name == objectName;
             Assert.IsTrue(found, $"No object named '{objectName}' after export/import");
         }
+
+        // Covers "Café" too: it fits the Windows ANSI code page, so it must not be written as raw UTF-8 bytes.
+        [UnityTest]
+        public IEnumerator ExportingToNonAsciiPath_WritesFileWithThatName([Values("Kėdė", "Café", "椅子")] string fileName)
+        {
+            GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            var outputPath = $"Assets/{fileName}_{Path.GetFileNameWithoutExtension(Path.GetTempFileName())}.abc";
+            exporter.Recorder.Settings.OutputPath = outputPath;
+            deleteFileList.Add(outputPath);
+            exporter.OneShot();
+            yield return null;
+
+            Assert.That(File.Exists(outputPath), $"Expected '{outputPath}' to be written");
+            AssetDatabase.Refresh();
+            var abc = AssetDatabase.LoadMainAssetAtPath(outputPath) as GameObject;
+            Assert.IsNotNull(abc, "Exported file failed to import");
+            Assert.IsNotNull(abc.GetComponentInChildren<MeshFilter>(), "Imported asset has no meshes");
+        }
     }
 }
