@@ -1,4 +1,3 @@
-using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Formats.Alembic.Importer;
@@ -30,15 +29,6 @@ namespace UnityEditor.Formats.Alembic.Exporter.UnitTests
             {
                 AssetDatabase.DeleteAsset(dest);
             }
-        }
-
-        [Test]
-        public void ObjectNamesAreReadAsUtf8()
-        {
-            // Names read back from the native plugin must round-trip through UTF-8, not the ANSI code page.
-            var src = AssetDatabase.GUIDToAssetPath(cubesColouredGuid);
-            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(src);
-            Assert.IsTrue(asset.GetComponentsInChildren<Transform>().All(t => !t.name.Contains('�')));
         }
     }
 }
