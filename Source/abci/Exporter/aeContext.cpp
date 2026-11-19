@@ -54,7 +54,15 @@ void aeContext::reset()
 
     m_node_top.reset();
     m_timesamplings.clear();
-    m_archive.reset(); // flush archive
+    try
+    {
+        m_archive.reset(); // flush archive
+    }
+    catch (const std::exception& e)
+    {
+        // A failed final flush (e.g. a full disk) must not escape: reset() runs from the destructor.
+        DebugLog("Failed to flush archive (%s)", e.what());
+    }
     m_stream.reset();
 }
 
