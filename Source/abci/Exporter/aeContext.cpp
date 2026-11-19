@@ -85,6 +85,8 @@ bool aeContext::openArchive(const char *path)
         }
         // MSVC's filebuf ignores setbuf until the file is open, so this must come after opening (as Ogawa does).
         m_stream->rdbuf()->pubsetbuf(m_stream_buffer.data(), m_stream_buffer.size());
+        // Like Ogawa's own file streams, report failed writes (e.g. a full disk) as exceptions.
+        m_stream->exceptions(std::ofstream::failbit | std::ofstream::badbit);
         m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive()(m_stream.get(), Alembic::AbcCoreAbstract::MetaData()), Abc::kWrapExisting);
 #else
         m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
