@@ -54,7 +54,16 @@ void aeContext::reset()
 
     m_node_top.reset();
     m_timesamplings.clear();
-    m_archive.reset(); // flush archive
+    try
+    {
+        m_archive.reset(); // flush archive
+    }
+    catch (const std::exception& e)
+    {
+        // A failed final flush (e.g. a full disk) must not escape: reset() runs from the destructor.
+        DebugLog("Failed to flush archive (%s)", e.what());
+    }
+    m_stream.reset();
 }
 
 void aeContext::setConfig(const aeConfig &conf)
@@ -69,11 +78,33 @@ bool aeContext::openArchive(const char *path)
     DebugLog("aeContext::openArchive() %s", path);
     try
     {
+#ifdef _WIN32
+        // Ogawa opens file names with a narrow std::ofstream, which MSVC interprets in the ANSI code page.
+        // The path is UTF-8, so open the stream with the wide path ourselves and hand it to Ogawa.
+        auto wpath = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t> >().from_bytes(path);
+        const size_t kStreamBufferSize = 2 * 1024 * 1024; // same buffer size Ogawa uses for its own file streams
+        m_stream_buffer.resize(kStreamBufferSize);
+        m_stream.reset(new std::ofstream(wpath.c_str(), std::ios_base::trunc | std::ios_base::binary));
+        if (!m_stream->is_open())
+        {
+            DebugLog("Failed to open %s", path);
+            m_stream.reset();
+            return false;
+        }
+        // MSVC's filebuf ignores setbuf until the file is open, so this must come after opening (as Ogawa does).
+        m_stream->rdbuf()->pubsetbuf(m_stream_buffer.data(), m_stream_buffer.size());
+        // Like Ogawa's own file streams, report failed writes (e.g. a full disk) as exceptions.
+        m_stream->exceptions(std::ofstream::failbit | std::ofstream::badbit);
+        m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive()(m_stream.get(), Alembic::AbcCoreAbstract::MetaData()), Abc::kWrapExisting);
+#else
         m_archive = Abc::OArchive(Alembic::AbcCoreOgawa::WriteArchive(), path);
+#endif
     }
-    catch (Alembic::Util::Exception e)
+    catch (const std::exception& e)
     {
         DebugLog("Failed (%s)", e.what());
+        m_archive.reset();
+        m_stream.reset();
         return false;
     }
 

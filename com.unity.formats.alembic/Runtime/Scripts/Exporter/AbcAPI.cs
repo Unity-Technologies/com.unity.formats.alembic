@@ -312,10 +312,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aeDestroyContext(IntPtr ctx);
         [DllImport(Abci.Lib)] [return: MarshalAs(UnmanagedType.I1)] public static extern bool aiContextGetIsHDF5(IntPtr ctx);
 
-        [DllImport(Abci.Lib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(Abci.Lib)]
         public static extern IntPtr aiContextGetApplication(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern void aeSetConfig(IntPtr ctx, AlembicExportOptions conf);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aeOpenArchive(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern Bool aeOpenArchive(IntPtr ctx, [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
         [DllImport(Abci.Lib)] public static extern aeObject aeGetTopObject(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern int aeAddTimeSampling(IntPtr ctx, float start_time);
         // relevant only if plingType is acyclic. if tsi==-1, add time to all time samplings.
@@ -324,16 +324,16 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aeMarkFrameEnd(IntPtr ctx);
 
 
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewXform(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewCamera(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPoints(IntPtr self, string name, int tsi);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeObject aeNewPolyMesh(IntPtr self, string name, int tsi);
+        [DllImport(Abci.Lib)] public static extern aeObject aeNewXform(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int tsi);
+        [DllImport(Abci.Lib)] public static extern aeObject aeNewCamera(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int tsi);
+        [DllImport(Abci.Lib)] public static extern aeObject aeNewPoints(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int tsi);
+        [DllImport(Abci.Lib)] public static extern aeObject aeNewPolyMesh(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, int tsi);
         [DllImport(Abci.Lib)] public static extern void aeXformWriteSample(IntPtr self, ref aeXformData data);
         [DllImport(Abci.Lib)] public static extern void aeCameraWriteSample(IntPtr self, ref CameraData data);
         [DllImport(Abci.Lib)] public static extern void aePolyMeshWriteSample(IntPtr self, ref aePolyMeshData data);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern int aePolyMeshAddFaceSet(IntPtr self, string name);
+        [DllImport(Abci.Lib)] public static extern int aePolyMeshAddFaceSet(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
         [DllImport(Abci.Lib)] public static extern void aePointsWriteSample(IntPtr self, ref aePointsData data);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aeProperty aeNewProperty(IntPtr self, string name, aePropertyType type);
+        [DllImport(Abci.Lib)] public static extern aeProperty aeNewProperty(IntPtr self, [MarshalAs(UnmanagedType.LPUTF8Str)] string name, aePropertyType type);
         [DllImport(Abci.Lib)] public static extern void aeMarkForceInvisible(IntPtr self);
 
 
@@ -354,10 +354,10 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern void aeApplyMatrixV(IntPtr dstVectors, int num, ref Matrix4x4 mat);
 
 
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern void aiClearContextsWithPath(string path);
+        [DllImport(Abci.Lib)] public static extern void aiClearContextsWithPath([MarshalAs(UnmanagedType.LPUTF8Str)] string path);
         [DllImport(Abci.Lib)] public static extern aiContext aiContextCreate(int uid);
         [DllImport(Abci.Lib)] public static extern void aiContextDestroy(IntPtr ctx);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern Bool aiContextLoad(IntPtr ctx, string path);
+        [DllImport(Abci.Lib)] public static extern Bool aiContextLoad(IntPtr ctx, [MarshalAs(UnmanagedType.LPUTF8Str)] string path);
         [DllImport(Abci.Lib)] public static extern void aiContextSetConfig(IntPtr ctx, ref aiConfig conf);
         [DllImport(Abci.Lib)] public static extern int aiContextGetTimeSamplingCount(IntPtr ctx);
         [DllImport(Abci.Lib)] public static extern aiTimeSampling aiContextGetTimeSampling(IntPtr ctx, int i);
@@ -391,7 +391,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
         [DllImport(Abci.Lib)] public static extern Bool aiSchemaIsDataUpdated(IntPtr schema);
         [DllImport(Abci.Lib)] public static extern int aiSchemaGetNumProperties(IntPtr schema);
         [DllImport(Abci.Lib)] public static extern aiProperty aiSchemaGetPropertyByIndex(IntPtr schema, int i);
-        [DllImport(Abci.Lib, BestFitMapping = false, ThrowOnUnmappableChar = true)] public static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, string name);
+        [DllImport(Abci.Lib)] public static extern aiProperty aiSchemaGetPropertyByName(IntPtr schema, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
         [DllImport(Abci.Lib)] public static extern void aiPolyMeshGetSummary(IntPtr schema, ref aiMeshSummary dst);
         [DllImport(Abci.Lib)] public static extern void aiSubDGetSummary(IntPtr schema, ref aiMeshSummary dst);

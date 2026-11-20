@@ -339,7 +339,7 @@ namespace UnityEngine.Formats.Alembic.Sdk
 
         public string GetApplication()
         {
-            return Marshal.PtrToStringAnsi(NativeMethods.aiContextGetApplication(self));
+            return Marshal.PtrToStringUTF8(NativeMethods.aiContextGetApplication(self));
         }
 
         internal void SetConfig(ref aiConfig conf) { NativeMethods.aiContextSetConfig(self, ref conf); }
@@ -364,8 +364,8 @@ namespace UnityEngine.Formats.Alembic.Sdk
         internal IntPtr self;
         public static implicit operator bool(aiObject v) { return v.self != IntPtr.Zero; }
         public aiContext context { get { return NativeMethods.aiObjectGetContext(self); } }
-        public string name { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetName(self)); } }
-        public string fullname { get { return Marshal.PtrToStringAnsi(NativeMethods.aiObjectGetFullName(self)); } }
+        public string name { get { return Marshal.PtrToStringUTF8(NativeMethods.aiObjectGetName(self)); } }
+        public string fullname { get { return Marshal.PtrToStringUTF8(NativeMethods.aiObjectGetFullName(self)); } }
         public aiObject parent { get { return NativeMethods.aiObjectGetParent(self); } }
 
         public void SetEnabled(bool value) { NativeMethods.aiObjectSetEnabled(self, value); }

@@ -389,7 +389,11 @@ bool aiContext::load(const char *in_path)
 
             auto message = L(e.what());
             DebugLogW(L"Failed to open archive: %s", message.c_str());
+#ifdef WIN32
+            std::ifstream fp(wpath.c_str(), std::ios::in | std::ios::binary);
+#else
             std::ifstream fp(path, std::ios::in | std::ios::binary);
+#endif
             if (!fp)
             {
                 DebugLog("Unable to open " + filename);

@@ -65,6 +65,11 @@ public:
 
 private:
     aeConfig m_config;
+    // Windows only: the file stream the archive writes to, opened with a wide path (see openArchive).
+    // Must outlive m_archive, which flushes into it on destruction.
+    // The buffer is declared first so it is destroyed after the stream, which flushes into it when closing.
+    std::vector<char> m_stream_buffer;
+    std::unique_ptr<std::ofstream> m_stream;
     Abc::OArchive m_archive;
     std::unique_ptr<aeObject> m_node_top;
     std::vector<aeTimeSamplingPtr> m_timesamplings;
