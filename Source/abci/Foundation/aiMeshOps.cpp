@@ -259,7 +259,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
                         int id = (int)tmp_submeshes.size();
                         tmp_submeshes.push_back({});
                     }
-                    tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
+                    tmp_submeshes[mid].index_count += (count - 2) * 3;
                     if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end())
                     {
                         materialSet.insert(mid);
@@ -294,7 +294,7 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
             {
                 auto mi = materialOrder[i];
                 auto& sm = tmp_submeshes[mi];
-                if (copyFacesetNames)
+                if (copyFacesetNames && mi >= 1 && mi - 1 < (int)faceset_names.size())
                 {
                     sm.facesetName = faceset_names[mi - 1];
                 }
