@@ -1036,6 +1036,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     if (!topology.m_faceset_sps.empty())
     {
         // use face set index as material id
+        topology.m_material_ids.clear();
         topology.m_material_ids.resize(refiner.counts.size(), -1);
         for (size_t fsi = 0; fsi < topology.m_faceset_sps.size(); ++fsi)
         {
