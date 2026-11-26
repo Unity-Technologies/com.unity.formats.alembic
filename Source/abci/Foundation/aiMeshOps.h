@@ -125,6 +125,7 @@ struct MeshRefiner
     RawVector<int> new_indices_lines;
     RawVector<int> new_indices_points;
     RawVector<int> new_indices_submeshes;
+    RawVector<int> new_face_to_old; // emitted face to input face
     RawVector<float3> new_points;
     RawVector<Split> splits;
     std::vector<Submesh> submeshes;

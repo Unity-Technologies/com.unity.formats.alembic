@@ -1036,6 +1036,7 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
     if (!topology.m_faceset_sps.empty())
     {
         // use face set index as material id
+        topology.m_material_ids.clear();
         topology.m_material_ids.resize(refiner.counts.size(), -1);
         for (size_t fsi = 0; fsi < topology.m_faceset_sps.size(); ++fsi)
         {
@@ -1043,10 +1044,11 @@ void aiMeshSchema<T, U>::onTopologyChange(U& sample)
             if (fsp.valid())
             {
                 auto& faces = *fsp.getFaces();
-                size_t num_faces = std::min(topology.m_material_ids.size(), faces.size());
-                for (size_t fi = 0; fi < num_faces; ++fi)
+                for (size_t fi = 0; fi < faces.size(); ++fi)
                 {
-                    topology.m_material_ids[faces[fi]] = (int)fsi;
+                    const auto face = faces[fi];
+                    if (face >= 0 && (size_t)face < topology.m_material_ids.size())
+                        topology.m_material_ids[face] = (int)fsi;
                 }
             }
         }

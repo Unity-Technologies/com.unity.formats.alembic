@@ -250,16 +250,17 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
             // gen submeshes by material ids
             for (int fi = 0; fi < split.face_count; ++fi)
             {
-                int count = counts[offset_faces + fi];
+                int face = new_face_to_old[offset_faces + fi];
+                int count = counts[face];
                 if (count >= 3)
                 {
-                    int mid = material_ids[offset_faces + fi] + 1; // -1 == no material. adjust to zero based
+                    int mid = material_ids[face] + 1; // -1 == no material. adjust to zero based
                     while (mid >= (int)tmp_submeshes.size())
                     {
                         int id = (int)tmp_submeshes.size();
                         tmp_submeshes.push_back({});
                     }
-                    tmp_submeshes[mid].index_count += (counts[fi] - 2) * 3;
+                    tmp_submeshes[mid].index_count += (count - 2) * 3;
                     if (std::find(materialSet.begin(), materialSet.end(), mid) == materialSet.end())
                     {
                         materialSet.insert(mid);
@@ -279,22 +280,22 @@ void MeshRefiner::genSubmeshes(IArray<int> material_ids, std::vector<std::string
             // copy indices
             for (int fi = 0; fi < split.face_count; ++fi)
             {
-                int count = counts[offset_faces + fi];
+                int face = new_face_to_old[offset_faces + fi];
+                int count = counts[face];
                 if (count >= 3)
                 {
-                    int mid = material_ids[offset_faces + fi] + 1;
+                    int mid = material_ids[face] + 1;
                     int nidx = (count - 2) * 3;
                     for (int i = 0; i < nidx; ++i)
                         *(tmp_submeshes[mid].dst_indices++) = *(src_tri++) - offset_vertices;
                 }
             }
 
-            auto copyFacesetNames = materialOrder.size() == faceset_names.size(); // safety
             for (int i = 0; i < materialOrder.size(); ++i)
             {
                 auto mi = materialOrder[i];
                 auto& sm = tmp_submeshes[mi];
-                if (copyFacesetNames)
+                if (mi >= 1 && mi - 1 < (int)faceset_names.size())
                 {
                     sm.facesetName = faceset_names[mi - 1];
                 }
@@ -460,6 +461,7 @@ void MeshRefiner::refine()
     }
 
     old2new_indices.resize(num_indices, -1);
+    new_face_to_old.clear();
 
     int num_faces_total = (int)counts.size();
     int offset_faces = 0;
@@ -545,6 +547,7 @@ void MeshRefiner::refine()
                 new_indices.push_back(find_or_emit_vertex(vi, ii));
             }
             ++num_faces;
+            new_face_to_old.push_back(fi);
             if (count >= 3)
                 num_indices_tri += (count - 2) * 3;
             else if (count == 2)
