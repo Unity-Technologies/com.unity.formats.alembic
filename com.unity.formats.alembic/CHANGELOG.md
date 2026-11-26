@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fixed out-of-bounds reads and writes in the native importer when a mesh has faces that are in no face set or face sets that are never used (UUM-150812).
+- Fixed submeshes getting the wrong faces when a mesh contains zero-count faces and face sets.
+- Fixed face set names being dropped when some face sets are unused.
 
 ## [2.5.0] - 2026-11-09
 ### Changed
