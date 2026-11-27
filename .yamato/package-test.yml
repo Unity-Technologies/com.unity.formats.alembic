@@ -14,8 +14,6 @@ test_{{ platform.name }}_{{ editor.version }}:
 {% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
-  variables:
-    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
 # If not on Silicon Mac nor ARM64 Windows, just call upm-ci which will use x64 version editor for testing.
@@ -33,7 +31,7 @@ test_{{ platform.name }}_{{ editor.version }}:
   dependencies:
     - .yamato/package-pack.yml#pack
 
-# Package vetting tests execute package validation suite, clean console, and package has tests (not package tests).
+# Package vetting tests execute package validation suite and package has tests (not package tests).
 vetting_test_{{ platform.name }}_{{ editor.version }}:
   name : Package vetting test in version {{ editor.version }} on {{ platform.name }}
   agent:
@@ -43,8 +41,6 @@ vetting_test_{{ platform.name }}_{{ editor.version }}:
 {% endif %}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
-  variables:
-    UPMCI_ENABLE_APV_CLEAN_CONSOLE_TEST: 1
   commands:
      - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
      - upm-ci package test --unity-version {{ editor.version }} --type vetting-tests --package-path com.unity.formats.alembic

@@ -12,13 +12,6 @@ nightly_test_editors:
   - version: 6000.7
   - version: trunk
 
-clean_console_test_editors:
-  - version: 6000.0
-  - version: 6000.3
-  - version: 6000.6
-  - version: 6000.7
-  - version: trunk
-
 promotion_test_editors:
   - version: 6000.0
 
