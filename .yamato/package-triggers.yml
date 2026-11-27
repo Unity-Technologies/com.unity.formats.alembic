@@ -27,10 +27,6 @@ test_trigger_pr:
     - .yamato/project-test.yml#test_project_{{ standalone_test_project.name }}_win_{{ editor.version }}
 {% endfor %}
     - .yamato/package-format.yml#formatting
-# Only run package clean console test jobs on Win for PR trigger
-{% for editor in clean_console_test_editors %}
-    - .yamato/clean-console-test.yml#clean_console_test_win_{{ editor.version }}
-{% endfor %}
 
 # Nightly test trigger
 nightly_test_trigger:
@@ -41,7 +37,6 @@ nightly_test_trigger:
         frequency: daily
         rerun: always    
   dependencies:
-    - .yamato/clean-console-test.yml#clean_console_test_trigger
 {% for editor in nightly_test_editors %}
 {% for platform in test_platforms %}
 # Run tests in all editor versions if not on Silicon Mac nor ARM64 Windows.

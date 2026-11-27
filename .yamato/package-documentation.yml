@@ -10,7 +10,7 @@ generate_documentation:
   commands:
     - brick_source: git@github.cds.internal.unity3d.com:wind-xu/virtual_production_doc_generation.git@v0.2.1
       variables:
-        EDITOR_VERSION: {{ clean_console_test_editors.first.version }}
+        EDITOR_VERSION: {{ test_editors.first.version }}
         PACKAGE_NAME: com.unity.formats.alembic
         PACKAGE_PATH: com.unity.formats.alembic
         #Treat doc build warnings as errors
